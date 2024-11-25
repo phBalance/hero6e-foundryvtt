@@ -1331,7 +1331,7 @@ export class HeroSystem6eActor extends Actor {
             if (duration === "constant") {
                 results.push(item);
             } else {
-                const NONPERSISTENT = (item.system.modifiers || []).find((o) => o.XMLID === "NONPERSISTENT");
+                const NONPERSISTENT = item.modifiers.find((o) => o.XMLID === "NONPERSISTENT");
                 if (NONPERSISTENT) {
                     results.push(item);
                 }

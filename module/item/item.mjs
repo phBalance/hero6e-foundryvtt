@@ -690,19 +690,21 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        if (this.system.XMLID === "ENTANGLE") debugger;
+
         // Power must be turned on
         if (this.system.active === false) return false;
 
         // TODO: Costs endurance (even if bought to 0 END) is perceivable when active unless it has invisible power effect bought for it.
 
         // FOCUS
-        const FOCUS = this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
+        const FOCUS = this.findModsByXmlid("FOCUS"); //this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
         if (FOCUS) {
-            if (FOCUS?.OPTION?.startsWith("O")) return true;
-            if (FOCUS?.OPTION?.startsWith("I")) return perceptionSuccess;
+            if (FOCUS?.OPTIONID?.startsWith("O")) return true;
+            if (FOCUS?.OPTIONID?.startsWith("I")) return perceptionSuccess;
         }
 
-        const VISIBLE = this.system.MODIFIER?.find((o) => o.XMLID === "VISIBLE");
+        const VISIBLE = this.modifiers.find((o) => o.XMLID === "VISIBLE");
         if (VISIBLE) {
             if (VISIBLE?.OPTION?.endsWith("OBVIOUS")) {
                 return true;
@@ -714,36 +716,33 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Parent that's visible?
-        const PARENT = this.actor.items.find((o) => o.system.ID === (this.system.PARENTID || "null"));
-        if (PARENT) {
-            const VISIBLE = PARENT.system.MODIFIER?.find((o) => o.XMLID === "VISIBLE");
-            if (VISIBLE) {
-                if (VISIBLE?.OPTION.endsWith("OBVIOUS")) {
-                    return true;
-                } else if (VISIBLE?.OPTION.endsWith("INOBVIOUS")) {
-                    return perceptionSuccess;
-                }
-            }
-        }
+        // if (this.parentItem) {
+        //     const VISIBLE = this.parentItem.system.MODIFIER?.find((o) => o.XMLID === "VISIBLE");
+        //     if (VISIBLE) {
+        //         if (VISIBLE?.OPTION.endsWith("OBVIOUS")) {
+        //             return true;
+        //         } else if (VISIBLE?.OPTION.endsWith("INOBVIOUS")) {
+        //             return perceptionSuccess;
+        //         }
+        //     }
+        // }
 
-        const configPowerInfo = this.baseInfo; // getPowerInfo({ item: this });
-
-        if (!configPowerInfo?.perceivability && !["skill", "disadvantage"].includes(this.type)) {
+        if (!this.baseInfo?.perceivability && !["skill", "disadvantage"].includes(this.type)) {
             console.warn(`Missing perceivability: for ${this.system.XMLID}`, this);
         }
 
-        if (configPowerInfo?.duration?.toLowerCase() === "instant") {
+        if (this.baseInfo?.duration?.toLowerCase() === "instant") {
             return false;
         }
 
-        if (!configPowerInfo?.perceivability) {
+        if (!this.baseInfo?.perceivability) {
             // TODO: Should it say that it's not perceivable if we haven't set it.
             return false;
-        } else if (configPowerInfo?.perceivability.toLowerCase() === "imperceptible") {
+        } else if (this.baseInfo?.perceivability.toLowerCase() === "imperceptible") {
             return false;
-        } else if (configPowerInfo?.perceivability.toLowerCase() === "obvious") {
+        } else if (this.baseInfo?.perceivability.toLowerCase() === "obvious") {
             return true;
-        } else if (configPowerInfo?.perceivability.toLowerCase() === "inobvious") {
+        } else if (this.baseInfo?.perceivability.toLowerCase() === "inobvious") {
             return perceptionSuccess;
         }
 
@@ -764,42 +763,63 @@ export class HeroSystem6eItem extends Item {
     static ItemXmlChildTagsUpload = ["ADDER", "MODIFIER", "POWER", "SKILL", "PERK", "TALENT"];
 
     findModsByXmlid(xmlid) {
-        for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-            if (this.system?.[key]) {
-                const value = this.system[key]?.find((o) => o.XMLID === xmlid);
-                if (value) {
-                    return value;
-                }
-            }
+        for (const mod of this.modifiers || this.system.MODIFIER) {
+            if (mod.XMLID === xmlid) return mod;
+            if ((mod.MODIFIER || []).length > 0) return mod.findModsByXmlid(xmlid);
+            if ((mod.ADDER || []).length > 0) return mod.findModsByXmlid(xmlid);
+            if ((mod.POWER || []).length > 0) return mod.findModsByXmlid(xmlid);
         }
 
-        // TODO: "Delete" support for old format
-        for (const key of ["ADDER", "MODIFIER", "POWER"]) {
-            if (this.system?.[key]) {
-                const value = this.system[key].find((o) => o.XMLID === xmlid);
-                if (value) {
-                    return value;
-                }
-
-                for (const subMod of this.system[key]) {
-                    for (const key2 of ["ADDER", "MODIFIER", "POWER"]) {
-                        if (subMod[key2]) {
-                            const value = subMod[key2].find((o) => o.XMLID === xmlid);
-                            if (value) {
-                                return value;
-                            }
-                        }
-                    }
-                }
-            }
+        for (const adder of this.adders || this.system.ADDER) {
+            if (adder.XMLID === xmlid) return adder;
+            if ((adder.MODIFIER || []).length > 0) return adder.findModsByXmlid(xmlid);
+            if ((adder.ADDER || []).length > 0) return adder.findModsByXmlid(xmlid);
+            if ((adder.POWER || []).length > 0) return adder.findModsByXmlid(xmlid);
         }
+
+        for (const power of this.powers || this.system.POWER) {
+            if (power.XMLID === xmlid) return power;
+            if ((power.MODIFIER || []).length > 0) return power.findModsByXmlid(xmlid);
+            if ((power.ADDER || []).length > 0) return power.findModsByXmlid(xmlid);
+            if ((power.POWER || []).length > 0) return power.findModsByXmlid(xmlid);
+        }
+
+        // for (const key of HeroSystem6eItem.ItemXmlChildTags) {
+        //     if (this.system?.[key]) {
+        //         const value = this.system[key]?.find((o) => o.XMLID === xmlid);
+        //         if (value) {
+        //             return value;
+        //         }
+        //     }
+        // }
+
+        // // TODO: "Delete" support for old format
+        // for (const key of ["ADDER", "MODIFIER", "POWER"]) {
+        //     if (this.system?.[key]) {
+        //         const value = this.system[key].find((o) => o.XMLID === xmlid);
+        //         if (value) {
+        //             return value;
+        //         }
+
+        //         for (const subMod of this.system[key]) {
+        //             for (const key2 of ["ADDER", "MODIFIER", "POWER"]) {
+        //                 if (subMod[key2]) {
+        //                     const value = subMod[key2].find((o) => o.XMLID === xmlid);
+        //                     if (value) {
+        //                         return value;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         // Power framework may include this modifier
-        if (this.parentItem && !this.parentItem.XMLID === "COMPOUNDPOWER" && this.actor?.items) {
-            if (this.parentItem) {
-                return this.parentItem.findModsByXmlid(xmlid);
-            }
-        }
+        // if (this.parentItem && !this.parentItem.XMLID === "COMPOUNDPOWER" && this.actor?.items) {
+        //     if (this.parentItem) {
+        //         return this.parentItem.findModsByXmlid(xmlid);
+        //     }
+        // }
 
         return null;
     }
@@ -1941,7 +1961,7 @@ export class HeroSystem6eItem extends Item {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
             ];
-            for (const usableas of (this.system.MODIFIER || []).filter((o) => o.XMLID === "USABLEAS")) {
+            for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
                 let foundMatch = false;
                 for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
                     if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
@@ -2341,6 +2361,33 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
+    get modifiers() {
+        const _modifiers = this.system.MODIFIER || [];
+        if (this.parentItem) {
+            // Include limitations from parent that are not private.
+            // <i>Crossbow:</i>  Multipower, 50-point reserve,  (50 Active Points); all slots OAF (-1)
+            for (const pMod of this.parentItem.modifiers.filter(
+                (mod) => parseFloat(mod.BASECOST_total) < 0 && mod.PRIVATE === false,
+            )) {
+                // Add parent mod if we don't already have it
+                if (!_modifiers.find((mod) => mod.ID === pMod.ID)) {
+                    // We may want the parent reference at some point (like for ingame editing of items)
+                    pMod.PARENTID ??= this.parentItem.system.ID;
+                    _modifiers.push(pMod);
+                }
+            }
+        }
+        return _modifiers;
+    }
+
+    get adders() {
+        return this.system.ADDER || [];
+    }
+
+    get powers() {
+        return this.system.POWER || [];
+    }
+
     calcItemPoints() {
         let changed = false;
         changed = this.calcBasePointsPlusAdders() || changed;
@@ -2518,7 +2565,7 @@ export class HeroSystem6eItem extends Item {
         //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
         if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
             let advantages = 0;
-            for (const modifier of (system.MODIFIER || []).filter((o) => !o.PRIVATE)) {
+            for (const modifier of this.modifiers.filter((o) => !o.PRIVATE)) {
                 const modPowerInfo = getPowerInfo({
                     item: modifier,
                     actor: this.actor,
@@ -2572,7 +2619,7 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = this.baseInfo;
 
-        for (const modifier of system.MODIFIER || []) {
+        for (const modifier of this.modifiers) {
             let _myAdvantage = 0;
 
             const modPowerInfo = getPowerInfo({
@@ -2710,7 +2757,7 @@ export class HeroSystem6eItem extends Item {
 
         // This may be a slot in a framework if so get parent
 
-        const modifiers = system.MODIFIER || [];
+        const modifiers = this.modifiers;
         // .filter(
         //     (o) =>
         //         //parseFloat(o.BASECOST) < 0 ||
@@ -2721,15 +2768,15 @@ export class HeroSystem6eItem extends Item {
         // );
 
         // Add limitations from parent
-        if (this.parentItem) {
-            for (const parentAllSlots of (this.parentItem?.system.MODIFIER || []).filter(
-                (o) => parseFloat(o.BASECOST_total) < 0,
-            )) {
-                if (!modifiers.find((mod) => mod.ID === parentAllSlots.ID)) {
-                    modifiers.push(parentAllSlots);
-                }
-            }
-        }
+        // if (this.parentItem) {
+        //     for (const parentAllSlots of (this.parentItem?.modifiers || []).filter(
+        //         (o) => parseFloat(o.BASECOST_total) < 0,
+        //     )) {
+        //         if (!modifiers.find((mod) => mod.ID === parentAllSlots.ID)) {
+        //             modifiers.push(parentAllSlots);
+        //         }
+        //     }
+        // }
 
         let limitations = 0;
         for (const modifier of modifiers) {
@@ -3845,7 +3892,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Advantages sorted low to high
-        for (let modifier of (system.MODIFIER || [])
+        for (let modifier of this.modifiers
             .filter((o) => o.BASECOST_total >= 0)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
@@ -3870,7 +3917,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MULTIPOWER slots typically include limitations
-        let modifiers = (system.MODIFIER || [])
+        let modifiers = this.modifiers
             .filter((o) => o.BASECOST_total < 0)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
@@ -5218,9 +5265,7 @@ export async function RequiresASkillRollCheck(item) {
     // Toggles don't need a roll to turn off
     //if (item.system?.active === true) return true;
 
-    let rar = (item.system.MODIFIER || []).find(
-        (o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL",
-    );
+    let rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (rar) {
         let OPTION_ALIAS = rar.OPTION_ALIAS;
 
