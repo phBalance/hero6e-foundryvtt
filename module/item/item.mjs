@@ -165,6 +165,11 @@ export class HeroSystem6eItem extends Item {
     async _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
 
+        if (!this.isOwner) {
+            //console.log(`Skipping _onUpdate because this client is not an owner of ${this.actor.name}:${this.name}`);
+            return;
+        }
+
         // If our value has changed, we need to rebuild this item.
         if (changed.system?.value != null) {
             // TODO: Update everything!
