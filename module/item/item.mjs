@@ -22,7 +22,7 @@ import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
-import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
+// import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
@@ -537,21 +537,21 @@ export class HeroSystem6eItem extends Item {
             // Special Visions
             const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
             const tokenDocument = token.document || token;
-            if (this.#baseInfo?.sight) {
-                const detectionModes = tokenDocument.detectionModes;
-                const basicSight = detectionModes.find((o) => o.id === "basicSight");
-                if (basicSight) {
-                    basicSight.range = null; // Infinite vision range
-                }
-                if (token) {
-                    await activateSpecialVision(this, token);
-                }
-            }
+            // if (this.#baseInfo?.sight) {
+            //     const detectionModes = tokenDocument.detectionModes;
+            //     const basicSight = detectionModes.find((o) => o.id === "basicSight");
+            //     if (basicSight) {
+            //         basicSight.range = null; // Infinite vision range
+            //     }
+            //     if (token) {
+            //         await activateSpecialVision(this, token);
+            //     }
+            // }
 
-            // CUSTOMPOWER LIGHT
-            if (this.system.XMLID === "CUSTOMPOWER") {
-                await activateSpecialVision(this, token);
-            }
+            // // CUSTOMPOWER LIGHT
+            // if (this.system.XMLID === "CUSTOMPOWER") {
+            //     await activateSpecialVision(this, token);
+            // }
         } else {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -581,7 +581,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Remove Special Visions
-            await removeSpecialVisions(this.actor.getActiveTokens()?.[0]);
+            //await removeSpecialVisions(this.actor.getActiveTokens()?.[0]);
         }
 
         const attr = "system.active";

@@ -1,9 +1,9 @@
 // Possible reference: https://github.com/foundryvtt/foundryvtt/issues/9026
 // Possible reference: https://gitlab.com/woodentavern/foundryvtt-bar-brawl
 
-import { getBarExtendedAttribute } from "../bar3/extendTokenConfig.mjs";
+// import { getBarExtendedAttribute } from "../bar3/extendTokenConfig.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
-import { clamp } from "../utility/compatibility.mjs";
+// import { clamp } from "../utility/compatibility.mjs";
 
 export class HeroSystem6eTokenDocument extends TokenDocument {
     constructor(data, context) {
@@ -68,6 +68,46 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
     //     });
     //     return schema;
     // }
+
+    _prepareDetectionModes() {
+        if (!this.sight.enabled) return;
+        this.sight.range = 0;
+
+        let changed = false;
+
+        // default lightPerception & basicSight detections
+        //super._prepareDetectionModes();
+
+        const lightMode = this.detectionModes.find((m) => m.id === "lightPerception");
+        if (!lightMode) {
+            this.detectionModes.push({ id: "lightPerception", enabled: true, range: null });
+            // changed = true;
+        }
+        const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+        if (!basicMode) {
+            this.detectionModes.push({ id: "basicSight", enabled: true, range: this.sight.range });
+            // changed = true;
+        }
+
+        // try {
+        //     // INFRAREDPERCEPTION
+        //     const INFRAREDPERCEPTION = this.actor?.items.find(
+        //         (item) => item.system.XMLID === "INFRAREDPERCEPTION" && item.isActive,
+        //     );
+        //     if (INFRAREDPERCEPTION) {
+        //         const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+        //         basicMode.range = null;
+        //         basicMode.enabled = true;
+        //         changed = true;
+        //     }
+        // } catch (e) {
+        //     console.error(e);
+        // }
+
+        // if (changed) {
+        //     this.update({ detectionModes: this.detectionModes });
+        // }
+    }
 }
 
 export class HeroSystem6eToken extends Token {

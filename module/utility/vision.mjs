@@ -1,3 +1,36 @@
+export function setPerceptionModes() {
+    // CONFIG.Canvas.visionModes.heroSight = new VisionMode({
+    //     id: "heroSight",
+    //     label: "VISION.HeroSight",
+    //     canvas: {
+    //         shader: ColorAdjustmentsSamplerShader,
+    //         //uniforms: { enable: true, contrast: 0, saturation: -1.0, brightness: 0 },
+    //         uniforms: { brightness: 0, contrast: 0, darknessLevel: 0, saturation: -1 },
+    //     },
+    //     lighting: {
+    //         levels: {
+    //             // from core-bundled darkvision mode: maybe restore?
+    //             [VisionMode.LIGHTING_LEVELS.DIM]: VisionMode.LIGHTING_LEVELS.BRIGHT,
+    //         },
+    //         background: { visibility: VisionMode.LIGHTING_VISIBILITY.REQUIRED },
+    //     },
+    //     vision: {
+    //         darkness: { adaptive: false },
+    //         defaults: { saturation: -1.0 },
+    //     },
+    // });
+    // NIGHTVISION
+    // Allows a character to see in total darkness as if it were normal
+    // daylight. Therefore, this effect does not penetrate the Power
+    // Darkness, but it does offset some forms of Change Environment
+    // that obscure vision.
+    // CONFIG.Canvas.detectionModes.heroNightVision = new DetectionMode({
+    //     id: "nightvision",
+    //     label: "VISION.NightVision",
+    //     type: DetectionMode.DETECTION_TYPES.SIGHT,
+    // });
+}
+
 // class ThoughtsDetectionMode extends DetectionMode {
 //     constructor() {
 //         super({
@@ -27,52 +60,52 @@
 // }
 
 // Turn on Special Vision
-export async function activateSpecialVision(item, token) {
-    if (!token) return;
+// export async function activateSpecialVision(item, token) {
+//     if (!token) return;
 
-    // token might be a PrototypeToken token
-    const tokenDocument = token.document || token;
+//     // token might be a PrototypeToken token
+//     const tokenDocument = token.document || token;
 
-    // Lantern or Torch
-    if (item.system.XMLID === "CUSTOMPOWER" && item.system.ALIAS.match(/light/i)) {
-        await tokenDocument.update({ "light.bright": parseInt(item.system.QUANTITY) });
-    }
+//     // Lantern or Torch
+//     if (item.system.XMLID === "CUSTOMPOWER" && item.system.ALIAS.match(/light/i)) {
+//         await tokenDocument.update({ "light.bright": parseInt(item.system.QUANTITY) });
+//     }
 
-    if (!item.baseInfo?.sight) return;
+//     if (!item.baseInfo?.sight) return;
 
-    const detectionModes = tokenDocument.detectionModes;
-    const basicSight = detectionModes.find((o) => o.id === "basicSight");
-    if (basicSight) {
-        basicSight.range = null; // Cannot see things in the dark without special visions
-    }
+//     const detectionModes = tokenDocument.detectionModes;
+//     const basicSight = detectionModes.find((o) => o.id === "basicSight");
+//     if (basicSight) {
+//         basicSight.range = null; // Cannot see things in the dark without special visions
+//     }
 
-    await tokenDocument.update({
-        sight: item.baseInfo.sight,
-        detectionModes,
-    });
-}
+//     await tokenDocument.update({
+//         sight: item.baseInfo.sight,
+//         detectionModes,
+//     });
+// }
 
 // Remove Special Visions
-export async function removeSpecialVisions(token) {
-    if (!token) return;
+// export async function removeSpecialVisions(token) {
+//     if (!token) return;
 
-    // token might be a PrototypeToken token
-    const tokenDocument = token.document || token;
+//     // token might be a PrototypeToken token
+//     const tokenDocument = token.document || token;
 
-    // Lantern or Torch
-    if (token.actor.items.find((o) => o.system.XMLID === "CUSTOMPOWER" && o.system.ALIAS.match(/light/i))) {
-        await tokenDocument.update({ "light.dim": 0, "light.bright": 0 });
-    }
+//     // Lantern or Torch
+//     if (token.actor.items.find((o) => o.system.XMLID === "CUSTOMPOWER" && o.system.ALIAS.match(/light/i))) {
+//         await tokenDocument.update({ "light.dim": 0, "light.bright": 0 });
+//     }
 
-    const detectionModes = tokenDocument.detectionModes;
-    const basicSight = detectionModes.find((o) => o.id === "basicSight");
-    if (basicSight) {
-        basicSight.range = 0; // Cannot see things in the dark without special visions
-    }
-    if (token) {
-        await tokenDocument.update({
-            sight: { visionMode: "basic", range: 0, color: undefined },
-            detectionModes,
-        });
-    }
-}
+//     const detectionModes = tokenDocument.detectionModes;
+//     const basicSight = detectionModes.find((o) => o.id === "basicSight");
+//     if (basicSight) {
+//         basicSight.range = 0; // Cannot see things in the dark without special visions
+//     }
+//     if (token) {
+//         await tokenDocument.update({
+//             sight: { visionMode: "basic", range: 0, color: undefined },
+//             detectionModes,
+//         });
+//     }
+// }
