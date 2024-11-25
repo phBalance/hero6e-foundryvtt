@@ -281,9 +281,11 @@
                                             height="24" /></div>
                                 </td>
                                 <td class="left">
-                                    {{!-- {{#if item.system.childIdx}}{{item.system.childIdx}}){{/if}} --}}
                                     {{#if item.parentItem}}{{item.parentItem.name}}: {{/if}}
                                     {{{itemFullDescription item}}}
+                                    {{#if item.system.NOTES}}
+                                        <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+                                    {{/if}}
                                 </td>
                                 <td>{{item.system.end}}</td>
                                 <td>
@@ -348,7 +350,7 @@
                                     {{#if (and (ne item.system.realCost 0) (ne item.system.XMLID "LIST"))}}
                                         {{item.system.realCost}}</td>
                                     {{/if}}
-                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{/if}}{{#if item.parentItem.parentItem}}2{{/if}}">
+                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{#if item.parentItem.parentItem}}2{{/if}}{{/if}}">
                                     {{#if item.system.childIdx}}
                                         {{#if (eq item.parentItem.type "skill")}}
                                             {{item.system.childIdx}})
@@ -358,6 +360,9 @@
                                     {{/if}}
                                     {{#if (ne item.name "LIST")}}
                                         {{{itemFullDescription item}}}
+                                        {{#if item.system.NOTES}}
+                                            <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+                                        {{/if}}
                                     {{/if}}
                                 </td>
                                 <td>
@@ -613,6 +618,9 @@
                                 <td>{{item.system.realCost}}</td>
                                 <td class="left">
                                     {{{itemFullDescription item}}}
+                                    {{#if item.system.NOTES}}
+                                        <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+                                    {{/if}}
                                 </td>
                                 <td>
                                     {{#if item.system.roll}}
@@ -658,6 +666,9 @@
                                 <td>{{item.system.realCost}}</td>
                                 <td class="left">
                                     {{{itemFullDescription item}}}
+                                    {{#if item.system.NOTES}}
+                                        <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+                                    {{/if}}
                                 </td>
                                 <td>
                                     {{#if item.system.roll}}
@@ -707,6 +718,9 @@
                                 <td>{{item.system.realCost}}</td>
                                 <td class="left">
                                     {{{itemFullDescription item}}}
+                                    {{#if item.system.NOTES}}
+                                        <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+                                    {{/if}}
                                 </td>
                                 <td>
                                     {{#if item.system.roll}}

@@ -1,24 +1,8 @@
 {{!-- HDC xml partial --}}
-    {{!-- UPPERCASE props are core to the item --}}
-    {{!-- "Yes" and "No" are converted to true/false --}}
-    {{!-- <SKILL XMLID="ACROBATICS" BASECOST="3.0" LEVELS="0" 
-        ALIAS="Acrobatics" POSITION="0" MULTIPLIER="1.0" 
-        GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" 
-        SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" 
-        NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>
-    --}}
-
-        {{!-- <div class="form-group">
-            <label>ALIAS</label>
-            <input type="text" name="system.ALIAS" value="{{system.ALIAS}}" data-dtype="text" />
-        </div> --}}
-
 <div class="description">
     {{item.system.description}}
     {{#if item.system.NOTES}}
-        <br>
-        <b>Notes:</b>
-        {{item.system.NOTES}}
+        <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
     {{/if}}
 </div>
 

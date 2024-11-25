@@ -41,10 +41,6 @@ function itemFullDescription(item) {
         desc = `<i>${item.system.NAME}:</i> ${item.system.description}`;
     }
 
-    if (item.system.NOTES) {
-        desc += `<p class="item-notes"><b>Notes:</b> ${item.system.NOTES}</p>`;
-    }
-
     return desc;
 }
 
@@ -442,11 +438,6 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.realCost && !isNaN(this.system.realCost)) {
             content += ` Total Cost: ${this.system.realCost} CP.`;
-        }
-
-        // TODO: Chat shouldn't provide the note (I don't think)
-        if (this.system.NOTES) {
-            content += `<p class="item-notes"><b>Notes:</b> ${this.system.NOTES}</p>`;
         }
 
         content += `</div>`;
@@ -3157,35 +3148,12 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "ENTANGLE":
-                {
-                    // Entangle 2d6, 7 rPD/2 rED or Entangle 2d6 5 rMD
-                    // const baseDef = parseInt(system.value || 0);
-
-                    // const additionalDef = parseInt(this.findModsByXmlid("ADDITIONALDEF")?.LEVELS || 0);
-                    // const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
-                    // const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
-
-                    // const rPD = baseDef + additionalPD;
-                    // const rED = baseDef + additionalED;
-                    // // 6e +1 DEF = +2 rMD. NOTE: HD doesn't have ability to buy MD in 6e.
-                    // const rMD = baseDef + 2 * (additionalDef || additionalPD + additionalED);
-
-                    // // BOECV for 5e, ACV for 6e
-                    // const mentalEntangle =
-                    //     (this.findModsByXmlid("BOECV") &&
-                    //         this.findModsByXmlid("TAKESNODAMAGE") &&
-                    //         this.findModsByXmlid("VERSUSEGO")) ||
-                    //     (this.findModsByXmlid("ACV") &&
-                    //         this.findModsByXmlid("TAKESNODAMAGE") &&
-                    //         this.findModsByXmlid("VERSUSEGO"));
-
-                    system.description = `${system.ALIAS} ${system.value}d6, ${this.baseInfo.defense(this).string}`;
-                }
+                system.description = `${system.ALIAS} ${system.value}d6, ${this.baseInfo.defense(this).string}`;
                 break;
 
             case "ELEMENTAL_CONTROL":
                 // Elemental Control, 12-point powers
-                system.description = `${system.NAME || system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`;
+                system.description = `${system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`;
                 break;
 
             case "MANEUVER":
@@ -3306,7 +3274,7 @@ export class HeroSystem6eItem extends Item {
             case "VPP":
             case "MULTIPOWER":
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
-                system.description = `${system.NAME || system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`;
+                system.description = `${system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`;
                 break;
 
             case "FLASH":
@@ -4937,7 +4905,7 @@ export class HeroSystem6eItem extends Item {
             return this.baseInfo.attackDefenseVs;
         }
 
-        // Generic defense specificiation
+        // Generic defense specification
         if (["PD", "ED", "MD"].includes(this.system.INPUT)) {
             return this.system.INPUT;
         }
