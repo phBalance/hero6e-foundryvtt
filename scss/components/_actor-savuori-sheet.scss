@@ -184,7 +184,6 @@ $sidebar-width: 136px;
 /* Need this because .savuori.actor-sheet table tr td  is more specific and messes up padding for frameworks */
 .savuori.actor-sheet table tr td.item-framework-child-name {
     padding-left: 27px;
-    text-indent: -17px;
 }
 
 .savuori.actor-sheet button {

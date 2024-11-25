@@ -216,7 +216,7 @@ export class HeroSystem6eActor extends Actor {
             await ChatMessage.create(chatData);
         }
 
-        // Chatcard about entering/leaving heroic identity
+        // Chat card about entering/leaving heroic identity
         if (
             changed.system?.heroicIdentity !== undefined &&
             this.system.heroicIdentity !== undefined &&
@@ -315,41 +315,6 @@ export class HeroSystem6eActor extends Actor {
                     }
                 }
             }
-
-            // Loop thru all the active effects, checking if source has OIHID
-            // const allEffects = await this.allApplicableEffects();
-            // for (const ae of allEffects) {
-            //     const item = ae.parent;
-            //     if (!item) continue;
-            //     if (item instanceof HeroSystem6eItem === false) continue;
-            //     if (item.findModsByXmlid("OIHID")) {
-            //         // Use flags to keep track which items were disabled so we will enable them when we go back into heroic ID
-            //         await item.update({ "flags.preOIHID": ae.disabled });
-            //         //await ae.update({ disabled: !data.system.heroicIdentity });
-
-            //         // Modify characteristics as appropriate
-            //         // for (const change of ae.changes) {
-            //         //     if (change.key.match(/max$/) && change.mode === 2 && change.value > 0) {
-            //         //         const valueKey = change.key.replace(/.max$/, ".value");
-            //         //         let max = this;
-            //         //         valueKey.split(".").forEach((subPath) => {
-            //         //             max = max[subPath] || null;
-            //         //         });
-            //         //         if (parseInt(max || 0) > 0) {
-            //         //             if (ae.disabled) {
-            //         //                 await this.update({
-            //         //                     [valueKey]: max - parseInt(change.value),
-            //         //                 });
-            //         //             } else {
-            //         //                 await this.update({
-            //         //                     [valueKey]: max + parseInt(change.value),
-            //         //                 });
-            //         //             }
-            //         //         }
-            //         //     }
-            //         // }
-            //     }
-            // }
         }
 
         // 5e calculated characteristics
@@ -1066,9 +1031,6 @@ export class HeroSystem6eActor extends Actor {
                     },
                 ],
                 origin: this.uuid,
-                // duration: {
-                //     seconds: 3.154e7 * 100, // 100 years should be close to infinity
-                // },
                 flags: {
                     str0: true,
                 },

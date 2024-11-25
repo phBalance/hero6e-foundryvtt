@@ -51,3 +51,6 @@
 
 /* Styles for TextEditor */
 @include meta.load-css("components/text-editor");
+
+/* Styles for Notes */
+@include meta.load-css("components/notes");
