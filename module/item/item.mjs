@@ -3255,7 +3255,7 @@ export class HeroSystem6eItem extends Item {
                             const effectiveStrength = 5 * dc;
                             system.description += `, ${system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`)}`;
                         } else if (dc) {
-                            const damageDiceFormula = getDiceFormulaFromItemDC(this, { ignoreDeadlyBlow: true }, dc);
+                            const damageDiceFormula = getDiceFormulaFromItemDC(this, dc);
                             if (damageDiceFormula) {
                                 system.description += `,`;
 
@@ -4006,7 +4006,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FOCUS":
-                result += ", " + modifier.ALIAS;
+                result += `, ${modifier.OPTION_ALIAS || modifier.OPTIONID}`;
                 break;
 
             case "ABLATIVE":
@@ -4018,7 +4018,7 @@ export class HeroSystem6eItem extends Item {
                 break;
         }
 
-        if (!["CONDITIONALPOWER"].includes(modifier.XMLID)) {
+        if (!["CONDITIONALPOWER"].includes(modifier.XMLID) && modifier.XMLID !== "FOCUS") {
             result += " (";
         } else {
             result += " ";
@@ -4063,6 +4063,7 @@ export class HeroSystem6eItem extends Item {
                         result += `${modifier.OPTION_ALIAS}; `;
                     }
                     break;
+
                 case "EXPLOSION":
                     {
                         const shape = modifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : modifier.OPTION_ALIAS;
@@ -4072,9 +4073,12 @@ export class HeroSystem6eItem extends Item {
                 case "EXTRATIME":
                     result += `${modifier.OPTION_ALIAS}, `;
                     break;
+                case "FOCUS":
+                    break;
                 case "CONDITIONALPOWER":
                     result += `${modifier.OPTION_ALIAS}; (`;
                     break;
+
                 default:
                     result += `${modifier.OPTION_ALIAS}; `;
             }
@@ -4084,7 +4088,10 @@ export class HeroSystem6eItem extends Item {
             result += modifier.INPUT + "; ";
         }
 
-        if (modifier.COMMENTS) result += modifier.COMMENTS + "; ";
+        if (modifier.COMMENTS && modifier.XMLID !== "FOCUS") {
+            result += modifier.COMMENTS + "; ";
+        }
+
         for (const adder of modifier.ADDER || []) {
             switch (adder.XMLID) {
                 case "DOUBLELENGTH":
@@ -4094,6 +4101,10 @@ export class HeroSystem6eItem extends Item {
                     // These adders relate to AOE and so are displayed as a part of that
                     break;
 
+                case "BREAKABILITY":
+                    result += `${adder.OPTION_ALIAS} `;
+                    break;
+
                 case "EXPLOSION":
                     result += adder.ALIAS + "; ";
 
@@ -4101,6 +4112,14 @@ export class HeroSystem6eItem extends Item {
                 default:
                     result += adder.ALIAS + ", ";
             }
+        }
+
+        if (modifier.XMLID === "FOCUS") {
+            // Sometimes the focus description is in the ALIAS, sometimes it is in the COMMENTS
+            result += `(${modifier.ALIAS.replace("Focus", "")} ${modifier.COMMENTS}; `
+                .replace(/ {2}/g, " ")
+                .replace("( ", "(")
+                .replace("(; ", "(");
         }
 
         let fraction = "";
