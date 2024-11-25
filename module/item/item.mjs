@@ -22,7 +22,7 @@ import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
-import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
+// import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
@@ -185,6 +185,17 @@ export class HeroSystem6eItem extends Item {
 
         if (this.actor && this.system.XMLID === "PENALTY_SKILL_LEVELS") {
             await this.actor.applyEncumbrancePenalty();
+        }
+
+        // Update detection modes for SENSE items
+        // Seems like a bit of a kluge.  There must be a better way.
+        if (this.system.active !== undefined) {
+            if (this.actor && this.baseInfo?.type.includes("sense")) {
+                for (const token of this.actor.getActiveTokens()) {
+                    token.document._prepareDetectionModes();
+                    token.renderFlags.set({ refreshVisibility: true });
+                }
+            }
         }
     }
 
@@ -526,23 +537,23 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Special Visions
-            const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
-            const tokenDocument = token.document || token;
-            if (this.#baseInfo?.sight) {
-                const detectionModes = tokenDocument.detectionModes;
-                const basicSight = detectionModes.find((o) => o.id === "basicSight");
-                if (basicSight) {
-                    basicSight.range = null; // Infinite vision range
-                }
-                if (token) {
-                    await activateSpecialVision(this, token);
-                }
-            }
+            //const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
+            //const tokenDocument = token.document || token;
+            // if (this.#baseInfo?.sight) {
+            //     const detectionModes = tokenDocument.detectionModes;
+            //     const basicSight = detectionModes.find((o) => o.id === "basicSight");
+            //     if (basicSight) {
+            //         basicSight.range = null; // Infinite vision range
+            //     }
+            //     if (token) {
+            //         await activateSpecialVision(this, token);
+            //     }
+            // }
 
-            // CUSTOMPOWER LIGHT
-            if (this.system.XMLID === "CUSTOMPOWER") {
-                await activateSpecialVision(this, token);
-            }
+            // // CUSTOMPOWER LIGHT
+            // if (this.system.XMLID === "CUSTOMPOWER") {
+            //     await activateSpecialVision(this, token);
+            // }
         } else {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -572,8 +583,31 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Remove Special Visions
-            await removeSpecialVisions(this.actor.getActiveTokens()?.[0]);
+            //await removeSpecialVisions(this.actor.getActiveTokens()?.[0]);
         }
+
+        // Refresh token (mainly for detectionModes)
+        // if (this.actor) {
+        //     for (const token of this.actor.getActiveTokens()) {
+        //         //     token.initializeSources();
+        //         //     token.renderFlags.set({ refresh: true });
+        //         //await token.document.update({ detectionModes: token.document.detectionModes });
+
+        //         foundry.utils.debounce(function () {
+        //             token.document._prepareDetectionModes();
+        //             token.renderFlags.set({ refreshVisibility: true });
+        //             console.log("refreshVisibility", token.detectionModes[1]);
+        //         }, 100);
+        //         // token.renderFlags.set({ refreshVisibility: true });
+        //     }
+
+        //     // for (const token of canvas.tokens.placeables) {
+        //     //     token.renderFlags.set({ refreshVisibility: true });
+        //     //     ////await token.refresh();
+        //     //     //console.log(token);
+        //     //     //console.log(token.sheet);
+        //     // }
+        // }
 
         const attr = "system.active";
         const newValue = !foundry.utils.getProperty(item, attr);
@@ -1543,9 +1577,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // CUSTOMPOWER LIGHT
-        if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
-            await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
-        }
+        // if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
+        //     await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
+        // }
 
         // Carried Equipment
         if (this.system.CARRIED && this.system.active === undefined) {

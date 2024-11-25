@@ -70,6 +70,7 @@ export default [
                 Token: "readonly",
                 TokenDocument: "readonly",
                 ui: "readonly",
+                DetectionMode: "readonly",
             },
         },
     },

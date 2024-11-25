@@ -26,6 +26,7 @@ import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
+import { setPerceptionModes } from "./utility/vision.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -33,6 +34,9 @@ import "./testing/testing-main.mjs";
 import { EffectsPanel } from "./effects-panel.mjs";
 
 Hooks.once("init", async function () {
+    // Custom HeroSystem VisionMode
+    setPerceptionModes();
+
     game.CreateHeroCompendiums = CreateHeroCompendiums;
     HEROSYS.module = game.system.id;
     game.herosystem6e = {
