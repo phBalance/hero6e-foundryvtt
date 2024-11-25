@@ -181,6 +181,7 @@ The following modules have been successfully tested for compatibility. They are 
 - [About Face](https://foundryvtt.com/packages/about-face)
 - [Bar Brawl](https://foundryvtt.com/packages/barbrawl)
 - [Tokenizer](https://foundryvtt.com/packages/vtta-tokenizer/)
+- [Active Token Effects](https://foundryvtt.com/packages/ATL). Used for automation of carried lights.
 
 ## 5th Edition Support
 
