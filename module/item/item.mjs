@@ -537,8 +537,8 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Special Visions
-            const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
-            const tokenDocument = token.document || token;
+            //const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
+            //const tokenDocument = token.document || token;
             // if (this.#baseInfo?.sight) {
             //     const detectionModes = tokenDocument.detectionModes;
             //     const basicSight = detectionModes.find((o) => o.id === "basicSight");
@@ -1577,9 +1577,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // CUSTOMPOWER LIGHT
-        if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
-            await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
-        }
+        // if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
+        //     await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
+        // }
 
         // Carried Equipment
         if (this.system.CARRIED && this.system.active === undefined) {
