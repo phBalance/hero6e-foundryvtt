@@ -4,6 +4,7 @@
 
 - Fixed missing cost for NIGHTVISION and other enhanced visions. [#1520](https://github.com/dmdorman/hero6e-foundryvtt/issues/1520)
 - DARKNESS now has an implied AOE for targeting purposes. [#1503](https://github.com/dmdorman/hero6e-foundryvtt/issues/1503)
+- Notes are now 1 line by default to match actual formatting as much as possible with space. Click and hold on the note to display one in full.
 
 ## Version 4.0.8
 
