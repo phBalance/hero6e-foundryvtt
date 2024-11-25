@@ -4088,7 +4088,10 @@ export class HeroSystem6eItem extends Item {
             result += modifier.INPUT + "; ";
         }
 
-        if (modifier.COMMENTS) result += modifier.COMMENTS + "; ";
+        if (modifier.COMMENTS && modifier.XMLID !== "FOCUS") {
+            result += modifier.COMMENTS + "; ";
+        }
+
         for (const adder of modifier.ADDER || []) {
             switch (adder.XMLID) {
                 case "DOUBLELENGTH":
@@ -4112,7 +4115,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (modifier.XMLID === "FOCUS") {
-            result += `(${modifier.ALIAS === "Focus" ? "" : `${modifier.ALIAS}; `}`;
+            // Sometimes the focus description is in the ALIAS, sometimes it is in the COMMENTS
+            result += `(${modifier.ALIAS.replace("Focus", "")} ${modifier.COMMENTS}; `
+                .replace(/ {2}/g, " ")
+                .replace("( ", "(")
+                .replace("(; ", "(");
         }
 
         let fraction = "";

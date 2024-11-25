@@ -4004,7 +4004,7 @@ export function registerUploadTests(quench) {
                     it("multipower description", function () {
                         assert.equal(
                             mpItem.system.description,
-                            "MP Ego Powers, 10-point reserve, all slots Personal Immunity (+1/4)",
+                            "Multipower, 10-point reserve, all slots Personal Immunity (+1/4)",
                         );
                     });
 
@@ -4166,7 +4166,7 @@ export function registerUploadTests(quench) {
                     it("elemental control description", function () {
                         assert.equal(
                             ecItem.system.description,
-                            "EC Ego Powers, 20-point powers (10 Active Points); all slots OAF (-1)",
+                            "Elemental Control, 20-point powers (10 Active Points); all slots OAF (-1)",
                         );
                     });
 
