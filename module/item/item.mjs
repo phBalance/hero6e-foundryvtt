@@ -186,6 +186,17 @@ export class HeroSystem6eItem extends Item {
         if (this.actor && this.system.XMLID === "PENALTY_SKILL_LEVELS") {
             await this.actor.applyEncumbrancePenalty();
         }
+
+        // Update detection modes for SENSE items
+        // Seems like a bit of a kluge.  There must be a better way.
+        if (this.system.active !== undefined) {
+            if (this.actor && this.baseInfo?.type.includes("sense")) {
+                for (const token of this.actor.getActiveTokens()) {
+                    token.document._prepareDetectionModes();
+                    token.renderFlags.set({ refreshVisibility: true });
+                }
+            }
+        }
     }
 
     /**
@@ -574,6 +585,29 @@ export class HeroSystem6eItem extends Item {
             // Remove Special Visions
             //await removeSpecialVisions(this.actor.getActiveTokens()?.[0]);
         }
+
+        // Refresh token (mainly for detectionModes)
+        // if (this.actor) {
+        //     for (const token of this.actor.getActiveTokens()) {
+        //         //     token.initializeSources();
+        //         //     token.renderFlags.set({ refresh: true });
+        //         //await token.document.update({ detectionModes: token.document.detectionModes });
+
+        //         foundry.utils.debounce(function () {
+        //             token.document._prepareDetectionModes();
+        //             token.renderFlags.set({ refreshVisibility: true });
+        //             console.log("refreshVisibility", token.detectionModes[1]);
+        //         }, 100);
+        //         // token.renderFlags.set({ refreshVisibility: true });
+        //     }
+
+        //     // for (const token of canvas.tokens.placeables) {
+        //     //     token.renderFlags.set({ refreshVisibility: true });
+        //     //     ////await token.refresh();
+        //     //     //console.log(token);
+        //     //     //console.log(token.sheet);
+        //     // }
+        // }
 
         const attr = "system.active";
         const newValue = !foundry.utils.getProperty(item, attr);

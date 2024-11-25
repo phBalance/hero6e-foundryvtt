@@ -71,9 +71,10 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
 
     _prepareDetectionModes() {
         if (!this.sight.enabled) return;
-        this.sight.range = 0;
 
-        let changed = false;
+        // By default you must have a light source to see the map
+        const initialRange = this.sight.range;
+        this.sight.range = 0;
 
         // default lightPerception & basicSight detections
         //super._prepareDetectionModes();
@@ -81,32 +82,62 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         const lightMode = this.detectionModes.find((m) => m.id === "lightPerception");
         if (!lightMode) {
             this.detectionModes.push({ id: "lightPerception", enabled: true, range: null });
-            // changed = true;
+        } else {
+            lightMode.range = null;
+            lightMode.enabled = true;
         }
         const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
         if (!basicMode) {
-            this.detectionModes.push({ id: "basicSight", enabled: true, range: this.sight.range });
-            // changed = true;
+            this.detectionModes.push({ id: "basicSight", enabled: true, range: 0 });
+        } else {
+            basicMode.range = 0;
+            basicMode.enabled = true;
         }
 
-        // try {
-        //     // INFRAREDPERCEPTION
-        //     const INFRAREDPERCEPTION = this.actor?.items.find(
-        //         (item) => item.system.XMLID === "INFRAREDPERCEPTION" && item.isActive,
-        //     );
-        //     if (INFRAREDPERCEPTION) {
-        //         const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
-        //         basicMode.range = null;
-        //         basicMode.enabled = true;
-        //         changed = true;
-        //     }
-        // } catch (e) {
-        //     console.error(e);
-        // }
+        try {
+            // GENERIC SIGHTGROUP (no lights required; INFRAREDPERCEPTION, NIGHTVISION, etc)
+            const SIGHTGROUP = this.actor?.items.find(
+                (item) =>
+                    item.baseInfo.type.includes("sense") &&
+                    item.system.GROUP === "SIGHTGROUP" &&
+                    //item.system.OPTIONID === undefined && // DETECT
+                    item.isActive,
+            );
+            if (SIGHTGROUP) {
+                const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+                basicMode.range = null;
+                this.sight.range = null; // You can see without a light source
+            }
 
-        // if (changed) {
-        //     this.update({ detectionModes: this.detectionModes });
-        // }
+            // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)
+            const NONSIGHTGROUP = this.actor?.items.find(
+                (item) =>
+                    item.baseInfo.type.includes("sense") &&
+                    item.system.GROUP !== "SIGHTGROUP" &&
+                    item.system.GROUP !== "MENTALGROUP" &&
+                    item.isActive,
+            );
+            const heroSense = this.detectionModes.find((m) => m.id === "heroSense");
+            if (NONSIGHTGROUP) {
+                if (!heroSense) {
+                    this.detectionModes.push({ id: "heroSense", enabled: true, range: null });
+                } else {
+                    heroSense.range = null;
+                    heroSense.enabled = true;
+                }
+            } else {
+                if (heroSense) {
+                    heroSense.enabled = false;
+                }
+            }
+
+            // Update Sight so people don't get confused when looking at the UI
+            if (initialRange !== this.sight.range) {
+                this.update({ "sight.range": this.sight.range });
+            }
+        } catch (e) {
+            console.error(e);
+        }
     }
 }
 

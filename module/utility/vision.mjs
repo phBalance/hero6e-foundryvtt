@@ -10,15 +10,29 @@ export function setPerceptionModes() {
     //     lighting: {
     //         levels: {
     //             // from core-bundled darkvision mode: maybe restore?
-    //             [VisionMode.LIGHTING_LEVELS.DIM]: VisionMode.LIGHTING_LEVELS.BRIGHT,
+    //             //[VisionMode.LIGHTING_LEVELS.DIM]: VisionMode.LIGHTING_LEVELS.BRIGHT,
     //         },
     //         background: { visibility: VisionMode.LIGHTING_VISIBILITY.REQUIRED },
     //     },
     //     vision: {
     //         darkness: { adaptive: false },
-    //         defaults: { saturation: -1.0 },
+    //         defaults: { contrast: 0, saturation: -1, brightness: 0.1 },
     //     },
     // });
+
+    // Hero Generic Sense
+    CONFIG.Canvas.detectionModes.heroSense = CONFIG.Canvas.detectionModes.feelTremor.clone();
+    CONFIG.Canvas.detectionModes.heroSense.id = "heroSense";
+    CONFIG.Canvas.detectionModes.heroSense.label = "Hero Sense";
+    CONFIG.Canvas.detectionModes.heroSense.type = DetectionMode.DETECTION_TYPES.SIGHT;
+    CONFIG.Canvas.detectionModes.heroSense.walls = true;
+
+    // new DetectionMode({
+    //     id: "heroSense",
+    //     label: "Hero Sense",
+    //     type: DetectionMode.DETECTION_TYPES.SIGHT,
+    // });
+
     // NIGHTVISION
     // Allows a character to see in total darkness as if it were normal
     // daylight. Therefore, this effect does not penetrate the Power
