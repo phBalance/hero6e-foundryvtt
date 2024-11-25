@@ -1386,15 +1386,31 @@ export class HeroSystem6eActor extends Actor {
             end: parseInt(this.system.characteristics?.end?.max) - parseInt(this.system.characteristics?.end?.value),
             hap: this.system.hap?.value,
             heroicIdentity: this.system.heroicIdentity ?? true,
+            charges: this.items
+                .filter(
+                    (item) =>
+                        item.system.charges &&
+                        (item.system.charges.max != item.system.charges.value ||
+                            item.system.charges.max != item.system.charges.value),
+                )
+                .map((o) => o.system),
         };
-        if (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end) {
+        if (
+            retainValuesOnUpload.body ||
+            retainValuesOnUpload.stun ||
+            retainValuesOnUpload.end ||
+            retainValuesOnUpload.charges.length > 0
+        ) {
             let content = `${this.name} has:<ul>`;
             if (retainValuesOnUpload.body) content += `<li>${retainValuesOnUpload.body} BODY damage</li>`;
             if (retainValuesOnUpload.stun) content += `<li>${retainValuesOnUpload.stun} STUN damage</li>`;
             if (retainValuesOnUpload.end) content += `<li>${retainValuesOnUpload.end} END used</li>`;
-            content += `</ul><p>Do you want to apply this damage after the upload?</p>`;
+            for (const c of retainValuesOnUpload.charges) {
+                content += `<li>Charges: ${c.NAME || c.ALIAS}</li>`;
+            }
+            content += `</ul><p>Do you want to apply resource usage after the upload?</p>`;
             const confirmed = await Dialog.confirm({
-                title: "Retain damage after upload?",
+                title: "Retain resource usage after upload?",
                 content: content,
             });
             if (confirmed === null) {
@@ -1403,6 +1419,7 @@ export class HeroSystem6eActor extends Actor {
                 retainValuesOnUpload.body = 0;
                 retainValuesOnUpload.stun = 0;
                 retainValuesOnUpload.end = 0;
+                retainValuesOnUpload.charges = [];
             }
         }
 
@@ -1718,6 +1735,25 @@ export class HeroSystem6eActor extends Actor {
                 .filter((o) => doLastXmlids.includes(o.system.XMLID))
                 .map((i) => i._postUpload({ render: false, uploadProgressBar })),
         );
+
+        // retainValuesOnUpload Charges
+        for (const chargeData of retainValuesOnUpload.charges) {
+            const item = this.items.find((i) => i.system.ID === chargeData.ID);
+            if (item) {
+                const chargesUsed = Math.max(0, chargeData.charges.max - chargeData.charges.value);
+                if (chargesUsed) {
+                    await item.update({ "system.charges.value": Math.max(0, item.system.charges.max - chargesUsed) });
+                }
+                const clipsUsed = Math.max(0, chargeData.clips - chargeData.clipsMax);
+                if (clipsUsed) {
+                    await item.update({ "system.clips.value": Math.max(0, item.system.clipsMax - clipsUsed) });
+                }
+                item.updateItemDescription();
+                await item.update({ "system.description": item.system.description });
+            } else {
+                await ui.notifications.warn(`Unable to locate ${item.ALIAS} to consume charges after upload.`);
+            }
+        }
         uploadPerformance.postUpload = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
@@ -1894,7 +1930,7 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.retainedDamage = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
-        // If we have control of this token, reaquire to update movement types
+        // If we have control of this token, reacquire to update movement types
         const myToken = this.getActiveTokens()?.[0];
         if (canvas.tokens.controlled.find((t) => t.id == myToken?.id)) {
             myToken.release();
