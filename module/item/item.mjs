@@ -3255,7 +3255,7 @@ export class HeroSystem6eItem extends Item {
                             const effectiveStrength = 5 * dc;
                             system.description += `, ${system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`)}`;
                         } else if (dc) {
-                            const damageDiceFormula = getDiceFormulaFromItemDC(this, { ignoreDeadlyBlow: true }, dc);
+                            const damageDiceFormula = getDiceFormulaFromItemDC(this, dc);
                             if (damageDiceFormula) {
                                 system.description += `,`;
 
