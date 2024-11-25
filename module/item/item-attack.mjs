@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { getActorDefensesVsAttack, defenseConditionalCheckedByDefault } from "../utility/defense.mjs";
+import { getActorDefensesVsAttack, getConditionalDefenses } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -1202,7 +1202,7 @@ export async function _onRollKnockback(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
-    const ignoreDefenseIds = JSON.parse(options.ignoreDefenseIdsJson) || [];
+    //const ignoreDefenseIds = JSON.parse(options.ignoreDefenseIdsJson) || [];
     const item = fromUuidSync(options.itemId);
     const token = game.scenes.current.tokens.get(options.targetTokenId);
     const knockbackResultTotal = options.knockbackResultTotal;
@@ -1262,7 +1262,7 @@ export async function _onRollKnockback(event) {
                     label: "Roll & Apply",
                     callback: async function (html) {
                         const dice = html.find("input")[0].value;
-                        await _rollApplyKnockback(token, parseInt(dice), ignoreDefenseIds);
+                        await _rollApplyKnockback(token, parseInt(dice));
                     },
                 },
                 cancel: {
@@ -1281,7 +1281,7 @@ export async function _onRollKnockback(event) {
  * @param {HeroSystem6eToken} token
  * @param {number} knockbackDice
  */
-async function _rollApplyKnockback(token, knockbackDice, ignoreDefenseIds) {
+async function _rollApplyKnockback(token, knockbackDice) {
     const actor = token.actor;
 
     const damageRoller = new HeroRoller()
@@ -1302,6 +1302,8 @@ async function _rollApplyKnockback(token, knockbackDice, ignoreDefenseIds) {
     const pdAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {});
     await pdAttack._postUpload();
     pdAttack.name ??= "KNOCKBACK";
+
+    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, pdAttack);
 
     let defense = "";
 
@@ -1342,7 +1344,54 @@ async function _rollApplyKnockback(token, knockbackDice, ignoreDefenseIds) {
         knockbackResistanceValue;
     damageData.targetToken = token;
 
+    // VULNERABILITY
+    for (const vuln of conditionalDefenses.filter(
+        (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
+    )) {
+        if (vuln.system.MODIFIER) {
+            for (const modifier of vuln.system.MODIFIER || []) {
+                switch (modifier.OPTIONID) {
+                    case "HALFSTUN":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 0.5;
+                        break;
+                    case "TWICESTUN":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 1;
+                        break;
+                    case "HALFBODY":
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 0.5;
+                        break;
+                    case "TWICEBODY":
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 1;
+                        break;
+                    case "HALFEFFECT":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 0.5;
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 0.5;
+                        break;
+                    case "TWICEEFFECT":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 1;
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 1;
+                        break;
+
+                    default:
+                        console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
+                }
+            }
+        } else {
+            // DEFAULT VULNERABILITY isi 1.5 STUN
+            damageData.vulnStunMultiplier = 1.5;
+        }
+    }
+
     const damageDetail = await _calcDamage(damageRoller, pdAttack, damageData);
+    damageDetail.effects = `${damageDetail.effects || ""} Prone`.replace("; ", "").trim();
 
     const cardData = {
         item: pdAttack,
@@ -1374,7 +1423,7 @@ async function _rollApplyKnockback(token, knockbackDice, ignoreDefenseIds) {
         hitLocText: damageDetail.hitLocText,
 
         // effects
-        effects: "prone", //damageDetail.effects;
+        effects: damageDetail.effects,
 
         // defense
         defense: defense,
@@ -2018,214 +2067,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // Check for conditional defenses
-    let ignoreDefenseIds = [];
-    let conditionalDefenses = token.actor.items.filter(
-        (o) =>
-            (o.system.subType || o.system.type) === "defense" &&
-            (o.isActive || o.effects.find(() => true)?.disabled === false) &&
-            ((o.system.MODIFIER || []).find((p) => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID)) ||
-                avad),
-    );
-
-    // Remove conditional defenses that provide no defense
-    if (!game.settings.get(HEROSYS.module, "ShowAllConditionalDefenses")) {
-        conditionalDefenses = conditionalDefenses.filter((defense) => defense.getDefense(token.actor, item));
-    }
-
-    // VULNERABILITY
-    const vulnerabilities = token.actor.items.filter((o) => o.system.XMLID === "VULNERABILITY");
-    conditionalDefenses.push(...vulnerabilities);
-
-    // AVAD Life Support
-    if (avad) {
-        const lifeSupport = token.actor.items.filter((o) => o.system.XMLID === "LIFESUPPORT");
-        conditionalDefenses.push(...lifeSupport);
-    }
-
-    // AVAD characteristic defenses (PD/ED)
-    if (avad) {
-        const pd = parseInt(token.actor.system.characteristics.pd.value);
-        if (pd > 0 && item.system.INPUT === "PD") {
-            conditionalDefenses.push({
-                name: "PD",
-                id: "PD",
-                system: {
-                    XMLID: "PD",
-                    INPUT: "Physical",
-                    LEVELS: pd,
-                    description: `${pd} PD from characteristics`,
-                },
-            });
-        }
-        const ed = parseInt(token.actor.system.characteristics.pd.value);
-        if (ed > 0 && item.system.INPUT === "ED") {
-            conditionalDefenses.push({
-                name: "ED",
-                id: "ED",
-                system: {
-                    XMLID: "ED",
-                    INPUT: "Energy",
-                    LEVELS: ed,
-                    description: `${ed} ED from characteristics`,
-                },
-            });
-        }
-    }
-
-    if (conditionalDefenses.length > 0) {
-        const template2 = `systems/${HEROSYS.module}/templates/attack/item-conditional-defense-card.hbs`;
-
-        let options = [];
-        for (const defense of conditionalDefenses) {
-            const option = {
-                id: defense.id,
-                name: defense.name,
-                checked: !avad && defenseConditionalCheckedByDefault(defense, item),
-                conditions: "",
-            };
-
-            // Attempt to check likely defenses
-
-            // PD, ED, MD
-            if (avad?.INPUT?.toUpperCase() === defense?.system?.XMLID) option.checked = true;
-
-            if (defense instanceof HeroSystem6eItem) {
-                // Damage Reduction
-                if (avad?.INPUT?.toUpperCase() == "PD" && defense.system.INPUT === "Physical") option.checked = true;
-                if (avad?.INPUT?.toUpperCase() == "ED" && defense.system?.INPUT === "Energy") option.checked = true;
-                if (
-                    avad?.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" &&
-                    defense.system?.INPUT === "Mental"
-                )
-                    option.checked = true;
-
-                // Damage Negation
-                if (avad?.INPUT?.toUpperCase() == "PD" && defense.findModsByXmlid("PHYSICAL")) option.checked = true;
-                if (avad?.INPUT?.toUpperCase() == "ED" && defense?.findModsByXmlid("ENERGY")) option.checked = true;
-                if (
-                    avad?.INPUT?.replace("Mental Defense", "MD").toUpperCase() == "MD" &&
-                    defense.findModsByXmlid("MENTAL")
-                )
-                    option.checked = true;
-
-                // Flash Defense
-                if (avad?.INPUT?.match(/flash/i) && defense.system.XMLID === "FLASHDEFENSE") option.checked = true;
-
-                // Power Defense
-                if (avad?.INPUT?.match(/power/i) && defense.system.XMLID === "POWERDEFENSE") option.checked = true;
-
-                // Life Support
-                if (avad?.INPUT?.match(/life/i) && defense.system.XMLID === "LIFESUPPORT") option.checked = true;
-
-                // Resistant Damage Reduction
-                if (
-                    avad?.INPUT == "Resistant PD" &&
-                    defense.system.INPUT === "Physical" &&
-                    defense.system.OPTION.match(/RESISTANT/i)
-                )
-                    option.checked = true;
-                if (
-                    avad?.INPUT == "Resistant ED" &&
-                    defense.system.INPUT === "Energy" &&
-                    defense.system.OPTION.match(/RESISTANT/i)
-                )
-                    option.checked = true;
-                if (
-                    avad?.INPUT == "Resistant MD" &&
-                    defense.system.INPUT === "Mental" &&
-                    defense.system.OPTION.match(/RESISTANT/i)
-                )
-                    option.checked = true;
-
-                // FORCEFIELD, RESISTANT PROTECTION
-                if (avad?.INPUT?.toUpperCase() == "PD" && parseInt(defense.system.PDLEVELS || 0) > 0)
-                    option.checked = true;
-                if (avad?.INPUT?.toUpperCase() == "ED" && parseInt(defense.system.EDLEVELS || 0) > 0)
-                    option.checked = true;
-                if (
-                    avad?.INPUT?.replace("Mental Defense", "MD").toUpperCase() == "MD" &&
-                    parseInt(defense.system.MDLEVELS || 0) > 0
-                )
-                    option.checked = true;
-                if (avad?.INPUT?.match(/power/i) && parseInt(defense.system.POWDLEVELS || 0) > 0) option.checked = true;
-            }
-
-            option.description = defense.system.description;
-            options.push(option);
-        }
-
-        let data = {
-            token,
-            item,
-            conditionalDefenses: options,
-        };
-
-        const html = await renderTemplate(template2, data);
-
-        async function getDialogOutput() {
-            return new Promise((resolve) => {
-                const dataConditionalDefenses = {
-                    title: item.actor.name + " conditional defenses",
-                    content: html,
-                    buttons: {
-                        normal: {
-                            label: "Apply Damage",
-                            callback: (html) => {
-                                resolve(html.find("form input"));
-                            },
-                        },
-                        cancel: {
-                            label: "Cancel",
-                            callback: () => {
-                                resolve(null);
-                            },
-                        },
-                    },
-                    default: "normal",
-                    close: () => {
-                        resolve(null);
-                    },
-                };
-                new Dialog(dataConditionalDefenses).render(true);
-            });
-        }
-
-        const inputs = await getDialogOutput();
-        if (inputs === null) return;
-
-        let defenses = [];
-        for (let input of inputs) {
-            if (!input.checked) {
-                ignoreDefenseIds.push(input.id);
-                defenses.push(token.actor.items.get(input.id) || conditionalDefenses.find((o) => o.id === input.id));
-            }
-        }
-
-        if (defenses.length > 0) {
-            let content = `The following defenses were not applied vs <span title="${item.name.replace(
-                /"/g,
-                "",
-            )}: ${item.system.description.replace(/"/g, "")}">${item.name}</span>:<ul>`;
-            for (let def of defenses) {
-                content += `<li title="${def.name.replace(/"/g, "")}: ${def.system.description.replace(/"/g, "")}">${
-                    def.name
-                }</li>`;
-            }
-            content += "</ul>";
-
-            const speaker = ChatMessage.getSpeaker({ actor: token.actor });
-            speaker["alias"] = token.actor.name;
-            const chatData = {
-                author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                content,
-                whisper: ChatMessage.getWhisperRecipients("GM"),
-                speaker,
-            };
-
-            await ChatMessage.create(chatData);
-        }
-    }
+    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, item, avad);
 
     // Some defenses require a roll not just to active, but on each use.  6e EVERYPHASE.  5e ACTIVATIONROLL
     const defenseEveryPhase = token.actor.items.filter(

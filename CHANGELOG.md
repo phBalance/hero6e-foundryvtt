@@ -9,6 +9,7 @@
 - Improved carried light support by leveraging the [Active Token Effects](https://foundryvtt.com/packages/ATL) module. You can create a CUSTOMPOWER with "light" in the name. Make it a piece of equipment for flexibility.
 - Fixed permission errors when other players upload HDC files. [#1494](https://github.com/dmdorman/hero6e-foundryvtt/issues/1494)
 - Improved description for FOCI. [#1521](https://github.com/dmdorman/hero6e-foundryvtt/issues/1521)
+- Main conditional defenses vary (PD/ED), but KB conditional defenses are always PD. [#1518](https://github.com/dmdorman/hero6e-foundryvtt/issues/1518)
 
 ## Version 4.0.8
 
