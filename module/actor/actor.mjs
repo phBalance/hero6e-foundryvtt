@@ -240,6 +240,12 @@ export class HeroSystem6eActor extends Actor {
     async _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
 
+        // Only owners have permission to  perform updates
+        if (!this.isOwner) {
+            //console.log(`Skipping _onUpdate because this client is not an owner of ${this.name}`);
+            return;
+        }
+
         // If stun was changed and running under triggering users context
         if (data?.system?.characteristics?.stun && userId === game.user.id) {
             if (data.system.characteristics.stun.value <= 0) {

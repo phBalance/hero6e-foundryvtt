@@ -165,6 +165,11 @@ export class HeroSystem6eItem extends Item {
     async _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
 
+        if (!this.isOwner) {
+            //console.log(`Skipping _onUpdate because this client is not an owner of ${this.actor.name}:${this.name}`);
+            return;
+        }
+
         // If our value has changed, we need to rebuild this item.
         if (changed.system?.value != null) {
             // TODO: Update everything!
@@ -2159,6 +2164,45 @@ export class HeroSystem6eItem extends Item {
                 });
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+        }
+
+        // CUSTOMPOWER LIGHT
+        if (changed && this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
+            if (!game.modules.get("ATL")?.active) {
+                ui.notifications.warn(
+                    `You must install the <b>Active Token Effects</b> module for carried lights to work`,
+                );
+            }
+            let activeEffect = Array.from(this.effects)?.[0] || {};
+            if (this.system.active) {
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
+                activeEffect.img = "icons/svg/light.svg";
+                activeEffect.changes = [
+                    {
+                        key: "ATL.light.bright",
+                        value: parseFloat(this.system.QUANTITY),
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ];
+
+                if (activeEffect.update) {
+                    await activeEffect.update({
+                        name: activeEffect.name,
+                        changes: activeEffect.changes,
+                        disabled: false,
+                    });
+                } else {
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                }
+            } else {
+                // Light was turned off?
+                if (activeEffect.update) {
+                    await activeEffect.update({
+                        name: activeEffect.name,
+                        disabled: true,
+                    });
+                }
             }
         }
 
