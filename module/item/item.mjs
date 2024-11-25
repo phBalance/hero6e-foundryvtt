@@ -4006,7 +4006,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FOCUS":
-                result += ", " + modifier.ALIAS;
+                result += `, ${modifier.OPTION_ALIAS || modifier.OPTIONID}`;
                 break;
 
             case "ABLATIVE":
@@ -4018,7 +4018,7 @@ export class HeroSystem6eItem extends Item {
                 break;
         }
 
-        if (!["CONDITIONALPOWER"].includes(modifier.XMLID)) {
+        if (!["CONDITIONALPOWER"].includes(modifier.XMLID) && modifier.XMLID !== "FOCUS") {
             result += " (";
         } else {
             result += " ";
@@ -4063,6 +4063,7 @@ export class HeroSystem6eItem extends Item {
                         result += `${modifier.OPTION_ALIAS}; `;
                     }
                     break;
+
                 case "EXPLOSION":
                     {
                         const shape = modifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : modifier.OPTION_ALIAS;
@@ -4072,9 +4073,12 @@ export class HeroSystem6eItem extends Item {
                 case "EXTRATIME":
                     result += `${modifier.OPTION_ALIAS}, `;
                     break;
+                case "FOCUS":
+                    break;
                 case "CONDITIONALPOWER":
                     result += `${modifier.OPTION_ALIAS}; (`;
                     break;
+
                 default:
                     result += `${modifier.OPTION_ALIAS}; `;
             }
@@ -4094,6 +4098,10 @@ export class HeroSystem6eItem extends Item {
                     // These adders relate to AOE and so are displayed as a part of that
                     break;
 
+                case "BREAKABILITY":
+                    result += `${adder.OPTION_ALIAS} `;
+                    break;
+
                 case "EXPLOSION":
                     result += adder.ALIAS + "; ";
 
@@ -4101,6 +4109,10 @@ export class HeroSystem6eItem extends Item {
                 default:
                     result += adder.ALIAS + ", ";
             }
+        }
+
+        if (modifier.XMLID === "FOCUS") {
+            result += `(${modifier.ALIAS === "Focus" ? "" : `${modifier.ALIAS}; `}`;
         }
 
         let fraction = "";
