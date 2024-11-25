@@ -463,6 +463,7 @@ export class HeroSystem6eItem extends Item {
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
+            whisper: [game.user.id],
         };
         ChatMessage.create(chatData);
     }
@@ -2386,6 +2387,10 @@ export class HeroSystem6eItem extends Item {
 
     get powers() {
         return this.system.POWER || [];
+    }
+
+    get convertToDc() {
+        return convertToDcFromItem(this);
     }
 
     calcItemPoints() {
