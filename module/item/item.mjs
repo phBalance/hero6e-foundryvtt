@@ -1459,14 +1459,17 @@ export class HeroSystem6eItem extends Item {
                 (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
             );
             if (setManeuver) {
-                item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + 1}`;
+                // Some items do not have OCV (like set itself)
+                if (item.system.ocvEstimated !== undefined) {
+                    item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + 1}`;
 
-                if (item.flags.tags.ocv) {
-                    item.flags.tags.ocv += "\n";
-                } else {
-                    item.flags.tags.ocv = "";
+                    if (item.flags.tags.ocv) {
+                        item.flags.tags.ocv += "\n";
+                    } else {
+                        item.flags.tags.ocv = "";
+                    }
+                    item.flags.tags.ocv += `+1 Set`;
                 }
-                item.flags.tags.ocv += `+1 Set`;
             }
 
             // Haymaker -5 DCV
