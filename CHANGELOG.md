@@ -4,7 +4,7 @@
 
 - Fixed missing cost for NIGHTVISION and other enhanced visions. [#1520](https://github.com/dmdorman/hero6e-foundryvtt/issues/1520)
 - DARKNESS now has an implied AOE for targeting purposes. [#1503](https://github.com/dmdorman/hero6e-foundryvtt/issues/1503)
-- NOTES are now 1 line by default to match actual formatting as much as possible with space. Click and hold on the note to display one in full.
+- NOTES are now 1 line by default to match actual formatting as much as possible with space. Click and hold on the note to display one in full. [#1492](https://github.com/dmdorman/hero6e-foundryvtt/issues/1492)
 - Improved Enhanced Senses. SIGHTGROUP shows map & tokens. Other sense groups show just tokens (purple outlines; no map). We will continue to improve enhanced senses, a little bit at a time. [#1433](https://github.com/dmdorman/hero6e-foundryvtt/issues/1433)
 - Improved carried light support by leveraging the [Active Token Effects](https://foundryvtt.com/packages/ATL) module. You can create a CUSTOMPOWER with "light" in the name. Make it a piece of equipment for flexibility.
 - Fixed permission errors when other players upload HDC files. [#1494](https://github.com/dmdorman/hero6e-foundryvtt/issues/1494)
