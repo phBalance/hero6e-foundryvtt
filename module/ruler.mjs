@@ -2,6 +2,7 @@ import { HEROSYS } from "./herosystem6e.mjs";
 import { getSystemDisplayUnits } from "./utility/units.mjs";
 import { calculateRangePenaltyFromDistanceInMetres } from "./utility/range.mjs";
 import { whisperUserTargetsForActor } from "./utility/util.mjs";
+import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 
 export class HeroRuler extends Ruler {
     static _controlToken() {
@@ -235,6 +236,13 @@ export class HeroRuler extends Ruler {
                                 // we can apply END modifications to specific movements.
                                 // This is only an issue with split movement types.
                                 let currentDistance = dragRuler.getMovedDistanceFromToken(tokenObj);
+
+                                // Noncombat Movement?
+                                if (Math.floor(currentDistance) > this.getRanges(token)[1].range && token.actor) {
+                                    token.actor.addActiveEffect(
+                                        HeroSystem6eActorActiveEffects.statusEffectsObj.nonCombatMovementEffect,
+                                    );
+                                }
 
                                 // If we non-combat we don't necessarily spend more END, so cap at max movement
                                 currentDistance = Math.min(currentDistance, this.getRanges(token)[1].range);
