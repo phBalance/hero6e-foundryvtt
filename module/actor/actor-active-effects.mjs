@@ -252,6 +252,18 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            nonCombatMovementEffect: {
+                id: "nonCombatMovement",
+                name: "NonCombat Movement",
+                img: `systems/${module}/icons/person-running.svg`,
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                ],
+            },
             silencedEffect: {
                 id: "silence",
                 name: game.i18n.localize("EFFECT.StatusSilenced"),
