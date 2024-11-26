@@ -1477,14 +1477,17 @@ export class HeroSystem6eItem extends Item {
                 (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
             );
             if (haymakerManeuver) {
-                item.system.dcvEstimated = `${parseInt(item.system.dcvEstimated) - 5}`;
+                // Some items do not have DCV (like haymaker itself)
+                if (item.system.dcvEstimated !== undefined) {
+                    item.system.dcvEstimated = `${parseInt(item.system.dcvEstimated) - 5}`;
 
-                if (item.flags.tags.dcv) {
-                    item.flags.tags.dcv += "\n";
-                } else {
-                    item.flags.tags.dcv = "";
+                    if (item.flags.tags.dcv) {
+                        item.flags.tags.dcv += "\n";
+                    } else {
+                        item.flags.tags.dcv = "";
+                    }
+                    item.flags.tags.dcv += `-5 Haymaker`;
                 }
-                item.flags.tags.dcv += `-5 Haymaker`;
             }
 
             // STRMINIMUM
