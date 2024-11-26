@@ -542,6 +542,8 @@ export class HeroSystem6eItem extends Item {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
             } else if (this.system.XMLID === "BRACE") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
+            } else if (this.system.XMLID === "HAYMAKER") {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
             }
 
             // Special Visions
@@ -588,6 +590,10 @@ export class HeroSystem6eItem extends Item {
                 if (this.actor.statuses.has("fly")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
+            } else if (this.system.XMLID === "BRACE") {
+                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
+            } else if (this.system.XMLID === "HAYMAKER") {
+                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
             }
 
             // Remove Special Visions

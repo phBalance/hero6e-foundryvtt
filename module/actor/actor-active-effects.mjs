@@ -264,6 +264,18 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            haymakerEffect: {
+                id: "haymaker",
+                name: "Haymaker",
+                img: `icons/svg/sword.svg`,
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: -5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ],
+            },
             silencedEffect: {
                 id: "silence",
                 name: game.i18n.localize("EFFECT.StatusSilenced"),
