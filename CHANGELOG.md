@@ -17,6 +17,7 @@
 - Fixed NaN roll for ACCIDENTALCHANGE with an ALWAYS CHANCETOCHANGE. [#1473](https://github.com/dmdorman/hero6e-foundryvtt/issues/1473)
 - SET and BRACE work again. HAYMAKER applies -4 DCV. [#1459](https://github.com/dmdorman/hero6e-foundryvtt/issues/1459)
 - SET, BRACE, HAYMAKER, and NONCOMBATMOVEMENT expire (toggle off) at the beginning of actors phase.
+- Fixed GROWTH. [#1531](https://github.com/dmdorman/hero6e-foundryvtt/issues/1531)
 
 ## Version 4.0.8
 

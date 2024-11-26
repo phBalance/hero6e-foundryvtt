@@ -2093,7 +2093,7 @@ export class HeroSystem6eItem extends Item {
         // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
         // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
         // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
-        if (changed && this.id && this.system.XMLID === "GROWTH" && this.system.active) {
+        if (changed && this.id && this.system.XMLID === "GROWTH") {
             const details = configPowerInfo?.details(this) || {};
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
