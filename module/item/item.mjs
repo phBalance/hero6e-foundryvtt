@@ -540,6 +540,8 @@ export class HeroSystem6eItem extends Item {
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
+            } else if (this.system.XMLID === "BRACE") {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
             }
 
             // Special Visions

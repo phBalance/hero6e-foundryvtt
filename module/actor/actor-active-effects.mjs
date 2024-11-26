@@ -240,6 +240,18 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            braceEffect: {
+                id: "brace",
+                name: "Braced",
+                img: "icons/svg/statue.svg",
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                ],
+            },
             silencedEffect: {
                 id: "silence",
                 name: game.i18n.localize("EFFECT.StatusSilenced"),
