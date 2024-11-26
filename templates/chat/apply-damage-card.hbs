@@ -82,7 +82,7 @@
       <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
 
 
-      {{#if (gt knockbackResultTotal 0)}}
+      {{#if (gte knockbackResultTotal 0)}}
         <div data-visibility="gm">
           <button class="roll-knockback" data-item-Id="{{item.uuid}}" data-target-Token-Id="{{targetToken.id}}"
             data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}">
