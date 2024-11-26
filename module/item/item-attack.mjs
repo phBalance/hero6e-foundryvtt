@@ -204,7 +204,7 @@ export async function AttackAoeToHit(item, options) {
             (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
         );
         if (braceManeuver) {
-            let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
+            const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
             if (brace > 0) {
                 attackHeroRoller.addNumber(brace, "Brace modifier");
             }
@@ -579,7 +579,7 @@ export async function AttackToHit(item, options) {
         // Brace (+2 OCV only to offset the Range Modifier)
         const braceManeuver = item.actor.items.find((o) => o.type == "maneuver" && o.name === "Brace" && o.isActive);
         if (braceManeuver) {
-            let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
+            const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
             if (brace > 0) {
                 heroRoller.addNumber(brace, braceManeuver.name);
             }
