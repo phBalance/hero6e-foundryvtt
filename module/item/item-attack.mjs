@@ -162,7 +162,7 @@ export async function AttackAoeToHit(item, options) {
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, item.system.uses)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
-        .addNumber(-parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
+        .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
 
     if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
         // TODO: Should not be able to use this on anyone else. Should add a check.
@@ -204,7 +204,7 @@ export async function AttackAoeToHit(item, options) {
             (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
         );
         if (braceManeuver) {
-            let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
+            const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
             if (brace > 0) {
                 attackHeroRoller.addNumber(brace, "Brace modifier");
             }
@@ -521,7 +521,7 @@ export async function AttackToHit(item, options) {
         .addNumber(hitCharacteristic, itemData.uses)
         .addNumber(parseInt(options.ocvMod), "OCV modifier")
         .addNumber(parseInt(options.omcvMod), "OMCV modifier")
-        .addNumber(parseInt(setManeuver?.system.ocv) || 0, "Maneuver OCV");
+        .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
 
     if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
         // TODO: Should not be able to use this on anyone else. Should add a check.
@@ -579,7 +579,7 @@ export async function AttackToHit(item, options) {
         // Brace (+2 OCV only to offset the Range Modifier)
         const braceManeuver = item.actor.items.find((o) => o.type == "maneuver" && o.name === "Brace" && o.isActive);
         if (braceManeuver) {
-            let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
+            const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
             if (brace > 0) {
                 heroRoller.addNumber(brace, braceManeuver.name);
             }

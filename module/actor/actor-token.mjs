@@ -98,7 +98,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             // GENERIC SIGHTGROUP (no lights required; INFRAREDPERCEPTION, NIGHTVISION, etc)
             const SIGHTGROUP = this.actor?.items.find(
                 (item) =>
-                    item.baseInfo.type.includes("sense") &&
+                    item.baseInfo?.type.includes("sense") &&
                     item.system.GROUP === "SIGHTGROUP" &&
                     //item.system.OPTIONID === undefined && // DETECT
                     item.isActive,
@@ -112,7 +112,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)
             const NONSIGHTGROUP = this.actor?.items.find(
                 (item) =>
-                    item.baseInfo.type.includes("sense") &&
+                    item.baseInfo?.type.includes("sense") &&
                     item.system.GROUP !== "SIGHTGROUP" &&
                     item.system.GROUP !== "MENTALGROUP" &&
                     item.isActive,

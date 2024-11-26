@@ -540,6 +540,10 @@ export class HeroSystem6eItem extends Item {
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
+            } else if (this.system.XMLID === "BRACE") {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
+            } else if (this.system.XMLID === "HAYMAKER") {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
             }
 
             // Special Visions
@@ -586,6 +590,10 @@ export class HeroSystem6eItem extends Item {
                 if (this.actor.statuses.has("fly")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
+            } else if (this.system.XMLID === "BRACE") {
+                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
+            } else if (this.system.XMLID === "HAYMAKER") {
+                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
             }
 
             // Remove Special Visions
@@ -1459,14 +1467,17 @@ export class HeroSystem6eItem extends Item {
                 (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
             );
             if (setManeuver) {
-                item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + 1}`;
+                // Some items do not have OCV (like set itself)
+                if (item.system.ocvEstimated !== undefined) {
+                    item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + 1}`;
 
-                if (item.flags.tags.ocv) {
-                    item.flags.tags.ocv += "\n";
-                } else {
-                    item.flags.tags.ocv = "";
+                    if (item.flags.tags.ocv) {
+                        item.flags.tags.ocv += "\n";
+                    } else {
+                        item.flags.tags.ocv = "";
+                    }
+                    item.flags.tags.ocv += `+1 Set`;
                 }
-                item.flags.tags.ocv += `+1 Set`;
             }
 
             // Haymaker -5 DCV
@@ -1474,14 +1485,17 @@ export class HeroSystem6eItem extends Item {
                 (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
             );
             if (haymakerManeuver) {
-                item.system.dcvEstimated = `${parseInt(item.system.dcvEstimated) - 5}`;
+                // Some items do not have DCV (like haymaker itself)
+                if (item.system.dcvEstimated !== undefined) {
+                    item.system.dcvEstimated = `${parseInt(item.system.dcvEstimated) - 5}`;
 
-                if (item.flags.tags.dcv) {
-                    item.flags.tags.dcv += "\n";
-                } else {
-                    item.flags.tags.dcv = "";
+                    if (item.flags.tags.dcv) {
+                        item.flags.tags.dcv += "\n";
+                    } else {
+                        item.flags.tags.dcv = "";
+                    }
+                    item.flags.tags.dcv += `-5 Haymaker`;
                 }
-                item.flags.tags.dcv += `-5 Haymaker`;
             }
 
             // STRMINIMUM
@@ -4603,20 +4617,45 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${perkRollValue}-`;
         } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
-            const changeChance = skillData.ADDER.find((adder) => adder.XMLID === "CHANCETOCHANGE")?.OPTIONID;
-            let rollValue;
+            const CHANCETOCHANGE = skillData.ADDER.find((adder) => adder.XMLID === "CHANCETOCHANGE");
+            const changeChance = CHANCETOCHANGE?.OPTIONID;
+            let rollValue = -8;
 
-            if (changeChance === "INFREQUENT") {
-                rollValue = 8;
-            } else if (changeChance === "FREQUENT") {
-                rollValue = 11;
-            } else if (changeChance === "VERYFREQUENT") {
-                rollValue = 14;
-            } else if (!changeChance) {
-                // Shouldn't happen. Give it a default.
-                console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
-                rollValue = 8;
+            switch (changeChance) {
+                case "INFREQUENT":
+                    rollValue = 8;
+                    break;
+                case "FREQUENT":
+                    rollValue = 11;
+                    break;
+                case "VERYFREQUENT":
+                    rollValue = 14;
+                    break;
+                case "ALWAYS":
+                    rollValue = 99;
+                    break;
+                default:
+                    if (parseInt(CHANCETOCHANGE?.BASECOST || 0) === 15) {
+                        console.warn(
+                            `Unknown CHANCETOCHANGE of ${changeChance}. It cost 15 pts, so assumsing VeryFewquently 14-.`,
+                        );
+                        rollValue = 14;
+                        break;
+                    }
+                    console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
             }
+
+            // if (changeChance === "INFREQUENT") {
+            //     rollValue = 8;
+            // } else if (changeChance === "FREQUENT") {
+            //     rollValue = 11;
+            // } else if (changeChance === "VERYFREQUENT") {
+            //     rollValue = 14;
+            // } else if (!changeChance) {
+            //     // Shouldn't happen. Give it a default.
+            //     console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
+            //     rollValue = 8;
+            // }
 
             tags.push({
                 value: rollValue,

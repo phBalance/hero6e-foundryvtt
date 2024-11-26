@@ -240,6 +240,42 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            braceEffect: {
+                id: "brace",
+                name: "Braced",
+                img: "icons/svg/statue.svg",
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                ],
+            },
+            nonCombatMovementEffect: {
+                id: "nonCombatMovement",
+                name: "NonCombat Movement",
+                img: `systems/${module}/icons/person-running.svg`,
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                ],
+            },
+            haymakerEffect: {
+                id: "haymaker",
+                name: "Haymaker",
+                img: `icons/svg/sword.svg`,
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: -5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ],
+            },
             silencedEffect: {
                 id: "silence",
                 name: game.i18n.localize("EFFECT.StatusSilenced"),

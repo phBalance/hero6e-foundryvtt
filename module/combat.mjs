@@ -450,6 +450,30 @@ export class HeroSystem6eCombat extends Combat {
             combatant.actor.removeActiveEffect(ae);
         }
 
+        // Stop nonCombatMovement
+        if (combatant.actor.statuses.has("nonCombatMovement")) {
+            const ae = combatant.actor.effects.find((effect) => effect.statuses.has("nonCombatMovement"));
+            combatant.actor.removeActiveEffect(ae);
+        }
+
+        // Stop SET
+        const SET = combatant.actor.items.find((i) => i.system.XMLID === "SET");
+        if (SET?.system.active === true) {
+            await SET.toggle();
+        }
+
+        // Stop BRACE
+        const BRACE = combatant.actor.items.find((i) => i.system.XMLID === "BRACE");
+        if (BRACE?.system.active === true) {
+            await BRACE.toggle();
+        }
+
+        // Stop HAYMAKER
+        const HAYMAKER = combatant.actor.items.find((i) => i.system.XMLID === "HAYMAKER");
+        if (HAYMAKER?.system.active === true) {
+            await HAYMAKER.toggle();
+        }
+
         // Reset movement history
         if (window.dragRuler) {
             if (masterCombatant) {
