@@ -1,6 +1,7 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { getSystemDisplayUnits } from "./utility/units.mjs";
 import { calculateRangePenaltyFromDistanceInMetres } from "./utility/range.mjs";
+import { whisperUserTargetsForActor } from "./utility/util.mjs";
 
 export class HeroRuler extends Ruler {
     static _controlToken() {
@@ -235,6 +236,9 @@ export class HeroRuler extends Ruler {
                                 // This is only an issue with split movement types.
                                 let currentDistance = dragRuler.getMovedDistanceFromToken(tokenObj);
 
+                                // If we non-combat we don't necessarily spend more END, so cap at max movement
+                                currentDistance = Math.min(currentDistance, this.getRanges(token)[1].range);
+
                                 // DistancePerEnd default is 10m costs 1 END
                                 let DistancePerEnd = 10;
 
@@ -244,8 +248,7 @@ export class HeroRuler extends Ruler {
                                 //  For example a natural 12m run with a 20m running power;
                                 //  you only need to adjust when you exceed 12m.
                                 const movementPower = actor.items.find(
-                                    (o) =>
-                                        o.system.XMLID === actor.flags.activeMovement?.toUpperCase() && o.system.active,
+                                    (o) => o.system.XMLID === actor.flags.activeMovement?.toUpperCase() && o.isActive,
                                 );
                                 const reducedEnd = movementPower?.findModsByXmlid("REDUCEDEND");
                                 if (reducedEnd) {
@@ -261,6 +264,28 @@ export class HeroRuler extends Ruler {
                                     DistancePerEnd /= parseInt(increasedEnd.OPTION.replace("x", "")) || 1;
                                 }
 
+                                let content = "";
+                                const CHARGES = movementPower?.findModsByXmlid("CHARGES");
+                                if (CHARGES && movementPower.system.charges && !combatant.flags.dragRuler?.spentEnd) {
+                                    if (movementPower.system.charges.value === 0) {
+                                        ui.notifications.error(
+                                            `${token.name} has no charges left and should not be moving.`,
+                                        );
+                                        content += `${token.name} has no charges left and should not be moving. `;
+                                    } else {
+                                        movementPower.system.charges.value = Math.max(
+                                            0,
+                                            parseInt(movementPower.system.charges.value) - 1,
+                                        );
+                                        movementPower.updateItemDescription();
+                                        await movementPower.update({
+                                            "system.charges.value": movementPower.system.charges.value,
+                                            "system.description": movementPower.system.description,
+                                        });
+                                        content += `${token.name} spent one charge of ${movementPower.name} (${movementPower.system.charges.value} charges remain). `;
+                                    }
+                                }
+
                                 // TODO: This is assuming every 10 costs 1 endurance
                                 let totalEnd = Math.ceil(currentDistance / DistancePerEnd);
                                 let costEnd = totalEnd - spentEnd;
@@ -269,7 +294,20 @@ export class HeroRuler extends Ruler {
                                         ["system.characteristics.end.value"]:
                                             parseInt(actor.system.characteristics.end.value) - costEnd,
                                     });
+
+                                    content += `${token.name} spent ${costEnd} END for ${actor.flags.activeMovement?.toUpperCase() || "movement"}. Total of ${Math.ceil(currentDistance)}m.  Movement exceeding full move doesn't cost more END.`;
+                                    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+                                    speaker.alias = actor.name;
+                                    const chatData = {
+                                        //author: game.user._id,
+                                        content,
+                                        speaker: speaker,
+                                        whisper: whisperUserTargetsForActor(token.actor), // [...ChatMessage.getWhisperRecipients("GM")],
+                                    };
+
+                                    await ChatMessage.create(chatData);
                                 }
+
                                 combatant.update({
                                     ["flags.dragRuler.spentEnd"]: totalEnd,
                                 });

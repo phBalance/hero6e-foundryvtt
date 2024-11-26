@@ -10,7 +10,10 @@
 - Fixed permission errors when other players upload HDC files. [#1494](https://github.com/dmdorman/hero6e-foundryvtt/issues/1494)
 - Improved description for FOCI. [#1521](https://github.com/dmdorman/hero6e-foundryvtt/issues/1521)
 - Main conditional defenses vary (PD/ED), but KB conditional defenses are always PD. [#1518](https://github.com/dmdorman/hero6e-foundryvtt/issues/1518)
-- Uploading HDC prompts to retain BODY, END, and CHARGES. HAP and HeroicIdentity are always retained after upload. [#1505](https://github.com/dmdorman/hero6e-foundryvtt/issues/1518)
+- Uploading HDC prompts to retain BODY, END, and CHARGES. HAP and HeroicIdentity are always retained after upload. [#1505](https://github.com/dmdorman/hero6e-foundryvtt/issues/1505)
+- Improved MULTIPOWER all slots limitation propagation. [#1504](https://github.com/dmdorman/hero6e-foundryvtt/issues/1504)
+- Sending items to chat are now private chat messages. You can right click those private chat messages to reveal them to everyone.
+- Movement exceeding full move no longer costs END. Movement with charges, now consumes charges. Chat cards are shown to token owners detailing movement resources used. [#1482](https://github.com/dmdorman/hero6e-foundryvtt/issues/1482)
 
 ## Version 4.0.8
 
