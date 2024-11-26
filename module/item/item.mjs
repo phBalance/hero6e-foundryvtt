@@ -4603,20 +4603,45 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${perkRollValue}-`;
         } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
-            const changeChance = skillData.ADDER.find((adder) => adder.XMLID === "CHANCETOCHANGE")?.OPTIONID;
-            let rollValue;
+            const CHANCETOCHANGE = skillData.ADDER.find((adder) => adder.XMLID === "CHANCETOCHANGE");
+            const changeChance = CHANCETOCHANGE?.OPTIONID;
+            let rollValue = -8;
 
-            if (changeChance === "INFREQUENT") {
-                rollValue = 8;
-            } else if (changeChance === "FREQUENT") {
-                rollValue = 11;
-            } else if (changeChance === "VERYFREQUENT") {
-                rollValue = 14;
-            } else if (!changeChance) {
-                // Shouldn't happen. Give it a default.
-                console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
-                rollValue = 8;
+            switch (changeChance) {
+                case "INFREQUENT":
+                    rollValue = 8;
+                    break;
+                case "FREQUENT":
+                    rollValue = 11;
+                    break;
+                case "VERYFREQUENT":
+                    rollValue = 14;
+                    break;
+                case "ALWAYS":
+                    rollValue = 99;
+                    break;
+                default:
+                    if (parseInt(CHANCETOCHANGE?.BASECOST || 0) === 15) {
+                        console.warn(
+                            `Unknown CHANCETOCHANGE of ${changeChance}. It cost 15 pts, so assumsing VeryFewquently 14-.`,
+                        );
+                        rollValue = 14;
+                        break;
+                    }
+                    console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
             }
+
+            // if (changeChance === "INFREQUENT") {
+            //     rollValue = 8;
+            // } else if (changeChance === "FREQUENT") {
+            //     rollValue = 11;
+            // } else if (changeChance === "VERYFREQUENT") {
+            //     rollValue = 14;
+            // } else if (!changeChance) {
+            //     // Shouldn't happen. Give it a default.
+            //     console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
+            //     rollValue = 8;
+            // }
 
             tags.push({
                 value: rollValue,
