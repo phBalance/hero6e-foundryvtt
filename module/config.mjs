@@ -5161,7 +5161,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GROWTH",
             type: ["body-affecting", "size"],
-            behaviors: ["activatable"],
+            behaviors: ["activatable", "defense"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -5769,13 +5769,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SHRINKING",
             type: ["body-affecting", "size"],
-            behaviors: ["activatable"],
+            behaviors: ["activatable", "defense"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: costPerLevelFixedValue(6),
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "KB":
+                        value = -(parseInt(actorItemDefense.system.LEVELS) || 0) * (this.is5e ? 3 : 6);
+                        break;
+                }
+                if (value > 0) {
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="SHRINKING" ID="1709334010424" BASECOST="0.0" LEVELS="1" ALIAS="Shrinking" POSITION="74" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         { costPerLevel: costPerLevelFixedValue(10) },

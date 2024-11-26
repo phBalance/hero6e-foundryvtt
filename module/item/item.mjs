@@ -2174,7 +2174,7 @@ export class HeroSystem6eItem extends Item {
 
         // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
         // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
-        if (changed && this.id && this.system.XMLID === "SHRINKING" && this.system.active) {
+        if (changed && this.id && this.system.XMLID === "SHRINKING") {
             const dcvAdd = Math.floor(this.system.value) * 2;
 
             let activeEffect = Array.from(this.effects)?.[0] || {};
