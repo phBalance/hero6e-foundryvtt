@@ -4748,9 +4748,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    // const newOptions = foundry.utils.deepClone(options);
-                    // newOptions.operation = "add";
-                    // newOptions.knockback = value * 2;
                     return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
@@ -5284,15 +5281,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "PD":
+                        value = this.details(actorItemDefense).pd;
+                        break;
                     case "ED":
-                        value = this.details(actorItemDefense);
+                        value = this.details(actorItemDefense).ed;
+                        break;
+                    case "KB":
+                        value = this.details(actorItemDefense).kb;
                         break;
                 }
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
                     newOptions.operation = "add";
                     newOptions.knockback = value * 2;
-                    return createDefenseProfile(actorItemDefense, attackItem, null, newOptions);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -5783,7 +5785,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         value = -(parseInt(actorItemDefense.system.LEVELS) || 0) * (this.is5e ? 3 : 6);
                         break;
                 }
-                if (value > 0) {
+                if (value != 0) {
                     return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
