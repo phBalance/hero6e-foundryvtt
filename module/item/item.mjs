@@ -691,8 +691,6 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        if (this.system.XMLID === "ENTANGLE") debugger;
-
         // Power must be turned on
         if (this.system.active === false) return false;
 
@@ -764,26 +762,30 @@ export class HeroSystem6eItem extends Item {
     static ItemXmlChildTagsUpload = ["ADDER", "MODIFIER", "POWER", "SKILL", "PERK", "TALENT"];
 
     findModsByXmlid(xmlid) {
-        for (const mod of this.modifiers || this.system.MODIFIER) {
-            if (mod.XMLID === xmlid) return mod;
-            if ((mod.MODIFIER || []).length > 0) return mod.findModsByXmlid(xmlid);
-            if ((mod.ADDER || []).length > 0) return mod.findModsByXmlid(xmlid);
-            if ((mod.POWER || []).length > 0) return mod.findModsByXmlid(xmlid);
+        function recursiveFindByXmlid(xmlid) {
+            for (const mod of this.modifiers || this.MODIFIER || []) {
+                if (mod.XMLID === xmlid) return mod;
+            }
+            for (const adder of this.adders || this.ADDER || []) {
+                if (adder.XMLID === xmlid) return adder;
+            }
+            for (const power of this.powers || this.POWER || []) {
+                if (power.XMLID === xmlid) return power;
+            }
+
+            // recurse part
+            for (const mod of this.modifiers || this.MODIFIER || []) {
+                return recursiveFindByXmlid.call(mod, xmlid);
+            }
+            for (const adder of this.adders || this.ADDER || []) {
+                return recursiveFindByXmlid.call(adder, xmlid);
+            }
+            for (const power of this.powers || this.POWER || []) {
+                return recursiveFindByXmlid.call(power, xmlid);
+            }
         }
 
-        for (const adder of this.adders || this.system.ADDER) {
-            if (adder.XMLID === xmlid) return adder;
-            if ((adder.MODIFIER || []).length > 0) return adder.findModsByXmlid(xmlid);
-            if ((adder.ADDER || []).length > 0) return adder.findModsByXmlid(xmlid);
-            if ((adder.POWER || []).length > 0) return adder.findModsByXmlid(xmlid);
-        }
-
-        for (const power of this.powers || this.system.POWER) {
-            if (power.XMLID === xmlid) return power;
-            if ((power.MODIFIER || []).length > 0) return power.findModsByXmlid(xmlid);
-            if ((power.ADDER || []).length > 0) return power.findModsByXmlid(xmlid);
-            if ((power.POWER || []).length > 0) return power.findModsByXmlid(xmlid);
-        }
+        return recursiveFindByXmlid.call(this, xmlid);
 
         // for (const key of HeroSystem6eItem.ItemXmlChildTags) {
         //     if (this.system?.[key]) {
@@ -821,8 +823,6 @@ export class HeroSystem6eItem extends Item {
         //         return this.parentItem.findModsByXmlid(xmlid);
         //     }
         // }
-
-        return null;
     }
 
     findModById(id, xmlid) {
@@ -4013,10 +4013,10 @@ export class HeroSystem6eItem extends Item {
                     result += ", ";
 
                     const maxCharges = parseInt(modifier.OPTION_ALIAS);
-                    if (maxCharges !== parseInt(system.charges.max)) {
+                    if (maxCharges !== parseInt(system.charges?.max)) {
                         console.error("CHARGES mismatch", item);
                     }
-                    const currentCharges = parseInt(this.system.charges.value);
+                    const currentCharges = parseInt(this.system.charges?.value);
                     if (currentCharges != maxCharges) {
                         result += `${currentCharges}/`;
                     }
@@ -4044,9 +4044,9 @@ export class HeroSystem6eItem extends Item {
 
                     result += maxCharges > 1 ? " Charges" : " Charge";
 
-                    const totalClips = this.system.charges.clipsMax;
+                    const totalClips = this.system.charges?.clipsMax;
                     if (totalClips > 1) {
-                        const currentClips = this.system.charges.clips;
+                        const currentClips = this.system.charges?.clips;
                         result += ` (${currentClips}/${totalClips} clips)`;
                     }
 
