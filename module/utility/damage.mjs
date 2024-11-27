@@ -23,7 +23,7 @@
 // Variable Advantage, and Variable Special Effects.
 
 import { HEROSYS } from "../herosystem6e.mjs";
-import { RoundDc } from "./round.mjs";
+import { RoundDc, RoundFavorPlayerDown } from "./round.mjs";
 
 export function convertToDiceParts(value) {
     const dice = Math.floor(value / 5);
@@ -160,7 +160,7 @@ export function convertToDcFromItem(item, options) {
         const str5Dc = RoundDc(str5 * apRatio);
 
         dc += str5Dc;
-        end += Math.max(1, Math.round(str / 10));
+        end += Math.max(1, RoundFavorPlayerDown(str / 10));
 
         if (str5Dc != 0) {
             tags.push({
