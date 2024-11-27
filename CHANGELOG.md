@@ -18,6 +18,7 @@
 - SET and BRACE work again. HAYMAKER applies -4 DCV. [#1459](https://github.com/dmdorman/hero6e-foundryvtt/issues/1459)
 - SET, BRACE, HAYMAKER, and NONCOMBATMOVEMENT expire (toggle off) at the beginning of actors phase.
 - Fixed 5e GROWTH & SHRINK, you may have to reload HDC file. [#1531](https://github.com/dmdorman/hero6e-foundryvtt/issues/1531)
+- Fixed END cost for STR to round down in players favor. [#1533](https://github.com/dmdorman/hero6e-foundryvtt/issues/1533)
 
 ## Version 4.0.8
 
