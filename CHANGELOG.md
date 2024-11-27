@@ -6,7 +6,7 @@
 - DARKNESS now has an implied AOE for targeting purposes. [#1503](https://github.com/dmdorman/hero6e-foundryvtt/issues/1503)
 - NOTES are now 1 line by default to match actual formatting as much as possible with space. Click and hold on the note to display one in full. [#1492](https://github.com/dmdorman/hero6e-foundryvtt/issues/1492)
 - Improved Enhanced Senses. SIGHTGROUP shows map & tokens. Other sense groups show just tokens (purple outlines; no map). We will continue to improve enhanced senses, a little bit at a time. [#1433](https://github.com/dmdorman/hero6e-foundryvtt/issues/1433)
-- Improved carried light support by leveraging the [Active Token Effects](https://foundryvtt.com/packages/ATL) module. You can create a CUSTOMPOWER with "light" in the name. Make it a piece of equipment for flexibility.
+- Improved carried light support by leveraging the [Active Token Effects](https://foundryvtt.com/packages/ATL) module. You can create a CUSTOMPOWER with "light" in the name. Works best if it is a piece of equipment. Change QUANTITY to adjust range of light. Must be able to toggle power, and I'm aware this is still a bit clunky.
 - Fixed permission errors when other players upload HDC files. [#1494](https://github.com/dmdorman/hero6e-foundryvtt/issues/1494)
 - Improved description for FOCI. [#1521](https://github.com/dmdorman/hero6e-foundryvtt/issues/1521)
 - Main conditional defenses vary (PD/ED), but KB conditional defenses are always PD. [#1518](https://github.com/dmdorman/hero6e-foundryvtt/issues/1518)
