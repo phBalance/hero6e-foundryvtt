@@ -38,15 +38,7 @@ export function calculateDistanceBetween(origin, target) {
     path.push({ x: origin.x, y: origin.y });
     path.push({ x: target.x, y: target.y });
     const _distanceMeasurePath = canvas.grid.measurePath(path);
-    const _distance = RoundFavorPlayerDown(_distanceMeasurePath.distance);
-
-    const originalMeasureDistance = canvas.grid.measureDistance(origin, target, {
-        gridSpaces: true,
-    });
-
-    if (_distance != originalMeasureDistance) {
-        console.log(_distance, originalMeasureDistance);
-    }
+    const originalMeasureDistance = RoundFavorPlayerDown(_distanceMeasurePath.distance);
 
     // We don't yet support measuring 3D distance between a token and a template volume, so we
     // return the original distance

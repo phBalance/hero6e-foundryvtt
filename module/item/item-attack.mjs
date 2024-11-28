@@ -1573,7 +1573,7 @@ export async function _onRollDamage(event) {
 
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.user.id === game.user.id);
+        game.scenes.current.templates.find((o) => o.author.id === game.user.id);
     const explosion = item.hasExplosionAdvantage();
 
     // Coerce type to boolean
