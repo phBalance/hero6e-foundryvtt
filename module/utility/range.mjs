@@ -1,5 +1,6 @@
 import { getRoundedFavorPlayerDownDistanceInSystemUnits } from "./units.mjs";
 import HeroSystem6eMeasuredTemplate from "../measuretemplate.mjs";
+import { RoundFavorPlayerDown } from "./round.mjs";
 
 /**
  * Calculate range based on a provided distance in metres. Range penalties are essentially
@@ -31,9 +32,21 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
 export function calculateDistanceBetween(origin, target) {
     // Note: canvas.grid.measureDistance is deprecated as of Foundry v12. When we add better support for
     // templates here, also consider updating to use the new api (canvas.grid.measurePath)
+
+    // https://foundryvtt.com/api/classes/foundry.grid.BaseGrid.html#measurePath
+    const path = [];
+    path.push({ x: origin.x, y: origin.y });
+    path.push({ x: target.x, y: target.y });
+    const _distanceMeasurePath = canvas.grid.measurePath(path);
+    const _distance = RoundFavorPlayerDown(_distanceMeasurePath.distance);
+
     const originalMeasureDistance = canvas.grid.measureDistance(origin, target, {
         gridSpaces: true,
     });
+
+    if (_distance != originalMeasureDistance) {
+        console.log(_distance, originalMeasureDistance);
+    }
 
     // We don't yet support measuring 3D distance between a token and a template volume, so we
     // return the original distance

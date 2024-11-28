@@ -553,7 +553,10 @@ export async function AttackToHit(item, options) {
         )
     ) {
         // Educated guess for token
-        const token = actor.getActiveTokens()[0];
+        const token =
+            actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+            actor.getActiveTokens()[0];
+
         if (!token) {
             // We can still proceed without a token for our actor.  We just don't know the range to our potential target.
             ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
@@ -573,7 +576,7 @@ export async function AttackToHit(item, options) {
         }
 
         if (rangePenalty) {
-            heroRoller.addNumber(rangePenalty, "Range penalty");
+            heroRoller.addNumber(rangePenalty, `Range penalty (${distance}${getSystemDisplayUnits(item.actor.is5e)}`);
         }
 
         // Brace (+2 OCV only to offset the Range Modifier)
