@@ -21,6 +21,7 @@
 - Fixed END cost for STR to round down in players favor. [#1533](https://github.com/dmdorman/hero6e-foundryvtt/issues/1533)
 - Fixed rare issue where a characteristic is unblocked and the associated power can no longer be toggled. [#1469](https://github.com/dmdorman/hero6e-foundryvtt/issues/1469)
 - Fixed issue where +1 SPD purchased as a power was not applying directly after upload. [#1439](https://github.com/dmdorman/hero6e-foundryvtt/issues/1439)
+- TELEKINESIS description now includes throw distance. [#1450](https://github.com/dmdorman/hero6e-foundryvtt/issues/1450)
 
 ## Version 4.0.8
 
