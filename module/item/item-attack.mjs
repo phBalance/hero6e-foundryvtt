@@ -1979,25 +1979,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         );
     }
 
-    // TESTING - VISION TESTING - AARON
-    // const basicMode = token.detectionModes.find((m) => m.id === "basicSight");
-    // const visionSource = token.vision;
-    // console.log(basicMode, visionSource);
-    //basicMode.testVisibility(visionSource, basicMode, config);
-
-    //debugger;
-
-    // Unique case where we use STR to break free of ENTANGLE
-    // if (!item && heroRoller.getHitLocation().activeEffect?.flags.XMLID === "ENTANGLE") {
-    //     const fakeItem = {
-    //         name: "Strength",
-    //         system: {
-    //             class: "physical",
-    //         },
-    //     };
-    //     return _onApplyDamageToActiveEffect(fakeItem, token, heroRoller);
-    // }
-
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
