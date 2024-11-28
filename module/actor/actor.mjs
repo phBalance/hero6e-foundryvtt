@@ -428,8 +428,11 @@ export class HeroSystem6eActor extends Actor {
             chars.end.value = 0;
         }
 
-        let newStun = parseInt(chars.stun.value) + parseInt(chars.rec.value);
-        let newEnd = parseInt(chars.end.value) + parseInt(chars.rec.value);
+        // Need to account for negative RECovery
+        const rec = Math.max(0, parseInt(chars.rec.value));
+
+        let newStun = parseInt(chars.stun.value) + rec;
+        let newEnd = parseInt(chars.end.value) + rec;
 
         if (newStun > chars.stun.max) {
             newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)); // possible > MAX (which is OKish)
@@ -450,6 +453,9 @@ export class HeroSystem6eActor extends Actor {
         );
 
         let content = `${tokenName} <i>Takes a Recovery</i>`;
+        if (rec <= 0) {
+            content += ` [REC=${chars.rec.value}]`;
+        }
         if (deltaEnd || deltaStun) {
             content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
         } else {

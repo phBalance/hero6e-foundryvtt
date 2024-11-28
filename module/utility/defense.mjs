@@ -248,6 +248,17 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
                 tag.value2 = tag.value;
             }
         }
+        // In 5e HARDENED protects vs PENETRATING. There is no IMPENETRABLE in 5e.
+        else if (targetActor.is5e && penetrating && tag.options?.hardened) {
+            if (tag.options?.hardened >= penetrating) {
+                actorDefenses.impenetrableValue += tag?.value || 0;
+            } else {
+                tag.options.strikethrough = true;
+                tag.name2 = tag.name.replace(/h\d+/, "");
+                tag.valueText2 = tag.valueText;
+                tag.value2 = tag.value;
+            }
+        }
     }
     actorDefenses.defenseTotalValue = actorDefenses.defenseValue + actorDefenses.resistantValue;
 

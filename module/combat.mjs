@@ -739,10 +739,12 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "npcOnly" && actor.type == "npc") ||
                 (automation === "pcEndOnly" && actor.type === "pc")
             ) {
+                const showToAll = !combatant.hidden && (combatant.hasPlayerOwner || combatant.actor?.type === "pc");
+
                 // Make sure combatant is visible in combat tracker
                 const recoveryText = await combatant.actor.TakeRecovery(false, combatant.token);
                 if (recoveryText) {
-                    if (!combatant.hidden && combatant.hasPlayerOwner) {
+                    if (showToAll) {
                         content += "<li>" + recoveryText + "</li>";
                     } else {
                         hasHidden = true;
@@ -764,7 +766,7 @@ export class HeroSystem6eCombat extends Combat {
                                 "system.value": newValue,
                             });
 
-                            if (!combatant.hidden) {
+                            if (showToAll) {
                                 content += "<li>" + `${combatant.token.name} ${item.name} +${delta}` + "</li>";
                             } else {
                                 contentHidden += "<li>" + `${combatant.token.name} ${item.name} +${delta}` + "</li>";
