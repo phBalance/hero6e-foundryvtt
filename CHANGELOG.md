@@ -23,6 +23,7 @@
 - Fixed issue where +1 SPD purchased as a power was not applying directly after upload. [#1439](https://github.com/dmdorman/hero6e-foundryvtt/issues/1439)
 - TELEKINESIS description now includes throw distance. [#1450](https://github.com/dmdorman/hero6e-foundryvtt/issues/1450)
 - Fixed issue with negative RECOVERY during "Take A Recovery". [#1396](https://github.com/dmdorman/hero6e-foundryvtt/issues/1396)
+- 5e HARDENED now works against PENETRATING. [#1437](https://github.com/dmdorman/hero6e-foundryvtt/issues/1437)
 
 ## Version 4.0.8
 
