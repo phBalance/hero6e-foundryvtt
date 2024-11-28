@@ -3349,7 +3349,7 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS} (${system.value} STR)`;
                 const strDetails = this.actor?.strDetails(parseInt(system.value));
                 if (strDetails) {
-                    system.description += ` Throw ${strDetails.strThrow}${getSystemDisplayUnits(this.actor.is5e)} `;
+                    system.description += ` Throw ${strDetails.strThrow}${getSystemDisplayUnits(this.actor.is5e)}`;
                 }
                 break;
             }
