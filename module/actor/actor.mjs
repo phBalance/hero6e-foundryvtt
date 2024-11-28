@@ -2164,8 +2164,10 @@ export class HeroSystem6eActor extends Actor {
 
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
-            let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0);
-            newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
+            //if (key.toLowerCase() === "spd") debugger;
+
+            //let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
+            let newValue = this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
             if (this.system.is5e && key === "spd") {
                 // SPD is always an integer, but in 5e due to figured characteristics, the base can be fractional.
                 newValue = Math.floor(newValue);

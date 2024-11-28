@@ -793,7 +793,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         html.find(".item-chat").click(this._onItemChat.bind(this));
 
-        html.find("td.characteristic-locked").click(this._onUnlockCharacteristic.bind(this));
+        html.find("td.characteristic-locked").click(this._onUnBlockCharacteristic.bind(this));
 
         // Drag events for macros.
         if (this.actor.isOwner) {
@@ -1332,7 +1332,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         reader.readAsText(file);
     }
 
-    async _onUnlockCharacteristic(event) {
+    async _onUnBlockCharacteristic(event) {
         event.preventDefault();
 
         // The event will not be generated from the disabled input (since disabled elements
@@ -1383,9 +1383,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                             }
                         }
                     }
-
-                    actionsToAwait.push(ae.delete());
-
+                    // Clicking to remove PD AE, removes checkbox to re-active it. #1469
+                    // We will disable the AE instead of deleting it
+                    //actionsToAwait.push(ae.delete());
+                    actionsToAwait.push(ae.update({ disabled: true }));
                     await Promise.all(actionsToAwait);
                 }
                 continue;
