@@ -210,7 +210,12 @@
 </div>
 {{/if}}
 
-
+{{#if (isdefined system.USE_END_RESERVE)}}
+<div class="form-group">
+    <label>USE_END_RESERVE</label>
+    <input type="checkbox" name="system.USE_END_RESERVE" {{checked system.USE_END_RESERVE}} data-dtype="Boolean"/>
+</div>
+{{/if}}
 
 
 {{#if (isdefined system.CHARACTERISTIC)}}
