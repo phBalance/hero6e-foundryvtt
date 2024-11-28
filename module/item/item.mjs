@@ -3342,12 +3342,17 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
-            case "TELEKINESIS":
+            case "TELEKINESIS": {
                 //Psychokinesis:  Telekinesis (62 STR), Alternate Combat Value (uses OMCV against DCV; +0)
                 // (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4),
                 // Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)
                 system.description = `${system.ALIAS} (${system.value} STR)`;
+                const strDetails = this.actor?.strDetails(parseInt(system.value));
+                if (strDetails) {
+                    system.description += ` Throw ${strDetails.strThrow}${getSystemDisplayUnits(this.actor.is5e)}`;
+                }
                 break;
+            }
 
             case "MENTAL_COMBAT_LEVELS":
             case "COMBAT_LEVELS":

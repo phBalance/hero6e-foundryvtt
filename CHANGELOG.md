@@ -13,7 +13,7 @@
 - Uploading HDC prompts to retain BODY, END, and CHARGES. HAP and HeroicIdentity are always retained after upload. [#1505](https://github.com/dmdorman/hero6e-foundryvtt/issues/1505)
 - Improved MULTIPOWER all slots limitation propagation. [#1504](https://github.com/dmdorman/hero6e-foundryvtt/issues/1504)
 - Sending items to chat are now private chat messages. You can right click those private chat messages to reveal them to everyone.
-- Movement exceeding full move no longer costs END. Movement with charges, now consumes charges. Chat cards are shown to token owners detailing movement resources used. Added NONCOMBATMOVEMENT status. [#1482](https://github.com/dmdorman/hero6e-foundryvtt/issues/1482)
+- Movement exceeding full move no longer costs END. Movement with charges, now consumes charges. Chat cards are shown to token owners detailing movement resources used. Added NONCOMBATMOVEMENT status. [#1482](https://github.com/dmdorman/hero6e-foundryvtt/issues/1482) [#1395](https://github.com/dmdorman/hero6e-foundryvtt/issues/1395)
 - Fixed NaN roll for ACCIDENTALCHANGE with an ALWAYS CHANCETOCHANGE. [#1473](https://github.com/dmdorman/hero6e-foundryvtt/issues/1473)
 - SET and BRACE work again. HAYMAKER applies -4 DCV. [#1459](https://github.com/dmdorman/hero6e-foundryvtt/issues/1459)
 - SET, BRACE, HAYMAKER, and NONCOMBATMOVEMENT expire (toggle off) at the beginning of actors phase.
@@ -21,6 +21,7 @@
 - Fixed END cost for STR to round down in players favor. [#1533](https://github.com/dmdorman/hero6e-foundryvtt/issues/1533)
 - Fixed rare issue where a characteristic is unblocked and the associated power can no longer be toggled. [#1469](https://github.com/dmdorman/hero6e-foundryvtt/issues/1469)
 - Fixed issue where +1 SPD purchased as a power was not applying directly after upload. [#1439](https://github.com/dmdorman/hero6e-foundryvtt/issues/1439)
+- TELEKINESIS description now includes throw distance. [#1450](https://github.com/dmdorman/hero6e-foundryvtt/issues/1450)
 
 ## Version 4.0.8
 

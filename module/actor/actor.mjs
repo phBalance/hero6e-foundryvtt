@@ -647,10 +647,10 @@ export class HeroSystem6eActor extends Actor {
         });
     }
 
-    strDetails() {
+    strDetails(str) {
         let strLiftText = "0";
         let strRunningThrow = 0;
-        let value = this.system.characteristics.str?.value;
+        let value = str || this.system.characteristics.str?.value;
         if (value >= 1) {
             strLiftText = "8kg";
             strRunningThrow = 2;
@@ -2166,8 +2166,11 @@ export class HeroSystem6eActor extends Actor {
         for (const key of Object.keys(this.system.characteristics)) {
             //if (key.toLowerCase() === "spd") debugger;
 
-            //let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
-            let newValue = this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
+            let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
+            if (newValue) {
+                console.log("newVALUE");
+            }
+            newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
             if (this.system.is5e && key === "spd") {
                 // SPD is always an integer, but in 5e due to figured characteristics, the base can be fractional.
                 newValue = Math.floor(newValue);

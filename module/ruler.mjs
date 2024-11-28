@@ -3,6 +3,7 @@ import { getSystemDisplayUnits } from "./utility/units.mjs";
 import { calculateRangePenaltyFromDistanceInMetres } from "./utility/range.mjs";
 import { whisperUserTargetsForActor } from "./utility/util.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
+import { RoundFavorPlayerDown } from "./utility/round.mjs";
 
 export class HeroRuler extends Ruler {
     static _controlToken() {
@@ -244,9 +245,6 @@ export class HeroRuler extends Ruler {
                                     );
                                 }
 
-                                // If we non-combat we don't necessarily spend more END, so cap at max movement
-                                currentDistance = Math.min(currentDistance, this.getRanges(token)[1].range);
-
                                 // DistancePerEnd default is 10m costs 1 END
                                 let DistancePerEnd = 10;
 
@@ -272,6 +270,15 @@ export class HeroRuler extends Ruler {
                                     DistancePerEnd /= parseInt(increasedEnd.OPTION.replace("x", "")) || 1;
                                 }
 
+                                // Maximum Endurance
+                                const MaximumEndurance = Math.max(
+                                    1,
+                                    RoundFavorPlayerDown(
+                                        (movementPower?.system.activePoints || this.getRanges(token)[1].range) /
+                                            DistancePerEnd,
+                                    ),
+                                );
+
                                 let content = "";
                                 const CHARGES = movementPower?.findModsByXmlid("CHARGES");
                                 if (CHARGES && movementPower.system.charges && !combatant.flags.dragRuler?.spentEnd) {
@@ -296,6 +303,12 @@ export class HeroRuler extends Ruler {
 
                                 // TODO: This is assuming every 10 costs 1 endurance
                                 let totalEnd = Math.ceil(currentDistance / DistancePerEnd);
+
+                                // MaximumEndurance
+                                if (totalEnd > MaximumEndurance) {
+                                    console.log("MaximumEndurance", MaximumEndurance);
+                                    totalEnd = MaximumEndurance;
+                                }
                                 let costEnd = totalEnd - spentEnd;
                                 if (costEnd > 0) {
                                     actor.update({
@@ -303,7 +316,7 @@ export class HeroRuler extends Ruler {
                                             parseInt(actor.system.characteristics.end.value) - costEnd,
                                     });
 
-                                    content += `${token.name} spent ${costEnd} END for ${actor.flags.activeMovement?.toUpperCase() || "movement"}. Total of ${Math.ceil(currentDistance)}m.  Movement exceeding full move doesn't cost more END.`;
+                                    content += `${token.name} spent ${costEnd} END for ${actor.flags.activeMovement?.toUpperCase() || "movement"}. Total of ${Math.ceil(currentDistance)}m and ${totalEnd} END. Encurance use is capped at ${MaximumEndurance}.`;
                                     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
                                     speaker.alias = actor.name;
                                     const chatData = {
