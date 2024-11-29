@@ -10,7 +10,11 @@ import {
     convertToDcFromItem,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
-import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
+import {
+    getRoundedDownDistanceInSystemUnits,
+    getSystemDisplayUnits,
+    distanceWithActorUnits,
+} from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
@@ -279,8 +283,7 @@ export async function AttackAoeToHit(item, options) {
     // Haymaker -5 DCV
     const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
     if (haymakerManeuver) {
-        //todo: if it is -5 , then why -4?
-        dcv -= 4;
+        dcv -= 5;
     }
 
     cvModifiers.forEach((cvModifier) => {
@@ -576,7 +579,10 @@ export async function AttackToHit(item, options) {
         }
 
         if (rangePenalty) {
-            heroRoller.addNumber(rangePenalty, `Range penalty (${distance}${getSystemDisplayUnits(item.actor.is5e)}`);
+            heroRoller.addNumber(
+                rangePenalty,
+                `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
+            );
         }
 
         // Brace (+2 OCV only to offset the Range Modifier)
@@ -657,8 +663,7 @@ export async function AttackToHit(item, options) {
     // Haymaker -5 DCV
     const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
     if (haymakerManeuver) {
-        //todo: if it is -5 , then why -4?
-        dcv -= 4;
+        dcv -= 5;
     }
 
     // STRMINIMUM
@@ -3506,7 +3511,7 @@ function calculateRequiredEnd(item, effectiveStr) {
         if (item.system.usesStrength || item.system.usesTk) {
             const strPerEnd =
                 item.actor.system.isHeroic && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
-            let strEnd = Math.max(1, Math.round(effectiveStr / strPerEnd));
+            let strEnd = Math.max(1, RoundFavorPlayerDown(effectiveStr / strPerEnd));
 
             // But wait, may have purchased STR with reduced endurance
             const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
@@ -3517,11 +3522,14 @@ function calculateRequiredEnd(item, effectiveStr) {
                     if (strREDUCEDEND.OPTIONID === "ZERO") {
                         strEnd = 0;
                     } else {
-                        strEnd = Math.max(1, Math.round(Math.min(effectiveStr, strPowerLevels) / (strPerEnd * 2)));
+                        strEnd = Math.max(
+                            1,
+                            RoundFavorPlayerDown(Math.min(effectiveStr, strPowerLevels) / (strPerEnd * 2)),
+                        );
                     }
                     // Add back in STR that isn't part of strPower
                     if (effectiveStr > strPowerLevels) {
-                        strEnd += Math.max(1, Math.round((effectiveStr - strPowerLevels) / strPerEnd));
+                        strEnd += Math.max(1, RoundFavorPlayerDown((effectiveStr - strPowerLevels) / strPerEnd));
                     }
                 }
             }

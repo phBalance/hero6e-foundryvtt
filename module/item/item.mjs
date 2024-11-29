@@ -461,7 +461,7 @@ export class HeroSystem6eItem extends Item {
         const chatData = {
             author: game.user._id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             content: content,
             whisper: [game.user.id],
         };
@@ -2379,15 +2379,13 @@ export class HeroSystem6eItem extends Item {
     get modifiers() {
         const _modifiers = this.system.MODIFIER || [];
         if (this.parentItem) {
-            // Include limitations from parent that are not private.
+            // Include common modifiers from parent that are not private.
             // <i>Crossbow:</i>  Multipower, 50-point reserve,  (50 Active Points); all slots OAF (-1)
-            for (const pMod of this.parentItem.modifiers.filter(
-                (mod) => parseFloat(mod.BASECOST_total) < 0 && mod.PRIVATE === false,
-            )) {
+            for (const pMod of this.parentItem.modifiers.filter((mod) => mod.PRIVATE === false)) {
                 // Add parent mod if we don't already have it
                 if (!_modifiers.find((mod) => mod.ID === pMod.ID)) {
                     // We may want the parent reference at some point (like for ingame editing of items)
-                    pMod.PARENTID ??= this.parentItem.system.ID;
+                    pMod.parentId ??= this.parentItem.system.ID;
                     _modifiers.push(pMod);
                 }
             }
@@ -3016,7 +3014,7 @@ export class HeroSystem6eItem extends Item {
                 system.description += `, +${system.value * 2} DCV`;
                 system.description += `, takes +${
                     system.value * (this.is5e ? 3 : 6) + getSystemDisplayUnits(this.is5e)
-                } KB`;
+                } KB)`;
 
                 break;
 
