@@ -1497,29 +1497,30 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
     // Do we really need this? Why not just check SET and BRACE?
-    // addPower(
-    //     {
-    //         key: "SETANDBRACE",
-    //         type: ["maneuver"],
-    //         behaviors: ["non-hd"],
-    //         name: "Set And Brace",
-    //         costPerLevel: costPerLevelFixedValue(0),
-    //         perceivability: "obvious",
-    //         duration: "instant",
-    //         range: HERO.RANGE_TYPES.SELF,
-    //         costEnd: false,
-    //         target: "target's dcv",
-    //         ignoreFor: ["base2", "computer", "ai"],
-    //         maneuverDesc: {
-    //             phase: "1",
-    //             ocv: "+3",
-    //             dcv: "1/2",
-    //             effects: "Take extra time to aim a Ranged attack at a target, +2 OCV only to offset the Range Modifier",
-    //             attack: false,
-    //         },
-    //     },
-    //     {},
-    // );
+    // If removed the migrations will generate a warning because SETANDBRACE is no longer defined.
+    addPower(
+        {
+            key: "SETANDBRACE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Set And Brace",
+            costPerLevel: costPerLevelFixedValue(0),
+            perceivability: "obvious",
+            duration: "instant",
+            range: HERO.RANGE_TYPES.SELF,
+            costEnd: false,
+            target: "target's dcv",
+            ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1",
+                ocv: "+3",
+                dcv: "1/2",
+                effects: "Take extra time to aim a Ranged attack at a target, +2 OCV only to offset the Range Modifier",
+                attack: false,
+            },
+        },
+        {},
+    );
     addPower(
         {
             key: "SHOVE",

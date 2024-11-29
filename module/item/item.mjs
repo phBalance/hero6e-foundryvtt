@@ -1567,7 +1567,7 @@ export class HeroSystem6eItem extends Item {
         const configPowerInfo = this.baseInfo;
         if (!configPowerInfo) {
             if (this.system.XMLID) {
-                ui.notifications.warn(`${this.actor?.name}/${this.system.XMLID}} doesn't have power defined`);
+                ui.notifications.warn(`${this.actor?.name}/${this.system.XMLID} doesn't have power defined`);
             } else {
                 console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
             }
