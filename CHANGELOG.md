@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.9 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.9 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed missing cost for NIGHTVISION and other enhanced visions. [#1520](https://github.com/dmdorman/hero6e-foundryvtt/issues/1520)
 - DARKNESS now has an implied AOE for targeting purposes. [#1503](https://github.com/dmdorman/hero6e-foundryvtt/issues/1503)
