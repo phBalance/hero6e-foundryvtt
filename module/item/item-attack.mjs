@@ -10,11 +10,7 @@ import {
     convertToDcFromItem,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
-import {
-    getRoundedDownDistanceInSystemUnits,
-    getSystemDisplayUnits,
-    distanceWithActorUnits,
-} from "../utility/units.mjs";
+import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
