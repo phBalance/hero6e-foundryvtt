@@ -239,11 +239,11 @@ export class HeroRuler extends Ruler {
                                 let currentDistance = dragRuler.getMovedDistanceFromToken(tokenObj);
 
                                 // Noncombat Movement?
-                                if (Math.floor(currentDistance) > this.getRanges(token)[1].range && token.actor) {
-                                    token.actor.addActiveEffect(
-                                        HeroSystem6eActorActiveEffects.statusEffectsObj.nonCombatMovementEffect,
-                                    );
-                                }
+                                // if (Math.floor(currentDistance - 1) > this.getRanges(token)[1].range && token.actor) {
+                                //     token.actor.addActiveEffect(
+                                //         HeroSystem6eActorActiveEffects.statusEffectsObj.nonCombatMovementEffect,
+                                //     );
+                                // }
 
                                 // DistancePerEnd default is 10m costs 1 END
                                 let DistancePerEnd = 10;
