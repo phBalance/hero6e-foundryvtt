@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.10 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.11 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Correct EC costing.
+
+## Version 4.0.10
 
 - Fix migration SETANDBRACE warning.
 
