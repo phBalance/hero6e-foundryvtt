@@ -21,16 +21,22 @@ import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } f
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 export async function chatListeners(html) {
-    html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
-    html.on("click", "button.apply-damage", this._onApplyDamage.bind(this));
-    html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
-    html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
-    html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
-    html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
+    bindEventListenersToHtml(html, "click", "button.roll-damage", this._onRollDamage.bind(this));
+    bindEventListenersToHtml(html, "click", "button.apply-damage", this._onApplyDamage.bind(this));
+    bindEventListenersToHtml(html, "click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
+    bindEventListenersToHtml(html, "click", "button.roll-knockback", this._onRollKnockback.bind(this));
+    bindEventListenersToHtml(html, "click", "button.roll-mindscan", this._onRollMindScan.bind(this));
+    bindEventListenersToHtml(html, "click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
+}
+
+function bindEventListenersToHtml(html, selector, eventName, listener) {
+    const nodeList = html.querySelectorAll(selector);
+    nodeList.forEach((node) => {
+        node[`on${eventName}`] = listener;
+    });
 }
 
 export async function onMessageRendered(html) {
-    //[data-visibility="gm"]
     if (!game.user.isGM) {
         html.find(`[data-visibility="gm"]`).remove();
     }
