@@ -47,7 +47,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         await super._onUpdate(data, options, userId);
 
         // Update user targets only if we moved the template (effectively an owner of the template) or if we are the author of the template
-        if (game.user.id !== userId && game.user.id !== this.document.user.id) return;
+        if (game.user.id !== userId && game.user.id !== this.document.author.id) return;
 
         this._computeShape();
         await this.selectObjects({ checkPositions: true, templateData: data });
