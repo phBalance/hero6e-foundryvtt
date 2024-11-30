@@ -1,8 +1,10 @@
 # Releases
 
-## Version 4.0.11 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.11 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Correct EC costing.
+- Correct 5e Elemental Control cost. [#1416](https://github.com/dmdorman/hero6e-foundryvtt/issues/1416)
+- Removed automation for Non-Combat effect as it isn't working properly. [#1560](https://github.com/dmdorman/hero6e-foundryvtt/issues/1560)
+- Fixed Non-combat running-person svg file that was crashing firefox. [#1554](https://github.com/dmdorman/hero6e-foundryvtt/issues/1554)
 
 ## Version 4.0.10
 
