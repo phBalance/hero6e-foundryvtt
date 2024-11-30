@@ -2908,7 +2908,8 @@ export class HeroSystem6eItem extends Item {
                     _realCost /= 5.0;
                 }
             } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
-                _realCost = _realCost - this.parentItem.system.BASECOST;
+                const baseCost = (this.parentItem.system.BASECOST = parseFloat(this.parentItem.system.BASECOST));
+                _realCost = Math.max(baseCost, _realCost - baseCost);
             }
         }
 
