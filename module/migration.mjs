@@ -11,9 +11,7 @@ function getAllActorsInGame() {
     ];
 }
 
-async function willNotMigrate() {
-    const lastMigration = game.settings.get(game.system.id, "lastMigration");
-
+async function willNotMigrate(lastMigration) {
     // We no longer support migration of things which are too old so that migration doesn't become too complicated.
     // If anything is too old (based on the elements it supports) then we won't update anything. That list is:
     // - Last migrated version is before 3.0.76 which is the last version that had custom migration methods
@@ -57,7 +55,13 @@ async function migrateToVersion(migratesToVersion, lastMigration, queue, queueTy
 }
 
 export async function migrateWorld() {
-    if (await willNotMigrate()) return;
+    const lastMigration = game.settings.get(game.system.id, "lastMigration");
+
+    // NOTE: If there has never been a migration then the lastMigration is "1.0.0". We don't need to give a warning in this case
+    // as we know that this system was not around then.
+    if (lastMigration === "1.0.0") return;
+
+    if (await willNotMigrate(lastMigration)) return;
 
     // Chat Card for GM about new version
     const content = `Version ${
