@@ -232,6 +232,17 @@ export default class SettingsHelpers {
             requiresReload: false,
         });
 
+        game.settings.register(module, "ShowOnlyVisibleCombatants", {
+            name: game.i18n.localize("Settings.ShowOnlyVisibleCombatants.Name"),
+            hint: game.i18n.localize("Settings.ShowOnlyVisibleCombatants.Hint"),
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: false,
+            //onChange: () => ui.combat.render(),
+            requiresReload: false,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: game.i18n.localize("Settings.AlphaTesting.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.Hint"),

@@ -1899,6 +1899,12 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.actorPostUpload = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
+        // For some unknown reason SPD with AE not working during upload.
+        // This kludge is a quick fix
+        // https://github.com/dmdorman/hero6e-foundryvtt/issues/1439
+        await this.update({ "system.characteristics.spd.max": this.system.characteristics.spd.core });
+        await this.update({ "system.characteristics.spd.value": this.system.characteristics.spd.max });
+
         // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
         this.items
             .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
@@ -2173,9 +2179,6 @@ export class HeroSystem6eActor extends Actor {
             //if (key.toLowerCase() === "spd") debugger;
 
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
-            if (newValue) {
-                console.log("newVALUE");
-            }
             newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
             if (this.system.is5e && key === "spd") {
                 // SPD is always an integer, but in 5e due to figured characteristics, the base can be fractional.
