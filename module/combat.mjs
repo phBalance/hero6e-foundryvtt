@@ -383,6 +383,8 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // We need a single combatant to store some flags. Like for DragRuler, end tracking, etc.
+        // getCombatantByToken seems to get the first combatant in combat.turns that is for our token.
+        // This likely causes issues when SPD/LightningReflexes changes.
         const masterCombatant = this.getCombatantByToken(combatant.tokenId);
 
         await super._onStartTurn(combatant);

@@ -75,6 +75,17 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         for (let [i, combatant] of combat.turns.entries()) {
             if (!combatant.visible) continue;
 
+            // Is this token visible by the player?  Always show PC's
+            if (game.settings.get(HEROSYS.module, "ShowOnlyVisibleCombatants")) {
+                if (
+                    !game.user.isGM &&
+                    canvas.visibility?.testVisibility(combatant.token) === false &&
+                    combatant.actor.type !== "pc"
+                ) {
+                    continue;
+                }
+            }
+
             // Prepare turn data
             const resource =
                 combatant.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER ? combatant.resource : null;
