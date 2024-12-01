@@ -659,178 +659,139 @@ export class HeroSystem6eActor extends Actor {
     strDetails(str) {
         let strLiftText = "0";
         let strRunningThrow = 0;
-        let value = str || this.system.characteristics.str?.value;
-        if (value >= 1) {
-            strLiftText = "8kg";
-            strRunningThrow = 2;
-        }
-        if (value >= 2) {
-            strLiftText = "16kg";
-            strRunningThrow = 3;
-        }
-        if (value >= 3) {
-            strLiftText = "25kg";
-            strRunningThrow = 4;
-        }
-        if (value >= 4) {
-            strLiftText = "38kg";
-            strRunningThrow = 6;
-        }
-        if (value >= 5) {
-            strLiftText = "50kg";
-            strRunningThrow = 8;
-        }
-        if (value >= 8) {
-            strLiftText = "75kg";
-            strRunningThrow = 12;
-        }
-        if (value >= 10) {
-            strLiftText = "100kg";
-            strRunningThrow = 16;
-        }
-        if (value >= 13) {
-            strLiftText = "150kg";
-            strRunningThrow = 20;
-        }
-        if (value >= 15) {
-            strLiftText = "200kg";
-            strRunningThrow = 24;
-        }
-        if (value >= 18) {
-            strLiftText = "300kg";
-            strRunningThrow = 28;
-        }
-        if (value >= 20) {
-            strLiftText = "400kg";
-            strRunningThrow = 32;
-        }
-        if (value >= 23) {
-            strLiftText = "600kg";
-            strRunningThrow = 36;
-        }
-        if (value >= 25) {
-            strLiftText = "800kg";
-            strRunningThrow = 40;
-        }
-        if (value >= 28) {
-            strLiftText = "1,200kg";
-            strRunningThrow = 44;
-        }
-        if (value >= 30) {
-            strLiftText = "1,600kg";
-            strRunningThrow = 48;
-        }
-        if (value >= 35) {
-            strLiftText = "3,200kg";
-            strRunningThrow = 56;
-        }
-        if (value >= 40) {
-            strLiftText = "6,400kg";
-            strRunningThrow = 64;
-        }
-        if (value >= 45) {
-            strLiftText = "12.5 tons";
-            strRunningThrow = 72;
-        }
-        if (value >= 50) {
-            strLiftText = "25 tons";
-            strRunningThrow = 80;
-        }
-        if (value >= 55) {
-            strLiftText = "50 tons";
-            strRunningThrow = 88;
-        }
-        if (value >= 60) {
-            strLiftText = "100 tons";
-            strRunningThrow = 96;
-        }
-        if (value >= 65) {
-            strLiftText = "200 tons";
-            strRunningThrow = 104;
-        }
-        if (value >= 70) {
-            strLiftText = "400 tons";
-            strRunningThrow = 112;
-        }
-        if (value >= 75) {
-            strLiftText = "800 tons";
-            strRunningThrow = 120;
-        }
-        if (value >= 80) {
-            strLiftText = "1.6 ktons";
-            strRunningThrow = 128;
-        }
-        if (value >= 85) {
-            strLiftText = "3.2 ktons";
-            strRunningThrow = 136;
-        }
-        if (value >= 90) {
-            strLiftText = "6.4 ktons";
-            strRunningThrow = 144;
-        }
-        if (value >= 95) {
-            strLiftText = "12.5 ktons";
-            strRunningThrow = 152;
-        }
-        if (value >= 100) {
-            strLiftText = "25 ktons";
-            strRunningThrow = 160;
-        }
+        const value = str || this.system.characteristics.str?.value;
+
         if (value >= 105) {
             strLiftText = `${50 + Math.floor((value - 105) / 5) * 25} ktons`;
             strRunningThrow = 168 + Math.floor((value - 105) / 5) * 8;
+        } else if (value >= 100) {
+            strLiftText = "25 ktons";
+            strRunningThrow = 160;
+        } else if (value >= 95) {
+            strLiftText = "12.5 ktons";
+            strRunningThrow = 152;
+        } else if (value >= 90) {
+            strLiftText = "6.4 ktons";
+            strRunningThrow = 144;
+        } else if (value >= 85) {
+            strLiftText = "3.2 ktons";
+            strRunningThrow = 136;
+        } else if (value >= 80) {
+            strLiftText = "1.6 ktons";
+            strRunningThrow = 128;
+        } else if (value >= 75) {
+            strLiftText = "800 tons";
+            strRunningThrow = 120;
+        } else if (value >= 70) {
+            strLiftText = "400 tons";
+            strRunningThrow = 112;
+        } else if (value >= 65) {
+            strLiftText = "200 tons";
+            strRunningThrow = 104;
+        } else if (value >= 60) {
+            strLiftText = "100 tons";
+            strRunningThrow = 96;
+        } else if (value >= 55) {
+            strLiftText = "50 tons";
+            strRunningThrow = 88;
+        } else if (value >= 50) {
+            strLiftText = "25 tons";
+            strRunningThrow = 80;
+        } else if (value >= 45) {
+            strLiftText = "12.5 tons";
+            strRunningThrow = 72;
+        } else if (value >= 40) {
+            strLiftText = "6,400kg";
+            strRunningThrow = 64;
+        } else if (value >= 35) {
+            strLiftText = "3,200kg";
+            strRunningThrow = 56;
+        } else if (value >= 30) {
+            strLiftText = "1,600kg";
+            strRunningThrow = 48;
+        } else if (value >= 28) {
+            strLiftText = "1,200kg";
+            strRunningThrow = 44;
+        } else if (value >= 25) {
+            strLiftText = "800kg";
+            strRunningThrow = 40;
+        } else if (value >= 23) {
+            strLiftText = "600kg";
+            strRunningThrow = 36;
+        } else if (value >= 20) {
+            strLiftText = "400kg";
+            strRunningThrow = 32;
+        } else if (value >= 18) {
+            strLiftText = "300kg";
+            strRunningThrow = 28;
+        } else if (value >= 15) {
+            strLiftText = "200kg";
+            strRunningThrow = 24;
+        } else if (value >= 13) {
+            strLiftText = "150kg";
+            strRunningThrow = 20;
+        } else if (value >= 10) {
+            strLiftText = "100kg";
+            strRunningThrow = 16;
+        } else if (value >= 8) {
+            strLiftText = "75kg";
+            strRunningThrow = 12;
+        } else if (value >= 5) {
+            strLiftText = "50kg";
+            strRunningThrow = 8;
+        } else if (value >= 4) {
+            strLiftText = "38kg";
+            strRunningThrow = 6;
+        } else if (value >= 3) {
+            strLiftText = "25kg";
+            strRunningThrow = 4;
+        } else if (value >= 2) {
+            strLiftText = "16kg";
+            strRunningThrow = 3;
+        } else if (value >= 1) {
+            strLiftText = "8kg";
+            strRunningThrow = 2;
         }
 
+        // 5e allows negative strength
         if (this.system.is5e) {
             if (value < -25) {
                 strLiftText = "0";
                 strRunningThrow = 0;
-            }
-            if (value >= -25 && value < -23) {
+            } else if (value < -23) {
                 strLiftText = "0.8kg";
                 strRunningThrow = 1;
-            }
-            if (value >= -23 && value < -20) {
+            } else if (value < -20) {
                 strLiftText = "1kg";
                 strRunningThrow = 1;
-            }
-            if (value >= -20 && value < -18) {
+            } else if (value < -18) {
                 strLiftText = "1.6kg";
                 strRunningThrow = 1;
-            }
-            if (value >= -18 && value < -15) {
+            } else if (value < -15) {
                 strLiftText = "2kg";
                 strRunningThrow = 1;
-            }
-            if (value >= -15 && value < -13) {
+            } else if (value < -13) {
                 strLiftText = "3.2kg";
                 strRunningThrow = 1;
-            }
-            if (value >= -13 && value < -10) {
+            } else if (value < -10) {
                 strLiftText = "4kg";
                 strRunningThrow = 1;
-            }
-            if (value >= -10 && value < -8) {
+            } else if (value < -8) {
                 strLiftText = "6.4kg";
                 strRunningThrow = 1;
-            }
-            if (value >= -8 && value < -5) {
+            } else if (value < -5) {
                 strLiftText = "8kg";
                 strRunningThrow = 2;
-            }
-            if (value >= -5 && value < -3) {
+            } else if (value < -3) {
                 strLiftText = "12.5kg";
                 strRunningThrow = 2;
-            }
-            if (value >= -3 && value < 0) {
+            } else if (value < 0) {
                 strLiftText = "16kg";
                 strRunningThrow = 3;
-            }
-            if (value >= 0 && value < 3) {
+            } else if (value < 3) {
                 strLiftText = "25kg";
                 strRunningThrow = 4;
-            }
-            if (value >= 3 && value < 5) {
+            } else if (value < 5) {
                 strLiftText = "37kg";
                 strRunningThrow = 6;
             }
