@@ -4,6 +4,7 @@
 
 - Fix for SPD purchased as a power not contributing to final values during upload. [#1439](https://github.com/dmdorman/hero6e-foundryvtt/issues/1439)
 - Fix for combat tracker where sometimes it would skip combatants when new combatants were added/removed. [#1447](https://github.com/dmdorman/hero6e-foundryvtt/issues/1447)
+- Attacks can override resource usage by using the override key on the "Roll to Hit" button.
 
 ## Version 4.0.11 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

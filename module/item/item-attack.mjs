@@ -18,6 +18,7 @@ import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -485,7 +486,7 @@ export async function AttackToHit(item, options) {
         resourcesUsedDescriptionRenderedRoll,
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveItem, {
         ...options,
-        ...{ noResourceUse: false },
+        ...{ noResourceUse: overrideCanAct },
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -3312,8 +3313,10 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  *
  * @param {HeroSystem6eItem} item
  * @param {Object} options
- * @param {boolean} options.noResourceUse - true to not consume resources but still indicate how many would have been consumed
- * @param {boolean} options.forceStunUsage - true to force STUN to be used if there is insufficient END
+ * @param {boolean} [options.noResourceUse] - true to not consume resources but still indicate how many would have been consumed
+ * @param {boolean} [options.forceStunUsage] - true to force STUN to be used if there is insufficient END
+ * @param {number} [options.effectiveStr] - strength used for END calculations
+ * @param {number} [options.boostableChargesToUse] - number of boostable charges to use
  *
  * @returns Object - discriminated union based on error or warning being falsy/truthy
  */
