@@ -5,7 +5,7 @@ import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsFor
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { RoundFavorPlayerUp } from "../utility/round.mjs";
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -816,43 +816,38 @@ export class HeroSystem6eActor extends Actor {
         if (!game.users.activeGM?.isSelf) return;
 
         const { strLiftKg } = this.strDetails();
-        let encumbrance = this.encumbrance;
+        const encumbrance = this.encumbrance;
 
         // Is actor encumbered?
         let dcvDex = 0;
-        let move = 0;
-        if (encumbrance / strLiftKg >= 0.1) {
-            dcvDex = -1;
-        }
-        if (encumbrance / strLiftKg >= 0.25) {
-            dcvDex = -2;
-            //move = -2;
-        }
-        if (encumbrance / strLiftKg >= 0.5) {
-            dcvDex = -3;
-            //move = -4;
-        }
-        if (encumbrance / strLiftKg >= 0.75) {
-            dcvDex = -4;
-            //move = -8;
-        }
-        if (encumbrance / strLiftKg >= 0.9) {
+        const maxStrengthPct = RoundFavorPlayerDown((100 * encumbrance) / strLiftKg);
+        if (maxStrengthPct >= 90) {
             dcvDex = -5;
-            //move = -16;
+        } else if (maxStrengthPct >= 75) {
+            dcvDex = -4;
+        } else if (maxStrengthPct >= 50) {
+            dcvDex = -3;
+        } else if (maxStrengthPct >= 25) {
+            dcvDex = -2;
+        } else if (maxStrengthPct >= 10) {
+            dcvDex = -1;
         }
 
         // Penalty Skill Levels for encumbrance
         for (const pslEncumbrance of this.items.filter(
-            (o) =>
-                o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
-                o.system.penalty === "encumbrance" &&
-                (o.type === "skill" || o.isActive),
+            (item) =>
+                item.system.XMLID === "PENALTY_SKILL_LEVELS" &&
+                item.system.penalty === "encumbrance" &&
+                (item.type === "skill" || item.isActive),
         )) {
             dcvDex = Math.min(0, dcvDex + parseInt(pslEncumbrance.system.LEVELS));
         }
 
         // Movement
+        let move = 0;
         switch (dcvDex) {
+            case 0:
+            // intentional fallthrough
             case -1:
                 move = 0;
                 break;
@@ -868,9 +863,12 @@ export class HeroSystem6eActor extends Actor {
             case -5:
                 move = -16;
                 break;
+            default:
+                console.error(`${this.name} has an unexpected dcvDex of ${dcvDex}`);
+                break;
         }
 
-        const name = `Encumbered ${Math.floor((encumbrance / strLiftKg) * 100)}%`;
+        const name = `Encumbered ${maxStrengthPct}%`;
         const prevActiveEffects = this.effects.filter((o) => o.flags?.encumbrance);
 
         // There should only be 1 encumbered effect, but with async loading we may have more
@@ -880,7 +878,7 @@ export class HeroSystem6eActor extends Actor {
         }
         const prevActiveEffect = prevActiveEffects?.[0];
         if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
-            let activeEffect = {
+            const activeEffect = {
                 name: name,
                 id: "encumbered",
                 img: `systems/${HEROSYS.module}/icons/encumbered.svg`,
@@ -951,16 +949,19 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // If we have control of this token, re-acquire to update movement types
-            const myToken = this.getActiveTokens()?.[0];
-            if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+            const myToken = this.getActiveTokens()?.[0] || {};
+            if (canvas.tokens.controlled.find((token) => token.id === myToken.id)) {
                 myToken.release();
                 myToken.control();
             }
+
             return;
         }
 
         if (dcvDex === 0 && prevActiveEffect) {
             await prevActiveEffect.delete();
+        } else if (prevActiveEffect && prevActiveEffect.name !== name) {
+            await prevActiveEffect.update({ name: name });
         }
         // else if (prevActiveEffect && prevActiveEffect.name != name) {
         //     await prevActiveEffect.update({ name: name });
@@ -978,8 +979,8 @@ export class HeroSystem6eActor extends Actor {
         // 0 on movement and DCV occur 5 points of STR
         // sooner.
         const massMultiplier = this.items
-            .filter((o) => o.system.XMLID === "DENSITYINCREASE" && o.isActive)
-            .reduce((p, a) => p + parseInt(a.system.LEVELS), 0);
+            .filter((item) => item.system.XMLID === "DENSITYINCREASE" && item.isActive)
+            .reduce((accum, currItem) => accum + parseInt(currItem.system.LEVELS), 0);
         const minStr = massMultiplier * 5;
 
         const prevStr0ActiveEffect = this.effects.find((o) => o.flags?.str0);
@@ -1028,8 +1029,8 @@ export class HeroSystem6eActor extends Actor {
 
             await this.createEmbeddedDocuments("ActiveEffect", [str0ActiveEffect]);
             // If we have control of this token, re-acquire to update movement types
-            const myToken = this.getActiveTokens()?.[0];
-            if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+            const myToken = this.getActiveTokens()?.[0] || {};
+            if (canvas.tokens.controlled.find((token) => token.id === myToken.id)) {
                 myToken.release();
                 myToken.control();
             }
@@ -1037,8 +1038,8 @@ export class HeroSystem6eActor extends Actor {
             if (prevStr0ActiveEffect && this.system.characteristics.str.value > minStr) {
                 await prevStr0ActiveEffect.delete();
                 // If we have control of this token, re-acquire to update movement types
-                const myToken = this.getActiveTokens()?.[0];
-                if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+                const myToken = this.getActiveTokens()?.[0] || {};
+                if (canvas.tokens.controlled.find((token) => token.id === myToken.id)) {
                     myToken.release();
                     myToken.control();
                 }
@@ -1048,8 +1049,8 @@ export class HeroSystem6eActor extends Actor {
 
     async FullHealth() {
         // Remove all status effects
-        for (let status of this.statuses) {
-            let ae = Array.from(this.effects).find((effect) => effect.statuses.has(status));
+        for (const status of this.statuses) {
+            const ae = Array.from(this.effects).find((effect) => effect.statuses.has(status));
             await ae.delete();
         }
 
