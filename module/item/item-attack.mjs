@@ -36,17 +36,16 @@ function bindEventListenersToHtml(html, selector, eventName, listener) {
     });
 }
 
-export async function onMessageRendered(html) {
+export async function onMessageRendered(jQueryHtml) {
     if (!game.user.isGM) {
-        html.find(`[data-visibility="gm"]`).remove();
-    }
-    if (game.user.isGM) {
-        html.find(`[data-visibility="redacted"]`).remove();
-        html.find(`[data-visibility="!gm"]`).remove();
+        jQueryHtml.find(`[data-visibility="gm"]`).remove();
+    } else {
+        jQueryHtml.find(`[data-visibility="redacted"]`).remove();
+        jQueryHtml.find(`[data-visibility="!gm"]`).remove();
     }
 
     // visibility based on actor owner
-    let element = html.find("div [data-visibility]");
+    let element = jQueryHtml.find("div [data-visibility]");
     if (element) {
         let actorId = element.data("visibility");
         if (actorId) {
