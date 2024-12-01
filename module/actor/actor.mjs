@@ -657,7 +657,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     strDetails(str) {
-        let strLiftText = "0";
+        let strLiftText = "0kg";
         let strRunningThrow = 0;
         const value = str || this.system.characteristics.str?.value;
 
@@ -756,7 +756,7 @@ export class HeroSystem6eActor extends Actor {
         // 5e allows negative strength
         if (this.system.is5e) {
             if (value < -25) {
-                strLiftText = "0";
+                strLiftText = "0kg";
                 strRunningThrow = 0;
             } else if (value < -23) {
                 strLiftText = "0.8kg";
