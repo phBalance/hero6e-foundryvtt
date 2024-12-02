@@ -5167,6 +5167,33 @@ export class HeroSystem6eItem extends Item {
         return this.baseInfo?.isContainer;
     }
 
+    get isRangedSense() {
+        return (
+            this.baseInfo?.type.includes("sense") &&
+            (this.findModsByXmlid("RANGE") || this.baseInfo?.behaviors.includes("rangeBuiltIn"))
+        );
+    }
+
+    get isSense() {
+        //SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
+        return (
+            this.baseInfo?.type.includes("sense") &&
+            (["SIGHTGROUP", "TOUCHGROUP", "HEARINGGROUP", "RADIOGROUP", "SMELLGROUP"].includes(this.system.GROUP) ||
+                this.findModsByXmlid("SENSE") ||
+                this.baseInfo?.behaviors.includes("targetingBuiltIn"))
+        );
+    }
+
+    get isTargeting() {
+        //SightGroup has TARGETING builtIn
+        return (
+            this.baseInfo?.type.includes("sense") &&
+            (["TARGETINGSENSE"].includes(this.system.GROUP) ||
+                this.findModsByXmlid("TARGETINGSENSE") ||
+                this.baseInfo?.behaviors.includes("senseBuiltIn"))
+        );
+    }
+
     get killing() {
         if (this.system.KILLING === true) {
             return true;

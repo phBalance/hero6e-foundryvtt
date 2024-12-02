@@ -5993,7 +5993,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACTIVESONAR",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: costPerLevelFixedValue(1),
@@ -6118,7 +6118,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HRRP",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn", "transmitBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6152,7 +6152,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INFRAREDPERCEPTION",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6180,7 +6180,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALAWARENESS",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             senseGroup: "mental",
             senseType: "passive",
@@ -6205,7 +6205,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NIGHTVISION",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6221,7 +6221,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "NRAYPERCEPTION",
-            type: ["sense"],
+            type: ["senseBuiltIn", "rangeBuiltIn"],
             behaviors: [],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6257,7 +6257,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RADAR",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6268,7 +6268,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RADIOPERCEIVETRANSMIT",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6279,7 +6279,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RADIOPERCEPTION",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6313,7 +6313,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SPATIALAWARENESS",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "targetingBuiltIn", "penetrativeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6370,7 +6370,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ULTRASONICPERCEPTION",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6386,7 +6386,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ULTRAVIOLETPERCEPTION",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,

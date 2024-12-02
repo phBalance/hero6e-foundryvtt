@@ -71,6 +71,7 @@ export default [
                 TokenDocument: "readonly",
                 ui: "readonly",
                 DetectionMode: "readonly",
+                OutlineOverlayFilter: "readonly",
             },
         },
     },

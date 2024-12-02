@@ -72,12 +72,24 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
     _prepareDetectionModes() {
         if (!this.sight.enabled) return;
 
+        if (this.sight.visionMode != "basic") {
+            super._prepareDetectionModes();
+            return;
+        }
+
+        // TO see the map you must have DETECT + SENSE
+        // Anything with 'detect limited class of physical objects'
+
         // By default you must have a light source to see the map
         const initialRange = this.sight.range;
         this.sight.range = 0;
 
         // default lightPerception & basicSight detections
         //super._prepareDetectionModes();
+
+        // if (this.name === "Onyx") {
+        //     debugger;
+        // }
 
         const lightMode = this.detectionModes.find((m) => m.id === "lightPerception");
         if (!lightMode) {
@@ -98,7 +110,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             // GENERIC SIGHTGROUP (no lights required; INFRAREDPERCEPTION, NIGHTVISION, etc)
             const SIGHTGROUP = this.actor?.items.find(
                 (item) =>
-                    item.baseInfo?.type.includes("sense") &&
+                    item.isSense &&
                     item.system.GROUP === "SIGHTGROUP" &&
                     //item.system.OPTIONID === undefined && // DETECT
                     item.isActive,
@@ -110,26 +122,26 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             }
 
             // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)
-            const NONSIGHTGROUP = this.actor?.items.find(
-                (item) =>
-                    item.baseInfo?.type.includes("sense") &&
-                    item.system.GROUP !== "SIGHTGROUP" &&
-                    item.system.GROUP !== "MENTALGROUP" &&
-                    item.isActive,
-            );
-            const heroSense = this.detectionModes.find((m) => m.id === "heroSense");
-            if (NONSIGHTGROUP) {
-                if (!heroSense) {
-                    this.detectionModes.push({ id: "heroSense", enabled: true, range: null });
-                } else {
-                    heroSense.range = null;
-                    heroSense.enabled = true;
-                }
+            // const NONSIGHTGROUP = this.actor?.items.find(
+            //     (item) =>
+            //         item.isSense &&
+            //         item.system.GROUP !== "SIGHTGROUP" &&
+            //         item.system.GROUP !== "MENTALGROUP" &&
+            //         item.isActive,
+            // );
+            const heroDetectSight = this.detectionModes.find((m) => m.id === "heroDetectSight");
+            // if (SIGHTGROUP || NONSIGHTGROUP) {
+            if (!heroDetectSight) {
+                this.detectionModes.push({ id: "heroDetectSight", enabled: true, range: null });
             } else {
-                if (heroSense) {
-                    heroSense.enabled = false;
-                }
+                heroDetectSight.range = null;
+                heroDetectSight.enabled = true;
             }
+            // } else {
+            //     if (heroDetectSight) {
+            //         heroDetectSight.enabled = false;
+            //     }
+            // }
 
             // Update Sight so people don't get confused when looking at the UI
             if (initialRange !== this.sight.range) {
