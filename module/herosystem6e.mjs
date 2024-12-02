@@ -27,6 +27,7 @@ import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 import { setPerceptionModes } from "./utility/vision.mjs";
+import { HeroPointVisionSource } from "./utility/vision.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -83,6 +84,7 @@ Hooks.once("init", async function () {
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.Canvas.rulerClass = HeroRuler;
+    CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
 
     HeroRuler.initialize();
 

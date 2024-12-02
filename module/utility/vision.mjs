@@ -1,4 +1,52 @@
+import { calculateDistanceBetween } from "./range.mjs";
+
+export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSource {
+    get isBlinded() {
+        const defaultBlind =
+            (this.data.radius === 0 && (this.data.lightRadius === 0 || !this.visionMode?.perceivesLight)) ||
+            Object.values(this.blinded).includes(true);
+        if (!defaultBlind) {
+            return defaultBlind;
+        }
+
+        // Do we have an enhanced vision with DETECT & SENSE & RANGE?
+        // Some visions have SENSE/RANGE (built in)
+        // SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
+        // Assuming only SIGHT/TOUCH/SMELL or TARGETING can actually SEE (you can see, touch, smell a wall)
+        const blindVisionItem = this.token?.actor?.items.find(
+            (i) =>
+                i.isActive &&
+                i.isSense &&
+                i.isRangedSense &&
+                (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)),
+        );
+        if (blindVisionItem) {
+            console.log("blindVisionItem", blindVisionItem);
+            return false;
+        }
+        return defaultBlind;
+    }
+
+    get token() {
+        if (!this.sourceId.match("Token.")) return null;
+        const _tokenId = this.sourceId.replace("Token.", "");
+        return canvas.tokens.placeables.find((t) => t.id === _tokenId);
+    }
+}
+
 export function setPerceptionModes() {
+    // class HeroVisionMode extends VisionMode {
+    //     constructor() {
+    //         super({
+    //             id: "heroSight",
+    //             //label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
+    //             walls: false,
+    //             angle: false,
+    //             type: DetectionMode.DETECTION_TYPES.OTHER,
+    //         });
+    //     }
+    // }
+    // CONFIG.Canvas.visionModes.heroVision = new HeroVisionMode();
     // CONFIG.Canvas.visionModes.heroSight = new VisionMode({
     //     id: "heroSight",
     //     label: "VISION.HeroSight",
@@ -19,20 +67,58 @@ export function setPerceptionModes() {
     //         defaults: { contrast: 0, saturation: -1, brightness: 0.1 },
     //     },
     // });
-
     // Hero Generic Sense
-    CONFIG.Canvas.detectionModes.heroSense = CONFIG.Canvas.detectionModes.feelTremor.clone();
-    CONFIG.Canvas.detectionModes.heroSense.id = "heroSense";
-    CONFIG.Canvas.detectionModes.heroSense.label = "Hero Sense";
-    CONFIG.Canvas.detectionModes.heroSense.type = DetectionMode.DETECTION_TYPES.SIGHT;
-    CONFIG.Canvas.detectionModes.heroSense.walls = true;
+
+    class HeroDetectionSightMode extends DetectionMode {
+        constructor() {
+            super({
+                id: "heroDetectSight",
+                //label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
+                //walls: true,
+                //angle: false,
+                type: DetectionMode.DETECTION_TYPES.SIGHT,
+            });
+        }
+        static getDetectionFilter() {
+            const filter2 = (this._detectionFilter ??= OutlineOverlayFilter.create({
+                wave: true,
+                knockout: false,
+            }));
+            return (filter2.thickness = 1), filter2;
+        }
+        _canDetect(visionSource, target) {
+            if (super._canDetect(visionSource, target)) return false; // handled by standard vision
+            if (!target.document.hidden && !target.document.hasStatusEffect("invisible")) {
+                return true;
+            }
+
+            // Invisibility Fringe
+            const INVISIBILITY = target?.actor?.items.find((i) => i.system.XMLID === "INVISIBILITY");
+            if (INVISIBILITY && !INVISIBILITY.findModsByXmlid("NOFRINGE")) {
+                const distance = calculateDistanceBetween(visionSource.token, target);
+                if (distance < 2.1) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    CONFIG.Canvas.detectionModes.heroDetectSight = new HeroDetectionSightMode(); //new DeCONFIG.Canvas.detectionModes.feelTremor.clone();
+    // CONFIG.Canvas.detectionModes.heroDetectSight.id = "heroDetectSight";
+    // CONFIG.Canvas.detectionModes.heroDetectSight.label = "Hero Detect Sight";
+    // CONFIG.Canvas.detectionModes.heroDetectSight.type = DetectionMode.DETECTION_TYPES.SIGHT;
+    // CONFIG.Canvas.detectionModes.heroDetectSight.walls = true;
+    // CONFIG.Canvas.detectionModes.heroDetectSight._canDetect(visionSource, target) {
+    //     super._canDetect(visionSource, target);
+    //     console.log("canDetect");
+    //}
 
     // new DetectionMode({
     //     id: "heroSense",
     //     label: "Hero Sense",
     //     type: DetectionMode.DETECTION_TYPES.SIGHT,
     // });
-
     // NIGHTVISION
     // Allows a character to see in total darkness as if it were normal
     // daylight. Therefore, this effect does not penetrate the Power
@@ -43,35 +129,35 @@ export function setPerceptionModes() {
     //     label: "VISION.NightVision",
     //     type: DetectionMode.DETECTION_TYPES.SIGHT,
     // });
-}
+    //}
 
-// class ThoughtsDetectionMode extends DetectionMode {
-//     constructor() {
-//         super({
-//             id: "thoughtsense",
-//             label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
-//             walls: false,
-//             angle: false,
-//             type: DetectionMode.DETECTION_TYPES.OTHER,
-//         });
-//     }
-//     static getDetectionFilter() {
-//         const filter2 = (this._detectionFilter ??= OutlineOverlayFilter.create({
-//             wave: true,
-//             knockout: false,
-//         }));
-//         return (filter2.thickness = 1), filter2;
-//     }
-//     _canDetect(visionSource, target) {
-//         return (
-//             target instanceof CONFIG.Token.objectClass /*TokenPF2e*/ &&
-//             !target.document.hidden &&
-//             !target.actor?.isOfType("loot") &&
-//             !target.actor?.system.traits.value.includes("mindless") &&
-//             super._canDetect(visionSource, target)
-//         );
-//     }
-// }
+    // class ThoughtsDetectionMode extends DetectionMode {
+    //     constructor() {
+    //         super({
+    //             id: "thoughtsense",
+    //             label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
+    //             walls: false,
+    //             angle: false,
+    //             type: DetectionMode.DETECTION_TYPES.OTHER,
+    //         });
+    //     }
+    //     static getDetectionFilter() {
+    //         const filter2 = (this._detectionFilter ??= OutlineOverlayFilter.create({
+    //             wave: true,
+    //             knockout: false,
+    //         }));
+    //         return (filter2.thickness = 1), filter2;
+    //     }
+    //     _canDetect(visionSource, target) {
+    //         return (
+    //             target instanceof CONFIG.Token.objectClass /*TokenPF2e*/ &&
+    //             !target.document.hidden &&
+    //             !target.actor?.isOfType("loot") &&
+    //             !target.actor?.system.traits.value.includes("mindless") &&
+    //             super._canDetect(visionSource, target)
+    //         );
+    //     }
+}
 
 // Turn on Special Vision
 // export async function activateSpecialVision(item, token) {
