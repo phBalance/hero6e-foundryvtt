@@ -122,13 +122,13 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             }
 
             // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)
-            const NONSIGHTGROUP = this.actor?.items.find(
-                (item) =>
-                    item.isSense &&
-                    item.system.GROUP !== "SIGHTGROUP" &&
-                    item.system.GROUP !== "MENTALGROUP" &&
-                    item.isActive,
-            );
+            // const NONSIGHTGROUP = this.actor?.items.find(
+            //     (item) =>
+            //         item.isSense &&
+            //         item.system.GROUP !== "SIGHTGROUP" &&
+            //         item.system.GROUP !== "MENTALGROUP" &&
+            //         item.isActive,
+            // );
             const heroDetectSight = this.detectionModes.find((m) => m.id === "heroDetectSight");
             // if (SIGHTGROUP || NONSIGHTGROUP) {
             if (!heroDetectSight) {
