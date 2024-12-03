@@ -2635,8 +2635,6 @@ export class HeroSystem6eItem extends Item {
 
         //return cost; //Math.max(1, cost)
         return old != system.basePointsPlusAdders;
-
-        return false;
     }
 
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
