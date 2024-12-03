@@ -88,7 +88,8 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         // default lightPerception & basicSight detections
         //super._prepareDetectionModes();
 
-        // Maximum distance we can see is based on perception
+        // Maximum distance we can see is based on perception.  This is typically 125m+ so rarely impacts scene.
+        // Only 5e INT/PERCEPTION can go below 9.  6e INT cannot go below 0.  5e INT can go below 0.
         // THE RANGE OF SENSES
         // The Range Modifier (page 144) applies to all PER Rolls with Ranged
         // Senses; this effectively restricts their Range significantly. The rules
@@ -104,7 +105,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         if (this.actor) {
             //9 + (INT/5)
             const perRoll = 9 + RoundFavorPlayerUp(parseInt(this.actor.system.characteristics.int.value) / 5);
-            const pwr = perRoll / 2 + 1;
+            const pwr = perRoll / 2 + 2;
             maxRange = Math.floor(Math.max(maxRange, Math.pow(2, pwr)));
         }
 
