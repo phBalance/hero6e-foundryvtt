@@ -10,6 +10,7 @@
   - When blind you can detect tokens. (Assumed use of non-targeting senses)
   - You can see the fringe of adjacent INVISIBLE creatures.
 - Experimental feature to "only show combatants you can see in the combat tracker" can be enabled in settings. [#1556](https://github.com/dmdorman/hero6e-foundryvtt/issues/1556)
+- Fixed TRANSFORM as it was preventing uploads in some cases. [#1574](https://github.com/dmdorman/hero6e-foundryvtt/issues/1574)
 
 ## Version 4.0.11 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

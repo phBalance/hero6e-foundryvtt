@@ -5915,7 +5915,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target's DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: function (item) {
-                switch (item.system.OPTIONID) {
+                // item appears to be an adder in some cases
+                switch (item.system?.OPTIONID || item.OPTIONID) {
                     case "COSMETIC":
                         return item.is5e ? 5 : 3;
                     case "MINOR":
