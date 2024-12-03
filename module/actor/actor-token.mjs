@@ -3,6 +3,7 @@
 
 // import { getBarExtendedAttribute } from "../bar3/extendTokenConfig.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
+import { RoundFavorPlayerUp } from "../utility/round.mjs";
 // import { clamp } from "../utility/compatibility.mjs";
 
 export class HeroSystem6eTokenDocument extends TokenDocument {
@@ -87,15 +88,31 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         // default lightPerception & basicSight detections
         //super._prepareDetectionModes();
 
-        // if (this.name === "Onyx") {
-        //     debugger;
-        // }
+        // Maximum distance we can see is based on perception
+        // THE RANGE OF SENSES
+        // The Range Modifier (page 144) applies to all PER Rolls with Ranged
+        // Senses; this effectively restricts their Range significantly. The rules
+        // don’t establish any absolute outer limit or boundary for a Ranged
+        // Sense; the GM should establish the limit based on common sense
+        // and the situation. As a guideline, when the Range Modifier exceeds
+        // the point where it reduces a character’s PER Roll to 0 or below,
+        // things become too blurry, indistinct, or obscured for the character
+        // to perceive, even if he rolls a 3.
+        let maxRange = 8;
+        // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
+        //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
+        if (this.actor) {
+            //9 + (INT/5)
+            const perRoll = 9 + RoundFavorPlayerUp(parseInt(this.actor.system.characteristics.int.value) / 5);
+            const pwr = perRoll / 2 + 1;
+            maxRange = Math.floor(Math.max(maxRange, Math.pow(2, pwr)));
+        }
 
         const lightMode = this.detectionModes.find((m) => m.id === "lightPerception");
         if (!lightMode) {
-            this.detectionModes.push({ id: "lightPerception", enabled: true, range: null });
+            this.detectionModes.push({ id: "lightPerception", enabled: true, range: maxRange });
         } else {
-            lightMode.range = null;
+            lightMode.range = maxRange;
             lightMode.enabled = true;
         }
         const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
@@ -117,8 +134,8 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             );
             if (SIGHTGROUP) {
                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
-                basicMode.range = null;
-                this.sight.range = null; // You can see without a light source
+                basicMode.range = maxRange;
+                this.sight.range = maxRange; // You can see without a light source
             }
 
             // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)
@@ -132,9 +149,9 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             const heroDetectSight = this.detectionModes.find((m) => m.id === "heroDetectSight");
             // if (SIGHTGROUP || NONSIGHTGROUP) {
             if (!heroDetectSight) {
-                this.detectionModes.push({ id: "heroDetectSight", enabled: true, range: null });
+                this.detectionModes.push({ id: "heroDetectSight", enabled: true, range: maxRange });
             } else {
-                heroDetectSight.range = null;
+                heroDetectSight.range = maxRange;
                 heroDetectSight.enabled = true;
             }
             // } else {
