@@ -353,6 +353,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusSenseTouchDisabled"),
                 img: `systems/${module}/icons/senses/touchSenseDisabled.svg`,
             },
+            burrowEffect: {
+                id: "tunneling",
+                name: "EFFECT.StatusTunneling",
+                img: "icons/svg/mole.svg",
+            },
         });
 
         // Return an array of status effects in alphabetical order

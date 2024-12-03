@@ -21,7 +21,7 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
                 (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)),
         );
         if (blindVisionItem) {
-            console.log("blindVisionItem", blindVisionItem);
+            //console.log("blindVisionItem", blindVisionItem);
             return false;
         }
         return defaultBlind;
@@ -29,7 +29,7 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
 
     get token() {
         if (!this.sourceId.match("Token.")) return null;
-        const _tokenId = this.sourceId.replace("Token.", "");
+        const _tokenId = this.sourceId.match(/\.([a-z0-9]{16})/i)?.[1];
         return canvas.tokens.placeables.find((t) => t.id === _tokenId);
     }
 }

@@ -35,8 +35,12 @@ export function calculateDistanceBetween(origin, target) {
 
     // https://foundryvtt.com/api/classes/foundry.grid.BaseGrid.html#measurePath
     const path = [];
-    path.push({ x: origin.x, y: origin.y });
-    path.push({ x: target.x, y: target.y });
+    try {
+        path.push({ x: origin.x, y: origin.y });
+        path.push({ x: target.x, y: target.y });
+    } catch (e) {
+        console.error(e, origin, target);
+    }
     const _distanceMeasurePath = canvas.grid.measurePath(path);
     const originalMeasureDistance = RoundFavorPlayerDown(_distanceMeasurePath.distance);
 

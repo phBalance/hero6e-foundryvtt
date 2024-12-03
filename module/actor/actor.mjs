@@ -274,7 +274,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // If STR was change check encumbrance
-        if (data?.system?.characteristics?.str && userId === game.user.id) {
+        if (data?.system?.characteristics?.str && userId === game.user.id && options.render !== false) {
             await this.applyEncumbrancePenalty();
         }
 
@@ -907,7 +907,14 @@ export class HeroSystem6eActor extends Actor {
         }
 
         const name = `Encumbered ${Math.floor((encumbrance / strLiftKg) * 100)}%`;
-        let prevActiveEffect = this.effects.find((o) => o.flags?.encumbrance);
+        const prevActiveEffects = this.effects.filter((o) => o.flags?.encumbrance);
+
+        // There should only be 1 encumbered effect, but with async loading we may have more
+        // Use the first one, get rid of the rest
+        for (let a = 1; a < prevActiveEffects.length; a++) {
+            await prevActiveEffects[a].delete();
+        }
+        const prevActiveEffect = prevActiveEffects?.[0];
         if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
             let activeEffect = {
                 name: name,
@@ -968,10 +975,16 @@ export class HeroSystem6eActor extends Actor {
             };
 
             if (prevActiveEffect) {
-                await prevActiveEffect.delete();
+                //await prevActiveEffect.delete();
+                await prevActiveEffect.update({
+                    name: name,
+                    changes: activeEffect.changes,
+                    origin: activeEffect.origin,
+                    flags: activeEffect.flags,
+                });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
-
-            await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
 
             // If we have control of this token, re-acquire to update movement types
             const myToken = this.getActiveTokens()?.[0];
@@ -984,9 +997,10 @@ export class HeroSystem6eActor extends Actor {
 
         if (dcvDex === 0 && prevActiveEffect) {
             await prevActiveEffect.delete();
-        } else if (prevActiveEffect && prevActiveEffect.name != name) {
-            await prevActiveEffect.update({ name: name });
         }
+        // else if (prevActiveEffect && prevActiveEffect.name != name) {
+        //     await prevActiveEffect.update({ name: name });
+        // }
 
         // At STR 0, halve the character’s Running,
         // Leaping, Swimming, Swinging, Tunneling, and
@@ -1453,6 +1467,9 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance._d = new Date();
         this.name = characterName;
         changes["name"] = this.name;
+        changes["flags"] = {
+            uploading: true,
+        };
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Reset system properties to defaults
@@ -1527,7 +1544,7 @@ export class HeroSystem6eActor extends Actor {
             if (
                 this.system.CHARACTER.TEMPLATE.includes("builtIn.") &&
                 this.system.CHARACTER.TEMPLATE.includes("6E.") &&
-                this.system.is5e
+                this.system.is5e !== true
             ) {
                 this.system.is5e = false;
             }
@@ -1536,7 +1553,7 @@ export class HeroSystem6eActor extends Actor {
             this.system.is5e = true;
         }
 
-        if (this.system.is5e && this.id) {
+        if (this.id) {
             // We can't delay this with the changes array because any items based on this actor needs this value.
             // Specifically compound power is a problem if we don't set is5e properly for a 5e actor.
             await this.update({ "system.is5e": this.system.is5e });
@@ -1730,15 +1747,27 @@ export class HeroSystem6eActor extends Actor {
 
         // Do CSLs last so we can property select the attacks
         // TODO: infinite loop of _postUpload until no changes?
+        // Do CHARACTERISTICS first (mostly for applyEncumbrance)
+
+        await Promise.all(
+            this.items
+                .filter((o) => o.baseInfo?.type.includes("characteristic"))
+                .map((i) => i._postUpload({ render: false, uploadProgressBar })),
+        );
+        await this._postUpload({ render: false });
         const doLastXmlids = ["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "MENTALDEFENSE"];
         await Promise.all(
             this.items
-                .filter((o) => !doLastXmlids.includes(o.system.XMLID))
-                .map((i) => i._postUpload({ render: false, uploadProgressBar })),
+                .filter((o) => !doLastXmlids.includes(o.system.XMLID) && !o.baseInfo?.type.includes("characteristic"))
+                .map((i) => i._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false })),
         );
+        // // Separate out equipment to avoid multiple encumbrance AE's
+        // for (const equipment of this.items.filter((o) => o.type === "equipment")) {
+        //     await equipment._postUpload({ render: false, applyEncumbrance: false });
+        // }
         await Promise.all(
             this.items
-                .filter((o) => doLastXmlids.includes(o.system.XMLID))
+                .filter((o) => doLastXmlids.includes(o.system.XMLID) && !o.baseInfo?.type.includes("characteristic"))
                 .map((i) => i._postUpload({ render: false, uploadProgressBar })),
         );
 
@@ -1911,14 +1940,14 @@ export class HeroSystem6eActor extends Actor {
         this.items
             .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
             .forEach(async (item) => {
-                await item._postUpload({ render: false });
+                await item._postUpload({ render: false, applyEncumbrance: false });
             });
 
         // Re-run _postUpload for SKILLS
         this.items
             .filter((item) => item.type === "skill")
             .forEach(async (item) => {
-                await item._postUpload({ render: false });
+                await item._postUpload({ render: false, applyEncumbrance: false });
             });
 
         uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
@@ -1941,6 +1970,8 @@ export class HeroSystem6eActor extends Actor {
                 );
             }
         }
+
+        await this.update({ "flags.-=uploading": null });
         uploadPerformance.retainedDamage = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
@@ -1987,7 +2018,7 @@ export class HeroSystem6eActor extends Actor {
             if (!this.id) {
                 this.items.set(perceptionItem.system.XMLID, perceptionItem);
             }
-            await perceptionItem._postUpload();
+            await perceptionItem._postUpload({ applyEncumbrance: false });
 
             // MANEUVERS
             const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
