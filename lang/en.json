@@ -160,6 +160,7 @@
         "StatusSilenced": "Silenced",
         "StatusStunned": "Stunned",
         "StatusTargeted": "Targeted",
+        "StatusTunneling": "Tunneling",
         "StatusUnconscious": "Unconscious",
         "Underwater": "Underwater"
     },
