@@ -28,7 +28,6 @@ import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 import { setPerceptionModes } from "./utility/vision.mjs";
 import { HeroPointVisionSource } from "./utility/vision.mjs";
-import { HeroRoller } from "./utility/dice.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -800,7 +799,7 @@ Hooks.on("getCombatTrackerEntryContext", function (html, menu) {
     menu.push(entry);
 });
 
-Hooks.on("renderSidebarTab", async (app, html, data) => {
+Hooks.on("renderSidebarTab", async (app, html) => {
     // Exit early if necessary;
     if (app.tabName !== "chat") return;
 
