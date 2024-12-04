@@ -421,6 +421,12 @@ export async function AttackToHit(item, options) {
     const targets = action.system.currentTargets;
 
     const actor = item.actor;
+
+    // Educated guess for token
+    const token =
+        actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+        actor.getActiveTokens()[0];
+
     let effectiveItem = item;
 
     // STR 0 character must succeed with
@@ -552,11 +558,6 @@ export async function AttackToHit(item, options) {
             normalRange
         )
     ) {
-        // Educated guess for token
-        const token =
-            actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-            actor.getActiveTokens()[0];
-
         if (!token) {
             // We can still proceed without a token for our actor.  We just don't know the range to our potential target.
             ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
@@ -965,6 +966,7 @@ export async function AttackToHit(item, options) {
 
         // data for damage card
         actor,
+        token,
         item,
         adjustment,
         senseAffecting,
@@ -983,6 +985,7 @@ export async function AttackToHit(item, options) {
             .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
         action,
+        inActiveCombat: token.inCombat,
     };
     options.rolledResult = targetData;
     action.system = {}; // clear out any system information that would interfere with parsing
@@ -995,7 +998,6 @@ export async function AttackToHit(item, options) {
             : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
 
-    const token = actor.token;
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
 

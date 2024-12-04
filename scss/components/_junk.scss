@@ -41,7 +41,8 @@ div.tags {
     padding: 0.1em 0.25em;
 }
 
-.tag > .strikethrough {
+.tag > .strikethrough,
+div.hit-roll .strikethrough {
     text-decoration-line: line-through;
     text-decoration-color: rgb(255 0 0 / 80%);
 }
