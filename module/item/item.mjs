@@ -5419,7 +5419,7 @@ export async function RequiresASkillRollCheck(item) {
                                 style: CONST.CHAT_MESSAGE_STYLES.OOC,
                                 author: game.user._id,
                                 content:
-                                    `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because that skill could not be found.</div></div>` +
+                                    `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
                                     `\nPress <b>${overrideKeyText}</b> to override.`,
                                 speaker: speaker,
                             };
