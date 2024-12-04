@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS apply-damage-card' this }} --}}
+{{ log 'HEROSYS apply-damage-card' this }}
 <div class="hero chat-card apply-damage-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
   tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
@@ -82,7 +82,7 @@
       <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
 
 
-      {{#if (gte knockbackResultTotal 0)}}
+      {{#if (gte knockbackResultTotalWithShrinking 0)}}
         <div data-visibility="gm">
           <button class="roll-knockback" data-item-Id="{{item.uuid}}" data-target-Token-Id="{{targetToken.id}}"
             data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}">

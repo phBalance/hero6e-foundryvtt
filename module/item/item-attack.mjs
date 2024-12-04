@@ -421,6 +421,12 @@ export async function AttackToHit(item, options) {
     const targets = action.system.currentTargets;
 
     const actor = item.actor;
+
+    // Educated guess for token
+    const token =
+        actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+        actor.getActiveTokens()[0];
+
     let effectiveItem = item;
 
     // STR 0 character must succeed with
@@ -552,11 +558,6 @@ export async function AttackToHit(item, options) {
             normalRange
         )
     ) {
-        // Educated guess for token
-        const token =
-            actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-            actor.getActiveTokens()[0];
-
         if (!token) {
             // We can still proceed without a token for our actor.  We just don't know the range to our potential target.
             ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
@@ -965,6 +966,7 @@ export async function AttackToHit(item, options) {
 
         // data for damage card
         actor,
+        token,
         item,
         adjustment,
         senseAffecting,
@@ -983,6 +985,7 @@ export async function AttackToHit(item, options) {
             .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
         action,
+        inActiveCombat: token.inCombat,
     };
     options.rolledResult = targetData;
     action.system = {}; // clear out any system information that would interfere with parsing
@@ -995,7 +998,6 @@ export async function AttackToHit(item, options) {
             : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
 
-    const token = actor.token;
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
 
@@ -1246,8 +1248,9 @@ export async function _onRollKnockback(event) {
         <p>
             <div class="form-group">
                 <label>KB damage dice</label>
-                <input type="text" name="knockbackDice" value="${Math.floor(
-                    knockbackResultTotal / 2,
+                <input type="text" name="knockbackDice" value="${Math.max(
+                    0,
+                    Math.floor(knockbackResultTotal / 2),
                 )}" data-dtype="Number" />
             </div>
         </p>
@@ -2334,6 +2337,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         knockbackRenderedResult: damageDetail.knockbackRenderedResult,
         knockbackTags: damageDetail.knockbackTags,
         knockbackResultTotal: damageDetail.knockbackResultTotal,
+        knockbackResultTotalWithShrinking: damageDetail.knockbackResultTotal + damageDetail.shrinkingKB,
 
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
@@ -3071,6 +3075,7 @@ async function _calcDamage(heroRoller, item, options) {
         knockbackTags,
         knockbackRoller,
         knockbackResultTotal,
+        shrinkingKB,
     } = await _calcKnockback(body, item, options, parseInt(itemData.knockbackMultiplier));
 
     // -------------------------------------------------
@@ -3164,6 +3169,7 @@ async function _calcDamage(heroRoller, item, options) {
     damageDetail.knockbackTags = knockbackTags;
     damageDetail.knockbackRoller = knockbackRoller;
     damageDetail.knockbackResultTotal = knockbackResultTotal;
+    damageDetail.shrinkingKB = shrinkingKB;
 
     return damageDetail;
 }
@@ -3176,6 +3182,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackRoller = null;
     let knockbackResultTotal = null;
     let knockbackResistanceValue = 0;
+    let shrinkingKB = 0;
 
     // Get poossible actor
     const actor = options?.targetToken?.actor;
@@ -3191,15 +3198,19 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         `;
         const kbAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {});
         //await pdAttack._postUpload();
-        let { defenseValue, defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
+        const { defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
         knockbackTags = [...knockbackTags, ...defenseTags];
-        knockbackResistanceValue += defenseValue;
+        for (const tag of defenseTags) {
+            knockbackResistanceValue += Math.max(0, tag.value); // SHRINKING only applies to distance not to damage
+        }
     }
 
     if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier && !isBase) {
         useKnockback = true;
 
         let knockbackDice = 2;
+
+        const actor = options?.targetToken?.actor;
 
         // Target is in the air -1d6
         // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
@@ -3227,7 +3238,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         // TODO: Target is in zero gravity -1d6
 
         // Target is underwater +1d6
-        if (options.targetToken?.actor?.statuses?.has("underwater")) {
+        if (actor?.statuses?.has("underwater")) {
             knockbackDice += 1;
             knockbackTags.push({
                 value: "+1d6KB",
@@ -3280,14 +3291,22 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
 
         knockbackRenderedResult = await knockbackRoller.render();
 
-        if (knockbackResultTotal < 0) {
+        // SHRINKING
+        if (actor) {
+            for (const shrinkItem of actor.items.filter((i) => i.system.XMLID === "SHRINKING" && i.isActive)) {
+                console.log(shrinkItem, shrinkItem.baseInfo);
+                shrinkingKB += (parseInt(shrinkItem.system.LEVELS) || 0) * 3; //(shrinkItem.is5e ? 3 : 6);
+            }
+        }
+
+        if (knockbackResultTotal + shrinkingKB < 0) {
             knockbackMessage = "No Knockback";
-        } else if (knockbackResultTotal == 0) {
+        } else if (knockbackResultTotal + shrinkingKB == 0) {
             knockbackMessage = "Inflicts Knockdown";
         } else {
             // If the result is positive, the target is Knocked Back 1" or 2m times the result
             knockbackMessage = `Knocked Back ${
-                knockbackResultTotal * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
+                (knockbackResultTotal + shrinkingKB) * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
             }${getSystemDisplayUnits(item.actor?.is5e || item.system.is5e)}`;
         }
     }
@@ -3299,6 +3318,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         knockbackTags,
         knockbackRoller,
         knockbackResultTotal,
+        shrinkingKB,
     };
 }
 

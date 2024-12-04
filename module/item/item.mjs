@@ -5407,6 +5407,27 @@ export async function RequiresASkillRollCheck(item) {
                         ui.notifications.warn(
                             `${item.actor.name} has a power ${item.name}. Expecting 'SKILL roll', where SKILL is the name of an owned skill.`,
                         );
+
+                        if (!overrideCanAct) {
+                            const actor = item.actor;
+                            const token = actor.token;
+                            const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+                            speaker.alias = actor.name;
+                            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+
+                            const chatData = {
+                                style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                                author: game.user._id,
+                                content:
+                                    `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
+                                    `\nPress <b>${overrideKeyText}</b> to override.`,
+                                speaker: speaker,
+                            };
+
+                            await ChatMessage.create(chatData);
+
+                            return false;
+                        }
                     }
                 }
                 break;

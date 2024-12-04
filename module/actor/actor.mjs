@@ -481,7 +481,7 @@ export class HeroSystem6eActor extends Actor {
 
         if (asAction && this.inCombat) {
             // While Recovering, a character is at ½ DCV
-            const existingEffect = Array.from(this.allApplicableEffects()).find((o) => o.id === "TakeRecovery");
+            const existingEffect = Array.from(this.temporaryEffects).find((o) => o.flags.takeRecovery);
             if (!existingEffect) {
                 const activeEffect = {
                     name: "TakeRecovery",
@@ -494,11 +494,14 @@ export class HeroSystem6eActor extends Actor {
                         },
                     ],
                     origin: this.uuid,
+                    flags: { takeRecovery: true },
                     duration: {
                         seconds: 1,
                     },
                 };
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            } else {
+                ui.notifications.warn("Taking multiple recoveries is typically not allowed.");
             }
         }
 

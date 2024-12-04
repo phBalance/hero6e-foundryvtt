@@ -79,7 +79,7 @@
     <div class="hit-roll">
         {{#if resourcesUsedDescription}}
             <div class="card-section">
-                <div class="description-tiny">Spent {{{ resourcesUsedDescription }}}</div>
+                <div class="description-tiny {{#unless inActiveCombat}}strikethrough{{/unless}}" {{#unless inActiveCombat}}title="END and other resources are only consumed when in combat"{{/unless}}>Spent {{{ resourcesUsedDescription }}}</div>
             </div>
         {{/if}}
 
