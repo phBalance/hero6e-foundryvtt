@@ -3198,15 +3198,19 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         `;
         const kbAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {});
         //await pdAttack._postUpload();
-        const { defenseValue, defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
+        const { defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
         knockbackTags = [...knockbackTags, ...defenseTags];
-        knockbackResistanceValue += Math.max(0, defenseValue); // SHRINKING only applies to distance not to damage
+        for (const tag of defenseTags) {
+            knockbackResistanceValue += Math.max(0, tag.value); // SHRINKING only applies to distance not to damage
+        }
     }
 
     if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier && !isBase) {
         useKnockback = true;
 
         let knockbackDice = 2;
+
+        const actor = options?.targetToken?.actor;
 
         // Target is in the air -1d6
         // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
@@ -3234,7 +3238,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         // TODO: Target is in zero gravity -1d6
 
         // Target is underwater +1d6
-        if (options.targetToken?.actor?.statuses?.has("underwater")) {
+        if (actor?.statuses?.has("underwater")) {
             knockbackDice += 1;
             knockbackTags.push({
                 value: "+1d6KB",
@@ -3288,9 +3292,11 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         knockbackRenderedResult = await knockbackRoller.render();
 
         // SHRINKING
-        for (const shrinkItem of actor.items.filter((i) => i.system.XMLID === "SHRINKING" && i.isActive)) {
-            console.log(shrinkItem, shrinkItem.baseInfo);
-            shrinkingKB += (parseInt(shrinkItem.system.LEVELS) || 0) * 3; //(shrinkItem.is5e ? 3 : 6);
+        if (actor) {
+            for (const shrinkItem of actor.items.filter((i) => i.system.XMLID === "SHRINKING" && i.isActive)) {
+                console.log(shrinkItem, shrinkItem.baseInfo);
+                shrinkingKB += (parseInt(shrinkItem.system.LEVELS) || 0) * 3; //(shrinkItem.is5e ? 3 : 6);
+            }
         }
 
         if (knockbackResultTotal + shrinkingKB < 0) {
