@@ -1,10 +1,9 @@
-section.heroRoll-panel {
+section.hero-roll-panel {
     flex: 0;
     border: 1px;
-    // padding: 5px;
 }
 
-section.heroRoll-panel button {
+section.hero-roll-panel button {
     display: flex;
     flex-direction: row;
     background: rgba(70, 130, 180, 1);
@@ -12,5 +11,5 @@ section.heroRoll-panel button {
     box-shadow: 0 0 6px inset #8d9ea7;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: rgb(255, 255, 255);
 }
