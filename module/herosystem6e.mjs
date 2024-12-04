@@ -828,11 +828,11 @@ Hooks.on("renderSidebarTab", async (app, html, data) => {
                 );
                 await Dialog.prompt({
                     title: "Roll ToHit",
+                    label: "Roll ToHit",
                     content: template,
                     callback: async function (html) {
                         const form = html.find("form")[0];
                         options = new FormDataExtended(form).object;
-                        //options.ocv = 1;
                     },
                 });
 
@@ -858,27 +858,55 @@ Hooks.on("renderSidebarTab", async (app, html, data) => {
                 return ChatMessage.create(chatData);
             }
             case "damage": {
-                let options = { dice: 1 };
+                let options = {
+                    dice: 1,
+                    dicePlus: {
+                        groupName: "dicePlus",
+                        choices: { ZERO: "0", PLUSHALFDIE: "Plus Half Die", PLUSONEPIP: "Plus One Pip" },
+                        chosen: "ZERO",
+                    },
+                    damageType: {
+                        groupName: "damageType",
+                        choices: {
+                            NORMAL: "Normal",
+                            KILLING: "Killing",
+                            ADJUSTMENT: "Adjustment",
+                            ENTANGLE: "Entangle",
+                            FLASH: "Flash",
+                            EFFECT: "Effect",
+                        },
+                        chosen: "NORMAL",
+                    },
+                };
                 const template = await renderTemplate(
                     `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
                     options,
                 );
                 await Dialog.prompt({
-                    title: "Roll ToHit",
+                    title: "Roll Damage",
+                    label: "Roll Damage",
                     content: template,
                     callback: async function (html) {
                         const form = html.find("form")[0];
                         options = new FormDataExtended(form).object;
-                        //options.ocv = 1;
                     },
                 });
 
                 //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
-                const heroRoller = new CONFIG.HERO.heroDice.HeroRoller().addDice(options.dice, "DICE").makeNormalRoll();
+                const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
+                    .addDice(options.dice, "DICE")
+                    .makeNormalRoll(options.damageType === "NORMAL")
+                    .makeKillingRoll(options.damageType === "KILLING")
+                    .makeAdjustmentRoll(options.damageType === "ADJUSTMENT")
+                    .makeEntangleRoll(options.damageType === "ENTANGLE")
+                    .makeFlashRoll(options.damageType === "FLASH")
+                    .makeEffectRoll(options.damageType === "EFFECT")
+                    .addDice(options.dicePlus === "PLUSHALFDIE" ? 0.5 : 0, "PLUSHALFDIE")
+                    .addNumber(options.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP");
 
                 await heroRoller.roll();
 
-                const cardHtml = await heroRoller.render("Roll Generic Damage");
+                const cardHtml = await heroRoller.render(`Roll Generic ${options.damageType} Damage`);
 
                 const chatData = {
                     style: CONST.CHAT_MESSAGE_STYLES.OTHER,
