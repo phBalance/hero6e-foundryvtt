@@ -243,6 +243,17 @@ export default class SettingsHelpers {
             requiresReload: false,
         });
 
+        game.settings.register(module, "ShowGenericRoller", {
+            name: game.i18n.localize("Settings.ShowGenericRoller.Name"),
+            hint: game.i18n.localize("Settings.ShowGenericRoller.Hint"),
+            scope: "client",
+            config: true,
+            type: Boolean,
+            default: false,
+            //onChange: () => ui.chat.render(), // doesn't seem to work
+            requiresReload: true,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: game.i18n.localize("Settings.AlphaTesting.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.Hint"),
