@@ -15,6 +15,7 @@
 - END and other resources are only spent during combat. When not in combat, those resources now have a strikethrough indicating they were not really spent. [#1549](https://github.com/dmdorman/hero6e-foundryvtt/issues/1549)
 - REQUIRES A ROLL (RAR) now automatically fails when that skill cannot be found. You can still use override key. [#1576](https://github.com/dmdorman/hero6e-foundryvtt/issues/1576)
 - Taking multiple recoveries before your next phase no longer stacks DCV penalties. [#1545](https://github.com/dmdorman/hero6e-foundryvtt/issues/1545)
+- The extra KB from SHRINKING is only for distance not damage. [#1544](https://github.com/dmdorman/hero6e-foundryvtt/issues/1545)
 
 ## Version 4.0.11 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

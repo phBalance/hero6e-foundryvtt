@@ -1248,8 +1248,9 @@ export async function _onRollKnockback(event) {
         <p>
             <div class="form-group">
                 <label>KB damage dice</label>
-                <input type="text" name="knockbackDice" value="${Math.floor(
-                    knockbackResultTotal / 2,
+                <input type="text" name="knockbackDice" value="${Math.max(
+                    0,
+                    Math.floor(knockbackResultTotal / 2),
                 )}" data-dtype="Number" />
             </div>
         </p>
@@ -2336,6 +2337,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         knockbackRenderedResult: damageDetail.knockbackRenderedResult,
         knockbackTags: damageDetail.knockbackTags,
         knockbackResultTotal: damageDetail.knockbackResultTotal,
+        knockbackResultTotalWithShrinking: damageDetail.knockbackResultTotal + damageDetail.shrinkingKB,
 
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
@@ -3073,6 +3075,7 @@ async function _calcDamage(heroRoller, item, options) {
         knockbackTags,
         knockbackRoller,
         knockbackResultTotal,
+        shrinkingKB,
     } = await _calcKnockback(body, item, options, parseInt(itemData.knockbackMultiplier));
 
     // -------------------------------------------------
@@ -3166,6 +3169,7 @@ async function _calcDamage(heroRoller, item, options) {
     damageDetail.knockbackTags = knockbackTags;
     damageDetail.knockbackRoller = knockbackRoller;
     damageDetail.knockbackResultTotal = knockbackResultTotal;
+    damageDetail.shrinkingKB = shrinkingKB;
 
     return damageDetail;
 }
@@ -3178,6 +3182,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackRoller = null;
     let knockbackResultTotal = null;
     let knockbackResistanceValue = 0;
+    let shrinkingKB = 0;
 
     // Get poossible actor
     const actor = options?.targetToken?.actor;
@@ -3193,9 +3198,9 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         `;
         const kbAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {});
         //await pdAttack._postUpload();
-        let { defenseValue, defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
+        const { defenseValue, defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
         knockbackTags = [...knockbackTags, ...defenseTags];
-        knockbackResistanceValue += defenseValue;
+        knockbackResistanceValue += Math.max(0, defenseValue); // SHRINKING only applies to distance not to damage
     }
 
     if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier && !isBase) {
@@ -3282,14 +3287,20 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
 
         knockbackRenderedResult = await knockbackRoller.render();
 
-        if (knockbackResultTotal < 0) {
+        // SHRINKING
+        for (const shrinkItem of actor.items.filter((i) => i.system.XMLID === "SHRINKING" && i.isActive)) {
+            console.log(shrinkItem, shrinkItem.baseInfo);
+            shrinkingKB += (parseInt(shrinkItem.system.LEVELS) || 0) * 3; //(shrinkItem.is5e ? 3 : 6);
+        }
+
+        if (knockbackResultTotal + shrinkingKB < 0) {
             knockbackMessage = "No Knockback";
-        } else if (knockbackResultTotal == 0) {
+        } else if (knockbackResultTotal + shrinkingKB == 0) {
             knockbackMessage = "Inflicts Knockdown";
         } else {
             // If the result is positive, the target is Knocked Back 1" or 2m times the result
             knockbackMessage = `Knocked Back ${
-                knockbackResultTotal * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
+                (knockbackResultTotal + shrinkingKB) * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
             }${getSystemDisplayUnits(item.actor?.is5e || item.system.is5e)}`;
         }
     }
@@ -3301,6 +3312,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         knockbackTags,
         knockbackRoller,
         knockbackResultTotal,
+        shrinkingKB,
     };
 }
 
