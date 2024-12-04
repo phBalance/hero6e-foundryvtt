@@ -28,6 +28,7 @@ import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 import { setPerceptionModes } from "./utility/vision.mjs";
 import { HeroPointVisionSource } from "./utility/vision.mjs";
+import { HeroRoller } from "./utility/dice.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -122,6 +123,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment-item.hbs`,
         // `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
+        `systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`,
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
@@ -142,6 +144,7 @@ Hooks.once("init", async function () {
         template.setAttribute("id", "hero-effects-panel");
         uiTop?.insertAdjacentElement("afterend", template);
     }
+
     game[HEROSYS.module] ??= {};
     game[HEROSYS.module].effectPanel = new EffectsPanel();
 });
@@ -795,4 +798,99 @@ Hooks.on("getCombatTrackerEntryContext", function (html, menu) {
     };
     menu.findSplice((o) => o.name === "COMBAT.CombatantRemove");
     menu.push(entry);
+});
+
+Hooks.on("renderSidebarTab", async (app, html, data) => {
+    // Exit early if necessary;
+    if (app.tabName !== "chat") return;
+
+    if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
+
+    let $chat_form = html.find("#chat-form");
+    const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`);
+    if (content.length === 0) return;
+
+    // Add template to chat
+    let $content = $(content);
+    $chat_form.after($content);
+
+    $content.find("button").on("click", async (event) => {
+        event.preventDefault();
+        const button = event.currentTarget;
+        const dataset = button.dataset;
+
+        switch (dataset.action) {
+            case "tohit": {
+                let options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
+                const template = await renderTemplate(
+                    `systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`,
+                    options,
+                );
+                await Dialog.prompt({
+                    title: "Roll ToHit",
+                    content: template,
+                    callback: async function (html) {
+                        const form = html.find("form")[0];
+                        options = new FormDataExtended(form).object;
+                        //options.ocv = 1;
+                    },
+                });
+
+                //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
+                const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
+                    .addNumber(options.ocv, "OCV")
+                    .addNumber(11, "Base to hit")
+                    .addDice(-3)
+                    .makeSuccessRoll();
+
+                await heroRoller.roll();
+
+                const cardHtml = await heroRoller.render("Attacker's OCV + 11 - 3d6");
+                const resultHtml = `Hits a DCV of ${heroRoller.getSuccessTotal()}`;
+
+                const chatData = {
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                    rolls: heroRoller.rawRolls(),
+                    author: game.user._id,
+                    content: `${cardHtml}${resultHtml}`,
+                };
+
+                return ChatMessage.create(chatData);
+            }
+            case "damage": {
+                let options = { dice: 1 };
+                const template = await renderTemplate(
+                    `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
+                    options,
+                );
+                await Dialog.prompt({
+                    title: "Roll ToHit",
+                    content: template,
+                    callback: async function (html) {
+                        const form = html.find("form")[0];
+                        options = new FormDataExtended(form).object;
+                        //options.ocv = 1;
+                    },
+                });
+
+                //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
+                const heroRoller = new CONFIG.HERO.heroDice.HeroRoller().addDice(options.dice, "DICE").makeNormalRoll();
+
+                await heroRoller.roll();
+
+                const cardHtml = await heroRoller.render("Roll Generic Damage");
+
+                const chatData = {
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                    rolls: heroRoller.rawRolls(),
+                    author: game.user._id,
+                    content: `${cardHtml}`,
+                };
+
+                return ChatMessage.create(chatData);
+            }
+            default:
+                console.log(`Unhandled action`, dataset.action);
+        }
+    });
 });

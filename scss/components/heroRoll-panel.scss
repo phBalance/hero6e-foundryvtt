@@ -1,0 +1,16 @@
+section.heroRoll-panel {
+    flex: 0;
+    border: 1px;
+    // padding: 5px;
+}
+
+section.heroRoll-panel button {
+    display: flex;
+    flex-direction: row;
+    background: rgba(70, 130, 180, 1);
+    border: 1px solid #000;
+    box-shadow: 0 0 6px inset #8d9ea7;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
