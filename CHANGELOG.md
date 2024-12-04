@@ -13,6 +13,7 @@
 - Fixed TRANSFORM as it was preventing uploads in some cases. [#1574](https://github.com/dmdorman/hero6e-foundryvtt/issues/1574)
 - Improved HDC upload to address multiple encumbrance active effects. [#1575](https://github.com/dmdorman/hero6e-foundryvtt/issues/1575)
 - END and other resources are only spent during combat. When not in combat, those resources now have a strikethrough indicating they were not really spent. [#1549](https://github.com/dmdorman/hero6e-foundryvtt/issues/1549)
+- REQUIRES A ROLL (RAR) now automatically fails when that skill cannot be found. You can still use override key. [#1576](https://github.com/dmdorman/hero6e-foundryvtt/issues/1576)
 
 ## Version 4.0.11 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
