@@ -16,6 +16,7 @@
 - REQUIRES A ROLL (RAR) now automatically fails when that skill is not owned. You can still use override key. [#1576](https://github.com/dmdorman/hero6e-foundryvtt/issues/1576)
 - Taking multiple recoveries before your next phase no longer stacks DCV penalties. [#1545](https://github.com/dmdorman/hero6e-foundryvtt/issues/1545)
 - The extra KB from SHRINKING is only for distance not damage. [#1544](https://github.com/dmdorman/hero6e-foundryvtt/issues/1545)
+- A first pass at creating generic dice roll buttons. A ROLL TO HIT and a ROLL DAMAGE that are not associated with any actor/token. These can be enabled in settings and will show up under the chat box. [#1579](https://github.com/dmdorman/hero6e-foundryvtt/issues/1579)
 
 ## Version 4.0.11 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
