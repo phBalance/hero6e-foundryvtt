@@ -122,7 +122,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment-item.hbs`,
         // `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
-        `systems/${HEROSYS.module}/templates/system/hero-roll-panel.hbs`,
+        `systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`,
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
@@ -806,7 +806,7 @@ Hooks.on("renderSidebarTab", async (app, html) => {
     if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
 
     let $chat_form = html.find("#chat-form");
-    const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/hero-roll-panel.hbs`);
+    const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`);
     if (content.length === 0) return;
 
     // Add template to chat
