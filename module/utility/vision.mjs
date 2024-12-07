@@ -2,6 +2,9 @@ import { calculateDistanceBetween } from "./range.mjs";
 
 export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSource {
     get isBlinded() {
+        // if (this.token?.name === "Onyx") {
+        //     debugger;
+        // }
         const defaultBlind =
             (this.data.radius === 0 && (this.data.lightRadius === 0 || !this.visionMode?.perceivesLight)) ||
             Object.values(this.blinded).includes(true);
@@ -89,7 +92,7 @@ export function setPerceptionModes() {
             return (filter2.thickness = 1), filter2;
         }
         _canDetect(visionSource, target) {
-            if (super._canDetect(visionSource, target)) return false; // handled by standard vision
+            if (super._canDetect(visionSource, target)) return true; // handled by standard vision
             if (!target.document.hidden && !target.document.hasStatusEffect("invisible")) {
                 return true;
             }

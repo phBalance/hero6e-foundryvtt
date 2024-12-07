@@ -127,44 +127,48 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         }
 
         try {
-            if (!this.actor?.statuses.has("blind")) {
-                // GENERIC SIGHTGROUP (no lights required; INFRAREDPERCEPTION, NIGHTVISION, etc)
-                const SIGHTGROUP = this.actor?.items.find(
-                    (item) =>
-                        item.isSense &&
-                        item.system.GROUP === "SIGHTGROUP" &&
-                        //item.system.OPTIONID === undefined && // DETECT
-                        item.isActive,
-                );
+            // GENERIC SIGHTGROUP (no lights required; INFRAREDPERCEPTION, NIGHTVISION, etc)
+            const SIGHTGROUP = this.actor?.items.find(
+                (item) =>
+                    item.isSense &&
+                    item.system.GROUP === "SIGHTGROUP" &&
+                    //item.system.OPTIONID === undefined && // DETECT
+                    item.isActive,
+            );
 
-                if (SIGHTGROUP) {
-                    const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
-                    basicMode.range = maxRange;
-                    this.sight.range = maxRange; // You can see without a light source
-                }
+            if (this.name === "Onyx") {
+                console.log(this);
             }
 
-            // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)
-            // const NONSIGHTGROUP = this.actor?.items.find(
-            //     (item) =>
-            //         item.isSense &&
-            //         item.system.GROUP !== "SIGHTGROUP" &&
-            //         item.system.GROUP !== "MENTALGROUP" &&
-            //         item.isActive,
-            // );
+            if (SIGHTGROUP && !this.actor?.statuses.has("blind")) {
+                const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+                basicMode.range = maxRange;
+                this.sight.range = maxRange; // You can see without a light source
+            }
+
+            // A special vision that can see the map (like targeting touch)
+            let blindVisionItem = this.actor?.items.find(
+                (i) =>
+                    i.isActive &&
+                    i.isSense &&
+                    i.isRangedSense &&
+                    (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)) &&
+                    (!this.token?.actor?.statuses.has("blind") || i.system.GROUP !== "SIGHTGROUP"),
+            );
+            if (blindVisionItem) {
+                const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+                basicMode.range = maxRange;
+                this.sight.range = maxRange; // You can see without a light source
+            }
+
+            // Assume we can use non-targeting senses to detect tokens
             const heroDetectSight = this.detectionModes.find((m) => m.id === "heroDetectSight");
-            // if (SIGHTGROUP || NONSIGHTGROUP) {
             if (!heroDetectSight) {
                 this.detectionModes.push({ id: "heroDetectSight", enabled: true, range: maxRange });
             } else {
                 heroDetectSight.range = maxRange;
                 heroDetectSight.enabled = true;
             }
-            // } else {
-            //     if (heroDetectSight) {
-            //         heroDetectSight.enabled = false;
-            //     }
-            // }
 
             // Update Sight so people don't get confused when looking at the UI
             if (initialRange !== this.sight.range) {
