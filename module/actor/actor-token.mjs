@@ -127,18 +127,21 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         }
 
         try {
-            // GENERIC SIGHTGROUP (no lights required; INFRAREDPERCEPTION, NIGHTVISION, etc)
-            const SIGHTGROUP = this.actor?.items.find(
-                (item) =>
-                    item.isSense &&
-                    item.system.GROUP === "SIGHTGROUP" &&
-                    //item.system.OPTIONID === undefined && // DETECT
-                    item.isActive,
-            );
-            if (SIGHTGROUP && !this.actor?.statuses.has("blind")) {
-                const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
-                basicMode.range = maxRange;
-                this.sight.range = maxRange; // You can see without a light source
+            if (!this.actor?.statuses.has("blind")) {
+                // GENERIC SIGHTGROUP (no lights required; INFRAREDPERCEPTION, NIGHTVISION, etc)
+                const SIGHTGROUP = this.actor?.items.find(
+                    (item) =>
+                        item.isSense &&
+                        item.system.GROUP === "SIGHTGROUP" &&
+                        //item.system.OPTIONID === undefined && // DETECT
+                        item.isActive,
+                );
+
+                if (SIGHTGROUP) {
+                    const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+                    basicMode.range = maxRange;
+                    this.sight.range = maxRange; // You can see without a light source
+                }
             }
 
             // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)

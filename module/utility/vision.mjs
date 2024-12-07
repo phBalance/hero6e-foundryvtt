@@ -13,13 +13,15 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
         // Some visions have SENSE/RANGE (built in)
         // SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
         // Assuming only SIGHT/TOUCH/SMELL or TARGETING can actually SEE (you can see, touch, smell a wall)
-        const blindVisionItem = this.token?.actor?.items.find(
+        let blindVisionItem = this.token?.actor?.items.find(
             (i) =>
                 i.isActive &&
                 i.isSense &&
                 i.isRangedSense &&
-                (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)),
+                (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)) &&
+                (!this.token?.actor?.statuses.has("blind") || i.system.GROUP !== "SIGHTGROUP"),
         );
+
         if (blindVisionItem) {
             //console.log("blindVisionItem", blindVisionItem);
             return false;

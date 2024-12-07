@@ -1,5 +1,10 @@
 # Releases
 
+## Version 4.0.13 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Enhanced Senses improvements:
+  - SIGHTGROUP visions now respect the BLIND status. [#1590](https://github.com/dmdorman/hero6e-foundryvtt/issues/1590)
+
 ## Version 4.0.12 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix for SPD purchased as a power not contributing to final values during upload. [#1439](https://github.com/dmdorman/hero6e-foundryvtt/issues/1439)
