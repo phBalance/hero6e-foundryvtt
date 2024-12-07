@@ -5,6 +5,7 @@
 - Enhanced Senses improvements:
   - SIGHTGROUP visions now respect the BLIND status. [#1590](https://github.com/dmdorman/hero6e-foundryvtt/issues/1590)
   - Fixed issue with some enhanced visions not showing map in the dark.
+- Adjustment powers now work with POWERDEFENSE.
 
 ## Version 4.0.12 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

@@ -5682,7 +5682,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "POWERDEFENSE":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = actorItemDefense.adjustedLevels; //parseInt(actorItemDefense.system.LEVELS) || 0;
                         break;
                 }
                 if (value > 0) {

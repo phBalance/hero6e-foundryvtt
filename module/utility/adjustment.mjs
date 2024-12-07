@@ -216,7 +216,7 @@ function _findExistingMatchingEffect(item, potentialCharacteristic, powerTargetN
     return targetSystem.effects.find(
         (effect) =>
             effect.origin === item.uuid &&
-            effect.flags.target[0] === (potentialCharacteristic || powerTargetName?.uuid),
+            effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic),
     );
 }
 
@@ -295,10 +295,10 @@ function _createNewAdjustmentEffect(
             affectedPoints: 0,
             XMLID: item.system.XMLID,
             source: targetActor.name,
-            target: [potentialCharacteristic || targetPower?.uuid],
-            key: potentialCharacteristic,
+            target: [targetPower?.uuid || potentialCharacteristic],
+            key: targetPower?.system?.XMLID || potentialCharacteristic,
             itemTokenName,
-            attackerTokenId: canvas.tokens.get(action?.current?.attackerTokenId),
+            attackerTokenId: action?.current?.attackerTokenId,
         },
         origin: item.uuid,
         //description: item.system.description,  // Issues with core FoundryVTT where description doesn't show, nor is editable.
@@ -394,7 +394,9 @@ export async function performAdjustment(
 
     // Do we have a target?
     if (!targetCharacteristic && !targetPower) {
-        await ui.notifications.error(`${nameOfCharOrPower} is an invalid target for the adjustment power ${item.name}`);
+        await ui.notifications.warn(
+            `${nameOfCharOrPower} is an invalid target for the adjustment power ${item.name}. Perhaps ${targetActor.name} does not have that characteristic or power.`,
+        );
         return;
     }
 

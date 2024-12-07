@@ -5290,6 +5290,19 @@ export class HeroSystem6eItem extends Item {
 
         return RoundFavorPlayerDown(cost) + costSuffix;
     }
+
+    /// Get Levels with AID/DRAIN Active Effects
+    get adjustedLevels() {
+        let _adjustedLevels = parseInt(this.system.LEVELS || 0);
+
+        for (const ae of this.actor.temporaryEffects.filter(
+            (effect) => effect.flags.XMLID === "DRAIN" && effect.flags.key === "POWERDEFENSE",
+        )) {
+            console.log(ae);
+            _adjustedLevels += parseInt(ae.changes?.[0].value || 0);
+        }
+        return Math.max(0, _adjustedLevels);
+    }
 }
 
 export function getItem(id) {
