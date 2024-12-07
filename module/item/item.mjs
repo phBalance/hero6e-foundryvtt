@@ -688,7 +688,7 @@ export class HeroSystem6eItem extends Item {
 
         // If we have control of this token, re-acquire to update movement types
         const myToken = this.actor?.getActiveTokens()?.[0];
-        if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+        if (canvas.tokens.controlled?.find((t) => t.id == myToken.id)) {
             myToken.release();
             myToken.control();
         }
