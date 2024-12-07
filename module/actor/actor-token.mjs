@@ -73,6 +73,8 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
     _prepareDetectionModes() {
         if (!this.sight.enabled) return;
 
+        if (!this.isOwner) return;
+
         if (this.sight.visionMode != "basic") {
             super._prepareDetectionModes();
             return;
@@ -102,7 +104,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         let maxRange = 8;
         // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
         //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
-        if (this.actor) {
+        if (this.actor && this.actor.system.characteristics.int) {
             //9 + (INT/5)
             const perRoll = 9 + RoundFavorPlayerUp(parseInt(this.actor.system.characteristics.int.value) / 5);
             const pwr = perRoll / 2 + 2;
@@ -133,7 +135,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
                     //item.system.OPTIONID === undefined && // DETECT
                     item.isActive,
             );
-            if (SIGHTGROUP) {
+            if (SIGHTGROUP && !this.actor?.statuses.has("blind")) {
                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
                 basicMode.range = maxRange;
                 this.sight.range = maxRange; // You can see without a light source
