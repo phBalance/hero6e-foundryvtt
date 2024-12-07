@@ -73,6 +73,8 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
     _prepareDetectionModes() {
         if (!this.sight.enabled) return;
 
+        if (!this.isOwner) return;
+
         if (this.sight.visionMode != "basic") {
             super._prepareDetectionModes();
             return;
@@ -133,7 +135,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
                     //item.system.OPTIONID === undefined && // DETECT
                     item.isActive,
             );
-            if (SIGHTGROUP) {
+            if (SIGHTGROUP && !this.actor?.statuses.has("blind")) {
                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
                 basicMode.range = maxRange;
                 this.sight.range = maxRange; // You can see without a light source
