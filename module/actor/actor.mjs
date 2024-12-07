@@ -1974,7 +1974,9 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        await this.update({ "flags.-=uploading": null });
+        if (this.id) {
+            await this.update({ "flags.-=uploading": null });
+        }
         uploadPerformance.retainedDamage = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
