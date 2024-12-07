@@ -102,7 +102,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         let maxRange = 8;
         // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
         //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
-        if (this.actor) {
+        if (this.actor && this.actor.system.characteristics.int) {
             //9 + (INT/5)
             const perRoll = 9 + RoundFavorPlayerUp(parseInt(this.actor.system.characteristics.int.value) / 5);
             const pwr = perRoll / 2 + 2;
