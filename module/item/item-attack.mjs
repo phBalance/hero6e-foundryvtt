@@ -1678,7 +1678,7 @@ export async function _onRollDamage(event) {
         attackTags: getAttackTags(item),
         targetTokens: targetTokens,
         user: game.user,
-        action,
+        actionData: JSON.stringify(action),
     };
 
     // render card
@@ -1996,9 +1996,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     const originalRoll = heroRoller.clone();
     const automation = game.settings.get(HEROSYS.module, "automation");
+    const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
 
     if (item.system.XMLID === "ENTANGLE") {
-        return _onApplyEntangleToSpecificToken(item, token, originalRoll);
+        return _onApplyEntangleToSpecificToken(item, token, originalRoll, action);
     }
 
     // Target ENTANGLE
@@ -2031,7 +2032,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
 
         if (targetEntangle && entangleAE) {
-            return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE);
+            return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE, action);
         }
     }
 
@@ -2203,7 +2204,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             item: item,
         })?.XMLID === "TRANSFORM";
     if (transformation) {
-        return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags);
+        return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
     }
 
     // AID, DRAIN or any adjustment powers
@@ -2211,7 +2212,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         item: item,
     })?.type?.includes("adjustment");
     if (adjustment) {
-        return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags);
+        return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
     }
     const senseAffecting =
         getPowerInfo({
@@ -2343,6 +2344,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
         targetToken: token,
+        actionData: JSON.parse(action),
     };
 
     // render card
@@ -2672,7 +2674,7 @@ async function _onApplyTransformationToSpecificToken(transformationItem, token, 
     ui.notifications.warn("TRANSFORM damage & defenses are not yet implemented.");
 }
 
-async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDetail, defense, defenseTags) {
+async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDetail, defense, defenseTags, action) {
     if (
         adjustmentItem.actor.id === token.actor.id &&
         ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(adjustmentItem.system.XMLID)
@@ -2765,6 +2767,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                 damageDetail.effects,
                 false,
                 reductionTargetActor,
+                action,
             ),
         );
     }

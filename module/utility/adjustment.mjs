@@ -263,13 +263,23 @@ function _createNewAdjustmentEffect(
     rawActivePointsDamage,
     targetActor,
     targetSystem,
+    action,
 ) {
     // Create new ActiveEffect
     // TODO: Add a document field
+
+    // Educated guess for token
+    const itemTokenName =
+        canvas.tokens.get(action?.current?.attackerTokenId)?.name ||
+        item.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id))?.name ||
+        item.actor?.getActiveTokens()?.[0].name ||
+        targetActor.name ||
+        "undefined";
+
     const activeEffect = {
         name: `${item.system.XMLID || "undefined"} 0 ${
             (targetPower?.name || potentialCharacteristic)?.toUpperCase() // TODO: This will need to change for multiple effects
-        } (0 AP) [by ${item.actor.name || "undefined"}]`,
+        } (0 AP) [by ${itemTokenName}]`,
         id: `${item.system.XMLID}.${item.id}.${
             targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
@@ -287,6 +297,8 @@ function _createNewAdjustmentEffect(
             source: targetActor.name,
             target: [potentialCharacteristic || targetPower?.uuid],
             key: potentialCharacteristic,
+            itemTokenName,
+            attackerTokenId: canvas.tokens.get(action?.current?.attackerTokenId),
         },
         origin: item.uuid,
         //description: item.system.description,  // Issues with core FoundryVTT where description doesn't show, nor is editable.
@@ -324,6 +336,7 @@ export async function performAdjustment(
     effectsDescription,
     isFade,
     targetActor,
+    action,
 ) {
     const isHealing = item.system.XMLID === "HEALING";
     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
@@ -408,6 +421,7 @@ export async function performAdjustment(
             thisAttackRawActivePointsDamage,
             targetActor,
             targetSystem,
+            action,
         );
 
     // Healing doesn't fade
@@ -548,10 +562,18 @@ export async function performAdjustment(
             parseInt(activeEffect.changes[2].value) + (newCalculatedValue - oldCalculatedValue);
     }
 
+    // Educated guess for token
+    const itemTokenName =
+        canvas.tokens.get(action?.current?.attackerTokenId)?.name ||
+        item.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id))?.name ||
+        item.actor?.getActiveTokens()?.[0].name ||
+        targetActor.name ||
+        "undefined";
+
     // Update the effect max value(s)
     activeEffect.name = `${item.system.XMLID || "undefined"} ${Math.abs(totalActivePointsThatShouldBeAffected)} ${(
         targetPower?.name || potentialCharacteristic
-    )?.toUpperCase()} (${Math.abs(totalAdjustmentNewActivePoints)} AP) [by ${item.actor.name || "undefined"}]`;
+    )?.toUpperCase()} (${Math.abs(totalAdjustmentNewActivePoints)} AP) [by ${itemTokenName}]`;
 
     activeEffect.flags.affectedPoints = totalActivePointsThatShouldBeAffected;
     activeEffect.flags.adjustmentActivePoints = totalAdjustmentNewActivePoints;
