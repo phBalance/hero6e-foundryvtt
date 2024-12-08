@@ -252,7 +252,11 @@ export class Attack {
     }
 
     static getAttackerToken(item) {
-        const attackerToken = item.actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
+        // Careful:  you may have a controlled token, but use an attack from actor on sidebar
+        //const attackerToken = item.actor?.getActiveTokens()[0] || canvas.tokens.controlled.find;
+        const attackerToken =
+            item.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+            item.actor.prototypeToken;
         if (!attackerToken) {
             console.error("There is no actor token!");
         }

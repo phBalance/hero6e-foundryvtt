@@ -702,6 +702,9 @@ export class HeroSystem6eItem extends Item {
         // Power must be turned on
         if (this.system.active === false) return false;
 
+        // Only In ALternate Identity
+        if (this.findModsByXmlid("OIHID") && this.actor.system.heroicIdentity === false) return false;
+
         // TODO: Costs endurance (even if bought to 0 END) is perceivable when active unless it has invisible power effect bought for it.
 
         // FOCUS
@@ -4108,7 +4111,7 @@ export class HeroSystem6eItem extends Item {
 
         // Multiple levels?
         if ((parseInt(modifier.LEVELS) || 0) > 1) {
-            if (["HARDENED", "PENETRATING", "ARMORPIERCING"].includes(modifier.XMLID)) {
+            if (["HARDENED", "PENETRATING", "ARMORPIERCING", "NOTELEPORT"].includes(modifier.XMLID)) {
                 result += "x" + parseInt(modifier.LEVELS) + "; ";
             }
         }
@@ -5293,10 +5296,11 @@ export class HeroSystem6eItem extends Item {
 
     /// Get Levels with AID/DRAIN Active Effects
     get adjustedLevels() {
+        // TODO: Custom adjustedLevels in config.mjs for things that are all or nothing?
         let _adjustedLevels = parseInt(this.system.LEVELS || 0);
 
         for (const ae of this.actor.temporaryEffects.filter(
-            (effect) => effect.flags.XMLID === "DRAIN" && effect.flags.key === "POWERDEFENSE",
+            (effect) => effect.flags.XMLID === "DRAIN" && effect.flags.key === this.system.XMLID,
         )) {
             console.log(ae);
             _adjustedLevels += parseInt(ae.changes?.[0].value || 0);

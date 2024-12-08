@@ -138,10 +138,6 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
                     item.isActive,
             );
 
-            if (this.name === "Onyx") {
-                console.log(this);
-            }
-
             if (SIGHTGROUP && !this.actor?.statuses.has("blind")) {
                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
                 basicMode.range = maxRange;

@@ -985,7 +985,7 @@ export async function AttackToHit(item, options) {
             .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
         action,
-        inActiveCombat: token.inCombat,
+        inActiveCombat: token?.inCombat,
     };
     options.rolledResult = targetData;
     action.system = {}; // clear out any system information that would interfere with parsing
