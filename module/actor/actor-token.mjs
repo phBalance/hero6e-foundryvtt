@@ -75,6 +75,8 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
 
         if (!this.isOwner) return;
 
+        if (!this.id) return;
+
         if (this.sight.visionMode != "basic") {
             super._prepareDetectionModes();
             return;
@@ -135,33 +137,40 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
                     //item.system.OPTIONID === undefined && // DETECT
                     item.isActive,
             );
+
+            if (this.name === "Onyx") {
+                console.log(this);
+            }
+
             if (SIGHTGROUP && !this.actor?.statuses.has("blind")) {
                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
                 basicMode.range = maxRange;
                 this.sight.range = maxRange; // You can see without a light source
             }
 
-            // GENERIC NON-SIGHTGROUP (not including MENTALGROUP which is unsupported)
-            // const NONSIGHTGROUP = this.actor?.items.find(
-            //     (item) =>
-            //         item.isSense &&
-            //         item.system.GROUP !== "SIGHTGROUP" &&
-            //         item.system.GROUP !== "MENTALGROUP" &&
-            //         item.isActive,
-            // );
+            // A special vision that can see the map (like targeting touch)
+            let blindVisionItem = this.actor?.items.find(
+                (i) =>
+                    i.isActive &&
+                    i.isSense &&
+                    i.isRangedSense &&
+                    (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)) &&
+                    (!this.token?.actor?.statuses.has("blind") || i.system.GROUP !== "SIGHTGROUP"),
+            );
+            if (blindVisionItem) {
+                const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+                basicMode.range = maxRange;
+                this.sight.range = maxRange; // You can see without a light source
+            }
+
+            // Assume we can use non-targeting senses to detect tokens
             const heroDetectSight = this.detectionModes.find((m) => m.id === "heroDetectSight");
-            // if (SIGHTGROUP || NONSIGHTGROUP) {
             if (!heroDetectSight) {
                 this.detectionModes.push({ id: "heroDetectSight", enabled: true, range: maxRange });
             } else {
                 heroDetectSight.range = maxRange;
                 heroDetectSight.enabled = true;
             }
-            // } else {
-            //     if (heroDetectSight) {
-            //         heroDetectSight.enabled = false;
-            //     }
-            // }
 
             // Update Sight so people don't get confused when looking at the UI
             if (initialRange !== this.sight.range) {

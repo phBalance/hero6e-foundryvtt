@@ -2,6 +2,9 @@ import { calculateDistanceBetween } from "./range.mjs";
 
 export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSource {
     get isBlinded() {
+        // if (this.token?.name === "Onyx") {
+        //     debugger;
+        // }
         const defaultBlind =
             (this.data.radius === 0 && (this.data.lightRadius === 0 || !this.visionMode?.perceivesLight)) ||
             Object.values(this.blinded).includes(true);
@@ -13,13 +16,15 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
         // Some visions have SENSE/RANGE (built in)
         // SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
         // Assuming only SIGHT/TOUCH/SMELL or TARGETING can actually SEE (you can see, touch, smell a wall)
-        const blindVisionItem = this.token?.actor?.items.find(
+        let blindVisionItem = this.token?.actor?.items.find(
             (i) =>
                 i.isActive &&
                 i.isSense &&
                 i.isRangedSense &&
-                (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)),
+                (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)) &&
+                (!this.token?.actor?.statuses.has("blind") || i.system.GROUP !== "SIGHTGROUP"),
         );
+
         if (blindVisionItem) {
             //console.log("blindVisionItem", blindVisionItem);
             return false;
@@ -87,7 +92,7 @@ export function setPerceptionModes() {
             return (filter2.thickness = 1), filter2;
         }
         _canDetect(visionSource, target) {
-            if (super._canDetect(visionSource, target)) return false; // handled by standard vision
+            if (super._canDetect(visionSource, target)) return true; // handled by standard vision
             if (!target.document.hidden && !target.document.hasStatusEffect("invisible")) {
                 return true;
             }
