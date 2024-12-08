@@ -702,6 +702,9 @@ export class HeroSystem6eItem extends Item {
         // Power must be turned on
         if (this.system.active === false) return false;
 
+        // Only In ALternate Identity
+        if (this.findModsByXmlid("OIHID") && this.actor.system.heroicIdentity === false) return false;
+
         // TODO: Costs endurance (even if bought to 0 END) is perceivable when active unless it has invisible power effect bought for it.
 
         // FOCUS
