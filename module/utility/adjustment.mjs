@@ -272,8 +272,8 @@ function _createNewAdjustmentEffect(
     const itemTokenName =
         canvas.tokens.get(action?.current?.attackerTokenId)?.name ||
         item.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id))?.name ||
-        item.actor?.getActiveTokens()?.[0].name ||
-        targetActor.name ||
+        item.actor?.getActiveTokens()?.[0]?.name ||
+        item.actor?.name ||
         "undefined";
 
     const activeEffect = {
@@ -568,8 +568,8 @@ export async function performAdjustment(
     const itemTokenName =
         canvas.tokens.get(action?.current?.attackerTokenId)?.name ||
         item.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id))?.name ||
-        item.actor?.getActiveTokens()?.[0].name ||
-        targetActor.name ||
+        item.actor?.getActiveTokens()?.[0]?.name ||
+        item.actor?.name ||
         "undefined";
 
     // Update the effect max value(s)

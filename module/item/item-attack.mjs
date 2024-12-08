@@ -985,7 +985,7 @@ export async function AttackToHit(item, options) {
             .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
         action,
-        inActiveCombat: token.inCombat,
+        inActiveCombat: token?.inCombat,
     };
     options.rolledResult = targetData;
     action.system = {}; // clear out any system information that would interfere with parsing
@@ -2344,7 +2344,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
         targetToken: token,
-        actionData: JSON.stringify(action),
+        actionData: JSON.parse(action),
     };
 
     // render card

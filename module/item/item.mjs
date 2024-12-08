@@ -5293,10 +5293,11 @@ export class HeroSystem6eItem extends Item {
 
     /// Get Levels with AID/DRAIN Active Effects
     get adjustedLevels() {
+        // TODO: Custom adjustedLevels in config.mjs for things that are all or nothing?
         let _adjustedLevels = parseInt(this.system.LEVELS || 0);
 
         for (const ae of this.actor.temporaryEffects.filter(
-            (effect) => effect.flags.XMLID === "DRAIN" && effect.flags.key === "POWERDEFENSE",
+            (effect) => effect.flags.XMLID === "DRAIN" && effect.flags.key === this.system.XMLID,
         )) {
             console.log(ae);
             _adjustedLevels += parseInt(ae.changes?.[0].value || 0);
