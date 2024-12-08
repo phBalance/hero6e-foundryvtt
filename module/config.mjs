@@ -7113,6 +7113,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    //NOTELEPORT
+    addPower(
+        {
+            key: "NOTELEPORT",
+            costPerLevel: 0.25, //costPerLevelFixedValue(0),
+            xml: ` <MODIFIER XMLID="NOTELEPORT" ID="1733613873292" BASECOST="0.0" LEVELS="1" ALIAS="Cannot Be Escaped With Teleportation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
     addPower(
         {
             key: "OIHID",

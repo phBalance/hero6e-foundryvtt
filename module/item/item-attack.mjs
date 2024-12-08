@@ -2344,7 +2344,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
         targetToken: token,
-        actionData: JSON.parse(action),
+        actionData: JSON.stringify(action),
     };
 
     // render card
