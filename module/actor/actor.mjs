@@ -983,7 +983,7 @@ export class HeroSystem6eActor extends Actor {
             .reduce((accum, currItem) => accum + parseInt(currItem.system.LEVELS), 0);
         const minStr = massMultiplier * 5;
 
-        const prevStr0ActiveEffect = this.effects.find((o) => o.flags?.str0);
+        const prevStr0ActiveEffect = this.effects.find((effect) => effect.flags?.str0);
         if (this.system.characteristics.str?.value <= minStr && !prevStr0ActiveEffect) {
             const str0ActiveEffect = {
                 name: "STR0",
