@@ -5057,6 +5057,17 @@ export class HeroSystem6eItem extends Item {
 
     async addActiveEffect(activeEffect) {
         const newEffect = foundry.utils.deepClone(activeEffect);
+        // newEffect.duration.duration ??= newEffect.duration.seconds;
+        // newEffect.duration.startTime ??= game.time.worldTime;
+        // newEffect.duration.startRound ??= game.combat.current.round;
+        // newEffect.duration.startTurn ??= game.combat.current.turn;
+        // newEffect.duration.type ??= "seconds";
+        newEffect.transfer = false;
+
+        //const ae = await this.createEmbeddedDocuments("ActiveEffect", [newEffect]);
+        //ae.duration = ae.updateDuration();
+
+        //return ae.update({ duration: ae.duration });
 
         return this.createEmbeddedDocuments("ActiveEffect", [newEffect]);
     }
@@ -5289,12 +5300,13 @@ export class HeroSystem6eItem extends Item {
         // TODO: Custom adjustedLevels in config.mjs for things that are all or nothing?
         let _adjustedLevels = parseInt(this.system.LEVELS || 0);
 
-        for (const ae of this.actor.temporaryEffects.filter(
-            (effect) => effect.flags.XMLID === "DRAIN" && effect.flags.key === this.system.XMLID,
-        )) {
-            console.log(ae);
+        // Notice that we are only looking for DRAINS on "this" item.  If there are more than one item with the same XMLID then we don't know which item is getting the drain.
+        for (const ae of this.effects) {
+            //console.log(ae);
             _adjustedLevels += parseInt(ae.changes?.[0].value || 0);
         }
+
+        // TODO: Should we be MAXing it here, or when we apply the defense?
         return Math.max(0, _adjustedLevels);
     }
 }

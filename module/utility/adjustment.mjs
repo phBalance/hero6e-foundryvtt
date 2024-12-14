@@ -385,11 +385,11 @@ export async function performAdjustment(
         targetPower = targetActor.items.find(
             (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
         );
-        if (targetPower) {
-            // Sometimes we pass an item.id, make sure we output item.name
-            nameOfCharOrPower = item.name;
-            targetUpperCaseName = nameOfCharOrPower.toUpperCase();
-        }
+        // if (targetPower) {
+        //     // Sometimes we pass an item.id, make sure we output item.name
+        //     nameOfCharOrPower = item.name;
+        //     targetUpperCaseName = nameOfCharOrPower.toUpperCase();
+        // }
     }
 
     // Do we have a target?

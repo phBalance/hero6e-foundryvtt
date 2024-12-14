@@ -40,19 +40,35 @@ export class EffectsPanel extends Application {
     refresh = foundry.utils.debounce(this.render, 100);
 
     async getData(options) {
+        if (!this.actor) return null;
+
         const context = await super.getData(options);
-        context.effects = this.actor?.appliedEffects; //effects;
+        context.effects = foundry.utils.deepClone(this.actor?.appliedEffects);
 
         if (context.effects) {
             for (const ae of context.effects) {
                 // Sometimes ae.parent?.system.active  is false, but the power is active, unclear why.
                 // Consider making active a getter (looking for the AE) instead of using system.actor.
                 if (ae.parent instanceof HeroSystem6eItem && ae.duration.seconds) {
-                    ae.flags.label = `${ae.flags.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
+                    ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
                 } else {
                     const d = ae._prepareDuration();
                     ae.flags.label = d.label;
                 }
+                ae.flags.targetDisplay = ae.flags.target;
+            }
+        }
+
+        // All the effects on items that are not transferred
+        for (const item of this.actor.items) {
+            for (const ae of item.effects.filter((ae) => ae.transfer === false && ae.duration.seconds)) {
+                ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
+                for (const target of ae.flags.target) {
+                    const item = fromUuidSync(target);
+                    ae.flags.targetDisplay = `${item?.name} [${item.system.XMLID}]`;
+                }
+
+                context.effects.push(ae);
             }
         }
 

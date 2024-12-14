@@ -23,11 +23,15 @@
   <hr>
 
   {{#if defenseDescription}}
-    <div class="tags">
+
+    {{!defense tags --}}
+    {{> (getModulePath 'chat/defense-tags-partial.hbs') defenseTags }}
+
+    {{!-- <div class="tags">
       {{#each defenseTags as |tag id|}}
         <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}} {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}</span>
       {{/each}}
-    </div>
+    </div> --}}
 
     <div class="card-section">
       <div class="description-tiny">Defense: {{ defenseDescription }}</div>
