@@ -12,7 +12,7 @@
 @use "global/flex";
 
 /* Styles for dice which are direct overrides of FoundryVTT styling */
-@include meta.load-css("components/dice");
+@include meta.load-css("components/foundry-overrides/dice");
 
 /* Styles limited to hero sheets */
 .hero {
