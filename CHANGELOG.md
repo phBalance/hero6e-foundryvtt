@@ -7,6 +7,7 @@
   - Fixed issue with some enhanced visions not showing map in the dark.
 - Adjustment powers now work with POWERDEFENSE.
 - Inobivous powers do not show for Actor Description.
+- Fixed the chat card name of Adjustment powers that targeted POWERs. Was showing attack item, not target power. [#1608](https://github.com/dmdorman/hero6e-foundryvtt/issues/1608)
 
 ## Version 4.0.12 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
