@@ -123,6 +123,7 @@ Hooks.once("init", async function () {
         // `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
         `systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`,
+        `systems/${HEROSYS.module}/templates/chat/defense-tags-partial.hbs`,
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);

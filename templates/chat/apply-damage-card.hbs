@@ -36,15 +36,7 @@
   <hr>
 
   {{!defense tags --}}
-  <div class="tags">
-    {{#each tags as |tag id|}}
-    <span class="tag tag-transparent " title="{{tag.title}}"><span class="{{#if tag.options.strikethrough}}strikethrough{{/if}}">{{tag.name}}
-      {{#if tag.valueText}}{{tag.valueText}}{{else}}{{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}{{/if}}</span>
-      <span>{{tag.name2}}
-      {{#if tag.valueText2}}{{tag.valueText2}}{{else}}{{#if (gte tag.value2 0)}}+{{/if}}{{tag.value2}}{{/if}}</span>
-      </span>
-    {{/each}}
-  </div>
+  {{> (getModulePath 'chat/defense-tags-partial.hbs') tags }}
 
   {{#if damageNegationValue}}
     <div class="card-section">
