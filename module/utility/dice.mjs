@@ -394,17 +394,17 @@ export class HeroRoller {
         return this;
     }
 
-    addHalfDice(numDice, description) {
-        if (!numDice) {
+    addHalfDice(numHalfDice, description) {
+        if (!numHalfDice) {
             return this;
         }
 
-        numDice = this.#prefixFormula(numDice);
+        numHalfDice = this.#prefixFormula(numHalfDice);
 
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: numDice,
+                number: numHalfDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.HALF_DIE,
                     flavor: description,
@@ -412,7 +412,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: numDice,
+                              value: numHalfDice,
                           },
                 },
             }),
@@ -421,17 +421,17 @@ export class HeroRoller {
         return this;
     }
 
-    addDiceMinus1(numDice, description) {
-        if (!numDice) {
+    addDiceMinus1(numDiceMinusOne, description) {
+        if (!numDiceMinusOne) {
             return this;
         }
 
-        numDice = this.#prefixFormula(numDice);
+        numDiceMinusOne = this.#prefixFormula(numDiceMinusOne);
 
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: numDice,
+                number: numDiceMinusOne,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE,
                     flavor: description,
@@ -439,7 +439,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: numDice,
+                              value: numDiceMinusOne,
                           },
                 },
             }),
