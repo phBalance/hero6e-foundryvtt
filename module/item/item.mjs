@@ -4367,17 +4367,22 @@ export class HeroSystem6eItem extends Item {
         // Specific power overrides
         if (xmlid === "ENTANGLE") {
             this.system.class = "entangle";
+            this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-            this.system.knockbackMultiplier = 0;
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "DARKNESS") {
             this.system.class = "darkness";
+            this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "IMAGES") {
             this.system.class = "images";
+            this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "ABSORPTION") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
@@ -4426,21 +4431,29 @@ export class HeroSystem6eItem extends Item {
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "CHANGEENVIRONMENT") {
             this.system.class = "change enviro";
+            this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "FLASH") {
             this.system.class = "flash";
+            this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "ENERGYBLAST") {
             this.system.usesStrength = false;
         } else if (xmlid === "RKA") {
             this.system.usesStrength = false;
         } else if (xmlid === "TRANSFORM") {
             this.system.class = "transform";
+            this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
+            this.system.noHitLocations = true;
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         }
 
         // AVAD
