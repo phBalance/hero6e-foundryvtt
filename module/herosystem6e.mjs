@@ -806,12 +806,12 @@ Hooks.on("renderSidebarTab", async (app, html) => {
 
     if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
 
-    let $chat_form = html.find("#chat-form");
+    const $chat_form = html.find("#chat-form");
     const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`);
     if (content.length === 0) return;
 
     // Add template to chat
-    let $content = $(content);
+    const $content = $(content);
     $chat_form.after($content);
 
     $content.find("button").on("click", async (event) => {
@@ -862,7 +862,7 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     dice: 1,
                     dicePlus: {
                         groupName: "dicePlus",
-                        choices: { ZERO: "0", PLUSHALFDIE: "Plus Half Die", PLUSONEPIP: "Plus One Pip" },
+                        choices: { ZERO: "0", PLUSHALFDIE: "+½d6", PLUSONEPIP: "+1", PLUSDIEMINUSONE: "+1d6-1" },
                         chosen: "ZERO",
                     },
                     damageType: {
@@ -895,14 +895,16 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                 //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
                     .addDice(options.dice, "DICE")
+                    .addHalfDice(options.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
+                    .addDiceMinus1(options.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
+                    .addNumber(options.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
+
                     .makeNormalRoll(options.damageType === "NORMAL")
                     .makeKillingRoll(options.damageType === "KILLING")
                     .makeAdjustmentRoll(options.damageType === "ADJUSTMENT")
                     .makeEntangleRoll(options.damageType === "ENTANGLE")
                     .makeFlashRoll(options.damageType === "FLASH")
-                    .makeEffectRoll(options.damageType === "EFFECT")
-                    .addDice(options.dicePlus === "PLUSHALFDIE" ? 0.5 : 0, "PLUSHALFDIE")
-                    .addNumber(options.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP");
+                    .makeEffectRoll(options.damageType === "EFFECT");
 
                 await heroRoller.roll();
 
