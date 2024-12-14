@@ -1289,7 +1289,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         let content = `${this.actor.system.APPEARANCE || ""}`;
         const perceivable = [];
         for (let item of this.actor.items) {
-            const p = item.isPerceivable("maybe");
+            const p = item.isPerceivable(false); // inobivous is not included
             if (p) {
                 perceivable.push(
                     `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
