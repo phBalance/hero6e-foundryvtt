@@ -11,6 +11,9 @@
 @use "global/grid";
 @use "global/flex";
 
+/* Styles for dice which are direct overrides of FoundryVTT styling */
+@include meta.load-css("components/dice");
+
 /* Styles limited to hero sheets */
 .hero {
     @include meta.load-css("components/forms");
@@ -25,11 +28,6 @@
 }
 
 @include meta.load-css("components/chat");
-
-/* Styles for dice */
-.dice-roll {
-    @include meta.load-css("components/dice");
-}
 
 /* Styles for time tracking */
 @include meta.load-css("components/time");
