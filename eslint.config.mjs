@@ -72,6 +72,8 @@ export default [
                 ui: "readonly",
                 DetectionMode: "readonly",
                 OutlineOverlayFilter: "readonly",
+                DocumentSheetConfig: "readonly",
+                ActiveEffectConfig: "readonly",
             },
         },
     },
