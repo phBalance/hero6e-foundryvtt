@@ -212,11 +212,13 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
 }
 
 function _findExistingMatchingEffect(item, potentialCharacteristic, powerTargetName, targetSystem) {
+    // Kluge: Ignore any negative changes as we want each DRAIN to be separate so we can properly track the fades.
     // Caution: The item may no longer exist.
     return targetSystem.effects.find(
         (effect) =>
             effect.origin === item.uuid &&
-            effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic),
+            effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic) &&
+            parseInt(effect.changes?.[0].value || 0) >= 0,
     );
 }
 

@@ -2,6 +2,25 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 export class HeroSystem6eActorActiveEffects extends ActiveEffect {
+    // static defineSchema() {
+    //     const schema2 = this.schema; // foundry.deepClone(super.defineSchema());
+    //     schema2.changes = new foundry.data.fields.ArrayField(
+    //         new foundry.data.fields.SchemaField({
+    //             key: new foundry.data.fields.StringField({ required: true, label: "EFFECT.ChangeKey" }),
+    //             value: new foundry.data.fields.StringField({ required: true, label: "EFFECT.ChangeValue" }),
+    //             mode: new foundry.data.fields.NumberField({
+    //                 integer: true,
+    //                 initial: CONST.ACTIVE_EFFECT_MODES.ADD,
+    //                 label: "EFFECT.ChangeMode",
+    //             }),
+    //             priority: new foundry.data.fields.NumberField(),
+    //             seconds: new foundry.data.fields.NumberField({ integer: true, label: "EFFECT.Seconds" }),
+    //         }),
+    //     );
+    //     return schema2;
+    // }
+    //ActiveEffect.schema.fields.changes.element.fields
+
     // All status effects
     static statusEffectsObj;
 
