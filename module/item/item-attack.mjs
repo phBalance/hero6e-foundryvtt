@@ -1575,15 +1575,17 @@ export async function _onRollDamage(event) {
 
     await damageRoller.roll();
 
-    // Build list of who to target?
+    // Build list of who to target
     const targetTokens = [];
     for (const id of toHitData.targetIds.split(",")) {
         const token = canvas.scene.tokens.get(id);
         if (token) {
             const entangleAE = token.actor?.temporaryEffects?.find((o) => o.flags?.XMLID === "ENTANGLE");
             const targetToken = {
-                token,
+                tokenId: id,
+                name: token.name,
                 subTarget: toHitData.targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
+                targetEntangle: !!toHitData.targetEntangle,
             };
 
             targetTokens.push(targetToken);
@@ -1604,13 +1606,6 @@ export async function _onRollDamage(event) {
     // // if (PERSONALIMMUNITY && targetTokens) {
     // //     targetTokens = targetTokens.filter((o) => o.token.actor.id !== actor.id);
     // // }
-
-    // // If there is only 1 target then get rid of targetIds (which is used for Apply Damage ALL)
-    // if (targetTokens.length <= 1) {
-    //     delete toHitData.targetIds;
-    // }
-
-    // PH: TODO: Continue to simplify the card and HBS
 
     const cardData = {
         user: game.user,
@@ -1883,6 +1878,8 @@ export async function _onRollMindScanEffectRoll(event) {
 export async function _onApplyDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
+
+    // PH: FIXME: Is toHitData actually needed?
     const damageData = { ...button.dataset };
     const toHitData = damageData.toHitData;
     const targetTokens = JSON.parse(damageData.targetTokens);
@@ -1894,19 +1891,23 @@ export async function _onApplyDamage(event) {
         }
 
         for (const token of canvas.tokens.controlled) {
-            await _onApplyDamageToSpecificToken(toHitData, damageData, token.id);
+            await _onApplyDamageToSpecificToken(toHitData, damageData, {
+                tokenId: token.id,
+                name: token.name,
+                subTarget: null,
+                targetEntangle: false,
+            });
         }
     } else {
         // Apply to all provided targets
         for (const targetToken of targetTokens) {
-            const id = targetToken.token._id;
-            await _onApplyDamageToSpecificToken(toHitData, damageData, id);
+            await _onApplyDamageToSpecificToken(toHitData, damageData, targetToken);
         }
     }
 }
 
-export async function _onApplyDamageToSpecificToken(toHitData, damageData, tokenId) {
-    const token = canvas.tokens.get(tokenId);
+export async function _onApplyDamageToSpecificToken(toHitData, damageData, targetToken) {
+    const token = canvas.scene.tokens.get(targetToken.tokenId);
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
@@ -1969,7 +1970,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, token
     const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
     if (entangleAE) {
         // Targeting ENTANGLE based on attack-application checkbox
-        let targetEntangle = damageData.targetEntangle === "true" || damageData.targetEntangle === true;
+        let targetEntangle = targetToken.targetEntangle;
 
         // If they clicked "Apply Damage" then prompt
         if (heroRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
@@ -2911,6 +2912,7 @@ async function _calcDamage(heroRoller, item, options) {
     if (adjustmentPower) {
         // kludge for SIMPLIFIED HEALING
         if (item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
+            // PH: FIXME: Didn't we already do this in the damage roll?
             const shr = await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
             body = shr.getBodyTotal();
             stun = shr.getStunTotal();
