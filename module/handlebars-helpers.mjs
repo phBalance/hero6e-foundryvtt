@@ -6,7 +6,9 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("gameConfigValue", gameConfigValue);
     Handlebars.registerHelper("getModulePath", getModulePath);
     Handlebars.registerHelper("includes", includes);
-    Handlebars.registerHelper("jsonify", jsonify);
+    Handlebars.registerHelper("toJSON", toJSON);
+    Handlebars.registerHelper("toArray", toArray);
+    Handlebars.registerHelper("toJsonArray", toJsonArray);
     Handlebars.registerHelper("increment", increment);
     Handlebars.registerHelper("indexOf", indexOf);
     Handlebars.registerHelper("is_active_segment", isActiveSegment);
@@ -40,8 +42,23 @@ function includes(str, searchTerm) {
     return str?.includes(searchTerm);
 }
 
-function jsonify(context) {
+function toJSON(context) {
     return JSON.stringify(context);
+}
+
+/**
+ * Takes args and turns it into an array.
+ *
+ * @returns Array
+ */
+function toArray(arg) {
+    if (arg == null) return [];
+
+    return [arg];
+}
+
+function toJsonArray(arg) {
+    return toJSON(toArray(arg));
 }
 
 function toLowerCase(str) {
@@ -57,12 +74,14 @@ function isActiveSegment(actives, index) {
 }
 
 function concat() {
-    var outStr = "";
-    for (var arg in arguments) {
-        if (typeof arguments[arg] != "object") {
+    let outStr = "";
+
+    for (const arg in arguments) {
+        if (typeof arguments[arg] !== "object") {
             outStr += arguments[arg];
         }
     }
+
     return outStr;
 }
 
