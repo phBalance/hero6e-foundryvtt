@@ -5,12 +5,14 @@ import { whisperUserTargetsForActor } from "./utility/util.mjs";
 import { RoundFavorPlayerDown } from "./utility/round.mjs";
 
 export class HeroRuler extends foundry.canvas.interaction.Ruler {
+    static #tokensControlButtonSelector = "#scene-controls button.control[data-control='tokens']";
+
     static _controlToken() {
         const sceneControls = ui.controls;
-        if (sceneControls.activeControl !== "token") {
+        if (sceneControls.control.name !== "tokens") {
             return;
         }
-        if (sceneControls.activeTool !== "select") {
+        if (sceneControls.tool.name !== "select") {
             return;
         }
 
@@ -18,7 +20,7 @@ export class HeroRuler extends foundry.canvas.interaction.Ruler {
 
         if (tokensControlled !== 1) {
             // remove movement radio buttons
-            $(".scene-control[data-control='token']").find(".radio-container").remove();
+            $(HeroRuler.#tokensControlButtonSelector).find(".radio-container").remove();
             return;
         }
 
@@ -26,7 +28,7 @@ export class HeroRuler extends foundry.canvas.interaction.Ruler {
     }
 
     static async _movementRadioSelectRender() {
-        const tokenControlButton = $(".scene-control[data-control='token']");
+        const tokenControlButton = $(HeroRuler.#tokensControlButtonSelector);
 
         const relevantToken = canvas.tokens.controlled[0];
 
