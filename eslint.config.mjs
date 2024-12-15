@@ -30,7 +30,6 @@ export default [
                 CombatTracker: "readonly",
                 CONFIG: "readonly",
                 CONST: "readonly",
-                DetectionMode: "readonly",
                 Dialog: "readonly",
                 Die: "readonly",
                 dragRuler: "readonly",

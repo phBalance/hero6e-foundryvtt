@@ -42,14 +42,14 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
 export function setPerceptionModes() {
     // Hero Generic Sense
 
-    class HeroDetectionSightMode extends DetectionMode {
+    class HeroDetectionSightMode extends foundry.canvas.perception.DetectionMode {
         constructor() {
             super({
                 id: "heroDetectSight",
                 //label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
                 //walls: true,
                 //angle: false,
-                type: DetectionMode.DETECTION_TYPES.SIGHT,
+                type: foundry.canvas.perception.DetectionMode.DETECTION_TYPES.SIGHT,
             });
         }
         static getDetectionFilter() {
