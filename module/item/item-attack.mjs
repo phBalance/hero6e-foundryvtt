@@ -1199,7 +1199,7 @@ function getAttackTags(item) {
 
 export async function _onRollAoeDamage(event) {
     const button = event.currentTarget;
-    button.blur(); // The button remains highlighted for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const options = { ...button.dataset };
     const item = fromUuidSync(options.itemId);
     return AttackToHit(item, JSON.parse(options.formData));
@@ -1207,7 +1207,7 @@ export async function _onRollAoeDamage(event) {
 
 export async function _onRollKnockback(event) {
     const button = event.currentTarget;
-    button.blur(); // The button remains highlighted for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const options = { ...button.dataset };
     //const ignoreDefenseIds = JSON.parse(options.ignoreDefenseIdsJson) || [];
     const item = fromUuidSync(options.itemId);
@@ -1493,7 +1493,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
 // Notice the chatListeners function in this file.
 export async function _onRollDamage(event) {
     const button = event.currentTarget;
-    button.blur(); // The button remains highlighted for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
     const item = fromUuidSync(toHitData.itemId);
     const actor = item?.actor;
@@ -1567,7 +1567,7 @@ export async function _onRollDamage(event) {
 
     await damageRoller.roll();
 
-    // Kluge for SIMPLIFIED HEALING
+    // Kludge for SIMPLIFIED HEALING
     const isSimpleHealing = item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i);
 
     const damageRenderedResult = isSimpleHealing
@@ -1701,7 +1701,7 @@ export async function _onRollDamage(event) {
 export async function _onRollMindScan(event) {
     console.log(event);
     const button = event.currentTarget;
-    button.blur(); // The button remains highlighted for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
     const item = fromUuidSync(event.currentTarget.dataset.itemId);
 
@@ -1755,7 +1755,7 @@ export async function _onRollMindScan(event) {
 
 export async function _onRollMindScanEffectRoll(event) {
     const button = event.currentTarget;
-    button.blur(); // The button remains highlighted for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
     const item = fromUuidSync(event.currentTarget.dataset.itemId);
     const actor = item?.actor;
@@ -1931,86 +1931,32 @@ export async function _onApplyDamage(event) {
 
     const targetTokens = JSON.parse(damageData.tokenData);
 
-    // Sort tokenData based on distance to apply in distance order if this is an AoE
-    // TODO: pass other stuff through targetTokens and rename
-    // TODO: confirm I don't need to implement this... done when generating?
-    // if (item.getAoeModifier()) {
-    //     const aoeTemplate =
-    //         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-    //         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
-
-    //     targetsArray.sort(function (a, b) {
-    //         let distanceA = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(a).object);
-    //         let distanceB = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(b).object);
-    //         return distanceA - distanceB;
-    //     });
-    // }
-
     if (targetTokens.length === 0) {
         // Check to make sure we have a selected token
         if (canvas.tokens.controlled.length == 0) {
             return ui.notifications.warn(`You must select at least one token before applying damage.`);
         }
 
-        // TODO: How to get the damageData information for this? Would imply we need to pass an extra faux copy around. Wouldn't work for Explosions...
+        // PH: TODO: How to get the damageData information for this?
+        // PH: TODO: Need to figure out how to rebuild an attack for a random token since we could have damage that is related to range (explosion or reduced by range) ... call calcDamage again?
         for (const token of canvas.tokens.controlled) {
-            _onApplyDamageToSpecificToken(damageData, null /* TODO: will fail */, token.id);
+            _onApplyDamageToSpecificToken(damageData, null /* PH: TODO: will fail */, token.id);
         }
     } else {
         // Apply to all targets
         for (const targetToken of targetTokens) {
             const id = targetToken.token._id;
-            console.log(game.scenes.current.tokens.get(id).name);
             await _onApplyDamageToSpecificToken(damageData, targetToken.roller, id);
         }
-    }
-
-    return;
-
-    // TODO: Is else there anything here worth saving? I guess the canvas.tokens.controlled is useful.
-
-    // Single target
-    if (damageData.targetTokenId) {
-        return _onApplyDamageToSpecificToken(damageData, damageData.targetTokenId);
-    } else if (damageData.targetIds) {
-        // All targets
-        const item = fromUuidSync(event.currentTarget.dataset.itemId);
-        const targetsArray = damageData.targetIds.split(",");
-
-        // If AOE then sort by distance from center
-        if (item.hasExplosionAdvantage()) {
-            const aoeTemplate =
-                game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-                game.scenes.current.templates.find((o) => o.user.id === game.user.id);
-
-            targetsArray.sort(function (a, b) {
-                let distanceA = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(a).object);
-                let distanceB = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(b).object);
-                return distanceA - distanceB;
-            });
-        }
-
-        for (const id of targetsArray) {
-            console.log(game.scenes.current.tokens.get(id).name);
-            await _onApplyDamageToSpecificToken(damageData, id);
-        }
-        return;
-    }
-
-    // Check to make sure we have a selected token
-    if (canvas.tokens.controlled.length == 0) {
-        return ui.notifications.warn(`You must select at least one token before applying damage.`);
-    }
-
-    for (const token of canvas.tokens.controlled) {
-        _onApplyDamageToSpecificToken(damageData, token.id);
     }
 }
 
 export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId) {
     const item = fromUuidSync(damageData.itemId);
 
-    const heroRoller = HeroRoller.fromJSON(roller || damageData.roller); // TODO: kludge only until null roller is resolved
+    // TODO: Figure out how to remove damageData.bodyDamage, damageData.bodyDamageEffective, damageData.stunDamage, damageData.stunDamageEffective
+
+    const heroRoller = HeroRoller.fromJSON(roller || damageData.roller); // PH: TODO: kludge only until null roller is resolved
 
     const token = canvas.tokens.get(tokenId);
     if (!token) {
@@ -3000,7 +2946,7 @@ async function _calcDamage(heroRoller, item, options) {
     let bodyForPenetrating = 0;
 
     if (adjustmentPower) {
-        // Kluge for SIMPLIFIED HEALING
+        // kludge for SIMPLIFIED HEALING
         if (item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
             const shr = await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
             body = shr.getBodyTotal();
@@ -3097,7 +3043,7 @@ async function _calcDamage(heroRoller, item, options) {
     // defenses (though it’s still resolved with one Attack Roll and
     // treated as a single attack).
     // This is super awkward with the current system.
-    // KLUGE: Apply body defense twice.
+    // kludge: Apply body defense twice.
     let REDUCEDPENETRATION = item.findModsByXmlid("REDUCEDPENETRATION");
     if (REDUCEDPENETRATION) {
         if (item.killing) {
