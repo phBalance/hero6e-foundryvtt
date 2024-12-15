@@ -1488,9 +1488,13 @@ async function _rollApplyKnockback(token, knockbackDice) {
     token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
 }
 
-// Event handler for when the Roll Damage button is
-// clicked on item-attack-card2.hbs
-// Notice the chatListeners function in this file.
+/**
+ * Event handler for when the Roll Damage button is clicked. Should only roll damage. The effects of damage
+ * are calculated later in the sequence when the apply buttons are pushed.
+ *
+ * @param {Event} event
+ * @returns
+ */
 export async function _onRollDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
@@ -1517,6 +1521,10 @@ export async function _onRollDamage(event) {
             await effectiveItem._postUpload();
         }
     }
+
+    // Coerce type to boolean
+    toHitData.targetEntangle =
+        toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
 
     const adjustment = getPowerInfo({
         item: item,
@@ -1567,6 +1575,21 @@ export async function _onRollDamage(event) {
 
     await damageRoller.roll();
 
+    // Build list of who to target?
+    const targetTokens = [];
+    for (const id of toHitData.targetIds.split(",")) {
+        const token = canvas.scene.tokens.get(id);
+        if (token) {
+            const entangleAE = token.actor?.temporaryEffects?.find((o) => o.flags?.XMLID === "ENTANGLE");
+            const targetToken = {
+                token,
+                subTarget: toHitData.targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
+            };
+
+            targetTokens.push(targetToken);
+        }
+    }
+
     // Kludge for SIMPLIFIED HEALING
     const isSimpleHealing = item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i);
 
@@ -1574,75 +1597,24 @@ export async function _onRollDamage(event) {
         ? await (await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).render()
         : await damageRoller.render();
 
-    const damageDetail = await _calcDamage(damageRoller, effectiveItem, toHitData);
+    // // PERSONALIMMUNITY
+    // // NOTE: We may want to reintroduce this code (CHANGE ENVIRONMENT or large scale MENTAL) at some point.
+    // // However at the moment AOE is the primary mechanism to target multiple tokens.
+    // // const PERSONALIMMUNITY = item.findModsByXmlid("PERSONALIMMUNITY");
+    // // if (PERSONALIMMUNITY && targetTokens) {
+    // //     targetTokens = targetTokens.filter((o) => o.token.actor.id !== actor.id);
+    // // }
 
-    const aoeTemplate =
-        game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.author.id === game.user.id);
-    const explosion = item.hasExplosionAdvantage();
-
-    // Coerce type to boolean
-    toHitData.targetEntangle =
-        toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
-
-    // Apply Damage button for specific targets
-    let targetTokens = [];
-    for (const id of toHitData.targetIds.split(",")) {
-        let token = canvas.scene.tokens.get(id);
-        if (token) {
-            const entangleAE = token.actor?.temporaryEffects?.find((o) => o.flags?.XMLID === "ENTANGLE");
-            let targetToken = {
-                token,
-                roller: damageRoller.toJSON(),
-                subTarget: toHitData.targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
-            };
-
-            // TODO: Add in explosion handling (or flattening)
-            if (explosion) {
-                // Distance from center
-                if (aoeTemplate) {
-                    // Explosion
-                    // Simple rules is to remove the hightest dice term for each
-                    // hex distance from center.  Works fine when radius = dice,
-                    // but that isn't always the case.
-
-                    // Remove highest terms based on distance
-                    const distance = calculateDistanceBetween(aoeTemplate, token.object.center);
-                    const pct = distance / aoeTemplate.distance;
-
-                    // TODO: This assumes that the number of terms equals the DC/5 AP. This is
-                    //       true for normal attacks but not always.
-                    //       This ignores explosion modifiers for DC falloff.
-                    const termsToRemove = Math.floor(pct * (damageRoller.getBaseTerms().length - 1));
-
-                    const heroRollerClone = damageRoller.clone();
-                    heroRollerClone.removeNHighestRankTerms(termsToRemove);
-
-                    targetToken = {
-                        ...targetToken,
-                        distance,
-                        roller: heroRollerClone.toJSON(),
-                    };
-                }
-            }
-            targetTokens.push(targetToken);
-        }
-    }
-
-    // PERSONALIMMUNITY
-    // NOTE: We may want to reintroduce this code (CHANGE ENVIRONMENT or large scale MENTAL) at some point.
-    // However at the moment AOE is the primary mechanism to target multiple tokens.
-    // const PERSONALIMMUNITY = item.findModsByXmlid("PERSONALIMMUNITY");
-    // if (PERSONALIMMUNITY && targetTokens) {
-    //     targetTokens = targetTokens.filter((o) => o.token.actor.id != actor.id);
+    // // If there is only 1 target then get rid of targetIds (which is used for Apply Damage ALL)
+    // if (targetTokens.length <= 1) {
+    //     delete toHitData.targetIds;
     // }
 
-    // If there is only 1 target then get rid of targetIds (which is used for Apply Damage ALL)
-    if (targetTokens.length <= 1) {
-        delete toHitData.targetIds;
-    }
+    // PH: TODO: Continue to simplify the card and HBS
 
     const cardData = {
+        user: game.user,
+
         item: item,
         nonDmgEffect:
             adjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item) || item.baseInfo?.nonDmgEffect,
@@ -1650,35 +1622,19 @@ export async function _onRollDamage(event) {
 
         // dice rolls
         renderedDamageRoll: damageRenderedResult,
-        renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
+        rollerJSON: damageRoller.toJSON(),
 
         // hit locations
-        useHitLoc: damageDetail.useHitLoc,
-        hitLocText: damageDetail.hitLocText,
-        hitLocation: damageDetail.hitLocation,
-
-        // body
-        bodyDamage: damageDetail.bodyDamage,
-        bodyDamageEffective: damageDetail.body,
-
-        // stun
-        stunDamage: damageDetail.stunDamage,
-        stunDamageEffective: damageDetail.stun,
-        hasRenderedDamageRoll: true,
-        stunMultiplier: damageDetail.stunMultiplier,
-        hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-
-        roller: damageRoller.toJSON(),
+        useHitLoc: damageRoller.hitLocationValid(),
+        hitLocText: damageRoller.getHitLocation().fullName,
 
         // misc
         targetIds: toHitData.targetIds,
-        targetEntangle: toHitData.targetEntangle,
         tags: tags,
 
         attackTags: getAttackTags(item),
         targetTokens: targetTokens,
-        user: game.user,
-        actionData: JSON.stringify(action),
+        actionDataJSON: JSON.stringify(action),
     };
 
     // render card
@@ -1921,15 +1877,15 @@ export async function _onRollMindScanEffectRoll(event) {
     return;
 }
 
-// Event handler for when the Apply Damage button is
-// clicked on item-damage-card.hbs
-// Notice the chatListeners function in this file.
+/**
+ * Event handler for when the Apply Damage button is clicked on item-damage-card.hbsNotice the chatListeners function in this file.
+ */
 export async function _onApplyDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const damageData = { ...button.dataset };
-
-    const targetTokens = JSON.parse(damageData.tokenData);
+    const toHitData = damageData.toHitData;
+    const targetTokens = JSON.parse(damageData.targetTokens);
 
     if (targetTokens.length === 0) {
         // Check to make sure we have a selected token
@@ -1937,27 +1893,19 @@ export async function _onApplyDamage(event) {
             return ui.notifications.warn(`You must select at least one token before applying damage.`);
         }
 
-        // PH: TODO: How to get the damageData information for this?
-        // PH: TODO: Need to figure out how to rebuild an attack for a random token since we could have damage that is related to range (explosion or reduced by range) ... call calcDamage again?
         for (const token of canvas.tokens.controlled) {
-            _onApplyDamageToSpecificToken(damageData, null /* PH: TODO: will fail */, token.id);
+            await _onApplyDamageToSpecificToken(toHitData, damageData, token.id);
         }
     } else {
-        // Apply to all targets
+        // Apply to all provided targets
         for (const targetToken of targetTokens) {
             const id = targetToken.token._id;
-            await _onApplyDamageToSpecificToken(damageData, targetToken.roller, id);
+            await _onApplyDamageToSpecificToken(toHitData, damageData, id);
         }
     }
 }
 
-export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId) {
-    const item = fromUuidSync(damageData.itemId);
-
-    // TODO: Figure out how to remove damageData.bodyDamage, damageData.bodyDamageEffective, damageData.stunDamage, damageData.stunDamageEffective
-
-    const heroRoller = HeroRoller.fromJSON(roller || damageData.roller); // PH: TODO: kludge only until null roller is resolved
-
+export async function _onApplyDamageToSpecificToken(toHitData, damageData, tokenId) {
     const token = canvas.tokens.get(tokenId);
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
@@ -1969,6 +1917,7 @@ export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId)
         );
     }
 
+    const item = fromUuidSync(damageData.itemId);
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
@@ -1976,12 +1925,44 @@ export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId)
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const originalRoll = heroRoller.clone();
+    // PH: TODO: Why are we cloning heroRoller here?
+    const originalRoll = HeroRoller.fromJSON(damageData.roller);
+    const heroRoller = originalRoll.clone();
+
+    // PH: TODO: Move this around. Should be near the top but there are some tweaks to do.
+    // PH: TODO: Do we need to call _calcDamage here? Seems to be done below. Does this mean we don't need toHitData?
+    // const damageDetail = await _calcDamage(heroRoller, effectiveItem, toHitData);
+
+    const aoeTemplate =
+        game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
+        game.scenes.current.templates.find((o) => o.author.id === game.user.id);
+    const explosion = item.hasExplosionAdvantage();
+    if (explosion) {
+        // Distance from center
+        if (aoeTemplate) {
+            // Explosion
+            // Simple rules is to remove the hightest dice term for each
+            // hex distance from center. Works fine when radius = dice,
+            // but that isn't always the case.
+
+            // Remove highest terms based on distance
+            const distance = calculateDistanceBetween(aoeTemplate, token.object.center);
+            const pct = distance / aoeTemplate.distance;
+
+            // TODO: This assumes that the number of terms equals the DC/5 AP. This is
+            //       true for normal attacks but not always.
+            // TODO: This ignores explosion modifiers for DC falloff.
+            const termsToRemove = Math.floor(pct * (heroRoller.getBaseTerms().length - 1));
+
+            heroRoller.removeNHighestRankTerms(termsToRemove);
+        }
+    }
+
     const automation = game.settings.get(HEROSYS.module, "automation");
     const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
 
     if (item.system.XMLID === "ENTANGLE") {
-        return _onApplyEntangleToSpecificToken(item, token, originalRoll, action);
+        return _onApplyEntangleToSpecificToken(item, token, heroRoller, action);
     }
 
     // Target ENTANGLE
@@ -1991,7 +1972,7 @@ export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId)
         let targetEntangle = damageData.targetEntangle === "true" || damageData.targetEntangle === true;
 
         // If they clicked "Apply Damage" then prompt
-        if (!button.textContent.includes("[ENTANGLE]")) {
+        if (heroRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
             console.log("do something");
             targetEntangle = await Dialog.wait({
                 title: `Confirm Target`,
@@ -2014,7 +1995,7 @@ export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId)
         }
 
         if (targetEntangle && entangleAE) {
-            return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE, action);
+            return _onApplyDamageToEntangle(item, token, heroRoller, entangleAE, action);
         }
     }
 
@@ -2074,22 +2055,6 @@ export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId)
         defenseTags,
     } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
 
-    // if (defenseValue != _defenseValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
-    //     console.warn("defenseValue mismatch", defenseValue, _defenseValue);
-    // }
-
-    // if (resistantValue != _resistantValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
-    //     console.warn("resistantValue mismatch", resistantValue, _resistantValue);
-    // }
-
-    // if (
-    //     knockbackResistanceValue != _knockbackResistanceValue &&
-    //     !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
-    //     !item.isKilling
-    // ) {
-    //     console.warn("knockbackResistance mismatch", knockbackResistanceValue, _knockbackResistanceValue);
-    // }
-
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }
@@ -2105,10 +2070,8 @@ export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId)
     damageData.impenetrableValue = impenetrableValue;
     damageData.damageReductionValue = damageReductionValue;
     damageData.damageNegationValue = damageNegationValue;
-    //damageData.knockbackResistanceValue = knockbackResistanceValue;
     damageData.defenseAvad =
-        defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue; // +
-    //knockbackResistanceValue;
+        defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue;
     damageData.targetToken = token;
 
     // VULNERABILITY
