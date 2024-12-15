@@ -5070,12 +5070,12 @@ export class HeroSystem6eItem extends Item {
 
     async addActiveEffect(activeEffect) {
         const newEffect = foundry.utils.deepClone(activeEffect);
-        // newEffect.duration.duration ??= newEffect.duration.seconds;
-        // newEffect.duration.startTime ??= game.time.worldTime;
-        // newEffect.duration.startRound ??= game.combat.current.round;
-        // newEffect.duration.startTurn ??= game.combat.current.turn;
-        // newEffect.duration.type ??= "seconds";
-        newEffect.transfer = false;
+        newEffect.duration.duration ??= newEffect.duration.seconds;
+        newEffect.duration.startTime ??= game.time.worldTime;
+        newEffect.duration.startRound ??= game.combat.current.round;
+        newEffect.duration.startTurn ??= game.combat.current.turn;
+        newEffect.duration.type ??= "seconds";
+        //newEffect.transfer = false;
 
         //const ae = await this.createEmbeddedDocuments("ActiveEffect", [newEffect]);
         //ae.duration = ae.updateDuration();

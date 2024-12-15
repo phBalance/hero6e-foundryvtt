@@ -50,12 +50,18 @@ export class EffectsPanel extends Application {
                 // Sometimes ae.parent?.system.active  is false, but the power is active, unclear why.
                 // Consider making active a getter (looking for the AE) instead of using system.actor.
                 if (ae.parent instanceof HeroSystem6eItem && ae.duration.seconds) {
-                    ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
+                    const d = ae._prepareDuration();
+                    ae.flags.label = d.label;
+                    //ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
+                    for (const target of ae.flags.target) {
+                        const item = fromUuidSync(target);
+                        ae.flags.targetDisplay = `${item?.name} [${item.system.XMLID}]`;
+                    }
                 } else {
                     const d = ae._prepareDuration();
                     ae.flags.label = d.label;
+                    ae.flags.targetDisplay = ae.flags.target;
                 }
-                ae.flags.targetDisplay = ae.flags.target;
             }
         }
 

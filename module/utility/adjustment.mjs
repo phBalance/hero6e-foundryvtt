@@ -212,11 +212,14 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
 }
 
 function _findExistingMatchingEffect(item, potentialCharacteristic, powerTargetName, targetSystem) {
+    // Kluge: Ignore any negative changes as we want each DRAIN to be separate so we can properly track the fades.
+    //        This introduces issues where the AP of multiple DRAINs don't add up partial drains.
     // Caution: The item may no longer exist.
     return targetSystem.effects.find(
         (effect) =>
             effect.origin === item.uuid &&
-            effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic),
+            effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic) &&
+            parseInt(effect.changes?.[0].value || 0) >= 0,
     );
 }
 
@@ -301,7 +304,7 @@ function _createNewAdjustmentEffect(
             attackerTokenId: action?.current?.attackerTokenId,
         },
         origin: item.uuid,
-        //description: item.system.description,  // Issues with core FoundryVTT where description doesn't show, nor is editable.
+        description: item.system.description, // Issues with core FoundryVTT where description doesn't show, nor is editable.
         transfer: true,
         disabled: false,
     };

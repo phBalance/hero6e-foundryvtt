@@ -14,8 +14,8 @@ import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import SettingsHelpers from "./settings/settings-helpers.mjs";
-import { HeroSystem6eTokenHud } from "./bar3/tokenHud.mjs";
-import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
+//import { HeroSystem6eTokenHud } from "./bar3/tokenHud.mjs";
+//import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
@@ -33,6 +33,7 @@ import "./utility/chat-dice.mjs";
 
 import "./testing/testing-main.mjs";
 import { EffectsPanel } from "./effects-panel.mjs";
+import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 
 Hooks.once("init", async function () {
     // Custom HeroSystem VisionMode
@@ -83,6 +84,7 @@ Hooks.once("init", async function () {
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
+    // CONFIG.ActiveEffect.dataModels.base = HeroSystem6eActorActiveEffects.defineSchema();
     CONFIG.Canvas.rulerClass = HeroRuler;
     CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
 
@@ -106,6 +108,12 @@ Hooks.once("init", async function () {
         makeDefault: true,
     });
 
+    //Not sure why ActiveEffect.registerSheet is missing.
+    DocumentSheetConfig.registerSheet(ActiveEffect, "herosystem6e", HeroSystemActiveEffectConfig, {
+        makeDefault: true,
+        label: "HeroSystemActiveEffectConfig",
+    });
+
     const templatePaths = [
         `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
@@ -120,6 +128,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-powers-item.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment-item.hbs`,
+        `systems/${HEROSYS.module}/templates/actor/active-effect-config.hbs`,
         // `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
         `systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`,
@@ -527,8 +536,8 @@ Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
 });
 
 //Modify TokenHUD (need 3 bars: end, stun, body)
-Hooks.on("renderTokenHUD", HeroSystem6eTokenHud);
-Hooks.on("renderTokenConfig", extendTokenConfig);
+// Hooks.on("renderTokenHUD", HeroSystem6eTokenHud);
+// Hooks.on("renderTokenConfig", extendTokenConfig);
 
 // Expire ActiveEffects
 let secondsSinceRecovery = 0;
@@ -942,3 +951,25 @@ Hooks.on("renderSidebarTab", async (app, html) => {
         }
     });
 });
+
+// Hooks.on("renderActiveEffectConfig", (activeEffectConfig, html, data) => {
+//     console.log(activeEffectConfig, html, data);
+
+//     const effectsTab = html.find("section[data-tab='effects']");
+//     const header = effectsTab.find("header");
+//     const headerValue = header.find("div.value");
+//     headerValue.after("<div>Seconds</div>");
+
+//     const changesList = effectsTab.find("ol.changes-list");
+//     changesList.find("li").each(function (idx) {
+//         const liValue = $(this).find("div.value");
+//         //const idx = liValue.name.match(/changes\.(\d+)/)[1];
+//         liValue.after(`<input type="text" class="seconds" name="changes.${idx}.seconds" value="">`);
+//     });
+
+//     const submitButton = html.find("button[type='submit']");
+//     submitButton.one("submit", function () {
+//         debugger;
+//         console.log(this);
+//     });
+// });
