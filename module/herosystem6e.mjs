@@ -830,24 +830,33 @@ Hooks.on("renderSidebarTab", async (app, html) => {
 
         switch (dataset.action) {
             case "tohit": {
-                let options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
+                const options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
                 const template = await renderTemplate(
                     `systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`,
                     options,
                 );
-                await Dialog.prompt({
+
+                const userSelection = await Dialog.prompt({
                     title: "Roll ToHit",
                     label: "Roll ToHit",
                     content: template,
                     callback: async function (html) {
                         const form = html.find("form")[0];
-                        options = new FormDataExtended(form).object;
+                        return new FormDataExtended(form).object;
                     },
+                }).catch(() => {
+                    // Promise is rejected most likely from user choosing close
+                    return undefined;
                 });
+
+                // No user selection? If so, don't roll.
+                if (!userSelection) {
+                    break;
+                }
 
                 //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
-                    .addNumber(options.ocv, "OCV")
+                    .addNumber(userSelection.ocv, "OCV")
                     .addNumber(11, "Base to hit")
                     .addDice(-3)
                     .makeSuccessRoll();
@@ -867,7 +876,7 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                 return ChatMessage.create(chatData);
             }
             case "damage": {
-                let options = {
+                const options = {
                     dice: 1,
                     dicePlus: {
                         groupName: "dicePlus",
@@ -887,37 +896,46 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                         chosen: "NORMAL",
                     },
                 };
+
                 const template = await renderTemplate(
                     `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
                     options,
                 );
-                await Dialog.prompt({
+                const userSelection = await Dialog.prompt({
                     title: "Roll Damage",
                     label: "Roll Damage",
                     content: template,
                     callback: async function (html) {
                         const form = html.find("form")[0];
-                        options = new FormDataExtended(form).object;
+                        return new FormDataExtended(form).object;
                     },
+                }).catch(() => {
+                    // Promise is rejected most likely from user choosing close
+                    return undefined;
                 });
+
+                // No user selection? If so, don't roll.
+                if (!userSelection) {
+                    break;
+                }
 
                 //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
-                    .addDice(options.dice, "DICE")
-                    .addHalfDice(options.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
-                    .addDiceMinus1(options.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
-                    .addNumber(options.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
+                    .addDice(userSelection.dice, "DICE")
+                    .addHalfDice(userSelection.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
+                    .addDiceMinus1(userSelection.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
+                    .addNumber(userSelection.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
 
-                    .makeNormalRoll(options.damageType === "NORMAL")
-                    .makeKillingRoll(options.damageType === "KILLING")
-                    .makeAdjustmentRoll(options.damageType === "ADJUSTMENT")
-                    .makeEntangleRoll(options.damageType === "ENTANGLE")
-                    .makeFlashRoll(options.damageType === "FLASH")
-                    .makeEffectRoll(options.damageType === "EFFECT");
+                    .makeNormalRoll(userSelection.damageType === "NORMAL")
+                    .makeKillingRoll(userSelection.damageType === "KILLING")
+                    .makeAdjustmentRoll(userSelection.damageType === "ADJUSTMENT")
+                    .makeEntangleRoll(userSelection.damageType === "ENTANGLE")
+                    .makeFlashRoll(userSelection.damageType === "FLASH")
+                    .makeEffectRoll(userSelection.damageType === "EFFECT");
 
                 await heroRoller.roll();
 
-                const cardHtml = await heroRoller.render(`Roll Generic ${options.damageType} Damage`);
+                const cardHtml = await heroRoller.render(`Roll Generic ${userSelection.damageType} Damage`);
 
                 const chatData = {
                     style: CONST.CHAT_MESSAGE_STYLES.OTHER,

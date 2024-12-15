@@ -188,26 +188,6 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusTargeted"),
                 img: "icons/svg/target.svg",
             },
-            shieldFireEffect: {
-                id: "fireShield",
-                name: "Shield: Fire",
-                img: "icons/svg/fire-shield.svg",
-            },
-            shieldIceEffect: {
-                id: "coldShield",
-                name: "Shield: Ice",
-                img: "icons/svg/ice-shield.svg",
-            },
-            shieldMagicEffect: {
-                id: "magicShield",
-                name: "Shield: Magic",
-                img: "icons/svg/mage-shield.svg",
-            },
-            shieldHolyEffect: {
-                id: "holyShield",
-                name: "Shield: holy",
-                img: "icons/svg/holy-shield.svg",
-            },
             abortEffect: {
                 id: "aborted",
                 name: game.i18n.localize("EFFECT.Aborted"),
