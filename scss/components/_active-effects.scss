@@ -5,3 +5,10 @@
 // div.herosystem-active-effect-config > .window-content {
 //     background: red;
 // }
+
+div.herosystem-active-effect-config div.description {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px dashed rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    max-width: 100%;
+}

@@ -18,6 +18,11 @@ export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
         for (let i = 0; i < context.data.changes.length; i++) {
             context.data.changes[i] = { ...context.data.changes[i], ...context.data.flags.changes?.[i] };
         }
+        const originItem = fromUuidSync(context.data.origin);
+        const token = fromUuidSync(context.data.origin.match(/(.*).Actor/)?.[1]);
+        context.originText = originItem
+            ? `${token?.name || originItem.actor?.name}: ${originItem.name}`
+            : context.data.origin;
         return context;
     }
 

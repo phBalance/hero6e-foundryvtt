@@ -77,9 +77,13 @@ export class HeroSystem6eActor extends Actor {
             newEffect.statuses = [activeEffect.id];
 
             // Check if this ActiveEffect already exists
-            const existingEffect = this.effects.find((o) => o.statuses.has(activeEffect.id));
+            const existingEffect = this.effects.find(
+                (o) => o.statuses.has(activeEffect.id) && !activeEffect.id.includes("DRAIN"),
+            );
             if (!existingEffect) {
                 await this.createEmbeddedDocuments("ActiveEffect", [newEffect]);
+            } else {
+                console.warn("There was a pre-existing ActiveEffect, so the new AE was not added.");
             }
         }
 
