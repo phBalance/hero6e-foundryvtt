@@ -21,23 +21,6 @@ export class ItemAttackFormApplication extends FormApplication {
         this.data = data;
         this.options.title = `${this.data?.item?.actor?.name} roll to hit`;
 
-        // const _updateItem = async function (item, changes, options, userId) {
-        //     if (!this.rendered) return;
-
-        //     if (item.id === this.data.item.id) {
-        //         this.updateItem(item, changes, options, userId);
-        //     }
-
-        //     const cslSkill = CombatSkillLevelsForAttack(this.data.item).skill;
-        //     if (cslSkill && item.id === cslSkill.id) {
-        //         this.updateItem(item, changes, options, userId);
-        //     }
-        //     if (!cslSkill && data.cslSkill) {
-        //         this.updateItem(item, changes, options, userId);
-        //     }
-        // };
-        // Hooks.on("updateItem", _updateItem.bind(this));
-
         const _targetToken = async function () {
             // Necessary for situations where it is not possible
             // to properly wait for promises to resolve before refreshing the UI.
@@ -61,13 +44,6 @@ export class ItemAttackFormApplication extends FormApplication {
         };
         Hooks.on("updateItem", _updateItem.bind(this));
     }
-
-    // async close(options = {}) {
-    //     Hooks.off("targetToken", this._targetToken);
-    //     Hooks.off("controlToken", this._controlToken);
-    //     Hooks.off("updateItem", this._updateItem);
-    //     return super.close(options);
-    // }
 
     refresh() {
         foundry.utils.debounce(this.render(), 100);

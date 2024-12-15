@@ -3955,21 +3955,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MULTIPOWER slots typically include limitations
-        let modifiers = this.modifiers
+        const modifiers = this.modifiers
             .filter((o) => o.BASECOST_total < 0)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             });
-        // Looks like atting parentItem mods is handed in the calc functions
-        // if (this.parentItem) {
-        //     modifiers.push(
-        //         ...(this.parentItem.system.MODIFIER || [])
-        //             .filter((o) => o.BASECOST < 0)
-        //             .sort((a, b) => {
-        //                 return a.BASECOST_total - b.BASECOST_total;
-        //             }),
-        //     );
-        // }
 
         // Disadvantages sorted low to high
         for (const modifier of modifiers) {
