@@ -62,7 +62,7 @@
 }
 
 .actor-sheet .sheet-body,
-.sheet.item .sheet-body {
+.actor-sheet .sheet.item .sheet-body {
     grid-area: content;
     position: relative;
     overflow: hidden auto;
@@ -185,12 +185,12 @@
     margin-top: 0;
 }
 
-th.left,
-td.left {
+.actor-sheet th.left,
+.actor-sheet td.left {
     text-align: left;
 }
 
-input.left {
+.actor-sheet input.left {
     text-align: left;
 }
 
@@ -322,11 +322,11 @@ input.left {
     margin-right: 2px;
 }
 
-ul.left li {
+.actor-sheet ul.left li {
     text-align: left;
 }
 
-.form-group div {
+.actor-sheet .form-group div {
     display: flex;
     flex-direction: row;
 }
@@ -336,7 +336,7 @@ ul.left li {
     margin-right: 5px;
 }
 
-.editor-content {
+.actor-sheet .editor-content {
     min-height: 36px;
     border-radius: 5px;
     border: 1px dashed rgb(0 0 0 / 30%);
