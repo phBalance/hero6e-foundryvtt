@@ -1926,13 +1926,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    // PH: TODO: Why are we cloning heroRoller here?
-    const originalRoll = HeroRoller.fromJSON(damageData.roller);
-    const heroRoller = originalRoll.clone();
-
-    // PH: TODO: Move this around. Should be near the top but there are some tweaks to do.
-    // PH: TODO: Do we need to call _calcDamage here? Seems to be done below. Does this mean we don't need toHitData?
-    // const damageDetail = await _calcDamage(heroRoller, effectiveItem, toHitData);
+    const damageRoller = HeroRoller.fromJSON(damageData.roller);
 
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
@@ -1953,17 +1947,21 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
             // TODO: This assumes that the number of terms equals the DC/5 AP. This is
             //       true for normal attacks but not always.
             // TODO: This ignores explosion modifiers for DC falloff.
-            const termsToRemove = Math.floor(pct * (heroRoller.getBaseTerms().length - 1));
+            const termsToRemove = Math.floor(pct * (damageRoller.getBaseTerms().length - 1));
 
-            heroRoller.removeNHighestRankTerms(termsToRemove);
+            damageRoller.removeNHighestRankTerms(termsToRemove);
         }
     }
+
+    // This the raw damage received by the target before any defenses (i.e. after explosion and other range effects).
+    // You probably don't want to use it - use damageRoller instead.
+    const baseDamageRoller = damageRoller.clone();
 
     const automation = game.settings.get(HEROSYS.module, "automation");
     const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
 
     if (item.system.XMLID === "ENTANGLE") {
-        return _onApplyEntangleToSpecificToken(item, token, heroRoller, action);
+        return _onApplyEntangleToSpecificToken(item, token, damageRoller, action);
     }
 
     // Target ENTANGLE
@@ -1973,7 +1971,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         let targetEntangle = targetToken.targetEntangle;
 
         // If they clicked "Apply Damage" then prompt
-        if (heroRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
+        if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
             console.log("do something");
             targetEntangle = await Dialog.wait({
                 title: `Confirm Target`,
@@ -1996,11 +1994,11 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         }
 
         if (targetEntangle && entangleAE) {
-            return _onApplyDamageToEntangle(item, token, heroRoller, entangleAE, action);
+            return _onApplyDamageToEntangle(item, token, damageRoller, entangleAE, action);
         }
     }
 
-    if (heroRoller.getHitLocation().item) {
+    if (damageRoller.getHitLocation().item) {
         return ui.notifications.error(`Damaging FOCI is not currently supported.`);
     }
 
@@ -2139,10 +2137,10 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         }
     }
 
-    heroRoller.removeNDC(damageData.damageNegationValue);
+    damageRoller.removeNDC(damageData.damageNegationValue);
 
     // We need to recalculate damage to account for possible Damage Negation
-    const damageDetail = await _calcDamage(heroRoller, item, damageData);
+    const damageDetail = await _calcDamage(damageRoller, item, damageData);
 
     // TRANSFORMATION
     const transformation =
@@ -2227,7 +2225,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         }
     }
 
-    const damageRenderedResult = await heroRoller.render();
+    const damageRenderedResult = await damageRoller.render();
 
     // Attack may have additional effects, such as those from martial arts
     let effectsFinal = foundry.utils.deepClone(damageDetail.effects);
@@ -2245,11 +2243,11 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         item: item,
 
         // Incoming Damage Information
-        incomingDamageSummary: originalRoll.getTotalSummary(),
-        incomingAnnotatedDamageTerms: originalRoll.getAnnotatedTermsSummary(),
+        incomingDamageSummary: baseDamageRoller.getTotalSummary(),
+        incomingAnnotatedDamageTerms: baseDamageRoller.getAnnotatedTermsSummary(),
 
         // dice rolls
-        roller: heroRoller,
+        roller: damageRoller,
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
         knockbackRoll: damageDetail.knockbackRoller,
@@ -2266,7 +2264,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
 
         // damage info
-        damageString: heroRoller.getTotalSummary(),
+        damageString: baseDamageRoller.getTotalSummary(),
         useHitLoc: damageDetail.useHitLoc,
         hitLocText: damageDetail.hitLocText,
 
