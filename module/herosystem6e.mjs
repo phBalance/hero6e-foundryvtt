@@ -165,10 +165,12 @@ Hooks.once("i18nInit", () => {
 });
 
 Hooks.on("canvasReady", () => {
-    // Effect Panel singleton application
-    game[HEROSYS.module].effectPanel.render(true);
-    if (!canvas.scene) return;
-    if (game.ready) canvas.scene.reset();
+    if (game.settings.get(game.system.id, "effectsPanel")) {
+        // Effect Panel singleton application
+        game[HEROSYS.module].effectPanel.render(true);
+        if (!canvas.scene) return;
+        if (game.ready) canvas.scene.reset();
+    }
 });
 
 Hooks.once("ready", async function () {

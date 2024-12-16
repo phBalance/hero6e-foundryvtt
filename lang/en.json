@@ -204,6 +204,10 @@
             "Name": "Combat Movement Only On Actors Phase",
             "Hint": "This prevents players from moving their tokens when it isn't their turn."
         },
+        "effectsPanel" :{
+            "Name": "Effects Panel",
+            "Hint": "Show the effects panel when a token is controlled."
+        },
         "ShowAllConditionalDefenses": {
             "Name": "Show all Conditional Defenses",
             "Hint": "Conditional Defenses that provide no obvious defense are hidden by default. There may be some edge cases where these defenses should be applied. Enabling this setting will give the GM an opportunity to apply a conditional defense, even when the automation thinks it does not apply."
