@@ -6,8 +6,9 @@
   - SIGHTGROUP visions now respect the BLIND status. [#1590](https://github.com/dmdorman/hero6e-foundryvtt/issues/1590)
   - Fixed issue with some enhanced visions not showing map in the dark.
 - Adjustment powers now work with POWERDEFENSE.
-- Inobivous powers do not show for Actor Description.
+- Inobivous powers no longer show for Actor Description.
 - Fixed the chat card name of Adjustment powers that targeted POWERs. Was showing attack item, not target power. [#1608](https://github.com/dmdorman/hero6e-foundryvtt/issues/1608)
+- Fixed formatting issues with prosemirror editor caused by us overriding some css that we shouldn't have. [#1629](https://github.com/dmdorman/hero6e-foundryvtt/issues/1629)
 
 ## Version 4.0.12 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

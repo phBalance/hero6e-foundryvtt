@@ -236,6 +236,24 @@ function _createAEChangeBlock(targetCharOrPower, targetSystem) {
     };
 }
 
+function _createAEChange(activeEffect, key, value, seconds, source, activePoints) {
+    activeEffect.changes ??= [];
+    activeEffect.changes.push({
+        key,
+        value,
+        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+    });
+    // activeEffect.flags ??= {};
+    // activeEffect.flags.changes ??= [];
+    // activeEffect.flags.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
+
+    // Trying system approach
+    activeEffect.system ??= {};
+    activeEffect.system.changes ??= [];
+    activeEffect.system.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
+    return activeEffect;
+}
+
 function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
     let durationOptionId;
 
@@ -287,7 +305,7 @@ function _createNewAdjustmentEffect(
             targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
         img: item.img,
-        changes: [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
+        //changes:  [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
         duration: {
             seconds: _determineEffectDurationInSeconds(item, rawActivePointsDamage),
         },
@@ -302,6 +320,13 @@ function _createNewAdjustmentEffect(
             key: targetPower?.system?.XMLID || potentialCharacteristic,
             itemTokenName,
             attackerTokenId: action?.current?.attackerTokenId,
+            // changes: [
+            //     {
+            //         source: item.uuid,
+            //         seconds: _determineEffectDurationInSeconds(item, rawActivePointsDamage),
+            //         adjustmentActivePoints: 0,
+            //     },
+            // ],
         },
         origin: item.uuid,
         description: item.system.description, // Issues with core FoundryVTT where description doesn't show, nor is editable.
@@ -338,9 +363,25 @@ export async function performAdjustment(
     defenseDescription,
     effectsDescription,
     isFade,
-    targetActor,
+    token,
     action,
 ) {
+    const targetActor = token.actor || token;
+
+    // Aaron's attempt to refactor
+    // if (item.system.XMLID === "AID") {
+    //     return performAdjustmentAaron(
+    //         item,
+    //         nameOfCharOrPower,
+    //         thisAttackRawActivePointsDamage, // Amount of AP to change (fade or initial value)
+    //         defenseDescription,
+    //         effectsDescription,
+    //         isFade,
+    //         token,
+    //         action,
+    //     );
+    // }
+
     const isHealing = item.system.XMLID === "HEALING";
     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
@@ -453,6 +494,15 @@ export async function performAdjustment(
         return chatCard;
     }
 
+    // Update AE active points by summing changes
+    if (activeEffect.flags.changes) {
+        const _ap = activeEffect.flags.changes?.reduce((partialSum, a) => partialSum + (a.activePoints || 0), 0);
+        if (_ap !== 0 && activeEffect.flags.adjustmentActivePoints != _ap) {
+            console.log("New AP calc");
+            activeEffect.flags.adjustmentActivePoints = _ap;
+        }
+    }
+
     // Healing is not cumulative but all else is. Healing cannot harm when lower than an existing effect.
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
         ? Math.min(thisAttackRawActivePointsDamage - activeEffect.flags.adjustmentActivePoints, 0)
@@ -545,7 +595,20 @@ export async function performAdjustment(
 
     // Calculate the effect's change to the maximum. Only healing does not change the maximum.
     if (!isOnlyToStartingValues) {
-        activeEffect.changes[0].value = parseInt(activeEffect.changes[0].value) - totalActivePointAffectedDifference;
+        //activeEffect.changes[0].value = parseInt(activeEffect.changes[0].value) - totalActivePointAffectedDifference;
+        const _key =
+            targetSystem.system.characteristics?.[potentialCharacteristic.toLowerCase()] != null
+                ? `system.characteristics.${potentialCharacteristic.toLowerCase()}.max`
+                : "system.max";
+        const _seconds = _determineEffectDurationInSeconds(item, thisAttackRawActivePointsDamage);
+        _createAEChange(
+            activeEffect,
+            _key,
+            -totalActivePointAffectedDifference,
+            _seconds,
+            item.uuid,
+            -totalAdjustmentNewActivePoints,
+        );
     }
 
     // If this is 5e then some characteristics are calculated (not figured) based on
@@ -596,6 +659,7 @@ export async function performAdjustment(
                 name: activeEffect.name,
                 changes: activeEffect.changes,
                 flags: activeEffect.flags,
+                system: activeEffect.system,
             }),
         );
     }
@@ -644,6 +708,136 @@ export async function performAdjustment(
         targetActor,
     );
 }
+
+// async function performAdjustmentAaron(
+//     item,
+//     targetXMLID,
+//     adjustmentEffectActivePoints, // Amount of AP to change (fade or initial value)
+//     _defenseDescription,
+//     _effectsDescription,
+//     _isFade,
+//     token,
+//     action,
+// ) {
+//     const isHealing = item.system.XMLID === "HEALING";
+//     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
+
+//     // TODO: pass in the correct adjustmentEffectActivePoints
+//     switch (item.system.XMLID) {
+//         case "AID":
+//             if (adjustmentEffectActivePoints < 0) {
+//                 adjustmentEffectActivePoints = Math.abs(adjustmentEffectActivePoints);
+//                 console.warn(`Fixed NEGATIVE adjustmentEffectActivePoints for ${item.system.XMLID}`);
+//             }
+//             break;
+//         case "DRAIN":
+//             if (adjustmentEffectActivePoints > 0) {
+//                 adjustmentEffectActivePoints = -Math.abs(adjustmentEffectActivePoints);
+//                 console.warn(`Fixed POSITIVE adjustmentEffectActivePoints for ${item.system.XMLID}`);
+//             }
+//             break;
+//         default:
+//             console.warn(`Unhandled ${targetXMLID}`);
+//     }
+
+//     // 5e conversions for Calculated Characteristics
+//     // Adjustment Powers
+//     // that affect Primary Characteristics have no effect
+//     // on Figured Characteristics, but do affect abilities
+//     // calculated from Primary Characteristics (such as
+//     // the lifting capacity of and damage caused by STR,
+//     // a character’s Combat Value derived from DEX, and
+//     // so forth).
+//     if (token.actor.is5e) {
+//         switch (targetXMLID) {
+//             case "OCV":
+//             case "DCV":
+//                 console.warn(`${targetXMLID} is invalid for a 5e actor, using DEX instead.`);
+//                 targetXMLID = "DEX";
+
+//                 break;
+//             case "OMCV":
+//             case "DMCV":
+//                 console.warn(`${targetXMLID} is invalid for a 5e actor, using EGO instead.`);
+//                 targetXMLID = "EGO";
+//                 break;
+//         }
+//     }
+
+//     // Find a matching characteristic.
+//     // Note that movement powers are sometimes treated as characteristics.
+//     const targetCharacteristic = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === targetXMLID)
+//         ? token.actor.system.characteristics[targetXMLID.toLowerCase()]
+//         : null;
+
+//     // Search the target for this power.
+//     // TODO: will return first matching power. How can we distinguish without making users
+//     //       setup the item for a specific? Will likely need to provide a dialog. That gets
+//     //       us into the thorny question of what powers have been discovered.
+//     const targetPowers = token.actor.items.filter((item) => item.system.XMLID === targetXMLID);
+//     if (!targetCharacteristic && targetPowers.length > 1) {
+//         console.warn(`Multiple ${targetXMLID} powers`);
+//     }
+//     // Notice we favor targetCharacteristic over a power
+//     const targetPower = targetCharacteristic ? null : targetPowers?.[0];
+
+//     // Do we have a target?
+//     if (!targetCharacteristic && !targetPower) {
+//         await ui.notifications.warn(
+//             `${targetXMLID} is an invalid target for the adjustment power ${item.name}. Perhaps ${token.name} does not have that characteristic or power.`,
+//         );
+//         return;
+//     }
+
+//     // Characteristics target an actor, and powers target an item
+//     const targetActorOrItem = targetCharacteristic ? token.actor : targetPower;
+
+//     const targetStartingValue = targetCharacteristic?.value || parseInt(targetPower.adjustedLevels);
+//     const targetStartingMax = targetCharacteristic?.max || parseInt(targetPower.system.LEVELS);
+//     const targetStartingCore = targetCharacteristic?.core || parseInt(targetPower.system.LEVELS);
+
+//     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
+//     const existingEffect = _findExistingMatchingEffect(item, targetXMLID, targetPower, targetActorOrItem);
+
+//     const activeEffect =
+//         existingEffect ||
+//         {
+//             name: `Adjustment ${taragetXMLID}`,
+//             img: item.img,
+//             flags: {
+//                 type: "adjustment",
+//                 version: 3,
+//                 adjustmentActivePoints: 0,
+//                 affectedPoints: 0,
+//                 XMLID: item.system.XMLID,
+//                 source: targetActor.name,
+//                 target: [targetPower?.uuid || potentialCharacteristic],
+//                 key: targetPower?.system?.XMLID || potentialCharacteristic,
+//                 itemTokenName,
+//                 attackerTokenId: action?.current?.attackerTokenId,
+//             },
+//             origin: item.uuid, // Not always true with multiple sources for same XMLID
+//             description: item.system.description, // Not always true with multiple sources for same XMLID
+//             transfer: true,
+//             disabled: false,
+//         };
+
+//     debugger;
+//     // return _generateAdjustmentChatCard(
+//     //     item,
+//     //     thisAttackRawActivePointsDamage,
+//     //     totalActivePointAffectedDifference,
+//     //     totalAdjustmentNewActivePoints,
+//     //     thisAttackActivePointAdjustmentNotAppliedDueToMax,
+//     //     thisAttackActivePointEffectNotAppliedDueToNotExceeding,
+//     //     defenseDescription,
+//     //     effectsDescription,
+//     //     targetUpperCaseName, //potentialCharacteristic,
+//     //     isFade,
+//     //     isEffectFinished,
+//     //     targetActor,
+//     // );
+// }
 
 function _generateAdjustmentChatCard(
     item,

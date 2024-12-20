@@ -232,6 +232,17 @@ export default class SettingsHelpers {
             requiresReload: false,
         });
 
+        game.settings.register(module, "effectsPanel", {
+            name: game.i18n.localize("Settings.effectsPanel.Name"),
+            hint: game.i18n.localize("Settings.effectsPanel.Hint"),
+            scope: "client",
+            config: true,
+            type: Boolean,
+            default: true,
+            //onChange: () => ui.chat.render(), // doesn't seem to work
+            requiresReload: true,
+        });
+
         game.settings.register(module, "ShowOnlyVisibleCombatants", {
             name: game.i18n.localize("Settings.ShowOnlyVisibleCombatants.Name"),
             hint: game.i18n.localize("Settings.ShowOnlyVisibleCombatants.Hint"),

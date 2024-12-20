@@ -40,6 +40,7 @@
         </div>
 
         <div data-visibility="gm">
+
             <button class="apply-damage"
                 title="Apply damage to selected tokens."
                 data-item-id="{{item.uuid}}"
@@ -55,6 +56,7 @@
             </button>
 
             {{#each targetTokens as |target id|}}
+
                 <button class="apply-damage"
                     title="Apply damage to {{target.name}}"
                     data-item-id="{{../item.uuid}}"

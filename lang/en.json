@@ -162,7 +162,10 @@
         "StatusTargeted": "Targeted",
         "StatusTunneling": "Tunneling",
         "StatusUnconscious": "Unconscious",
-        "Underwater": "Underwater"
+        "Underwater": "Underwater",
+        "Seconds": "Sec",
+        "AP": "AP",
+        "Source": "Source"
     },
 
     "Settings": {
@@ -203,6 +206,10 @@
         "CombatMovementOnlyOnActorsPhase" :{
             "Name": "Combat Movement Only On Actors Phase",
             "Hint": "This prevents players from moving their tokens when it isn't their turn."
+        },
+        "effectsPanel" :{
+            "Name": "Effects Panel",
+            "Hint": "Show the effects panel when a token is controlled."
         },
         "ShowAllConditionalDefenses": {
             "Name": "Show all Conditional Defenses",
