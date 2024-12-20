@@ -5,7 +5,7 @@ export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
         const defaultOptions = super.defaultOptions;
         return foundry.utils.mergeObject(defaultOptions, {
             //classes: ["herosystem6e", "sheet", "item"],
-            // width: 520,
+            width: 700,
             // height: 660,
             // scrollY: [".sheet-body"],
             classes: ["sheet", "herosystem-active-effect-config", "active-effect-sheet"],
@@ -16,21 +16,50 @@ export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
     async getData() {
         const context = await super.getData();
         for (let i = 0; i < context.data.changes.length; i++) {
-            context.data.changes[i] = { ...context.data.changes[i], ...context.data.flags.changes?.[i] };
+            context.data.changes[i] = { ...context.data.changes[i], ...context.data.system.changes?.[i] };
         }
         const originItem = fromUuidSync(context.data.origin);
-        const token = fromUuidSync(context.data.origin.match(/(.*).Actor/)?.[1]);
+        const token = fromUuidSync(context.data.origin?.match(/(.*).Actor/)?.[1]);
         context.originText = originItem
             ? `${token?.name || originItem.actor?.name}: ${originItem.name}`
             : context.data.origin;
+
+        //sourceText
+        for (const change of context.data.changes) {
+            if (change.source) {
+                const sourceItem = fromUuidSync(change.source);
+                const token = fromUuidSync(change.source.match(/(.*).Actor/)?.[1]);
+                change.sourceText = `${token?.name || sourceItem.actor?.name}: ${sourceItem.name}`;
+            }
+        }
         return context;
     }
 
-    // async _updateObject(event, formData) {
-    //     await super._updateObject(event, formData);
+    _onEffectControl(event) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        switch (button.dataset.action) {
+            case "add":
+                return this._addEffectChange();
+            case "delete":
+                button.closest(".effect-change").remove();
+                return this.submit({ preventClose: true }).then(() => this.render());
+        }
+    }
 
-    //     // if (formData.changes) {
-    //     //     await this.object.update({ changes: formData.changes });
-    //     // }
-    // }
+    async _updateObject(event, formData) {
+        await super._updateObject(event, formData);
+    }
+
+    _getSubmitData(updateData = {}) {
+        const fd = new FormDataExtended(this.form, { editors: this.editors, disabled: true });
+        let data = foundry.utils.expandObject(fd.object);
+        if (updateData) foundry.utils.mergeObject(data, updateData);
+        data.changes = Array.from(Object.values(data.changes || {}));
+        data.statuses ??= [];
+
+        // Need to collapse the array (get rid of any sparse indexes that can occur when deleting middle indexes)
+        data.system.changes = Array.from(Object.values(data.system.changes || {}));
+        return data;
+    }
 }

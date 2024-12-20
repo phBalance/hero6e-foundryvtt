@@ -9,7 +9,10 @@ import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.m
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 import * as chat from "./chat.mjs";
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
-import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
+import {
+    HeroSystem6eActorActiveEffects,
+    HeroSystem6eActorActiveEffectsSystemData,
+} from "./actor/actor-active-effects.mjs";
 import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
@@ -84,9 +87,13 @@ Hooks.once("init", async function () {
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-    // CONFIG.ActiveEffect.dataModels.base = HeroSystem6eActorActiveEffects.defineSchema();
     CONFIG.Canvas.rulerClass = HeroRuler;
     CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
+
+    Object.assign(CONFIG.ActiveEffect.dataModels, {
+        // REF: https://foundryvtt.wiki/en/development/api/DataModel
+        base: HeroSystem6eActorActiveEffectsSystemData,
+    });
 
     HeroRuler.initialize();
 

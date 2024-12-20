@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sheet' this}} --}}
+{{log 'actor-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off">
 
     <aside>
@@ -513,6 +513,7 @@
                         <th title="{{localize 'ActorSheet.ValueTitle'}}">{{localize "ActorSheet.Value"}}</th>
                         <th title="{{localize 'ActorSheet.MaxTitle'}}">{{localize "ActorSheet.Max"}}</th>
                         <th title="{{localize 'ActorSheet.CoreTitle'}}">{{localize "ActorSheet.Core"}}</th>
+                        {{!-- {{#if alphaTesting}}<th title="{{localize 'ActorSheet.APTitle'}}">{{localize "ActorSheet.AP"}}</th>{{/if}} --}}
                         <th title="{{localize 'ActorSheet.CharTitle'}}">{{localize "ActorSheet.Char"}}</th>
                         <th title="{{localize 'ActorSheet.BaseTitle'}}">{{localize "ActorSheet.Base"}}</th>
                         <th title="{{localize 'ActorSheet.CostTitle'}}">{{localize "ActorSheet.Cost"}}</th>
@@ -543,6 +544,14 @@
                                 null)}}disabled{{/if}}>
                             {{/unless}}
                         </td>
+                        {{!-- {{#if @root/alphaTesting}}
+                            <td>
+                                {{#unless (eq characteristic.core null)}}
+                                <input name="system.characteristics.{{characteristic.key}}.ap" type="number"
+                                    value="{{characteristic.ap}}" data-dtype="Number" disabled>
+                                {{/unless}}
+                            </td>
+                        {{/if}} --}}
                         <td title="{{characteristic.name}}">
                             {{toUpperCase characteristic.key}}
                             

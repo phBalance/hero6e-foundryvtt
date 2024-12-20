@@ -162,7 +162,10 @@
         "StatusTargeted": "Targeted",
         "StatusTunneling": "Tunneling",
         "StatusUnconscious": "Unconscious",
-        "Underwater": "Underwater"
+        "Underwater": "Underwater",
+        "Seconds": "Sec",
+        "AP": "AP",
+        "Source": "Source"
     },
 
     "Settings": {

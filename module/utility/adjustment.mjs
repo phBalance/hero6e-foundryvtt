@@ -236,6 +236,24 @@ function _createAEChangeBlock(targetCharOrPower, targetSystem) {
     };
 }
 
+function _createAEChange(activeEffect, key, value, seconds, source, activePoints) {
+    activeEffect.changes ??= [];
+    activeEffect.changes.push({
+        key,
+        value,
+        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+    });
+    // activeEffect.flags ??= {};
+    // activeEffect.flags.changes ??= [];
+    // activeEffect.flags.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
+
+    // Trying system approach
+    activeEffect.system ??= {};
+    activeEffect.system.changes ??= [];
+    activeEffect.system.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
+    return activeEffect;
+}
+
 function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
     let durationOptionId;
 
@@ -287,7 +305,7 @@ function _createNewAdjustmentEffect(
             targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
         img: item.img,
-        changes: [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
+        //changes:  [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
         duration: {
             seconds: _determineEffectDurationInSeconds(item, rawActivePointsDamage),
         },
@@ -302,6 +320,13 @@ function _createNewAdjustmentEffect(
             key: targetPower?.system?.XMLID || potentialCharacteristic,
             itemTokenName,
             attackerTokenId: action?.current?.attackerTokenId,
+            // changes: [
+            //     {
+            //         source: item.uuid,
+            //         seconds: _determineEffectDurationInSeconds(item, rawActivePointsDamage),
+            //         adjustmentActivePoints: 0,
+            //     },
+            // ],
         },
         origin: item.uuid,
         description: item.system.description, // Issues with core FoundryVTT where description doesn't show, nor is editable.
@@ -313,6 +338,7 @@ function _createNewAdjustmentEffect(
     // those. We only need to worry about 2 (DEX -> OCV & DCV and EGO -> OMCV & DMCV)
     // as figured characteristics aren't adjusted.
     if (targetActor.system.is5e) {
+        debugger;
         if (potentialCharacteristic === "dex") {
             activeEffect.changes.push(_createAEChangeBlock("ocv", targetSystem));
             activeEffect.flags.target.push("ocv");
@@ -453,6 +479,15 @@ export async function performAdjustment(
         return chatCard;
     }
 
+    // Update AE active points by summing changes
+    if (activeEffect.flags.changes) {
+        const _ap = activeEffect.flags.changes?.reduce((partialSum, a) => partialSum + (a.activePoints || 0), 0);
+        if (_ap !== 0 && activeEffect.flags.adjustmentActivePoints != _ap) {
+            console.log("New AP calc");
+            activeEffect.flags.adjustmentActivePoints = _ap;
+        }
+    }
+
     // Healing is not cumulative but all else is. Healing cannot harm when lower than an existing effect.
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
         ? Math.min(thisAttackRawActivePointsDamage - activeEffect.flags.adjustmentActivePoints, 0)
@@ -545,7 +580,20 @@ export async function performAdjustment(
 
     // Calculate the effect's change to the maximum. Only healing does not change the maximum.
     if (!isOnlyToStartingValues) {
-        activeEffect.changes[0].value = parseInt(activeEffect.changes[0].value) - totalActivePointAffectedDifference;
+        //activeEffect.changes[0].value = parseInt(activeEffect.changes[0].value) - totalActivePointAffectedDifference;
+        const _key =
+            targetSystem.system.characteristics?.[potentialCharacteristic.toLowerCase()] != null
+                ? `system.characteristics.${potentialCharacteristic.toLowerCase()}.max`
+                : "system.max";
+        const _seconds = _determineEffectDurationInSeconds(item, thisAttackRawActivePointsDamage);
+        _createAEChange(
+            activeEffect,
+            _key,
+            -totalActivePointAffectedDifference,
+            _seconds,
+            item.uuid,
+            -totalAdjustmentNewActivePoints,
+        );
     }
 
     // If this is 5e then some characteristics are calculated (not figured) based on
@@ -596,6 +644,7 @@ export async function performAdjustment(
                 name: activeEffect.name,
                 changes: activeEffect.changes,
                 flags: activeEffect.flags,
+                system: activeEffect.system,
             }),
         );
     }
