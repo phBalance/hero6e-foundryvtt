@@ -12,7 +12,6 @@ import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
  * @extends {Actor}
  */
 export class HeroSystem6eActor extends Actor {
-
     /** @inheritdoc */
     async _preCreate(data, options, user) {
         await super._preCreate(data, options, user);
