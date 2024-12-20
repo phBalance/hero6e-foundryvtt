@@ -9,6 +9,8 @@
 - Inobivous powers no longer show for Actor Description.
 - Fixed the chat card name of Adjustment powers that targeted POWERs. Was showing attack item, not target power. [#1608](https://github.com/dmdorman/hero6e-foundryvtt/issues/1608)
 - Fixed formatting issues with prosemirror editor caused by us overriding some css that we shouldn't have. [#1629](https://github.com/dmdorman/hero6e-foundryvtt/issues/1629)
+- Knocked out targets no longer get double adjustment effect. [#1255](https://github.com/dmdorman/hero6e-foundryvtt/issues/1255)
+- Explosions now correctly deal different damage to each token based on distance when using the "Apply Damage to ALL" button. [#1323](https://github.com/dmdorman/hero6e-foundryvtt/issues/1323)
 
 ## Version 4.0.12 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

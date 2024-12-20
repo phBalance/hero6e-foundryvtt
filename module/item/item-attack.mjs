@@ -2946,6 +2946,13 @@ async function _calcDamage(heroRoller, item, options) {
         } else {
             bodyForPenetrating = body;
         }
+
+        // Knocked out targets take double STUN damage from attacks
+        const targetActor = (game.scenes.current.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
+        if (targetActor?.statuses.has("knockedOut")) {
+            effects += "Knocked Out x2 STUN;";
+            stun *= 2;
+        }
     }
 
     const noHitLocationsPower = !!item.system.noHitLocations;
@@ -2979,12 +2986,6 @@ async function _calcDamage(heroRoller, item, options) {
     let effects = "";
     if (item.system.EFFECT) {
         effects = item.system.EFFECT + "; ";
-    }
-
-    const targetActor = (game.scenes.current.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
-    if (targetActor?.statuses.has("knockedOut")) {
-        effects += "Knocked Out x2 STUN;";
-        stun *= 2;
     }
 
     // VULNERABILITY
