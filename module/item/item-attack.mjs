@@ -2721,7 +2721,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     // AID
     const enhancementChatMessages = [];
-    const enhancementTargetActor = adjustmentItem.system.XMLID === "TRANSFER" ? adjustmentItem.actor : token.actor;
+    //const enhancementTargetActor = adjustmentItem.system.XMLID === "TRANSFER" ? adjustmentItem.actor : token.actor;
     for (const enhance of enhancesArray) {
         const simplifiedHealing = adjustmentItem.system.XMLID === "HEALING" && enhance.match(/simplified/i);
 

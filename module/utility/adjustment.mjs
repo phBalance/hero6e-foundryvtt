@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo, hdcTimeOptionIdToSeconds, getCharacteristicInfoArrayForActor } from "./util.mjs";
+import { getPowerInfo, hdcTimeOptionIdToSeconds } from "./util.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
 /**
