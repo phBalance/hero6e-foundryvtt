@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo, hdcTimeOptionIdToSeconds } from "./util.mjs";
+import { getPowerInfo, hdcTimeOptionIdToSeconds, getCharacteristicInfoArrayForActor } from "./util.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
 /**
@@ -338,7 +338,6 @@ function _createNewAdjustmentEffect(
     // those. We only need to worry about 2 (DEX -> OCV & DCV and EGO -> OMCV & DMCV)
     // as figured characteristics aren't adjusted.
     if (targetActor.system.is5e) {
-        debugger;
         if (potentialCharacteristic === "dex") {
             activeEffect.changes.push(_createAEChangeBlock("ocv", targetSystem));
             activeEffect.flags.target.push("ocv");
@@ -364,9 +363,25 @@ export async function performAdjustment(
     defenseDescription,
     effectsDescription,
     isFade,
-    targetActor,
+    token,
     action,
 ) {
+    const targetActor = token.actor || token;
+
+    // Aaron's attempt to refactor
+    // if (item.system.XMLID === "AID") {
+    //     return performAdjustmentAaron(
+    //         item,
+    //         nameOfCharOrPower,
+    //         thisAttackRawActivePointsDamage, // Amount of AP to change (fade or initial value)
+    //         defenseDescription,
+    //         effectsDescription,
+    //         isFade,
+    //         token,
+    //         action,
+    //     );
+    // }
+
     const isHealing = item.system.XMLID === "HEALING";
     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
@@ -693,6 +708,136 @@ export async function performAdjustment(
         targetActor,
     );
 }
+
+// async function performAdjustmentAaron(
+//     item,
+//     targetXMLID,
+//     adjustmentEffectActivePoints, // Amount of AP to change (fade or initial value)
+//     _defenseDescription,
+//     _effectsDescription,
+//     _isFade,
+//     token,
+//     action,
+// ) {
+//     const isHealing = item.system.XMLID === "HEALING";
+//     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
+
+//     // TODO: pass in the correct adjustmentEffectActivePoints
+//     switch (item.system.XMLID) {
+//         case "AID":
+//             if (adjustmentEffectActivePoints < 0) {
+//                 adjustmentEffectActivePoints = Math.abs(adjustmentEffectActivePoints);
+//                 console.warn(`Fixed NEGATIVE adjustmentEffectActivePoints for ${item.system.XMLID}`);
+//             }
+//             break;
+//         case "DRAIN":
+//             if (adjustmentEffectActivePoints > 0) {
+//                 adjustmentEffectActivePoints = -Math.abs(adjustmentEffectActivePoints);
+//                 console.warn(`Fixed POSITIVE adjustmentEffectActivePoints for ${item.system.XMLID}`);
+//             }
+//             break;
+//         default:
+//             console.warn(`Unhandled ${targetXMLID}`);
+//     }
+
+//     // 5e conversions for Calculated Characteristics
+//     // Adjustment Powers
+//     // that affect Primary Characteristics have no effect
+//     // on Figured Characteristics, but do affect abilities
+//     // calculated from Primary Characteristics (such as
+//     // the lifting capacity of and damage caused by STR,
+//     // a character’s Combat Value derived from DEX, and
+//     // so forth).
+//     if (token.actor.is5e) {
+//         switch (targetXMLID) {
+//             case "OCV":
+//             case "DCV":
+//                 console.warn(`${targetXMLID} is invalid for a 5e actor, using DEX instead.`);
+//                 targetXMLID = "DEX";
+
+//                 break;
+//             case "OMCV":
+//             case "DMCV":
+//                 console.warn(`${targetXMLID} is invalid for a 5e actor, using EGO instead.`);
+//                 targetXMLID = "EGO";
+//                 break;
+//         }
+//     }
+
+//     // Find a matching characteristic.
+//     // Note that movement powers are sometimes treated as characteristics.
+//     const targetCharacteristic = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === targetXMLID)
+//         ? token.actor.system.characteristics[targetXMLID.toLowerCase()]
+//         : null;
+
+//     // Search the target for this power.
+//     // TODO: will return first matching power. How can we distinguish without making users
+//     //       setup the item for a specific? Will likely need to provide a dialog. That gets
+//     //       us into the thorny question of what powers have been discovered.
+//     const targetPowers = token.actor.items.filter((item) => item.system.XMLID === targetXMLID);
+//     if (!targetCharacteristic && targetPowers.length > 1) {
+//         console.warn(`Multiple ${targetXMLID} powers`);
+//     }
+//     // Notice we favor targetCharacteristic over a power
+//     const targetPower = targetCharacteristic ? null : targetPowers?.[0];
+
+//     // Do we have a target?
+//     if (!targetCharacteristic && !targetPower) {
+//         await ui.notifications.warn(
+//             `${targetXMLID} is an invalid target for the adjustment power ${item.name}. Perhaps ${token.name} does not have that characteristic or power.`,
+//         );
+//         return;
+//     }
+
+//     // Characteristics target an actor, and powers target an item
+//     const targetActorOrItem = targetCharacteristic ? token.actor : targetPower;
+
+//     const targetStartingValue = targetCharacteristic?.value || parseInt(targetPower.adjustedLevels);
+//     const targetStartingMax = targetCharacteristic?.max || parseInt(targetPower.system.LEVELS);
+//     const targetStartingCore = targetCharacteristic?.core || parseInt(targetPower.system.LEVELS);
+
+//     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
+//     const existingEffect = _findExistingMatchingEffect(item, targetXMLID, targetPower, targetActorOrItem);
+
+//     const activeEffect =
+//         existingEffect ||
+//         {
+//             name: `Adjustment ${taragetXMLID}`,
+//             img: item.img,
+//             flags: {
+//                 type: "adjustment",
+//                 version: 3,
+//                 adjustmentActivePoints: 0,
+//                 affectedPoints: 0,
+//                 XMLID: item.system.XMLID,
+//                 source: targetActor.name,
+//                 target: [targetPower?.uuid || potentialCharacteristic],
+//                 key: targetPower?.system?.XMLID || potentialCharacteristic,
+//                 itemTokenName,
+//                 attackerTokenId: action?.current?.attackerTokenId,
+//             },
+//             origin: item.uuid, // Not always true with multiple sources for same XMLID
+//             description: item.system.description, // Not always true with multiple sources for same XMLID
+//             transfer: true,
+//             disabled: false,
+//         };
+
+//     debugger;
+//     // return _generateAdjustmentChatCard(
+//     //     item,
+//     //     thisAttackRawActivePointsDamage,
+//     //     totalActivePointAffectedDifference,
+//     //     totalAdjustmentNewActivePoints,
+//     //     thisAttackActivePointAdjustmentNotAppliedDueToMax,
+//     //     thisAttackActivePointEffectNotAppliedDueToNotExceeding,
+//     //     defenseDescription,
+//     //     effectsDescription,
+//     //     targetUpperCaseName, //potentialCharacteristic,
+//     //     isFade,
+//     //     isEffectFinished,
+//     //     targetActor,
+//     // );
+// }
 
 function _generateAdjustmentChatCard(
     item,

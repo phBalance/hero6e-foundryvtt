@@ -2756,7 +2756,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     // DRAIN
     const reductionChatMessages = [];
-    const reductionTargetActor = token.actor;
+    //const reductionTargetActor = token.actor;
     for (const reduce of reducesArray) {
         reductionChatMessages.push(
             await performAdjustment(
@@ -2766,7 +2766,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                 defense,
                 damageDetail.effects,
                 false,
-                reductionTargetActor,
+                token,
                 action,
             ),
         );
@@ -2791,7 +2791,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     "None - Beneficial",
                     "",
                     false,
-                    enhancementTargetActor,
+                    token,
                 ),
             );
             // BODY
@@ -2803,7 +2803,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     "None - Beneficial",
                     "",
                     false,
-                    enhancementTargetActor,
+                    token,
                 ),
             );
             adjustmentItemTags.push({
@@ -2823,7 +2823,8 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     "None - Beneficial",
                     "",
                     false,
-                    enhancementTargetActor,
+                    token,
+                    action,
                 ),
             );
             adjustmentItemTags.push({ name: enhance });
