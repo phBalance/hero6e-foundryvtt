@@ -786,13 +786,13 @@ export class HeroSystem6eItem extends Item {
 
             // recurse part
             for (const mod of this.modifiers || this.MODIFIER || []) {
-                return recursiveFindByXmlid.call(mod, xmlid);
+                if (recursiveFindByXmlid.call(mod, xmlid)) return mod;
             }
             for (const adder of this.adders || this.ADDER || []) {
-                return recursiveFindByXmlid.call(adder, xmlid);
+                if (recursiveFindByXmlid.call(adder, xmlid)) return adder;
             }
             for (const power of this.powers || this.POWER || []) {
-                return recursiveFindByXmlid.call(power, xmlid);
+                if (recursiveFindByXmlid.call(power, xmlid)) return power;
             }
         }
 
