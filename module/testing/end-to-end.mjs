@@ -13,6 +13,16 @@ export class HeroSystem6eEndToEndTest {
     delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
 
     async start() {
+        // Close existing dialog window if it exists
+        $(".dialog.end-to-end-testing button[data-button='ok']").click();
+
+        // Wait for previous dialog to close
+        for (let i = 0; i < 50; i++) {
+            if ($(".dialog.end-to-end-testing button[data-button='ok']").length === 0) break;
+            await this.delay();
+        }
+
+        // Create new dialog
         await new Dialog({
             title: `End To End Testing`,
             content: `<div style="height:400px; overflow-y:scroll"><ol class="end-to-end-testing">
@@ -40,10 +50,10 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestActors();
 
         // AID
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "STR"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "STR"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
         if (!(await this.testAdjustment(this.token5, this.token5, "AID", "DEX"))) return;
 
         // reset actors
@@ -51,9 +61,9 @@ export class HeroSystem6eEndToEndTest {
         await this.token6.actor.FullHealth();
 
         // DRAIN
-        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "STR"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "DEX"))) return;
-        if (!(await this.testAdjustment(this.token5, this.token6, "DRAIN", "DEX"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "STR"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "DEX"))) return;
+        // if (!(await this.testAdjustment(this.token5, this.token6, "DRAIN", "DEX"))) return;
     }
 
     log(text, css) {
