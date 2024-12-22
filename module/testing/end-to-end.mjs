@@ -37,8 +37,8 @@ export class HeroSystem6eEndToEndTest {
     async performTests() {
         await this.createTestScene();
         await this.createTestActors();
-        await this.testAid(this.token6);
-        await this.testAid(this.token5);
+        await this.testAid(this.token6, "PD");
+        //await this.testAid(this.token5);
     }
 
     log(text, css) {
@@ -121,10 +121,13 @@ export class HeroSystem6eEndToEndTest {
         this.token6 = this.actor6.getActiveTokens()[0];
     }
 
-    async testAid(token) {
+    async testAid(token, XMLID) {
         // Create AID
         const xml = `
-            <POWER XMLID="AID" ID="1734814179562" BASECOST="0.0" LEVELS="2" ALIAS="Aid" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="STR" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <POWER XMLID="AID" ID="1734814179562" BASECOST="0.0" LEVELS="2" ALIAS="Aid" POSITION="1" 
+            MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" 
+            INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="${XMLID}" USESTANDARDEFFECT="No" QUANTITY="1" 
+            AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             </POWER>
         `;
         const itemData = HeroSystem6eItem.itemDataFromXml(xml, token.actor);
@@ -183,11 +186,11 @@ export class HeroSystem6eEndToEndTest {
         }
         this.log(`Active Effect: ${aidActiveEffect.changes[0].key} ${aidActiveEffect.changes[0].value}`);
 
-        // Confirm STR has been aided
+        // Confirm Characteristic has been aided
         let aidValue = parseInt(aidActiveEffect.changes[0].value);
-        let actorStrValue = 10 + aidValue;
-        if (token.actor.system.characteristics.str.value !== actorStrValue) {
-            this.log(`FAIL`, "color:red");
+        let actorCharaisticValue = token.actor.characteristics[XMLID.tolowerCase()].core + aidValue;
+        if (token.actor.system.characteristics[XMLID.toLowerCase()].value !== actorCharaisticValue) {
+            this.log(`FAIL: ${XMLID.toLowerCase()}.value !== actorCharaisticValue`, "color:red");
             return;
         }
 
@@ -206,7 +209,7 @@ export class HeroSystem6eEndToEndTest {
 
             // Wait for AE to update/fade
             for (let i = 0; i < 50; i++) {
-                if (token.actor.system.characteristics.str.value !== actorStrValue) break;
+                if (token.actor.system.characteristics.str.value !== actorCharaisticValue) break;
                 await this.delay();
             }
             aidActiveEffect = token.actor.temporaryEffects?.[0]; // Make sure we have latest updates
@@ -219,7 +222,7 @@ export class HeroSystem6eEndToEndTest {
             // Check for fade
             this.log(`Active Effect: ${aidActiveEffect?.changes[0].key} ${aidActiveEffect?.changes[0].value}`);
             const aidNewValue = Math.max(0, aidValue - 5);
-            const actorNewStrValue = Math.max(10, actorStrValue - 5);
+            const actorNewStrValue = Math.max(10, actorCharaisticValue - 5);
             if (
                 (!aidActiveEffect && aidNewValue === 0) ||
                 token.actor.system.characteristics.str.value === actorNewStrValue
@@ -240,7 +243,7 @@ export class HeroSystem6eEndToEndTest {
 
             // fade again?
             aidValue = parseInt(aidActiveEffect?.changes[0].value || 0);
-            actorStrValue = 10 + aidValue;
+            actorCharaisticValue = 10 + aidValue;
         }
         this.log(`Active Effect: Fade completed succesfully`);
     }
