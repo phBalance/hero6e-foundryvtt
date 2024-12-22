@@ -196,7 +196,7 @@ export class HeroSystem6eEndToEndTest {
             return;
         }
 
-        const saveWorldTime = game.time.worldTime;
+        //const saveWorldTime = game.time.worldTime;
 
         while (aidValue !== 0) {
             // Advance world time 12 seconds

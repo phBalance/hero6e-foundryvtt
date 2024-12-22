@@ -236,23 +236,23 @@ function _createAEChangeBlock(targetCharOrPower, targetSystem) {
     };
 }
 
-function _createAEChange(activeEffect, key, value, seconds, source, activePoints) {
-    activeEffect.changes ??= [];
-    activeEffect.changes.push({
-        key,
-        value,
-        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-    });
-    // activeEffect.flags ??= {};
-    // activeEffect.flags.changes ??= [];
-    // activeEffect.flags.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
+// function _createAEChange(activeEffect, key, value, seconds, source, activePoints) {
+//     activeEffect.changes ??= [];
+//     activeEffect.changes.push({
+//         key,
+//         value,
+//         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+//     });
+//     // activeEffect.flags ??= {};
+//     // activeEffect.flags.changes ??= [];
+//     // activeEffect.flags.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
 
-    // Trying system approach
-    activeEffect.system ??= {};
-    activeEffect.system.changes ??= [];
-    activeEffect.system.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
-    return activeEffect;
-}
+//     // Trying system approach
+//     activeEffect.system ??= {};
+//     activeEffect.system.changes ??= [];
+//     activeEffect.system.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
+//     return activeEffect;
+// }
 
 function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
     let durationOptionId;
