@@ -12,6 +12,11 @@ export class HeroSystem6eEndToEndTest {
 
     delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
 
+    floorCeil(value) {
+        if (value >= 0) return Math.floor(value);
+        return Math.ceil(value);
+    }
+
     async start() {
         // Close existing dialog window if it exists
         $(".dialog.end-to-end-testing button[data-button='ok']").click();
@@ -49,21 +54,27 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestScene();
         await this.createTestActors();
 
-        // AID
-        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "STR"))) return;
-        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
-        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
-        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
-        if (!(await this.testAdjustment(this.token5, this.token5, "AID", "DEX"))) return;
+        // AID 6
+        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "STR"))) return;
+        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
+        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
+        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
 
-        // reset actors
+        // AID 5
         await this.token5.actor.FullHealth();
         await this.token6.actor.FullHealth();
+        if (!(await this.testAdjustment(this.token5, this.token5, "AID", "DEX"))) return;
 
-        // DRAIN
-        // if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "STR"))) return;
-        // if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "DEX"))) return;
-        // if (!(await this.testAdjustment(this.token5, this.token6, "DRAIN", "DEX"))) return;
+        // DRAIN 6
+        await this.token5.actor.FullHealth();
+        await this.token6.actor.FullHealth();
+        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "STR"))) return;
+        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "DEX"))) return;
+
+        // DRAIN 5
+        await this.token5.actor.FullHealth();
+        await this.token6.actor.FullHealth();
+        if (!(await this.testAdjustment(this.token5, this.token6, "DRAIN", "DEX"))) return;
     }
 
     log(text, css) {
@@ -293,10 +304,10 @@ export class HeroSystem6eEndToEndTest {
 
             if (
                 parseInt(adjustmentActiveEffect.changes[0].value) !==
-                Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
+                this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
             ) {
                 this.log(
-                    `FAIL adjustmentActiveEffect.changes[0].value: ${adjustmentActiveEffect.changes[0].value} !== ${Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
+                    `FAIL adjustmentActiveEffect.changes[0].value: ${adjustmentActiveEffect.changes[0].value} !== ${this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
                     "color:red",
                 );
                 return;
@@ -304,10 +315,10 @@ export class HeroSystem6eEndToEndTest {
 
             if (
                 -adjustmentActiveEffect.flags.affectedPoints !==
-                Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
+                this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
             ) {
                 this.log(
-                    `FAIL adjustmentActiveEffect.flags.affectedPoints: ${-adjustmentActiveEffect.flags.affectedPoints} !== ${Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
+                    `FAIL adjustmentActiveEffect.flags.affectedPoints: ${-adjustmentActiveEffect.flags.affectedPoints} !== ${this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
                     "color:red",
                 );
                 return;
@@ -338,14 +349,7 @@ export class HeroSystem6eEndToEndTest {
                 powerXMLID === "AID"
                     ? Math.max(0, adjustmentActivePoints - 5)
                     : Math.min(0, adjustmentActivePoints + 5);
-            // const aidNewValue = aidActiveEffect
-            //     ? Math.max(0, Math.floor(-aidActiveEffect.flags.adjustmentActivePoints - 5 / costPerActivePoint))
-            //     : 0;
-            const adjustmentNewValue = Math.floor(newAidActivePoints / costPerActivePoint);
-            // const actorNewCharacteristicValue = Math.max(
-            //     token.actor.system.characteristics[XMLID.toLowerCase()].core,
-            //     actorCharaisticValue - 5 / costPerActivePoint,
-            // );
+            const adjustmentNewValue = this.floorCeil(newAidActivePoints / costPerActivePoint);
             const actorNewCharacteristicValue =
                 tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].core + adjustmentNewValue;
             if (
