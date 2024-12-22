@@ -230,3 +230,7 @@ li.directory-item.child-item {
 .dialog.end-to-end-testing .window-content {
     background: rgba(255 255 255 /80%);
 }
+
+.dialog.end-to-end-testing .window-content li {
+    margin-left: 5px;
+}
