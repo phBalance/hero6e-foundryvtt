@@ -11,6 +11,7 @@
 - Fixed formatting issues with prosemirror editor caused by us overriding some css that we shouldn't have. [#1629](https://github.com/dmdorman/hero6e-foundryvtt/issues/1629)
 - Knocked out targets no longer get double adjustment effect. [#1255](https://github.com/dmdorman/hero6e-foundryvtt/issues/1255)
 - Explosions now correctly deal different damage to each token based on distance when using the "Apply Damage to ALL" button. [#1323](https://github.com/dmdorman/hero6e-foundryvtt/issues/1323)
+- Fixed issue where some adders (like EVERYPHASE) were ignored when there were multiple modifiers. [#1634](https://github.com/dmdorman/hero6e-foundryvtt/issues/1634)
 
 ## Version 4.0.12 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
