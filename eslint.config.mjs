@@ -74,6 +74,7 @@ export default [
                 OutlineOverlayFilter: "readonly",
                 DocumentSheetConfig: "readonly",
                 ActiveEffectConfig: "readonly",
+                Scene: "readonly",
             },
         },
     },

@@ -305,7 +305,7 @@ function _createNewAdjustmentEffect(
             targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
         img: item.img,
-        //changes:  [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
+        changes: [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
         duration: {
             seconds: _determineEffectDurationInSeconds(item, rawActivePointsDamage),
         },
@@ -495,13 +495,13 @@ export async function performAdjustment(
     }
 
     // Update AE active points by summing changes
-    if (activeEffect.flags.changes) {
-        const _ap = activeEffect.flags.changes?.reduce((partialSum, a) => partialSum + (a.activePoints || 0), 0);
-        if (_ap !== 0 && activeEffect.flags.adjustmentActivePoints != _ap) {
-            console.log("New AP calc");
-            activeEffect.flags.adjustmentActivePoints = _ap;
-        }
-    }
+    // if (activeEffect.flags.changes) {
+    //     const _ap = activeEffect.flags.changes?.reduce((partialSum, a) => partialSum + (a.activePoints || 0), 0);
+    //     if (_ap !== 0 && activeEffect.flags.adjustmentActivePoints != _ap) {
+    //         console.log("New AP calc");
+    //         activeEffect.flags.adjustmentActivePoints = _ap;
+    //     }
+    // }
 
     // Healing is not cumulative but all else is. Healing cannot harm when lower than an existing effect.
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
@@ -595,20 +595,20 @@ export async function performAdjustment(
 
     // Calculate the effect's change to the maximum. Only healing does not change the maximum.
     if (!isOnlyToStartingValues) {
-        //activeEffect.changes[0].value = parseInt(activeEffect.changes[0].value) - totalActivePointAffectedDifference;
-        const _key =
-            targetSystem.system.characteristics?.[potentialCharacteristic.toLowerCase()] != null
-                ? `system.characteristics.${potentialCharacteristic.toLowerCase()}.max`
-                : "system.max";
-        const _seconds = _determineEffectDurationInSeconds(item, thisAttackRawActivePointsDamage);
-        _createAEChange(
-            activeEffect,
-            _key,
-            -totalActivePointAffectedDifference,
-            _seconds,
-            item.uuid,
-            -totalAdjustmentNewActivePoints,
-        );
+        activeEffect.changes[0].value = parseInt(activeEffect.changes[0].value) - totalActivePointAffectedDifference;
+        // const _key =
+        //     targetSystem.system.characteristics?.[potentialCharacteristic.toLowerCase()] != null
+        //         ? `system.characteristics.${potentialCharacteristic.toLowerCase()}.max`
+        //         : "system.max";
+        // const _seconds = _determineEffectDurationInSeconds(item, thisAttackRawActivePointsDamage);
+        // _createAEChange(
+        //     activeEffect,
+        //     _key,
+        //     -totalActivePointAffectedDifference,
+        //     _seconds,
+        //     item.uuid,
+        //     -totalAdjustmentNewActivePoints,
+        // );
     }
 
     // If this is 5e then some characteristics are calculated (not figured) based on
