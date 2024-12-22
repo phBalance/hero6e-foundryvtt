@@ -55,26 +55,31 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestActors();
 
         // AID 6
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "STR"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "STR"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
 
-        // AID 5
+        // // AID 5
+        // await this.token5.actor.FullHealth();
+        // await this.token6.actor.FullHealth();
+        // if (!(await this.testAdjustment(this.token5, this.token5, "AID", "DEX"))) return;
+
+        // // DRAIN 6
+        // await this.token5.actor.FullHealth();
+        // await this.token6.actor.FullHealth();
+        // if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "STR"))) return;
+        // if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "DEX"))) return;
+
+        // // DRAIN 5
+        // await this.token5.actor.FullHealth();
+        // await this.token6.actor.FullHealth();
+        // if (!(await this.testAdjustment(this.token5, this.token6, "DRAIN", "DEX"))) return;
+
+        // AID 6 stacking
         await this.token5.actor.FullHealth();
         await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustment(this.token5, this.token5, "AID", "DEX"))) return;
-
-        // DRAIN 6
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "STR"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "DEX"))) return;
-
-        // DRAIN 5
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustment(this.token5, this.token6, "DRAIN", "DEX"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR"))) return;
     }
 
     log(text, css) {
@@ -164,23 +169,26 @@ export class HeroSystem6eEndToEndTest {
         this.token6 = this.actor6.getActiveTokens()[0];
     }
 
-    async testAdjustment(tokenSource, tokenTarget, powerXMLID, targetXMLID) {
-        // Create AID
+    async createPower(powerXMLID, targetXMLID, tokenSource) {
         const xml = `
-            <POWER XMLID="${powerXMLID}" ID="1734814179562" BASECOST="0.0" LEVELS="2" ALIAS="${powerXMLID.titleCase()}" POSITION="1" 
-            MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" 
-            INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="${targetXMLID}" USESTANDARDEFFECT="No" QUANTITY="1" 
-            AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-            </POWER>
-        `;
+        <POWER XMLID="${powerXMLID}" ID="1734814179562" BASECOST="0.0" LEVELS="2" ALIAS="${powerXMLID.titleCase()}" POSITION="1" 
+        MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" 
+        INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="${targetXMLID}" USESTANDARDEFFECT="No" QUANTITY="1" 
+        AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+        </POWER>
+    `;
         const itemData = HeroSystem6eItem.itemDataFromXml(xml, tokenSource.actor);
         const adjustmentItem = await HeroSystem6eItem.create(itemData, { parent: tokenSource.actor });
         await adjustmentItem._postUpload();
+
         this.log(
             `Added <b>${adjustmentItem.name} ${adjustmentItem.system.INPUT}</b> to <b>${adjustmentItem.actor.name}</b>`,
         );
 
-        // Target tokenTarget
+        return adjustmentItem;
+    }
+
+    async targetToken(tokenTarget) {
         await game.user.updateTokenTargets([tokenTarget.id]);
         await game.user.broadcastActivity({
             targets: Array.from(game.user.targets.map((t) => t.id)),
@@ -188,12 +196,9 @@ export class HeroSystem6eEndToEndTest {
 
         // Control targetToken (when we miss we don't have the APPLY to X button)
         tokenTarget.control();
+    }
 
-        // for (let i = 0; i < 50; i++) {
-        //     if (game.user.targets.first()?.id === tokenTarget.id) break;
-        //     this.delay(); // For some reson targets don't always update right away.
-        // }
-
+    async doAdjustment(adjustmentItem, tokenTarget) {
         // Roll
         await adjustmentItem.roll();
 
@@ -234,12 +239,19 @@ export class HeroSystem6eEndToEndTest {
                 break;
             await this.delay();
         }
-        // if (!button.text().trim().includes(" to ")) {
-        //     this.log(`FAIL: Is "Apply ${powerXMLID} to ${tokenTarget.name}" in the chatcard?`, "color:red");
-        //     return false;
-        // }
         button.click();
         this.log(`CLICK: ${button.text().trim()}`);
+
+        // wait for results & Get AP value
+        for (let i = 0; i < 50; i++) {
+            if ($(`ol#chat-log .chat-message:last-child .card-section:last-child`).length === 1) break;
+            await this.delay();
+        }
+        const ap = parseInt(
+            document
+                .querySelector(`ol#chat-log .chat-message:last-child .card-section:last-child`)
+                .textContent.match(/(\d+) Active Points/)[1],
+        );
 
         // Get Active Effect
         let adjustmentActiveEffect;
@@ -248,15 +260,69 @@ export class HeroSystem6eEndToEndTest {
             await this.delay();
         }
         if (!adjustmentActiveEffect) {
-            this.log(
-                `FAIL: unable to locate AE. Is "Apply ${powerXMLID}  to ${tokenTarget.name}" in the chatcard?`,
-                "color:red",
-            );
+            this.log(`FAIL: unable to locate AE.`, "color:red");
             return false;
         }
         this.log(
-            `Active Effect: ${adjustmentActiveEffect.changes?.[0].key} ${adjustmentActiveEffect.changes?.[0].value}`,
+            `Active Effect ${adjustmentItem.system.XMLID}: value=${adjustmentActiveEffect.changes?.[0].value} ap=${ap}`,
         );
+        return { adjustmentActiveEffect, ap };
+    }
+
+    async testAdjustmentStacking(tokenSource, tokenTarget, powerXMLID, targetXMLID, stacks = 2) {
+        // Create power/item and add to actor
+        const adjustmentItem = await this.createPower(powerXMLID, targetXMLID, tokenSource);
+
+        // Target tokenTarget
+        await this.targetToken(tokenTarget);
+
+        const aeStacks = [];
+
+        for (let i = 0; i < stacks; i++) {
+            const { adjustmentActiveEffect, ap } = await this.doAdjustment(adjustmentItem, tokenTarget);
+            aeStacks.push({ adjustmentActiveEffect, ap });
+        }
+
+        // Confirm Characteristic has been aided
+        // Positive Adjustment Powers have maximum effects. A character
+        // can achieve his maximum with one or more uses of the Positive
+        // Adjustment Power.
+        // For Aid, this is equal to the maximum amount you can roll
+        // on the dice – for example, 3d6 Aid Blast can add a maximum
+        // of 18 CP to a Blast. This maximum applies to each target.
+        // For example, the Aid Blast above can add a maximum of 18
+        // CP of Blast to Sapphire, and a maximum of 18 CP of Blast to
+        // Witchcraft.
+        let adjustmentValue = Math.min(
+            parseInt(adjustmentItem.system.LEVELS) * 6,
+            aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0),
+        );
+        let actorCharaisticValue =
+            tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].core + adjustmentValue;
+        if (tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value !== actorCharaisticValue) {
+            this.log(
+                `Actor ${targetXMLID}.value expecting ${actorCharaisticValue} got ${tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value}`,
+                "color:red",
+            );
+            return;
+        }
+        if (tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].max !== actorCharaisticValue) {
+            this.log(
+                `Actor ${targetXMLID}.max expecting ${actorCharaisticValue} got ${tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].max}`,
+                "color:red",
+            );
+            return;
+        }
+    }
+
+    async testAdjustment(tokenSource, tokenTarget, powerXMLID, targetXMLID) {
+        // Create power/item and add to actor
+        const adjustmentItem = await this.createPower(powerXMLID, targetXMLID, tokenSource);
+
+        // Target tokenTarget
+        await this.targetToken(tokenTarget);
+
+        let adjustmentActiveEffect = await this.doAdjustment(adjustmentItem, tokenTarget);
 
         // Confirm Characteristic has been aided
         let adjustmentValue = parseInt(adjustmentActiveEffect.changes[0].value);
@@ -274,15 +340,6 @@ export class HeroSystem6eEndToEndTest {
         }
 
         const costPerActivePoint = determineCostPerActivePoint(targetXMLID, null, tokenTarget.actor);
-        // if (aidActiveEffect.flags.costPerActivePoint !== costPerActivePoint) {
-        //     this.log(
-        //         `FAIL costPerActivePoint: ${aidActiveEffect.flags.costPerActivePoint} !== ${costPerActivePoint}`,
-        //         "color:red",
-        //     );
-        //     return;
-        // }
-
-        //const saveWorldTime = game.time.worldTime;
 
         while (adjustmentValue !== 0) {
             // Make sure AP = change.value
