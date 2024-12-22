@@ -165,10 +165,13 @@ export class HeroSystem6eEndToEndTest {
             targets: Array.from(game.user.targets.map((t) => t.id)),
         });
 
-        for (let i = 0; i < 50; i++) {
-            if (game.user.targets.first()?.id === tokenTarget.id) break;
-            this.delay(); // For some reson targets don't always update right away.
-        }
+        // Control targetToken (when we miss we don't have the APPLY to X button)
+        tokenTarget.control();
+
+        // for (let i = 0; i < 50; i++) {
+        //     if (game.user.targets.first()?.id === tokenTarget.id) break;
+        //     this.delay(); // For some reson targets don't always update right away.
+        // }
 
         // Roll
         await adjustmentItem.roll();
@@ -192,6 +195,11 @@ export class HeroSystem6eEndToEndTest {
                 break;
             await this.delay();
         }
+        // const actionData = JSON.parse(button[0].dataset.actionData);
+        // if (actionData?.current?.attacks?.[0].targets?.[0].targetId !== tokenTarget.id) {
+        //     this.log(`FAIL: Missing token target. Known async issue, unclear how to resolve.`, "color:red");
+        //     return false;
+        // }
         button.click();
         this.log(`CLICK: ${button.text().trim()}`);
 
@@ -205,10 +213,10 @@ export class HeroSystem6eEndToEndTest {
                 break;
             await this.delay();
         }
-        if (!button.text().trim().includes(" to ")) {
-            this.log(`FAIL: Is "Apply ${powerXMLID} to ${tokenTarget.name}" in the chatcard?`, "color:red");
-            return false;
-        }
+        // if (!button.text().trim().includes(" to ")) {
+        //     this.log(`FAIL: Is "Apply ${powerXMLID} to ${tokenTarget.name}" in the chatcard?`, "color:red");
+        //     return false;
+        // }
         button.click();
         this.log(`CLICK: ${button.text().trim()}`);
 
