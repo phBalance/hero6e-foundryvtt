@@ -37,6 +37,7 @@ import "./utility/chat-dice.mjs";
 import "./testing/testing-main.mjs";
 import { EffectsPanel } from "./effects-panel.mjs";
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
+import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
 Hooks.once("init", async function () {
     // Custom HeroSystem VisionMode
@@ -457,6 +458,9 @@ Hooks.once("ready", async function () {
         // Update lastMigration
         await game.settings.set(game.system.id, "lastMigration", game.system.version.replace("-alpha", ""));
     }
+
+    // Testing
+    window.HeroSystem6eEndToEndTest = new HeroSystem6eEndToEndTest();
 });
 
 // New Actor Dialog
