@@ -224,12 +224,14 @@ export async function expireEffects(actor) {
                     adjustmentChatMessages.push(
                         await performAdjustment(
                             item,
-                            ae.flags.target[0],
-                            -_fade,
-                            "None - Effect Fade",
-                            "",
-                            true,
-                            ae.target || actor,
+                            ae.flags.target[0], // nameOfCharOrPower
+                            -_fade, // thisAttackRawActivePointsDamage
+                            "None - Effect Fade", // defenseDescription
+                            "", // effectsDescription
+                            true, // isFade
+                            ae.target || actor, // token
+                            null, // action
+                            ae,
                         ),
                     );
                 } else {

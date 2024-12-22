@@ -218,8 +218,8 @@ function _findExistingMatchingEffect(item, potentialCharacteristic, powerTargetN
     return targetSystem.effects.find(
         (effect) =>
             effect.origin === item.uuid &&
-            effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic) &&
-            parseInt(effect.changes?.[0].value || 0) >= 0,
+            effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic), //&&
+        //parseInt(effect.changes?.[0].value || 0) >= 0,
     );
 }
 
@@ -365,6 +365,7 @@ export async function performAdjustment(
     isFade,
     token,
     action,
+    existingEffect,
 ) {
     const targetActor = token.actor || token;
 
@@ -456,7 +457,13 @@ export async function performAdjustment(
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
     // and calculate the total effect
-    const existingEffect = _findExistingMatchingEffect(item, targetUpperCaseName, targetPower, targetSystem);
+    // AARON: Just pass in the previous AE so we don't get confused.
+    const existingEffect2 = _findExistingMatchingEffect(item, targetUpperCaseName, targetPower, targetSystem);
+    if (existingEffect && existingEffect2 && existingEffect.id != existingEffect2.id) {
+        // We are going to use the AE that was passed in.
+        // There is another AE that has same item source and targetSystem, likely multiple drains. The partial
+        console.warn("Possible confusion over which ActiveEffect is being adjusted.", existingEffect);
+    }
 
     const activeEffect =
         existingEffect ||
