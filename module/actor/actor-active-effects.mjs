@@ -170,6 +170,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusParalyzed"),
                 img: "icons/svg/paralysis.svg",
             },
+            mindControlledEffect: {
+                id: "mindControl",
+                name: game.i18n.localize("EFFECT.MindControlled"),
+                img: `systems/${module}/icons/mindControlled.svg`,
+            },
             flyingEffect: {
                 id: "fly",
                 name: game.i18n.localize("EFFECT.StatusFlying"),
@@ -369,6 +374,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusSenseTouchDisabled"),
                 img: `systems/${module}/icons/senses/touchSenseDisabled.svg`,
             },
+
             burrowEffect: {
                 id: "tunneling",
                 name: "EFFECT.StatusTunneling",
