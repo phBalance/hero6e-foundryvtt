@@ -51,15 +51,17 @@ export class HeroSystem6eEndToEndTest {
     }
 
     async performTests() {
+        // Keep active effects when AP = 0, do not delete them.
+        // This also addes teh worldtime to the beginning of the AE name.
+        // Useful for debugging.
         CONFIG.debug.adjustmentFadeKeep = true;
 
         await this.createTestScene();
         await this.createTestActors();
 
-        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "FLIGHT"))) return;
-
         // AID 6 multiple characteristics + stacking
-
+        await this.token5.actor.FullHealth();
+        await this.token6.actor.FullHealth();
         if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END, POWERDEFENSE"))) return;
 
@@ -70,21 +72,26 @@ export class HeroSystem6eEndToEndTest {
             if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", char.XMLID))) return;
         }
 
-        // // AID 5
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "DEX"))) return;
+        // AID 5
+        for (const char of getCharacteristicInfoArrayForActor(this.token5actor)) {
+            await this.token5.actor.FullHealth();
+            await this.token6.actor.FullHealth();
+            if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", char.XMLID))) return;
+        }
 
         // DRAIN 6
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "STR"))) return;
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "DEX"))) return;
+        for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
+            await this.token5.actor.FullHealth();
+            await this.token6.actor.FullHealth();
+            if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", char.XMLID))) return;
+        }
 
         // DRAIN 5
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustmentStacking(this.token5, this.token6, "DRAIN", "DEX"))) return;
+        for (const char of getCharacteristicInfoArrayForActor(this.token5actor)) {
+            await this.token5.actor.FullHealth();
+            await this.token6.actor.FullHealth();
+            if (!(await this.testAdjustmentStacking(this.token5, this.token5, "DRAIN", char.XMLID))) return;
+        }
 
         CONFIG.debug.adjustmentFadeKeep = false;
 
