@@ -513,9 +513,15 @@ export async function performAdjustment(
         }
         totalActivePointAffectedDifference = thisAttackActivePointsEffect;
         existingEffect.flags.adjustmentActivePoints += thisAttackActivePointsEffect;
-        totalPointsDifference = parseInt(existingEffect.changes[0].value);
-        existingEffect.changes[0].value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
-        totalPointsDifference = existingEffect.changes[0].value - totalPointsDifference;
+        //totalPointsDifference = parseInt(existingEffect.changes[0].value);
+
+        for (const change of activeEffect.changes) {
+            const char = change.key.match(/([a-z]+)\.max/)?.[1];
+            const costPerActivePoint = determineCostPerActivePoint(char, null, targetActor);
+            change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
+        }
+        //existingEffect.changes[0].value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
+        //totalPointsDifference = existingEffect.changes[0].value - totalPointsDifference;
 
         if (activeEffect.flags.adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
             isEffectFinished = true;
@@ -541,7 +547,7 @@ export async function performAdjustment(
             );
 
             const previousPointsForThisChangeKey = targetActor.temporaryEffects.reduce(
-                (a, c) => a + parseInt(c.changes.find((cc) => cc.key === change.key).value),
+                (a, c) => a + parseInt(c.changes.find((cc) => cc.key === change.key)?.value || 0),
                 0,
             );
 
@@ -808,7 +814,10 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
 
     let _ap = 0;
     let _value = 0;
-    for (const ae of targetActor.temporaryEffects.sort((a, b) => a.flags.createTime - b.flags.createTime)) {
+    // use effects instead of temporaryEffects because of item AE transfer
+    for (const ae of Array.from(targetActor.effects.filter((ae) => !ae.disabled)).sort(
+        (a, b) => (a.flags.createTime || 0) - (b.flags.createTime || 0),
+    )) {
         _ap += ae.flags.adjustmentActivePoints;
         const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;
 
@@ -917,23 +926,24 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
         // const changes = { [targetValuePath]: newValue };
         // await targetSystem.update(changes);
         // console.log(`Updated characteristices`);
-    } else {
-        console.error(`Unhandled targetSystem`);
-        debugger;
     }
+    // else {
+    //     console.error(`Unhandled targetSystem`);
+    //     debugger;
+    // }
 }
 
 function updateEffectName(activeEffect) {
     const item = fromUuidSync(activeEffect.origin);
-    const xmlidSlug = `${
+    const xmlidSlug =
         activeEffect.changes.length > 1
-            ? `${activeEffect.flags.adjustmentActivePoints >= 0 ? "+" : "-"}`
-            : `${item.name} ${(parseInt(activeEffect.changes?.[0].value) || 0).signedString()} ${activeEffect.flags.key?.toUpperCase()}`
-    }`;
+            ? `${activeEffect.flags.adjustmentActivePoints >= 0 ? "+" : "-"}${item?.name || "MULTIPLE"}`
+            : `${(parseInt(activeEffect.changes?.[0].value) || 0).signedString()} ${activeEffect.flags.key?.toUpperCase()}`;
     activeEffect.name =
         `${CONFIG.debug.adjustmentFadeKeep && activeEffect.flags?.createTime ? activeEffect.flags.createTime : ""} ` +
         `${xmlidSlug} (${Math.abs(activeEffect.flags.adjustmentActivePoints)} AP) ` +
         `[by ${activeEffect.flags.itemTokenName}]`;
+    // +(activeEffect.updateDuration ? `~${activeEffect.updateDuration().remaining}s remain` : "");
 }
 
 // async function performAdjustmentAaron(

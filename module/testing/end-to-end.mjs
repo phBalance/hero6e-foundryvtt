@@ -56,11 +56,15 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestScene();
         await this.createTestActors();
 
+        // AID 6 multiple characteristics + stacking
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END, POWERDEFENSE"))) return;
+
         // AID 6
-        //if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR"))) return;
-        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
-        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
-        // if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "PD"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "DEX"))) return;
 
         // // AID 5
         // await this.token5.actor.FullHealth();
@@ -68,10 +72,10 @@ export class HeroSystem6eEndToEndTest {
         // if (!(await this.testAdjustment(this.token5, this.token5, "AID", "DEX"))) return;
 
         // // DRAIN 6
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        //if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "STR"))) return;
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "DEX"))) return;
+        // await this.token5.actor.FullHealth();
+        // await this.token6.actor.FullHealth();
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "STR"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "DEX"))) return;
 
         // // DRAIN 5
         // await this.token5.actor.FullHealth();
@@ -84,9 +88,6 @@ export class HeroSystem6eEndToEndTest {
         //if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR", 1))) return;
         //if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "DEX"))) return;
         //if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END"))) return;
-
-        // AID 6 multiple characteristics + stacking
-        //if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
 
         CONFIG.debug.adjustmentFadeKeep = false;
 
@@ -300,11 +301,6 @@ export class HeroSystem6eEndToEndTest {
         }
         if (adjustmentActiveEffect && options.expectToFail) {
             this.log(`FAIL: Expected AE to fail, but it didn't.`, "color:red");
-            return { error: true };
-        }
-        if (!tokenTarget.actor.temporaryEffects.find((ae) => ae.id === adjustmentActiveEffect.id)) {
-            this.log(`FAIL: AE not a member of tempoaryEffects. Check duration.`, "color:red");
-            console.error(adjustmentActiveEffect);
             return { error: true };
         }
         if (adjustmentActiveEffect) {
