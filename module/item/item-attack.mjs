@@ -2695,8 +2695,8 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     const adjustmentItemTags = getAttackTags(adjustmentItem);
 
-    const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
-    const activePointsDamageAfterDefense = damageDetail.stun;
+    const rawActivePointsEffectBeforeDefense = damageDetail.stunDamage;
+    const activePointsEffectAfterDefense = damageDetail.stun;
 
     // DRAIN
     const reductionChatMessages = [];
@@ -2706,7 +2706,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
             await performAdjustment(
                 adjustmentItem,
                 reduce,
-                activePointsDamageAfterDefense,
+                -activePointsEffectAfterDefense,
                 defense,
                 damageDetail.effects,
                 false,
@@ -2731,7 +2731,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                 await performAdjustment(
                     adjustmentItem,
                     "STUN", //enhance,
-                    -rawActivePointsDamageBeforeDefense,
+                    rawActivePointsEffectBeforeDefense,
                     "None - Beneficial",
                     "",
                     false,
@@ -2743,7 +2743,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                 await performAdjustment(
                     adjustmentItem,
                     "BODY", //enhance,
-                    -damageDetail.bodyDamage,
+                    damageDetail.bodyDamage,
                     "None - Beneficial",
                     "",
                     false,
@@ -2760,10 +2760,10 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     adjustmentItem,
                     enhance,
                     adjustmentItem.system.XMLID === "TRANSFER"
-                        ? -activePointsDamageAfterDefense
+                        ? activePointsEffectAfterDefense
                         : simplifiedHealing && enhance === "BODY"
-                          ? -damageDetail.bodyDamage
-                          : -rawActivePointsDamageBeforeDefense,
+                          ? damageDetail.bodyDamage
+                          : rawActivePointsEffectBeforeDefense,
                     "None - Beneficial",
                     "",
                     false,

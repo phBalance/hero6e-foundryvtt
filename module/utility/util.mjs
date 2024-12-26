@@ -214,10 +214,10 @@ export async function expireEffects(actor) {
             if (ae.flags.type === "adjustment") {
                 // Fade by up to 5 Active Points
                 let _fade;
-                if (ae.flags.adjustmentActivePoints < 0) {
-                    _fade = Math.max(ae.flags.adjustmentActivePoints, -5);
-                } else {
+                if (ae.flags.adjustmentActivePoints >= 0) {
                     _fade = Math.min(ae.flags.adjustmentActivePoints, 5);
+                } else {
+                    _fade = Math.max(ae.flags.adjustmentActivePoints, -5);
                 }
 
                 if (item) {
