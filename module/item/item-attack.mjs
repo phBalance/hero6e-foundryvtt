@@ -2985,7 +2985,7 @@ async function _calcDamage(heroRoller, item, options) {
 
     let effects = "";
     if (item.system.EFFECT) {
-        effects = item.system.EFFECT + "; ";
+        effects = `${item.system._effect || item.system.EFFECT}; `;
     }
 
     // VULNERABILITY
