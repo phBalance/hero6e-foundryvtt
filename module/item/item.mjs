@@ -2615,8 +2615,7 @@ export class HeroSystem6eItem extends Item {
 
         system.basePointsPlusAdders = cost;
 
-        //return cost; //Math.max(1, cost)
-        return old != system.basePointsPlusAdders;
+        return old !== system.basePointsPlusAdders;
     }
 
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
@@ -2934,11 +2933,6 @@ export class HeroSystem6eItem extends Item {
 
     updateItemDescription() {
         // Description (eventual goal is to largely match Hero Designer)
-        // TODO: This should probably be moved to the sheets code
-        // so when the power is modified in foundry, the power
-        // description updates as well.
-        // If in sheets code it may handle drains/suppresses nicely.
-
         const system = this.system;
         const type = this.type;
         const is5e = !!this.actor?.system.is5e;
@@ -3295,6 +3289,38 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`;
                 break;
 
+            // Generic maneuvers and the ones that are not in Hero Designer (freebees)
+            case "BLAZINGAWAY":
+            case "BLOCK":
+            case "BRACE":
+            case "CHOKE":
+            case "CLUBWEAPON":
+            case "COVER":
+            case "DISARM":
+            case "DIVEFORCOVER":
+            case "DODGE":
+            case "GRAB":
+            case "GRABBY":
+            case "HAYMAKER":
+            case "HIPSHOT":
+            case "HURRY":
+            case "MOVEBY":
+            case "MOVETHROUGH":
+            case "MULTIPLEATTACK":
+            case "OTHERATTACKS":
+            case "PULLINGAPUNCH":
+            case "RAPIDFIRE":
+            case "ROLLWITHAPUNCH":
+            case "SET":
+            case "SETANDBRACE":
+            case "SHOVE":
+            case "SNAPSHOT":
+            case "STRAFE":
+            case "STRIKE":
+            case "SUPPRESSIONFIRE":
+            case "SWEEP":
+            case "THROW":
+            case "TRIP":
             case "MANEUVER":
                 {
                     system.description = "";
@@ -3311,28 +3337,28 @@ export class HeroSystem6eItem extends Item {
                     }
                     system.description += `, ${dcv.signedString()} DCV`;
                     if (system.EFFECT) {
-                        let dc = convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc;
+                        let effect = system.EFFECT;
                         if (system.EFFECT.search(/\[STRDC\]/) > -1) {
                             const effectiveStrength = 5 * dc;
-                            system.description += `, ${system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`)}`;
+                            effect = system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`);
                         } else if (dc) {
                             const damageDiceFormula = getDiceFormulaFromItemDC(this, dc);
                             if (damageDiceFormula) {
-                                system.description += `,`;
+                                const nnd = system.EFFECT.indexOf("NNDDC") > -1;
+                                const killing =
+                                    system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLINGDC") > -1;
 
-                                if (system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLING") > -1) {
-                                    system.description += " HKA";
-                                }
+                                const diceFormula = `${damageDiceFormula} ${nnd ? " NND" : ""}${killing ? " HKA" : ""}`;
 
-                                const dice = system.EFFECT.replace("[NORMALDC]", damageDiceFormula)
-                                    .replace("[KILLINGDC]", damageDiceFormula)
-                                    .replace("[FLASHDC]", damageDiceFormula);
-
-                                system.description += ` ${dice}`;
+                                effect = system.EFFECT.replace("[NORMALDC]", diceFormula)
+                                    .replace("[KILLINGDC]", diceFormula)
+                                    .replace("[FLASHDC]", diceFormula)
+                                    .replace("[NNDDC]", diceFormula);
                             }
-                        } else {
-                            system.description += ", " + system.EFFECT;
                         }
+
+                        system._effect = effect;
+                        system.description += `, ${effect}`;
                     }
                 }
                 break;
@@ -3657,7 +3683,7 @@ export class HeroSystem6eItem extends Item {
 
         // The INPUT field isn't always displayed in HD so that is not strictly compatible, but it does mean that we will show things
         // like a ranged killing attack being ED vs PD in the power description.
-        if (system?.INPUT) {
+        if (system.INPUT) {
             switch (powerXmlId) {
                 case "ABSORPTION":
                 case "AID":
@@ -4294,15 +4320,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Fix CHOKE
-        if (this.system.EFFECT?.includes("NND")) {
-            const nndd6 = this.system.EFFECT.match(/NND (\d+)d6/);
-            const d6 = parseInt(nndd6?.[1]);
-            if (d6 > 0) {
-                this.system.DC = d6 * 2; // Were going to halve it later on in this function due to NND;
-            }
-        }
-
         this.system.subType = "attack";
         this.system.class = input === "ED" ? "energy" : "physical";
         this.system.dice = levels;
@@ -4326,23 +4343,11 @@ export class HeroSystem6eItem extends Item {
                 this.system.EFFECT &&
                 (this.system.EFFECT.toLowerCase().indexOf("block") > -1 ||
                     this.system.EFFECT.toLowerCase().indexOf("dodge") > -1 ||
-                    this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
+                    this.system.EFFECT.search("[FLASHDC]") > -1 ||
+                    this.system.EFFECT.search("[NNDDC]") > -1)
             ) {
                 this.system.usesStrength = false;
             }
-        }
-
-        // MAXSTR = 0 does not use STR (NNDs for example)
-        // BROKEN: Offensive Strike has MAXSTR = 0, which is wrong, so commenting this out for now.
-        // if (this.system.MAXSTR && parseInt(this.system.MAXSTR) === 0) {
-        //     this.system.usesStrength = false;
-        // }
-
-        // NND (the DC should be halved; suspect because of AVAD/NND implied limitation; Nerve Strike)
-        if (this.system.EFFECT?.includes("NND")) {
-            this.system.dice = Math.floor(parseInt(this.system.DC) / 2);
-            this.system.usesStrength = false;
-            this.system.EFFECT = this.system.EFFECT.replace(`[NNDDC]`, `${this.system.dice}d6 NND`);
         }
 
         // Specific power overrides
@@ -5078,7 +5083,7 @@ export class HeroSystem6eItem extends Item {
         const aoe = this.findModsByXmlid("AOE");
         const explosion5e = this.findModsByXmlid("EXPLOSION");
 
-        // Kluge: DARKNESS inherently should behave like an AOE
+        // Kludge: DARKNESS inherently should behave like an AOE
         if (this.system.XMLID === "DARKNESS" && !aoe) {
             const _darknessAoe = {
                 XMLID: "AOE",
@@ -5094,7 +5099,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     getDefense(targetActor, attackItem) {
-        //return determineDefense(targetActor, attackItem, { only: this });
         return getItemDefenseVsAttack(this, attackItem);
     }
 

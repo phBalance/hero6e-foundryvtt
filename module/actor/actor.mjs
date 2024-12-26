@@ -2005,6 +2005,7 @@ export class HeroSystem6eActor extends Actor {
                     const OCV = maneuverDetails.ocv;
                     const DCV = maneuverDetails.dcv;
                     const EFFECT = maneuverDetails.effects;
+                    const DC = maneuverDetails.dc;
 
                     const itemData = {
                         name,
@@ -2013,6 +2014,7 @@ export class HeroSystem6eActor extends Actor {
                             PHASE,
                             OCV,
                             DCV,
+                            DC,
                             EFFECT,
                             active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
                             description: EFFECT,
