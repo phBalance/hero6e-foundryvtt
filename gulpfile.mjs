@@ -86,7 +86,7 @@ function handleError(err) {
 function compileSass() {
     // Configure options for sass output. For example, "expanded" or "nested"
     let options = {
-        outputStyle: "expanded",
+        style: "expanded",
     };
     return gulp
         .src(SASS_FILES)
