@@ -1,7 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, hdcTimeOptionIdToSeconds } from "./util.mjs";
-import { RoundFavorPlayerUp } from "./round.mjs";
-import { HeroSystem6eTokenDocument } from "../actor/actor-token.mjs";
+// import { RoundFavorPlayerUp } from "./round.mjs";
+// import { HeroSystem6eTokenDocument } from "../actor/actor-token.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 /**
  * Return the full list of possible powers and characteristics. No skills, talents, or perks.
@@ -386,7 +386,7 @@ export async function performAdjustment(
     // for backward compatibility
     const targetActor = targetToken.actor || targetToken;
     const isHealing = item.system.XMLID === "HEALING";
-    const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
+    //const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
     // 5e conversions for Calculated Characteristics
     // Adjustment Powers
@@ -501,7 +501,7 @@ export async function performAdjustment(
     // Positive Adjustment Powers have maximum effects.
     const maximumEffectActivePoints = determineMaxAdjustment(item);
     let totalActivePointAffectedDifference = 0;
-    let totalPointsDifference = 0;
+    //let totalPointsDifference = 0;
     let thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
     let thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing = 0;
     let isEffectFinished = false;
@@ -827,7 +827,7 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
                 console.warn(msg);
             } else {
                 console.error(msg);
-                debugger;
+                //debugger;
             }
             console.log();
             const previousChanges = foundry.utils.deepClone(ae.changes);
@@ -915,7 +915,7 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
                 }
             } else {
                 console.error(`Unhandled characteristis `);
-                debugger;
+                //debugger;
             }
         }
         // const targetStartingValue = targetSystem.characteristics[targetValuePath];
