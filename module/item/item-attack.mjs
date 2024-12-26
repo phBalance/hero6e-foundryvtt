@@ -2630,7 +2630,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     // Where is the adjustment taking from/giving to?
     const { valid, reducesArray, enhancesArray } = adjustmentItem.splitAdjustmentSourceAndTarget();
-    if (!valid) {
+    if (!valid && token.actor.items.filter((o) => o.type === "power").length > 0) {
         // Show a list of powers from target token
         if (game.settings.get(game.system.id, "alphaTesting")) {
             let html = "<table>";

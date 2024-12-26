@@ -1,6 +1,6 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { determineCostPerActivePoint } from "../utility/adjustment.mjs";
-
+import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 export class HeroSystem6eEndToEndTest {
     sceneName = "EndToEndTest";
     //scene;
@@ -56,17 +56,19 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestScene();
         await this.createTestActors();
 
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "FLIGHT"))) return;
+
         // AID 6 multiple characteristics + stacking
+
         if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END, POWERDEFENSE"))) return;
 
         // AID 6
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR"))) return;
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "PD"))) return;
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END"))) return;
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "DEX"))) return;
+        for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
+            await this.token5.actor.FullHealth();
+            await this.token6.actor.FullHealth();
+            if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", char.XMLID))) return;
+        }
 
         // // AID 5
         await this.token5.actor.FullHealth();
@@ -256,7 +258,7 @@ export class HeroSystem6eEndToEndTest {
         this.log(`CLICK: ${button.text().trim()}`);
 
         // Wait for chat chard then Apply AID
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < (options.expectToFail ? 5 : 50); i++) {
             if (
                 (button = $(
                     `ol#chat-log .chat-message:last-child button.apply-damage[data-item-id='${adjustmentItem.uuid}']:last-child`,
@@ -269,14 +271,14 @@ export class HeroSystem6eEndToEndTest {
         this.log(`CLICK: ${button.text().trim()}`);
 
         // wait for results & Get AP value
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < (options.expectToFail ? 5 : 50); i++) {
             if ($(`ol#chat-log .chat-message:last-child .card-section:last-child`).length === 1) break;
             await this.delay();
         }
         const ap = parseInt(
             document
                 .querySelector(`ol#chat-log .chat-message:last-child .card-section:last-child`)
-                .textContent.match(/(\d+) Active Points/)[1],
+                ?.textContent.match(/(\d+) Active Points/)[1],
         );
 
         // Get Active Effect
@@ -290,9 +292,13 @@ export class HeroSystem6eEndToEndTest {
                 break;
             await this.delay();
         }
-        if (!adjustmentActiveEffect && !options.expectToFail) {
-            this.log(`FAIL: unable to locate AE.`, "color:red");
-            return { error: true };
+        if (!adjustmentActiveEffect) {
+            if (!options.expectToFail) {
+                this.log(`FAIL: unable to locate AE.`, "color:red");
+                return { error: true };
+            } else {
+                this.log(`AE not created, which was expected.`);
+            }
         }
         if (adjustmentActiveEffect && options.expectToFail) {
             this.log(`FAIL: Expected AE to fail, but it didn't.`, "color:red");
@@ -332,8 +338,18 @@ export class HeroSystem6eEndToEndTest {
             const _max = parseInt(adjustmentItem.system.LEVELS) * 6;
             const _ap = aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0);
 
+            // Some AE's are expected to fail
+            let expectToFail = _ap >= _max && powerXMLID != "DRAIN";
+            if (
+                !targetXMLID.includes(",") &&
+                !tokenTarget.actor.system.characteristics?.[targetXMLID.toLowerCase()]?.core &&
+                !tokenTarget.actor.items.find((i) => i.system.XMLID === targetXMLID.toUpperCase())
+            ) {
+                expectToFail = true;
+            }
+
             let { adjustmentActiveEffect, ap, error } = await this.doAdjustment(adjustmentItem, tokenTarget, {
-                expectToFail: _ap >= _max && powerXMLID != "DRAIN",
+                expectToFail,
             });
             if (error) {
                 this.log("early exit");
