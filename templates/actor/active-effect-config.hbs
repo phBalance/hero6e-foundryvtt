@@ -173,10 +173,10 @@
             <div class="value">{{ localize "EFFECT.ChangeValue" }}</div>
 
             {{!-- FLAGS --}}
-            <div class="seconds">{{ localize "EFFECT.Seconds" }}</div>
+            {{!-- <div class="seconds">{{ localize "EFFECT.Seconds" }}</div>
             <div class="ap">{{ localize "EFFECT.AP" }}</div>
             <div class="startTime">{{ localize "EFFECT.StartTime" }}</div>
-            <div class="source">{{ localize "EFFECT.Source" }}</div>
+            <div class="source">{{ localize "EFFECT.Source" }}</div> --}}
 
             <div class="effect-controls">
                 <a class="effect-control" data-action="add"><i class="far fa-plus-square"></i></a>
@@ -198,7 +198,7 @@
                 </div>
 
                 {{!-- FLAGS --}}
-                <div class="seconds">
+                {{!-- <div class="seconds">
                     <input type="text" name="system.changes.{{i}}.seconds" value="{{change.seconds}}"/>
                 </div>
                 <div class="activePoints">
@@ -212,7 +212,7 @@
                 </div>
                 <div style="display:none">
                     <input title="{{change.sourceText}}" type="text" name="system.changes.{{i}}.source" value="{{change.source}}" disabled/>
-                </div>
+                </div> --}}
 
                 <div class="effect-controls">
                     <a class="effect-control" data-action="delete"><i class="fas fa-trash"></i></a>

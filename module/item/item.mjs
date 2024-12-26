@@ -3127,6 +3127,8 @@ export class HeroSystem6eItem extends Item {
                             ? reduceAndEnhanceTargets.enhances || reduceAndEnhanceTargets.reduces
                             : "unknown"
                     } ${diceFormula}`;
+
+                    this.name = system.NAME || `${system.ALIAS} ${system.INPUT}`;
                 }
                 break;
 

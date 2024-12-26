@@ -12,7 +12,22 @@ export class HeroSystem6eEndToEndTest {
 
     delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
 
+    floorCeil(value) {
+        if (value >= 0) return Math.floor(value);
+        return Math.ceil(value);
+    }
+
     async start() {
+        // Close existing dialog window if it exists
+        $(".dialog.end-to-end-testing button[data-button='ok']").click();
+
+        // Wait for previous dialog to close
+        for (let i = 0; i < 50; i++) {
+            if ($(".dialog.end-to-end-testing button[data-button='ok']").length === 0) break;
+            await this.delay();
+        }
+
+        // Create new dialog
         await new Dialog({
             title: `End To End Testing`,
             content: `<div style="height:400px; overflow-y:scroll"><ol class="end-to-end-testing">
@@ -36,28 +51,46 @@ export class HeroSystem6eEndToEndTest {
     }
 
     async performTests() {
+        CONFIG.debug.adjustmentFadeKeep = true;
+
         await this.createTestScene();
         await this.createTestActors();
 
-        // AID
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "STR"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "PD"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "END"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "AID", "DEX"))) return;
-        if (!(await this.testAdjustment(this.token5, this.token5, "AID", "DEX"))) return;
+        // AID 6 multiple characteristics + stacking
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END, POWERDEFENSE"))) return;
 
-        // reset actors
+        // AID 6
         await this.token5.actor.FullHealth();
         await this.token6.actor.FullHealth();
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "PD"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "DEX"))) return;
 
-        // DRAIN
-        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "STR"))) return;
-        if (!(await this.testAdjustment(this.token6, this.token5, "DRAIN", "DEX"))) return;
-        if (!(await this.testAdjustment(this.token5, this.token6, "DRAIN", "DEX"))) return;
+        // // AID 5
+        await this.token5.actor.FullHealth();
+        await this.token6.actor.FullHealth();
+        if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "DEX"))) return;
+
+        // DRAIN 6
+        await this.token5.actor.FullHealth();
+        await this.token6.actor.FullHealth();
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "STR"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "DRAIN", "DEX"))) return;
+
+        // DRAIN 5
+        await this.token5.actor.FullHealth();
+        await this.token6.actor.FullHealth();
+        if (!(await this.testAdjustmentStacking(this.token5, this.token6, "DRAIN", "DEX"))) return;
+
+        CONFIG.debug.adjustmentFadeKeep = false;
+
+        this.log(`Tests completed`, "color:green");
     }
 
     log(text, css) {
-        if (css) {
+        if (css?.includes("red")) {
             console.error(text);
         } else {
             console.log(text);
@@ -143,23 +176,42 @@ export class HeroSystem6eEndToEndTest {
         this.token6 = this.actor6.getActiveTokens()[0];
     }
 
-    async testAdjustment(tokenSource, tokenTarget, powerXMLID, targetXMLID) {
-        // Create AID
-        const xml = `
+    async createPower(powerXMLID, targetXMLID, tokenSource) {
+        let expandedEffect = 1;
+        while (targetXMLID.split(",").length > expandedEffect * 2) {
+            expandedEffect++;
+        }
+        const xml =
+            `
             <POWER XMLID="${powerXMLID}" ID="1734814179562" BASECOST="0.0" LEVELS="2" ALIAS="${powerXMLID.titleCase()}" POSITION="1" 
             MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" 
             INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="${targetXMLID}" USESTANDARDEFFECT="No" QUANTITY="1" 
             AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            ` +
+            `${
+                expandedEffect > 1
+                    ? `<MODIFIER XMLID="EXPANDEDEFFECT" ID="1735178298410" 
+                    BASECOST="-0.5" LEVELS="${expandedEffect}" ALIAS="Expanded Effect (x2 Characteristics or Powers simultaneously)"
+                    POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" 
+                    INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`
+                    : ""
+            }` +
+            `<NOTES />
             </POWER>
         `;
+
         const itemData = HeroSystem6eItem.itemDataFromXml(xml, tokenSource.actor);
         const adjustmentItem = await HeroSystem6eItem.create(itemData, { parent: tokenSource.actor });
         await adjustmentItem._postUpload();
+
         this.log(
             `Added <b>${adjustmentItem.name} ${adjustmentItem.system.INPUT}</b> to <b>${adjustmentItem.actor.name}</b>`,
         );
 
-        // Target tokenTarget
+        return adjustmentItem;
+    }
+
+    async targetToken(tokenTarget) {
         await game.user.updateTokenTargets([tokenTarget.id]);
         await game.user.broadcastActivity({
             targets: Array.from(game.user.targets.map((t) => t.id)),
@@ -167,11 +219,11 @@ export class HeroSystem6eEndToEndTest {
 
         // Control targetToken (when we miss we don't have the APPLY to X button)
         tokenTarget.control();
+    }
 
-        // for (let i = 0; i < 50; i++) {
-        //     if (game.user.targets.first()?.id === tokenTarget.id) break;
-        //     this.delay(); // For some reson targets don't always update right away.
-        // }
+    async doAdjustment(adjustmentItem, tokenTarget, options) {
+        // Keep track of old temporaryEffects so we know when it has been added
+        const oldTempEffectIds = tokenTarget.actor.temporaryEffects.map((ae) => ae.id);
 
         // Roll
         await adjustmentItem.roll();
@@ -213,160 +265,375 @@ export class HeroSystem6eEndToEndTest {
                 break;
             await this.delay();
         }
-        // if (!button.text().trim().includes(" to ")) {
-        //     this.log(`FAIL: Is "Apply ${powerXMLID} to ${tokenTarget.name}" in the chatcard?`, "color:red");
-        //     return false;
-        // }
         button.click();
         this.log(`CLICK: ${button.text().trim()}`);
 
-        // Get Active Effect
-        let adjustmentActiveEffect;
+        // wait for results & Get AP value
         for (let i = 0; i < 50; i++) {
-            if ((adjustmentActiveEffect = tokenTarget.actor.temporaryEffects?.[0])) break;
+            if ($(`ol#chat-log .chat-message:last-child .card-section:last-child`).length === 1) break;
             await this.delay();
         }
-        if (!adjustmentActiveEffect) {
-            this.log(
-                `FAIL: unable to locate AE. Is "Apply ${powerXMLID}  to ${tokenTarget.name}" in the chatcard?`,
-                "color:red",
-            );
-            return false;
-        }
-        this.log(
-            `Active Effect: ${adjustmentActiveEffect.changes?.[0].key} ${adjustmentActiveEffect.changes?.[0].value}`,
+        const ap = parseInt(
+            document
+                .querySelector(`ol#chat-log .chat-message:last-child .card-section:last-child`)
+                .textContent.match(/(\d+) Active Points/)[1],
         );
 
+        // Get Active Effect
+        let adjustmentActiveEffect;
+        for (let i = 0; i < (options.expectToFail ? 5 : 50); i++) {
+            if (
+                (adjustmentActiveEffect = tokenTarget.actor.temporaryEffects.find(
+                    (ae) => !oldTempEffectIds.find((oe) => oe === ae.id),
+                ))
+            )
+                break;
+            await this.delay();
+        }
+        if (!adjustmentActiveEffect && !options.expectToFail) {
+            this.log(`FAIL: unable to locate AE.`, "color:red");
+            return { error: true };
+        }
+        if (adjustmentActiveEffect && options.expectToFail) {
+            this.log(`FAIL: Expected AE to fail, but it didn't.`, "color:red");
+            return { error: true };
+        }
+        if (adjustmentActiveEffect) {
+            this.log(
+                `Active Effect ${adjustmentItem.system.XMLID}: value=${adjustmentActiveEffect.changes?.[0].value} ` +
+                    `ap=${adjustmentActiveEffect.flags.adjustmentActivePoints}/${ap} ` +
+                    `startTime=${adjustmentActiveEffect.duration.startTime} worldTime=${adjustmentActiveEffect.duration._worldTime}`,
+            );
+        }
+        return { adjustmentActiveEffect, ap };
+    }
+
+    async testAdjustmentStacking(tokenSource, tokenTarget, powerXMLID, targetXMLID, stacks = 3) {
+        // Create power/item and add to actor
+        const adjustmentItem = await this.createPower(powerXMLID, targetXMLID, tokenSource);
+
+        // Target tokenTarget
+        await this.targetToken(tokenTarget);
+
+        const aeStacks = [];
+        let adjustmentActivePoints;
+        let adjustmentValue = {};
+        let actorCharaisticValue = {};
+        const costPerActivePoint = {};
+
+        for (let s = 0; s < stacks; s++) {
+            if (s > 0) {
+                // Advance world time 1 second so we can see the fades of each ae/stack
+                this.log(`worldTime + 1 second`);
+                await game.time.advance(1);
+            }
+
+            // Confirm characteristic.value matches AE adjustment
+            const _max = parseInt(adjustmentItem.system.LEVELS) * 6;
+            const _ap = aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0);
+
+            let { adjustmentActiveEffect, ap, error } = await this.doAdjustment(adjustmentItem, tokenTarget, {
+                expectToFail: _ap >= _max && powerXMLID != "DRAIN",
+            });
+            if (error) {
+                this.log("early exit");
+                return;
+            }
+
+            if (adjustmentActiveEffect) {
+                // the effect rolled is not necessarily the final ap (maximum effect)
+                if (ap !== Math.abs(adjustmentActiveEffect.flags.adjustmentActivePoints)) {
+                    this.log(
+                        `WARN${s}: rolled ${ap}, applied ${adjustmentActiveEffect.flags.adjustmentActivePoints}. Likely due to maximum effect.`,
+                    );
+                    ap = adjustmentActiveEffect.flags.adjustmentActivePoints;
+                }
+                aeStacks.push({ adjustmentActiveEffect, ap });
+            } else {
+                continue;
+            }
+
+            // Positive Adjustment
+            if (adjustmentActiveEffect.flags.adjustmentActivePoints >= 0) {
+                adjustmentActivePoints = Math.min(
+                    parseInt(adjustmentItem.system.LEVELS) * 6,
+                    aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0),
+                );
+            } else {
+                // Negative Adjustment
+                adjustmentActivePoints = -aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0);
+            }
+
+            for (const change of adjustmentActiveEffect.changes) {
+                const char = change.key.match(/([a-z]+)\.max/)?.[1];
+                costPerActivePoint[change.key] = determineCostPerActivePoint(
+                    char.toUpperCase(),
+                    null,
+                    tokenTarget.actor,
+                );
+
+                adjustmentValue[change.key] = Math.trunc(adjustmentActivePoints / costPerActivePoint[change.key]);
+                actorCharaisticValue[change.key] =
+                    tokenTarget.actor.system.characteristics[char].core + adjustmentValue[change.key];
+
+                if (tokenTarget.actor.system.characteristics[char].value !== actorCharaisticValue[change.key]) {
+                    this.log(
+                        `Actor ${char}.value expecting ${actorCharaisticValue[change.key]} got ${tokenTarget.actor.system.characteristics[char].value}/${tokenTarget.actor.system.characteristics[char].max}`,
+                        "color:red",
+                    );
+                    return;
+                }
+                if (tokenTarget.actor.system.characteristics[char].max !== actorCharaisticValue[change.key]) {
+                    this.log(
+                        `Actor ${char}.max expecting ${actorCharaisticValue[change.key]} got ${tokenTarget.actor.system.characteristics[char].max}`,
+                        "color:red",
+                    );
+                    return;
+                }
+            }
+        }
+
         // Confirm Characteristic has been aided
-        let adjustmentValue = parseInt(adjustmentActiveEffect.changes[0].value);
-        let adjustmentActivePoints = -adjustmentActiveEffect.flags.adjustmentActivePoints;
-        let actorCharaisticValue =
-            tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].core + adjustmentValue;
-        if (tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value !== actorCharaisticValue) {
-            this.log(`FAIL: ${targetXMLID.toLowerCase()}.value !== actorCharaisticValue`, "color:red");
-            return;
-        }
+        // Positive Adjustment Powers have maximum effects. A character
+        // can achieve his maximum with one or more uses of the Positive
+        // Adjustment Power.
+        // For Aid, this is equal to the maximum amount you can roll
+        // on the dice – for example, 3d6 Aid Blast can add a maximum
+        // of 18 CP to a Blast. This maximum applies to each target.
+        // For example, the Aid Blast above can add a maximum of 18
+        // CP of Blast to Sapphire, and a maximum of 18 CP of Blast to
+        // Witchcraft.
 
-        if (adjustmentActiveEffect.changes.length !== 1) {
-            this.log(`FAIL: AE has more than 1 change`, "color:red");
-            return;
-        }
-
-        const costPerActivePoint = determineCostPerActivePoint(targetXMLID, null, tokenTarget.actor);
-        // if (aidActiveEffect.flags.costPerActivePoint !== costPerActivePoint) {
-        //     this.log(
-        //         `FAIL costPerActivePoint: ${aidActiveEffect.flags.costPerActivePoint} !== ${costPerActivePoint}`,
-        //         "color:red",
-        //     );
-        //     return;
-        // }
-
-        //const saveWorldTime = game.time.worldTime;
-
-        while (adjustmentValue !== 0) {
+        // fades
+        let fadeCount = 0;
+        while (adjustmentValue !== 0 && fadeCount < 50) {
+            fadeCount++;
             // Make sure AP = change.value
-            if (parseInt(adjustmentActiveEffect.changes[0].value) !== -adjustmentActiveEffect.flags.affectedPoints) {
-                this.log(
-                    `FAIL aidActiveEffect.flags.affectedPoints: ${adjustmentActiveEffect.changes[0].value} !== ${-adjustmentActiveEffect.flags.affectedPoints}`,
-                    "color:red",
-                );
-                return;
+            // if (parseInt(adjustmentActiveEffect.changes[0].value) !== -adjustmentActiveEffect.flags.affectedPoints) {
+            //     this.log(
+            //         `FAIL aidActiveEffect.flags.affectedPoints: ${adjustmentActiveEffect.changes[0].value} !== ${-adjustmentActiveEffect.flags.affectedPoints}`,
+            //         "color:red",
+            //     );
+            //     return;
+            // }
+
+            // Find first AE to expire
+            let firstActiveEffectToExpire;
+            for (const ae of tokenTarget.actor.temporaryEffects) {
+                if (
+                    (!firstActiveEffectToExpire ||
+                        ae.updateDuration().remaining < firstActiveEffectToExpire.updateDuration().remaining) &&
+                    ae.flags.adjustmentActivePoints !== 0 &&
+                    ae.updateDuration().remaining > 0
+                ) {
+                    firstActiveEffectToExpire = ae;
+                }
             }
 
-            if (adjustmentActivePoints !== -adjustmentActiveEffect.flags.adjustmentActivePoints) {
-                this.log(
-                    `FAIL aidActivePoints: ${adjustmentActivePoints} !== ${-adjustmentActiveEffect.flags.adjustmentActivePoints}`,
-                    "color:red",
-                );
-                return;
+            if (!firstActiveEffectToExpire) {
+                this.log("All fades complete");
+                return true;
             }
 
-            if (
-                parseInt(adjustmentActiveEffect.changes[0].value) !==
-                Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
-            ) {
-                this.log(
-                    `FAIL adjustmentActiveEffect.changes[0].value: ${adjustmentActiveEffect.changes[0].value} !== ${Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
-                    "color:red",
-                );
+            // fade amout expected
+            const _fade =
+                firstActiveEffectToExpire.flags.adjustmentActivePoints >= 0
+                    ? -Math.min(5, parseInt(firstActiveEffectToExpire.flags.adjustmentActivePoints))
+                    : -Math.max(-5, parseInt(firstActiveEffectToExpire.flags.adjustmentActivePoints));
+            this.log(
+                `Preparing to fade ${firstActiveEffectToExpire.flags.createTime}.${fadeCount} (which has ${firstActiveEffectToExpire.flags.adjustmentActivePoints} AP) by ${_fade} active points`,
+            );
+
+            // Advance X seconds to expire firstActiveEffectToExpire
+            const seconds =
+                firstActiveEffectToExpire.duration.startTime +
+                firstActiveEffectToExpire.duration.seconds -
+                game.time.worldTime;
+            if (seconds <= 0) {
+                this.log(`Seconds= ${seconds}`, "color:red");
                 return;
             }
+            this.log(`worldTime +${seconds} seconds`);
+            await game.time.advance(seconds);
 
-            if (
-                -adjustmentActiveEffect.flags.affectedPoints !==
-                Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
-            ) {
-                this.log(
-                    `FAIL adjustmentActiveEffect.flags.affectedPoints: ${-adjustmentActiveEffect.flags.affectedPoints} !== ${Math.floor(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
-                    "color:red",
-                );
-                return;
+            const newAdjustmentActivePoints =
+                firstActiveEffectToExpire.flags.adjustmentActivePoints >= 0
+                    ? Math.max(0, adjustmentActivePoints + _fade)
+                    : Math.min(0, adjustmentActivePoints + _fade);
+            const adjustmentNewValue = {};
+            const actorNewCharacteristicValue = {};
+            for (const change of firstActiveEffectToExpire.changes) {
+                const char = change.key.match(/([a-z]+)\.max/)?.[1];
+                //newAdjustmentActivePoints[change.key] = Math.max(0, adjustmentActivePoints - _fade);
+                adjustmentNewValue[change.key] = Math.trunc(newAdjustmentActivePoints / costPerActivePoint[change.key]);
+                actorNewCharacteristicValue[change.key] =
+                    tokenTarget.actor.system.characteristics[char].core + adjustmentNewValue[change.key];
             }
-
-            // Advance world time 12 seconds
-            this.log(`worldTime + 12 seconds`);
-            await game.time.advance(12);
 
             // Wait for AE to update/fade
             for (let i = 0; i < 50; i++) {
-                if (tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value !== actorCharaisticValue)
+                const char = firstActiveEffectToExpire.changes[0].key.match(/([a-z]+)\.max/)?.[1];
+                if (
+                    tokenTarget.actor.system.characteristics[char].value ===
+                    actorNewCharacteristicValue[firstActiveEffectToExpire.changes[0].key]
+                )
                     break;
                 await this.delay();
             }
-            adjustmentActiveEffect = tokenTarget.actor.temporaryEffects?.[0]; // Make sure we have latest updates
 
-            if (adjustmentActiveEffect && adjustmentActiveEffect.changes.length !== 1) {
-                this.log(`FAIL: AE has more than 1 change`, "color:red");
-                return;
+            for (const change of firstActiveEffectToExpire.changes) {
+                const char = change.key.match(/([a-z]+)\.max/)?.[1];
+                if (tokenTarget.actor.system.characteristics[char].value === actorNewCharacteristicValue[change.key]) {
+                    this.log(
+                        `Fade ${firstActiveEffectToExpire.flags.createTime}.${fadeCount} from ${adjustmentValue[change.key]} to ` +
+                            `${adjustmentNewValue[change.key]} was successful. ${char}=${actorNewCharacteristicValue[change.key]}/` +
+                            `${tokenTarget.actor.system.characteristics[char].value}/` +
+                            `${tokenTarget.actor.system.characteristics[char].max}`,
+                    );
+                } else {
+                    this.log(
+                        `Fade ${firstActiveEffectToExpire.flags.createTime}.${fadeCount} ` +
+                            `FAIL: Expected actor ${char}=${actorNewCharacteristicValue[change.key]} got ` +
+                            `${tokenTarget.actor.system.characteristics[char].value}/` +
+                            `${tokenTarget.actor.system.characteristics[char].max}`,
+                        "color:red",
+                    );
+                    return;
+                }
             }
 
-            // Check for fade
-            this.log(
-                `Active Effect: ${adjustmentActiveEffect?.changes[0].key} ${adjustmentActiveEffect?.changes[0].value}`,
-            );
-            const newAidActivePoints =
-                powerXMLID === "AID"
-                    ? Math.max(0, adjustmentActivePoints - 5)
-                    : Math.min(0, adjustmentActivePoints + 5);
-            // const aidNewValue = aidActiveEffect
-            //     ? Math.max(0, Math.floor(-aidActiveEffect.flags.adjustmentActivePoints - 5 / costPerActivePoint))
-            //     : 0;
-            const adjustmentNewValue = Math.floor(newAidActivePoints / costPerActivePoint);
-            // const actorNewCharacteristicValue = Math.max(
-            //     token.actor.system.characteristics[XMLID.toLowerCase()].core,
-            //     actorCharaisticValue - 5 / costPerActivePoint,
-            // );
-            const actorNewCharacteristicValue =
-                tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].core + adjustmentNewValue;
-            if (
-                (!adjustmentActiveEffect && adjustmentNewValue === 0) ||
-                tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value ===
-                    actorNewCharacteristicValue
-            ) {
-                this.log(
-                    `Fade from ${adjustmentValue} to ${adjustmentNewValue} was successful. ${targetXMLID}=${actorNewCharacteristicValue}`,
-                );
-            } else {
-                this.log(
-                    `Expected actor ${targetXMLID}=${actorNewCharacteristicValue} got ${tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value}`,
-                    "color:red",
-                );
-                this.log(
-                    `Expected change.value=${adjustmentNewValue} got ${adjustmentActiveEffect?.changes[0].value}`,
-                    "color:red",
-                );
-                return;
-            }
-
-            // fade again?
-            adjustmentActivePoints = newAidActivePoints;
-            adjustmentValue = adjustmentNewValue;
-            actorCharaisticValue = actorNewCharacteristicValue;
+            adjustmentActivePoints = foundry.utils.deepClone(newAdjustmentActivePoints);
+            adjustmentValue = foundry.utils.deepClone(adjustmentNewValue);
+            actorCharaisticValue = foundry.utils.deepClone(actorNewCharacteristicValue);
         }
-        this.log(
-            `AID Active Effect <b>${targetXMLID}</b> for <b>${tokenTarget.actor.name}</b>: Fade completed succesfully`,
-        );
 
-        return true; // true = success
+        this.log("Abandon fade loop");
+        return false; // true = success
     }
+
+    // async testAdjustment(tokenSource, tokenTarget, powerXMLID, targetXMLID) {
+    //     // Create power/item and add to actor
+    //     const adjustmentItem = await this.createPower(powerXMLID, targetXMLID, tokenSource);
+
+    //     // Target tokenTarget
+    //     await this.targetToken(tokenTarget);
+
+    //     let adjustmentActiveEffect = await this.doAdjustment(adjustmentItem, tokenTarget);
+
+    //     // Confirm Characteristic has been aided
+    //     let adjustmentValue = parseInt(adjustmentActiveEffect.changes[0].value);
+    //     let adjustmentActivePoints = -adjustmentActiveEffect.flags.adjustmentActivePoints;
+    //     let actorCharaisticValue =
+    //         tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].core + adjustmentValue;
+    //     if (tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value !== actorCharaisticValue) {
+    //         this.log(`FAIL: ${targetXMLID.toLowerCase()}.value !== actorCharaisticValue`, "color:red");
+    //         return;
+    //     }
+
+    //     if (adjustmentActiveEffect.changes.length !== 1) {
+    //         this.log(`FAIL: AE has more than 1 change`, "color:red");
+    //         return;
+    //     }
+
+    //     const costPerActivePoint = determineCostPerActivePoint(targetXMLID, null, tokenTarget.actor);
+
+    //     while (adjustmentValue !== 0) {
+    //         // Make sure AP = change.value
+    //         if (parseInt(adjustmentActiveEffect.changes[0].value) !== -adjustmentActiveEffect.flags.affectedPoints) {
+    //             this.log(
+    //                 `FAIL aidActiveEffect.flags.affectedPoints: ${adjustmentActiveEffect.changes[0].value} !== ${-adjustmentActiveEffect.flags.affectedPoints}`,
+    //                 "color:red",
+    //             );
+    //             return;
+    //         }
+
+    //         if (adjustmentActivePoints !== -adjustmentActiveEffect.flags.adjustmentActivePoints) {
+    //             this.log(
+    //                 `FAIL aidActivePoints: ${adjustmentActivePoints} !== ${-adjustmentActiveEffect.flags.adjustmentActivePoints}`,
+    //                 "color:red",
+    //             );
+    //             return;
+    //         }
+
+    //         if (
+    //             parseInt(adjustmentActiveEffect.changes[0].value) !==
+    //             this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
+    //         ) {
+    //             this.log(
+    //                 `FAIL adjustmentActiveEffect.changes[0].value: ${adjustmentActiveEffect.changes[0].value} !== ${this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
+    //                 "color:red",
+    //             );
+    //             return;
+    //         }
+
+    //         if (
+    //             -adjustmentActiveEffect.flags.affectedPoints !==
+    //             this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)
+    //         ) {
+    //             this.log(
+    //                 `FAIL adjustmentActiveEffect.flags.affectedPoints: ${-adjustmentActiveEffect.flags.affectedPoints} !== ${this.floorCeil(-adjustmentActiveEffect.flags.adjustmentActivePoints / costPerActivePoint)})`,
+    //                 "color:red",
+    //             );
+    //             return;
+    //         }
+
+    //         // Advance world time 12 seconds
+    //         this.log(`worldTime + 12 seconds`);
+    //         await game.time.advance(12);
+
+    //         // Wait for AE to update/fade
+    //         for (let i = 0; i < 50; i++) {
+    //             if (tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value !== actorCharaisticValue)
+    //                 break;
+    //             await this.delay();
+    //         }
+    //         adjustmentActiveEffect = tokenTarget.actor.temporaryEffects?.[0]; // Make sure we have latest updates
+
+    //         if (adjustmentActiveEffect && adjustmentActiveEffect.changes.length !== 1) {
+    //             this.log(`FAIL: AE has more than 1 change`, "color:red");
+    //             return;
+    //         }
+
+    //         // Check for fade
+    //         this.log(
+    //             `Active Effect: ${adjustmentActiveEffect?.changes[0].key} ${adjustmentActiveEffect?.changes[0].value}`,
+    //         );
+    //         const newAidActivePoints =
+    //             powerXMLID === "AID"
+    //                 ? Math.max(0, adjustmentActivePoints - 5)
+    //                 : Math.min(0, adjustmentActivePoints + 5);
+    //         const adjustmentNewValue = this.floorCeil(newAidActivePoints / costPerActivePoint);
+    //         const actorNewCharacteristicValue =
+    //             tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].core + adjustmentNewValue;
+    //         if (
+    //             (!adjustmentActiveEffect && adjustmentNewValue === 0) ||
+    //             tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value ===
+    //                 actorNewCharacteristicValue
+    //         ) {
+    //             this.log(
+    //                 `Fade from ${adjustmentValue} to ${adjustmentNewValue} was successful. ${targetXMLID}=${actorNewCharacteristicValue}`,
+    //             );
+    //         } else {
+    //             this.log(
+    //                 `Expected actor ${targetXMLID}=${actorNewCharacteristicValue} got ${tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value}`,
+    //                 "color:red",
+    //             );
+    //             this.log(
+    //                 `Expected change.value=${adjustmentNewValue} got ${adjustmentActiveEffect?.changes[0].value}`,
+    //                 "color:red",
+    //             );
+    //             return;
+    //         }
+
+    //         // fade again?
+    //         adjustmentActivePoints = newAidActivePoints;
+    //         adjustmentValue = adjustmentNewValue;
+    //         actorCharaisticValue = actorNewCharacteristicValue;
+    //     }
+    //     this.log(
+    //         `AID Active Effect <b>${targetXMLID}</b> for <b>${tokenTarget.actor.name}</b>: Fade completed succesfully`,
+    //     );
+
+    //     return true; // true = success
+    // }
 }

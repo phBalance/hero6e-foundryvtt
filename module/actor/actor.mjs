@@ -2476,4 +2476,12 @@ export class HeroSystem6eActor extends Actor {
         const price = equipment.reduce((a, b) => a + parseFloat(b.system.PRICE), 0);
         return price.toFixed(2);
     }
+
+    /**
+     * Apply any transformations to the Actor data which are caused by ActiveEffects.
+     */
+    // *override
+    applyActiveEffects(...args) {
+        return super.applyActiveEffects(...args);
+    }
 }
