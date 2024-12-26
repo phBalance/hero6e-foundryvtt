@@ -2,13 +2,13 @@
     "HERO6EFOUNDRYVTTV2": {
         "confirms": {
             "deleteConfirm": {
-              "Title": "Confirm Deletion",
-              "Content": "Are you sure you want to delete this? This action cannot be undone."
+                "Title": "Confirm Deletion",
+                "Content": "Are you sure you want to delete this? This action cannot be undone."
             },
             "fullHealthConfirm": {
                 "Title": "Confirm Full Health",
                 "Content": "Are you sure you want to restore all characteristics to max, remove status effects, and remove temporary effects?"
-              }
+            }
         }
     },
     "Items": {
@@ -41,7 +41,7 @@
     },
     "ActorSheet": {
         "Active": "Active",
-        "ActiveEffect": "ActiveEffect",        
+        "ActiveEffect": "ActiveEffect",
         "ActiveEffectTemporary": "Temporary Effects",
         "ActiveEffectConstant": "Constant Effects",
         "ActiveEffectPersistent": "Persistent Effects",
@@ -52,7 +52,7 @@
         "BaseTitle": "Starting amount you get for free.",
         "Biography": "Biography",
         "CAMPAIGN_USE": "CAMPAIGN USE",
-        "Carried" : "Carried",
+        "Carried": "Carried",
         "Char": "Char",
         "Characteristic": "Characteristic",
         "CharTitle": "Characteristic Name's Abbreviation.",
@@ -67,7 +67,7 @@
         "Description": "Description",
         "Dmg": "Dmg.",
         "EditItem": "Edit item",
-        "Effect" : "Effect",
+        "Effect": "Effect",
         "End": "END",
         "ExpandItem": "Expand Item",
         "Hard": "Hard.",
@@ -83,7 +83,7 @@
         "Perk": "Perk",
         "PERSONALITY": "PERSONALITY",
         "Phase": "Phase",
-        "Price" : "Price",
+        "Price": "Price",
         "QUOTE": "QUOTE",
         "Res": "Res.",
         "Roll": "Roll",
@@ -93,8 +93,8 @@
         "Type": "Type",
         "Value": "Current",
         "ValueTitle": "Current total value including all powers, effects and damage.",
-        "Velocity" : "Velocity",
-        "Weight" : "Weight"
+        "Velocity": "Velocity",
+        "Weight": "Weight"
     },
     "Errors": {
         "TokenSelect": "Please select a token"
@@ -126,13 +126,13 @@
 
         "Segment": "Segment",
         "CombatantRemoveHero": "Remove Combatant"
-        
     },
 
     "EFFECT": {
         "Aborted": "Aborted",
         "HoldingAnAction": "Holding An Action",
         "HoldingBreath": "Holding Breath",
+        "MindControlled": "Mind Controlled",
         "StandingInWater": "Standing In Water",
         "StatusAdjustmentAid": "Aided",
         "StatusAdjustmentDrain": "Drained",
@@ -203,11 +203,11 @@
             "Name": "Add 3rd Bar and labels",
             "Hint": "Add a 3rd resource bar to tokens. Each token will have a Body, Stun and Endurance resource bar with an appropriate label. It is recommended this be disabled and instead use the BarBrawl module for custom bars."
         },
-        "CombatMovementOnlyOnActorsPhase" :{
+        "CombatMovementOnlyOnActorsPhase": {
             "Name": "Combat Movement Only On Actors Phase",
             "Hint": "This prevents players from moving their tokens when it isn't their turn."
         },
-        "effectsPanel" :{
+        "effectsPanel": {
             "Name": "Effects Panel",
             "Hint": "Show the effects panel when a token is controlled."
         },
@@ -223,7 +223,7 @@
             "Name": "Show Generic Dice Roller",
             "Hint": "Show generic dice rolling buttons at the bottom of the Chat Messages sidebar."
         },
-        "DefaultEdition" : {
+        "DefaultEdition": {
             "Name": "Default System Rules",
             "Hint": "The system rules are typically determined by the edition defined within the HDC file you import for each actor. When there is no actor (or otherwise 5e/6e cannot be determined) we will use this choice for the rule system.  Also used to create the HeroSystem compendium.",
             "Choices": {
@@ -235,7 +235,7 @@
             "Name": "Combat Tracker Disposition Highlighting",
             "Hint": "The background color of combatants in the combat tracker will match the color associated with the token disposition. Players with a friendly disposition will be green."
         },
-        "StrEnd" : {
+        "StrEnd": {
             "Name": "Heroic Strength & Endurance",
             "Hint": "Using STR typically costs 1 END per 10 points of STR used. In heroic campaigns the GM has the option of charging 1 END per 5 STR used. This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
             "Choices": {
@@ -257,7 +257,7 @@
             "Name": "Use hexagonal AOE templates",
             "Hint": "When the scene has a hexagonal grid, the Area Of Effect templates will follow 5th edition shapes."
         },
-        "HitLocation" : {
+        "HitLocation": {
             "Name": "Hit Locations",
             "Tracking": {
                 "Name": "Hit Location Left/Right",
@@ -276,43 +276,36 @@
             "Name": "Secret Mind Scan",
             "Hint": "Mind Scan has several components that the Game Master may wish to keep secret. When enabled players are unable to make Mind Scan rolls. Instead the GM is required to make Mind Scan rolls for the players. When disabled, players can select number of minds and familarity."
         },
-        "UseEndurance": 
-        {
+        "UseEndurance": {
             "Name": "Use Endurance",
             "Hint": "Automate tracking of endurance. For example END will used for attacks and constant powers when in combat."
         },
-        "LongTermEndurance": 
-        {
+        "LongTermEndurance": {
             "Name": "Long-term Endurance",
             "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation. When an actor's average END use per turn exceeds double their REC, max END is lowered."
         },
-        "DoubleDamageLimit": 
-        {
+        "DoubleDamageLimit": {
             "Name": "Double Damage Limit",
             "Hint": "A character cannot more than double the Damage Classes of his base attack. This should be enabled for 5E games. It is an optional rule for 6E games."
         },
-        "DiceSkinning": 
-        {
+        "DiceSkinning": {
             "Name": "Dice Skinning (Dice So Nice)",
             "Hint": "Requires Dice So Nice module. Dice associated with hit locations, stun multipliers, and knockback have a different dice skin."
         },
-        "UseKnockback": 
-        {
+        "UseKnockback": {
             "Name": "Use Knockback",
             "Hint": "Use knockback rules."
         },
-        "UseStunned": 
-        {
+        "UseStunned": {
             "Name": "Use Stunned",
             "Hint": "Automate applying the stunned condition."
-        }        
+        }
     },
     "keybindings": {
         "OverrideCanAct": {
             "Name": "Override Cannot Act/Move",
             "Hint": "There are times when an actor cannot act or move (such as when stunned). There are also times when you are out of resources an cannot activate a power. You can override the automated blocking by holding down this key. Note that if you hold down a CONTROL key while trying to move you will trigger the measurement control, which uses the SPACEBAR to follow the path."
         }
-        
     },
 
     "TYPES": {
@@ -337,4 +330,3 @@
         }
     }
 }
-
