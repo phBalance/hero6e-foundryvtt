@@ -3666,6 +3666,12 @@ export class HeroSystem6eItem extends Item {
         if (system.ADDER?.length > 0 || _adderArray.length > 0) {
             for (const adder of system?.ADDER || []) {
                 switch (adder.XMLID) {
+                    case "HEALEDBY":
+                        {
+                            _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS || "unknown"}`);
+                        }
+                        break;
+
                     case "DIMENSIONS":
                         system.description += `, ${adder.ALIAS}`;
                         break;
