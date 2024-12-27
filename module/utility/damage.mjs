@@ -32,6 +32,28 @@ export function convertToDiceParts(value) {
     return { dice, halfDice, plus1 };
 }
 
+function addExtraDcs(item, dcObj) {
+    // PH: FIXME: Is it possible to have multiple EXTRADCs purchased? If so, this doesn't work.
+    const extraDc = item.actor.items.find((item) => item.system.XMLID === "EXTRADC");
+    if (extraDc) {
+        let extraDcLevels = parseInt(extraDc.system.LEVELS);
+
+        // 5E extraDCLevels are halved for killing attacks
+        if (item.is5e && item.system.killing) {
+            extraDcLevels = Math.floor(extraDcLevels / 2);
+        }
+
+        if (extraDcLevels > 0) {
+            dcObj.dc += extraDcLevels;
+            dcObj.tags.push({
+                value: `${extraDcLevels}DC`,
+                name: extraDc.name.replace(/\+\d+ HTH/, "").trim(),
+                title: `${extraDcLevels.signedString()}DC`,
+            });
+        }
+    }
+}
+
 /**
  * Calculate the base DC. The base DC concept is only useful for 5e where there is a base DC doubling rule.
  * Consequently, no 6e specific rules should be in here.
@@ -53,8 +75,6 @@ function calculateBaseDcFromItem(item, options) {
         itemBaseDc = Math.floor(itemBaseDc / 2);
     }
 
-    // PH: FIXME: For hand to hand attacks the strength bonus counts as base damage.
-
     const baseDc = {
         dc: itemBaseDc,
         tags: [
@@ -67,29 +87,12 @@ function calculateBaseDcFromItem(item, options) {
     };
 
     // PH: FIXME: This is not correct as it does not account for only unarmed attacks.
-    // 5e martial arts EXTRADC
+    // 5e martial arts EXTRADCs are baseDCs
     if (item.is5e && item.type === "martialart") {
-        // PH: FIXME: Is it possible to have multiple EXTRADCs purchased? If so, this doesn't work.
-        const extraDc = item.actor.items.find((item) => item.system.XMLID === "EXTRADC");
-        if (extraDc) {
-            let extraDcLevels = parseInt(extraDc.system.LEVELS);
-
-            // 5E extraDCLevels are halved for killing attacks
-            // PH: FIXME: 5E EXTRADC for unarmed killing attacks count at half DCs but count towards the base DC. As usual there are no 1/2 DCs.
-            if (item.system.killing) {
-                extraDcLevels = Math.floor(extraDcLevels / 2);
-            }
-
-            if (extraDcLevels > 0) {
-                baseDc.dc += extraDcLevels;
-                baseDc.tags.push({
-                    value: `${extraDcLevels}`,
-                    name: extraDc.name.replace(/\+\d+ HTH/, "").trim(),
-                    title: `${extraDcLevels.signedString()}DC`,
-                });
-            }
-        }
+        addExtraDcs(item, baseDc);
     }
+
+    // PH: FIXME: For hand to hand attacks the strength bonus counts as base damage.
 
     return {
         itemBaseDc,
@@ -110,6 +113,12 @@ export function calculateDcFromItem(item, options) {
         dc: 0,
         tags: [],
     };
+
+    // PH: FIXME: This is not correct as it does not account for only unarmed attacks.
+    // 6e doesn't have the concept of base and added DCs so do it here.
+    if (!item.is5e && item.type === "martialart") {
+        addExtraDcs(item, addedDc);
+    }
 
     // PH: FIXME: I don't think that this is right.
     // Add in STR
@@ -289,71 +298,61 @@ export function calculateDcFromItem(item, options) {
 
     // DEADLYBLOW
     // Only check if it has been turned off
-    // FIXME: This function should not be changing the item.system. Please fix me.
-    // const deadlyBlow = item.actor?.items.find((o) => o.system.XMLID === "DEADLYBLOW");
-    // if (deadlyBlow) {
-    //     item.system.conditionalAttacks ??= {};
-    //     item.system.conditionalAttacks[deadlyBlow.id] = deadlyBlow;
-    //     item.system.conditionalAttacks[deadlyBlow.id].system.checked ??= true;
-    // }
+    // FIXME: This function should not be changing the item.system. Please fix me by moving to something in the user flow.
+    const deadlyBlow = item.actor?.items.find((o) => o.system.XMLID === "DEADLYBLOW");
+    if (deadlyBlow) {
+        item.system.conditionalAttacks ??= {};
+        item.system.conditionalAttacks[deadlyBlow.id] = deadlyBlow;
+        item.system.conditionalAttacks[deadlyBlow.id].system.checked ??= true;
+    }
 
-    // if (item.actor) {
-    //     for (const key in item.system.conditionalAttacks) {
-    //         const conditionalAttack = item.actor.items.find((o) => o.id === key);
-    //         if (!conditionalAttack) {
-    //             // FIXME: This is the wrong place to be playing with the database. Should be done at the
-    //             //            to hit phase.
-    //             // Quench and other edge cases where item.id is null
-    //             if (item.id) {
-    //                 console.warn("conditionalAttack is empty");
-    //                 delete item.system.conditionalAttacks[key];
-    //                 // NOTE: typically we await here, but this isn't an async function.
-    //                 // Shouldn't be a problem.
-    //                 item.update({
-    //                     [`system.conditionalAttacks`]: item.system.conditionalAttacks,
-    //                 });
-    //             }
-    //             continue;
-    //         }
+    if (item.actor) {
+        for (const key in item.system.conditionalAttacks) {
+            const conditionalAttack = item.actor.items.find((item) => item.id === key);
+            if (!conditionalAttack) {
+                // FIXME: This is the wrong place to be playing with the database. Should be done at the
+                //            to hit phase.
+                // Quench and other edge cases where item.id is null
+                if (item.id) {
+                    console.warn("conditionalAttack is empty");
+                    delete item.system.conditionalAttacks[key];
+                    // NOTE: typically we await here, but this isn't an async function.
+                    // Shouldn't be a problem.
+                    item.update({
+                        [`system.conditionalAttacks`]: item.system.conditionalAttacks,
+                    });
+                }
+                continue;
+            }
 
-    //         // If unchecked or missing then assume it is enabled
-    //         if (!conditionalAttack.system.checked) continue;
+            // If unchecked or missing then assume it is enabled
+            if (!conditionalAttack.system.checked) continue;
 
-    //         // Make sure conditionalAttack applies (only for DEADLYBLOW at the moment)
-    //         if (typeof conditionalAttack.baseInfo?.appliesTo === "function") {
-    //             if (!conditionalAttack.baseInfo.appliesTo(item)) continue;
-    //         }
+            // Make sure conditionalAttack applies (only for DEADLYBLOW at the moment)
+            if (typeof conditionalAttack.baseInfo?.appliesTo === "function") {
+                if (!conditionalAttack.baseInfo.appliesTo(item)) continue;
+            }
 
-    //         switch (conditionalAttack.system.XMLID) {
-    //             case "DEADLYBLOW": {
-    //                 if (!options?.ignoreDeadlyBlow) {
-    //                     const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-    //                     const deadlyDc = RoundDc(dcPlus * apRatio);
-    //                     dc += deadlyDc;
-    //                     tags.push({
-    //                         value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
-    //                         name: "DeadlyBlow",
-    //                         title:
-    //                             conditionalAttack.system.OPTION_ALIAS +
-    //                             `${
-    //                                 deadlyDc != dcPlus
-    //                                     ? `\n${getDiceFormulaFromItemDC(
-    //                                           item,
-    //                                           dcPlus,
-    //                                       )} reduced to ${getDiceFormulaFromItemDC(item, deadlyDc)} due to advantages`
-    //                                     : ""
-    //                             }`,
-    //                     });
-    //                 }
+            switch (conditionalAttack.system.XMLID) {
+                case "DEADLYBLOW": {
+                    if (!options?.ignoreDeadlyBlow) {
+                        const deadlyDc = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
+                        addedDc.dc += deadlyDc;
+                        addedDc.tags.push({
+                            value: `${deadlyDc}DC`,
+                            name: "DeadlyBlow",
+                            title: conditionalAttack.system.OPTION_ALIAS,
+                        });
+                    }
 
-    //                 break;
-    //             }
+                    break;
+                }
 
-    //             default:
-    //                 console.warn("Unhandled conditionalAttack", conditionalAttack);
-    //         }
-    //     }
-    // }
+                default:
+                    console.warn("Unhandled conditionalAttack", conditionalAttack);
+            }
+        }
+    }
 
     if (item.actor?.statuses?.has("underwater")) {
         addedDc.dc -= 2;

@@ -2508,10 +2508,15 @@ export function registerUploadTests(quench) {
                     actor.system.characteristics.str.value = 10;
                     await actor._postUpload();
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
-                    });
-                    item.type = "maneuver";
+                    item = new HeroSystem6eItem(
+                        {
+                            ...HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                        },
+                        {
+                            parent: actor,
+                        },
+                    );
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);
                 });
