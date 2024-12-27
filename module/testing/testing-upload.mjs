@@ -2491,7 +2491,7 @@ export function registerUploadTests(quench) {
             describe("Killing Strike", async function () {
                 const contents = `
                     <MANEUVER XMLID="MANEUVER" ID="1689357675658" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="2" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="10" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
-                    <NOTES />
+                        <NOTES />
                     </MANEUVER>
                 `;
                 let item;
@@ -2511,12 +2511,13 @@ export function registerUploadTests(quench) {
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
+                    item.type = "maneuver";
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, HKA 1d6+1");
+                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, 1d6+1 HKA");
                 });
 
                 it("realCost", function () {
@@ -4285,7 +4286,6 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        //"Aid CON 3d6+1 (Increased Maximum (+8 points) (27 total points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
                         "Aid CON 3d6+1, Can Add Maximum Of 27 Points, Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
                     );
                 });
@@ -6285,7 +6285,7 @@ export function registerUploadTests(quench) {
             describe("Nerve Strike", async function () {
                 const contents = `
                     <MANEUVER XMLID="MANEUVER" ID="1717892734727" BASECOST="4.0" LEVELS="0" ALIAS="Nerve Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Nerve Strike" OCV="-1" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NNDDC]" ADDSTR="No" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[NNDDC]">
-                    <NOTES />
+                        <NOTES />
                     </MANEUVER>
                 `;
                 let item;
@@ -6326,7 +6326,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("dice", function () {
-                    assert.equal(item.system.dice, 2); // There are 4 raw dice, STR is added later
+                    assert.equal(item.system.damage, "2d6");
                 });
 
                 it("end", function () {

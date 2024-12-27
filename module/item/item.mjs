@@ -3750,12 +3750,7 @@ export class HeroSystem6eItem extends Item {
                     case "INCREASEDMAX":
                         // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
                         // Can Add Maximum Of 34 Points
-                        //_adderArray.push(
-                        // `${adder.ALIAS} (${determineMaxAdjustment(
-                        //     this,
-                        // )} total points)`,
                         system.description += `, Can Add Maximum Of ${determineMaxAdjustment(this)} Points`;
-                        //);
                         break;
 
                     case "ADDER":

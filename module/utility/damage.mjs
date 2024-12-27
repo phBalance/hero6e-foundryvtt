@@ -532,7 +532,7 @@ export function addDiceParts(firstDiceParts, secondDiceParts, useDieMinusOne) {
  * @param {Object} options
  * @returns {HeroSystemFormulaDiceParts}
  */
-function calculateDicePartsForItem(item, options) {
+export function calculateDicePartsForItem(item, options) {
     // Get base DCs (with a breakout for actual fundamental DC contribution to the extra DCs) and added DCs
     // Figure extra DCs based on base DCs
     // Figure out how many extra dice are caused by the extra DCs
