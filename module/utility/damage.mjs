@@ -33,25 +33,27 @@ export function convertToDiceParts(value) {
 }
 
 function addExtraDcs(item, dcObj) {
-    // PH: FIXME: Is it possible to have multiple EXTRADCs purchased? If so, this doesn't work.
-    const extraDc = item.actor.items.find((item) => item.system.XMLID === "EXTRADC");
-    if (extraDc) {
-        let extraDcLevels = parseInt(extraDc.system.LEVELS);
+    const extraDcItems = item.actor.items.filter((item) => item.system.XMLID === "EXTRADC");
+    let partialExtraDcs = 0; // Since we consider all EXTRADCs as 1 sum
+
+    extraDcItems.forEach((extraDcItem) => {
+        let extraDcLevels = parseInt(extraDcItem.system.LEVELS || 0);
 
         // 5E extraDCLevels are halved for killing attacks
         if (item.is5e && item.system.killing) {
-            extraDcLevels = Math.floor(extraDcLevels / 2);
+            extraDcLevels = Math.floor(extraDcLevels / 2) + partialExtraDcs;
+            partialExtraDcs = (partialExtraDcs + (extraDcLevels % 2)) % 2;
         }
 
         if (extraDcLevels > 0) {
             dcObj.dc += extraDcLevels;
             dcObj.tags.push({
                 value: `${extraDcLevels}DC`,
-                name: extraDc.name.replace(/\+\d+ HTH/, "").trim(),
+                name: extraDcItem.name.replace(/\+\d+ HTH/, "").trim(),
                 title: `${extraDcLevels.signedString()}DC`,
             });
         }
-    }
+    });
 }
 
 /**
@@ -87,7 +89,8 @@ function calculateBaseDcFromItem(item, options) {
     };
 
     // PH: FIXME: This is not correct as it does not account for only unarmed attacks.
-    // 5e martial arts EXTRADCs are baseDCs
+    // 5e martial arts EXTRADCs and RANGEDCs are baseDCs
+    // TODO: support RANGEDC
     if (item.is5e && item.type === "martialart") {
         addExtraDcs(item, baseDc);
     }
@@ -536,8 +539,8 @@ export function calculateDicePartsForItem(item, options) {
     // Figure extra DCs based on base DCs
     // Figure out how many extra dice are caused by the extra DCs
     const { itemBaseDc, dc: totalDc } = calculateDcFromItem(item, options);
-    const extraDcs = totalDc - itemBaseDc;
-    const extraDcsDiceParts = calculateDicePartsFromDcForItem(item, extraDcs);
+    const extraBaseAndAddedDcs = totalDc - itemBaseDc;
+    const extraDcsDiceParts = calculateDicePartsFromDcForItem(item, extraBaseAndAddedDcs);
 
     // Get basic damage based on base DC (for maneuvers/martialarts) or the item's dice
     const baseDiceParts = ["maneuver", "martialart"].includes(item.type)
