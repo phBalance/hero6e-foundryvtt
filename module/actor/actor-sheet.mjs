@@ -88,12 +88,12 @@ export class HeroSystemActorSheet extends ActorSheet {
             data.pointsTitle = "";
             data.activePointsTitle = "";
             if (data.actor.system.pointsDetail) {
-                for (let [key, value] of Object.entries(data.actor.system.pointsDetail)) {
+                for (const [key, value] of Object.entries(data.actor.system.pointsDetail)) {
                     data.pointsTitle += `${key.replace("equipment", "[equipment]")}: ${value}\n`;
                 }
             }
             if (data.actor.system.activePointsDetail) {
-                for (let [key, value] of Object.entries(data.actor.system.activePointsDetail)) {
+                for (const [key, value] of Object.entries(data.actor.system.activePointsDetail)) {
                     data.activePointsTitle += `${key}: ${value}\n`;
                 }
             } else {
@@ -101,17 +101,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             }
 
             // // override actor.items (which is a map) to an array with some custom properties
-            // let items = [];
             for (let item of data.actor.items) {
                 // Update Attack Details (estimateOCV, DCV, Damage)
                 item._postUploadDetails();
 
-                if (item.type == "martialart") {
+                if (item.type === "martialart") {
                     data.hasMartialArts = true;
-                    continue;
-                }
-
-                if (item.type == "equipment") {
+                } else if (item.type === "equipment") {
                     data.hasEquipment = true;
                 }
             }

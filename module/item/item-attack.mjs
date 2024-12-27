@@ -8,6 +8,7 @@ import {
     combatSkillLevelsForAttack,
     penaltySkillLevelsForAttack,
     calculateDcFromItem,
+    calculateDicePartsForItem,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import {
@@ -2558,18 +2559,17 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
             const actor = absorptionItem.actor;
             let maxAbsorption;
             if (actor.system.is5e) {
-                const dice = absorptionItem.system.dice;
-                const extraDice = absorptionItem.system.extraDice;
+                const diceParts = calculateDicePartsForItem(absorptionItem, {});
 
                 // Absorption allowed based on a roll with the usual requirements
                 const absorptionRoller = new HeroRoller()
                     .makeAdjustmentRoll()
-                    .addDice(dice)
-                    .addHalfDice(extraDice === "half" ? 1 : 0)
-                    .addDiceMinus1(extraDice === "one-pip" ? 1 : 0)
-                    .addNumber(extraDice === "pip" ? 1 : 0);
+                    .addDice(diceParts.d6Count)
+                    .addHalfDice(diceParts.halfDieCount)
+                    .addDiceMinus1(diceParts.d6Less1DieCount)
+                    .addNumber(diceParts.constant);
 
-                if (dice > 0 || (dice === 0 && extraDice !== "zero")) {
+                if (diceParts.d6Count + diceParts.halfDieCount + diceParts.d6Less1DieCount + diceParts.constant) {
                     await absorptionRoller.roll();
                     maxAbsorption = absorptionRoller.getAdjustmentTotal();
                 } else {

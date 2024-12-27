@@ -2734,7 +2734,6 @@ export class HeroSystem6eItem extends Item {
         // This may be a slot in a framework if so get parent
 
         const modifiers = this.modifiers;
-        
 
         let limitations = 0;
         for (const modifier of modifiers) {
@@ -4196,12 +4195,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     makeAttack() {
-        // this.id will be null for temporary items (quench, defense left sidebar summary on actor sheet)
-        // Keep this as it is handy for breakpoints
-        // if (this.id) {
-        //     console.log("makeAttack", this);
-        // }
-
         // AARON: Do we really need makeAttack?
         // Many of these properties can converted into get properties on the item and calculated on the fly.
 
@@ -4212,7 +4205,6 @@ export class HeroSystem6eItem extends Item {
         let name = this.system.NAME || description || this.system.name || this.name;
         this.name = name;
 
-        // 5E Martial DC, EXTRADC, and CSL DCs are halved for killing attacks.  STR/5 DCs are unchanged.
         const dc = parseInt(this.system.DC);
         let levels = parseInt(this.system.value) || dc || 0;
         const input = this.system.INPUT;
@@ -4242,8 +4234,6 @@ export class HeroSystem6eItem extends Item {
 
         this.system.subType = "attack";
         this.system.class = input === "ED" ? "energy" : "physical";
-        this.system.dice = levels;
-        this.system.extraDice = "zero";
         this.system.killing = false;
         this.system.knockbackMultiplier = 1;
         this.system.targets = "dcv";
@@ -4406,39 +4396,12 @@ export class HeroSystem6eItem extends Item {
             this.system.uses = "omcv";
         }
 
-        if (this.findModsByXmlid("PLUSONEPIP")) {
-            this.system.extraDice = "pip";
-        }
-
-        if (this.findModsByXmlid("PLUSONEHALFDIE")) {
-            this.system.extraDice = "half";
-        }
-
-        if (this.findModsByXmlid("MINUSONEPIP")) {
-            // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
-            this.system.extraDice = "one-pip";
-        }
-
-        // TODO: Investigate why this is required. It is wrong for 1/2d6 vs d6-1.
+        // PH: TODO: Investigate why this is required. It is wrong for 1/2d6 vs d6-1.
+        //           Only the this.system.killing bit is right.
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
             this.system.killing = true;
-
-            // Killing Strike uses DC=2 which is +1/2d6.
-            // For now just recalculate that, but ideally rework this function to use DC instead of dice.
-            let pips = parseInt(this.system.DC || this.system.value * 3);
-            this.system.dice = Math.floor(pips / 3);
-            if (pips % 3 == 1) {
-                this.system.extraDice = "pip";
-            }
-            if (pips % 3 == 2) {
-                this.system.extraDice = "half";
-            }
-        }
-
-        if (xmlid === "TELEKINESIS") {
+        } else if (xmlid === "TELEKINESIS") {
             // levels is the equivalent strength
-            this.system.dice = 0;
-            this.system.extraDice = "zero";
             this.name = name + " (TK strike)";
             this.system.usesStrength = false;
             this.system.usesTk = true;

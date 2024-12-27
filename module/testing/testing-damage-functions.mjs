@@ -926,7 +926,6 @@ export function registerDamageFunctionTests(quench) {
                             parent: actor,
                         },
                     );
-                    item.type = "maneuver";
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);
                 });
