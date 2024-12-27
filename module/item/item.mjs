@@ -3582,7 +3582,7 @@ export class HeroSystem6eItem extends Item {
                     // Provide dice if this is an attack
                     if (this.baseInfo.behaviors.includes("attack")) {
                         const damageFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
-                        if (damageFormula) {
+                        if (damageFormula !== "0") {
                             if (system.description.indexOf(damageFormula) === -1) {
                                 system.description = ` ${damageFormula} ${system.class || ""}`;
                             }
