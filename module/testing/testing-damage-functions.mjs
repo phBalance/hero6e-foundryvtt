@@ -872,10 +872,15 @@ export function registerDamageFunctionTests(quench) {
                     actor.system.is5e = false;
                     await actor._postUpload();
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
-                    });
-                    item.type = "maneuver";
+                    item = new HeroSystem6eItem(
+                        {
+                            ...HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                        },
+                        {
+                            parent: actor,
+                        },
+                    );
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);
                 });
@@ -912,9 +917,15 @@ export function registerDamageFunctionTests(quench) {
                     actor.system.is5e = false;
                     await actor._postUpload();
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
-                    });
+                    item = new HeroSystem6eItem(
+                        {
+                            ...HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                        },
+                        {
+                            parent: actor,
+                        },
+                    );
                     item.type = "maneuver";
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);
@@ -924,7 +935,6 @@ export function registerDamageFunctionTests(quench) {
                     // No strength bonus for NND maneuvers
                     assert.equal(calculateDcFromItem(item, {}).dc, 4);
                 });
-                item.type = "maneuver";
 
                 it("NND Choke Hold damage", function () {
                     assert.equal(item.system.damage, "2d6");

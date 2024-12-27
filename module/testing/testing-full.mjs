@@ -1544,6 +1544,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("Killing Strike damage", async function () {
+                    // Killing Strike: 2DC killing, EXTRADC (+22 DC), 40 STR (+8 DC), 2 CSL (+1 DC) = 34 DC (killing) = 11d6+1
                     assert.equal(actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage, "11d6+1K");
                 });
 
@@ -1556,6 +1557,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("Martial Strike damage", async function () {
+                    // Martial Strike: 2DC, EXTRADC (+22 DC),  40 STR (+8 DC), 2 CSL (+1 DC) = 34 DC (normal) = 34d6
                     assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage, "34d6");
                 });
 
