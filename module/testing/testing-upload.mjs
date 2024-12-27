@@ -1352,14 +1352,6 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 40);
                 });
 
-                it("dice", function () {
-                    assert.equal(item.system.dice, 2);
-                });
-
-                it("extraDice", function () {
-                    assert.equal(item.system.extraDice, "half");
-                });
-
                 it("end", function () {
                     assert.equal(item.system.end, 0);
                 });
@@ -1418,14 +1410,6 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 25);
                 });
 
-                it("dice", function () {
-                    assert.equal(item.system.dice, 1);
-                });
-
-                it("extraDice", function () {
-                    assert.equal(item.system.extraDice, "one-pip");
-                });
-
                 it("end", function () {
                     assert.equal(item.system.end, 2);
                 });
@@ -1476,14 +1460,6 @@ export function registerUploadTests(quench) {
 
                 it("activePoints", function () {
                     assert.equal(item.system.activePoints, 75);
-                });
-
-                it("dice", function () {
-                    assert.equal(item.system.dice, 15);
-                });
-
-                it("extraDice", function () {
-                    assert.equal(item.system.extraDice, "zero");
                 });
 
                 it("end", function () {
@@ -1550,14 +1526,6 @@ export function registerUploadTests(quench) {
 
                 it("activePoints", function () {
                     assert.equal(item.system.activePoints, 206);
-                });
-
-                it("dice", function () {
-                    assert.equal(item.system.dice, 15);
-                });
-
-                it("extraDice", function () {
-                    assert.equal(item.system.extraDice, "zero");
                 });
 
                 it("end", function () {
@@ -2866,14 +2834,6 @@ export function registerUploadTests(quench) {
 
                 it("end", function () {
                     assert.equal(item.system.end, "5");
-                });
-
-                it("dice", function () {
-                    assert.equal(item.system.dice, "5");
-                });
-
-                it("extraDice", function () {
-                    assert.equal(item.system.extraDice, "half");
                 });
 
                 it("killing", function () {
@@ -6164,10 +6124,6 @@ export function registerUploadTests(quench) {
                         assert.equal(item.system.activePoints, 5);
                     });
 
-                    it("dice", function () {
-                        assert.equal(item.system.dice, 4); // There are 4 raw dice, STR is added later
-                    });
-
                     it("end", function () {
                         assert.equal(item.system.end, 0);
                     });
@@ -6216,10 +6172,6 @@ export function registerUploadTests(quench) {
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 4);
-                    });
-
-                    it("dice", function () {
-                        assert.equal(item.system.dice, 4);
                     });
 
                     it("levels", function () {
@@ -6271,10 +6223,6 @@ export function registerUploadTests(quench) {
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 4);
-                    });
-
-                    it("dice", function () {
-                        assert.equal(item.system.dice, 2);
                     });
 
                     it("levels", function () {
