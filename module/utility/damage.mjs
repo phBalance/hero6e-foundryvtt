@@ -22,9 +22,9 @@
 // Transdimensional, Trigger, Uncontrolled, Usable As Attack,
 // Variable Advantage, and Variable Special Effects.
 
-import { HEROSYS } from "../herosystem6e.mjs";
-import { RoundDc, RoundFavorPlayerDown } from "./round.mjs";
+import { RoundFavorPlayerUp } from "./round.mjs";
 
+// PH: TODO: see if we can do anything about this - add to other methods like it?
 export function convertToDiceParts(value) {
     const dice = Math.floor(value / 5);
     const halfDice = value % 5 >= 2.5 ? 1 : 0;
@@ -32,239 +32,165 @@ export function convertToDiceParts(value) {
     return { dice, halfDice, plus1 };
 }
 
-// Determine DC solely from item/attack
-export function convertToDcFromItem(item, options) {
-    let actor = item.actor;
-    let dc = 0;
-    let tags = [];
-    let end = 0;
-    let baseDcParts = {};
-    let tooltip = "";
+/**
+ * Calculate the base DC. The base DC concept is only useful for 5e where there is a base DC doubling rule.
+ * Consequently, no 6e specific rules should be in here.
+ * @param {HeroSystem6eItem} item
+ * @param {Object} options
+ * @returns
+ */
+function calculateBaseDcFromItem(item, options) {
+    // MartialArts & Maneuvers have DC. Others have active points with some advantages that contribute to DC.
+    // PH: FIXME: Either everything has a DC function or nothing has one.
+    let itemBaseDc =
+        typeof item.baseInfo?.dc === "function"
+            ? item.baseInfo.dc(item, options)
+            : parseInt(item.system.DC) || Math.floor(item.system.activePointsDc / 5);
 
-    // MartialArts & Maneuvers have DC
-    dc = parseInt(item.system.DC) || 0;
-
-    // 5E Martial DC, EXTRADC, and CSL DCs are halved for killing attacks.  STR/5 DCs are unchanged.
-    // pg 400 (+1 Damage Class); pg 406
-    if (
-        item.is5e &&
-        item.system.killing &&
-        (item.system.XMLID === "MANEUVER" || ["maneuver", "martialart"].includes(item.type))
-    ) {
-        dc = Math.floor(dc / 2);
-        tooltip = "It takes two Extra DCs to add +1 DC to a Killing Damage attack";
+    // FRed pg. 406: 5e maneuver/martial arts DCs are halved for killing attacks this applies to the base DC
+    // of the maneuver/martial art as well. As always, no partial DCs allowed.
+    if (item.is5e && ["maneuver", "martialart"].includes(item.type) && item.system.killing) {
+        itemBaseDc = Math.floor(itemBaseDc / 2);
     }
 
-    // NND (the DC should be halved; suspect because of AVAD/NND implied limitation; Nerve Strike)
-    if (item.system.EFFECT?.includes("NND")) {
-        dc = Math.floor(dc / 2);
-        tooltip = "AVAD/NND implied limitation";
-    }
+    // PH: FIXME: For hand to hand attacks the strength bonus counts as base damage.
 
-    // Powers use LEVELS, which we will convert to DCs
-    if (dc === 0) {
-        dc = parseInt(item.system.LEVELS) || 0;
-        if (item.system.killing) {
-            dc *= 3;
-        }
-    }
+    const baseDc = {
+        dc: itemBaseDc,
+        tags: [
+            {
+                value: `${itemBaseDc.signedString()}DC`,
+                name: item.name,
+                title: `${itemBaseDc.signedString()}DC`,
+            },
+        ],
+    };
 
-    // Check for DC override (TELEKINESIS for example)
-    if (typeof item.baseInfo?.dc === "function") {
-        dc = item.baseInfo.dc(item, options);
-    } else {
-        // If the item.baseInfo.dc supports PIP adders then Peter thinks the PIP handling shoudld be done there.
+    // PH: FIXME: This is not correct as it does not account for only unarmed attacks.
+    // 5e martial arts EXTRADC
+    if (item.is5e && item.type === "martialart") {
+        // PH: FIXME: Is it possible to have multiple EXTRADCs purchased? If so, this doesn't work.
+        const extraDc = item.actor.items.find((item) => item.system.XMLID === "EXTRADC");
+        if (extraDc) {
+            let extraDcLevels = parseInt(extraDc.system.LEVELS);
 
-        // Killing Attack
-        if (item.system.killing) {
-            if (item.findModsByXmlid("PLUSONEPIP")) {
-                dc += 1;
-            } else if (item.findModsByXmlid("PLUSONEHALFDIE")) {
-                dc += 2;
-            } else if (item.findModsByXmlid("MINUSONEPIP")) {
-                // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
-                dc += 2;
+            // 5E extraDCLevels are halved for killing attacks
+            // PH: FIXME: 5E EXTRADC for unarmed killing attacks count at half DCs but count towards the base DC. As usual there are no 1/2 DCs.
+            if (item.system.killing) {
+                extraDcLevels = Math.floor(extraDcLevels / 2);
             }
-        } else {
-            if (item.findModsByXmlid("PLUSONEPIP")) {
-                dc += 0.2;
-            } else if (item.findModsByXmlid("PLUSONEHALFDIE")) {
-                dc += 0.5;
-            } else if (item.findModsByXmlid("MINUSONEPIP")) {
-                // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
-                dc += 0.5;
+
+            if (extraDcLevels > 0) {
+                baseDc.dc += extraDcLevels;
+                baseDc.tags.push({
+                    value: `${extraDcLevels}`,
+                    name: extraDc.name.replace(/\+\d+ HTH/, "").trim(),
+                    title: `${extraDcLevels.signedString()}DC`,
+                });
             }
         }
     }
 
-    let displayName = "";
-    // XMLID != Name tooltip
-    if (item.name != item.system.XMLID) {
-        if (item.system.XMLID != "MANEUVER") {
-            displayName = item.system.XMLID;
-        } else {
-            if (item.name != item.system.DISPLAY) {
-                displayName = item.system.DISPLAY;
-            }
-        }
-    }
+    return {
+        itemBaseDc,
+        baseDc,
+    };
+}
 
-    tags.push({
-        value: `${getDiceFormulaFromItemDC(item, dc)}`,
-        name: item.name,
-        title: `${dc.signedString()}DC${displayName ? `\n${displayName}` : ""}${tooltip ? `\n${tooltip}` : ""}`,
-    });
+/**
+ * Determine DC solely from item/attack. A DC is NOT a die of damage.
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {Object} options
+ */
+export function calculateDcFromItem(item, options) {
+    const { itemBaseDc, baseDc } = calculateBaseDcFromItem(item, options);
 
-    baseDcParts.item = dc;
+    const addedDc = {
+        dc: 0,
+        tags: [],
+    };
 
-    // Make sure we have activepointsdc
-    // item.calcActivePoints();
-
-    // Active Point to CP ratio of base attack.
-    // We need this to properly calculate the DC of STR.
-    // For some reason we don't "adjust" MartialArts with advantages
-    // Also some things like REDUCED END do not impact the damage taken by the victim.
-    const apRatio =
-        item.type === "martialart" || !item.system.basePointsPlusAdders
-            ? 1
-            : item.system.basePointsPlusAdders / (item.system.activePointsDc || item.system.activePoints);
-
+    // PH: FIXME: I don't think that this is right.
     // Add in STR
     if (item.system.usesStrength) {
-        let str = parseInt(
-            options?.effectivestr != undefined ? options?.effectivestr : actor?.system.characteristics.str.value || 0,
-        );
-
-        // MOVEBY halves STR
-        if (item.system.XMLID === "MOVEBY") {
-            str = str / 2;
-        }
-
         // STRMINIMUM
         // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
         const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
         if (STRMINIMUM) {
             const strMinimum = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
-            //if (strMinimum && str > strMinimum) {
             const strMinDc = Math.ceil(strMinimum / 5);
-            dc -= strMinDc;
-            tags.push({
+            addedDc.dc -= strMinDc;
+            addedDc.tags.push({
                 value: `-${strMinDc}DC`,
                 name: "STR Minimum",
                 title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
             });
-            //}
         }
 
-        const str5 = RoundDc(str / 5);
-        const str5Dc = RoundDc(str5 * apRatio);
+        let str = parseInt(
+            options?.effectivestr != undefined
+                ? options?.effectivestr
+                : item.actor?.system.characteristics.str.value || 0,
+        );
 
-        dc += str5Dc;
-        end += Math.max(1, RoundFavorPlayerDown(str / 10));
+        // MOVEBY halves STR
+        // PH: FIXME: Missing move through...
+        // PH: FIXME: Is this the best way to do it? Shouldn't we have a generic way of handling maneuvers rather than 1 off?
+        //            This would allow us to make a tag and then do things like subtract off strength minimums.
+        if (item.system.XMLID === "MOVEBY") {
+            str = RoundFavorPlayerUp(str / 2);
+        }
 
-        if (str5Dc != 0) {
-            tags.push({
-                value: `${getDiceFormulaFromItemDC(item, str5Dc)}`, //`${str5.signedString()}DC`,
+        // PH: FIXME: Can we have negative DC contributions from strength?
+        // +1 DC per 5 strength. No partial DCs.
+        const str5Dc = Math.floor(str / 5);
+        if (str5Dc !== 0) {
+            addedDc.dc += str5Dc;
+            addedDc.tags.push({
+                value: `${str5Dc}DC`,
                 name: "STR",
-                title: `${str5.signedString()}DC${
-                    str5Dc != str5
-                        ? `\n${getDiceFormulaFromItemDC(item, str5)} reduced to ${getDiceFormulaFromItemDC(
-                              item,
-                              str5Dc,
-                          )} due to advantages`
-                        : ""
-                }${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
+                title: `${str5Dc.signedString()}DC${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
             });
         }
     }
 
-    baseDcParts.str = dc - baseDcParts.item;
+    // EXTRADCs
+    // PH: TODO: 5e EXTRADC for armed killing attacks count at full DCs but do NOT count towards the base DC.
+    // PH: TODO: 6e EXTRADC are additional DC because there is no doubling rule.
 
     // Boostable Charges
     if (options?.boostableCharges) {
+        // Each used boostable charge, to a max of 4, increases the damage class by 1.
         const boostCharges = parseInt(options.boostableCharges);
-        const boostDc = RoundDc(boostCharges * apRatio);
-        dc += boostDc;
-        //tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
-        tags.push({
-            value: `${getDiceFormulaFromItemDC(item, boostDc)}`,
-            name: "boostable",
-            title: `${boostDc.signedString()}DC${
-                boostDc != boostCharges
-                    ? `\n${getDiceFormulaFromItemDC(item, boostCharges)} reduced to ${getDiceFormulaFromItemDC(
-                          item,
-                          boostDc,
-                      )} due to advantages`
-                    : ""
-            }`,
+        addedDc.dc += 1 * boostCharges;
+        addedDc.tags.push({
+            value: `${boostCharges}DC`,
+            name: "boostable charges",
+            title: `${boostCharges.signedString()}DC`,
         });
     }
 
     // Combat Skill Levels
-    for (const csl of CombatSkillLevelsForAttack(item)) {
+    // PH: TODO: 5E Superheroic: Each 2 CSLs modify the killing attack BODY roll by +1 (cannot exceed the max possible roll). Obviously no +1/2 BODY.
+    // PH: TODO: 5E Superheroic: Each 2 CSLs modify the normal attack STUN roll by +3 (cannot exceed the max possible roll). Obviously no +1 1/2 STUN.
+    // PH: TODO: THE ABOVE 2 NEED NEW HERO ROLLER FUNCTIONALITY.
+    // PH: TODO: 5E Heroic: Each 2 CSLs add to the DC by +1 and follow the doubling rule as it is not base DC. Obviously no +1/2 DC.
+    // PH: DONE: 6E: Each 2 CSLs add to the DC by +1. Obviously no +1/2 DC.
+    for (const csl of combatSkillLevelsForAttack(item)) {
         if (csl && csl.dc > 0) {
-            const cslDc = RoundDc(csl.dc * apRatio);
-            // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
-            dc += cslDc;
-
-            // Each DC should roughly be 5 active points
-            // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
-            // let ratio = (dcPerAp || 5) / 5;  // Typically 1 to 1 radio
-            // dc += (csl.dc * dcPerAp);
-            // console.log(dcPerAp, dc, csl.dc)
-
-            // tags.push({
-            //     value: `${csl.dc.signedString()}DC`,
-            //     name: csl.item.name,
-            // });
-
-            tags.push({
-                value: `${getDiceFormulaFromItemDC(item, cslDc)}`,
+            addedDc.dc += csl.dc;
+            addedDc.tags.push({
+                value: `${csl.dc}DC`,
                 name: csl.item.name,
-                title: `${csl.dc.signedString()}DC${
-                    cslDc != csl.dc
-                        ? `\n+${getDiceFormulaFromItemDC(item, csl.dc)} reduced to +${
-                              getDiceFormulaFromItemDC(item, cslDc) || 0
-                          } due to advantages`
-                        : ""
-                }`,
+                title: `${csl.dc.signedString()}DC`,
             });
         }
     }
 
-    // Only Martial Arts, generic maneuvers do not get the EXTRADC purchased in the Martial Arts tab
-    let extraDcLevels = 0;
-    //if (item.system.XMLID === "MANEUVER") {
-    if (item.type === "martialart") {
-        const EXTRADC = item.actor.items.find((o) => o.system?.XMLID === "EXTRADC");
-        if (EXTRADC) {
-            extraDcLevels = parseInt(EXTRADC.system.LEVELS);
+    // PH: FIXME: velocity from maneuvers does not apply towards the 5e doubling DC limit rule for normal attacks (only).
 
-            // 5E extraDCLevels are halved for killing attacks
-            if (item.system.is5e && item.system.killing) {
-                extraDcLevels = Math.floor(extraDcLevels / 2);
-            }
-
-            // For some reason we do not "adjust" martial attacks with advantages.
-            const adjustedExtraDc = extraDcLevels; //RoundFavorPlayerUp(extraDcLevels * apRatio);
-
-            tags.push({
-                value: `${getDiceFormulaFromItemDC(item, adjustedExtraDc)}`,
-                name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
-                title: `${adjustedExtraDc.signedString()}DC${
-                    adjustedExtraDc != extraDcLevels
-                        ? `\n${getDiceFormulaFromItemDC(item, extraDcLevels)} reduced to ${getDiceFormulaFromItemDC(
-                              item,
-                              adjustedExtraDc,
-                          )} due to advantages`
-                        : ""
-                }${tooltip ? `\n${tooltip}` : ""}`,
-            });
-            dc += extraDcLevels;
-        }
-    }
-
-    // Move By (add in velocity)
+    // Move By, Move By, etc - Maneuvers that add in velocity
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
     //
     // A character can accelerate at a rate of 5m per meter, up to their
@@ -277,35 +203,19 @@ export function convertToDcFromItem(item, options) {
     // Currently assuming token starts at 0 velocity and ends at 0 velocity.
     // Under this assumption the max velocity is half the speed.
 
-    let velocityDC = 0;
     // [NORMALDC] +v/5 Strike, FMove
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
     if ((item.system.EFFECT || "").match(/v\/\d/)) {
-        //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
-        if (!options) {
-            options = {};
-        }
-        options.velocity = parseInt(options?.velocity || 0);
-        let divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]); //10;
-        // if (item.system.XMLID === "MOVETHROUGH") {
-        //     divisor = 6;
-        // }
-        velocityDC = Math.floor(options.velocity / divisor);
-        const velocityAdjustedDC = RoundDc(velocityDC * apRatio);
+        const velocity = parseInt(options?.velocity || 0);
+        const divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]);
+        const velocityDC = Math.floor(velocity / divisor);
 
-        if (velocityAdjustedDC > 0) {
-            dc += velocityAdjustedDC;
-            tags.push({
-                value: `${getDiceFormulaFromItemDC(item, velocityAdjustedDC)}`,
+        if (velocityDC > 0) {
+            addedDc.dc += velocityDC;
+            addedDc.tags.push({
+                value: `${velocityDC}DC`,
                 name: "Velocity",
-                title: `Velocity (${options.velocity}) / ${divisor}${
-                    velocityAdjustedDC != velocityDC
-                        ? `\n${getDiceFormulaFromItemDC(item, velocityDC)} reduced to ${getDiceFormulaFromItemDC(
-                              item,
-                              velocityAdjustedDC,
-                          )} due to advantages`
-                        : ""
-                }`,
+                title: `Velocity (${velocity}) / ${divisor}`,
             });
         }
     }
@@ -315,10 +225,11 @@ export function convertToDcFromItem(item, options) {
         for (const ae of item.actor.appliedEffects.filter((o) => !o.disabled && o.flags?.target === item.uuid)) {
             for (const change of ae.changes.filter((o) => o.key === "system.value" && o.value != 0 && o.mode === 2)) {
                 const _value = parseInt(change.value);
-                dc += _value;
-                tags.push({
+                addedDc.dc += _value;
+                addedDc.tags.push({
                     value: `${_value.signedString()}DC`,
                     name: ae.name,
+                    title: `${_value.signedString()}DC`,
                 });
             }
         }
@@ -327,34 +238,28 @@ export function convertToDcFromItem(item, options) {
     // Add in Haymaker to any non-maneuver attack DCV based attack
     if (item.actor) {
         const haymakerManeuver = item.actor.items.find(
-            (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
+            (item) => item.type.includes("maneuver") && item.name === "Haymaker" && item.system.active,
         );
         if (haymakerManeuver) {
-            // && item.type != 'maneuver' && item.system.targets == 'dcv')
-            if (item.name == "Strike" || item.type != "maneuver") {
+            if (item.name == "Strike" || !item.type.includes("maneuver")) {
                 if (item.system.targets == "dcv") {
-                    const haymakerDc = RoundDc(4 * apRatio);
+                    const haymakerDc = 4;
 
-                    dc += haymakerDc;
-                    tags.push({
-                        value: `${getDiceFormulaFromItemDC(item, haymakerDc)}`,
+                    addedDc.dc += haymakerDc;
+                    addedDc.tags.push({
+                        value: `${haymakerDc}DC`,
                         name: "Haymaker",
-                        title: `${
-                            haymakerDc != 4
-                                ? `\n${getDiceFormulaFromItemDC(item, 4)} reduced to ${getDiceFormulaFromItemDC(
-                                      item,
-                                      haymakerDc,
-                                  )} due to advantages`
-                                : ""
-                        }`,
+                        title: `${haymakerDc}DC`,
                     });
                 } else {
+                    // PH: FIXME: This is a poor location for this. Better off in the to hit code and reject immediately.
                     if (options?.isAction)
                         ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", {
                             localize: true,
                         });
                 }
             } else {
+                // PH: FIXME: This is a poor location for this. Better off in the to hit code and reject immediately.
                 if (options?.isAction)
                     ui.notifications.warn("Haymaker cannot be combined with another maneuver (except for Strike).", {
                         localize: true,
@@ -365,26 +270,18 @@ export function convertToDcFromItem(item, options) {
 
     // WEAPON MASTER (also check that item is present as a custom ADDER)
     if (item.actor) {
-        const WEAPON_MASTER = item.actor.items.find((o) => o.system.XMLID === "WEAPON_MASTER");
-        if (WEAPON_MASTER) {
-            const weaponMatch = (WEAPON_MASTER.system.ADDER || []).find(
+        const weaponMaster = item.actor.items.find((item) => item.system.XMLID === "WEAPON_MASTER");
+        if (weaponMaster) {
+            const weaponMatch = (weaponMaster.system.ADDER || []).find(
                 (o) => o.XMLID === "ADDER" && o.ALIAS === item.name,
             );
             if (weaponMatch) {
-                const dcPlus = 3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
-                const masterDc = RoundDc(dcPlus * apRatio);
-                dc += masterDc;
-                tags.push({
-                    value: `${getDiceFormulaFromItemDC(item, masterDc)}`,
+                const dcPlus = 3 * Math.max(1, parseInt(weaponMaster.system.LEVELS) || 1);
+                addedDc.dc += dcPlus;
+                addedDc.tags.push({
+                    value: `${dcPlus}DC`,
                     name: "WeaponMaster",
-                    title: `${dcPlus.signedString()}DC${
-                        masterDc != dcPlus
-                            ? `\n${getDiceFormulaFromItemDC(item, dcPlus)} reduced to ${getDiceFormulaFromItemDC(
-                                  item,
-                                  masterDc,
-                              )} due to advantages`
-                            : ""
-                    }`,
+                    title: `${dcPlus.signedString()}DC`,
                 });
             }
         }
@@ -392,72 +289,79 @@ export function convertToDcFromItem(item, options) {
 
     // DEADLYBLOW
     // Only check if it has been turned off
+    // FIXME: This function should not be changing the item.system. Please fix me.
+    // const deadlyBlow = item.actor?.items.find((o) => o.system.XMLID === "DEADLYBLOW");
+    // if (deadlyBlow) {
+    //     item.system.conditionalAttacks ??= {};
+    //     item.system.conditionalAttacks[deadlyBlow.id] = deadlyBlow;
+    //     item.system.conditionalAttacks[deadlyBlow.id].system.checked ??= true;
+    // }
 
-    const DEADLYBLOW = item.actor?.items.find((o) => o.system.XMLID === "DEADLYBLOW");
-    if (DEADLYBLOW) {
-        item.system.conditionalAttacks ??= {};
-        item.system.conditionalAttacks[DEADLYBLOW.id] = DEADLYBLOW;
-        item.system.conditionalAttacks[DEADLYBLOW.id].system.checked ??= true;
-    }
+    // if (item.actor) {
+    //     for (const key in item.system.conditionalAttacks) {
+    //         const conditionalAttack = item.actor.items.find((o) => o.id === key);
+    //         if (!conditionalAttack) {
+    //             // FIXME: This is the wrong place to be playing with the database. Should be done at the
+    //             //            to hit phase.
+    //             // Quench and other edge cases where item.id is null
+    //             if (item.id) {
+    //                 console.warn("conditionalAttack is empty");
+    //                 delete item.system.conditionalAttacks[key];
+    //                 // NOTE: typically we await here, but this isn't an async function.
+    //                 // Shouldn't be a problem.
+    //                 item.update({
+    //                     [`system.conditionalAttacks`]: item.system.conditionalAttacks,
+    //                 });
+    //             }
+    //             continue;
+    //         }
 
-    if (item.actor) {
-        for (const key in item.system.conditionalAttacks) {
-            const conditionalAttack = item.actor.items.find((o) => o.id === key);
-            if (!conditionalAttack) {
-                // Quench and other edge cases where item.id is null
-                if (item.id) {
-                    console.warn("conditionalAttack is empty");
-                    delete item.system.conditionalAttacks[key];
-                    // NOTE: typically we await here, but this isn't an async function.
-                    // Shouldn't be a problem.
-                    item.update({
-                        [`system.conditionalAttacks`]: item.system.conditionalAttacks,
-                    });
-                }
-                continue;
-            }
+    //         // If unchecked or missing then assume it is enabled
+    //         if (!conditionalAttack.system.checked) continue;
 
-            // If unchecked or missing then assume it is enabled
-            if (!conditionalAttack.system.checked) continue;
+    //         // Make sure conditionalAttack applies (only for DEADLYBLOW at the moment)
+    //         if (typeof conditionalAttack.baseInfo?.appliesTo === "function") {
+    //             if (!conditionalAttack.baseInfo.appliesTo(item)) continue;
+    //         }
 
-            // Make sure conditionalAttack applies (only for DEADLYBLOW at the moment)
-            if (typeof conditionalAttack.baseInfo?.appliesTo === "function") {
-                if (!conditionalAttack.baseInfo.appliesTo(item)) continue;
-            }
+    //         switch (conditionalAttack.system.XMLID) {
+    //             case "DEADLYBLOW": {
+    //                 if (!options?.ignoreDeadlyBlow) {
+    //                     const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
+    //                     const deadlyDc = RoundDc(dcPlus * apRatio);
+    //                     dc += deadlyDc;
+    //                     tags.push({
+    //                         value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
+    //                         name: "DeadlyBlow",
+    //                         title:
+    //                             conditionalAttack.system.OPTION_ALIAS +
+    //                             `${
+    //                                 deadlyDc != dcPlus
+    //                                     ? `\n${getDiceFormulaFromItemDC(
+    //                                           item,
+    //                                           dcPlus,
+    //                                       )} reduced to ${getDiceFormulaFromItemDC(item, deadlyDc)} due to advantages`
+    //                                     : ""
+    //                             }`,
+    //                     });
+    //                 }
 
-            switch (conditionalAttack.system.XMLID) {
-                case "DEADLYBLOW": {
-                    if (!options?.ignoreDeadlyBlow) {
-                        const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-                        const deadlyDc = RoundDc(dcPlus * apRatio);
-                        dc += deadlyDc;
-                        tags.push({
-                            value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
-                            name: "DeadlyBlow",
-                            title:
-                                conditionalAttack.system.OPTION_ALIAS +
-                                `${
-                                    deadlyDc != dcPlus
-                                        ? `\n${getDiceFormulaFromItemDC(
-                                              item,
-                                              dcPlus,
-                                          )} reduced to ${getDiceFormulaFromItemDC(item, deadlyDc)} due to advantages`
-                                        : ""
-                                }`,
-                        });
-                    }
+    //                 break;
+    //             }
 
-                    break;
-                }
-                default:
-                    console.warn("Unhandled conditionalAttack", conditionalAttack);
-            }
-        }
-    }
+    //             default:
+    //                 console.warn("Unhandled conditionalAttack", conditionalAttack);
+    //         }
+    //     }
+    // }
 
     if (item.actor?.statuses?.has("underwater")) {
-        dc = Math.max(0, dc - 2);
-        tags.push({ value: `-2DC`, name: "Underwater" });
+        addedDc.dc -= 2;
+        addedDc.tags.push({
+            value: `-2DC`,
+            name: "Underwater",
+            title: `-2DC`,
+        });
     }
 
     // Max Killing Doubling Damage
@@ -466,83 +370,195 @@ export function convertToDcFromItem(item, options) {
     // matter how many different methods he uses to add
     // damage.
 
-    const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-    if (DoubleDamageLimit) {
-        // BaseDC
-        let baseDC = baseDcParts.str;
-        if (["HA", "HKA"].includes(item.system.XMLID) || item.system.CATEGORY === "Hand To Hand") {
-            baseDC = baseDcParts.item;
-        }
-        if (item.system.XMLID === "MANEUVER" && !item.type.USEWEAPON) {
-            baseDC += extraDcLevels;
-        }
+    // PH: FIXME: Need to work this through. Not sure it's right and there are some exceptions in 5e (heroic vs superheroic).
+    // const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
+    // if (DoubleDamageLimit) {
+    //     // BaseDC
+    //     let baseDC = baseDcParts.str;
+    //     if (["HA", "HKA"].includes(item.system.XMLID) || item.system.CATEGORY === "Hand To Hand") {
+    //         baseDC = baseDcParts.item;
+    //     }
+    //     if (item.system.XMLID === "MANEUVER" && !item.type.USEWEAPON) {
+    //         baseDC += extraDcLevels;
+    //     }
 
-        // NOTE: baseDC > 0 is not great - need to consider things with effect rolls like mind scan and illusions
-        if (baseDC > 0 && dc > baseDC * 2) {
-            const backOutDc = Math.floor(baseDC * 2 - dc);
-            tags.push({
-                value: `${backOutDc}DC`,
-                name: "DoubleDamageLimit",
-                title: `BASEDC=${baseDC}. DC=${dc}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
-            });
-            dc = Math.max(0, dc + backOutDc);
-        }
-    }
-
-    // Programmer warning
-    // if (dc <= 0) {
-    //     console.warn("DC <= 0", dc, item);
+    //     // NOTE: baseDC > 0 is not great - need to consider things with effect rolls like mind scan and illusions
+    //     if (baseDC > 0 && dc > baseDC * 2) {
+    //         const backOutDc = Math.floor(baseDC * 2 - dc);
+    //         tags.push({
+    //             value: `${backOutDc}DC`,
+    //             name: "DoubleDamageLimit",
+    //             title: `BASEDC=${baseDC}. DC=${dc}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
+    //         });
+    //         dc = Math.max(0, dc + backOutDc);
+    //     }
     // }
 
-    return { dc: dc, tags: tags, end: end };
+    // PH: FIXME: Is this the place to limit the DC to 0? Seems like it should be at the end.
+    const finalUnmodifiedDc = baseDc.dc + addedDc.dc;
+    const finalDc = Math.max(0, finalUnmodifiedDc);
+
+    return {
+        itemBaseDc,
+        dc: finalDc,
+        tags: [...baseDc.tags, ...addedDc.tags],
+    };
 }
 
 /**
- * This is not perfect as it has to make a guess at if the 2 DC chunks are a 1/2d6 or 1d6-1. Make a guess by looking
- * at the extraDice for a hint if available. Otherwise default to 1/2d6
+ * Given a number of DCs, return the dice formula parts for this item
+ *
+ * NOTE: This is ugly because with floating point calculations we need to use epsilon comparisons (see https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ for instance)
+ *       To work around the need for epsilon comparison we just multiply by a large enough number that we're just doing integer math and ignoring the mantissa.
+ *
+ * A 3AP/die attack: +1 pip is 1 point, +1/2d6 is 2 points, and +1d6 is 3 points.
+ * This makes 3 possible breakpoints x.0, x.3333, x.6666 for any whole number x >=0 when we divide by the AP/3 to get the num of dice.
+ *
+ * A 5AP/die normal attack like energy blast: +1 pip is 2 points, +1/2d6 is 3 points, and +1d6 is 5 points.
+ * This makes 3 possible breakpoints x.0, x.4, x.6 for any whole number x >=0 when we divide by the AP/5 to get the num of dice.
+ *
+ * A 10AP/die normal attack like ego attack: +1 pip is 3 points, +1/2d6 is 5 points, and +1d6 is 10 points.
+ * This makes 3 possible breakpoints x.0, x.3, x.5 for any whole number x >=0 when we divide by the AP/10 to get the num of dice.
+ *
+ * A 15 AP/die killing attack: +1 pip is 5 points, +1/2d6 or +1d6-1 is 10 points, and +1d6 is 15 points.
+ * This makes 3 possible breakpoints x.0, x.3333, x.6666 for any whole number x >=0 when we divide by the AP/15 to get the num of dice.
+ *
+ * Overall there are 3 possible sets of calculations based on the basic AP per die of damage.
+ *
+ * Rather than use floating point math and Epsilon, we'll just multiply to shift values into large integers
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {number} dc
+ * @returns
  */
-// TODO: Does 0.2, 0.5, and 1 as partials for 5AP/DC scale correctly when the costs are > 5AP/die?/
-export function calculateDiceFormulaParts(item, dc) {
-    const usesDieLessOne = item.system.extraDice === "one-pip";
-    let d6Count = 0;
-    let halfDieCount = 0;
-    let constant = 0;
-
-    if (dc) {
-        // Normal Attack
-        if (!item.system.killing) {
-            // NOTE: This is ugly because with floating point calculations we need to use epsilon comparisons (see https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ for instance)
-            //       However due to the fact that Number.EPSILON doesn't scale based on input we're going to make our tolerances based on the fact that we
-            //       can only have 3 possible values x.0, x.2, and x.5 for any whole number x >= 0. If we make our epsilon 0.1 it'll more than do for
-            //       values of x < a few million.
-            const ourEpsilon = 0.1;
-
-            d6Count = Math.floor(dc);
-            // d3Count = DC % 1 >= 0.5 ? 1 : 0
-            halfDieCount = (dc % 1) - 0.5 >= -ourEpsilon ? 1 : 0;
-            // constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
-            constant = (dc % 1) - 0.2 >= -ourEpsilon && (dc % 1) - 0.5 < -ourEpsilon ? 1 : 0;
-        }
-
-        // Killing Attack
-        else {
-            d6Count = Math.floor(dc / 3);
-            halfDieCount = Math.floor((dc % 3) / 2);
-            constant = Math.floor((dc % 3) % 2);
+export function calculateDicePartsFromDcForItem(item, dc) {
+    const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
+    let martialOrManeuverEquivalentApPerDice = 0;
+    if (isMartialOrManeuver) {
+        const effect = item.system.EFFECT;
+        if (effect.search("NORMALDC") !== -1) {
+            martialOrManeuverEquivalentApPerDice = 5;
+        } else if (effect.search("NNDDC") !== -1) {
+            martialOrManeuverEquivalentApPerDice = 10;
+        } else if (effect.search("KILLINGDC") !== -1) {
+            martialOrManeuverEquivalentApPerDice = 15;
+        } else {
+            // FIXME: We shouldn't be calculating damage dice for things that don't do damage
+            // Most maneuvers don't do damage. Pretend they are NORMALDC so we don't spew errors below.
+            martialOrManeuverEquivalentApPerDice = 5;
         }
     }
 
+    const baseApPerDie = martialOrManeuverEquivalentApPerDice || item.baseInfo.costPerLevel(item);
+    const apPerDie = baseApPerDie * (1 + item.system._advantagesDc);
+    const multiplierToAvoidEpsilon = 100000;
+    let halfDieValue;
+    let pipValue;
+    if (baseApPerDie === 3) {
+        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 2) / 3);
+        pipValue = Math.floor((multiplierToAvoidEpsilon * 1) / 3);
+    } else if (baseApPerDie === 5) {
+        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 3) / 5);
+        pipValue = Math.floor((multiplierToAvoidEpsilon * 2) / 5);
+    } else if (baseApPerDie === 10) {
+        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 5) / 10);
+        pipValue = Math.floor((multiplierToAvoidEpsilon * 3) / 10);
+    } else if (baseApPerDie === 15) {
+        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 10) / 15);
+        pipValue = Math.floor((multiplierToAvoidEpsilon * 5) / 15);
+    } else {
+        console.error(`Unhandled die of damage cost ${baseApPerDie} for ${item.name}/${item.system.XMLID}`);
+    }
+
+    // MartialArts & Maneuvers have DC and no advantages. Others have active points with some advantages that contribute to DC.
+    // See FRed pp 403, 404 6e vol 2 pp 96, 97
+    const shiftedDiceOfDamage = multiplierToAvoidEpsilon * (dc * (5 / apPerDie));
+
+    const d6Count = Math.floor(shiftedDiceOfDamage / multiplierToAvoidEpsilon);
+    const halfDieCount = shiftedDiceOfDamage % multiplierToAvoidEpsilon >= halfDieValue ? 1 : 0;
+    const constant = shiftedDiceOfDamage % multiplierToAvoidEpsilon >= pipValue && !halfDieCount ? 1 : 0;
+
+    // PH: FIXME: Need to do up a big table of checks for this it would seem
+    // PH: FIXME: Note that the 6e vol 2 p.97 hints that 1/2d6 < 1d6-1
+
     return {
-        isKilling: item.system.killing,
         d6Count,
-        halfDieCount: usesDieLessOne ? 0 : halfDieCount,
-        d6Less1DieCount: usesDieLessOne ? halfDieCount : 0,
+        halfDieCount: halfDieCount,
+
+        // PH: FIXME: Note that the 6e vol 2 p.97 shows that 1/2d6 < 1d6-1
+        d6Less1DieCount: 0,
         constant,
     };
 }
 
-export function getDiceFormulaFromItemDC(item, DC) {
-    const formulaParts = calculateDiceFormulaParts(item, DC);
+/**
+ * @typedef {Object} HeroSystemFormulaDiceParts
+ * @property {number} d6Count - number of whole dice (e.g. 73d6)
+ * @property {number} d6Less1DieCount - 1 or 0 1d6-1 terms (e.g. 1d6-1)
+ * @property {number} halfDieCount - 1 or 0 half dice terms (e.g. ½d6)
+ * @property {number} constant - 1 or 0 reflecting a +1 (e.g. 2d6 + 1)
+ */
+/**
+ * Add two dice parts together by steps and not straight math. For example: 1/2d6 + 1/2d6 = 1d6+1
+ * @param {HeroSystemFormulaDiceParts} firstDiceParts
+ * @param {HeroSystemFormulaDiceParts} secondDiceParts
+ * @param {boolean} useDieMinusOne
+ * @returns
+ */
+export function addDiceParts(firstDiceParts, secondDiceParts, useDieMinusOne) {
+    const firstSum =
+        3 * firstDiceParts.d6Count +
+        2 * (firstDiceParts.d6Less1DieCount + firstDiceParts.halfDieCount) +
+        firstDiceParts.constant;
+    const secondSum =
+        3 * secondDiceParts.d6Count +
+        2 * (secondDiceParts.d6Less1DieCount + secondDiceParts.halfDieCount) +
+        secondDiceParts.constant;
+    const totalSum = firstSum + secondSum;
+
+    const result = {
+        d6Count: Math.floor(totalSum / 3),
+        d6Less1DieCount: useDieMinusOne ? (totalSum % 3 >= 2 ? 1 : 0) : 0,
+        halfDieCount: !useDieMinusOne ? (totalSum % 3 >= 2 ? 1 : 0) : 0,
+        constant: totalSum % 3 === 1 ? 1 : 0,
+    };
+    return result;
+}
+
+/**
+ * Calculate the damage dice for an item
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {Object} options
+ * @returns {HeroSystemFormulaDiceParts}
+ */
+function calculateDicePartsForItem(item, options) {
+    // Get base DCs (with a breakout for actual fundamental DC contribution to the extra DCs) and added DCs
+    // Figure extra DCs based on base DCs
+    // Figure out how many extra dice are caused by the extra DCs
+    const { itemBaseDc, dc: totalDc } = calculateDcFromItem(item, options);
+    const extraDcs = totalDc - itemBaseDc;
+    const extraDcsDiceParts = calculateDicePartsFromDcForItem(item, extraDcs);
+
+    // Get basic damage based on base DC (for maneuvers/martialarts) or the item's dice
+    const baseDiceParts = ["maneuver", "martialart"].includes(item.type)
+        ? calculateDicePartsFromDcForItem(item, itemBaseDc)
+        : {
+              d6Count: parseInt(item.system.LEVELS || 0),
+              d6Less1DieCount: item.findModsByXmlid("MINUSONEPIP") ? 1 : 0,
+              halfDieCount: item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0,
+              constant: item.findModsByXmlid("PLUSONEPIP") ? 1 : 0,
+          };
+
+    // Add the basic dice with the added dice
+    const useDieMinusOne = !!item.findModsByXmlid("MINUSONEPIP");
+    const sum = addDiceParts(baseDiceParts, extraDcsDiceParts, useDieMinusOne);
+    return sum;
+}
+
+export function getDiceFormulaFromItem(item, options) {
+    // PH: FIXME: Need to stop looking at end returned from other functions.
+    const formulaParts = calculateDicePartsForItem(item, options);
 
     return `${
         formulaParts.d6Count + formulaParts.d6Less1DieCount + formulaParts.halfDieCount > 0
@@ -557,14 +573,19 @@ export function getDiceFormulaFromItemDC(item, DC) {
             ? formulaParts.d6Count + formulaParts.d6Less1DieCount + formulaParts.halfDieCount > 0
                 ? "+1"
                 : "1"
-            : `${formulaParts.d6Less1DieCount > 0 ? "-1" : ""}`
+            : formulaParts.d6Count + formulaParts.d6Less1DieCount + formulaParts.halfDieCount > 0
+              ? `${formulaParts.d6Less1DieCount > 0 ? "-1" : ""}`
+              : "0"
     }`;
 }
 
-export function CombatSkillLevelsForAttack(item) {
-    let results = [];
+export function getFullyQualifiedDiceFormulaFromItem(item, options) {
+    return `${getDiceFormulaFromItem(item, options)}${item.system.killing ? "K" : ""}`;
+}
 
-    // Guard
+export function combatSkillLevelsForAttack(item) {
+    const results = [];
+
     if (!item.actor) return results;
 
     const cslSkills = item.actor.items.filter(
@@ -575,7 +596,7 @@ export function CombatSkillLevelsForAttack(item) {
     );
 
     for (const cslSkill of cslSkills) {
-        let result = {
+        const result = {
             ocv: 0,
             dcv: 0,
             dmcv: 0,
@@ -600,11 +621,8 @@ export function CombatSkillLevelsForAttack(item) {
     return results;
 }
 
-export function PenaltySkillLevelsForAttack(item) {
-    let results = [];
-
-    // Guard
-    if (!item.actor) return results;
+export function penaltySkillLevelsForAttack(item) {
+    if (!item.actor) return [];
 
     const psls = item.actor.items.filter(
         (o) =>

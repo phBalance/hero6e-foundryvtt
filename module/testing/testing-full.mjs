@@ -1,5 +1,5 @@
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { CombatSkillLevelsForAttack } from "../utility/damage.mjs";
+import { combatSkillLevelsForAttack } from "../utility/damage.mjs";
 
 export function registerFullTests(quench) {
     quench.registerBatch(
@@ -1573,7 +1573,7 @@ export function registerFullTests(quench) {
 
                 it("HKA CSL", async function () {
                     assert.equal(
-                        CombatSkillLevelsForAttack(actor.items.find((o) => o.system.XMLID === "HKA"))[0].ocv,
+                        combatSkillLevelsForAttack(actor.items.find((o) => o.system.XMLID === "HKA"))[0].ocv,
                         2,
                     );
                 });

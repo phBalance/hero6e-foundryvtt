@@ -8,7 +8,7 @@ import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { CombatSkillLevelsForAttack, convertToDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
+import { combatSkillLevelsForAttack, calculateDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
@@ -484,8 +484,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                 let activePoints = item.system.activePoints;
 
                 if (item.type == "attack" || item.system.subType === "attack" || item.system.XMLID === "martialart") {
-                    const csl = CombatSkillLevelsForAttack(item);
-                    let { dc } = convertToDcFromItem(item, { ignoreDeadlyBlow: true });
+                    const csl = combatSkillLevelsForAttack(item);
+
+                    // PH: TODO: Look at this. Why does it need to do this here?
+                    let { dc } = calculateDcFromItem(item, { ignoreDeadlyBlow: true });
 
                     if (dc > 0) {
                         let costPerDice =

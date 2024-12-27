@@ -2019,7 +2019,7 @@ export class HeroSystem6eActor extends Actor {
                             active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
                             description: EFFECT,
                             XMLID,
-                            // MARTIALARTS consises of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
+                            // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
                             // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
                             //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
                             //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
