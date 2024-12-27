@@ -4337,14 +4337,14 @@ export class HeroSystem6eItem extends Item {
 
         this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
 
-        // FLASHDC, BLOCK, DODGE do not use STR
+        // Maneuvers and martial arts with FLASHDC, NND, BLOCK, DODGE do not use STR
         if (["maneuver", "martialart"].includes(this.type)) {
             if (
                 this.system.EFFECT &&
                 (this.system.EFFECT.toLowerCase().indexOf("block") > -1 ||
                     this.system.EFFECT.toLowerCase().indexOf("dodge") > -1 ||
-                    this.system.EFFECT.search("[FLASHDC]") > -1 ||
-                    this.system.EFFECT.search("[NNDDC]") > -1)
+                    this.system.EFFECT.search(/\[FLASHDC\]/) > -1 ||
+                    this.system.EFFECT.search(/\[NNDDC\]/) > -1)
             ) {
                 this.system.usesStrength = false;
             }
@@ -4433,6 +4433,7 @@ export class HeroSystem6eItem extends Item {
         } else if (xmlid === "ENERGYBLAST") {
             this.system.usesStrength = false;
         } else if (xmlid === "RKA") {
+            this.system.killing = true;
             this.system.usesStrength = false;
         } else if (xmlid === "TRANSFORM") {
             this.system.class = "transform";
@@ -4522,15 +4523,6 @@ export class HeroSystem6eItem extends Item {
             this.name = name + " (TK strike)";
             this.system.usesStrength = false;
             this.system.usesTk = true;
-        }
-
-        if (xmlid === "ENERGYBLAST") {
-            this.system.usesStrength = false;
-        }
-
-        if (xmlid === "RKA") {
-            this.system.killing = true;
-            this.system.usesStrength = false;
         }
 
         // Damage effect/type modifiers
