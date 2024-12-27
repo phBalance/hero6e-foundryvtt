@@ -27,7 +27,6 @@ import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
-// import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
