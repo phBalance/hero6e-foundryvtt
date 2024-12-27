@@ -348,7 +348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             let xml = parser.parseFromString(powerDescription6e.xml.trim(), "text/xml");
 
             // Add power properties based on valid XML.
-            // NOTE: Chrome will parse partially valid XML, FireFox will not
+            // NOTE: Chrome will parse partially valid XML, Firefox will not
             // which is why we are checking for parsererror.
             if (xml.getElementsByTagName("parsererror").length === 0) {
                 powerDescription6e.key ??= xml.children[0].getAttribute("XMLID");

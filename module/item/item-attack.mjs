@@ -4,13 +4,17 @@ import { getActorDefensesVsAttack, getConditionalDefenses } from "../utility/def
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
-    calculateDiceFormulaParts,
-    CombatSkillLevelsForAttack,
-    PenaltySkillLevelsForAttack,
-    convertToDcFromItem,
+    calculateDicePartsFromDcForItem,
+    combatSkillLevelsForAttack,
+    penaltySkillLevelsForAttack,
+    calculateDcFromItem,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
-import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
+import {
+    getRoundedDownDistanceInSystemUnits,
+    getRoundedUpDistanceInSystemUnits,
+    getSystemDisplayUnits,
+} from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
@@ -189,7 +193,7 @@ export async function AttackAoeToHit(item, options) {
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distanceToken);
 
         // PENALTY_SKILL_LEVELS (range)
-        const pslRange = PenaltySkillLevelsForAttack(item).find(
+        const pslRange = penaltySkillLevelsForAttack(item).find(
             (o) => o.system.penalty === "range" && o.system.checked,
         );
         if (pslRange) {
@@ -219,7 +223,7 @@ export async function AttackAoeToHit(item, options) {
 
     // Combat Skill Levels
     const skillLevelMods = {};
-    for (const csl of CombatSkillLevelsForAttack(item)) {
+    for (const csl of combatSkillLevelsForAttack(item)) {
         const id = csl.skill.id;
         skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
@@ -228,7 +232,6 @@ export async function AttackAoeToHit(item, options) {
         cvMod.dc += csl.dc;
         if (csl.ocv || csl.omcv > 0) {
             cvMod.ocv += csl.ocv || csl.omcv;
-            //heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
         }
         dcv += csl.dcv;
         cvMod.dcv += csl.dcv;
@@ -263,7 +266,6 @@ export async function AttackAoeToHit(item, options) {
                     nextPhase: true,
                 },
             };
-            //await item.addActiveEffect(activeEffect);
             await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
         }
     }
@@ -569,7 +571,7 @@ export async function AttackToHit(item, options) {
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
-        const pslRange = PenaltySkillLevelsForAttack(item).find(
+        const pslRange = penaltySkillLevelsForAttack(item).find(
             (o) => o.system.penalty === "range" && o.system.checked,
         );
         if (pslRange) {
@@ -600,7 +602,7 @@ export async function AttackToHit(item, options) {
 
     // Combat Skill Levels
     const skillLevelMods = {};
-    for (const csl of CombatSkillLevelsForAttack(item)) {
+    for (const csl of combatSkillLevelsForAttack(item)) {
         const id = csl.skill.id;
         skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
@@ -644,7 +646,6 @@ export async function AttackToHit(item, options) {
                     nextPhase: true,
                 },
             };
-            //await item.addActiveEffect(activeEffect);
             await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
         }
     }
@@ -703,7 +704,7 @@ export async function AttackToHit(item, options) {
 
         // Penalty Skill Levels
         if (options.usePsl) {
-            const pslHit = PenaltySkillLevelsForAttack(item).find(
+            const pslHit = penaltySkillLevelsForAttack(item).find(
                 (o) => o.system.penalty === "hitLocation" && o.system.checked,
             );
             if (pslHit) {
@@ -1533,6 +1534,7 @@ export async function _onRollDamage(event) {
     const senseAffecting = getPowerInfo({
         item: item,
     })?.type?.includes("sense-affecting");
+    const isKilling = item.system.killing;
 
     const entangle = item.system.XMLID === "ENTANGLE";
 
@@ -1541,18 +1543,18 @@ export async function _onRollDamage(event) {
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
-    const { dc, tags } = convertToDcFromItem(effectiveItem, {
+    const { dc, tags } = calculateDcFromItem(effectiveItem, {
         isAction: true,
         ...toHitData,
     });
-    const formulaParts = calculateDiceFormulaParts(effectiveItem, dc);
+    const formulaParts = calculateDicePartsFromDcForItem(effectiveItem, dc);
 
     const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations;
 
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
-        .makeNormalRoll(!senseAffecting && !adjustment && !formulaParts.isKilling)
-        .makeKillingRoll(!senseAffecting && !adjustment && formulaParts.isKilling)
+        .makeNormalRoll(!senseAffecting && !adjustment && !isKilling)
+        .makeKillingRoll(!senseAffecting && !adjustment && isKilling)
         .makeAdjustmentRoll(!!adjustment)
         .makeFlashRoll(!!senseAffecting)
         .makeEntangleRoll(!!entangle)
@@ -1747,14 +1749,14 @@ export async function _onRollMindScanEffectRoll(event) {
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
-    const { dc, tags } = convertToDcFromItem(effectiveItem, {
+    const { dc, tags } = calculateDcFromItem(effectiveItem, {
         isAction: true,
         ...toHitData,
     });
 
-    const formulaParts = calculateDiceFormulaParts(effectiveItem, dc);
+    const formulaParts = calculateDicePartsFromDcForItem(effectiveItem, dc);
 
-    const damageRoller = new HeroRoller()
+    const mindScanRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
         .makeEffectRoll()
         .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
@@ -1763,9 +1765,9 @@ export async function _onRollMindScanEffectRoll(event) {
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(useStandardEffect);
 
-    await damageRoller.roll();
+    await mindScanRoller.roll();
 
-    const damageRenderedResult = await damageRoller.render();
+    const damageRenderedResult = await mindScanRoller.render();
 
     // Conditional defense not implemented yet
     const ignoreDefenseIds = [];
@@ -1809,7 +1811,7 @@ export async function _onRollMindScanEffectRoll(event) {
         knockbackResistanceValue;
     damageData.targetToken = token;
 
-    const damageDetail = await _calcDamage(damageRoller, item, damageData);
+    const damageDetail = await _calcDamage(mindScanRoller, item, damageData);
 
     const cardData = {
         item: item,
@@ -1844,7 +1846,7 @@ export async function _onRollMindScanEffectRoll(event) {
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
 
-        roller: damageRoller.toJSON(),
+        roller: mindScanRoller.toJSON(),
 
         // misc
         targetIds: toHitData.targetIds,
@@ -1863,7 +1865,7 @@ export async function _onRollMindScanEffectRoll(event) {
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
-        rolls: damageRoller.rawRolls(),
+        rolls: mindScanRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,

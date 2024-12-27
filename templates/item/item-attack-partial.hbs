@@ -1,8 +1,3 @@
-{{!-- <div class="form-group">
-    <label>{{localize "Items.Attack.EndCost"}}</label>
-    <input type="text" name="system.end" value="{{system.end}}" data-dtype="Number" />
-</div> --}}
-
 <div class="form-group">
     <label>{{localize "Items.Attack.Class"}}</label>
     <select name="system.class" data-dtype="text">
@@ -22,7 +17,7 @@
 
 <div class="form-group">
     <label>{{localize "Items.Attack.Value"}}</label>
-    <input type="text" name="system.dice" value="{{system.dice}}" data-dtype="Number" disabled/>
+    <input type="text" name="system.dice" value="{{system.dice}}" data-dtype="Number" disabled />
     D6
     <select name="system.extraDice" data-dtype="text" disabled>
         {{selectOptions config.extraDice selected=system.extraDice}}
@@ -62,7 +57,6 @@
     </select>
 </div>
 
-
 <div class="form-group">
     <label>{{localize "Items.Attack.TargetsUsing"}}</label>
     <select name="system.uses" data-dtype="text">
@@ -100,7 +94,6 @@
     <input type="checkbox" name="system.noHitLocations" {{checked system.noHitLocations}} data-dtype="Boolean" />
 </div>
 
-
 <div class="form-group">
     <label>{{localize "Items.Attack.AreaOfEffect"}}</label>
     <select name="system.areaOfEffect.type" data-dtype="text">
@@ -112,7 +105,10 @@
 
 <div class="form-group">
     <label>{{localize "Items.Attack.CustomEffects"}}</label>
-    <textarea placeholder="Attack Description" class="power-card-power-description textarea input"
-        name="system.effect">{{item.system.effect}}</textarea>
+    <textarea
+        placeholder="Attack Description"
+        class="power-card-power-description textarea input"
+        name="system.effect"
+    >{{item.system.effect}}</textarea>
 
 </div>
