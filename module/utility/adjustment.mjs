@@ -841,7 +841,12 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
     try {
         // use effects instead of temporaryEffects because of item AE transfer
         for (const ae of Array.from(targetActor.effects)
-            .filter((ae) => !ae.disabled && ae.changes?.[0].key === activeEffect.changes[0].key)
+            .filter(
+                (ae) =>
+                    !ae.disabled &&
+                    ae.changes?.[0].key === activeEffect.changes[0].key &&
+                    ae.flags.type === "adjustment",
+            )
             .sort((a, b) => (a.flags.createTime || 0) - (b.flags.createTime || 0))) {
             _ap += ae.flags.adjustmentActivePoints;
             const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;

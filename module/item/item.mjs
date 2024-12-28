@@ -595,37 +595,11 @@ export class HeroSystem6eItem extends Item {
             } else if (this.system.XMLID === "HAYMAKER") {
                 this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
             }
-
-            // Remove Special Visions
-            //await removeSpecialVisions(this.actor.getActiveTokens()?.[0]);
         }
-
-        // Refresh token (mainly for detectionModes)
-        // if (this.actor) {
-        //     for (const token of this.actor.getActiveTokens()) {
-        //         //     token.initializeSources();
-        //         //     token.renderFlags.set({ refresh: true });
-        //         //await token.document.update({ detectionModes: token.document.detectionModes });
-
-        //         foundry.utils.debounce(function () {
-        //             token.document._prepareDetectionModes();
-        //             token.renderFlags.set({ refreshVisibility: true });
-        //             console.log("refreshVisibility", token.detectionModes[1]);
-        //         }, 100);
-        //         // token.renderFlags.set({ refreshVisibility: true });
-        //     }
-
-        //     // for (const token of canvas.tokens.placeables) {
-        //     //     token.renderFlags.set({ refreshVisibility: true });
-        //     //     ////await token.refresh();
-        //     //     //console.log(token);
-        //     //     //console.log(token.sheet);
-        //     // }
-        // }
 
         const attr = "system.active";
         const newValue = !foundry.utils.getProperty(item, attr);
-        const firstAE = item.effects.contents[0];
+        const firstAE = item.effects.find((ae) => ae.flags.type !== "adjustment");
 
         switch (this.type) {
             case "defense":
@@ -1267,7 +1241,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // showToggle
-        const itemEffects = item.effects.find(() => true);
+        const itemEffects = item.effects.find((ae) => ae.flags.type !== "adjustment");
         if (itemEffects) {
             item.system.showToggle = true;
             item.system.active = !itemEffects.disabled;
