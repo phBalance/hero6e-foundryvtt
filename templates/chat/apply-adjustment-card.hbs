@@ -37,13 +37,12 @@
       <div class="description-tiny">Defense: {{ defenseDescription }}</div>
     </div>
 
-    {{#if effectsDescription}}
-      <div class="card-section">
-        <div class="description-tiny">Effect</div>
-        <div class="description-medium">{{ activePoints }} Active Points</div>
-        <div class="description-tiny">{{{ effectsDescription }}}</div>
-      </div>
-    {{/if}}
+    <div class="card-section">
+      <div class="description-tiny">Effect</div>
+      <div class="description-medium">{{ activePoints }} Active Points</div>
+      <div class="description-tiny">{{{ effectsDescription }}}</div>
+    </div>
+
   {{/if}}
 
   {{#each adjustments as | adj |}}

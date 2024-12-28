@@ -368,7 +368,7 @@ function _createNewAdjustmentEffect(
 }
 
 export async function performAdjustment(
-    item,
+    attackItem,
     nameOfCharOrPower,
     thisAttackActivePointsEffect, // Amount of AP to change (fade or initial value)
     defenseDescription,
@@ -384,7 +384,7 @@ export async function performAdjustment(
 
     // for backward compatibility
     const targetActor = targetToken.actor || targetToken;
-    const isHealing = item.system.XMLID === "HEALING";
+    const isHealing = attackItem.system.XMLID === "HEALING";
     //const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
     // 5e conversions for Calculated Characteristics
@@ -441,7 +441,7 @@ export async function performAdjustment(
     // Do we have a target?
     if (!targetCharacteristic && !targetPower) {
         await ui.notifications.warn(
-            `${nameOfCharOrPower} is an invalid target for the adjustment power ${item.name}. Perhaps ${targetActor.name} does not have that characteristic or power.`,
+            `${nameOfCharOrPower} is an invalid target for the adjustment power ${attackItem.name}. Perhaps ${targetActor.name} does not have that characteristic or power.`,
         );
         return;
     }
@@ -456,12 +456,12 @@ export async function performAdjustment(
     // const targetStartingMax = targetCharacteristic != null ? targetCharacteristic.max : targetPower.system.max;
     //const targetStartingCore = targetCharacteristic != null ? targetCharacteristic.core : targetPower.system.core;
 
-    existingEffect = existingEffect || _findExistingMatchingEffect(item, potentialCharacteristic, targetSystem);
+    existingEffect = existingEffect || _findExistingMatchingEffect(attackItem, potentialCharacteristic, targetSystem);
 
     const activeEffect =
         existingEffect ||
         _createNewAdjustmentEffect(
-            item,
+            attackItem,
             targetUpperCaseName,
             targetPower,
             thisAttackActivePointsEffect,
@@ -475,7 +475,7 @@ export async function performAdjustment(
         const deletePromise = existingEffect.delete();
 
         const chatCard = _generateAdjustmentChatCard(
-            item,
+            attackItem,
             existingEffect.flags.adjustmentActivePoints,
             0,
             0,
@@ -498,7 +498,7 @@ export async function performAdjustment(
     let costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, targetPower, targetActor);
 
     // Positive Adjustment Powers have maximum effects.
-    const maximumEffectActivePoints = determineMaxAdjustment(item);
+    const maximumEffectActivePoints = determineMaxAdjustment(attackItem);
     let totalActivePointAffectedDifference = 0;
     //let totalPointsDifference = 0;
     let thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
@@ -784,16 +784,30 @@ export async function performAdjustment(
 
     await Promise.all(promises);
 
+    // This does not work for items, perhaps change the key to match xmlid
+    // Use effects to get items?
     const _key = _createAEChangeBlock(potentialCharacteristic, targetSystem).key;
-    const totalEffectActivePoints = Array.from(targetActor.effects)
-        .map((o) => o.changes.filter((c) => c.key === _key))
-        .reduce((accum, curr) => accum + curr.reduce((a2, c2) => a2 + parseInt(c2.value), 0), 0);
+    const totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects).reduce(
+        (accum, curr) =>
+            accum +
+            curr.changes.reduce(
+                (a2, c2) =>
+                    a2 +
+                    (c2.key === _key &&
+                    curr.flags.XMLID === activeEffect.flags.XMLID &&
+                    curr.flags.type === "adjustment"
+                        ? parseInt(c2.value)
+                        : 0),
+                0,
+            ),
+        0,
+    );
 
     return _generateAdjustmentChatCard(
-        item,
+        attackItem,
         thisAttackActivePointsEffect,
         totalActivePointAffectedDifference,
-        totalEffectActivePoints,
+        totalEffectActivePointsForXmlid,
         thisAttackActivePointAdjustmentNotAppliedDueToMax,
         thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,
         defenseDescription,
@@ -813,66 +827,73 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
 
     let _ap = 0;
     let _value = 0;
-    // use effects instead of temporaryEffects because of item AE transfer
-    for (const ae of Array.from(targetActor.effects)
-        .filter((ae) => !ae.disabled && ae.changes?.[0].key === activeEffect.changes[0].key)
-        .sort((a, b) => (a.flags.createTime || 0) - (b.flags.createTime || 0))) {
-        _ap += ae.flags.adjustmentActivePoints;
-        const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;
-        if (isNaN(_targetValue)) {
-            ui.notifications.error("recalcEffectBasedOnTotalApForXmlid failed", activeEffect);
-            return;
-        }
-
-        if (parseInt(ae.changes[0].value) !== _targetValue) {
-            const msg = `updating AE change value from ${ae.changes[0].value} to ${_targetValue} because sumAP=${_ap} and costPerActivePoint=${costPerActivePoint}.  ${_ap}/${costPerActivePoint} = ${_ap / costPerActivePoint}.  There is already a ${_value} value from other effects.`;
-            if (isFade) {
-                console.warn(msg);
-            } else {
-                console.error(msg);
-                //debugger;
+    try {
+        // use effects instead of temporaryEffects because of item AE transfer
+        for (const ae of Array.from(targetActor.effects)
+            .filter((ae) => !ae.disabled && ae.changes?.[0].key === activeEffect.changes[0].key)
+            .sort((a, b) => (a.flags.createTime || 0) - (b.flags.createTime || 0))) {
+            _ap += ae.flags.adjustmentActivePoints;
+            const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;
+            if (isNaN(_targetValue)) {
+                ui.notifications.error("recalcEffectBasedOnTotalApForXmlid failed", activeEffect);
+                return;
             }
-            console.log();
-            const previousChanges = foundry.utils.deepClone(ae.changes);
-            ae.changes[0].value = _targetValue;
-            if (_targetValue === 0 && !CONFIG.debug.adjustmentFadeKeep) {
-                await ae.delete();
-                console.log(`${ae.name} deleted`);
-            } else {
-                // Async issues, so we need to pre-calc the actor/chcar max & value.
-                // const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
-                // const targetStartingValue = foundry.utils.getProperty(
-                //     targetActor,
-                //     `system.characteristics.${char}.value`,
-                // );
-                // const targetStartingMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
-                // const delta = _targetValue - ae.changes[0].value;
-                // const newActorValue = Math.min(targetStartingValue + delta, targetStartingMax + delta);
-                // await targetActor.update({ [`system.characteristics.${char}.value`]: newActorValue });
 
-                const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
-                const startingActorMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
-
-                updateEffectName(ae);
-                await ae.update({ changes: ae.changes });
-
-                // Apparently we sometimes need to delay to let all the async's catch up
-                const delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
-                for (let i = 0; i < 50; i++) {
-                    if (
-                        foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`) !==
-                        startingActorMax
-                    )
-                        break;
-                    await delay();
-                    console.log(`recalc delay ${i}. Waiting for system.characteristics.${char}.max to change`);
+            if (parseInt(ae.changes[0].value) !== _targetValue) {
+                const msg = `updating AE change value from ${ae.changes[0].value} to ${_targetValue} because sumAP=${_ap} and costPerActivePoint=${costPerActivePoint}.  ${_ap}/${costPerActivePoint} = ${_ap / costPerActivePoint}.  There is already a ${_value} value from other effects.`;
+                if (isFade) {
+                    console.warn(msg);
+                } else {
+                    console.error(msg);
+                    //debugger;
                 }
+                console.log();
+                const previousChanges = foundry.utils.deepClone(ae.changes);
+                ae.changes[0].value = _targetValue;
+                if (_targetValue === 0 && !CONFIG.debug.adjustmentFadeKeep) {
+                    await ae.delete();
+                    console.log(`${ae.name} deleted`);
+                } else {
+                    // Async issues, so we need to pre-calc the actor/chcar max & value.
+                    // const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
+                    // const targetStartingValue = foundry.utils.getProperty(
+                    //     targetActor,
+                    //     `system.characteristics.${char}.value`,
+                    // );
+                    // const targetStartingMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
+                    // const delta = _targetValue - ae.changes[0].value;
+                    // const newActorValue = Math.min(targetStartingValue + delta, targetStartingMax + delta);
+                    // await targetActor.update({ [`system.characteristics.${char}.value`]: newActorValue });
 
-                await updateCharacteristicValue(ae, { previousChanges });
+                    const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
+                    const startingActorMax = foundry.utils.getProperty(
+                        targetActor,
+                        `system.characteristics.${char}.max`,
+                    );
+
+                    updateEffectName(ae);
+                    await ae.update({ changes: ae.changes });
+
+                    // Apparently we sometimes need to delay to let all the async's catch up
+                    const delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
+                    for (let i = 0; i < 50; i++) {
+                        if (
+                            foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`) !==
+                            startingActorMax
+                        )
+                            break;
+                        await delay();
+                        console.log(`recalc delay ${i}. Waiting for system.characteristics.${char}.max to change`);
+                    }
+
+                    await updateCharacteristicValue(ae, { previousChanges });
+                }
             }
-        }
 
-        _value += _targetValue;
+            _value += _targetValue;
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 
@@ -1100,7 +1121,7 @@ function _generateAdjustmentChatCard(
         effectsDescription: effectsDescription,
 
         adjustment: {
-            adjustmentDamageRaw: activePointDamage,
+            adjustmentDamageRaw: Math.abs(activePointDamage),
             adjustmentDamageThisApplication: activePointAffectedDifference,
             adjustmentTarget: targetCharOrPower.toUpperCase(),
             adjustmentTotalActivePointEffect: totalActivePointEffect,
