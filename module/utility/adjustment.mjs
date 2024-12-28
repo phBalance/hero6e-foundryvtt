@@ -378,10 +378,9 @@ export async function performAdjustment(
     action,
     existingEffect,
 ) {
-    if (thisAttackActivePointsEffect === 0) {
-        console.warn("Why are we calling this with a 0 adjustment");
-        return;
-    }
+    // if (thisAttackActivePointsEffect === 0) {
+    //     console.warn("Why are we calling this with a 0 adjustment?  Power Defense absorbed it all?");
+    // }
 
     // for backward compatibility
     const targetActor = targetToken.actor || targetToken;
@@ -785,9 +784,9 @@ export async function performAdjustment(
 
     await Promise.all(promises);
 
-    const totalEffectActivePoints = targetActor.temporaryEffects
-        .filter((ae) => ae.origin === item.uuid)
-        .map((o) => o.changes.filter((c) => c.key === activeEffect.changes[0].key))
+    const _key = _createAEChangeBlock(potentialCharacteristic, targetSystem).key;
+    const totalEffectActivePoints = Array.from(targetActor.effects)
+        .map((o) => o.changes.filter((c) => c.key === _key))
         .reduce((accum, curr) => accum + curr.reduce((a2, c2) => a2 + parseInt(c2.value), 0), 0);
 
     return _generateAdjustmentChatCard(
