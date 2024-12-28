@@ -196,6 +196,13 @@ export function determineMaxAdjustment(item) {
     }
 }
 
+export function determineCostPerActivePointWithDefenseMultipler(targetCharacteristic, targetPower, targetActor) {
+    return (
+        determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) *
+        defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e)
+    );
+}
+
 export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) {
     // TODO: Not sure we need to use the characteristic here...
     const powerInfo =
@@ -210,24 +217,26 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
         return 1;
     }
 
-    return (
-        (targetPower
-            ? parseFloat(targetPower.system.activePoints / targetPower.system.LEVELS)
-            : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel(targetActor) || 0)) *
-        defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e)
-    );
+    return targetPower
+        ? parseFloat(targetPower.system.activePoints / targetPower.system.LEVELS)
+        : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel(targetActor) || 0);
 }
 
 function _findExistingMatchingEffect(item, potentialCharacteristic, targetSystem) {
     // We will find an existing effect with our item that does not have our potentialCharacteristic.
     // Goal is to reuse a single AE for items that have multiple adjustment targets.
-
+    const costPerActivePoint = determineCostPerActivePointWithDefenseMultipler(
+        potentialCharacteristic,
+        null,
+        targetSystem,
+    );
     const _change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
     return targetSystem.effects.find(
         (effect) =>
             effect.origin === item.uuid &&
             effect.flags.createTime === game.time.worldTime &&
-            effect.changes.find((c) => c.key !== _change.key),
+            effect.changes.find((c) => c.key !== _change.key) &&
+            effect.flags.initialCostPerActivePoint === costPerActivePoint,
         //effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic), //&&
         //parseInt(effect.changes?.[0].value || 0) >= 0,
     );
@@ -331,6 +340,12 @@ function _createNewAdjustmentEffect(
             itemTokenName,
             attackerTokenId: action?.current?.attackerTokenId,
             createTime: game.time.worldTime,
+            initialCostPerActivePoint: determineCostPerActivePointWithDefenseMultipler(
+                potentialCharacteristic,
+                null,
+                targetSystem,
+            ),
+
             // changes: [
             //     {
             //         source: item.uuid,
@@ -495,7 +510,6 @@ export async function performAdjustment(
     }
 
     // TODO: The code below might not work correctly with non integer costs per active point
-    let costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, targetPower, targetActor);
 
     // Positive Adjustment Powers have maximum effects.
     const maximumEffectActivePoints = determineMaxAdjustment(attackItem);
@@ -516,6 +530,7 @@ export async function performAdjustment(
 
         for (const change of activeEffect.changes) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
+            // Note that costPerActivePoint is different between fade/recovery and initial adjustment (which uses defense multiplier)
             const costPerActivePoint = determineCostPerActivePoint(char, null, targetActor);
             change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
         }
@@ -535,6 +550,18 @@ export async function performAdjustment(
             });
         }
     } else {
+        // Note that costPerActivePoint is different between fade/recovery and initial adjustment (which uses defense multiplier)
+        const costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, null, targetActor);
+        const _multiplier = defensivePowerAdjustmentMultiplier(
+            potentialCharacteristic.toUpperCase(),
+            targetActor,
+            targetActor?.is5e,
+        );
+        if (_multiplier !== 1) {
+            console.log(`Defense multiplier ${_multiplier}`);
+        }
+        thisAttackActivePointsEffect = Math.trunc(thisAttackActivePointsEffect / _multiplier);
+
         // Positive Adjustment
         if (thisAttackActivePointsEffect > 0) {
             const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
@@ -833,7 +860,11 @@ export async function performAdjustment(
 /// When one of multiple AE's are faded, the rounding of AP to VALUE may change.
 async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
     const targetActor = activeEffect.parent;
-    const costPerActivePoint = determineCostPerActivePoint(activeEffect.flags.key, null, targetActor);
+    const costPerActivePoint = determineCostPerActivePointWithDefenseMultipler(
+        activeEffect.flags.key,
+        null,
+        targetActor,
+    );
     if (costPerActivePoint === 1) return;
 
     let _ap = 0;
@@ -870,17 +901,6 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
                     await ae.delete();
                     console.log(`${ae.name} deleted`);
                 } else {
-                    // Async issues, so we need to pre-calc the actor/chcar max & value.
-                    // const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
-                    // const targetStartingValue = foundry.utils.getProperty(
-                    //     targetActor,
-                    //     `system.characteristics.${char}.value`,
-                    // );
-                    // const targetStartingMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
-                    // const delta = _targetValue - ae.changes[0].value;
-                    // const newActorValue = Math.min(targetStartingValue + delta, targetStartingMax + delta);
-                    // await targetActor.update({ [`system.characteristics.${char}.value`]: newActorValue });
-
                     const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
                     const startingActorMax = foundry.utils.getProperty(
                         targetActor,
@@ -974,147 +994,29 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
 }
 
 function updateEffectName(activeEffect) {
-    const item = fromUuidSync(activeEffect.origin);
-    const xmlidSlug =
-        activeEffect.changes.length > 1
-            ? `${activeEffect.flags.adjustmentActivePoints >= 0 ? "+" : "-"}${item?.name || "MULTIPLE"}`
-            : `${(parseInt(activeEffect.changes?.[0].value) || 0).signedString()} ${activeEffect.flags.key?.toUpperCase()}`;
+    //const item = fromUuidSync(activeEffect.origin);
+    let _array = [];
+    for (const c of activeEffect.changes) {
+        const _name = c.key.match(/([a-z]+)\.max/)?.[1] || "?";
+        const _value = (parseInt(activeEffect.changes?.[0].value) || 0).signedString();
+        const valItem = _array.find((o) => o.value === _value);
+        if (valItem) {
+            valItem.name += `/${_name.toUpperCase()}`;
+        } else {
+            _array.push({ name: _name.toUpperCase(), value: _value });
+        }
+    }
+
+    const xmlidSlug = `${_array.map((o) => `${o.value} ${o.name}`).join(",")}`;
+    // activeEffect.changes.length > 1
+    //     ? `${activeEffect.flags.adjustmentActivePoints >= 0 ? "+" : "-"}${item?.name || "MULTIPLE"}`
+    //     : `${(parseInt(activeEffect.changes?.[0].value) || 0).signedString()} ${activeEffect.flags.key?.toUpperCase()}`;
     activeEffect.name =
         `${CONFIG.debug.adjustmentFadeKeep && activeEffect.flags?.createTime ? activeEffect.flags.createTime : ""} ` +
         `${xmlidSlug} (${Math.abs(activeEffect.flags.adjustmentActivePoints)} AP) ` +
         `[by ${activeEffect.flags.itemTokenName}]`;
     // +(activeEffect.updateDuration ? `~${activeEffect.updateDuration().remaining}s remain` : "");
 }
-
-// async function performAdjustmentAaron(
-//     item,
-//     targetXMLID,
-//     adjustmentEffectActivePoints, // Amount of AP to change (fade or initial value)
-//     _defenseDescription,
-//     _effectsDescription,
-//     _isFade,
-//     token,
-//     action,
-// ) {
-//     const isHealing = item.system.XMLID === "HEALING";
-//     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
-
-//     // TODO: pass in the correct adjustmentEffectActivePoints
-//     switch (item.system.XMLID) {
-//         case "AID":
-//             if (adjustmentEffectActivePoints < 0) {
-//                 adjustmentEffectActivePoints = Math.abs(adjustmentEffectActivePoints);
-//                 console.warn(`Fixed NEGATIVE adjustmentEffectActivePoints for ${item.system.XMLID}`);
-//             }
-//             break;
-//         case "DRAIN":
-//             if (adjustmentEffectActivePoints > 0) {
-//                 adjustmentEffectActivePoints = -Math.abs(adjustmentEffectActivePoints);
-//                 console.warn(`Fixed POSITIVE adjustmentEffectActivePoints for ${item.system.XMLID}`);
-//             }
-//             break;
-//         default:
-//             console.warn(`Unhandled ${targetXMLID}`);
-//     }
-
-//     // 5e conversions for Calculated Characteristics
-//     // Adjustment Powers
-//     // that affect Primary Characteristics have no effect
-//     // on Figured Characteristics, but do affect abilities
-//     // calculated from Primary Characteristics (such as
-//     // the lifting capacity of and damage caused by STR,
-//     // a character’s Combat Value derived from DEX, and
-//     // so forth).
-//     if (token.actor.is5e) {
-//         switch (targetXMLID) {
-//             case "OCV":
-//             case "DCV":
-//                 console.warn(`${targetXMLID} is invalid for a 5e actor, using DEX instead.`);
-//                 targetXMLID = "DEX";
-
-//                 break;
-//             case "OMCV":
-//             case "DMCV":
-//                 console.warn(`${targetXMLID} is invalid for a 5e actor, using EGO instead.`);
-//                 targetXMLID = "EGO";
-//                 break;
-//         }
-//     }
-
-//     // Find a matching characteristic.
-//     // Note that movement powers are sometimes treated as characteristics.
-//     const targetCharacteristic = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === targetXMLID)
-//         ? token.actor.system.characteristics[targetXMLID.toLowerCase()]
-//         : null;
-
-//     // Search the target for this power.
-//     // TODO: will return first matching power. How can we distinguish without making users
-//     //       setup the item for a specific? Will likely need to provide a dialog. That gets
-//     //       us into the thorny question of what powers have been discovered.
-//     const targetPowers = token.actor.items.filter((item) => item.system.XMLID === targetXMLID);
-//     if (!targetCharacteristic && targetPowers.length > 1) {
-//         console.warn(`Multiple ${targetXMLID} powers`);
-//     }
-//     // Notice we favor targetCharacteristic over a power
-//     const targetPower = targetCharacteristic ? null : targetPowers?.[0];
-
-//     // Do we have a target?
-//     if (!targetCharacteristic && !targetPower) {
-//         await ui.notifications.warn(
-//             `${targetXMLID} is an invalid target for the adjustment power ${item.name}. Perhaps ${token.name} does not have that characteristic or power.`,
-//         );
-//         return;
-//     }
-
-//     // Characteristics target an actor, and powers target an item
-//     const targetActorOrItem = targetCharacteristic ? token.actor : targetPower;
-
-//     const targetStartingValue = targetCharacteristic?.value || parseInt(targetPower.adjustedLevels);
-//     const targetStartingMax = targetCharacteristic?.max || parseInt(targetPower.system.LEVELS);
-//     const targetStartingCore = targetCharacteristic?.core || parseInt(targetPower.system.LEVELS);
-
-//     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
-//     const existingEffect = _findExistingMatchingEffect(item, targetXMLID, targetPower, targetActorOrItem);
-
-//     const activeEffect =
-//         existingEffect ||
-//         {
-//             name: `Adjustment ${taragetXMLID}`,
-//             img: item.img,
-//             flags: {
-//                 type: "adjustment",
-//                 version: 3,
-//                 adjustmentActivePoints: 0,
-//                 affectedPoints: 0,
-//                 XMLID: item.system.XMLID,
-//                 source: targetActor.name,
-//                 target: [targetPower?.uuid || potentialCharacteristic],
-//                 key: targetPower?.system?.XMLID || potentialCharacteristic,
-//                 itemTokenName,
-//                 attackerTokenId: action?.current?.attackerTokenId,
-//             },
-//             origin: item.uuid, // Not always true with multiple sources for same XMLID
-//             description: item.system.description, // Not always true with multiple sources for same XMLID
-//             transfer: true,
-//             disabled: false,
-//         };
-
-//     debugger;
-//     // return _generateAdjustmentChatCard(
-//     //     item,
-//     //     thisAttackRawActivePointsDamage,
-//     //     totalActivePointAffectedDifference,
-//     //     totalAdjustmentNewActivePoints,
-//     //     thisAttackActivePointAdjustmentNotAppliedDueToMax,
-//     //     thisAttackActivePointEffectNotAppliedDueToNotExceeding,
-//     //     defenseDescription,
-//     //     effectsDescription,
-//     //     targetUpperCaseName, //potentialCharacteristic,
-//     //     isFade,
-//     //     isEffectFinished,
-//     //     targetActor,
-//     // );
-// }
 
 function _generateAdjustmentChatCard(
     item,

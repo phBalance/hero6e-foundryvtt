@@ -42,6 +42,33 @@ export async function onManageActiveEffect(event, owner) {
                     if (!effect.disabled) {
                         await onActiveEffectToggle(effect);
                     }
+
+                    // fixup characteristics value when AE is manually removed
+                    const actor = effect.parent;
+                    for (const change of effect.changes) {
+                        const xmlid = change.key.match(/([a-z]+)\.max/)?.[1];
+                        if (xmlid) {
+                            if (actor?.system?.characteristics?.[xmlid]) {
+                                const value = parseInt(change.value) || 0;
+                                if (value > 0) {
+                                    await actor.update({
+                                        [`system.characteristics.${xmlid}.value`]: Math.max(
+                                            actor.system.characteristics[xmlid].value - value,
+                                            actor.system.characteristics[xmlid].max - value,
+                                        ),
+                                    });
+                                }
+                                if (value < 0) {
+                                    await actor.update({
+                                        [`system.characteristics.${xmlid}.value`]: Math.min(
+                                            actor.system.characteristics[xmlid].value + value,
+                                            actor.system.characteristics[xmlid].max + value,
+                                        ),
+                                    });
+                                }
+                            }
+                        }
+                    }
                     await effect.delete();
                 } else {
                     await item.delete();

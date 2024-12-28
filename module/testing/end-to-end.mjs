@@ -1,5 +1,5 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { determineCostPerActivePoint } from "../utility/adjustment.mjs";
+import { determineCostPerActivePointWithDefenseMultipler } from "../utility/adjustment.mjs";
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 export class HeroSystem6eEndToEndTest {
     sceneName = "EndToEndTest";
@@ -389,7 +389,7 @@ export class HeroSystem6eEndToEndTest {
 
             for (const change of adjustmentActiveEffect.changes) {
                 const char = change.key.match(/([a-z]+)\.max/)?.[1];
-                costPerActivePoint[change.key] = determineCostPerActivePoint(
+                costPerActivePoint[change.key] = determineCostPerActivePointWithDefenseMultipler(
                     char.toUpperCase(),
                     null,
                     tokenTarget.actor,
