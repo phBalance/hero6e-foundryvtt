@@ -42,42 +42,51 @@ export class EffectsPanel extends Application {
     async getData(options) {
         if (!this.actor) return null;
 
-        const context = await super.getData(options);
-        context.effects = foundry.utils.deepClone(this.actor?.appliedEffects);
+        try {
+            const context = await super.getData(options);
+            context.effects = [];
 
-        if (context.effects) {
-            for (const ae of context.effects) {
+            for (const ae of foundry.utils.deepClone(this.actor?.appliedEffects)) {
+                const d = ae._prepareDuration();
                 // Sometimes ae.parent?.system.active  is false, but the power is active, unclear why.
                 // Consider making active a getter (looking for the AE) instead of using system.actor.
-                if (ae.parent instanceof HeroSystem6eItem && ae.duration.seconds) {
-                    const d = ae._prepareDuration();
-                    ae.flags.label = d.label;
-                    //ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
-                    for (const target of ae.flags.target) {
-                        const item = fromUuidSync(target);
-                        ae.flags.targetDisplay = `${item?.name} [${item.system.XMLID}]`;
+                if (ae.parent instanceof HeroSystem6eItem) {
+                    // Only show items that have a duration(temporary), or are perceivable
+                    if (!d.duration && !ae.parent.isPerceivable()) {
+                        continue;
+                    }
+
+                    if (d.duration) {
+                        ae.flags.label = d.label;
                     }
                 } else {
-                    const d = ae._prepareDuration();
-                    ae.flags.label = d.label;
-                    ae.flags.targetDisplay = ae.flags.target;
+                    if (d.duration) {
+                        ae.flags.label = d.label;
+                        ae.flags.targetDisplay = ae.flags.target;
+                    } else if (!ae.statuses) {
+                        console.log(`Skipping ${ae.name}`);
+                        continue;
+                    }
                 }
-            }
-        }
-
-        // All the effects on items that are not transferred
-        for (const item of this.actor.items) {
-            for (const ae of item.effects.filter((ae) => ae.transfer === false && ae.duration.seconds)) {
-                ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
-                for (const target of ae.flags.target) {
-                    const item = fromUuidSync(target);
-                    ae.flags.targetDisplay = `${item?.name} [${item.system.XMLID}]`;
-                }
-
                 context.effects.push(ae);
             }
-        }
 
-        return context;
+            // All the effects on items that are not transferred
+            // for (const item of this.actor.items) {
+            //     for (const ae of item.effects.filter((ae) => ae.transfer === false && ae.duration.seconds)) {
+            //         ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
+            //         for (const target of ae.flags.target) {
+            //             const item = fromUuidSync(target);
+            //             ae.flags.targetDisplay = `${item?.name} [${item.system.XMLID}]`;
+            //         }
+
+            //         context.effects.push(ae);
+            //     }
+            // }
+
+            return context;
+        } catch (e) {
+            console.error(e);
+        }
     }
 }
