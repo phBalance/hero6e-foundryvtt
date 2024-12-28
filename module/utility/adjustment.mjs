@@ -819,6 +819,10 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
     )) {
         _ap += ae.flags.adjustmentActivePoints;
         const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;
+        if (isNaN(_targetValue)) {
+            ui.notifications.error("recalcEffectBasedOnTotalApForXmlid failed", activeEffect);
+            return;
+        }
 
         if (parseInt(ae.changes[0].value) !== _targetValue) {
             const msg = `updating AE change value from ${ae.changes[0].value} to ${_targetValue} because sumAP=${_ap} and costPerActivePoint=${costPerActivePoint}.  ${_ap}/${costPerActivePoint} = ${_ap / costPerActivePoint}.  There is already a ${_value} value from other effects.`;
