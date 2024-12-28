@@ -500,7 +500,7 @@ export async function performAdjustment(
     // Positive Adjustment Powers have maximum effects.
     const maximumEffectActivePoints = determineMaxAdjustment(attackItem);
     let totalActivePointAffectedDifference = 0;
-    //let totalPointsDifference = 0;
+    let totalPointsDifference = 0;
     let thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
     let thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing = 0;
     let isEffectFinished = false;
@@ -569,7 +569,7 @@ export async function performAdjustment(
                 thisAttackActivePointsEffect - activeEffect.flags.adjustmentActivePoints;
 
             totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
-            //totalPointsDifference = activeEffect.changes[0].value;
+            totalPointsDifference = activeEffect.changes[0].value;
 
             // TODO: Healing
         }
@@ -589,7 +589,8 @@ export async function performAdjustment(
             activeEffect.changes.push(change);
 
             thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
-            totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
+            //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
+            totalPointsDifference = activeEffect.changes[0].value;
         }
 
         // Add new activeEffect
@@ -784,29 +785,39 @@ export async function performAdjustment(
 
     await Promise.all(promises);
 
-    // This does not work for items, perhaps change the key to match xmlid
     // Use effects to get items?
     const _key = _createAEChangeBlock(potentialCharacteristic, targetSystem).key;
-    const totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects).reduce(
-        (accum, curr) =>
-            accum +
-            curr.changes.reduce(
-                (a2, c2) =>
-                    a2 +
-                    (c2.key === _key &&
-                    curr.flags.XMLID === activeEffect.flags.XMLID &&
-                    curr.flags.type === "adjustment"
-                        ? parseInt(c2.value)
-                        : 0),
-                0,
-            ),
-        0,
-    );
+    // const totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects).reduce(
+    //     (accum, curr) =>
+    //         accum +
+    //         curr.changes.reduce(
+    //             (a2, c2) =>
+    //                 a2 +
+    //                 (c2.key === _key &&
+    //                 curr.flags.XMLID === activeEffect.flags.XMLID &&
+    //                 curr.flags.type === "adjustment" &&
+    //                 curr.flags.key === activeEffect.flags.key
+    //                     ? parseInt(c2.value)
+    //                     : 0),
+    //             0,
+    //         ),
+    //     0,
+    // );
+
+    const totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects)
+        .filter(
+            (ae) =>
+                ae.changes.find((c) => c.key === _key) &&
+                ae.flags.XMLID === activeEffect.flags.XMLID &&
+                ae.flags.type === "adjustment" &&
+                ae.flags.key === activeEffect.flags.key,
+        )
+        .reduce((accum, curr) => accum + curr.flags.adjustmentActivePoints, 0);
 
     return _generateAdjustmentChatCard(
         attackItem,
         thisAttackActivePointsEffect,
-        totalActivePointAffectedDifference,
+        totalPointsDifference, //totalActivePointAffectedDifference,
         totalEffectActivePointsForXmlid,
         thisAttackActivePointAdjustmentNotAppliedDueToMax,
         thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,
