@@ -48,7 +48,7 @@ function isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item) {
 }
 
 function addExtraDcs(item, dcObj, halve5eKillingAttacks) {
-    const extraDcItems = item.actor.items.filter((item) => item.system.XMLID === "EXTRADC");
+    const extraDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
     let partialExtraDcs = 0; // Since we consider all EXTRADCs as 1 sum we need to count fractions for killing attacks
 
     extraDcItems.forEach((extraDcItem) => {
@@ -88,6 +88,21 @@ function calculateBaseDcFromItem(item, options) {
         const str = effectiveStrength(item, options);
         rawItemBaseDc = Math.floor(str / 5);
         effectiveItemName = "STR";
+
+        // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
+        // strength for damage purposes.
+        if (str >= 3) {
+            const hthAttacks = item.actor?.items.filter((item) => item.system.XMLID === "HANDTOHANDATTACK") || [];
+            hthAttacks.forEach((hthAttack) => {
+                // This adds into strength
+                // PH: FIXME: Not sure this is right... should look at dice, DC
+                // PH: FIXME: Full tests have a problem (as normal characters would too) that the HA Damage is added after this martial maneuver so activePointsDc is always NaN for this calculation.
+                // const hthDc = Math.floor(hthAttack.system.activePointsDc / 5);
+                const hthDc = parseInt(hthAttack.system.LEVELS || 0);
+                rawItemBaseDc += hthDc;
+                effectiveItemName = "STR with HA damage added";
+            });
+        }
     } else if (["maneuver", "martialart"].includes(item.type)) {
         rawItemBaseDc = parseInt(item.system.DC);
     } else {
@@ -122,10 +137,6 @@ function calculateBaseDcFromItem(item, options) {
     // 5e martial arts EXTRADCs are baseDCs
     if (item.is5e && item.type === "martialart" && !item.system.USEWEAPON) {
         addExtraDcs(item, baseDc, true);
-    }
-
-    // PH: FIXME: For hand to hand attacks the strength bonus counts aattackStrengths base damage.
-    if (item.system.XMLID === "HANDTOHANDATTACK") {
     }
 
     return {
@@ -178,12 +189,7 @@ export function calculateDcFromItem(item, options) {
         });
     }
 
-    // PH: FIXME: I don't think that this is right since it can be the base DC for martials and haymaker
-    // if (item.type === "martialart" || (item.type === "maneuver" && item.name === "Strike")) {
-    //     // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
-    //     itemBaseDc = attackStrength(item, options);
-    // }
-    // Add in STR
+    // Add in STR when appropriate
     if (item.system.usesStrength && !isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
         // STRMINIMUM
         // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
@@ -283,18 +289,18 @@ export function calculateDcFromItem(item, options) {
         }
     }
 
-    // ActiveEffects
-    if (item.actor) {
-        for (const ae of item.actor.appliedEffects.filter((o) => !o.disabled && o.flags?.target === item.uuid)) {
-            for (const change of ae.changes.filter((o) => o.key === "system.value" && o.value != 0 && o.mode === 2)) {
-                const _value = parseInt(change.value);
-                addedDc.dc += _value;
-                addedDc.tags.push({
-                    value: `${_value.signedString()}DC`,
-                    name: ae.name,
-                    title: `${_value.signedString()}DC`,
-                });
-            }
+    // Applied effects
+    for (const ae of item.actor?.appliedEffects.filter((ae) => !ae.disabled && ae.flags?.target === item.uuid) || []) {
+        for (const change of ae.changes.filter(
+            (change) => change.key === "system.value" && change.value !== 0 && change.mode === 2,
+        )) {
+            const _value = parseInt(change.value);
+            addedDc.dc += _value;
+            addedDc.tags.push({
+                value: `${_value.signedString()}DC`,
+                name: ae.name,
+                title: `${_value.signedString()}DC`,
+            });
         }
     }
 
@@ -325,27 +331,24 @@ export function calculateDcFromItem(item, options) {
     }
 
     // WEAPON MASTER (also check that item is present as a custom ADDER)
-    if (item.actor) {
-        const weaponMaster = item.actor.items.find((item) => item.system.XMLID === "WEAPON_MASTER");
-        if (weaponMaster) {
-            const weaponMatch = (weaponMaster.system.ADDER || []).find(
-                (o) => o.XMLID === "ADDER" && o.ALIAS === item.name,
-            );
-            if (weaponMatch) {
-                const dcPlus = 3 * Math.max(1, parseInt(weaponMaster.system.LEVELS) || 1);
-                addedDc.dc += dcPlus;
-                addedDc.tags.push({
-                    value: `${dcPlus}DC`,
-                    name: "WeaponMaster",
-                    title: `${dcPlus.signedString()}DC`,
-                });
-            }
+    const weaponMaster = item.actor?.items.find((item) => item.system.XMLID === "WEAPON_MASTER");
+    if (weaponMaster) {
+        const weaponMatch = (weaponMaster.system.ADDER || []).find((o) => o.XMLID === "ADDER" && o.ALIAS === item.name);
+        if (weaponMatch) {
+            const dcPlus = 3 * Math.max(1, parseInt(weaponMaster.system.LEVELS) || 1);
+            addedDc.dc += dcPlus;
+            addedDc.tags.push({
+                value: `${dcPlus}DC`,
+                name: "WeaponMaster",
+                title: `${dcPlus.signedString()}DC`,
+            });
         }
     }
 
     // DEADLYBLOW
     // Only check if it has been turned off
     // FIXME: This function should not be changing the item.system. Please fix me by moving to something in the user flow.
+    // PH: FIXME: this should work for all deadlyBlows
     const deadlyBlow = item.actor?.items.find((o) => o.system.XMLID === "DEADLYBLOW");
     if (deadlyBlow) {
         item.system.conditionalAttacks ??= {};
@@ -572,7 +575,7 @@ export function calculateDicePartsForItem(item, options) {
     // Get base DCs (with a breakout for actual fundamental DC contribution to the extra DCs) and added DCs
     // Figure extra DCs based on base DCs
     // Figure out how many extra dice are caused by the extra DCs
-    const { itemBaseDc, dc: totalDc } = calculateDcFromItem(item, options);
+    const { itemBaseDc, dc: totalDc, tags } = calculateDcFromItem(item, options);
     const extraBaseAndAddedDcs = totalDc - itemBaseDc;
     const extraDcsDiceParts = calculateDicePartsFromDcForItem(item, extraBaseAndAddedDcs);
 
@@ -589,28 +592,31 @@ export function calculateDicePartsForItem(item, options) {
     // Add the basic dice with the added dice
     const useDieMinusOne = !!item.findModsByXmlid("MINUSONEPIP");
     const sum = addDiceParts(baseDiceParts, extraDcsDiceParts, useDieMinusOne);
-    return sum;
+    return {
+        diceParts: sum,
+        tags,
+    };
 }
 
 export function getDiceFormulaFromItem(item, options) {
     // PH: FIXME: Need to stop looking at end returned from other functions.
-    const formulaParts = calculateDicePartsForItem(item, options);
+    const { diceParts } = calculateDicePartsForItem(item, options);
 
     return `${
-        formulaParts.d6Count + formulaParts.d6Less1DieCount + formulaParts.halfDieCount > 0
+        diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount > 0
             ? `${
-                  formulaParts.d6Count + formulaParts.d6Less1DieCount
-                      ? `${formulaParts.d6Count + formulaParts.d6Less1DieCount}`
+                  diceParts.d6Count + diceParts.d6Less1DieCount
+                      ? `${diceParts.d6Count + diceParts.d6Less1DieCount}`
                       : ""
-              }${formulaParts.halfDieCount ? `½` : ""}d6`
+              }${diceParts.halfDieCount ? `½` : ""}d6`
             : ""
     }${
-        formulaParts.constant
-            ? formulaParts.d6Count + formulaParts.d6Less1DieCount + formulaParts.halfDieCount > 0
+        diceParts.constant
+            ? diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount > 0
                 ? "+1"
                 : "1"
-            : formulaParts.d6Count + formulaParts.d6Less1DieCount + formulaParts.halfDieCount > 0
-              ? `${formulaParts.d6Less1DieCount > 0 ? "-1" : ""}`
+            : diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount > 0
+              ? `${diceParts.d6Less1DieCount > 0 ? "-1" : ""}`
               : "0"
     }`;
 }

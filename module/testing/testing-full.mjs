@@ -1753,7 +1753,7 @@ export function registerFullTests(quench) {
                 });
             });
 
-            describe("5e - base vs added DCs", function () {
+            describe.only("5e - base vs added DCs", function () {
                 const contents = `
                 <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -1877,15 +1877,6 @@ export function registerFullTests(quench) {
                             <NOTES />
                         </ADDER>
                         </POWER>
-                        <POWER XMLID="HANDTOHANDATTACK" ID="1735338176312" BASECOST="0.0" LEVELS="5" ALIAS="Hand-To-Hand Attack" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <ADDER XMLID="PLUSONEHALFDIE" ID="1735338328419" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
-                            <NOTES />
-                        </ADDER>
-                        <MODIFIER XMLID="HANDTOHANDATTACK" ID="1735338317348" BASECOST="-0.5" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES />
-                        </MODIFIER>
-                        </POWER>
                     </POWERS>
                     <DISADVANTAGES />
                     <EQUIPMENT />
@@ -1914,13 +1905,13 @@ export function registerFullTests(quench) {
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.system.points, 322);
+                    assert.equal(actor.system.points, 303);
                 });
                 it("should match the cost breakdown of HD", function () {
                     assert.deepEqual(actor.system.pointsDetail, {
                         characteristics: 60,
                         martialart: 65,
-                        power: 79,
+                        power: 60,
                         skill: 88,
                         talent: 30,
                     });
@@ -1942,7 +1933,6 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for Killing Strike", function () {
-                        // PH: If we view strength as the base item.
                         // Added DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
                         // Base: STR +14 DC (STR 70) => +14 DC  =>  14DC
                         // Base + Added = 7C + 14DC (doubling rule clamps the strength added DC) = 14DC. Killing strike is 15AP/die => 4½d6
@@ -1971,12 +1961,234 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for Sacrifice Strike", function () {
-                        // Base: Sacrifice Strike 4DC, EXTRADC +11DC =>  15DC
-                        // Added DCs: STR +14 DC (STR 70) => +14 DC
-                        // Base + Added = 15DC + 14DC (doubling rule does not apply since strength is applied to base weapon) = 29DC. Sacrifice Strike is 5AP/die => 29d6
+                        // Base DCs:  STR +14 DC (STR 70),  EXTRADC +11DC =>  25DC
+                        // Added: Sacrifice Strike 4DC =>  4DC
+                        // Base + Added = 15DC + 4DC (doubling rule does not apply) = 29DC. Sacrifice Strike is 5AP/die => 29d6
                         assert.equal(
                             actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike").system.damage,
                             "29d6",
+                        );
+                    });
+                });
+
+                describe("Martial Arts with CSLs", function () {
+                    // PH: FIXME: TBD - repeat the above with CSLs?
+                    // PH: FIXME: TBD - repeat above but with HTH levels
+                });
+            });
+
+            describe.only("5e - base vs added DCs with HTH attacks", function () {
+                const contents = `
+                    <?xml version="1.0" encoding="UTF-16"?>
+                    <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                    <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
+                    <CHARACTER_INFO CHARACTER_NAME="base vs added DCs Test" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                        <BACKGROUND />
+                        <PERSONALITY />
+                        <QUOTE />1
+                        <TACTICS />
+                        <CAMPAIGN_USE />
+                        <APPEARANCE />
+                        <NOTES1 />
+                        <NOTES2 />
+                        <NOTES3 />
+                        <NOTES4 />
+                        <NOTES5 />
+                    </CHARACTER_INFO>
+                    <CHARACTERISTICS>
+                        <STR XMLID="STR" ID="1735337504125" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STR>
+                        <DEX XMLID="DEX" ID="1735337503912" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DEX>
+                        <CON XMLID="CON" ID="1735337503964" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </CON>
+                        <BODY XMLID="BODY" ID="1735337504092" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </BODY>
+                        <INT XMLID="INT" ID="1735337504091" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </INT>
+                        <EGO XMLID="EGO" ID="1735337504562" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </EGO>
+                        <PRE XMLID="PRE" ID="1735337504596" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PRE>
+                        <COM XMLID="COM" ID="1735337504526" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </COM>
+                        <PD XMLID="PD" ID="1735337504806" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PD>
+                        <ED XMLID="ED" ID="1735337503860" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </ED>
+                        <SPD XMLID="SPD" ID="1735337503827" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SPD>
+                        <REC XMLID="REC" ID="1735337504790" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </REC>
+                        <END XMLID="END" ID="1735337504217" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </END>
+                        <STUN XMLID="STUN" ID="1735337503922" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STUN>
+                        <RUNNING XMLID="RUNNING" ID="1735337503998" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </RUNNING>
+                        <SWIMMING XMLID="SWIMMING" ID="1735337504502" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SWIMMING>
+                        <LEAPING XMLID="LEAPING" ID="1735337504789" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </LEAPING>
+                    </CHARACTERISTICS>
+                    <SKILLS />
+                    <PERKS />
+                    <TALENTS />
+                    <MARTIALARTS>
+                        <MANEUVER XMLID="MANEUVER" ID="1735337587944" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="4" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
+                        <NOTES />
+                        </MANEUVER>
+                        <MANEUVER XMLID="MANEUVER" ID="1735337623705" BASECOST="4.0" LEVELS="0" ALIAS="Martial Strike" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Strike" OCV="+0" DCV="+2" DC="2" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="20" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                        <NOTES />
+                        </MANEUVER>
+                        <MANEUVER XMLID="MANEUVER" ID="1735337570473" BASECOST="4.0" LEVELS="0" ALIAS="Nerve Strike" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Nerve Strike" OCV="-1" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NNDDC]" ADDSTR="No" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[NNDDC]">
+                        <NOTES />
+                        </MANEUVER>
+                        <MANEUVER XMLID="MANEUVER" ID="1735337662832" BASECOST="4.0" LEVELS="0" ALIAS="Martial Flash" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Hearing" CATEGORY="Hand To Hand" DISPLAY="Martial Flash" OCV="-1" DCV="-1" DC="4" PHASE="1/2" EFFECT="[FLASHDC]" ADDSTR="No" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[FLASHDC]">
+                        <NOTES />
+                        </MANEUVER>
+                        <MANEUVER XMLID="MANEUVER" ID="1735337713693" BASECOST="5.0" LEVELS="0" ALIAS="Sacrifice Strike" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Sacrifice Strike" OCV="+1" DCV="-2" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                        <NOTES />
+                        </MANEUVER>
+                        <MANEUVER XMLID="MANEUVER" ID="1735422272832" BASECOST="4.0" LEVELS="0" ALIAS="Martial Strike" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Strike" OCV="+0" DCV="+2" DC="2" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="20" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                        <NOTES />
+                        </MANEUVER>
+                    </MARTIALARTS>
+                    <POWERS>
+                        <POWER XMLID="HKA" ID="1735338119256" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA1" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="PLUSONEHALFDIE" ID="1735341333479" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </POWER>
+                        <POWER XMLID="HKA" ID="1735338133849" BASECOST="0.0" LEVELS="0" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="MINUSONEPIP" ID="1735341346922" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </POWER>
+                        <POWER XMLID="HKA" ID="1735338147368" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA3" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="MINUSONEPIP" ID="1735341355413" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </POWER>
+                        <POWER XMLID="HKA" ID="1735504607262" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Hand-To-Hand" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA3" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="PLUSONEPIP" ID="1735504900458" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </POWER>
+                        <POWER XMLID="HANDTOHANDATTACK" ID="1735510411182" BASECOST="0.0" LEVELS="14" ALIAS="Hand-To-Hand Attack" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <MODIFIER XMLID="HANDTOHANDATTACK" ID="1735510801302" BASECOST="-0.5" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        </POWER>
+                    </POWERS>
+                    <DISADVANTAGES />
+                    <EQUIPMENT />
+                    <RULES name="Default" path="H:\TableTopGames\Hero System\HD Characters\General_CampaignRules.hdr" BASEPOINTS="200" DISADPOINTS="150" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="90" ATTACKAPMAXRESPONSE="0" DEFENSEAPMAXVALUE="90" DEFENSEAPMAXRESPONSE="0" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="0" AVAILDISADPOINTSRESPONSE="0" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="Yes" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
+                    </CHARACTER>
+                `;
+
+                let actor;
+
+                before(async () => {
+                    const previousSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+
+                    await actor.uploadFromXml(contents);
+
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                });
+
+                // Verify the cost of powers
+                it("should match the overall cost of HD", function () {
+                    assert.equal(actor.system.points, 167);
+                });
+                it("should match the cost breakdown of HD", function () {
+                    assert.deepEqual(actor.system.pointsDetail, {
+                        characteristics: 0,
+                        martialart: 25,
+                        power: 142,
+                    });
+                });
+
+                describe("MANEUVER with Velocity", function () {
+                    // PH: FIXME: TBD
+                    // it("should correctly allow movement DCs to exceed the base DC doubling rule", function () {
+                    //     assert.equal(xxx);
+                    // });
+                });
+
+                describe("Martial Arts", function () {
+                    it("should have the correct damage for Nerve Strike", function () {
+                        // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
+                        // Added DCs: Does not use STR => +0 DC
+                        // Base + Added = 4DC. Nerve Strike is an NND (10AP/die) => 2d6
+                        assert.equal(actor.items.find((o) => o.system.ALIAS === "Nerve Strike").system.damage, "2d6");
+                    });
+
+                    it("should have the correct damage for Killing Strike", function () {
+                        // Base: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
+                        // Added DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
+                        // Base + Added = 2C + 16DC (doubling rule clamps the strength added DC) = 4DC. Killing strike is 15AP/die => 1d6+1
+                        assert.equal(
+                            actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage,
+                            "1d6+1K",
+                        );
+                    });
+
+                    it("should have the correct damage for Martial Strike", function () {
+                        assert.equal(
+                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                            // Added DCs: Martial Strike 2DC =>  +2 DC
+                            // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
+                            actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage,
+                            "18d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Martial Flash", function () {
+                        // Base DCs: Martial Flash 4DC => 4DC.
+                        // Added DCs: Does not use STR => +0 DC
+                        // Base + Added = 4DC. Martial Flash is a 5AP/die => 4d6
+                        assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Flash").system.damage, "4d6");
+                    });
+
+                    it("should have the correct damage for Sacrifice Strike", function () {
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                        // Added: Sacrifice Strike 4DC =>  4DC
+                        // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20DC. Sacrifice Strike is 5AP/die => 20d6
+                        assert.equal(
+                            actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike").system.damage,
+                            "20d6",
                         );
                     });
                 });

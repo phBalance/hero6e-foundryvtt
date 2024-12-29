@@ -11,11 +11,7 @@ import {
     calculateDicePartsForItem,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
-import {
-    getRoundedDownDistanceInSystemUnits,
-    getRoundedUpDistanceInSystemUnits,
-    getSystemDisplayUnits,
-} from "../utility/units.mjs";
+import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
@@ -1544,11 +1540,10 @@ export async function _onRollDamage(event) {
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
-    const { dc, tags } = calculateDcFromItem(effectiveItem, {
+    const { diceParts, tags } = calculateDicePartsForItem(effectiveItem, {
         isAction: true,
         ...toHitData,
     });
-    const formulaParts = calculateDicePartsFromDcForItem(effectiveItem, dc);
 
     const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations;
 
@@ -1561,10 +1556,10 @@ export async function _onRollDamage(event) {
         .makeEntangleRoll(!!entangle)
         .makeEffectRoll(isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item))
         .addStunMultiplier(increasedMultiplierLevels - decreasedMultiplierLevels)
-        .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
-        .addHalfDice(formulaParts.halfDieCount >= 1 ? formulaParts.halfDieCount : 0)
-        .addDiceMinus1(formulaParts.d6Less1DieCount >= 1 ? formulaParts.d6Less1DieCount : 0)
-        .addNumber(formulaParts.constant)
+        .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
+        .addHalfDice(diceParts.halfDieCount >= 1 ? diceParts.halfDieCount : 0)
+        .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
+        .addNumber(diceParts.constant)
         .modifyToStandardEffect(useStandardEffect)
         .modifyToNoBody(
             item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
@@ -2559,7 +2554,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
             const actor = absorptionItem.actor;
             let maxAbsorption;
             if (actor.system.is5e) {
-                const diceParts = calculateDicePartsForItem(absorptionItem, {});
+                const { diceParts } = calculateDicePartsForItem(absorptionItem, {});
 
                 // Absorption allowed based on a roll with the usual requirements
                 const absorptionRoller = new HeroRoller()
