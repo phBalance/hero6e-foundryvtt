@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 
@@ -6090,6 +6091,12 @@ export function registerUploadTests(quench) {
                     let item;
 
                     before(async () => {
+                        const previousDoubleDamageLimitSetting = await game.settings.set(
+                            HEROSYS.module,
+                            "DoubleDamageLimit",
+                        );
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6110,6 +6117,8 @@ export function registerUploadTests(quench) {
                         );
                         await item._postUpload();
                         actor.items.set(item.system.XMLID, item);
+
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -6142,6 +6151,12 @@ export function registerUploadTests(quench) {
                     let item;
 
                     before(async () => {
+                        const previousDoubleDamageLimitSetting = await game.settings.set(
+                            HEROSYS.module,
+                            "DoubleDamageLimit",
+                        );
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6161,6 +6176,8 @@ export function registerUploadTests(quench) {
                         );
                         await item._postUpload();
                         actor.items.set(item.system.XMLID, item);
+
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -6197,6 +6214,12 @@ export function registerUploadTests(quench) {
                     let item;
 
                     before(async () => {
+                        const previousDoubleDamageLimitSetting = await game.settings.set(
+                            HEROSYS.module,
+                            "DoubleDamageLimit",
+                        );
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6216,6 +6239,8 @@ export function registerUploadTests(quench) {
                         );
                         await item._postUpload();
                         actor.items.set(item.system.XMLID, item);
+
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -6252,6 +6277,12 @@ export function registerUploadTests(quench) {
                     let item;
 
                     before(async () => {
+                        const previousDoubleDamageLimitSetting = await game.settings.set(
+                            HEROSYS.module,
+                            "DoubleDamageLimit",
+                        );
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6272,6 +6303,8 @@ export function registerUploadTests(quench) {
                         );
                         await item._postUpload();
                         actor.items.set(item.system.XMLID, item);
+
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
