@@ -235,7 +235,7 @@ function _findExistingMatchingEffect(item, potentialCharacteristic, targetSystem
         (effect) =>
             effect.origin === item.uuid &&
             effect.flags.createTime === game.time.worldTime &&
-            effect.changes.find((c) => c.key !== _change.key) &&
+            !effect.changes.find((c) => c.key === _change.key) &&
             effect.flags.initialCostPerActivePoint === costPerActivePoint,
         //effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic), //&&
         //parseInt(effect.changes?.[0].value || 0) >= 0,
@@ -557,10 +557,20 @@ export async function performAdjustment(
             targetActor,
             targetActor?.is5e,
         );
+
+        // Halve AP, min 1
+        // GM_Champion (he/him) (UTC-5) — Dec 28 2024 https://discord.com/channels/609528652878839828/609529601600782378/1322714156025122878
+        // Minimum 1 character point.
+        // There is no effect until 40, but you track the points drained until they reach 40.
+        // It's like a measuring cup - the drain takes out a little water at a time, which eventually adds up to one full mark on the cup.
         if (_multiplier !== 1) {
             console.log(`Defense multiplier ${_multiplier}`);
+            if (thisAttackActivePointsEffect > 0) {
+                thisAttackActivePointsEffect = Math.max(1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
+            } else {
+                thisAttackActivePointsEffect = Math.min(-1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
+            }
         }
-        thisAttackActivePointsEffect = Math.trunc(thisAttackActivePointsEffect / _multiplier);
 
         // Positive Adjustment
         if (thisAttackActivePointsEffect > 0) {
@@ -625,10 +635,10 @@ export async function performAdjustment(
             updateEffectName(activeEffect);
             const createdEffects = await targetSystem.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
 
+            await recalcEffectBasedOnTotalApForXmlid(createdEffects[0]);
+
             updateEffectName(createdEffects[0]);
             await createdEffects[0].update({ name: createdEffects[0].name });
-
-            await recalcEffectBasedOnTotalApForXmlid(createdEffects[0]);
         } else if (activeEffect.flags.adjustmentActivePoints !== 0) {
             // Were likely adding a second change row
             updateEffectName(activeEffect);
@@ -894,36 +904,33 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
                     console.error(msg);
                     //debugger;
                 }
-                console.log();
+
                 const previousChanges = foundry.utils.deepClone(ae.changes);
                 ae.changes[0].value = _targetValue;
-                if (_targetValue === 0 && !CONFIG.debug.adjustmentFadeKeep) {
-                    await ae.delete();
-                    console.log(`${ae.name} deleted`);
-                } else {
-                    const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
-                    const startingActorMax = foundry.utils.getProperty(
-                        targetActor,
-                        `system.characteristics.${char}.max`,
-                    );
+                // if (_targetValue === 0 && !CONFIG.debug.adjustmentFadeKeep) {
+                //     await ae.delete();
+                //     console.log(`${ae.name} deleted`);
+                // } else {
+                const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
+                const startingActorMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
 
-                    updateEffectName(ae);
-                    await ae.update({ changes: ae.changes });
+                updateEffectName(ae);
+                await ae.update({ changes: ae.changes });
 
-                    // Apparently we sometimes need to delay to let all the async's catch up
-                    const delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
-                    for (let i = 0; i < 50; i++) {
-                        if (
-                            foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`) !==
-                            startingActorMax
-                        )
-                            break;
-                        await delay();
-                        console.log(`recalc delay ${i}. Waiting for system.characteristics.${char}.max to change`);
-                    }
-
-                    await updateCharacteristicValue(ae, { previousChanges });
+                // Apparently we sometimes need to delay to let all the async's catch up
+                const delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
+                for (let i = 0; i < 50; i++) {
+                    if (
+                        foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`) !==
+                        startingActorMax
+                    )
+                        break;
+                    await delay();
+                    console.log(`recalc delay ${i}. Waiting for system.characteristics.${char}.max to change`);
                 }
+
+                await updateCharacteristicValue(ae, { previousChanges });
+                //}
             }
 
             _value += _targetValue;
@@ -998,7 +1005,10 @@ function updateEffectName(activeEffect) {
     let _array = [];
     for (const c of activeEffect.changes) {
         const _name = c.key.match(/([a-z]+)\.max/)?.[1] || "?";
-        const _value = (parseInt(activeEffect.changes?.[0].value) || 0).signedString();
+        let _value = (parseInt(activeEffect.changes?.[0].value) || 0).signedString();
+        if (_value === "+0" && activeEffect.flags.adjustmentActivePoints < 0) {
+            _value = "-0";
+        }
         const valItem = _array.find((o) => o.value === _value);
         if (valItem) {
             valItem.name += `/${_name.toUpperCase()}`;
