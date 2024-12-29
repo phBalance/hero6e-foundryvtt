@@ -6127,8 +6127,9 @@ export function registerUploadTests(quench) {
                     it("end", function () {
                         assert.equal(item.system.end, 0);
                     });
+
                     it("damage", function () {
-                        assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
+                        assert.equal(item.system.damage, "6d6");
                     });
                 });
 
@@ -6181,6 +6182,10 @@ export function registerUploadTests(quench) {
                     it("end", function () {
                         assert.equal(item.system.end, 0);
                     });
+
+                    it("damage", function () {
+                        assert.equal(item.system.damage, "4d6");
+                    });
                 });
 
                 describe("Martial Disarm", async function () {
@@ -6232,58 +6237,62 @@ export function registerUploadTests(quench) {
                     it("end", function () {
                         assert.equal(item.system.end, 0);
                     });
-                });
-            });
 
-            describe("Nerve Strike", async function () {
-                const contents = `
+                    it("damage", function () {
+                        assert.equal(item.system.damage, "4d6");
+                    });
+                });
+
+                describe("Nerve Strike", async function () {
+                    const contents = `
                     <MANEUVER XMLID="MANEUVER" ID="1717892734727" BASECOST="4.0" LEVELS="0" ALIAS="Nerve Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Nerve Strike" OCV="-1" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NNDDC]" ADDSTR="No" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[NNDDC]">
                         <NOTES />
                     </MANEUVER>
                 `;
-                let item;
+                    let item;
 
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    actor.system.characteristics.dex.value = 15;
-                    await actor._postUpload();
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        actor.system.characteristics.dex.value = 15;
+                        await actor._postUpload();
 
-                    item = await new HeroSystem6eItem(
-                        {
-                            ...HeroSystem6eItem.itemDataFromXml(contents, actor),
-                            type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
-                        },
-                        { parent: actor },
-                    );
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
-                });
+                        item = await new HeroSystem6eItem(
+                            {
+                                ...HeroSystem6eItem.itemDataFromXml(contents, actor),
+                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                            },
+                            { parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
 
-                it("description", function () {
-                    assert.equal(item.system.description, "1/2 Phase, -1 OCV, +1 DCV, 2d6 NND");
-                });
+                    it("description", function () {
+                        assert.equal(item.system.description, "1/2 Phase, -1 OCV, +1 DCV, 2d6 NND");
+                    });
 
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 4);
-                });
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 4);
+                    });
 
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 4);
-                });
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 4);
+                    });
 
-                it("dice", function () {
-                    assert.equal(item.system.damage, "2d6");
-                });
+                    it("damage", function () {
+                        assert.equal(item.system.damage, "2d6");
+                    });
 
-                it("end", function () {
-                    assert.equal(item.system.end, 0);
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
                 });
             });
 
