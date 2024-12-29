@@ -4210,32 +4210,10 @@ export class HeroSystem6eItem extends Item {
         let name = this.system.NAME || description || this.system.name || this.name;
         this.name = name;
 
-        const dc = parseInt(this.system.DC);
-        let levels = parseInt(this.system.value) || dc || 0;
         const input = this.system.INPUT;
 
         const ocv = parseInt(this.system.OCV) || 0;
         const dcv = parseInt(this.system.DCV) || 0;
-        // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
-        if (this.system.XMLID == "TELEKINESIS") {
-            if (
-                this.actor?.items &&
-                this.actor.items.find(
-                    (o) => o.system.XMLID == "WEAPON_ELEMENT" && o.system.ADDER?.find((o) => o.XMLID == "BAREHAND"),
-                )
-            ) {
-                const EXTRADC = this.actor.items.find(
-                    (o) => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1,
-                );
-                // Extract +2 HTH Damage Class(es)
-                if (EXTRADC) {
-                    let match = EXTRADC.system.ALIAS.match(/\+\d+/);
-                    if (match) {
-                        levels += parseInt(match[0]) * 5; // Below we take these levels (as STR) and determine dice
-                    }
-                }
-            }
-        }
 
         this.system.subType = "attack";
         this.system.class = input === "ED" ? "energy" : "physical";
@@ -4254,7 +4232,9 @@ export class HeroSystem6eItem extends Item {
 
         // Maneuvers and martial arts with FLASHDC, NND, BLOCK, DODGE do not use STR
         if (["maneuver", "martialart"].includes(this.type)) {
-            if (
+            if (this.system.ADDSTR != undefined) {
+                this.system.usesStrength = this.system.ADDSTR;
+            } else if (
                 this.system.EFFECT &&
                 (this.system.EFFECT.toLowerCase().indexOf("block") > -1 ||
                     this.system.EFFECT.toLowerCase().indexOf("dodge") > -1 ||

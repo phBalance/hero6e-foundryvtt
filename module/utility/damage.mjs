@@ -22,6 +22,7 @@
 // Transdimensional, Trigger, Uncontrolled, Usable As Attack,
 // Variable Advantage, and Variable Special Effects.
 
+import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
 // PH: TODO: see if we can do anything about this - add to other methods like it?
@@ -32,23 +33,37 @@ export function convertToDiceParts(value) {
     return { dice, halfDice, plus1 };
 }
 
-function addExtraDcs(item, dcObj) {
+function effectiveStrength(item, options) {
+    return parseInt(
+        options?.effectivestr != undefined ? options?.effectivestr : item.actor?.system.characteristics.str.value || 0,
+    );
+}
+
+function isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item) {
+    return (
+        !item.system.killing &&
+        item.system.usesStrength &&
+        (item.type === "martialart" || (item.type === "maneuver" && item.name === "Strike"))
+    );
+}
+
+function addExtraDcs(item, dcObj, halve5eKillingAttacks) {
     const extraDcItems = item.actor.items.filter((item) => item.system.XMLID === "EXTRADC");
-    let partialExtraDcs = 0; // Since we consider all EXTRADCs as 1 sum
+    let partialExtraDcs = 0; // Since we consider all EXTRADCs as 1 sum we need to count fractions for killing attacks
 
     extraDcItems.forEach((extraDcItem) => {
-        let extraDcLevels = parseInt(extraDcItem.system.LEVELS || 0);
+        let extraDcLevels = parseInt(extraDcItem.system.LEVELS || 0) + partialExtraDcs;
 
-        // 5E extraDCLevels are halved for killing attacks
-        if (item.is5e && item.system.killing) {
-            extraDcLevels = Math.floor(extraDcLevels / 2) + partialExtraDcs;
+        // 5E extraDCLevels are halved for unarmed killing attacks
+        if (item.is5e && item.system.killing && halve5eKillingAttacks) {
             partialExtraDcs = (partialExtraDcs + (extraDcLevels % 2)) % 2;
+            extraDcLevels = Math.floor(extraDcLevels / 2);
         }
 
         if (extraDcLevels > 0) {
             dcObj.dc += extraDcLevels;
             dcObj.tags.push({
-                value: `${extraDcLevels}DC`,
+                value: `${extraDcLevels.signedString()}DC`,
                 name: extraDcItem.name.replace(/\+\d+ HTH/, "").trim(),
                 title: `${extraDcLevels.signedString()}DC`,
             });
@@ -64,15 +79,30 @@ function addExtraDcs(item, dcObj) {
  * @returns
  */
 function calculateBaseDcFromItem(item, options) {
-    // MartialArts & Maneuvers have DC. Others have active points with some advantages that contribute to DC.
-    // PH: FIXME: Either everything has a DC function or nothing has one.
-    let itemBaseDc =
-        typeof item.baseInfo?.dc === "function"
-            ? item.baseInfo.dc(item, options)
-            : parseInt(item.system.DC) || Math.floor(item.system.activePointsDc / 5);
+    let rawItemBaseDc = 0;
+    let effectiveItemName = item.name;
 
-    // FRed pg. 406: 5e maneuver/martial arts DCs are halved for killing attacks this applies to the base DC
+    // MartialArts & Maneuvers have DC or basic STR. Others have active points with some advantages that define their DC.
+    if (isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
+        // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
+        const str = effectiveStrength(item, options);
+        rawItemBaseDc = Math.floor(str / 5);
+        effectiveItemName = "STR";
+    } else if (["maneuver", "martialart"].includes(item.type)) {
+        rawItemBaseDc = parseInt(item.system.DC);
+    } else {
+        // PH: FIXME: Either everything has a DC function or nothing has one.
+        if (typeof item.baseInfo?.dc === "function") {
+            rawItemBaseDc = item.baseInfo.dc(item, options);
+        } else {
+            rawItemBaseDc = Math.floor(item.system.activePointsDc / 5);
+        }
+    }
+
+    // FRed pg. 406: 5e maneuver/martial arts DCs are halved for killing attacks. This applies to the base DC
     // of the maneuver/martial art as well. As always, no partial DCs allowed.
+    // PH: FIXME: Not sure this is true as written for raw strength? Presumably it is but not sure.
+    let itemBaseDc = rawItemBaseDc;
     if (item.is5e && ["maneuver", "martialart"].includes(item.type) && item.system.killing) {
         itemBaseDc = Math.floor(itemBaseDc / 2);
     }
@@ -81,21 +111,22 @@ function calculateBaseDcFromItem(item, options) {
         dc: itemBaseDc,
         tags: [
             {
-                value: `${itemBaseDc.signedString()}DC`,
-                name: item.name,
-                title: `${itemBaseDc.signedString()}DC`,
+                value: `${itemBaseDc}DC`,
+                name: effectiveItemName,
+                title: `${itemBaseDc}DC`,
             },
         ],
     };
 
     // PH: FIXME: This is not correct as it does not account for only unarmed attacks.
-    // 5e martial arts EXTRADCs and RANGEDCs are baseDCs
-    // TODO: support RANGEDC
-    if (item.is5e && item.type === "martialart") {
-        addExtraDcs(item, baseDc);
+    // 5e martial arts EXTRADCs are baseDCs
+    if (item.is5e && item.type === "martialart" && !item.system.USEWEAPON) {
+        addExtraDcs(item, baseDc, true);
     }
 
-    // PH: FIXME: For hand to hand attacks the strength bonus counts as base damage.
+    // PH: FIXME: For hand to hand attacks the strength bonus counts aattackStrengths base damage.
+    if (item.system.XMLID === "HANDTOHANDATTACK") {
+    }
 
     return {
         itemBaseDc,
@@ -110,6 +141,10 @@ function calculateBaseDcFromItem(item, options) {
  * @param {Object} options
  */
 export function calculateDcFromItem(item, options) {
+    const haymakerManeuverActive = item.actor?.items.find(
+        (item) => item.type === "maneuver" && item.name === "Haymaker" && item.system.active,
+    );
+
     const { itemBaseDc, baseDc } = calculateBaseDcFromItem(item, options);
 
     const addedDc = {
@@ -117,20 +152,44 @@ export function calculateDcFromItem(item, options) {
         tags: [],
     };
 
-    // PH: FIXME: This is not correct as it does not account for only unarmed attacks.
-    // 6e doesn't have the concept of base and added DCs so do it here.
-    if (!item.is5e && item.type === "martialart") {
-        addExtraDcs(item, addedDc);
+    // EXTRADCs
+    // 5e EXTRADC for armed killing attacks count at full DCs but do NOT count towards the base DC.
+    // 6e doesn't have the concept of base and added DCs or the doubling rule so do as an added DC for simplicity.
+    if (
+        (item.is5e && item.type === "martialart" && item.system.USEWEAPON) ||
+        (!item.is5e && item.type === "martialart")
+    ) {
+        addExtraDcs(item, addedDc, false);
     }
 
-    // PH: FIXME: I don't think that this is right.
+    // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
+    if (isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
+        const rawManeuverDc = parseInt(item.system.DC);
+        let maneuverDC = rawManeuverDc;
+        if (item.is5e && item.system.killing) {
+            maneuverDC = Math.floor(rawManeuverDc / 2);
+        }
+
+        addedDc.dc += maneuverDC;
+        addedDc.tags.push({
+            value: `+${maneuverDC}DC`,
+            name: item.name,
+            title: `+${rawManeuverDc}DC${maneuverDC !== rawManeuverDc ? " halved due to 5e killing attack" : ""}`,
+        });
+    }
+
+    // PH: FIXME: I don't think that this is right since it can be the base DC for martials and haymaker
+    // if (item.type === "martialart" || (item.type === "maneuver" && item.name === "Strike")) {
+    //     // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
+    //     itemBaseDc = attackStrength(item, options);
+    // }
     // Add in STR
-    if (item.system.usesStrength) {
+    if (item.system.usesStrength && !isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
         // STRMINIMUM
         // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
         const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
         if (STRMINIMUM) {
-            const strMinimum = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+            const strMinimum = parseInt(STRMINIMUM.OPTeffectiveStrengthION_ALIAS.match(/\d+/)?.[0] || 0);
             const strMinDc = Math.ceil(strMinimum / 5);
             addedDc.dc -= strMinDc;
             addedDc.tags.push({
@@ -140,11 +199,7 @@ export function calculateDcFromItem(item, options) {
             });
         }
 
-        let str = parseInt(
-            options?.effectivestr != undefined
-                ? options?.effectivestr
-                : item.actor?.system.characteristics.str.value || 0,
-        );
+        let str = effectiveStrength(item, options);
 
         // MOVEBY halves STR
         // PH: FIXME: Missing move through...
@@ -160,16 +215,12 @@ export function calculateDcFromItem(item, options) {
         if (str5Dc !== 0) {
             addedDc.dc += str5Dc;
             addedDc.tags.push({
-                value: `${str5Dc}DC`,
+                value: `+${str5Dc}DC`,
                 name: "STR",
                 title: `${str5Dc.signedString()}DC${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
             });
         }
     }
-
-    // EXTRADCs
-    // PH: TODO: 5e EXTRADC for armed killing attacks count at full DCs but do NOT count towards the base DC.
-    // PH: TODO: 6e EXTRADC are additional DC because there is no doubling rule.
 
     // Boostable Charges
     if (options?.boostableCharges) {
@@ -247,38 +298,29 @@ export function calculateDcFromItem(item, options) {
         }
     }
 
-    // Is this attack using a Haymaker
-    if (item.actor) {
-        // Is there a haymaker active?
-        const haymakerManeuver = item.actor.items.find(
-            (item) => item.type.includes("maneuver") && item.name === "Haymaker" && item.system.active,
-        );
-        if (haymakerManeuver) {
-            // Can haymaker anything except for maneuvers because it is a maneuver itself.
-            // The strike manuever is the 1 exception.
-            if (
-                !["maneuver", "martialart"].includes(item.type) ||
-                (item.type === "maneuver" && item.name === "Strike")
-            ) {
-                const rawHaymakerDc = parseInt(haymakerManeuver.system.DC);
-                let haymakerDC = rawHaymakerDc;
-                if (item.is5e && item.system.killing) {
-                    haymakerDC = Math.floor(rawHaymakerDc / 2);
-                }
-
-                addedDc.dc += haymakerDC;
-                addedDc.tags.push({
-                    value: `+${haymakerDC}DC`,
-                    name: "Haymaker",
-                    title: `${rawHaymakerDc}DC${haymakerDC !== rawHaymakerDc ? " halved due to killing attack" : ""}`,
-                });
-            } else {
-                // PH: FIXME: This is a poor location for this. Better off in the to hit code and reject immediately.
-                if (options?.isAction)
-                    ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
-                        localize: true,
-                    });
+    // Is there a haymaker active and thus part of this attack?
+    if (haymakerManeuverActive) {
+        // Can haymaker anything except for maneuvers because it is a maneuver itself.
+        // The strike manuever is the 1 exception.
+        if (!["maneuver", "martialart"].includes(item.type) || (item.type === "maneuver" && item.name === "Strike")) {
+            const rawHaymakerDc = parseInt(haymakerManeuverActive.system.DC);
+            let haymakerDC = rawHaymakerDc;
+            if (item.is5e && item.system.killing) {
+                haymakerDC = Math.floor(rawHaymakerDc / 2);
             }
+
+            addedDc.dc += haymakerDC;
+            addedDc.tags.push({
+                value: `+${haymakerDC}DC`,
+                name: "Haymaker",
+                title: `${rawHaymakerDc}DC${haymakerDC !== rawHaymakerDc ? " halved due to 5e killing attack" : ""}`,
+            });
+        } else {
+            // PH: FIXME: This is a poor location for this. Better off in the to hit code and reject immediately.
+            if (options?.isAction)
+                ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
+                    localize: true,
+                });
         }
     }
 
@@ -368,39 +410,29 @@ export function calculateDcFromItem(item, options) {
         });
     }
 
-    // Max Killing Doubling Damage
-    // A character cannot more than
-    // double the Damage Classes of his base attack, no
-    // matter how many different methods he uses to add
-    // damage.
+    // Max Doubling Rules
+    // A character cannot more than double the Damage Classes of his base attack, no
+    // matter how many different methods they use to add damage.
+    const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
+    if (DoubleDamageLimit) {
+        // Exceptions to the rule (because it wouldn't be the hero system without exceptions) from FRed pg. 405:
+        // 1) Weapons that do normal damage (this really means not killing attacks) in superheroic campaigns
+        // 2) extra damage classes for unarmed martial maneuvers
+        // 3) movement bonuses to normal damage (this really means not killing attacks)
 
-    // PH: FIXME: Need to work this through. Not sure it's right and there are some exceptions in 5e (heroic vs superheroic).
-    // const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-    // if (DoubleDamageLimit) {
-    //     // BaseDC
-    //     let baseDC = baseDcParts.str;
-    //     if (["HA", "HKA"].includes(item.system.XMLID) || item.system.CATEGORY === "Hand To Hand") {
-    //         baseDC = baseDcParts.item;
-    //     }
-    //     if (item.system.XMLID === "MANEUVER" && !item.type.USEWEAPON) {
-    //         baseDC += extraDcLevels;
-    //     }
+        const lostAddedDcs = addedDc.dc - baseDc.dc;
+        if (lostAddedDcs > 0) {
+            addedDc.tags.push({
+                value: `-${lostAddedDcs}DC`,
+                name: "DoubleDamageLimit",
+                title: `Base DC=${baseDc.dc}. Added DC=${addedDc.dc}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
+            });
+            addedDc.dc = baseDc.dc;
+        }
+    }
 
-    //     // NOTE: baseDC > 0 is not great - need to consider things with effect rolls like mind scan and illusions
-    //     if (baseDC > 0 && dc > baseDC * 2) {
-    //         const backOutDc = Math.floor(baseDC * 2 - dc);
-    //         tags.push({
-    //             value: `${backOutDc}DC`,
-    //             name: "DoubleDamageLimit",
-    //             title: `BASEDC=${baseDC}. DC=${dc}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
-    //         });
-    //         dc = Math.max(0, dc + backOutDc);
-    //     }
-    // }
-
-    // PH: FIXME: Is this the place to limit the DC to 0? Seems like it should be at the end.
-    const finalUnmodifiedDc = baseDc.dc + addedDc.dc;
-    const finalDc = Math.max(0, finalUnmodifiedDc);
+    // Doesn't really feel right to allow a total DC of less than 0 so cap it.
+    const finalDc = Math.max(0, baseDc.dc + addedDc.dc);
 
     return {
         itemBaseDc,
@@ -448,7 +480,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
             martialOrManeuverEquivalentApPerDice = 15;
         } else {
             // FIXME: We shouldn't be calculating damage dice for things that don't do damage
-            // Most maneuvers don't do damage. Pretend they are NORMALDC so we don't spew errors below.
+            // Most maneuvers don't do damage. However there are some that use STR as a base so assume normal damage.
             martialOrManeuverEquivalentApPerDice = 5;
         }
     }
