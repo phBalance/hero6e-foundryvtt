@@ -2419,7 +2419,7 @@ export class HeroSystem6eActor extends Actor {
 
             if (_realCost != 0) {
                 // Equipment is typically purchased with money, not character points
-                if ((item.parentItem?.type || item.type) != "equipment") {
+                if ((item.parentItem?.type || item.type) !== "equipment") {
                     realCost += _realCost;
                 }
                 activePoints += _activePoints;

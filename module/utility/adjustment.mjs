@@ -137,12 +137,13 @@ export function determineMaxAdjustment(item) {
         return reallyBigInteger;
     }
 
+    const { diceParts } = calculateDicePartsForItem(item, {});
+
     if (item.actor.is5e) {
         // INCREASEDMAX, if available.
         const increaseMax = parseInt(item.system.ADDER?.find((adder) => adder.XMLID === "INCREASEDMAX")?.LEVELS || 0);
 
         // Max pips in a roll is starting max base.
-        const diceParts = calculateDicePartsForItem(item, {});
         const maxAdjustment =
             6 * diceParts.d6Count +
             5 * diceParts.d6Less1DieCount +
@@ -164,7 +165,6 @@ export function determineMaxAdjustment(item) {
         }
 
         // Max pips in a roll is starting max base.
-        const diceParts = calculateDicePartsForItem(item, {});
         const maxAdjustment =
             6 * diceParts.d6Count + 5 * diceParts.d6Less1DieCount + 3 * diceParts.halfDieCount + 1 * diceParts.constant;
 
