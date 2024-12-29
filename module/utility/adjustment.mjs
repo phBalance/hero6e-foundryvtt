@@ -255,24 +255,6 @@ function _createAEChangeBlock(targetCharOrPower, targetSystem) {
     };
 }
 
-// function _createAEChange(activeEffect, key, value, seconds, source, activePoints) {
-//     activeEffect.changes ??= [];
-//     activeEffect.changes.push({
-//         key,
-//         value,
-//         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-//     });
-//     // activeEffect.flags ??= {};
-//     // activeEffect.flags.changes ??= [];
-//     // activeEffect.flags.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
-
-//     // Trying system approach
-//     activeEffect.system ??= {};
-//     activeEffect.system.changes ??= [];
-//     activeEffect.system.changes.push({ seconds, source, activePoints, startTime: game.time.worldTime });
-//     return activeEffect;
-// }
-
 function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
     let durationOptionId;
 
@@ -552,6 +534,11 @@ export async function performAdjustment(
     } else {
         // Note that costPerActivePoint is different between fade/recovery and initial adjustment (which uses defense multiplier)
         const costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, null, targetActor);
+        const costPerActivePointWithDefenseMultipler = determineCostPerActivePointWithDefenseMultipler(
+            potentialCharacteristic,
+            null,
+            targetActor,
+        );
         const _multiplier = defensivePowerAdjustmentMultiplier(
             potentialCharacteristic.toUpperCase(),
             targetActor,
@@ -620,8 +607,9 @@ export async function performAdjustment(
             );
             activeEffect.flags.adjustmentActivePoints = thisAttackActivePointsEffect;
             const finalAp =
-                activeEffect.flags.adjustmentActivePoints + (previousActivePointsForThisXmlid % costPerActivePoint);
-            const targetValue = Math.trunc(finalAp / costPerActivePoint);
+                activeEffect.flags.adjustmentActivePoints +
+                (previousActivePointsForThisXmlid % costPerActivePointWithDefenseMultipler);
+            const targetValue = Math.trunc(finalAp / costPerActivePointWithDefenseMultipler);
             change.value = targetValue;
             activeEffect.changes.push(change);
 
@@ -841,11 +829,20 @@ export async function performAdjustment(
     //     0,
     // );
 
+    // Sanity check for totalPointsDifference
+    // We may have changed it during recalcEffectBasedOnTotalApForXmlid
+    const _totalPointsDifference = activeEffect.changes.find((c) => c.key === _key).value;
+    if (totalPointsDifference != _totalPointsDifference) {
+        debugger;
+        totalPointsDifference = _totalPointsDifference;
+        console.log(`_totalPointsDifference`);
+    }
+
     const totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects)
         .filter(
             (ae) =>
                 ae.changes.find((c) => c.key === _key) &&
-                ae.flags.XMLID === activeEffect.flags.XMLID &&
+                //ae.flags.XMLID === activeEffect.flags.XMLID &&
                 ae.flags.type === "adjustment" &&
                 ae.flags.key === activeEffect.flags.key,
         )
@@ -1004,7 +1001,7 @@ function updateEffectName(activeEffect) {
     //const item = fromUuidSync(activeEffect.origin);
     let _array = [];
     for (const c of activeEffect.changes) {
-        const _name = c.key.match(/([a-z]+)\.max/)?.[1] || "?";
+        const _name = c.key.match(/([a-z]+)\.max/)?.[1].replace("system", activeEffect.flags.key);
         let _value = (parseInt(activeEffect.changes?.[0].value) || 0).signedString();
         if (_value === "+0" && activeEffect.flags.adjustmentActivePoints < 0) {
             _value = "-0";
