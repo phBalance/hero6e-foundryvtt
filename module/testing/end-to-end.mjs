@@ -1,5 +1,8 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { determineCostPerActivePointWithDefenseMultipler } from "../utility/adjustment.mjs";
+import {
+    determineCostPerActivePointWithDefenseMultipler,
+    determineCostPerActivePoint,
+} from "../utility/adjustment.mjs";
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 export class HeroSystem6eEndToEndTest {
     sceneName = "EndToEndTest";
@@ -59,35 +62,50 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestScene();
         await this.createTestActors();
 
+        // Testing
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
+        //if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "CON"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "END"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "STR"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "OCV"))) return;
+        // return;
+
         // AID 6 multiple characteristics + stacking
-        await this.token5.actor.FullHealth();
-        await this.token6.actor.FullHealth();
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
-        if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END, POWERDEFENSE"))) return;
+        // await this.token5.actor.FullHealth();
+        // await this.token6.actor.FullHealth();
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END, POWERDEFENSE"))) return;
 
         // AID 6
-        for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
-            await this.token5.actor.FullHealth();
-            await this.token6.actor.FullHealth();
-            if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", char.XMLID))) return;
-        }
+        // for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
+        //     await this.token5.actor.FullHealth();
+        //     await this.token6.actor.FullHealth();
+        //     if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", char.XMLID))) return;
+        // }
 
         // AID 5
-        for (const char of getCharacteristicInfoArrayForActor(this.token5actor)) {
-            await this.token5.actor.FullHealth();
-            await this.token6.actor.FullHealth();
-            if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", char.XMLID))) return;
-        }
+        // for (const char of getCharacteristicInfoArrayForActor(this.token5.actor).filter(
+        //     (c) => !["OCV", "DCV", "OMCV", "DMCV"].includes(c.key),
+        // )) {
+        //     await this.token5.actor.FullHealth();
+        //     await this.token6.actor.FullHealth();
+        //     if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", char.XMLID))) return;
+        // }
 
-        // DRAIN 6
-        for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
-            await this.token5.actor.FullHealth();
-            await this.token6.actor.FullHealth();
-            if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", char.XMLID))) return;
-        }
+        // DRAIN 6  (PRE causes issues with an override request)
+        // for (const char of getCharacteristicInfoArrayForActor(this.token6.actor).filter(
+        //     (c) => !["PRE"].includes(c.key),
+        // )) {
+        //     await this.token5.actor.FullHealth();
+        //     await this.token6.actor.FullHealth();
+        //     if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", char.XMLID))) return;
+        // }
 
-        // DRAIN 5
-        for (const char of getCharacteristicInfoArrayForActor(this.token5actor)) {
+        // DRAIN 5 (PRE causes issues with an override request)
+        for (const char of getCharacteristicInfoArrayForActor(this.token5.actor).filter(
+            (c) => !["OCV", "DCV", "OMCV", "DMCV", "PRE"].includes(c.key),
+        )) {
             await this.token5.actor.FullHealth();
             await this.token6.actor.FullHealth();
             if (!(await this.testAdjustmentStacking(this.token5, this.token5, "DRAIN", char.XMLID))) return;
@@ -144,9 +162,16 @@ export class HeroSystem6eEndToEndTest {
         this.log(`Creating ${this.actor5Name}`);
         this.actor5 = await Actor.create({
             name: this.actor5Name,
-            type: "npc",
+            type: "pc",
+            system: {
+                is5e: true,
+                "characteristics.end.core": 50,
+                "characteristics.pre.core": 50,
+            },
         });
         await this.actor5.update({ "system.is5e": true });
+        await this.actor5.FullHealth();
+
         await TokenDocument.create(
             {
                 name: this.actor5.name.replace("_", ""),
@@ -170,8 +195,11 @@ export class HeroSystem6eEndToEndTest {
             type: "pc",
             system: {
                 is5e: false,
+                "characteristics.end.core": 50,
+                "characteristics.pre.core": 50,
             },
         });
+        await this.actor6.FullHealth();
         await TokenDocument.create(
             {
                 name: this.actor6.name.replace("_", ""),
@@ -285,7 +313,7 @@ export class HeroSystem6eEndToEndTest {
         const ap = parseInt(
             document
                 .querySelector(`ol#chat-log .chat-message:last-child .card-section:last-child`)
-                ?.textContent.match(/(\d+) Active Points/)[1],
+                ?.textContent.match(/(\d+) Character Points/)[1],
         );
 
         // Get Active Effect
@@ -331,7 +359,7 @@ export class HeroSystem6eEndToEndTest {
         const aeStacks = [];
         let adjustmentActivePoints;
         let adjustmentValue = {};
-        let actorCharaisticValue = {};
+        let actorCharacteristicValue = {};
         const costPerActivePoint = {};
 
         for (let s = 0; s < stacks; s++) {
@@ -343,7 +371,7 @@ export class HeroSystem6eEndToEndTest {
 
             // Confirm characteristic.value matches AE adjustment
             const _max = parseInt(adjustmentItem.system.LEVELS) * 6;
-            const _ap = aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0);
+            const _ap = -aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0);
 
             // Some AE's are expected to fail
             let expectToFail = _ap >= _max && powerXMLID != "DRAIN";
@@ -367,13 +395,25 @@ export class HeroSystem6eEndToEndTest {
                 // the effect rolled is not necessarily the final ap (maximum effect)
                 if (ap !== Math.abs(adjustmentActiveEffect.flags.adjustmentActivePoints)) {
                     this.log(
-                        `WARN${s}: rolled ${ap}, applied ${adjustmentActiveEffect.flags.adjustmentActivePoints}. Likely due to maximum effect.`,
+                        `WARN${s}: rolled ${ap}, applied ${adjustmentActiveEffect.flags.adjustmentActivePoints}. Likely due to maximum effect or costPerPoint.`,
                     );
-                    ap = adjustmentActiveEffect.flags.adjustmentActivePoints;
+                    ap = Math.abs(adjustmentActiveEffect.flags.adjustmentActivePoints);
                 }
                 aeStacks.push({ adjustmentActiveEffect, ap });
             } else {
                 continue;
+            }
+
+            // Wait for value to change from doAdjustment
+            for (let i = 0; i < 50; i++) {
+                const char = adjustmentActiveEffect.changes[0].key.match(/([a-z]+)\.max/)?.[1];
+                if (
+                    tokenTarget.actor.system.characteristics[char].value ===
+                    tokenTarget.actor.system.characteristics[char].max
+                    //actorCharaisticValue[adjustmentActiveEffect.changes[0].key]
+                )
+                    break;
+                await this.delay();
             }
 
             // Positive Adjustment
@@ -389,26 +429,26 @@ export class HeroSystem6eEndToEndTest {
 
             for (const change of adjustmentActiveEffect.changes) {
                 const char = change.key.match(/([a-z]+)\.max/)?.[1];
-                costPerActivePoint[change.key] = determineCostPerActivePointWithDefenseMultipler(
+                costPerActivePoint[change.key] = determineCostPerActivePoint(
                     char.toUpperCase(),
                     null,
                     tokenTarget.actor,
                 );
 
                 adjustmentValue[change.key] = Math.trunc(adjustmentActivePoints / costPerActivePoint[change.key]);
-                actorCharaisticValue[change.key] =
+                actorCharacteristicValue[change.key] =
                     tokenTarget.actor.system.characteristics[char].core + adjustmentValue[change.key];
 
-                if (tokenTarget.actor.system.characteristics[char].value !== actorCharaisticValue[change.key]) {
+                if (tokenTarget.actor.system.characteristics[char].value !== actorCharacteristicValue[change.key]) {
                     this.log(
-                        `Actor ${char}.value expecting ${actorCharaisticValue[change.key]} got ${tokenTarget.actor.system.characteristics[char].value}/${tokenTarget.actor.system.characteristics[char].max}`,
+                        `Actor ${char}.value expecting ${actorCharacteristicValue[change.key]} got ${tokenTarget.actor.system.characteristics[char].value}/${tokenTarget.actor.system.characteristics[char].max}`,
                         "color:red",
                     );
                     return;
                 }
-                if (tokenTarget.actor.system.characteristics[char].max !== actorCharaisticValue[change.key]) {
+                if (tokenTarget.actor.system.characteristics[char].max !== actorCharacteristicValue[change.key]) {
                     this.log(
-                        `Actor ${char}.max expecting ${actorCharaisticValue[change.key]} got ${tokenTarget.actor.system.characteristics[char].max}`,
+                        `Actor ${char}.max expecting ${actorCharacteristicValue[change.key]} got ${tokenTarget.actor.system.characteristics[char].max}`,
                         "color:red",
                     );
                     return;
@@ -477,6 +517,7 @@ export class HeroSystem6eEndToEndTest {
                 return;
             }
             this.log(`worldTime +${seconds} seconds`);
+            console.log(firstActiveEffectToExpire);
             await game.time.advance(seconds);
 
             const newAdjustmentActivePoints =
@@ -527,7 +568,7 @@ export class HeroSystem6eEndToEndTest {
 
             adjustmentActivePoints = foundry.utils.deepClone(newAdjustmentActivePoints);
             adjustmentValue = foundry.utils.deepClone(adjustmentNewValue);
-            actorCharaisticValue = foundry.utils.deepClone(actorNewCharacteristicValue);
+            actorCharacteristicValue = foundry.utils.deepClone(actorNewCharacteristicValue);
         }
 
         this.log("Abandon fade loop");

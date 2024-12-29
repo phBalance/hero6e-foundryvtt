@@ -9,10 +9,17 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 export function adjustmentSourcesPermissive(actor, is5e) {
     let choices = {};
 
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error("bad paramater", is5e);
+    if (!actor) {
+        console.error("Missing Actor");
         return choices;
     }
+
+    if (is5e === undefined) is5e = actor.is5e;
+
+    // if (is5e !== false && is5e !== true && is5e !== undefined) {
+    //     console.error("bad paramater", is5e);
+    //     return choices;
+    // }
 
     const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(
@@ -379,6 +386,8 @@ export async function performAdjustment(
     //     console.warn("Why are we calling this with a 0 adjustment?  Power Defense absorbed it all?");
     // }
 
+    const thisAttackActivePointsEffectRaw = thisAttackActivePointsEffect;
+
     // for backward compatibility
     const targetActor = targetToken.actor || targetToken;
     const isHealing = attackItem.system.XMLID === "HEALING";
@@ -473,7 +482,7 @@ export async function performAdjustment(
 
         const chatCard = _generateAdjustmentChatCard(
             attackItem,
-            existingEffect.flags.adjustmentActivePoints,
+            thisAttackActivePointsEffectRaw, //existingEffect.flags.adjustmentActivePoints,
             0,
             0,
             0,
@@ -508,7 +517,7 @@ export async function performAdjustment(
         }
         totalActivePointAffectedDifference = thisAttackActivePointsEffect;
         existingEffect.flags.adjustmentActivePoints += thisAttackActivePointsEffect;
-        //totalPointsDifference = parseInt(existingEffect.changes[0].value);
+        totalPointsDifference = parseInt(existingEffect.changes[0].value);
 
         for (const change of activeEffect.changes) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
@@ -517,7 +526,7 @@ export async function performAdjustment(
             change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
         }
         //existingEffect.changes[0].value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
-        //totalPointsDifference = existingEffect.changes[0].value - totalPointsDifference;
+        totalPointsDifference = existingEffect.changes[0].value - totalPointsDifference;
 
         if (activeEffect.flags.adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
             isEffectFinished = true;
@@ -546,10 +555,13 @@ export async function performAdjustment(
         );
 
         // Halve AP, min 1
-        // GM_Champion (he/him) (UTC-5) — Dec 28 2024 https://discord.com/channels/609528652878839828/609529601600782378/1322714156025122878
+        // GM_Champion (he/him) — Dec 28 2024 https://discord.com/channels/609528652878839828/609529601600782378/1322714156025122878
         // Minimum 1 character point.
         // There is no effect until 40, but you track the points drained until they reach 40.
         // It's like a measuring cup - the drain takes out a little water at a time, which eventually adds up to one full mark on the cup.
+        //
+        //  GM_Champion (he/him) https://discord.com/channels/609528652878839828/609529601600782378/1322742128312582196
+        // The book answer for you is 6e1 p.138, right column, top paragraph, final sentence, "...and the remainder can be added to by another use of the Power later on, potentially taking effect."
         if (_multiplier !== 1) {
             console.log(`Defense multiplier ${_multiplier}`);
             if (thisAttackActivePointsEffect > 0) {
@@ -607,9 +619,8 @@ export async function performAdjustment(
             );
             activeEffect.flags.adjustmentActivePoints = thisAttackActivePointsEffect;
             const finalAp =
-                activeEffect.flags.adjustmentActivePoints +
-                (previousActivePointsForThisXmlid % costPerActivePointWithDefenseMultipler);
-            const targetValue = Math.trunc(finalAp / costPerActivePointWithDefenseMultipler);
+                activeEffect.flags.adjustmentActivePoints + (previousActivePointsForThisXmlid % costPerActivePoint);
+            const targetValue = Math.trunc(finalAp / costPerActivePoint);
             change.value = targetValue;
             activeEffect.changes.push(change);
 
@@ -833,9 +844,8 @@ export async function performAdjustment(
     // We may have changed it during recalcEffectBasedOnTotalApForXmlid
     const _totalPointsDifference = activeEffect.changes.find((c) => c.key === _key).value;
     if (totalPointsDifference != _totalPointsDifference) {
-        debugger;
         totalPointsDifference = _totalPointsDifference;
-        console.log(`_totalPointsDifference`);
+        console.warn(`_totalPointsDifference`);
     }
 
     const totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects)
@@ -850,7 +860,7 @@ export async function performAdjustment(
 
     return _generateAdjustmentChatCard(
         attackItem,
-        thisAttackActivePointsEffect,
+        thisAttackActivePointsEffectRaw,
         totalPointsDifference, //totalActivePointAffectedDifference,
         totalEffectActivePointsForXmlid,
         thisAttackActivePointAdjustmentNotAppliedDueToMax,
@@ -867,11 +877,7 @@ export async function performAdjustment(
 /// When one of multiple AE's are faded, the rounding of AP to VALUE may change.
 async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
     const targetActor = activeEffect.parent;
-    const costPerActivePoint = determineCostPerActivePointWithDefenseMultipler(
-        activeEffect.flags.key,
-        null,
-        targetActor,
-    );
+    const costPerActivePoint = determineCostPerActivePoint(activeEffect.flags.key, null, targetActor);
     if (costPerActivePoint === 1) return;
 
     let _ap = 0;
@@ -912,7 +918,7 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
                 const startingActorMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
 
                 updateEffectName(ae);
-                await ae.update({ changes: ae.changes });
+                await ae.update({ name: ae.name, changes: ae.changes });
 
                 // Apparently we sometimes need to delay to let all the async's catch up
                 const delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
