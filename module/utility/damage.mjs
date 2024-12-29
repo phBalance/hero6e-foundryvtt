@@ -247,33 +247,35 @@ export function calculateDcFromItem(item, options) {
         }
     }
 
-    // Add in Haymaker to any non-maneuver attack DCV based attack
+    // Is this attack using a Haymaker
     if (item.actor) {
+        // Is there a haymaker active?
         const haymakerManeuver = item.actor.items.find(
             (item) => item.type.includes("maneuver") && item.name === "Haymaker" && item.system.active,
         );
         if (haymakerManeuver) {
-            if (item.name == "Strike" || !item.type.includes("maneuver")) {
-                if (item.system.targets == "dcv") {
-                    const haymakerDc = 4;
-
-                    addedDc.dc += haymakerDc;
-                    addedDc.tags.push({
-                        value: `${haymakerDc}DC`,
-                        name: "Haymaker",
-                        title: `${haymakerDc}DC`,
-                    });
-                } else {
-                    // PH: FIXME: This is a poor location for this. Better off in the to hit code and reject immediately.
-                    if (options?.isAction)
-                        ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", {
-                            localize: true,
-                        });
+            // Can haymaker anything except for maneuvers because it is a maneuver itself.
+            // The strike manuever is the 1 exception.
+            if (
+                !["maneuver", "martialart"].includes(item.type) ||
+                (item.type === "maneuver" && item.name === "Strike")
+            ) {
+                const rawHaymakerDc = parseInt(haymakerManeuver.system.DC);
+                let haymakerDC = rawHaymakerDc;
+                if (item.is5e && item.system.killing) {
+                    haymakerDC = Math.floor(rawHaymakerDc / 2);
                 }
+
+                addedDc.dc += haymakerDC;
+                addedDc.tags.push({
+                    value: `+${haymakerDC}DC`,
+                    name: "Haymaker",
+                    title: `${rawHaymakerDc}DC${haymakerDC !== rawHaymakerDc ? " halved due to killing attack" : ""}`,
+                });
             } else {
                 // PH: FIXME: This is a poor location for this. Better off in the to hit code and reject immediately.
                 if (options?.isAction)
-                    ui.notifications.warn("Haymaker cannot be combined with another maneuver (except for Strike).", {
+                    ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
                         localize: true,
                     });
             }
