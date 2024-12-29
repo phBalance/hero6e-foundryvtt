@@ -156,23 +156,23 @@ export function determineMaxAdjustment(item) {
         //     default:
         //         break;
         // }
-        let maxAdjustment = Math.floor(item.convertToDc.dc * 6);
+        let maxAdjustment5e = Math.floor(item.convertToDc.dc * 6);
 
         // Add INCREASEDMAX if available.
         const increaseMax = item.system.ADDER?.find((adder) => adder.XMLID === "INCREASEDMAX");
-        maxAdjustment = maxAdjustment + (parseInt(increaseMax?.LEVELS) || 0);
+        maxAdjustment5e = maxAdjustment5e + (parseInt(increaseMax?.LEVELS) || 0);
 
-        return maxAdjustment;
+        return maxAdjustment5e;
     } else {
         if (item.system.XMLID === "ABSORPTION") {
-            let maxAdjustment = item.system.LEVELS * 2;
+            let maxAdjustment6ea = item.system.LEVELS * 2;
 
             const increasedMax = item.system.MODIFIER?.find((mod) => mod.XMLID === "INCREASEDMAX");
             if (increasedMax) {
                 // Each level is 2x
-                maxAdjustment = maxAdjustment * Math.pow(2, parseInt(increasedMax.LEVELS));
+                maxAdjustment6ea = maxAdjustment6ea * Math.pow(2, parseInt(increasedMax.LEVELS));
             }
-            return maxAdjustment;
+            return maxAdjustment6ea;
         }
 
         // let maxAdjustment = item.system.dice * 6;
@@ -190,9 +190,9 @@ export function determineMaxAdjustment(item) {
         //     default:
         //         break;
         // }
-        let maxAdjustment = Math.floor(item.convertToDc.dc * 6);
+        const maxAdjustment6e = Math.floor(item.convertToDc.dc * 6);
 
-        return maxAdjustment;
+        return maxAdjustment6e;
     }
 }
 
