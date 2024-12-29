@@ -1946,7 +1946,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
                         // Base: STR +14 DC (STR 70) => +14 DC  =>  14DC
                         // Base + Added = 7C + 14DC (doubling rule clamps the strength added DC) = 14DC. Killing strike is 15AP/die => 4½d6
-                        // NOTE: I don't understand how HD gets 5d6K as it seems to be more than doubling the equivalent HKA. Math rounding problems in HD?
+                        // NOTE: HD gets 5d6K as it seems to be more than doubling the equivalent HKA. Math rounding problems in HD?
                         assert.equal(
                             actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage,
                             "4½d6K",
