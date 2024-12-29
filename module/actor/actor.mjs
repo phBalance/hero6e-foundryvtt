@@ -1312,7 +1312,7 @@ export class HeroSystem6eActor extends Actor {
 
     getActiveConstantItems() {
         let results = [];
-        for (let item of this.items.filter((o) => o.isActive)) {
+        for (let item of this.items.filter((item) => item.isActive)) {
             let duration = getPowerInfo({
                 xmlid: item.system.XMLID,
                 actor: this,
@@ -1332,14 +1332,14 @@ export class HeroSystem6eActor extends Actor {
     getConstantEffects() {
         return Array.from(this.allApplicableEffects())
             .filter(
-                (o) =>
-                    !o.duration.duration &&
-                    o.statuses.size === 0 &&
-                    (!o.flags?.XMLID ||
+                (ae) =>
+                    !ae.duration.duration &&
+                    ae.statuses.size === 0 &&
+                    (!ae.flags?.XMLID ||
                         getPowerInfo({
-                            xmlid: o.flags?.XMLID,
+                            xmlid: ae.flags?.XMLID,
                             actor: this,
-                        })?.duration != "persistent"),
+                        })?.duration !== "persistent"),
             )
             .sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -1347,11 +1347,11 @@ export class HeroSystem6eActor extends Actor {
     getPersistentEffects() {
         return Array.from(this.allApplicableEffects())
             .filter(
-                (o) =>
-                    !o.duration.duration &&
-                    o.statuses.size === 0 &&
-                    o.flags?.XMLID &&
-                    getPowerInfo({ xmlid: o.flags?.XMLID, actor: this })?.duration === "persistent",
+                (ae) =>
+                    !ae.duration.duration &&
+                    ae.statuses.size === 0 &&
+                    ae.flags?.XMLID &&
+                    getPowerInfo({ xmlid: ae.flags?.XMLID, actor: this })?.duration === "persistent",
             )
             .sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -2006,6 +2006,9 @@ export class HeroSystem6eActor extends Actor {
                     const DCV = maneuverDetails.dcv;
                     const EFFECT = maneuverDetails.effects;
                     const DC = maneuverDetails.dc;
+                    const ADDSTR = maneuverDetails.addStr;
+                    const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
+                    const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
 
                     const itemData = {
                         name,
@@ -2027,6 +2030,9 @@ export class HeroSystem6eActor extends Actor {
                             //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
                             //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
                             DISPLAY: name, // Not sure we should allow editing of basic maneuvers
+                            ADDSTR,
+                            USEWEAPON,
+                            WEAPONEFFECT,
                         },
                     };
 
