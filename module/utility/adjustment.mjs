@@ -401,21 +401,21 @@ export async function performAdjustment(
     // the lifting capacity of and damage caused by STR,
     // a character’s Combat Value derived from DEX, and
     // so forth).
-    // if (targetActor.is5e) {
-    //     switch (nameOfCharOrPower.toLowerCase()) {
-    //         case "ocv":
-    //         case "dcv":
-    //             console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using DEX instead.`);
-    //             nameOfCharOrPower = "dex";
+    if (targetActor.is5e) {
+        switch (nameOfCharOrPower.toLowerCase()) {
+            case "ocv":
+            case "dcv":
+                console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using DEX instead.`);
+                nameOfCharOrPower = "dex";
 
-    //             break;
-    //         case "omcv":
-    //         case "dmcv":
-    //             console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using EGO instead.`);
-    //             nameOfCharOrPower = "ego";
-    //             break;
-    //     }
-    // }
+                break;
+            case "omcv":
+            case "dmcv":
+                console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using EGO instead.`);
+                nameOfCharOrPower = "ego";
+                break;
+        }
+    }
 
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
@@ -596,7 +596,7 @@ export async function performAdjustment(
                 thisAttackActivePointsEffect,
             );
             const finalAp = previousActivePointsForThisXmlid + activeEffect.flags.adjustmentActivePoints;
-            const targetValue = Math.trunc(finalAp / costPerActivePoint);
+            const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
 
             change.value = targetValue - previousPointsForThisChangeKey;
             activeEffect.changes.push(change);
@@ -604,7 +604,7 @@ export async function performAdjustment(
             thisAttackActivePointAdjustmentNotAppliedDueToMax =
                 thisAttackActivePointsEffect - activeEffect.flags.adjustmentActivePoints;
 
-            totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
+            //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
             totalPointsDifference = activeEffect.changes[0].value;
 
             // TODO: Healing
@@ -620,7 +620,7 @@ export async function performAdjustment(
             activeEffect.flags.adjustmentActivePoints = thisAttackActivePointsEffect;
             const finalAp =
                 activeEffect.flags.adjustmentActivePoints + (previousActivePointsForThisXmlid % costPerActivePoint);
-            const targetValue = Math.trunc(finalAp / costPerActivePoint);
+            const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
             change.value = targetValue;
             activeEffect.changes.push(change);
 
@@ -654,15 +654,15 @@ export async function performAdjustment(
     }
 
     // Healing is not cumulative but all else is. Healing cannot harm when lower than an existing effect.
-    // let thisAttackEffectiveAdjustmentActivePoints = isHealing
-    //     ? Math.min(thisAttackRawActivePointsEffect - activeEffect.flags.adjustmentActivePoints, 0)
-    //     : thisAttackRawActivePointsEffect;
-    // const thisAttackActivePointEffectNotAppliedDueToNotExceeding = isHealing
-    //     ? Math.max(activeEffect.flags.adjustmentActivePoints, thisAttackRawActivePointsEffect)
-    //     : 0;
-    // let thisAttackActivePointAdjustmentNotAppliedDueToMax;
-    // const totalActivePointsStartingEffect =
-    //     activeEffect.flags.adjustmentActivePoints + thisAttackEffectiveAdjustmentActivePoints;
+    let thisAttackEffectiveAdjustmentActivePoints = isHealing
+        ? Math.min(thisAttackRawActivePointsEffect - activeEffect.flags.adjustmentActivePoints, 0)
+        : thisAttackRawActivePointsEffect;
+    const thisAttackActivePointEffectNotAppliedDueToNotExceeding = isHealing
+        ? Math.max(activeEffect.flags.adjustmentActivePoints, thisAttackRawActivePointsEffect)
+        : 0;
+    //let thisAttackActivePointAdjustmentNotAppliedDueToMax;
+    const totalActivePointsStartingEffect =
+        activeEffect.flags.adjustmentActivePoints + thisAttackEffectiveAdjustmentActivePoints;
 
     // Clamp max adjustment to the max allowed by the power.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.
@@ -893,7 +893,7 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
             )
             .sort((a, b) => (a.flags.createTime || 0) - (b.flags.createTime || 0))) {
             _ap += ae.flags.adjustmentActivePoints;
-            const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;
+            const _targetValue = costPerActivePoint ? Math.trunc(_ap / costPerActivePoint) - _value : 0;
             if (isNaN(_targetValue)) {
                 ui.notifications.error("recalcEffectBasedOnTotalApForXmlid failed", activeEffect);
                 return;

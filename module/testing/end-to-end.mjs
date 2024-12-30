@@ -62,13 +62,16 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestScene();
         await this.createTestActors();
 
-        // Testing
-        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
-        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
-        //if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "CON"))) return;
-        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "END"))) return;
-        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "STR"))) return;
+        // Interactive Testing (change these at will)
+        if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "OCV"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "CON"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "END"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "STR"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "OCV"))) return;
+        if (!(await this.testAdjustmentStacking(this.token5, this.token5, "DRAIN", "COM"))) return;
+        if (!(await this.testAdjustmentStacking(this.token5, this.token5, "DRAIN", "STUN"))) return;
         // return;
 
         // AID 6 multiple characteristics + stacking
@@ -85,27 +88,21 @@ export class HeroSystem6eEndToEndTest {
         // }
 
         // AID 5
-        // for (const char of getCharacteristicInfoArrayForActor(this.token5.actor).filter(
-        //     (c) => !["OCV", "DCV", "OMCV", "DMCV"].includes(c.key),
-        // )) {
-        //     await this.token5.actor.FullHealth();
-        //     await this.token6.actor.FullHealth();
-        //     if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", char.XMLID))) return;
-        // }
+        for (const char of getCharacteristicInfoArrayForActor(this.token5.actor)) {
+            await this.token5.actor.FullHealth();
+            await this.token6.actor.FullHealth();
+            if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", char.XMLID))) return;
+        }
 
-        // DRAIN 6  (PRE causes issues with an override request)
-        // for (const char of getCharacteristicInfoArrayForActor(this.token6.actor).filter(
-        //     (c) => !["PRE"].includes(c.key),
-        // )) {
+        // DRAIN 6
+        // for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
         //     await this.token5.actor.FullHealth();
         //     await this.token6.actor.FullHealth();
         //     if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", char.XMLID))) return;
         // }
 
-        // DRAIN 5 (PRE causes issues with an override request)
-        for (const char of getCharacteristicInfoArrayForActor(this.token5.actor).filter(
-            (c) => !["OCV", "DCV", "OMCV", "DMCV", "PRE"].includes(c.key),
-        )) {
+        // DRAIN 5
+        for (const char of getCharacteristicInfoArrayForActor(this.token5.actor)) {
             await this.token5.actor.FullHealth();
             await this.token6.actor.FullHealth();
             if (!(await this.testAdjustmentStacking(this.token5, this.token5, "DRAIN", char.XMLID))) return;
@@ -154,6 +151,9 @@ export class HeroSystem6eEndToEndTest {
         const x = Math.floor(this.scene.dimensions.width / 200) * 100;
         const y = Math.floor(this.scene.dimensions.height / 200) * 100;
 
+        // You may notice that we increase some characteristics.
+        // This is because some characteristics prevent actions or prompt when they go to 0 during DRAIN tests.
+
         // 5e
         for (const actor of game.actors.filter((a) => a.name === this.actor5Name)) {
             this.log(`Deleting ${actor.name}`);
@@ -167,6 +167,7 @@ export class HeroSystem6eEndToEndTest {
                 is5e: true,
                 "characteristics.end.core": 50,
                 "characteristics.pre.core": 50,
+                "characteristics.stun.core": 50,
             },
         });
         await this.actor5.update({ "system.is5e": true });
@@ -197,6 +198,7 @@ export class HeroSystem6eEndToEndTest {
                 is5e: false,
                 "characteristics.end.core": 50,
                 "characteristics.pre.core": 50,
+                "characteristics.stun.core": 50,
             },
         });
         await this.actor6.FullHealth();
@@ -371,7 +373,7 @@ export class HeroSystem6eEndToEndTest {
 
             // Confirm characteristic.value matches AE adjustment
             const _max = parseInt(adjustmentItem.system.LEVELS) * 6;
-            const _ap = -aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0);
+            const _ap = aeStacks.reduce((accum, currItem) => accum + currItem.ap, 0);
 
             // Some AE's are expected to fail
             let expectToFail = _ap >= _max && powerXMLID != "DRAIN";
