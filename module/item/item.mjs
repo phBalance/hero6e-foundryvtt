@@ -940,7 +940,7 @@ export class HeroSystem6eItem extends Item {
      * @param {Modifier} modifier
      * @returns
      */
-    buildAoeAttackParameters(modifier, options) {
+    buildAoeAttackParameters(modifier) {
         const is5e = !!this.actor?.system?.is5e;
 
         let changed = false;
@@ -1010,9 +1010,7 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     dcFalloff = 1;
                 }
-                dcFalloff = parseInt(options?.LEVELS || modifier.LEVELS || 0)
-                    ? parseInt(options?.LEVELS || modifier.LEVELS)
-                    : dcFalloff;
+                dcFalloff = modifier.LEVELS ? parseInt(modifier.LEVELS) : dcFalloff;
 
                 // TODO: Can we work with DC given all the adders that are possible at the time of attack?
                 const { dc } = calculateDcFromItem(this, {});
@@ -1020,7 +1018,7 @@ export class HeroSystem6eItem extends Item {
                 levels = dc * dcFalloff;
             }
         } else {
-            levels = parseInt(modifier.LEVELS);
+            levels = parseInt(modifier.LEVELS || 0);
         }
 
         // 5e has a slightly different alias for an Explosive Radius in HD.
@@ -4336,7 +4334,17 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-        }
+        } else if (xmlid === "SUSCEPTIBILITY") {
+            // FIXME: This XMLIDs aren't really attacks but they have either the attack or dice behaviour which means that,
+            // for the time, being we consider them to be attack like.
+            this.system.class = this.is5e ? "disadvantage" : "complication";
+            this.system.usesStrength = false;
+        } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
+            // FIXME: These XMLIDs aren't really attacks but they have either the attack or dice behaviour which means that,
+            // for the time, being we consider them to be attack like.
+            this.system.class = "luck";
+            this.system.usesStrength = false;
+        } 
 
         // AVAD
         const avad = this.findModsByXmlid("AVAD");
