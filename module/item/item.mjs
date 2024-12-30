@@ -2716,10 +2716,8 @@ export class HeroSystem6eItem extends Item {
                 xmlid: modifier.XMLID,
                 item: this,
             });
-            if (powerInfo && powerInfo.type?.includes("attack")) {
-                if (modifierInfo && modifierInfo.dc) {
-                    advantagesDc += Math.max(0, _myAdvantage);
-                }
+            if (modifierInfo?.dcAffecting(modifier)) {
+                advantagesDc += Math.max(0, _myAdvantage);
             }
 
             // Save _myAdvantage
@@ -4365,7 +4363,7 @@ export class HeroSystem6eItem extends Item {
             // for the time, being we consider them to be attack like.
             this.system.class = "luck";
             this.system.usesStrength = false;
-        } 
+        }
 
         // AVAD
         const avad = this.findModsByXmlid("AVAD");
