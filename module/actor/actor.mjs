@@ -1995,7 +1995,7 @@ export class HeroSystem6eActor extends Actor {
             const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
 
             powerList
-                .filter((power) => power.type.includes("maneuver"))
+                .filter((power) => power.type?.includes("maneuver"))
                 .forEach(async (maneuver) => {
                     const name = maneuver.name;
                     const XMLID = maneuver.key;
@@ -2047,6 +2047,7 @@ export class HeroSystem6eActor extends Actor {
                             parent: this,
                         });
                         if (maneuverDetails.attack) {
+                            console.warn(`${item.name}/${item.system.XMLID} is being turned into an attack`);
                             await item.makeAttack();
                         }
                         await item._postUpload();
