@@ -654,15 +654,18 @@ export async function performAdjustment(
     }
 
     // Healing is not cumulative but all else is. Healing cannot harm when lower than an existing effect.
-    let thisAttackEffectiveAdjustmentActivePoints = isHealing
-        ? Math.min(thisAttackRawActivePointsEffect - activeEffect.flags.adjustmentActivePoints, 0)
-        : thisAttackRawActivePointsEffect;
-    const thisAttackActivePointEffectNotAppliedDueToNotExceeding = isHealing
-        ? Math.max(activeEffect.flags.adjustmentActivePoints, thisAttackRawActivePointsEffect)
-        : 0;
-    //let thisAttackActivePointAdjustmentNotAppliedDueToMax;
-    const totalActivePointsStartingEffect =
-        activeEffect.flags.adjustmentActivePoints + thisAttackEffectiveAdjustmentActivePoints;
+    if (isHealing) {
+        console.log("HEALING");
+    }
+    // let thisAttackEffectiveAdjustmentActivePoints = isHealing
+    //     ? Math.min(thisAttackRawActivePointsEffect - activeEffect.flags.adjustmentActivePoints, 0)
+    //     : thisAttackRawActivePointsEffect;
+    // const thisAttackActivePointEffectNotAppliedDueToNotExceeding = isHealing
+    //     ? Math.max(activeEffect.flags.adjustmentActivePoints, thisAttackRawActivePointsEffect)
+    //     : 0;
+    // //let thisAttackActivePointAdjustmentNotAppliedDueToMax;
+    // const totalActivePointsStartingEffect =
+    //     activeEffect.flags.adjustmentActivePoints + thisAttackEffectiveAdjustmentActivePoints;
 
     // Clamp max adjustment to the max allowed by the power.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.
