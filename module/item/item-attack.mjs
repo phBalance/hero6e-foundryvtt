@@ -1750,15 +1750,15 @@ export async function _onRollMindScanEffectRoll(event) {
         ...toHitData,
     });
 
-    const formulaParts = calculateDicePartsFromDcForItem(effectiveItem, dc);
+    const diceParts = calculateDicePartsFromDcForItem(effectiveItem, dc);
 
     const mindScanRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
         .makeEffectRoll()
-        .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
-        .addHalfDice(formulaParts.halfDieCount >= 1 ? formulaParts.halfDieCount : 0)
-        .addDiceMinus1(formulaParts.d6Less1DieCount >= 1 ? formulaParts.d6Less1DieCount : 0)
-        .addNumber(formulaParts.constant)
+        .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
+        .addHalfDice(diceParts.halfDieCount >= 1 ? diceParts.halfDieCount : 0)
+        .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
+        .addNumber(diceParts.constant)
         .modifyToStandardEffect(useStandardEffect);
 
     await mindScanRoller.roll();

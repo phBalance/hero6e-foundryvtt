@@ -3,6 +3,7 @@ import * as heroDice from "./utility/dice.mjs";
 import { createDefenseProfile } from "./utility/defense.mjs";
 import { RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
+import { characteristicValueToDiceParts } from "./utility/damage.mjs";
 
 export const HERO = { heroDice };
 
@@ -5991,14 +5992,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: costPerLevelFixedValue(3 / 2),
-            dc: function (item, options) {
-                // The DC's for TELEKINESIS is based on STR.
+            damageDiceParts: function (item, options = {}) {
+                // The damage for TELEKINESIS is based on STR.
                 // Each LEVEL of TELEKINESIS is equal to 1 pt of STR.
-                let str = parseInt(item.system.LEVELS) || 0;
-                str = options?.effectivestr != undefined ? options?.effectivestr : str;
-                let str5 = Math.floor(str / 5);
-                const dc = str5;
-                return dc;
+                const str =
+                    options.effectivestr != undefined
+                        ? parseInt(options.effectivestr)
+                        : parseInt(item.system.LEVELS || 0);
+
+                return characteristicValueToDiceParts(str);
             },
             xml: `<POWER XMLID="TELEKINESIS" ID="1709334027228" BASECOST="0.0" LEVELS="2" ALIAS="Telekinesis" POSITION="79" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
@@ -6794,7 +6796,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["disadvantage"],
             behaviors: ["dice"],
             name: "Susceptibility",
-            costPerLevel: costPerLevelFixedValue(0), // TODO: needs function
+            costPerLevel: costPerLevelFixedValue(5), // NOTE: Doesn't use LEVELS but this helps our DC calculations
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             xml: `<DISAD XMLID="SUSCEPTIBILITY" ID="1709445759247" BASECOST="0.0" LEVELS="0" ALIAS="Susceptibility" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
@@ -7320,12 +7322,8 @@ HERO.ModifierOverride = {
     ADDITIONALED: { BASECOST: 5 / 2 },
     ADDITIONALPD: { BASECOST: 5 / 2 },
     ALWAYSOCCURS: { BASECOST: 0, MULTIPLIER: 2 },
-    //AOE: { dc: true },
-    //ARMORPIERCING: { BASECOST: 0.25, dc: true },
-    //AUTOFIRE: { dc: true },
     AVAD: { dc: true },
     BOOSTABLE: { dc: true },
-    //CONTINUOUS: { dc: true },
     CONTINUOUSCONCENTRATION: { BASECOST: -0.25 },
     DAMAGEOVERTIME: { dc: true },
     DEFBONUS: { BASECOST: 2 },
@@ -7333,13 +7331,9 @@ HERO.ModifierOverride = {
     DIMENSIONS: { BASECOST: 5 },
     DOESBODY: { dc: true },
     DOUBLEKB: { dc: true },
-    //ENDURANCERESERVEREC: { BASECOST: 2 / 3 },
     ENERGY: { BASECOST: 5 }, // DAMAGENEGATION
-    //HARDENED: { BASECOST: 0.25 },
-    //IMPENETRABLE: { BASECOST: 0.25 },
     IMPROVEDNONCOMBAT: { BASECOST: 5 },
     MENTAL: { BASECOST: 5 }, // DAMAGENEGATION
-    //PENETRATING: { BASECOST: 0.5, dc: true },
     PHYSICAL: { BASECOST: 5 }, // DAMAGENEGATION
     STICKY: { dc: true },
     TIMELIMIT: { dc: true },

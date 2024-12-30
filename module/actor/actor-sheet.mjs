@@ -8,7 +8,7 @@ import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { combatSkillLevelsForAttack, calculateDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
+import { combatSkillLevelsForAttack, calculateDcFromItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
@@ -923,11 +923,11 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     async _onPrimaryNonStrengthCharacteristicRoll(characteristicValue, flavor) {
         // NOTE: Characteristic rolls can't have +1 to their roll.
-        const diceParts = convertToDiceParts(characteristicValue);
+        const diceParts = characteristicValueToDiceParts(characteristicValue);
         const characteristicRoller = new HeroRoller()
             .makeBasicRoll()
-            .addDice(diceParts.dice)
-            .addHalfDice(diceParts.halfDice ? 1 : 0);
+            .addDice(diceParts.d6Count)
+            .addHalfDice(diceParts.halfDieCount ? 1 : 0);
 
         await characteristicRoller.roll();
 
@@ -974,11 +974,11 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         // NOTE: Characteristic rolls can't have +1 to their roll.
-        const diceParts = convertToDiceParts(characteristicValue);
+        const diceParts = characteristicValueToDiceParts(characteristicValue);
         const characteristicRoller = new HeroRoller()
             .makeNormalRoll()
-            .addDice(diceParts.dice)
-            .addHalfDice(diceParts.halfDice ? 1 : 0);
+            .addDice(diceParts.d6Count)
+            .addHalfDice(diceParts.halfDieCount ? 1 : 0);
 
         await characteristicRoller.roll();
         const damageRenderedResult = await characteristicRoller.render();

@@ -25,12 +25,26 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
-// PH: TODO: see if we can do anything about this - add to other methods like it?
-export function convertToDiceParts(value) {
-    const dice = Math.floor(value / 5);
-    const halfDice = value % 5 >= 2.5 ? 1 : 0;
-    const plus1 = value % 5 < 2.5 && value % 5 > 0 ? 1 : 0;
-    return { dice, halfDice, plus1 };
+/**
+ * @typedef {Object} HeroSystemFormulaDiceParts
+ * @property {number} d6Count - number of whole dice (e.g. 73d6)
+ * @property {number} d6Less1DieCount - 1 or 0 1d6-1 terms (e.g. 1d6-1)
+ * @property {number} halfDieCount - 1 or 0 half dice terms (e.g. ½d6)
+ * @property {number} constant - 1 or 0 reflecting a +1 (e.g. 2d6 + 1)
+ */
+
+/**
+ * Return the dice and half dice roll for this characteristic value. Doesn't support +1 intentionally.
+ * @param {number} value
+ * @returns {HeroSystemFormulaDiceParts}
+ */
+export function characteristicValueToDiceParts(value) {
+    return {
+        d6Count: Math.floor(value / 5),
+        d6Less1DieCount: 0,
+        halfDieCount: RoundFavorPlayerUp((value % 5) / 5),
+        constant: 0,
+    };
 }
 
 function effectiveStrength(item, options) {
@@ -89,6 +103,8 @@ function calculateBaseDcFromItem(item, options) {
         rawItemBaseDc = Math.floor(str / 5);
         effectiveItemName = "STR";
 
+        // PH: FIXME: Does this work correctly in heroic with weapons and STRMIN?
+
         // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
         // strength for damage purposes.
         if (str >= 3) {
@@ -106,17 +122,11 @@ function calculateBaseDcFromItem(item, options) {
     } else if (["maneuver", "martialart"].includes(item.type)) {
         rawItemBaseDc = parseInt(item.system.DC);
     } else {
-        // PH: FIXME: Either everything has a DC function or nothing has one.
-        if (typeof item.baseInfo?.dc === "function") {
-            rawItemBaseDc = item.baseInfo.dc(item, options);
-        } else {
-            rawItemBaseDc = Math.floor(item.system.activePointsDc / 5);
-        }
+        rawItemBaseDc = Math.floor(item.system.activePointsDc / 5);
     }
 
     // FRed pg. 406: 5e maneuver/martial arts DCs are halved for killing attacks. This applies to the base DC
     // of the maneuver/martial art as well. As always, no partial DCs allowed.
-    // PH: FIXME: Not sure this is true as written for raw strength? Presumably it is but not sure.
     let itemBaseDc = rawItemBaseDc;
     if (item.is5e && ["maneuver", "martialart"].includes(item.type) && item.system.killing) {
         itemBaseDc = Math.floor(itemBaseDc / 2);
@@ -133,7 +143,6 @@ function calculateBaseDcFromItem(item, options) {
         ],
     };
 
-    // PH: FIXME: This is not correct as it does not account for only unarmed attacks.
     // 5e martial arts EXTRADCs are baseDCs
     if (item.is5e && item.type === "martialart" && !item.system.USEWEAPON) {
         addExtraDcs(item, baseDc, true);
@@ -208,9 +217,6 @@ export function calculateDcFromItem(item, options) {
         let str = effectiveStrength(item, options);
 
         // MOVEBY halves STR
-        // PH: FIXME: Missing move through...
-        // PH: FIXME: Is this the best way to do it? Shouldn't we have a generic way of handling maneuvers rather than 1 off?
-        //            This would allow us to make a tag and then do things like subtract off strength minimums.
         if (item.system.XMLID === "MOVEBY") {
             str = RoundFavorPlayerUp(str / 2);
         }
@@ -525,18 +531,12 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         halfDieCount: halfDieCount,
 
         // PH: FIXME: Note that the 6e vol 2 p.97 shows that 1/2d6 < 1d6-1
+        // PH: FIXME: Not implemented yet
         d6Less1DieCount: 0,
         constant,
     };
 }
 
-/**
- * @typedef {Object} HeroSystemFormulaDiceParts
- * @property {number} d6Count - number of whole dice (e.g. 73d6)
- * @property {number} d6Less1DieCount - 1 or 0 1d6-1 terms (e.g. 1d6-1)
- * @property {number} halfDieCount - 1 or 0 half dice terms (e.g. ½d6)
- * @property {number} constant - 1 or 0 reflecting a +1 (e.g. 2d6 + 1)
- */
 /**
  * Add two dice parts together by steps and not straight math. For example: 1/2d6 + 1/2d6 = 1d6+1
  * @param {HeroSystemFormulaDiceParts} firstDiceParts
@@ -564,6 +564,18 @@ export function addDiceParts(firstDiceParts, secondDiceParts, useDieMinusOne) {
     return result;
 }
 
+// This function is not great. Really it needs to be fed AP or something that will allow pushing.
+function getRawDicePartsFromItem(item, options) {
+    return (
+        item.baseInfo.damageDiceParts?.(item, options) ?? {
+            d6Count: parseInt(item.system.LEVELS || 0),
+            d6Less1DieCount: item.findModsByXmlid("MINUSONEPIP") ? 1 : 0,
+            halfDieCount: item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0,
+            constant: item.findModsByXmlid("PLUSONEPIP") ? 1 : 0,
+        }
+    );
+}
+
 /**
  * Calculate the damage dice for an item
  *
@@ -582,12 +594,7 @@ export function calculateDicePartsForItem(item, options) {
     // Get basic damage based on base DC (for maneuvers/martialarts) or the item's dice
     const baseDiceParts = ["maneuver", "martialart"].includes(item.type)
         ? calculateDicePartsFromDcForItem(item, itemBaseDc)
-        : {
-              d6Count: parseInt(item.system.LEVELS || 0),
-              d6Less1DieCount: item.findModsByXmlid("MINUSONEPIP") ? 1 : 0,
-              halfDieCount: item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0,
-              constant: item.findModsByXmlid("PLUSONEPIP") ? 1 : 0,
-          };
+        : getRawDicePartsFromItem(item, options);
 
     // Add the basic dice with the added dice
     const useDieMinusOne = !!item.findModsByXmlid("MINUSONEPIP");
