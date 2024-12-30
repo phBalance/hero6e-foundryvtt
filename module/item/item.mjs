@@ -2240,7 +2240,13 @@ export class HeroSystem6eItem extends Item {
         itemData.system ??= {};
         itemData.system.is5e = actor.system?.is5e;
 
-        const powerList = actor.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+        const powerList = (actor.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e).filter(
+            (possibleNonModifierOrAdder) =>
+                !(
+                    possibleNonModifierOrAdder.behaviors.includes("adder") ||
+                    possibleNonModifierOrAdder.behaviors.includes("modifier")
+                ),
+        );
         for (const itemTag of [
             ...HeroSystem6eItem.ItemXmlTags,
             ...powerList
