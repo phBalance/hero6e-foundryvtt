@@ -654,8 +654,6 @@ export function registerDamageFunctionTests(quench) {
                 });
             });
 
-            // PH: FIXME: add test for doubling rule
-
             describe("calculateDcFromItem 5e - EGOATTACK", function () {
                 const contents = `
                     <POWER XMLID="EGOATTACK" ID="1734666299193" BASECOST="0.0" LEVELS="1" ALIAS="Ego Attack" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Standard Ego Attack" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
