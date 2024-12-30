@@ -1298,6 +1298,10 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.value, 62);
                 });
 
+                it("damage", function () {
+                    assert.equal(item.system.damage, "12d6");
+                });
+
                 it("end", function () {
                     assert.equal(item.system.end, 9);
                 });
