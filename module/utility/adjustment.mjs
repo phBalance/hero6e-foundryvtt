@@ -517,7 +517,7 @@ export async function performAdjustment(
             targetActor,
             targetActor?.is5e,
         );
-        if (_multiplier !== 1) {
+        if (_multiplier !== 1 && !attackItem.system.INPUT.match(/simplified/i)) {
             console.log(`Defense multiplier ${_multiplier}`);
             thisAttackActivePointsEffect = Math.max(1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
         }
@@ -531,21 +531,6 @@ export async function performAdjustment(
         // Shortcut here in case we have 0 adjustment done for performance. This will stop
         // active effects with 0 AP being created and unnecessary AE and characteristic no-op updates.
         if (thisAttackActivePointsEffect <= 0) {
-            // return _generateAdjustmentChatCard(
-            //     attackItem,
-            //     thisAttackActivePointsEffect,
-            //     totalActivePointAffectedDifference,
-            //     maximumEffectActivePoints,
-            //     thisAttackActivePointAdjustmentNotAppliedDueToMax,
-            //     thisAttackActivePointEffectNotAppliedDueToNotExceeding,
-            //     defenseDescription,
-            //     effectsDescription,
-            //     potentialCharacteristic,
-            //     isFade,
-            //     false,
-            //     targetActor,
-            // );
-
             return _generateAdjustmentChatCard(
                 attackItem,
                 thisAttackActivePointsEffectRaw,
@@ -574,21 +559,12 @@ export async function performAdjustment(
 
         if (totalPointsDifference !== 0) {
             await targetActor.update({ [`system.characteristics.${char}.value`]: newActorValue });
-            //change.value = totalPointsDifference;
-            // const changes = [];
-            // changes.push({ ...change, key: `${char}.apMaxEffect`, value: maximumEffectActivePoints });
-            // changes.push({ ...change, key: `${char}.apCurrentEffect`, value: newAeApCurrentEffect });
             activeEffect.changes = [change];
             activeEffect.flags.adjustmentActivePoints =
                 (activeEffect.flags.adjustmentActivePoints || 0) + thisAttackActivePointsEffect;
-            //activeEffect.flags.affectedPoints = totalPointsDifference;
             totalEffectActivePointsForXmlid = activeEffect.flags.adjustmentActivePoints;
         }
     }
-
-    // TODO: The code below might not work correctly with non integer costs per active point
-
-    // Positive Adjustment Powers have maximum effects.
 
     if (!isHealing) {
         if (isFade) {
