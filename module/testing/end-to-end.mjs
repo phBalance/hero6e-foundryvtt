@@ -63,6 +63,9 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestActors();
 
         // Interactive Testing (change these at will)
+        await this.token6.actor.update({ "system.characteristics.end.value": 10 });
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "HEALING", "END"))) return;
+        return;
         if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "OCV"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
@@ -410,8 +413,8 @@ export class HeroSystem6eEndToEndTest {
             for (let i = 0; i < 50; i++) {
                 const char = adjustmentActiveEffect.changes[0].key.match(/([a-z]+)\.max/)?.[1];
                 if (
-                    tokenTarget.actor.system.characteristics[char].value ===
-                    tokenTarget.actor.system.characteristics[char].max
+                    tokenTarget.actor.system.characteristics[char]?.value ===
+                    tokenTarget.actor.system.characteristics[char]?.max
                     //actorCharaisticValue[adjustmentActiveEffect.changes[0].key]
                 )
                     break;

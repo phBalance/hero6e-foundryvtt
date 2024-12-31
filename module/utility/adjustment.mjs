@@ -139,8 +139,8 @@ export function determineMaxAdjustment(item) {
         item.system.XMLID !== "ABSORPTION" &&
         item.system.XMLID !== "AID" &&
         item.system.XMLID !== "SUCCOR" &&
-        item.system.XMLID !== "TRANSFER"
-        // && item.system.XMLID !== "HEALING"
+        item.system.XMLID !== "TRANSFER" &&
+        item.system.XMLID !== "HEALING"
     ) {
         return reallyBigInteger;
     }
@@ -242,7 +242,7 @@ function _findExistingMatchingEffect(item, potentialCharacteristic, targetSystem
         (effect) =>
             effect.origin === item.uuid &&
             effect.flags.createTime === game.time.worldTime &&
-            !effect.changes.find((c) => c.key === _change.key) &&
+            (effect.flags.XMLID === "HEALING" || !effect.changes.find((c) => c.key === _change.key)) &&
             effect.flags.initialCostPerActivePoint === costPerActivePoint,
         //effect.flags.target[0] === (powerTargetName?.uuid || potentialCharacteristic), //&&
         //parseInt(effect.changes?.[0].value || 0) >= 0,
@@ -476,187 +476,270 @@ export async function performAdjustment(
             action,
         );
 
-    // Healing doesn't fade
-    if (existingEffect && isFade && isHealing) {
-        const deletePromise = existingEffect.delete();
-
-        const chatCard = _generateAdjustmentChatCard(
-            attackItem,
-            thisAttackActivePointsEffectRaw, //existingEffect.flags.adjustmentActivePoints,
-            0,
-            0,
-            0,
-            0,
-            defenseDescription,
-            effectsDescription,
-            potentialCharacteristic,
-            true,
-            true,
-            targetActor,
-        );
-
-        await deletePromise;
-
-        return chatCard;
-    }
-
-    // TODO: The code below might not work correctly with non integer costs per active point
-
-    // Positive Adjustment Powers have maximum effects.
     const maximumEffectActivePoints = determineMaxAdjustment(attackItem);
-    let totalActivePointAffectedDifference = 0;
+    //let totalActivePointAffectedDifference = 0;
     let totalPointsDifference = 0;
     let thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
     let thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing = 0;
     let isEffectFinished = false;
     const previousChanges = foundry.utils.deepClone(existingEffect?.changes);
+    let totalEffectActivePointsForXmlid;
 
-    if (isFade) {
-        if (!existingEffect.changes?.[0]) {
-            console.error("Fade failed", existingEffect);
-        }
-        totalActivePointAffectedDifference = thisAttackActivePointsEffect;
-        existingEffect.flags.adjustmentActivePoints += thisAttackActivePointsEffect;
-        totalPointsDifference = parseInt(existingEffect.changes[0].value);
+    // Healing is special
+    if (isHealing) {
+        // Healing doesn't fade
+        if (existingEffect && isFade && isHealing) {
+            //const deletePromise = existingEffect.delete();
 
-        for (const change of activeEffect.changes) {
-            const char = change.key.match(/([a-z]+)\.max/)?.[1];
-            // Note that costPerActivePoint is different between fade/recovery and initial adjustment (which uses defense multiplier)
-            const costPerActivePoint = determineCostPerActivePoint(char, null, targetActor);
-            change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
-        }
-        //existingEffect.changes[0].value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
-        totalPointsDifference = existingEffect.changes[0].value - totalPointsDifference;
+            const chatCard = _generateAdjustmentChatCard(
+                attackItem,
+                thisAttackActivePointsEffectRaw, //existingEffect.flags.adjustmentActivePoints,
+                0,
+                0,
+                0,
+                0,
+                defenseDescription,
+                effectsDescription,
+                potentialCharacteristic,
+                true,
+                true,
+                targetActor,
+            );
 
-        if (activeEffect.flags.adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
-            isEffectFinished = true;
-            await existingEffect.delete();
-        } else {
-            updateEffectName(existingEffect);
-            await existingEffect.update({
-                name: existingEffect.name,
-                changes: existingEffect.changes,
-                flags: existingEffect.flags,
-                "duration.startTime": existingEffect.duration.startTime + existingEffect.duration.seconds,
-            });
+            // await deletePromise;
+
+            return chatCard;
         }
-    } else {
-        // Note that costPerActivePoint is different between fade/recovery and initial adjustment (which uses defense multiplier)
-        const costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, null, targetActor);
-        const costPerActivePointWithDefenseMultipler = determineCostPerActivePointWithDefenseMultipler(
-            potentialCharacteristic,
-            null,
-            targetActor,
-        );
+
+        // Halve AP, min 1 for defenses
         const _multiplier = defensivePowerAdjustmentMultiplier(
             potentialCharacteristic.toUpperCase(),
             targetActor,
             targetActor?.is5e,
         );
-
-        // Halve AP, min 1
-        // GM_Champion (he/him) — Dec 28 2024 https://discord.com/channels/609528652878839828/609529601600782378/1322714156025122878
-        // Minimum 1 character point.
-        // There is no effect until 40, but you track the points drained until they reach 40.
-        // It's like a measuring cup - the drain takes out a little water at a time, which eventually adds up to one full mark on the cup.
-        //
-        //  GM_Champion (he/him) https://discord.com/channels/609528652878839828/609529601600782378/1322742128312582196
-        // The book answer for you is 6e1 p.138, right column, top paragraph, final sentence, "...and the remainder can be added to by another use of the Power later on, potentially taking effect."
         if (_multiplier !== 1) {
             console.log(`Defense multiplier ${_multiplier}`);
-            if (thisAttackActivePointsEffect > 0) {
-                thisAttackActivePointsEffect = Math.max(1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
-            } else {
-                thisAttackActivePointsEffect = Math.min(-1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
-            }
+            thisAttackActivePointsEffect = Math.max(1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
         }
 
-        // Positive Adjustment
-        if (thisAttackActivePointsEffect > 0) {
-            const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
+        thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing = thisAttackActivePointsEffect;
 
-            // Determine Effective Active Points for this attack
-            const previousActivePointsForThisXmlid = targetActor.temporaryEffects.reduce(
-                (a, c) => a + (c.changes.find((cc) => cc.key === change.key) ? c.flags.adjustmentActivePoints : 0),
-                0,
+        // Subtract pervious AP as repeated healing is only effective if you exceed previous AP
+        thisAttackActivePointsEffect = thisAttackActivePointsEffect - (activeEffect.flags.adjustmentActivePoints || 0);
+        thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing -= thisAttackActivePointsEffect;
+
+        // Shortcut here in case we have 0 adjustment done for performance. This will stop
+        // active effects with 0 AP being created and unnecessary AE and characteristic no-op updates.
+        if (thisAttackActivePointsEffect <= 0) {
+            // return _generateAdjustmentChatCard(
+            //     attackItem,
+            //     thisAttackActivePointsEffect,
+            //     totalActivePointAffectedDifference,
+            //     maximumEffectActivePoints,
+            //     thisAttackActivePointAdjustmentNotAppliedDueToMax,
+            //     thisAttackActivePointEffectNotAppliedDueToNotExceeding,
+            //     defenseDescription,
+            //     effectsDescription,
+            //     potentialCharacteristic,
+            //     isFade,
+            //     false,
+            //     targetActor,
+            // );
+
+            return _generateAdjustmentChatCard(
+                attackItem,
+                thisAttackActivePointsEffectRaw,
+                totalPointsDifference, //totalActivePointAffectedDifference,
+                totalEffectActivePointsForXmlid,
+                thisAttackActivePointAdjustmentNotAppliedDueToMax,
+                thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,
+                defenseDescription,
+                effectsDescription,
+                targetUpperCaseName, //potentialCharacteristic,
+                isFade,
+                isEffectFinished,
+                targetActor,
             );
-
-            const previousPointsForThisChangeKey = targetActor.temporaryEffects.reduce(
-                (a, c) => a + parseInt(c.changes.find((cc) => cc.key === change.key)?.value || 0),
-                0,
-            );
-
-            // Max Effect for this attack
-            const thisAttackMaxActivePoints =
-                previousActivePointsForThisXmlid > maximumEffectActivePoints
-                    ? 0
-                    : Math.min(maximumEffectActivePoints - previousActivePointsForThisXmlid);
-            activeEffect.flags.adjustmentActivePoints = Math.min(
-                thisAttackMaxActivePoints,
-                thisAttackActivePointsEffect,
-            );
-            const finalAp = previousActivePointsForThisXmlid + activeEffect.flags.adjustmentActivePoints;
-            const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
-
-            change.value = targetValue - previousPointsForThisChangeKey;
-            activeEffect.changes.push(change);
-
-            thisAttackActivePointAdjustmentNotAppliedDueToMax =
-                thisAttackActivePointsEffect - activeEffect.flags.adjustmentActivePoints;
-
-            //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
-            totalPointsDifference = activeEffect.changes[0].value;
-
-            // TODO: Healing
         }
 
-        // Negative Adjustment
-        else if (thisAttackActivePointsEffect < 0) {
-            const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
-            const previousActivePointsForThisXmlid = targetActor.temporaryEffects.reduce(
-                (a, c) => a + (c.changes.find((cc) => cc.key === change.key) ? c.flags.adjustmentActivePoints : 0),
-                0,
-            );
-            activeEffect.flags.adjustmentActivePoints = thisAttackActivePointsEffect;
-            const finalAp =
-                activeEffect.flags.adjustmentActivePoints + (previousActivePointsForThisXmlid % costPerActivePoint);
-            const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
-            change.value = targetValue;
-            activeEffect.changes.push(change);
+        const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
+        const char = change.key.match(/([a-z]+)\.max/)?.[1];
 
-            thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
-            //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
-            totalPointsDifference = activeEffect.changes[0].value;
-        }
+        const actorValue = targetActor.system.characteristics[char].value;
+        const actorMax = targetActor.system.characteristics[char].max;
+        const costPerActivePoint = determineCostPerActivePoint(char, null, targetActor);
+        const value = Math.max(1, Math.floor(thisAttackActivePointsEffect / costPerActivePoint));
+        const newActorValue = Math.min(actorMax, actorValue + value);
+        totalPointsDifference = Math.abs(actorValue - newActorValue);
 
-        // Add new activeEffect
-        if (!existingEffect && activeEffect.flags.adjustmentActivePoints !== 0) {
-            updateEffectName(activeEffect);
-            const createdEffects = await targetSystem.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-
-            await recalcEffectBasedOnTotalApForXmlid(createdEffects[0]);
-
-            updateEffectName(createdEffects[0]);
-            await createdEffects[0].update({ name: createdEffects[0].name });
-        } else if (activeEffect.flags.adjustmentActivePoints !== 0) {
-            // Were likely adding a second change row
-            updateEffectName(activeEffect);
-            await activeEffect.update({ name: activeEffect.name, changes: activeEffect.changes });
-        } else {
-            console.warn("ActiveEffect not created because adjustmentActivePoints=0");
+        if (totalPointsDifference !== 0) {
+            await targetActor.update({ [`system.characteristics.${char}.value`]: newActorValue });
+            //change.value = totalPointsDifference;
+            // const changes = [];
+            // changes.push({ ...change, key: `${char}.apMaxEffect`, value: maximumEffectActivePoints });
+            // changes.push({ ...change, key: `${char}.apCurrentEffect`, value: newAeApCurrentEffect });
+            activeEffect.changes = [change];
+            activeEffect.flags.adjustmentActivePoints =
+                (activeEffect.flags.adjustmentActivePoints || 0) + thisAttackActivePointsEffect;
+            //activeEffect.flags.affectedPoints = totalPointsDifference;
+            totalEffectActivePointsForXmlid = activeEffect.flags.adjustmentActivePoints;
         }
     }
 
-    await updateCharacteristicValue(activeEffect, { targetSystem, previousChanges });
+    // TODO: The code below might not work correctly with non integer costs per active point
 
-    if (isFade) {
+    // Positive Adjustment Powers have maximum effects.
+
+    if (!isHealing) {
+        if (isFade) {
+            if (!existingEffect.changes?.[0]) {
+                console.error("Fade failed", existingEffect);
+            }
+            //totalActivePointAffectedDifference = thisAttackActivePointsEffect;
+            existingEffect.flags.adjustmentActivePoints += thisAttackActivePointsEffect;
+            totalPointsDifference = parseInt(existingEffect.changes[0].value);
+
+            for (const change of activeEffect.changes) {
+                const char = change.key.match(/([a-z]+)\.max/)?.[1];
+                // Note that costPerActivePoint is different between fade/recovery and initial adjustment (which uses defense multiplier)
+                const costPerActivePoint = determineCostPerActivePoint(char, null, targetActor);
+                change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
+            }
+            //existingEffect.changes[0].value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint);
+            totalPointsDifference = existingEffect.changes[0].value - totalPointsDifference;
+
+            if (activeEffect.flags.adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
+                isEffectFinished = true;
+                await existingEffect.delete();
+            } else {
+                updateEffectName(existingEffect);
+                await existingEffect.update({
+                    name: existingEffect.name,
+                    changes: existingEffect.changes,
+                    flags: existingEffect.flags,
+                    "duration.startTime": existingEffect.duration.startTime + existingEffect.duration.seconds,
+                });
+            }
+        } else {
+            // Note that costPerActivePoint is different between fade/recovery and initial adjustment (which uses defense multiplier)
+            const costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, null, targetActor);
+            // const costPerActivePointWithDefenseMultipler = determineCostPerActivePointWithDefenseMultipler(
+            //     potentialCharacteristic,
+            //     null,
+            //     targetActor,
+            // );
+            const _multiplier = defensivePowerAdjustmentMultiplier(
+                potentialCharacteristic.toUpperCase(),
+                targetActor,
+                targetActor?.is5e,
+            );
+
+            // Halve AP, min 1
+            // GM_Champion (he/him) — Dec 28 2024 https://discord.com/channels/609528652878839828/609529601600782378/1322714156025122878
+            // Minimum 1 character point.
+            // There is no effect until 40, but you track the points drained until they reach 40.
+            // It's like a measuring cup - the drain takes out a little water at a time, which eventually adds up to one full mark on the cup.
+            //
+            //  GM_Champion (he/him) https://discord.com/channels/609528652878839828/609529601600782378/1322742128312582196
+            // The book answer for you is 6e1 p.138, right column, top paragraph, final sentence, "...and the remainder can be added to by another use of the Power later on, potentially taking effect."
+            if (_multiplier !== 1) {
+                console.log(`Defense multiplier ${_multiplier}`);
+                if (thisAttackActivePointsEffect > 0) {
+                    thisAttackActivePointsEffect = Math.max(1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
+                } else {
+                    thisAttackActivePointsEffect = Math.min(-1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
+                }
+            }
+
+            // Positive Adjustment
+            if (thisAttackActivePointsEffect > 0) {
+                const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
+
+                // Determine Effective Active Points for this attack
+                const previousActivePointsForThisXmlid = targetActor.temporaryEffects.reduce(
+                    (a, c) => a + (c.changes.find((cc) => cc.key === change.key) ? c.flags.adjustmentActivePoints : 0),
+                    0,
+                );
+
+                const previousPointsForThisChangeKey = targetActor.temporaryEffects.reduce(
+                    (a, c) => a + parseInt(c.changes.find((cc) => cc.key === change.key)?.value || 0),
+                    0,
+                );
+
+                // Max Effect for this attack
+                const thisAttackMaxActivePoints =
+                    previousActivePointsForThisXmlid > maximumEffectActivePoints
+                        ? 0
+                        : Math.min(maximumEffectActivePoints - previousActivePointsForThisXmlid);
+                activeEffect.flags.adjustmentActivePoints = Math.min(
+                    thisAttackMaxActivePoints,
+                    thisAttackActivePointsEffect,
+                );
+                const finalAp = previousActivePointsForThisXmlid + activeEffect.flags.adjustmentActivePoints;
+                const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
+
+                change.value = targetValue - previousPointsForThisChangeKey;
+                activeEffect.changes.push(change);
+
+                thisAttackActivePointAdjustmentNotAppliedDueToMax =
+                    thisAttackActivePointsEffect - activeEffect.flags.adjustmentActivePoints;
+
+                //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
+                totalPointsDifference = activeEffect.changes[0].value;
+
+                // TODO: Healing
+            }
+
+            // Negative Adjustment
+            else if (thisAttackActivePointsEffect < 0) {
+                const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
+                const previousActivePointsForThisXmlid = targetActor.temporaryEffects.reduce(
+                    (a, c) => a + (c.changes.find((cc) => cc.key === change.key) ? c.flags.adjustmentActivePoints : 0),
+                    0,
+                );
+                activeEffect.flags.adjustmentActivePoints = thisAttackActivePointsEffect;
+                const finalAp =
+                    activeEffect.flags.adjustmentActivePoints + (previousActivePointsForThisXmlid % costPerActivePoint);
+                const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
+                change.value = targetValue;
+                activeEffect.changes.push(change);
+
+                thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
+                //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
+                totalPointsDifference = activeEffect.changes[0].value;
+            }
+        }
+    }
+
+    // Add new activeEffect
+    if (!existingEffect && activeEffect.flags.adjustmentActivePoints !== 0) {
+        updateEffectName(activeEffect);
+        const createdEffects = await targetSystem.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+
+        if (!isHealing) {
+            await recalcEffectBasedOnTotalApForXmlid(createdEffects[0]);
+        }
+
+        updateEffectName(createdEffects[0]);
+        await createdEffects[0].update({ name: createdEffects[0].name });
+    } else if (activeEffect.flags.adjustmentActivePoints !== 0) {
+        // Were likely adding a second change row
+        updateEffectName(activeEffect);
+        await activeEffect.update({ name: activeEffect.name, changes: activeEffect.changes });
+    } else {
+        console.warn("ActiveEffect not created because adjustmentActivePoints=0");
+    }
+
+    if (!isHealing) {
+        await updateCharacteristicValue(activeEffect, { targetSystem, previousChanges });
+    }
+
+    if (isFade && !isHealing) {
         await recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade);
     }
 
     // Healing is not cumulative but all else is. Healing cannot harm when lower than an existing effect.
-    if (isHealing) {
-        console.log("HEALING");
-    }
+
     // let thisAttackEffectiveAdjustmentActivePoints = isHealing
     //     ? Math.min(thisAttackRawActivePointsEffect - activeEffect.flags.adjustmentActivePoints, 0)
     //     : thisAttackRawActivePointsEffect;
@@ -845,21 +928,23 @@ export async function performAdjustment(
 
     // Sanity check for totalPointsDifference
     // We may have changed it during recalcEffectBasedOnTotalApForXmlid
-    const _totalPointsDifference = activeEffect.changes.find((c) => c.key === _key).value;
-    if (totalPointsDifference != _totalPointsDifference) {
-        totalPointsDifference = _totalPointsDifference;
-        console.warn(`_totalPointsDifference`);
-    }
+    if (!isHealing) {
+        const _totalPointsDifference = activeEffect.changes.find((c) => c.key === _key)?.value;
+        if (totalPointsDifference != _totalPointsDifference) {
+            totalPointsDifference = _totalPointsDifference;
+            console.warn(`_totalPointsDifference`);
+        }
 
-    const totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects)
-        .filter(
-            (ae) =>
-                ae.changes.find((c) => c.key === _key) &&
-                //ae.flags.XMLID === activeEffect.flags.XMLID &&
-                ae.flags.type === "adjustment" &&
-                ae.flags.key === activeEffect.flags.key,
-        )
-        .reduce((accum, curr) => accum + curr.flags.adjustmentActivePoints, 0);
+        totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects)
+            .filter(
+                (ae) =>
+                    ae.changes.find((c) => c.key === _key && parseInt(c.value) !== 0) &&
+                    //ae.flags.XMLID === activeEffect.flags.XMLID &&
+                    ae.flags.type === "adjustment" &&
+                    ae.flags.key === activeEffect.flags.key,
+            )
+            .reduce((accum, curr) => accum + curr.flags.adjustmentActivePoints, 0);
+    }
 
     return _generateAdjustmentChatCard(
         attackItem,
@@ -1011,9 +1096,19 @@ function updateEffectName(activeEffect) {
     let _array = [];
     for (const c of activeEffect.changes) {
         const _name = c.key.match(/([a-z]+)\.max/)?.[1].replace("system", activeEffect.flags.key);
+        if (!_name) {
+            _array.push({
+                name: activeEffect.flags.key.toUpperCase(),
+                value: activeEffect.flags.XMLID,
+            });
+            break;
+        }
         let _value = (parseInt(activeEffect.changes?.[0].value) || 0).signedString();
         if (_value === "+0" && activeEffect.flags.adjustmentActivePoints < 0) {
             _value = "-0";
+        }
+        if (parseInt(_value) || 0 === 0) {
+            _value = activeEffect.flags.XMLID;
         }
         const valItem = _array.find((o) => o.value === _value);
         if (valItem) {
