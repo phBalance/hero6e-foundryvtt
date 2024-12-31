@@ -244,14 +244,14 @@ function validatePowers() {
     }
     numViolations += powersWithoutBehaviors.length;
 
-    // Has range field and is not framework/compound
+    // Has range field and is not framework/compound/adder/modifier
     const powersWithoutRange = this.filter(
         (power) =>
             !(
-                power.type.includes("framework") ||
-                power.type.includes("compound") ||
                 power.behaviors.includes("adder") ||
-                power.behaviors.includes("modifier")
+                power.behaviors.includes("modifier") ||
+                power.type.includes("framework") ||
+                power.type.includes("compound")
             ) && !power.range,
     );
     if (powersWithoutRange.length > 0) {
@@ -259,9 +259,10 @@ function validatePowers() {
     }
     numViolations += powersWithoutRange.length;
 
-    // A power without duration field?
+    // A power (not modifier or adder) without duration field?
     const powersWithoutDuration = this.filter(
         (power) =>
+            !(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
             !power.duration &&
             (power.type.includes("adjustment ") ||
                 (power.type.includes("attack") && !power.type.includes("martial")) ||
@@ -6881,6 +6882,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
 
     addPower(undefined, {
+        // BOECV related
+        key: "ATTACKERCHOOSESDEFENSE",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="ATTACKERCHOOSESDEFENSE" ID="1735602821852" BASECOST="0.5" LEVELS="0" ALIAS="Attacker Chooses Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
+
+    addPower(undefined, {
         key: "DOUBLEAREA",
         behaviors: ["adder"],
         costPerLevel: fixedValueFunction(1 / 4),
@@ -7024,6 +7033,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            // AUTOFIRE related
+            key: "ODDPOWER",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ODDPOWER" ID="1735602855475" BASECOST="1.0" LEVELS="0" ALIAS="Non-Standard Attack Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "PLUSONEHALFDIE",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
@@ -7038,6 +7058,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="PLUSONEPIP" ID="1712342367072" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            // BOECV related
+            key: "RANGEMODSAPPLY",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="RANGEMODSAPPLY" ID="1735602821851" BASECOST="-0.25" LEVELS="0" ALIAS="Range Modifiers Apply" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7192,6 +7223,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "AUTOFIRE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0), // FIXME: extra costs for AVLD and REDUCEDEND
+            cost: function (modifier, item) {
+                let cost = parseFloat(modifier.BASECOST);
+
+                // If there a non standard power used then it costs an extra +1. This can happen from either having the
+                // "ODDPOWER" declared or AVLD or NND as additional modifiers for the power.
+                const oddPower = modifier.ADDER?.find((adder) => adder.XMLID === "ODDPOWER");
+                if (oddPower) {
+                    // ODDPOWER adder will capture this cost.
+                } else if (item.findModsByXmlid("AVLD") || item.findModsByXmlid("NND")) {
+                    cost += 1;
+                }
+
+                return cost;
+            },
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="AUTOFIRE" ID="1713378198591" BASECOST="0.25" LEVELS="0" ALIAS="Autofire" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="2 Shots" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
@@ -7542,7 +7587,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STICKY",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
+            dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="STICKY" ID="1735536581282" BASECOST="0.5" LEVELS="0" ALIAS="Sticky" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STANDARD" OPTIONID="STANDARD" OPTION_ALIAS="Standard" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7553,7 +7598,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRIGGER",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
+            dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="TRIGGER" ID="1735590829092" BASECOST="0.25" LEVELS="0" ALIAS="Trigger" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SET" OPTIONID="SET" OPTION_ALIAS="Set Trigger" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},

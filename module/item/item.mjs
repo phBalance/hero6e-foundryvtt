@@ -1372,7 +1372,7 @@ export class HeroSystem6eItem extends Item {
 
             if (item.system.dcv != undefined && item.system.uses === "ocv") {
                 const dcv = parseInt(item.actor?.system.characteristics.dcv?.value || 0);
-                if (parseInt(dcv) != 0) {
+                if (parseInt(dcv) !== 0) {
                     if (item.flags.tags.dcv) {
                         item.flags.tags.dcv += "\n";
                     } else {
@@ -1398,7 +1398,7 @@ export class HeroSystem6eItem extends Item {
             if (item.system.uses === "omcv") {
                 const omcv = parseInt(item.actor?.system.characteristics.omcv?.value || 0);
                 item.system.ocvEstimated = `${omcv + parseInt(cslSummary.omcv || 0)}`;
-                if (omcv != 0) {
+                if (omcv !== 0) {
                     if (item.flags.tags.omcv) {
                         item.flags.tags.omcv += "\n";
                     } else {
@@ -1409,7 +1409,7 @@ export class HeroSystem6eItem extends Item {
 
                 const dmcv = parseInt(item.actor?.system.characteristics.dmcv?.value || 0);
                 item.system.dcvEstimated = `${dmcv + parseInt(cslSummary.dmcv || 0)}`;
-                if (dmcv != 0) {
+                if (dmcv !== 0) {
                     if (item.flags.tags.dmcv) {
                         item.flags.tags.dmcv += "\n";
                     } else {
@@ -2593,7 +2593,7 @@ export class HeroSystem6eItem extends Item {
         let system = this.system;
 
         let advantages = 0;
-        let advantagesDc = 0;
+        let advantagesAffectingDc = 0;
         let minAdvantage = 0;
         let endModifierCost = 0;
 
@@ -2690,19 +2690,19 @@ export class HeroSystem6eItem extends Item {
             }
 
             // No negative advantages and minimum is 1/4
-            advantages += Math.max(minAdvantage, _myAdvantage);
+            _myAdvantage = Math.max(minAdvantage, _myAdvantage);
+            advantages += _myAdvantage;
             modifier.BASECOST_total = _myAdvantage;
 
             // For attacks with Advantages, determine the DCs by
             // making a special Active Point calculation that only counts
             // Advantages that directly affect how the victim takes damage.
-            const powerInfo = getPowerInfo({ item: this });
             const modifierInfo = getModifierInfo({
                 xmlid: modifier.XMLID,
                 item: this,
             });
             if (modifierInfo?.dcAffecting(modifier)) {
-                advantagesDc += Math.max(0, _myAdvantage);
+                advantagesAffectingDc += Math.max(0, _myAdvantage);
             }
 
             // Save _myAdvantage
@@ -2710,10 +2710,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         const _activePoints = system.basePointsPlusAdders * (1 + advantages);
-        system.activePointsDc = RoundFavorPlayerDown(system.basePointsPlusAdders * (1 + advantagesDc));
+        system.activePointsDc = RoundFavorPlayerDown(system.basePointsPlusAdders * (1 + advantagesAffectingDc));
 
         system._advantages = advantages;
-        system._advantagesDc = advantagesDc;
+        system._advantagesDc = advantagesAffectingDc;
 
         // HALFEND is based on active points without the HALFEND modifier
         if (this.findModsByXmlid("REDUCEDEND")) {
