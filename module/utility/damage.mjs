@@ -1,27 +1,3 @@
-// DAMAGE CLASS (DC)
-//
-// Different dice of damage are not the same – 2d6 of Killing
-// Damage is much more likely to injure a target than a 2d6
-// Normal Damage attack. For comparisons between damage
-// types, Champions uses Damage Classes (“DC”).
-//
-// An attack’s DC is based on the number of Active Points in
-// it divided by 5. Thus, a Blast 6d6 and an HKA 2d6 (each with
-// 30 Active Points) each have 6 DCs; if added STR increases that
-// HKA to 3d6+1, it counts as 10 DCs; and so on.
-//
-// For attacks with Advantages, determine the DCs by
-// making a special Active Point calculation that only counts
-// Advantages that directly affect how the victim takes damage.
-// The GM makes the final call on which Advantages this includes,
-// but typically, the following Advantages qualify: Area Of
-// Effect, Armor Piercing, AVAD, Autofire, Charges (Boostable),
-// Constant, Cumulative, Damage Over Time, Does BODY, Does
-// Knockback, Double Knockback, Increased STUN Multiplier,
-// MegaScale in some instances, Penetrating, Sticky, Time Limit,
-// Transdimensional, Trigger, Uncontrolled, Usable As Attack,
-// Variable Advantage, and Variable Special Effects.
-
 import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
@@ -61,6 +37,10 @@ function isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item) {
     );
 }
 
+function doubleDamageLimit() {
+    return game.settings.get(HEROSYS.module, "DoubleDamageLimit");
+}
+
 function addExtraDcs(item, dcObj, halve5eKillingAttacks) {
     const extraDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
     let partialExtraDcs = 0; // Since we consider all EXTRADCs as 1 sum we need to count fractions for killing attacks
@@ -86,8 +66,7 @@ function addExtraDcs(item, dcObj, halve5eKillingAttacks) {
 }
 
 /**
- * Calculate the base DC. The base DC concept is only useful for 5e where there is a base DC doubling rule.
- * Consequently, no 6e specific rules should be in here.
+ * Calculate the base DC. The base DC concept is only useful for 5e where there is a base DC doubling rule (although it is optional in 6e).
  * @param {HeroSystem6eItem} item
  * @param {Object} options
  * @returns
@@ -143,8 +122,8 @@ function calculateBaseDcFromItem(item, options) {
         ],
     };
 
-    // 5e martial arts EXTRADCs are baseDCs
-    if (item.is5e && item.type === "martialart" && !item.system.USEWEAPON) {
+    // 5e martial arts EXTRADCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
+    if (item.type === "martialart" && !item.system.USEWEAPON) {
         addExtraDcs(item, baseDc, true);
     }
 
@@ -175,10 +154,7 @@ export function calculateDcFromItem(item, options) {
     // EXTRADCs
     // 5e EXTRADC for armed killing attacks count at full DCs but do NOT count towards the base DC.
     // 6e doesn't have the concept of base and added DCs or the doubling rule so do as an added DC for simplicity.
-    if (
-        (item.is5e && item.type === "martialart" && item.system.USEWEAPON) ||
-        (!item.is5e && item.type === "martialart")
-    ) {
+    if (item.type === "martialart" && item.system.USEWEAPON) {
         addExtraDcs(item, addedDc, false);
     }
 
@@ -194,7 +170,7 @@ export function calculateDcFromItem(item, options) {
         addedDc.tags.push({
             value: `+${maneuverDC}DC`,
             name: item.name,
-            title: `+${rawManeuverDc}DC${maneuverDC !== rawManeuverDc ? " halved due to 5e killing attack" : ""}`,
+            title: `+${rawManeuverDc}DC${maneuverDC !== rawManeuverDc ? " halved as is a killing attack" : ""}`,
         });
     }
 
@@ -422,8 +398,7 @@ export function calculateDcFromItem(item, options) {
     // Max Doubling Rules
     // A character cannot more than double the Damage Classes of his base attack, no
     // matter how many different methods they use to add damage.
-    const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-    if (DoubleDamageLimit) {
+    if (doubleDamageLimit()) {
         // Exceptions to the rule (because it wouldn't be the hero system without exceptions) from FRed pg. 405:
         // 1) Weapons that do normal damage (this really means not killing attacks) in superheroic campaigns
         // 2) extra damage classes for unarmed martial maneuvers
@@ -433,7 +408,7 @@ export function calculateDcFromItem(item, options) {
         if (lostAddedDcs > 0) {
             addedDc.tags.push({
                 value: `-${lostAddedDcs}DC`,
-                name: "DoubleDamageLimit",
+                name: "Double damage limit",
                 title: `Base DC=${baseDc.dc}. Added DC=${addedDc.dc}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
             });
             addedDc.dc = baseDc.dc;

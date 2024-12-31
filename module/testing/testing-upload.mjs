@@ -7237,6 +7237,58 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("EB with AVLD advantage", () => {
+                const contents = `
+                    <POWER XMLID="ENERGYBLAST" ID="1735535975123" BASECOST="0.0" LEVELS="4" ALIAS="Energy Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <MODIFIER XMLID="AVLD" ID="1735536296325" BASECOST="0.75" LEVELS="0" ALIAS="Attack Versus Limited Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = true;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", async function () {
+                    expect(item.system.description).to.be.equal(
+                        "Energy Blast 4d6 (ED), Attack Versus Limited Defense (+3/4)",
+                    );
+                });
+
+                it("levels", async function () {
+                    assert.equal(item.system.value, 4);
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 35);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 35);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 3);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

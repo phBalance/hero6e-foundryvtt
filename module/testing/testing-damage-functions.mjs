@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { calculateDicePartsFromDcForItem, calculateDcFromItem, addDiceParts } from "../utility/damage.mjs";
@@ -620,8 +621,12 @@ export function registerDamageFunctionTests(quench) {
                         <NOTES />
                     </MANEUVER>
                 `;
+                let previousDoubleDamageLimitSetting;
                 let item;
                 before(async () => {
+                    previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -638,6 +643,10 @@ export function registerDamageFunctionTests(quench) {
                     item.type = "maneuver";
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);
+                });
+
+                after(async () => {
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                 });
 
                 it("5e Killing Strike dc", function () {
