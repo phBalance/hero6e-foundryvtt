@@ -3574,6 +3574,10 @@ export class HeroSystem6eItem extends Item {
                 break;
             }
 
+            case "CHANGEENVIRONMENT":
+                system.description = `${system.ALIAS}`;
+                break;
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
