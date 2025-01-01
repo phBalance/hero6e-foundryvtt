@@ -98,11 +98,20 @@ function effectiveStrength(item, options) {
     );
 }
 
-function isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item) {
+function isNonKillingStrengthBasedManeuver(item) {
     return (
         !item.system.killing &&
         item.system.usesStrength &&
-        (item.type === "martialart" || (item.type === "maneuver" && item.name === "Strike"))
+        (item.type === "martialart" ||
+            (item.type === "maneuver" &&
+                (item.name === "Strike" ||
+                    item.name === "Disarm" ||
+                    item.name === "Grab By" ||
+                    item.name === "Move Through" ||
+                    item.name === "Move By" ||
+                    item.name === "Pulling A Punch" ||
+                    item.name === "Shove" ||
+                    item.name === "Throw")))
     );
 }
 
@@ -148,6 +157,10 @@ export function calculateAddedDicePartsFromItem(item, options) {
         diceParts: emptyFormulaParts,
         tags: [],
     };
+    const velocityDamageBundle = {
+        diceParts: emptyFormulaParts,
+        tags: [],
+    };
 
     // EXTRADCs
     // 5e EXTRADC for armed killing attacks count at full DCs but do NOT count towards the base DC.
@@ -159,7 +172,7 @@ export function calculateAddedDicePartsFromItem(item, options) {
 
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main weapon and the maneuver is additional damage.
     // These are added is added in without consideration of advantages in 5e but not in 6e.
-    if (isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
+    if (isNonKillingStrengthBasedManeuver(item)) {
         const rawManeuverDc = parseInt(item.system.DC);
 
         let maneuverDC = rawManeuverDc;
@@ -179,7 +192,7 @@ export function calculateAddedDicePartsFromItem(item, options) {
     }
 
     // Add in STR when appropriate
-    if (item.system.usesStrength && !isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
+    if (item.system.usesStrength && !isNonKillingStrengthBasedManeuver(item)) {
         // PH: FIXME: Review the STRMINIMUM stuff in 5e and 6e.
         // // STRMINIMUM
         // // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
@@ -254,35 +267,41 @@ export function calculateAddedDicePartsFromItem(item, options) {
 
     // // PH: FIXME: velocity from maneuvers does not apply towards the 5e doubling DC limit rule for normal attacks (only).
 
-    // // Move By, Move By, etc - Maneuvers that add in velocity
-    // // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    // //
-    // // A character can accelerate at a rate of 5m per meter, up to their
-    // // maximum normal Combat Movement in meters per Phase. Thus
-    // // a character with 50m of Flight would be moving at a velocity of
-    // // 5m after traveling one meter, 10m after traveling two meters,
-    // // 15m after traveling three meters, and so on, up to 50m after
-    // // traveling ten meters.
-    // //
-    // // Currently assuming token starts at 0 velocity and ends at 0 velocity.
-    // // Under this assumption the max velocity is half the speed.
+    // Move By, Move By, etc - Maneuvers that add in velocity
+    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
+    //
+    // A character can accelerate at a rate of 5m per meter, up to their
+    // maximum normal Combat Movement in meters per Phase. Thus
+    // a character with 50m of Flight would be moving at a velocity of
+    // 5m after traveling one meter, 10m after traveling two meters,
+    // 15m after traveling three meters, and so on, up to 50m after
+    // traveling ten meters.
+    //
+    // Currently assuming token starts at 0 velocity and ends at 0 velocity.
+    // Under this assumption the max velocity is half the speed.
 
-    // // [NORMALDC] +v/5 Strike, FMove
-    // // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    // if ((item.system.EFFECT || "").match(/v\/\d/)) {
-    //     const velocity = parseInt(options?.velocity || 0);
-    //     const divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]);
-    //     const velocityDC = Math.floor(velocity / divisor); // There is no rounding
+    // [NORMALDC] +v/5 Strike, FMove
+    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
+    if ((item.system.EFFECT || "").match(/v\/\d/)) {
+        const velocity = parseInt(options?.velocity || 0);
+        const divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]);
+        const velocityDc = Math.floor(velocity / divisor); // There is no rounding
 
-    //     if (velocityDC > 0) {
-    //         addedDc.dc += velocityDC;
-    //         addedDc.tags.push({
-    //             value: `${velocityDC}DC`,
-    //             name: "Velocity",
-    //             title: `Velocity (${velocity}) / ${divisor}`,
-    //         });
-    //     }
-    // }
+        const velocityDiceParts = calculateDicePartsFromDcForItem(item, velocityDc, true);
+        const formula = dicePartsToEffectFormula(velocityDiceParts);
+
+        // Velocity adding to normal damage does not count towards any doubling rules.
+        const bundleToUse = item.system.killing ? addedDamageBundle : velocityDamageBundle;
+
+        if (velocityDc > 0) {
+            bundleToUse.diceParts = addDiceParts(bundleToUse.diceParts, velocityDiceParts);
+            bundleToUse.tags.push({
+                value: `${formula}`,
+                name: "Velocity",
+                title: `Velocity (${velocity}/${divisor}) -> ${formula}`,
+            });
+        }
+    }
 
     // // Applied effects
     // for (const ae of item.actor?.appliedEffects.filter((ae) => !ae.disabled && ae.flags?.target === item.uuid) || []) {
@@ -420,7 +439,10 @@ export function calculateAddedDicePartsFromItem(item, options) {
     //     });
     // }
 
-    return addedDamageBundle;
+    return {
+        addedDamageBundle,
+        velocityDamageBundle,
+    };
 }
 
 /**
@@ -563,13 +585,16 @@ export function subtractDiceParts(firstDiceParts, secondDiceParts, useDieMinusOn
 export function calculateDicePartsForItem(item, options) {
     const doubleDamageLimitTags = [];
     const { diceParts: baseDiceParts, tags: baseTags } = item.baseInfo.baseEffectDiceParts(item, options);
-    const { diceParts: addedDiceParts, tags: extraTags } = calculateAddedDicePartsFromItem(item, options);
+    const {
+        addedDamageBundle: { diceParts: addedDiceParts, tags: extraTags },
+        velocityDamageBundle: { diceParts: velocityDiceParts, tags: velocityTags },
+    } = calculateAddedDicePartsFromItem(item, options);
     const useDieMinusOne = !!item.findModsByXmlid("MINUSONEPIP");
 
     // Max Doubling Rules
     // 5e rule and 6e optional rule: A character cannot more than double the Damage Classes of their base attack, no
     // matter how many different methods they use to add damage.
-    let sum = addDiceParts(baseDiceParts, addedDiceParts, useDieMinusOne);
+    let sumDiceParts = addDiceParts(baseDiceParts, addedDiceParts, useDieMinusOne);
     if (doubleDamageLimit()) {
         // PH: FIXME: Need to implement these:
         // Exceptions to the rule (because it wouldn't be the hero system without exceptions) from FRed pg. 405:
@@ -593,16 +618,20 @@ export function calculateDicePartsForItem(item, options) {
                 title: `Base ${baseFormula}. Added ${addedFormula}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
             });
 
-            sum = addDiceParts(baseDiceParts, excessDiceParts, useDieMinusOne);
+            sumDiceParts = addDiceParts(baseDiceParts, excessDiceParts, useDieMinusOne);
         }
     }
 
+    // Add velocity contributions too which were excluded from doubling considerations
+    sumDiceParts = addDiceParts(sumDiceParts, velocityDiceParts, useDieMinusOne);
+
+    // PH: FIXME: Should probably cap
     // // Doesn't really feel right to allow a total DC of less than 0 so cap it.
     // const finalDc = Math.max(0, baseDc.dc + addedDc.dc);
 
     return {
-        diceParts: sum,
-        tags: [...baseTags, ...extraTags, ...doubleDamageLimitTags],
+        diceParts: sumDiceParts,
+        tags: [...baseTags, ...extraTags, ...doubleDamageLimitTags, ...velocityTags],
     };
 }
 
@@ -647,7 +676,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
     // If unarmed combat
     if (["maneuver", "martialart"].includes(item.type) && !item.system.USEWEAPON) {
         // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
-        if (isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
+        if (isNonKillingStrengthBasedManeuver(item)) {
             const str = effectiveStrength(item, options);
             const strDiceParts = characteristicValueToDiceParts(str);
             baseDicePartsBundle.diceParts = strDiceParts;
@@ -695,7 +724,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
     // If using a weapon
     else if (["maneuver", "martialart"].includes(item.type) && item.system.USEWEAPON) {
         // PH: FIXME: Damage is the weapon
-        console.error(`Weapon combat is not implemented`);
+        console.error(`${item.name}/${item.system.XMLID} weapon combat is not implemented`);
     } else {
         console.error(`${item.name}/${item.system.XMLID} should not be calling MANEUVER base damage`);
     }
