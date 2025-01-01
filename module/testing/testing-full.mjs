@@ -6,7 +6,7 @@ export function registerFullTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.utils.full",
         (context) => {
-            const { assert, before, describe, it } = context;
+            const { afterEach, assert, before, beforeEach, describe, it } = context;
 
             describe("Characteristics 5e simple", function () {
                 const contents = `
@@ -2150,11 +2150,21 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                it("should have the correct damage for a strike", function () {
-                    // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
-                    // Added DCs: Strike 0DC =>  +0 DC
-                    // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 16d6
-                    assert.equal(actor.items.find((item) => item.name === "Strike").system.damage, "16d6");
+                describe("basic maneuvers", function () {
+                    it("should have the correct damage for a strike", function () {
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                        // Added DCs: Strike 0DC =>  +0 DC
+                        // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 16d6
+                        assert.equal(actor.items.find((item) => item.name === "Strike").system.damage, "16d6");
+                    });
+
+                    it("should have the correct damage for a move through", function () {
+                        // Base DCs: Move Through (STR 10 -> 2d6/2DC), +14d6 HTH -> 14d6/14DC) => 16DC
+                        // Added DCs: velocity 20"/3 -> 6d6/6DC,
+                        // Base + Added = 16DC + 6DC (doubling rule does not apply) = 22 DC. Move Through is 5AP/die => 22d6
+                        const strikeItem = actor.items.find((item) => item.name === "Move Through");
+                        assert.equal(getEffectForumulaFromItem(strikeItem, { velocity: 20 }), "22d6");
+                    });
                 });
 
                 describe("Haymaker", function () {
@@ -2182,6 +2192,14 @@ export function registerFullTests(quench) {
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
                         const strikeItem = actor.items.find((item) => item.name === "Strike");
                         assert.equal(getEffectForumulaFromItem(strikeItem, {}), "20d6");
+                    });
+
+                    it("should not increase the damage of a move through", function () {
+                        // Base DCs: Move Through (STR 10 -> 2d6/2DC), +14d6 HTH -> 14d6/14DC) => 16DC
+                        // Added DCs: Haymaker does not apply since we are executing a maneuver and this is not a Strike, velocity 20"/3 -> 6d6/6DC,
+                        // Base + Added = 16DC + 6DC (doubling rule does not apply) = 22 DC. Move Through is 5AP/die => 22d6
+                        const strikeItem = actor.items.find((item) => item.name === "Move Through");
+                        assert.equal(getEffectForumulaFromItem(strikeItem, { velocity: 20 }), "22d6");
                     });
                 });
 
