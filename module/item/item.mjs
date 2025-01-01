@@ -17,10 +17,11 @@ import {
 } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
-    calculateDcFromItem,
+    calculateDicePartsForItem,
     combatSkillLevelsForAttack,
-    getDiceFormulaFromItem,
-    getFullyQualifiedDiceFormulaFromItem,
+    dicePartsToEffectFormula,
+    getEffectForumulaFromItem,
+    getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { calculateVelocityInSystemUnits } from "../ruler.mjs";
@@ -955,6 +956,15 @@ export class HeroSystem6eItem extends Item {
         return this.actor?.is5e || this.system?.is5e;
     }
 
+    get dc() {
+        return Math.floor(this.activePointsForDc / 5);
+    }
+
+    // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
+    get activePointsForDc() {
+        return this.system.activePointsDc;
+    }
+
     /**
      * Calculate all the AOE related parameters.
      *
@@ -1033,10 +1043,7 @@ export class HeroSystem6eItem extends Item {
                 }
                 dcFalloff = modifier.LEVELS ? parseInt(modifier.LEVELS) : dcFalloff;
 
-                // TODO: Can we work with DC given all the adders that are possible at the time of attack?
-                const { dc } = calculateDcFromItem(this, {});
-
-                levels = dc * dcFalloff;
+                levels = this.dc * dcFalloff;
             }
         } else {
             levels = parseInt(modifier.LEVELS || 0);
@@ -1220,10 +1227,7 @@ export class HeroSystem6eItem extends Item {
                         ? parseInt(options?.LEVELS || aoeModifier.LEVELS)
                         : dcFalloff;
 
-                    // TODO: Can we work with DC given all the adders that are possible at the time of attack?
-                    const { dc } = calculateDcFromItem(effectiveItemData, {});
-
-                    levels = dc * dcFalloff;
+                    levels = this.dc * dcFalloff;
                 }
             } else {
                 levels = parseInt(options?.LEVELS || aoeModifier.LEVELS);
@@ -1323,12 +1327,12 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // PH: FIXME: Dice of damage has no fundamental relationship to DC
-            const { end } = calculateDcFromItem(item, { ignoreDeadlyBlow: true });
-            item.system.endEstimate = Math.max(item.system.endEstimate, end);
+            // PH: FIXME: We no longer provide END. Should we?
+            // const { end } = calculateDcFromItem(item, { ignoreDeadlyBlow: true });
+            // item.system.endEstimate = Math.max(item.system.endEstimate, end);
 
             // text description of damage
-            item.system.damage = getFullyQualifiedDiceFormulaFromItem(item, { ignoreDeadlyBlow: true });
+            item.system.damage = getFullyQualifiedEffectFormulaFromItem(item, { ignoreDeadlyBlow: true });
 
             if (item.system.cvModifiers === undefined) {
                 item.system.cvModifiers = Attack.parseCvModifiers(item.system.OCV, item.system.DCV, item.system.DC);
@@ -1687,11 +1691,12 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 if (changed) {
-                    let { end } = calculateDcFromItem(this, { ignoreDeadlyBlow: true });
-                    this.system.endEstimate = Math.max(this.system.endEstimate, end);
+                    // PH: FIXME: We no longer provide END. Should we?
+                    // let { end } = calculateDcFromItem(this, { ignoreDeadlyBlow: true });
+                    // this.system.endEstimate = Math.max(this.system.endEstimate, end);
 
                     // text description of damage
-                    this.system.damage = getFullyQualifiedDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                 }
             }
 
@@ -2386,10 +2391,6 @@ export class HeroSystem6eItem extends Item {
         return this.system.POWER || [];
     }
 
-    get convertToDc() {
-        return calculateDcFromItem(this, {});
-    }
-
     calcItemPoints() {
         let changed = false;
         changed = this.calcBasePointsPlusAdders() || changed;
@@ -2991,7 +2992,7 @@ export class HeroSystem6eItem extends Item {
 
             case "MINDSCAN":
                 {
-                    const diceFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${diceFormula} ${system.ALIAS}`;
                 }
                 break;
@@ -3033,7 +3034,7 @@ export class HeroSystem6eItem extends Item {
             case "ABSORPTION":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
 
                     system.description = `${system.ALIAS} ${is5e ? `${diceFormula}` : `${system.value} BODY`} (${
                         system.OPTION_ALIAS
@@ -3053,7 +3054,7 @@ export class HeroSystem6eItem extends Item {
             case "HEALING":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
 
                     system.description = `${system.ALIAS} ${
                         reduceAndEnhanceTargets.valid
@@ -3068,7 +3069,7 @@ export class HeroSystem6eItem extends Item {
             case "TRANSFER":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
 
                     system.description = `${system.ALIAS} ${diceFormula} from ${
                         reduceAndEnhanceTargets.valid ? reduceAndEnhanceTargets.reduces : "unknown"
@@ -3078,7 +3079,7 @@ export class HeroSystem6eItem extends Item {
 
             case "TRANSFORM":
                 {
-                    const diceFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${system.OPTION_ALIAS} ${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -3219,7 +3220,7 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
             case "HANDTOHANDATTACK":
                 {
-                    const diceFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -3289,12 +3290,19 @@ export class HeroSystem6eItem extends Item {
                     system.description += `, ${dcv.signedString()} DCV`;
                     if (system.EFFECT) {
                         let effect = system.EFFECT;
-                        const dc = calculateDcFromItem(this, { ignoreDeadlyBlow: true }).dc;
+                        const { diceParts } = calculateDicePartsForItem(this, { ignoreDeadlyBlow: true });
                         if (system.EFFECT.search(/\[STRDC\]/) > -1) {
-                            const effectiveStrength = 5 * dc;
+                            // Cheat a bit. d6Count for strength is ~DC.
+                            const effectiveStrength = diceParts.d6Count * 5;
                             effect = system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`);
-                        } else if (dc) {
-                            const damageFormula = getDiceFormulaFromItem(this, {});
+                        } else if (
+                            diceParts.d6Count +
+                            diceParts.d6Less1DieCount +
+                            diceParts.halfDieCount +
+                            diceParts.constant
+                        ) {
+                            // This does some damage.
+                            const damageFormula = dicePartsToEffectFormula(diceParts);
                             if (damageFormula) {
                                 const nnd = system.EFFECT.indexOf("NNDDC") > -1;
                                 const killing =
@@ -3434,7 +3442,7 @@ export class HeroSystem6eItem extends Item {
                         system.description += " and " + _singles.slice(-1);
                     }
 
-                    const damageFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const damageFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description += ` ${system.ALIAS} ${damageFormula}`;
                 }
                 break;
@@ -3606,7 +3614,7 @@ export class HeroSystem6eItem extends Item {
 
                     // Provide dice if this is an attack
                     if (this.baseInfo.behaviors.includes("attack")) {
-                        const damageFormula = getDiceFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                        const damageFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                         if (damageFormula !== "0") {
                             if (system.description.indexOf(damageFormula) === -1) {
                                 system.description = ` ${damageFormula} ${system.class || ""}`;
