@@ -4,11 +4,9 @@ import { getActorDefensesVsAttack, getConditionalDefenses } from "../utility/def
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
-    calculateDicePartsFromDcForItem,
+    calculateDicePartsForItem,
     combatSkillLevelsForAttack,
     penaltySkillLevelsForAttack,
-    calculateDcFromItem,
-    calculateDicePartsForItem,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
@@ -1745,12 +1743,10 @@ export async function _onRollMindScanEffectRoll(event) {
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
-    const { dc, tags } = calculateDcFromItem(effectiveItem, {
+    const { diceParts, tags } = calculateDicePartsForItem(item, {
         isAction: true,
         ...toHitData,
     });
-
-    const diceParts = calculateDicePartsFromDcForItem(effectiveItem, dc);
 
     const mindScanRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
