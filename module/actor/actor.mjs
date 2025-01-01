@@ -2041,17 +2041,24 @@ export class HeroSystem6eActor extends Actor {
                         return;
                     }
 
-                    // Skip if temporary actor (Quench)
-                    if (this.id) {
-                        const item = await HeroSystem6eItem.create(itemData, {
-                            parent: this,
-                        });
-                        if (maneuverDetails.attack) {
-                            console.warn(`${item.name}/${item.system.XMLID} is being turned into an attack`);
-                            await item.makeAttack();
-                        }
-                        await item._postUpload();
+                    const item = this.id
+                        ? await HeroSystem6eItem.create(itemData, {
+                              parent: this,
+                          })
+                        : new HeroSystem6eItem(itemData, {
+                              parent: this,
+                          });
+
+                    if (maneuverDetails.attack) {
+                        console.warn(`${item.name}/${item.system.XMLID} is being turned into an attack`);
+                        await item.makeAttack();
                     }
+
+                    // Work around if temporary actor
+                    if (!this.id) {
+                        this.items.set(item.system.XMLID, item);
+                    }
+                    await item._postUpload();
                 });
         }
     }

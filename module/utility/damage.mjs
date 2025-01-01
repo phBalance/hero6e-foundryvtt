@@ -318,7 +318,7 @@ export function calculateAddedDicePartsFromItem(item, options) {
             const haymakerDiceParts = calculateDicePartsFromDcForItem(item, haymakerDC, !item.is5e);
             const formula = dicePartsToEffectFormula(haymakerDiceParts);
 
-            addedDamageBundle.diceParts += haymakerDC;
+            addedDamageBundle.diceParts = addDiceParts(addedDamageBundle.diceParts, haymakerDiceParts);
             addedDamageBundle.tags.push({
                 value: `${formula}`,
                 name: "Haymaker",
@@ -639,7 +639,7 @@ export function dicePartsToEffectFormula(diceParts) {
 
 // PH: FIXME: Implement this properly.
 export function maneuverBaseEffectDiceParts(item, options) {
-    const baseDiceParts = {
+    const baseDicePartsBundle = {
         diceParts: undefined,
         tags: [], // PH: FIXME: Need to plumb this all the way through
     };
@@ -650,10 +650,10 @@ export function maneuverBaseEffectDiceParts(item, options) {
         if (isNonKillingMartialArtOrStrikeManeuverThatUsesStrength(item)) {
             const str = effectiveStrength(item, options);
             const strDiceParts = characteristicValueToDiceParts(str);
-            baseDiceParts.diceParts = strDiceParts;
+            baseDicePartsBundle.diceParts = strDiceParts;
 
             const strFormula = dicePartsToEffectFormula(strDiceParts);
-            baseDiceParts.tags.push({
+            baseDicePartsBundle.tags.push({
                 value: `${strFormula}`,
                 name: "STR",
                 title: `STR ${str} -> ${strFormula}`,
@@ -668,8 +668,8 @@ export function maneuverBaseEffectDiceParts(item, options) {
                         hthAttack,
                         options,
                     );
-                    baseDiceParts.diceParts = addDiceParts(baseDiceParts.diceParts, hthAttackDiceParts);
-                    baseDiceParts.tags.push(tags);
+                    baseDicePartsBundle.diceParts = addDiceParts(baseDicePartsBundle.diceParts, hthAttackDiceParts);
+                    baseDicePartsBundle.tags.push(tags);
                 });
             }
         } else {
@@ -679,15 +679,15 @@ export function maneuverBaseEffectDiceParts(item, options) {
                 itemBaseDc = Math.floor(itemBaseDc / 2);
             }
 
-            baseDiceParts.diceParts = calculateDicePartsFromDcForItem(item, itemBaseDc, true);
+            baseDicePartsBundle.diceParts = calculateDicePartsFromDcForItem(item, itemBaseDc, true);
         }
 
         // 5e martial arts EXTRADCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
         if (item.type === "martialart" && !item.system.USEWEAPON) {
-            addExtraDcs(item, baseDiceParts, true);
+            addExtraDcs(item, baseDicePartsBundle, true);
         }
 
-        return baseDiceParts;
+        return baseDicePartsBundle;
     }
 
     // PH: FIXME: Clean this up
