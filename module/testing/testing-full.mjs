@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { combatSkillLevelsForAttack } from "../utility/damage.mjs";
+import { combatSkillLevelsForAttack, getEffectForumulaFromItem } from "../utility/damage.mjs";
 
 export function registerFullTests(quench) {
     quench.registerBatch(
@@ -2120,7 +2120,7 @@ export function registerFullTests(quench) {
 
                 let actor;
 
-                before(async () => {
+                beforeEach(async () => {
                     const previousSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
@@ -2141,11 +2141,47 @@ export function registerFullTests(quench) {
                 it("should match the overall cost of HD", function () {
                     assert.equal(actor.system.points, 167);
                 });
+
                 it("should match the cost breakdown of HD", function () {
                     assert.deepEqual(actor.system.pointsDetail, {
                         characteristics: 0,
                         martialart: 25,
                         power: 142,
+                    });
+                });
+
+                it("should have the correct damage for a strike", function () {
+                    // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                    // Added DCs: Strike 0DC =>  +0 DC
+                    // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 16d6
+                    assert.equal(actor.items.find((item) => item.name === "Strike").system.damage, "16d6");
+                });
+
+                describe("Haymaker", function () {
+                    let haymakerPreviousActiveState;
+                    let haymakerManuever;
+
+                    beforeEach(function () {
+                        // Turn on the haymaker
+                        haymakerManuever = actor.items.find(
+                            (item) => item.type === "maneuver" && item.name === "Haymaker",
+                        );
+
+                        haymakerPreviousActiveState = haymakerManuever.system.active;
+                        haymakerManuever.system.active = true;
+                    });
+
+                    afterEach(function () {
+                        // Turn off the haymaker
+                        haymakerManuever.system.active = haymakerPreviousActiveState;
+                    });
+
+                    it("should increase the damage of a Strike", function () {
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                        // Added DCs: Strike 0DC, Haymaker +4DC =>  +4 DC
+                        // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
+                        const strikeItem = actor.items.find((item) => item.name === "Strike");
+                        assert.equal(getEffectForumulaFromItem(strikeItem, {}), "20d6");
                     });
                 });
 
