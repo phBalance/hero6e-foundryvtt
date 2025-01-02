@@ -9,7 +9,7 @@ export function combatSkillLevelsForAttack(item) {
     const cslSkills = item.actor.items.filter(
         (o) =>
             ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) &&
-            (o.system.ADDER || []).find((p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name) &&
+            (o.system.ADDER || []).find((adder) => adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name) &&
             o.isActive != false,
     );
 
@@ -43,16 +43,17 @@ export function penaltySkillLevelsForAttack(item) {
     if (!item.actor) return [];
 
     const psls = item.actor.items.filter(
-        (o) =>
-            ["PENALTY_SKILL_LEVELS"].includes(o.system.XMLID) &&
-            (o.system.ADDER || []).find((p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name) &&
-            o.isActive != false,
+        (item) =>
+            ["PENALTY_SKILL_LEVELS"].includes(item.system.XMLID) &&
+            (item.system.ADDER || []).find((p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name) &&
+            item.isActive != false,
     );
 
     return psls;
 }
 
 const emptyFormulaParts = Object.freeze({
+    dc: 0,
     d6Count: 0,
     d6Less1DieCount: 0,
     halfDieCount: 0,
@@ -65,6 +66,7 @@ const emptyFormulaParts = Object.freeze({
  * @property {number} d6Less1DieCount - 1 or 0 1d6-1 terms (e.g. 1d6-1)
  * @property {number} halfDieCount - 1 or 0 half dice terms (e.g. ½d6)
  * @property {number} constant - 1 or 0 reflecting a +1 (e.g. 2d6 + 1)
+ * @property {number} dc - damage class with factional DCs allowed
  */
 /**
  * @typedef {HeroSystemFormulaTag}
@@ -85,6 +87,7 @@ const emptyFormulaParts = Object.freeze({
  */
 export function characteristicValueToDiceParts(value) {
     return {
+        dc: value / 5,
         d6Count: Math.floor(value / 5),
         d6Less1DieCount: 0,
         halfDieCount: RoundFavorPlayerUp((value % 5) / 5),
@@ -131,11 +134,11 @@ function addExtraDcs(item, dicePartsBundle, halve5eKillingAttacks) {
         extraDcLevels = Math.floor(extraDcLevels / 2);
     }
 
-    const extraDcDiceParts = calculateDicePartsFromDcForItem(item, extraDcLevels, true);
+    const extraDcDiceParts = calculateDicePartsFromDcForItem(item, extraDcLevels);
     const formula = dicePartsToEffectFormula(extraDcDiceParts);
 
     if (extraDcLevels > 0) {
-        dicePartsBundle.diceParts = addDiceParts(dicePartsBundle.diceParts, extraDcDiceParts);
+        dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, extraDcDiceParts);
         dicePartsBundle.tags.push({
             value: `${formula}`,
             name: "Extra DCs",
@@ -180,10 +183,13 @@ export function calculateAddedDicePartsFromItem(item, options) {
             maneuverDC = Math.floor(rawManeuverDc / 2);
         }
 
-        const maneuverDiceParts = calculateDicePartsFromDcForItem(item, rawManeuverDc, !item.is5e);
+        // Martial Maneuvers in 5e ignore advantages. Everything else care about them.
+        const alteredManeuverDc =
+            item.is5e && item.type === "martialart" ? maneuverDC * (1 + item.system._advantagesDc) : maneuverDC;
+        const maneuverDiceParts = calculateDicePartsFromDcForItem(item, alteredManeuverDc);
         const formula = dicePartsToEffectFormula(maneuverDiceParts);
 
-        addedDamageBundle.diceParts = addDiceParts(addedDamageBundle.diceParts, maneuverDiceParts);
+        addedDamageBundle.diceParts = addDiceParts(item, addedDamageBundle.diceParts, maneuverDiceParts);
         addedDamageBundle.tags.push({
             value: `+${formula}`,
             name: item.name,
@@ -192,7 +198,11 @@ export function calculateAddedDicePartsFromItem(item, options) {
     }
 
     // Add in STR when appropriate
+    // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage
     if (item.system.usesStrength && !isNonKillingStrengthBasedManeuver(item)) {
+        const baseEffectiveStrength = effectiveStrength(item, options);
+        let str = baseEffectiveStrength;
+
         // PH: FIXME: Review the STRMINIMUM stuff in 5e and 6e.
         // // STRMINIMUM
         // // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
@@ -208,10 +218,6 @@ export function calculateAddedDicePartsFromItem(item, options) {
         //     });
         // }
 
-        // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage
-        const baseEffectiveStrength = effectiveStrength(item, options);
-        let str = baseEffectiveStrength;
-
         // MOVEBY halves STR
         if (item.system.XMLID === "MOVEBY") {
             str = RoundFavorPlayerUp(str / 2);
@@ -220,11 +226,11 @@ export function calculateAddedDicePartsFromItem(item, options) {
         // NOTE: intentionally using fractional DC here.
         // PH: FIXME: There are some weird rules around 5e and advantaged powers for adding STR.
         // PH: FIXME: Confirm that the partial DCs are working as intended.
-        const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5, true);
+        const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5);
         const formula = dicePartsToEffectFormula(strDiceParts);
 
         if (str !== 0) {
-            addedDamageBundle.diceParts = addDiceParts(addedDamageBundle.diceParts, strDiceParts);
+            addedDamageBundle.diceParts = addDiceParts(item, addedDamageBundle.diceParts, strDiceParts);
             addedDamageBundle.tags.push({
                 value: `+${formula}`,
                 name: "STR",
@@ -234,13 +240,13 @@ export function calculateAddedDicePartsFromItem(item, options) {
     }
 
     // Boostable Charges
-    if (options.boostableCharges !== 0) {
+    if (options.boostableCharges != undefined && options.boostableCharges > 0) {
         // Each used boostable charge, to a max of 4, increases the damage class by 1.
         const boostChargesDc = Math.min(4, parseInt(options.boostableCharges));
-        const boostableDiceParts = calculateDicePartsFromDcForItem(item, boostChargesDc, true);
+        const boostableDiceParts = calculateDicePartsFromDcForItem(item, boostChargesDc);
         const formula = dicePartsToEffectFormula(boostableDiceParts);
 
-        addedDamageBundle.diceParts = addDiceParts(addedDamageBundle.diceParts, boostableDiceParts);
+        addedDamageBundle.diceParts = addDiceParts(item, addedDamageBundle.diceParts, boostableDiceParts);
         addedDamageBundle.tags.push({
             value: `${formula}`,
             name: "Boostable Charges",
@@ -251,15 +257,14 @@ export function calculateAddedDicePartsFromItem(item, options) {
     // Combat Skill Levels. These are added is added in without consideration of advantages in 5e but not in 6e.
     // PH: TODO: 5E Superheroic: Each 2 CSLs modify the killing attack BODY roll by +1 (cannot exceed the max possible roll). Obviously no +1/2 DC.
     // PH: TODO: 5E Superheroic: Each 2 CSLs modify the normal attack STUN roll by +3 (cannot exceed the max possible roll). Obviously no +1/2 DC.
-    // PH: FIXME: 1/2 effect for CSL for 5e killing attacks?
     // PH: TODO: THE ABOVE 2 NEED NEW HERO ROLLER FUNCTIONALITY.
-    // PH: TODO: (Done by omission) 5E Heroic: Each 2 CSLs add to the DC by +1 and follow the doubling rule as it is not base DC. Obviously no +1/2 DC.
-    // PH: DONE: 6E: Each 2 CSLs add to the DC by +1. Obviously no +1/2 DC.
     for (const csl of combatSkillLevelsForAttack(item)) {
         if (csl.dc > 0) {
-            const cslDiceParts = calculateDicePartsFromDcForItem(item, csl.dc, !item.is5e);
+            // CSLs in 5e ignore advantages. In 6e they care about it.
+            const alteredCslDc = item.is5e ? csl.dc * (1 + item.system._advantagesDc) : csl.dc;
+            const cslDiceParts = calculateDicePartsFromDcForItem(item, alteredCslDc);
             const formula = dicePartsToEffectFormula(cslDiceParts);
-            addedDamageBundle.diceParts = addDiceParts(addedDamageBundle.diceParts, cslDiceParts);
+            addedDamageBundle.diceParts = addDiceParts(item, addedDamageBundle.diceParts, cslDiceParts);
             addedDamageBundle.tags.push({
                 value: `+${formula}`,
                 name: csl.item.name,
@@ -288,14 +293,14 @@ export function calculateAddedDicePartsFromItem(item, options) {
         const divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]);
         const velocityDc = Math.floor(velocity / divisor); // There is no rounding
 
-        const velocityDiceParts = calculateDicePartsFromDcForItem(item, velocityDc, true);
+        const velocityDiceParts = calculateDicePartsFromDcForItem(item, velocityDc);
         const formula = dicePartsToEffectFormula(velocityDiceParts);
 
         // Velocity adding to normal damage does not count towards any doubling rules.
         const bundleToUse = item.system.killing ? addedDamageBundle : velocityDamageBundle;
 
         if (velocityDc > 0) {
-            bundleToUse.diceParts = addDiceParts(bundleToUse.diceParts, velocityDiceParts);
+            bundleToUse.diceParts = addDiceParts(item, bundleToUse.diceParts, velocityDiceParts);
             bundleToUse.tags.push({
                 value: `${formula}`,
                 name: "Velocity",
@@ -304,20 +309,23 @@ export function calculateAddedDicePartsFromItem(item, options) {
         }
     }
 
-    // // Applied effects
-    // for (const ae of item.actor?.appliedEffects.filter((ae) => !ae.disabled && ae.flags?.target === item.uuid) || []) {
-    //     for (const change of ae.changes.filter(
-    //         (change) => change.key === "system.value" && change.value !== 0 && change.mode === 2,
-    //     )) {
-    //         const _value = parseInt(change.value);
-    //         addedDc.dc += _value;
-    //         addedDc.tags.push({
-    //             value: `${_value.signedString()}DC`,
-    //             name: ae.name,
-    //             title: `${_value.signedString()}DC`,
-    //         });
-    //     }
-    // }
+    // Applied effects
+    for (const ae of item.actor?.appliedEffects.filter((ae) => !ae.disabled && ae.flags?.target === item.uuid) || []) {
+        for (const change of ae.changes.filter(
+            (change) => change.key === "system.value" && change.value !== 0 && change.mode === 2,
+        )) {
+            const value = parseInt(change.value);
+            const aeDiceParts = calculateDicePartsFromDcForItem(item, value);
+            const formula = dicePartsToEffectFormula(aeDiceParts);
+
+            addedDamageBundle.diceParts = addDiceParts(item, addedDamageBundle.diceParts, aeDiceParts);
+            addedDamageBundle.tags.push({
+                value: `${formula}`,
+                name: ae.name,
+                title: `${value}DC -> ${formula}`,
+            });
+        }
+    }
 
     // Is there a haymaker active and thus part of this attack? Haymaker is added in without consideration of advantages in 5e but not in 6e.
     // Also in 5e killing haymakers get the DC halved.
@@ -335,10 +343,13 @@ export function calculateAddedDicePartsFromItem(item, options) {
                 haymakerDC = Math.floor(rawHaymakerDc / 2);
             }
 
-            const haymakerDiceParts = calculateDicePartsFromDcForItem(item, haymakerDC, !item.is5e);
+            // 5e does not consider advantages so we have to compensate and as a consequence we may have a fractional DC (yes, the rules are not self consistent).
+            // 6e is sensible in this regard.
+            const alteredHaymakerDc = item.is5e ? haymakerDC * (1 + item.system._advantagesDc) : haymakerDC;
+            const haymakerDiceParts = calculateDicePartsFromDcForItem(item, alteredHaymakerDc);
             const formula = dicePartsToEffectFormula(haymakerDiceParts);
 
-            addedDamageBundle.diceParts = addDiceParts(addedDamageBundle.diceParts, haymakerDiceParts);
+            addedDamageBundle.diceParts = addDiceParts(item, addedDamageBundle.diceParts, haymakerDiceParts);
             addedDamageBundle.tags.push({
                 value: `${formula}`,
                 name: "Haymaker",
@@ -427,18 +438,19 @@ export function calculateAddedDicePartsFromItem(item, options) {
     //     }
     // }
 
-    // if (item.actor?.statuses?.has("underwater")) {
-    //     // PH: FIXME: Need way to get dice parts and the formula.
-    //     // 1) The formula gets put into the tags information
-    //     // 2) The diceParts get added in or are they just DCs that get turned into parts?
-    //     // const diceParts = calculateDicePartsFromDcForItem(item, -2);
-    //     addedDc.dc -= 2;
-    //     addedDc.tags.push({
-    //         value: `-2DC`,
-    //         name: "Underwater",
-    //         title: `-2DC`,
-    //     });
-    // }
+    // FIXME: Environmental Movement: Aquatic Environments should actually counteract this.
+    if (item.actor?.statuses?.has("underwater")) {
+        const underwaterDc = 2; // NOTE: Working with 2 DC and then subtracting
+        const underwaterDiceParts = calculateDicePartsFromDcForItem(item, underwaterDc);
+        const formula = dicePartsToEffectFormula(underwaterDiceParts);
+
+        addedDamageBundle.diceParts = subtractDiceParts(item, addedDamageBundle.diceParts, underwaterDiceParts);
+        addedDamageBundle.tags.push({
+            value: `-(${formula})`,
+            name: "Underwater",
+            title: `-${underwaterDc}DC -> ${formula}`,
+        });
+    }
 
     return {
         addedDamageBundle,
@@ -464,15 +476,18 @@ export function calculateAddedDicePartsFromItem(item, options) {
  * A 15 AP/die killing attack: +1 pip is 5 points, +1/2d6 or +1d6-1 is 10 points, and +1d6 is 15 points.
  * This makes 3 possible breakpoints x.0, x.3333, x.6666 for any whole number x >=0 when we divide by the AP/15 to get the num of dice.
  *
- * Overall there are 3 possible sets of calculations based on the basic AP per die of damage.
- *
- * Rather than use floating point math and Epsilon, we'll just multiply to shift values into large integers
- *
  * @param {HeroSystem6eItem} item
  * @param {number} dc
  * @returns
  */
-export function calculateDicePartsFromDcForItem(item, dc, considerAdvantages) {
+export function calculateDicePartsFromDcForItem(item, dc) {
+    // Since the smallest interval is 0.3 to 0.5 so 0.099 is probably the smallest. However, the results don't match tables we see in 6e vol 2 p.97.
+    // It's possible a better algorithm would produce something better but with this one:
+    // 0.066666 appears to be too large. (1DC KA @ +1/4)
+    // 0.04 appears to be too large. (1DC EA @ +1)
+    // PH: FIXME: It's also possible that this indicates that the rules only use one of the attack types to determine 1/2 vs +1.
+    const epsilon = 0.039;
+
     const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
     let martialOrManeuverEquivalentApPerDice = 0;
     if (isMartialOrManeuver) {
@@ -490,90 +505,126 @@ export function calculateDicePartsFromDcForItem(item, dc, considerAdvantages) {
         }
     }
 
-    const baseApPerDie = martialOrManeuverEquivalentApPerDice || item.baseInfo.costPerLevel(item);
-    const apPerDie = baseApPerDie * (considerAdvantages ? 1 + item.system._advantagesDc : 1);
-    const multiplierToAvoidEpsilon = 100000;
+    const baseApPerDie =
+        martialOrManeuverEquivalentApPerDice ||
+        (item.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
+        item.baseInfo.costPerLevel(item);
+
+    // const baseApPerDie =
+    //     martialOrManeuverEquivalentApPerDice ||
+    //     (item.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
+    //     item.system.basePointsPlusAdders / diceParts.dc;
+
+    const fullDieValue = 1;
     let halfDieValue;
     let pipValue;
     if (baseApPerDie === 3) {
-        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 2) / 3);
-        pipValue = Math.floor((multiplierToAvoidEpsilon * 1) / 3);
+        halfDieValue = 2 / 3;
+        pipValue = 1 / 3;
     } else if (baseApPerDie === 5) {
-        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 3) / 5);
-        pipValue = Math.floor((multiplierToAvoidEpsilon * 2) / 5);
+        halfDieValue = 3 / 5;
+        pipValue = 2 / 5;
     } else if (baseApPerDie === 10) {
-        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 5) / 10);
-        pipValue = Math.floor((multiplierToAvoidEpsilon * 3) / 10);
+        halfDieValue = 5 / 10;
+        pipValue = 3 / 10;
     } else if (baseApPerDie === 15) {
-        halfDieValue = Math.floor((multiplierToAvoidEpsilon * 10) / 15);
-        pipValue = Math.floor((multiplierToAvoidEpsilon * 5) / 15);
+        halfDieValue = 10 / 15;
+        pipValue = 5 / 15;
     } else {
         console.error(`Unhandled die of damage cost ${baseApPerDie} for ${item.name}/${item.system.XMLID}`);
     }
 
+    let apPerDie;
+    if (!isMartialOrManeuver) {
+        // Some ugly stuff to deal with the case where we have adders to the base powers. We need to figure out
+        // how much a die actually costs.
+        // FIXME: would be nice to pull out the TK exception/special handling.
+        const { diceParts } = item.baseInfo.baseEffectDiceParts(item, {}); // PH: FIXME: Recursion for maneuvers
+        let diceValue = 0;
+        diceValue += diceParts.d6Count * fullDieValue;
+        diceValue += (diceParts.d6Less1DieCount + diceParts.halfDieCount) * halfDieValue;
+        diceValue += diceParts.constant * pipValue;
+        apPerDie =
+            item.system.XMLID === "TELEKINESIS"
+                ? 5 * (1 + item.system._advantagesDc)
+                : item.system.activePointsDc / diceValue;
+    } else {
+        apPerDie = baseApPerDie * (1 + item.system._advantagesDc); // PH: FIXME: Shouldn't be able to be advantaged...
+    }
+
     // MartialArts & Maneuvers have DC and no advantages. Others have active points with some advantages that contribute to DC.
     // See FRed pp 403, 404 6e vol 2 pp 96, 97
-    const shiftedDiceOfDamage = multiplierToAvoidEpsilon * (dc * (5 / apPerDie));
+    const diceOfDamage = dc * (5 / apPerDie);
 
-    const d6Count = Math.floor(shiftedDiceOfDamage / multiplierToAvoidEpsilon);
-    const halfDieCount = shiftedDiceOfDamage % multiplierToAvoidEpsilon >= halfDieValue ? 1 : 0;
-    const constant = shiftedDiceOfDamage % multiplierToAvoidEpsilon >= pipValue && !halfDieCount ? 1 : 0;
+    const d6Count = Math.floor(diceOfDamage);
+    const halfDieCount = (diceOfDamage % fullDieValue) - halfDieValue > -epsilon ? 1 : 0;
+    const constant =
+        item.system.XMLID === "TELEKINESIS"
+            ? 0
+            : (diceOfDamage % fullDieValue) - pipValue > -epsilon && !halfDieCount
+              ? 1
+              : 0;
 
     // PH: FIXME: Need to do up a big table of checks for this it would seem
     // PH: FIXME: Note that the 6e vol 2 p.97 hints that 1/2d6 < 1d6-1
 
     return {
+        dc,
         d6Count,
         halfDieCount: halfDieCount,
 
-        // PH: FIXME: Note that the 6e vol 2 p.97 shows that 1/2d6 < 1d6-1
         // PH: FIXME: Not implemented yet
         d6Less1DieCount: 0,
         constant,
     };
 }
 
-function dicePartsToPseudoSum(diceParts) {
-    return 3 * diceParts.d6Count + 2 * (diceParts.d6Less1DieCount + diceParts.halfDieCount) + diceParts.constant;
-}
-
-function pseudoCountToDiceParts(pseudoSum, useDieMinusOne) {
-    return {
-        d6Count: Math.floor(pseudoSum / 3),
-        d6Less1DieCount: useDieMinusOne ? (pseudoSum % 3 >= 2 ? 1 : 0) : 0,
-        halfDieCount: !useDieMinusOne ? (pseudoSum % 3 >= 2 ? 1 : 0) : 0,
-        constant: pseudoSum % 3 === 1 ? 1 : 0,
-    };
-}
-
 /**
- * Add two dice parts together by steps and not straight math. For example: 1/2d6 + 1/2d6 = 1d6+1
+ * Add two dice parts together by DCs and then update rest of the dice parts to match the DC.
+ * For example: 1/2d6 + 1/2d6 = 1d6+1 when we're talking about a straight 15 AP/die killing attack (i.e. 2DC + 2DC = 4DC)
+ *              1/2d6 + 1/2d6 = 1d6 when we're talking about a straight 10 AP/die ego attack (i.e. 1DC + 1DC = 2DC)
+ * @param {HeroSystem6eItem} item
  * @param {HeroSystemFormulaDiceParts} firstDiceParts
  * @param {HeroSystemFormulaDiceParts} secondDiceParts
  * @param {boolean} useDieMinusOne
  * @returns
  */
-export function addDiceParts(firstDiceParts, secondDiceParts, useDieMinusOne) {
-    const firstPseudoSum = dicePartsToPseudoSum(firstDiceParts);
-    const secondPseudoSum = dicePartsToPseudoSum(secondDiceParts);
-    const pseduoSum = firstPseudoSum + secondPseudoSum;
+export function addDiceParts(item, firstDiceParts, secondDiceParts, useDieMinusOne) {
+    const firstDc = firstDiceParts.dc;
+    const secondDc = secondDiceParts.dc;
+    const dcSum = firstDc + secondDc;
 
-    return pseudoCountToDiceParts(pseduoSum, useDieMinusOne);
+    const diceParts = calculateDicePartsFromDcForItem(item, dcSum);
+    if (useDieMinusOne) {
+        diceParts.d6Less1DieCount = diceParts.halfDieCount;
+        diceParts.halfDieCount = 0;
+    }
+
+    return diceParts;
 }
 
 /**
- * Subtract the second dice parts from the first dice parts by steps and not straight math. For example: 1/2d6 + 1/2d6 = 1d6+1
+ * Subtract the second dice parts from the first dice parts by steps and not straight math.
+ * For example: 1d6+1 - 1 = 1d6 when we're talking about a straight 15 AP/die killing attack (i.e. 4DC - 1DC = 3DC)
+ *              1d6 - 1/2d6 = 1/2d6 when we're talking about a straight 10 AP/die ego attack (i.e. 2DC - 1DC = 1DC)
+ * @param {HeroSystem6eItem} item
  * @param {HeroSystemFormulaDiceParts} firstDiceParts
  * @param {HeroSystemFormulaDiceParts} secondDiceParts
- * @param {boolean} useDieMinusOne
+ * @param {boolean} useDieMinusOne - Should it try to return 1d6-1 rather than 1/2d6
  * @returns
  */
-export function subtractDiceParts(firstDiceParts, secondDiceParts, useDieMinusOne) {
-    const firstPseudoSum = dicePartsToPseudoSum(firstDiceParts);
-    const secondPseudoSum = dicePartsToPseudoSum(secondDiceParts);
-    const pseduoSum = firstPseudoSum - secondPseudoSum;
+export function subtractDiceParts(item, firstDiceParts, secondDiceParts, useDieMinusOne) {
+    const firstDc = firstDiceParts.dc;
+    const secondDc = secondDiceParts.dc;
+    const dcSub = firstDc - secondDc;
 
-    return pseudoCountToDiceParts(pseduoSum, useDieMinusOne);
+    const diceParts = calculateDicePartsFromDcForItem(item, dcSub);
+    if (useDieMinusOne) {
+        diceParts.d6Less1DieCount = diceParts.halfDieCount;
+        diceParts.halfDieCount = 0;
+    }
+
+    return diceParts;
 }
 
 /**
@@ -595,7 +646,7 @@ export function calculateDicePartsForItem(item, options) {
     // Max Doubling Rules
     // 5e rule and 6e optional rule: A character cannot more than double the Damage Classes of their base attack, no
     // matter how many different methods they use to add damage.
-    let sumDiceParts = addDiceParts(baseDiceParts, addedDiceParts, useDieMinusOne);
+    let sumDiceParts = addDiceParts(item, baseDiceParts, addedDiceParts, useDieMinusOne);
     if (doubleDamageLimit()) {
         // PH: FIXME: Need to implement these:
         // Exceptions to the rule (because it wouldn't be the hero system without exceptions) from FRed pg. 405:
@@ -603,15 +654,15 @@ export function calculateDicePartsForItem(item, options) {
         // 2) extra damage classes for unarmed martial maneuvers
         // 3) movement bonuses to normal damage (this really means not killing attacks)
 
-        const basePseudoSum = dicePartsToPseudoSum(baseDiceParts);
-        const addedPseudoSum = dicePartsToPseudoSum(addedDiceParts);
+        const baseDc = baseDiceParts.dc;
+        const addDc = addedDiceParts.dc;
 
-        const excessPseudoSum = addedPseudoSum - basePseudoSum;
-        if (excessPseudoSum > 0) {
+        const excessDc = addDc - baseDc;
+        if (excessDc > 0) {
             const baseFormula = dicePartsToEffectFormula(baseDiceParts);
             const addedFormula = dicePartsToEffectFormula(addedDiceParts);
 
-            const excessDiceParts = pseudoCountToDiceParts(excessPseudoSum, useDieMinusOne);
+            const excessDiceParts = calculateDicePartsFromDcForItem(item, excessDc);
             const excessFormula = dicePartsToEffectFormula(excessDiceParts);
             doubleDamageLimitTags.push({
                 value: `-(${excessFormula})`,
@@ -619,12 +670,12 @@ export function calculateDicePartsForItem(item, options) {
                 title: `Base ${baseFormula}. Added ${addedFormula}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
             });
 
-            sumDiceParts = subtractDiceParts(sumDiceParts, excessDiceParts, useDieMinusOne);
+            sumDiceParts = subtractDiceParts(item, sumDiceParts, excessDiceParts, useDieMinusOne);
         }
     }
 
     // Add velocity contributions too which were excluded from doubling considerations
-    sumDiceParts = addDiceParts(sumDiceParts, velocityDiceParts, useDieMinusOne);
+    sumDiceParts = addDiceParts(item, sumDiceParts, velocityDiceParts, useDieMinusOne);
 
     // PH: FIXME: Should probably cap
     // // Doesn't really feel right to allow a total DC of less than 0 so cap it.
@@ -698,7 +749,11 @@ export function maneuverBaseEffectDiceParts(item, options) {
                         hthAttack,
                         options,
                     );
-                    baseDicePartsBundle.diceParts = addDiceParts(baseDicePartsBundle.diceParts, hthAttackDiceParts);
+                    baseDicePartsBundle.diceParts = addDiceParts(
+                        item,
+                        baseDicePartsBundle.diceParts,
+                        hthAttackDiceParts,
+                    );
                     baseDicePartsBundle.tags.push(tags);
                 });
             }
@@ -709,7 +764,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
                 itemBaseDc = Math.floor(itemBaseDc / 2);
             }
 
-            baseDicePartsBundle.diceParts = calculateDicePartsFromDcForItem(item, itemBaseDc, true);
+            baseDicePartsBundle.diceParts = calculateDicePartsFromDcForItem(item, itemBaseDc);
         }
 
         // 5e martial arts EXTRADCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
@@ -732,6 +787,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
 
     return {
         diceParts: {
+            dc: 0,
             d6Count: 0,
             d6Less1DieCount: 0,
             halfDieCount: 0,

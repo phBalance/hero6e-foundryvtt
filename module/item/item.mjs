@@ -939,6 +939,10 @@ export class HeroSystem6eItem extends Item {
         return Math.floor(this.activePointsForDc / 5);
     }
 
+    get dcRaw() {
+        return this.activePointsForDc / 5;
+    }
+
     // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
     get activePointsForDc() {
         return this.system.activePointsDc;
@@ -1875,6 +1879,8 @@ export class HeroSystem6eItem extends Item {
                         }
 
                         if (addMe) {
+                            // FIXME: This should check that it doesn't already exist. Frequently there are multiple entries.
+
                             const newAdder = {
                                 XMLID: "ADDER",
                                 ID: new Date().getTime().toString(),
@@ -2640,6 +2646,8 @@ export class HeroSystem6eItem extends Item {
             _myAdvantage += modCost;
 
             // We are only intertested in Advantages
+            // PH: FIXME: This is probably wrong when we have something like charges that slide over into the advantage territory
+            // with things like boostable
             if (_myAdvantage < 0) {
                 continue;
             }
@@ -2712,7 +2720,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         const _activePoints = system.basePointsPlusAdders * (1 + advantages);
-        system.activePointsDc = RoundFavorPlayerDown(system.basePointsPlusAdders * (1 + advantagesAffectingDc));
+        system.activePointsDc = system.basePointsPlusAdders * (1 + advantagesAffectingDc);
 
         system._advantages = advantages;
         system._advantagesDc = advantagesAffectingDc;
@@ -2770,29 +2778,33 @@ export class HeroSystem6eItem extends Item {
 
             _myLimitation += modCost;
 
-            // We are only intertested in Limitations
-            if (_myLimitation >= 0 && !modPowerInfo?.minimumLimitation) {
-                continue;
-            }
-
-            // Some modifiers may have ADDERS as well (like a focus)
             for (const adder of modifier.ADDER || []) {
-                const adderBaseCost = parseFloat(adder.BASECOST || 0);
+                const adderPowerInfo = getPowerInfo({
+                    item: adder,
+                    actor: this.actor,
+                });
 
-                // Unique situation where JAMMED floors the limitation
-                // if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
-                //     system.title =
-                //         (system.title || "") +
-                //         "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
-                //     adderBaseCost = 0;
-                // }
+                if (!adderPowerInfo) {
+                    console.warn(`Missing powerInfo for adder ${adder.XMLID}`, adder);
+                }
 
-                // can be positive or negative (like charges).
-                // Requires a roll gets interesting with Jammed / Can choose which of two rolls to make from use to use
-                _myLimitation += adderBaseCost;
+                let adderCost = adderPowerInfo?.cost ? adderPowerInfo.cost(adder, this) : 0;
 
-                const multiplier = Math.max(1, parseFloat(adder.MULTIPLIER || 0));
-                _myLimitation *= multiplier;
+                if (!adderCost) {
+                    adderCost += parseFloat(adder.BASECOST);
+
+                    // TODO: Add all adders into the system so that we can simplify this
+                    const adderCostPerLevel =
+                        typeof adderPowerInfo?.costPerLevel === "function"
+                            ? adderPowerInfo.costPerLevel(adder)
+                            : adderPowerInfo?.costPerLevel ||
+                              parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) ||
+                              0;
+                    adderCost += parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
+                }
+
+                adder.BASECOST_total = adderCost;
+                _myLimitation += adderCost;
             }
 
             // There are some special cases with the increased endurance modifier not found in the HDC's XML
@@ -2807,6 +2819,12 @@ export class HeroSystem6eItem extends Item {
                 if (activationOnlyEndCost) {
                     _myLimitation = _myLimitation / 2;
                 }
+            }
+
+            // We are only intertested in limitations and some limitations can turn into advantages (or at least -0 limitations),
+            // like charges, once adders are applied.
+            if (_myLimitation >= 0 && !modPowerInfo?.minimumLimitation) {
+                continue;
             }
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.

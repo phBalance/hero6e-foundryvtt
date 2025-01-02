@@ -1035,7 +1035,7 @@ function getAttackTags(item) {
 
     // Item adders
     if (item.system.adders) {
-        for (let adder of item.system.adders) {
+        for (const adder of item.system.adders) {
             switch (adder.XMLID) {
                 case "MINUSONEPIP":
                 case "PLUSONEHALFDIE":

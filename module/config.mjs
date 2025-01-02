@@ -346,6 +346,7 @@ function defaultPowerDiceParts(item, diceParts) {
 
 function standardBaseEffectDiceParts(item) {
     const diceParts = {
+        dc: item.dcRaw,
         d6Count: parseInt(item.system.LEVELS || 0),
         d6Less1DieCount: item.findModsByXmlid("MINUSONEPIP") ? 1 : 0,
         halfDieCount: item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0,
@@ -360,6 +361,7 @@ function noDamageBaseEffectDiceParts(item) {
 
     return {
         diceParts: {
+            dc: 0,
             d6Count: 0,
             d6Less1DieCount: 0,
             halfDieCount: 0,
@@ -4727,6 +4729,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 const diceParts = {
+                    dc: item.dcRaw,
                     d6Count: 0,
                     d6Less1DieCount: 0,
                     halfDieCount: 0,
@@ -5217,6 +5220,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 const diceParts = {
+                    dc: item.dcRaw,
                     d6Count: baseBodyDice + additionalBodyDice,
                     d6Less1DieCount: 0,
                     halfDieCount: baseHalfDice,
@@ -6042,6 +6046,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             baseEffectDiceParts: (item) => {
                 const diceParts = {
+                    dc: item.dcRaw,
                     d6Count: 0,
                     d6Less1DieCount: 0,
                     halfDieCount: 0,
@@ -7020,6 +7025,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 const diceParts = {
+                    dc: item.dcRaw,
                     d6Count: numDice,
                     d6Less1DieCount: 0,
                     halfDieCount: 0,
