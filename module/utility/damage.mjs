@@ -233,17 +233,20 @@ export function calculateAddedDicePartsFromItem(item, options) {
         }
     }
 
-    // // Boostable Charges
-    // if (options?.boostableCharges) {
-    //     // Each used boostable charge, to a max of 4, increases the damage class by 1.
-    //     const boostCharges = parseInt(options.boostableCharges);
-    //     addedDc.dc += 1 * boostCharges;
-    //     addedDc.tags.push({
-    //         value: `${boostCharges}DC`,
-    //         name: "boostable charges",
-    //         title: `${boostCharges.signedString()}DC`,
-    //     });
-    // }
+    // Boostable Charges
+    if (options.boostableCharges !== 0) {
+        // Each used boostable charge, to a max of 4, increases the damage class by 1.
+        const boostChargesDc = Math.min(4, parseInt(options.boostableCharges));
+        const boostableDiceParts = calculateDicePartsFromDcForItem(item, boostChargesDc, true);
+        const formula = dicePartsToEffectFormula(boostableDiceParts);
+
+        addedDamageBundle.diceParts = addDiceParts(addedDamageBundle.diceParts, boostableDiceParts);
+        addedDamageBundle.tags.push({
+            value: `${formula}`,
+            name: "Boostable Charges",
+            title: `${boostChargesDc}DC -> ${formula}`,
+        });
+    }
 
     // Combat Skill Levels. These are added is added in without consideration of advantages in 5e but not in 6e.
     // PH: TODO: 5E Superheroic: Each 2 CSLs modify the killing attack BODY roll by +1 (cannot exceed the max possible roll). Obviously no +1/2 DC.
@@ -264,8 +267,6 @@ export function calculateAddedDicePartsFromItem(item, options) {
             });
         }
     }
-
-    // // PH: FIXME: velocity from maneuvers does not apply towards the 5e doubling DC limit rule for normal attacks (only).
 
     // Move By, Move By, etc - Maneuvers that add in velocity
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
@@ -608,7 +609,7 @@ export function calculateDicePartsForItem(item, options) {
         const excessPseudoSum = addedPseudoSum - basePseudoSum;
         if (excessPseudoSum > 0) {
             const baseFormula = dicePartsToEffectFormula(baseDiceParts);
-            const addedFormula = dicePartsToEffectFormula(addedPseudoSum);
+            const addedFormula = dicePartsToEffectFormula(addedDiceParts);
 
             const excessDiceParts = pseudoCountToDiceParts(excessPseudoSum, useDieMinusOne);
             const excessFormula = dicePartsToEffectFormula(excessDiceParts);
@@ -618,7 +619,7 @@ export function calculateDicePartsForItem(item, options) {
                 title: `Base ${baseFormula}. Added ${addedFormula}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
             });
 
-            sumDiceParts = addDiceParts(baseDiceParts, excessDiceParts, useDieMinusOne);
+            sumDiceParts = subtractDiceParts(sumDiceParts, excessDiceParts, useDieMinusOne);
         }
     }
 
