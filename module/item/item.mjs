@@ -1747,10 +1747,11 @@ export class HeroSystem6eItem extends Item {
                                 }
                                 break;
                             case "COMBAT_LEVELS":
-                                // Skip mental powers
-                                if (attackItem.baseInfo.type.includes("mental")) {
+                                // Skip mental powers for 6e as they have a different XMLID
+                                if (!this.is5e && attackItem.baseInfo.type.includes("mental")) {
                                     continue;
                                 }
+
                                 switch (this.system.OPTIONID) {
                                     case "SINGLE":
                                         if (count === 0) {
