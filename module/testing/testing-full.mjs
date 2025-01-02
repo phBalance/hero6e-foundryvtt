@@ -2198,8 +2198,8 @@ export function registerFullTests(quench) {
                         // Base DCs: Move Through (STR 10 -> 2d6/2DC), +14d6 HTH -> 14d6/14DC) => 16DC
                         // Added DCs: Haymaker does not apply since we are executing a maneuver and this is not a Strike, velocity 20"/3 -> 6d6/6DC,
                         // Base + Added = 16DC + 6DC (doubling rule does not apply) = 22 DC. Move Through is 5AP/die => 22d6
-                        const strikeItem = actor.items.find((item) => item.name === "Move Through");
-                        assert.equal(getEffectForumulaFromItem(strikeItem, { velocity: 20 }), "22d6");
+                        const moveThroughItem = actor.items.find((item) => item.name === "Move Through");
+                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { velocity: 20 }), "22d6");
                     });
                 });
 
@@ -2229,13 +2229,14 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for Martial Strike", function () {
-                        assert.equal(
-                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
-                            // Added DCs: Martial Strike 2DC =>  +2 DC
-                            // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
-                            actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage,
-                            "18d6",
-                        );
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                        // Added DCs: Martial Strike 2DC =>  +2 DC
+                        // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
+                        // FIXME: HTH is not built properly and we don't circle back and update all other items when it is built
+                        //        so we need to calculate directly.
+                        const msItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
+
+                        assert.equal(getEffectForumulaFromItem(msItem, {}), "18d6");
                     });
 
                     it("should have the correct damage for Martial Flash", function () {
@@ -2249,16 +2250,394 @@ export function registerFullTests(quench) {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
                         // Added: Sacrifice Strike 4DC =>  4DC
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20DC. Sacrifice Strike is 5AP/die => 20d6
-                        assert.equal(
-                            actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike").system.damage,
-                            "20d6",
-                        );
+
+                        // FIXME: HTH is not built properly and we don't circle back and update all other items when it is built
+                        //        so we need to calculate directly.
+                        const ssItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
+                        assert.equal(getEffectForumulaFromItem(ssItem, {}), "20d6");
                     });
                 });
 
                 describe("Martial Arts with CSLs", function () {
                     // PH: FIXME: TBD - repeat the above with CSLs?
                     // PH: FIXME: TBD - repeat above but with HTH levels
+                });
+
+                describe("Underwater", function () {
+                    let previousStatuses;
+
+                    beforeEach(function () {
+                        // Pretend that we have the underwater status on
+                        previousStatuses = actor.statuses;
+                        actor.statuses = new Set(["underwater"]);
+                    });
+
+                    afterEach(function () {
+                        actor.statuses = previousStatuses;
+                    });
+
+                    it("should increase the damage of a Strike", function () {
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                        // Added DCs: Strike 0DC, Underwater -2DC =>  -2 DC
+                        // Base + Added = 16DC - 2DC (doubling rule does not apply) = 14 DC. Martial Strike is 5AP/die => 14d6
+                        const strikeItem = actor.items.find((item) => item.name === "Strike");
+                        assert.equal(getEffectForumulaFromItem(strikeItem, {}), "14d6");
+                    });
+
+                    it("should not increase the damage of a move through", function () {
+                        // Base DCs: Move Through (STR 10 -> 2d6/2DC), +14d6 HTH -> 14d6/14DC) => 16DC
+                        // Added DCs: Underwater -2DC, Velocity 20" -> 6DC =>  +4 DC
+                        // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20 DC. Move Through is 5AP/die => 20d6
+                        const moveThroughItem = actor.items.find((item) => item.name === "Move Through");
+                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { velocity: 20 }), "20d6");
+                    });
+                });
+            });
+
+            describe("5e - base vs added DCs with HTH attacks", function () {
+                const contents = `
+                    <?xml version="1.0" encoding="UTF-16"?>
+                    <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                    <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
+                    <CHARACTER_INFO CHARACTER_NAME="Test boostable charges" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                        <BACKGROUND />
+                        <PERSONALITY />
+                        <QUOTE />
+                        <TACTICS />
+                        <CAMPAIGN_USE />
+                        <APPEARANCE />
+                        <NOTES1 />
+                        <NOTES2 />
+                        <NOTES3 />
+                        <NOTES4 />
+                        <NOTES5 />
+                    </CHARACTER_INFO>
+                    <CHARACTERISTICS>
+                        <STR XMLID="STR" ID="1735766445105" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STR>
+                        <DEX XMLID="DEX" ID="1735766445641" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DEX>
+                        <CON XMLID="CON" ID="1735766445971" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </CON>
+                        <BODY XMLID="BODY" ID="1735766445805" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </BODY>
+                        <INT XMLID="INT" ID="1735766445348" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </INT>
+                        <EGO XMLID="EGO" ID="1735766445336" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </EGO>
+                        <PRE XMLID="PRE" ID="1735766445965" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PRE>
+                        <COM XMLID="COM" ID="1735766445460" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </COM>
+                        <PD XMLID="PD" ID="1735766445097" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PD>
+                        <ED XMLID="ED" ID="1735766445982" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </ED>
+                        <SPD XMLID="SPD" ID="1735766445446" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SPD>
+                        <REC XMLID="REC" ID="1735766445544" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </REC>
+                        <END XMLID="END" ID="1735766445535" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </END>
+                        <STUN XMLID="STUN" ID="1735766445567" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STUN>
+                        <RUNNING XMLID="RUNNING" ID="1735766445501" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </RUNNING>
+                        <SWIMMING XMLID="SWIMMING" ID="1735766445708" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SWIMMING>
+                        <LEAPING XMLID="LEAPING" ID="1735766445584" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </LEAPING>
+                    </CHARACTERISTICS>
+                    <SKILLS />
+                    <PERKS />
+                    <TALENTS />
+                    <MARTIALARTS />
+                    <POWERS>
+                        <POWER XMLID="ENERGYBLAST" ID="1735766587654" BASECOST="0.0" LEVELS="3" ALIAS="Energy Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Little" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="CHARGES" ID="1735767372525" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BOOSTABLE" ID="1735767372461" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="ENERGYBLAST" ID="1735767170919" BASECOST="0.0" LEVELS="4" ALIAS="Energy Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="CHARGES" ID="1735767170913" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BOOSTABLE" ID="1735767170849" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="EGOATTACK" ID="1735766550110" BASECOST="0.0" LEVELS="1" ALIAS="Ego Attack" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Little" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="PLUSONEHALFDIE" ID="1735767380221" BASECOST="5.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="CHARGES" ID="1735767380286" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BOOSTABLE" ID="1735767380222" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="EGOATTACK" ID="1735767176022" BASECOST="0.0" LEVELS="2" ALIAS="Ego Attack" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="CHARGES" ID="1735767175956" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BOOSTABLE" ID="1735767175892" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="TRANSFORM" ID="1735766646334" BASECOST="0.0" LEVELS="1" ALIAS="Transform" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MAJOR" OPTIONID="MAJOR" OPTION_ALIAS="Major" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Little" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="HEALEDBY" ID="1735767387694" BASECOST="0.0" LEVELS="0" ALIAS="Healed back by" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="METHOD" OPTIONID="METHOD" OPTION_ALIAS="" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="CHARGES" ID="1735767387759" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BOOSTABLE" ID="1735767387695" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="TRANSFORM" ID="1735767180647" BASECOST="0.0" LEVELS="2" ALIAS="Transform" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MAJOR" OPTIONID="MAJOR" OPTION_ALIAS="Major" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="HEALEDBY" ID="1735767397201" BASECOST="0.0" LEVELS="0" ALIAS="Healed back by" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="METHOD" OPTIONID="METHOD" OPTION_ALIAS="" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="PLUSONEHALFDIE" ID="1735767401273" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="CHARGES" ID="1735767397266" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BOOSTABLE" ID="1735767397202" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                    </POWERS>
+                    <DISADVANTAGES />
+                    <EQUIPMENT />
+                    <RULES name="Default" path="foo.hdr" BASEPOINTS="200" DISADPOINTS="150" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="90" ATTACKAPMAXRESPONSE="0" DEFENSEAPMAXVALUE="90" DEFENSEAPMAXRESPONSE="0" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="0" AVAILDISADPOINTSRESPONSE="0" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="Yes" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
+                    </CHARACTER>
+                `;
+
+                let actor;
+                let previousSetting;
+                let threeDcEnergyBlast;
+                let fourDcEnergyBlast;
+                let threeDcEgoAttack;
+                let fourDcEgoAttack;
+                let threeDcTransform;
+                let eightDcTransform;
+
+                beforeEach(async () => {
+                    previousSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+
+                    await actor.uploadFromXml(contents);
+
+                    threeDcEnergyBlast = actor.items.find(
+                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "Little",
+                    );
+                    fourDcEnergyBlast = actor.items.find(
+                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name !== "Little",
+                    );
+                    threeDcEgoAttack = actor.items.find(
+                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "Little",
+                    );
+                    fourDcEgoAttack = actor.items.find(
+                        (item) => item.system.XMLID === "EGOATTACK" && item.name !== "Little",
+                    );
+                    threeDcTransform = actor.items.find(
+                        (item) => item.system.XMLID === "TRANSFORM" && item.name === "Little",
+                    );
+                    eightDcTransform = actor.items.find(
+                        (item) => item.system.XMLID === "TRANSFORM" && item.name !== "Little",
+                    );
+                });
+
+                afterEach(async function () {
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                });
+
+                // Verify the cost of powers
+                it("should match the overall cost of HD", function () {
+                    assert.equal(actor.system.points, 125);
+                });
+
+                it("should match the cost breakdown of HD", function () {
+                    assert.deepEqual(actor.system.pointsDetail, {
+                        characteristics: 0,
+                        power: 125,
+                    });
+                });
+
+                describe("Energy Blast", function () {
+                    it("should have the correct cost for the little EB", function () {
+                        assert.equal(threeDcEnergyBlast.system.activePoints, 15);
+                    });
+
+                    it("should have the correct END cost for the little EB", function () {
+                        assert.equal(threeDcEnergyBlast.system.end, 0);
+                    });
+
+                    it("should have the correct damage for the little EB", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcEnergyBlast, { boostableCharges: 0 }), "3d6");
+                    });
+
+                    it("should have the correct damage for a minimally boosted little EB", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcEnergyBlast, { boostableCharges: 1 }), "4d6");
+                    });
+
+                    it("should have the correct damage for a fully boosted little EB", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcEnergyBlast, { boostableCharges: 4 }), "6d6");
+                    });
+
+                    it("should have the correct cost for the big EB", function () {
+                        assert.equal(fourDcEnergyBlast.system.activePoints, 20);
+                    });
+
+                    it("should have the correct END cost for the big EB", function () {
+                        assert.equal(fourDcEnergyBlast.system.end, 0);
+                    });
+
+                    it("should have the correct damage for the big EB", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 0 }), "4d6");
+                    });
+
+                    it("should have the correct damage for a minimally boosted little EB", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 1 }), "5d6");
+                    });
+
+                    it("should have the correct damage for a fully boosted big EB", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 4 }), "8d6");
+                    });
+
+                    it("should have the correct damage for an over boosted big EB", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 5 }), "8d6");
+                    });
+                });
+
+                describe("Ego Attack", function () {
+                    it("should have the correct cost for the little Ego Attack", function () {
+                        assert.equal(threeDcEgoAttack.system.activePoints, 15);
+                    });
+
+                    it("should have the correct END cost for the little Ego Attack", function () {
+                        assert.equal(threeDcEgoAttack.system.end, 0);
+                    });
+
+                    it("should have the correct damage for the little Ego Attack", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcEgoAttack, { boostableCharges: 0 }), "1½d6");
+                    });
+
+                    it("should have the correct damage for a minimally boosted little Ego Attack", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcEgoAttack, { boostableCharges: 1 }), "2d6");
+                    });
+
+                    it("should have the correct damage for a fully boosted little Ego Attack", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcEgoAttack, { boostableCharges: 4 }), "3d6");
+                    });
+
+                    it("should have the correct cost for the big Ego Attack", function () {
+                        assert.equal(fourDcEgoAttack.system.activePoints, 20);
+                    });
+
+                    it("should have the correct END cost for the big Ego Attack", function () {
+                        assert.equal(fourDcEgoAttack.system.end, 0);
+                    });
+
+                    it("should have the correct damage for the big Ego Attack", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 0 }), "2d6");
+                    });
+
+                    it("should have the correct damage for a minimally boosted little Ego Attack", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 1 }), "2½d6");
+                    });
+
+                    it("should have the correct damage for a fully boosted big Ego Attack", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 4 }), "4d6");
+                    });
+
+                    it("should have the correct damage for an over boosted big Ego Attack", function () {
+                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 5 }), "4d6");
+                    });
+                });
+
+                describe("Major Transform", function () {
+                    it("should have the correct cost for the little Transform", function () {
+                        assert.equal(threeDcTransform.system.activePoints, 15);
+                    });
+
+                    it("should have the correct END cost for the little Transform", function () {
+                        assert.equal(threeDcTransform.system.end, 0);
+                    });
+
+                    it("should have the correct damage for the little Transform", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcTransform, { boostableCharges: 0 }), "1d6");
+                    });
+
+                    it("should have the correct damage for a minimally boosted little Transform", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcTransform, { boostableCharges: 1 }), "1d6+1");
+                    });
+
+                    it("should have the correct damage for a fully boosted little Transform", function () {
+                        assert.equal(getEffectForumulaFromItem(threeDcTransform, { boostableCharges: 4 }), "2d6");
+                    });
+
+                    it("should have the correct cost for the big Transform", function () {
+                        assert.equal(eightDcTransform.system.activePoints, 40);
+                    });
+
+                    it("should have the correct END cost for the big Transform", function () {
+                        assert.equal(eightDcTransform.system.end, 0);
+                    });
+
+                    it("should have the correct damage for the big Transform", function () {
+                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 0 }), "2½d6");
+                    });
+
+                    it("should have the correct damage for a minimally boosted big Transform", function () {
+                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 1 }), "3d6");
+                    });
+
+                    it("should have the correct damage for a fully boosted big Transform", function () {
+                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 4 }), "4d6");
+                    });
+
+                    it("should have the correct damage for an over boosted big Transform", function () {
+                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 5 }), "4d6");
+                    });
                 });
             });
 
@@ -2498,6 +2877,730 @@ export function registerFullTests(quench) {
 
                 it("should recognize all flight advantages as DC affecting", async function () {
                     assert.equal(flightItem.system._advantagesDc, 2);
+                });
+            });
+
+            describe("5e - DC altering advantages", function () {
+                const contents = `
+                    <?xml version="1.0" encoding="UTF-16"?>
+                    <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                    <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
+                    <CHARACTER_INFO CHARACTER_NAME="Test Advantaged Attacks" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                        <BACKGROUND />
+                        <PERSONALITY />
+                        <QUOTE />
+                        <TACTICS />
+                        <CAMPAIGN_USE />
+                        <APPEARANCE />
+                        <NOTES1 />
+                        <NOTES2 />
+                        <NOTES3 />
+                        <NOTES4 />
+                        <NOTES5 />
+                    </CHARACTER_INFO>
+                    <CHARACTERISTICS>
+                        <STR XMLID="STR" ID="1735787459548" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STR>
+                        <DEX XMLID="DEX" ID="1735787458927" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DEX>
+                        <CON XMLID="CON" ID="1735787459732" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </CON>
+                        <BODY XMLID="BODY" ID="1735787459867" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </BODY>
+                        <INT XMLID="INT" ID="1735787459605" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </INT>
+                        <EGO XMLID="EGO" ID="1735787459121" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </EGO>
+                        <PRE XMLID="PRE" ID="1735787459422" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PRE>
+                        <COM XMLID="COM" ID="1735787459574" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </COM>
+                        <PD XMLID="PD" ID="1735787459044" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PD>
+                        <ED XMLID="ED" ID="1735787459459" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </ED>
+                        <SPD XMLID="SPD" ID="1735787458890" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SPD>
+                        <REC XMLID="REC" ID="1735787459832" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </REC>
+                        <END XMLID="END" ID="1735787459801" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </END>
+                        <STUN XMLID="STUN" ID="1735787459628" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STUN>
+                        <RUNNING XMLID="RUNNING" ID="1735787459032" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </RUNNING>
+                        <SWIMMING XMLID="SWIMMING" ID="1735787459573" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SWIMMING>
+                        <LEAPING XMLID="LEAPING" ID="1735787459359" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </LEAPING>
+                    </CHARACTERISTICS>
+                    <SKILLS>
+                        <SKILL XMLID="COMBAT_LEVELS" ID="1735835785525" BASECOST="0.0" LEVELS="2" ALIAS="Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES />
+                        </SKILL>
+                    </SKILLS>
+                    <PERKS />
+                    <TALENTS />
+                    <MARTIALARTS />
+                    <POWERS>
+                        <POWER XMLID="ENERGYBLAST" ID="1735787490764" BASECOST="0.0" LEVELS="4" ALIAS="Energy Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EB+1" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1735788364606" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="ENERGYBLAST" ID="1735788017030" BASECOST="0.0" LEVELS="4" ALIAS="Energy Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EB+1/2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735788383400" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="EGOATTACK" ID="1735787520724" BASECOST="0.0" LEVELS="4" ALIAS="Ego Attack" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EA+1" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1735788391856" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="EGOATTACK" ID="1735788060059" BASECOST="0.0" LEVELS="4" ALIAS="Ego Attack" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EA+1/2" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735788404918" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="HKA" ID="1735787618860" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Hand-To-Hand" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA+1/2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735788415571" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                        <POWER XMLID="RKA" ID="1735787638516" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Ranged" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="RKA+1/2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735788428822" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    </POWERS>
+                    <DISADVANTAGES />
+                    <EQUIPMENT />
+                    <RULES name="Default" path="foo.hdr" BASEPOINTS="200" DISADPOINTS="150" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="90" ATTACKAPMAXRESPONSE="0" DEFENSEAPMAXVALUE="90" DEFENSEAPMAXRESPONSE="0" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="0" AVAILDISADPOINTSRESPONSE="0" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="Yes" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
+                    </CHARACTER>
+                `;
+
+                let actor;
+                let ebPlusOneItem;
+                let ebPlusHalfItem;
+                let eaPlusOneItem;
+                let eaPlusHalfItem;
+                let hkaPlusHalfItem;
+                let rkaPlusHalfItem;
+
+                before(async () => {
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+
+                    await actor.uploadFromXml(contents);
+                    ebPlusOneItem = actor.items.find(
+                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
+                    );
+                    ebPlusHalfItem = actor.items.find(
+                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1/2",
+                    );
+                    eaPlusOneItem = actor.items.find(
+                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1",
+                    );
+                    eaPlusHalfItem = actor.items.find(
+                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1/2",
+                    );
+                    hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
+                    rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                });
+
+                describe("Energy Blast", function () {
+                    it("should have the correct cost for the +1/2 EB", function () {
+                        assert.equal(ebPlusHalfItem.system.activePoints, 30);
+                    });
+
+                    it("should have the correct END cost for the +1/2 EB", function () {
+                        assert.equal(ebPlusHalfItem.system.end, 3);
+                    });
+
+                    it("should have the correct damage for the +1/2 EB", function () {
+                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "4d6");
+                    });
+
+                    it("should have the correct cost for the +1 EB", function () {
+                        assert.equal(ebPlusOneItem.system.activePoints, 40);
+                    });
+
+                    it("should have the correct END cost for the +1 EB", function () {
+                        assert.equal(ebPlusOneItem.system.end, 4);
+                    });
+
+                    it("should have the correct damage for the +1 EB", function () {
+                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "4d6");
+                    });
+                });
+
+                describe("Ego Attack", function () {
+                    it("should have the correct cost for the +1/2 EA", function () {
+                        assert.equal(eaPlusHalfItem.system.activePoints, 60);
+                    });
+
+                    it("should have the correct END cost for the +1/2 EA", function () {
+                        assert.equal(eaPlusHalfItem.system.end, 6);
+                    });
+
+                    it("should have the correct damage for the +1/2 EA", function () {
+                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4d6");
+                    });
+
+                    it("should have the correct cost for the +1 EA", function () {
+                        assert.equal(eaPlusOneItem.system.activePoints, 80);
+                    });
+
+                    it("should have the correct END cost for the +1 EA", function () {
+                        assert.equal(eaPlusOneItem.system.end, 8);
+                    });
+
+                    it("should have the correct damage for the +1 EA", function () {
+                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4d6");
+                    });
+                });
+
+                describe("Killing Attack", function () {
+                    it("should have the correct cost for the +1/2 RKA", function () {
+                        assert.equal(rkaPlusHalfItem.system.activePoints, 67);
+                    });
+
+                    it("should have the correct END cost for the +1/2 RKA", function () {
+                        assert.equal(rkaPlusHalfItem.system.end, 7);
+                    });
+
+                    it("should have the correct damage for the +1/2 RKA", function () {
+                        assert.equal(getEffectForumulaFromItem(rkaPlusHalfItem, { effectivestr: 15 }), "3d6");
+                    });
+
+                    it("should have the correct cost for the +1/2 HKA", function () {
+                        assert.equal(hkaPlusHalfItem.system.activePoints, 67);
+                    });
+
+                    it("should have the correct END cost for the +1/2 HKA", function () {
+                        assert.equal(hkaPlusHalfItem.system.end, 7);
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA", function () {
+                        // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 15 }), "3½d6");
+                    });
+                });
+
+                describe("CSLs and DCs", function () {
+                    let cslItem;
+                    let cslPreviousActiveState;
+                    let cslPreviousAllocation;
+
+                    beforeEach(function () {
+                        // Turn on the CSLs
+                        cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
+                        cslPreviousActiveState = cslItem.system.active;
+                        cslItem.system.active = true;
+
+                        // Set the CSLs for DCs
+                        cslPreviousAllocation = cslItem.system.csl;
+                        cslItem.system.csl = ["dc", "dc"];
+                    });
+
+                    afterEach(function () {
+                        // Turn off the CSLs
+                        cslItem.system.active = cslPreviousActiveState;
+
+                        // Set the CSLs to previous
+                        cslItem.system.csl = cslPreviousAllocation;
+                    });
+
+                    it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
+                        // 2 CSLs is 1DC (ignores advantage). 4d6 + 1 DC = 5d6
+                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "5d6");
+                    });
+
+                    it("should have the correct damage for the +1 EB with 2 CSLs", function () {
+                        // 2 CSLs is 2DCs (ignores advantage). 3d6 + 2 DC = 3d6+1
+                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "5d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
+                        // 2 CSLs at +1/2 is 1DC (ignores advantages). + 1 DC = +½d6
+                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4½d6");
+                    });
+
+                    it("should have the correct damage for the +1 EA with 2 CSLs", function () {
+                        // 2 CSLs at +1/2 is 1DC  (ignores advantages). + 1 DC = +1
+                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4½d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
+                        // Only use 1 CSL
+                        cslItem.system.csl = ["dc", "ocv"];
+
+                        // 1 CSLs is 0DC (ignores advantage). 3d6 + 0 DC = 3d6
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
+                        // 2 CSLs is 1DC (ignores advantage). 3d6 + 1 DC = 3d6+1
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6+1");
+                    });
+                });
+
+                // Confirm that we add straight dice in 5e for haymakers.
+                describe("Haymaker", function () {
+                    let haymakerPreviousActiveState;
+                    let haymakerManuever;
+
+                    beforeEach(function () {
+                        // Turn on the haymaker
+                        haymakerManuever = actor.items.find(
+                            (item) => item.type === "maneuver" && item.name === "Haymaker",
+                        );
+
+                        haymakerPreviousActiveState = haymakerManuever.system.active;
+                        haymakerManuever.system.active = true;
+                    });
+
+                    afterEach(function () {
+                        // Turn off the haymaker
+                        haymakerManuever.system.active = haymakerPreviousActiveState;
+                    });
+
+                    it("should have the correct damage for the +1/2 EB", function () {
+                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "8d6");
+                    });
+
+                    it("should have the correct damage for the +1 EB", function () {
+                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "8d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 EA", function () {
+                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "6d6");
+                    });
+
+                    it("should have the correct damage for the +1 EA", function () {
+                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "6d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 RKA", function () {
+                        // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
+                        assert.equal(getEffectForumulaFromItem(rkaPlusHalfItem, {}), "3½d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA", function () {
+                        // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3½d6");
+                    });
+                });
+            });
+
+            describe.only("6e - DC altering advantages", function () {
+                const contents = `
+                    <?xml version="1.0" encoding="UTF-16"?>
+                    <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
+                    <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
+                    <CHARACTER_INFO CHARACTER_NAME="Test 6e Advantaged Attacks" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                        <BACKGROUND />
+                        <PERSONALITY />
+                        <QUOTE />
+                        <TACTICS />
+                        <CAMPAIGN_USE />
+                        <APPEARANCE />
+                        <NOTES1 />
+                        <NOTES2 />
+                        <NOTES3 />
+                        <NOTES4 />
+                        <NOTES5 />
+                    </CHARACTER_INFO>
+                    <CHARACTERISTICS>
+                        <STR XMLID="STR" ID="1735840338551" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STR>
+                        <DEX XMLID="DEX" ID="1735840339052" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DEX>
+                        <CON XMLID="CON" ID="1735840339216" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </CON>
+                        <INT XMLID="INT" ID="1735840338337" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </INT>
+                        <EGO XMLID="EGO" ID="1735840338920" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </EGO>
+                        <PRE XMLID="PRE" ID="1735840339282" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PRE>
+                        <OCV XMLID="OCV" ID="1735840339279" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </OCV>
+                        <DCV XMLID="DCV" ID="1735840339283" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DCV>
+                        <OMCV XMLID="OMCV" ID="1735840338944" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </OMCV>
+                        <DMCV XMLID="DMCV" ID="1735840339058" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DMCV>
+                        <SPD XMLID="SPD" ID="1735840338401" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SPD>
+                        <PD XMLID="PD" ID="1735840338452" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PD>
+                        <ED XMLID="ED" ID="1735840338626" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </ED>
+                        <REC XMLID="REC" ID="1735840338980" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </REC>
+                        <END XMLID="END" ID="1735840339275" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </END>
+                        <BODY XMLID="BODY" ID="1735840338809" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </BODY>
+                        <STUN XMLID="STUN" ID="1735840339104" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STUN>
+                        <RUNNING XMLID="RUNNING" ID="1735840338862" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </RUNNING>
+                        <SWIMMING XMLID="SWIMMING" ID="1735840338758" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SWIMMING>
+                        <LEAPING XMLID="LEAPING" ID="1735840338882" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </LEAPING>
+                    </CHARACTERISTICS>
+                    <SKILLS>
+                        <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1735844995029" BASECOST="0.0" LEVELS="2" ALIAS="Mental Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with all Mental Powers" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="COMBAT_LEVELS" ID="1735840354037" BASECOST="0.0" LEVELS="2" ALIAS="Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <NOTES />
+                        </SKILL>
+                    </SKILLS>
+                    <PERKS />
+                    <TALENTS />
+                    <MARTIALARTS />
+                    <POWERS>
+                        <POWER XMLID="ENERGYBLAST" ID="1735841051758" BASECOST="0.0" LEVELS="4" ALIAS="Energy Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EB+1" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1735841893968" BASECOST="0.0" LEVELS="1" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="MOBILE" ID="1735841900728" BASECOST="0.25" LEVELS="1" ALIAS="Mobile" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="SELECTIVETARGET" ID="1735841902155" BASECOST="0.25" LEVELS="0" ALIAS="Selective" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="ENERGYBLAST" ID="1735841074561" BASECOST="0.0" LEVELS="4" ALIAS="Energy Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EB+1/2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735841189837" BASECOST="0.0" LEVELS="2" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="EGOATTACK" ID="1735841096274" BASECOST="0.0" LEVELS="4" ALIAS="Ego Attack" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EA+1" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1735841918378" BASECOST="0.0" LEVELS="1" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="SELECTIVETARGET" ID="1735841920146" BASECOST="0.25" LEVELS="0" ALIAS="Selective" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="MOBILE" ID="1735841921253" BASECOST="0.25" LEVELS="1" ALIAS="Mobile" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="EGOATTACK" ID="1735841123188" BASECOST="0.0" LEVELS="4" ALIAS="Ego Attack" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EA+1/2" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735841212055" BASECOST="0.0" LEVELS="2" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="HKA" ID="1735841147388" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Hand-To-Hand" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA+1/2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735841231198" BASECOST="0.0" LEVELS="2" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="RKA" ID="1735841170408" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Ranged" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="RKA+1/2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="ARMORPIERCING" ID="1735841258732" BASECOST="0.0" LEVELS="2" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    </POWERS>
+                    <DISADVANTAGES />
+                    <EQUIPMENT />
+                    <RULES name="Default" path="foo.hdr" BASEPOINTS="200" DISADPOINTS="150" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="90" ATTACKAPMAXRESPONSE="0" DEFENSEAPMAXVALUE="90" DEFENSEAPMAXRESPONSE="0" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="0" AVAILDISADPOINTSRESPONSE="0" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="Yes" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
+                    </CHARACTER>
+                `;
+
+                let actor;
+                let ebPlusOneItem;
+                let ebPlusHalfItem;
+                let eaPlusOneItem;
+                let eaPlusHalfItem;
+                let hkaPlusHalfItem;
+                let rkaPlusHalfItem;
+
+                before(async () => {
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+
+                    await actor.uploadFromXml(contents);
+                    ebPlusOneItem = actor.items.find(
+                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
+                    );
+                    ebPlusHalfItem = actor.items.find(
+                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1/2",
+                    );
+                    eaPlusOneItem = actor.items.find(
+                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1",
+                    );
+                    eaPlusHalfItem = actor.items.find(
+                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1/2",
+                    );
+                    hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
+                    rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                });
+
+                describe("Energy Blast", function () {
+                    it("should have the correct cost for the +1/2 EB", function () {
+                        assert.equal(ebPlusHalfItem.system.activePoints, 30);
+                    });
+
+                    it("should have the correct END cost for the +1/2 EB", function () {
+                        assert.equal(ebPlusHalfItem.system.end, 3);
+                    });
+
+                    it("should have the correct damage for the +1/2 EB", function () {
+                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "4d6");
+                    });
+
+                    it("should have the correct cost for the +1 EB", function () {
+                        assert.equal(ebPlusOneItem.system.activePoints, 40);
+                    });
+
+                    it("should have the correct END cost for the +1 EB", function () {
+                        assert.equal(ebPlusOneItem.system.end, 4);
+                    });
+
+                    it("should have the correct damage for the +1 EB", function () {
+                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "4d6");
+                    });
+                });
+
+                describe("Ego Attack", function () {
+                    it("should have the correct cost for the +1/2 EA", function () {
+                        assert.equal(eaPlusHalfItem.system.activePoints, 60);
+                    });
+
+                    it("should have the correct END cost for the +1/2 EA", function () {
+                        assert.equal(eaPlusHalfItem.system.end, 6);
+                    });
+
+                    it("should have the correct damage for the +1/2 EA", function () {
+                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4d6");
+                    });
+
+                    it("should have the correct cost for the +1 EA", function () {
+                        assert.equal(eaPlusOneItem.system.activePoints, 80);
+                    });
+
+                    it("should have the correct END cost for the +1 EA", function () {
+                        assert.equal(eaPlusOneItem.system.end, 8);
+                    });
+
+                    it("should have the correct damage for the +1 EA", function () {
+                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4d6");
+                    });
+                });
+
+                describe("Killing Attack", function () {
+                    it("should have the correct cost for the +1/2 RKA", function () {
+                        assert.equal(rkaPlusHalfItem.system.activePoints, 67);
+                    });
+
+                    it("should have the correct END cost for the +1/2 RKA", function () {
+                        assert.equal(rkaPlusHalfItem.system.end, 7);
+                    });
+
+                    it("should have the correct damage for the +1/2 RKA", function () {
+                        assert.equal(getEffectForumulaFromItem(rkaPlusHalfItem, { effectivestr: 15 }), "3d6");
+                    });
+
+                    it("should have the correct cost for the +1/2 HKA", function () {
+                        assert.equal(hkaPlusHalfItem.system.activePoints, 67);
+                    });
+
+                    it("should have the correct END cost for the +1/2 HKA", function () {
+                        assert.equal(hkaPlusHalfItem.system.end, 7);
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA", function () {
+                        // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 15 }), "3½d6");
+                    });
+                });
+
+                describe("CSLs and DCs", function () {
+                    let cslCombatItem;
+                    let cslCombatPreviousActiveState;
+                    let cslCombatPreviousAllocation;
+                    let cslMentalItem;
+                    let cslMentalPreviousActiveState;
+                    let cslMentalPreviousAllocation;
+
+                    beforeEach(function () {
+                        // Turn on the CSLs
+                        cslCombatItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
+                        cslCombatPreviousActiveState = cslCombatItem.system.active;
+                        cslCombatItem.system.active = true;
+
+                        cslMentalItem = actor.items.find((item) => item.system.XMLID === "MENTAL_COMBAT_LEVELS");
+                        cslMentalPreviousActiveState = cslMentalItem.system.active;
+                        cslMentalItem.system.active = true;
+
+                        // Set the CSLs for DCs
+                        cslCombatPreviousAllocation = cslCombatItem.system.csl;
+                        cslCombatItem.system.csl = ["dc", "dc"];
+
+                        cslMentalPreviousAllocation = cslMentalItem.system.csl;
+                        cslMentalItem.system.csl = ["dc", "dc"];
+                    });
+
+                    afterEach(function () {
+                        // Turn off the CSLs
+                        cslCombatItem.system.active = cslCombatPreviousActiveState;
+                        cslMentalItem.system.active = cslMentalPreviousActiveState;
+
+                        // Set the CSLs to previous
+                        cslCombatItem.system.csl = cslCombatPreviousAllocation;
+                        cslMentalItem.system.csl = cslMentalPreviousAllocation;
+                    });
+
+                    it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
+                        // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +½d6
+                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "4½d6");
+                    });
+
+                    it("should have the correct damage for the +1 EB with 2 CSLs", function () {
+                        // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +1
+                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "4d6+1");
+                    });
+
+                    it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
+                        // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +1
+                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4d6+1");
+                    });
+
+                    it("should have the correct damage for the +1 EA with 2 CSLs", function () {
+                        // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +0
+                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
+                        // Only use 1 CSL
+                        cslCombatItem.system.csl = ["dc", "ocv"];
+
+                        // 1 CSLs is 0DC. 3d6 + 0 DC = 0d6
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
+                        // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = 0d6
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
+                    });
+                });
+
+                // Confirm that we add straight dice in 5e for haymakers.
+                describe("Haymaker", function () {
+                    let haymakerPreviousActiveState;
+                    let haymakerManuever;
+
+                    beforeEach(function () {
+                        // Turn on the haymaker
+                        haymakerManuever = actor.items.find(
+                            (item) => item.type === "maneuver" && item.name === "Haymaker",
+                        );
+
+                        haymakerPreviousActiveState = haymakerManuever.system.active;
+                        haymakerManuever.system.active = true;
+                    });
+
+                    afterEach(function () {
+                        // Turn off the haymaker
+                        haymakerManuever.system.active = haymakerPreviousActiveState;
+                    });
+
+                    it("should have the correct damage for the +1/2 EB", function () {
+                        // +4 DC at +1/2 is 2.66 DC => 2½d6
+                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "6½d6");
+                    });
+
+                    it("should have the correct damage for the +1 EB", function () {
+                        // +4 DC at +1 is 2 DC => 2d6
+                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "6d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 EA", function () {
+                        // +4 DC at +1/2 is 2.66 DC => 1d6+1
+                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "5d6+1");
+                    });
+
+                    it("should have the correct damage for the +1 EA", function () {
+                        // +4 DC at +1 is 2 DC => 1d6
+                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "5d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 RKA", function () {
+                        // +4 DC at +1/2 is 2.66 DC => ½d6
+                        assert.equal(getEffectForumulaFromItem(rkaPlusHalfItem, {}), "3½d6");
+                    });
+
+                    it("should have the correct damage for the +1/2 HKA", function () {
+                        // +4 DC at +1 is 2 DC => 2d6
+                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3½d6");
+                    });
                 });
             });
         },
