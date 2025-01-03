@@ -5,6 +5,7 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mj
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
+    calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
     penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
@@ -662,12 +663,12 @@ export async function AttackToHit(item, options) {
     }
 
     // STRMINIMUM
-    const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
-    if (STRMINIMUM) {
-        const strMinimumValue = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+    const strMinimumModifier = item.findModsByXmlid("STRMINIMUM");
+    if (strMinimumModifier) {
+        const strMinimumValue = calculateStrengthMinimumForItem(item, strMinimumModifier);
         const extraStr = Math.max(0, parseInt(actor.system.characteristics.str.value)) - strMinimumValue;
         if (extraStr < 0) {
-            heroRoller.addNumber(Math.floor(extraStr / 5), STRMINIMUM.ALIAS);
+            heroRoller.addNumber(Math.floor(extraStr / 5), strMinimumModifier.ALIAS);
         }
     }
 

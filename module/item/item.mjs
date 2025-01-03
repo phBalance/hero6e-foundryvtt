@@ -18,6 +18,7 @@ import {
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
+    calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
     dicePartsToEffectFormula,
     getEffectForumulaFromItem,
@@ -1464,9 +1465,9 @@ export class HeroSystem6eItem extends Item {
             }
 
             // STRMINIMUM
-            const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
-            if (STRMINIMUM) {
-                const strMinimumValue = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+            const strengthMinimumModifier = item.findModsByXmlid("STRMINIMUM");
+            if (strengthMinimumModifier) {
+                const strMinimumValue = calculateStrengthMinimumForItem(item, strengthMinimumModifier);
                 const extraStr =
                     Math.max(0, parseInt(item.actor?.system.characteristics.str.value || 0)) - strMinimumValue;
                 if (extraStr < 0) {
@@ -1478,7 +1479,7 @@ export class HeroSystem6eItem extends Item {
                     } else {
                         item.flags.tags.ocv = "";
                     }
-                    item.flags.tags.ocv += `${adjustment.signedString()} ${STRMINIMUM.ALIAS}`;
+                    item.flags.tags.ocv += `${adjustment.signedString()} ${strengthMinimumModifier.ALIAS}`;
                 }
             }
 
@@ -4380,6 +4381,13 @@ export class HeroSystem6eItem extends Item {
             this.system.class = "luck";
             this.system.usesStrength = false;
         }
+        // PH: FIXME: See bug report
+
+        // else if (xmlid === "FORCEWALL") {
+        //     // FIXME: This XMLIDs aren't really attacks but they have either the attack or dice behaviour which means that,
+        //     // for the time, being we consider them to be attack like.
+        //     this.system.usesStrength = false;
+        // }
 
         // AVAD
         const avad = this.findModsByXmlid("AVAD");
