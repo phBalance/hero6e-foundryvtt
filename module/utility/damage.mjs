@@ -52,7 +52,7 @@ export function penaltySkillLevelsForAttack(item) {
     return psls;
 }
 
-const emptyFormulaParts = Object.freeze({
+const zeroDiceParts = Object.freeze({
     dc: 0,
     d6Count: 0,
     d6Less1DieCount: 0,
@@ -122,7 +122,7 @@ function doubleDamageLimit() {
     return game.settings.get(HEROSYS.module, "DoubleDamageLimit");
 }
 
-function addExtraDcs(item, dicePartsBundle, halve5eKillingAttacks) {
+function addExtraDcsToBundle(item, dicePartsBundle, halve5eKillingAttacks) {
     const extraDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
 
     // Consider all EXTRADCs as one
@@ -157,11 +157,11 @@ export function calculateAddedDicePartsFromItem(item, options) {
     // PH: FIXME: base is now so simple that we could put it in here.
 
     const addedDamageBundle = {
-        diceParts: emptyFormulaParts,
+        diceParts: zeroDiceParts,
         tags: [],
     };
     const velocityDamageBundle = {
-        diceParts: emptyFormulaParts,
+        diceParts: zeroDiceParts,
         tags: [],
     };
 
@@ -170,7 +170,7 @@ export function calculateAddedDicePartsFromItem(item, options) {
     // 6e doesn't have the concept of base and added DCs or the doubling rule so do as an added DC for simplicity.
 
     if (item.type === "martialart" && item.system.USEWEAPON) {
-        addExtraDcs(item, addedDamageBundle, false);
+        addExtraDcsToBundle(item, addedDamageBundle, false);
     }
 
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main weapon and the maneuver is additional damage.
@@ -198,44 +198,8 @@ export function calculateAddedDicePartsFromItem(item, options) {
     }
 
     // Add in STR when appropriate
-    // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage
     if (item.system.usesStrength && !isNonKillingStrengthBasedManeuver(item)) {
-        const baseEffectiveStrength = effectiveStrength(item, options);
-        let str = baseEffectiveStrength;
-
-        // PH: FIXME: Review the STRMINIMUM stuff in 5e and 6e.
-        // // STRMINIMUM
-        // // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
-        // const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
-        // if (STRMINIMUM) {
-        //     const strMinimum = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
-        //     const strMinDc = Math.ceil(strMinimum / 5);
-        //     addedDamage.dc -= strMinDc;
-        //     addedDamage.tags.push({
-        //         value: `-${strMinDc}DC`,
-        //         name: "STR Minimum",
-        //         title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
-        //     });
-        // }
-
-        // MOVEBY halves STR
-        if (item.system.XMLID === "MOVEBY") {
-            str = RoundFavorPlayerUp(str / 2);
-        }
-
-        // NOTE: intentionally using fractional DC here.
-        // PH: FIXME: There are some weird rules around 5e and advantaged powers for adding STR.
-        const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5);
-        const formula = dicePartsToEffectFormula(strDiceParts);
-
-        if (str !== 0) {
-            addedDamageBundle.diceParts = addDiceParts(item, addedDamageBundle.diceParts, strDiceParts);
-            addedDamageBundle.tags.push({
-                value: `+${formula}`,
-                name: "STR",
-                title: `${str} STR${item.system.XMLID === "MOVEBY" ? " halved due to MOVEBY" : ""} -> ${formula}`,
-            });
-        }
+        addStrengthToBundle(item, options, addedDamageBundle);
     }
 
     // Boostable Charges
@@ -714,27 +678,59 @@ export function dicePartsToEffectFormula(diceParts) {
     }`;
 }
 
-// PH: FIXME: Implement this properly.
+function addStrengthToBundle(item, options, dicePartsBundle) {
+    // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage
+
+    const baseEffectiveStrength = effectiveStrength(item, options);
+    let str = baseEffectiveStrength;
+
+    // PH: FIXME: Review the STRMINIMUM stuff in 5e and 6e.
+    // // STRMINIMUM
+    // // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
+    // const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
+    // if (STRMINIMUM) {
+    //     const strMinimum = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+    //     const strMinDc = Math.ceil(strMinimum / 5);
+    //     addedDamage.dc -= strMinDc;
+    //     addedDamage.tags.push({
+    //         value: `-${strMinDc}DC`,
+    //         name: "STR Minimum",
+    //         title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
+    //     });
+    // }
+
+    // MOVEBY halves STR
+    if (item.system.XMLID === "MOVEBY") {
+        str = RoundFavorPlayerUp(str / 2);
+    }
+
+    // NOTE: intentionally using fractional DC here.
+    const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5);
+    const formula = dicePartsToEffectFormula(strDiceParts);
+
+    if (str !== 0) {
+        dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
+        dicePartsBundle.tags.push({
+            value: `+${formula}`,
+            name: "STR",
+            title: `${str} STR${item.system.XMLID === "MOVEBY" ? " halved due to MOVEBY" : ""} -> ${formula}`,
+        });
+    }
+
+    return str;
+}
+
 export function maneuverBaseEffectDiceParts(item, options) {
     const baseDicePartsBundle = {
-        diceParts: undefined,
-        tags: [], // PH: FIXME: Need to plumb this all the way through
+        diceParts: zeroDiceParts,
+        tags: [],
     };
 
     // If unarmed combat
     if (["maneuver", "martialart"].includes(item.type) && !item.system.USEWEAPON) {
         // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
         if (isNonKillingStrengthBasedManeuver(item)) {
-            const str = effectiveStrength(item, options);
-            const strDiceParts = characteristicValueToDiceParts(str);
-            baseDicePartsBundle.diceParts = strDiceParts;
-
-            const strFormula = dicePartsToEffectFormula(strDiceParts);
-            baseDicePartsBundle.tags.push({
-                value: `${strFormula}`,
-                name: "STR",
-                title: `STR ${str} -> ${strFormula}`,
-            });
+            const str = addStrengthToBundle(item, options, baseDicePartsBundle);
 
             // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
             // strength for damage purposes.
@@ -765,7 +761,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
 
         // 5e martial arts EXTRADCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
         if (item.type === "martialart" && !item.system.USEWEAPON) {
-            addExtraDcs(item, baseDicePartsBundle, true);
+            addExtraDcsToBundle(item, baseDicePartsBundle, true);
         }
 
         return baseDicePartsBundle;

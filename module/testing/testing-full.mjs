@@ -1929,11 +1929,61 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe("MANEUVER with Velocity", function () {
-                    // PH: FIXME: TBD
-                    // it("should correctly allow movement DCs to exceed the base DC doubling rule", function () {
-                    //     assert.equal(xxx);
-                    // });
+                describe("MANEUVERs with Velocity", function () {
+                    it("should add velocity damage for Move Through", function () {
+                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                        // Added DCs: velocity 30"/3 -> 10DC => +10DC
+                        // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.name === "Move Through"),
+                                { effectivestr: 20, velocity: 30 },
+                            ),
+                            "14d6",
+                        );
+                    });
+
+                    it("should add velocity damage for Move Through (not subject to doubling rule)", function () {
+                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                        // Added DCs: velocity 90"/3 -> 30DC => +30DC
+                        // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.name === "Move Through"),
+                                { effectivestr: 20, velocity: 90 },
+                            ),
+                            "34d6",
+                        );
+                    });
+
+                    it("should add velocity damage for Move By", function () {
+                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC)  => 2DC
+                        // Added DCs: velocity 10"/5 -> 3DC => +3DC
+                        // Base + Added = 2DC + 3DC (doubling rule does not apply) = 4 DC. Move By is 5AP/die => 4d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.name === "Move By"),
+                                { effectivestr: 20, velocity: 10 },
+                            ),
+                            "4d6",
+                        );
+                    });
+
+                    it("should add velocity damage for Move By (not subject to doubling rule)", function () {
+                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC) => 2DC
+                        // Added DCs: velocity 90"/5 -> 18DC => +18DC
+                        // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.name === "Move By"),
+                                { effectivestr: 20, velocity: 90 },
+                            ),
+                            "20d6",
+                        );
+                    });
+
+                    // TODO: move through with weapon
+                    // TODO: move by with weapon
                 });
 
                 describe("Martial Arts", function () {
@@ -1983,7 +2033,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe("Martial Arts with CSLs", function () {
+                describe("Maneuvers with CSLs", function () {
                     let cslItem;
                     let cslPreviousActiveState;
                     let cslPreviousAllocation;
@@ -2069,6 +2119,19 @@ export function registerFullTests(quench) {
                                 {},
                             ),
                             "34d6",
+                        );
+                    });
+
+                    it("should add velocity damage for Move By", function () {
+                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC)  => 2DC
+                        // Added DCs: velocity 10"/5 -> 2DC, (11 CSL) 2:1 +5DC => +7DC
+                        // Base + Added = 2DC + 7DC (doubling rule does apply but not to velocity) = 6 DC. Move By is 5AP/die => 6d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.name === "Move By"),
+                                { effectivestr: 20, velocity: 10 },
+                            ),
+                            "6d6",
                         );
                     });
                 });
