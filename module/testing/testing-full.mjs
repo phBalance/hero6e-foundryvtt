@@ -1936,7 +1936,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
                         assert.equal(
                             getEffectForumulaFromItem(
-                                actor.items.find((item) => item.name === "Move Through"),
+                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
                                 { effectivestr: 20, velocity: 30 },
                             ),
                             "14d6",
@@ -1949,7 +1949,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
                         assert.equal(
                             getEffectForumulaFromItem(
-                                actor.items.find((item) => item.name === "Move Through"),
+                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
                                 { effectivestr: 20, velocity: 90 },
                             ),
                             "34d6",
@@ -1962,7 +1962,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 2DC + 3DC (doubling rule does not apply) = 4 DC. Move By is 5AP/die => 4d6
                         assert.equal(
                             getEffectForumulaFromItem(
-                                actor.items.find((item) => item.name === "Move By"),
+                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { effectivestr: 20, velocity: 10 },
                             ),
                             "4d6",
@@ -1975,7 +1975,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
                         assert.equal(
                             getEffectForumulaFromItem(
-                                actor.items.find((item) => item.name === "Move By"),
+                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { effectivestr: 20, velocity: 90 },
                             ),
                             "20d6",
@@ -2128,7 +2128,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 2DC + 7DC (doubling rule does apply but not to velocity) = 6 DC. Move By is 5AP/die => 6d6
                         assert.equal(
                             getEffectForumulaFromItem(
-                                actor.items.find((item) => item.name === "Move By"),
+                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { effectivestr: 20, velocity: 10 },
                             ),
                             "6d6",
@@ -2314,15 +2314,7 @@ export function registerFullTests(quench) {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
                         // Added DCs: Strike 0DC =>  +0 DC
                         // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 16d6
-                        assert.equal(actor.items.find((item) => item.name === "Strike").system.damage, "16d6");
-                    });
-
-                    it("should have the correct damage for a move through", function () {
-                        // Base DCs: Move Through (STR 10 -> 2d6/2DC), +14d6 HTH -> 14d6/14DC) => 16DC
-                        // Added DCs: velocity 20"/3 -> 6d6/6DC,
-                        // Base + Added = 16DC + 6DC (doubling rule does not apply) = 22 DC. Move Through is 5AP/die => 22d6
-                        const strikeItem = actor.items.find((item) => item.name === "Move Through");
-                        assert.equal(getEffectForumulaFromItem(strikeItem, { velocity: 20 }), "22d6");
+                        assert.equal(actor.items.find((item) => item.system.XMLID === "STRIKE").system.damage, "16d6");
                     });
                 });
 
@@ -2333,7 +2325,7 @@ export function registerFullTests(quench) {
                     beforeEach(function () {
                         // Turn on the haymaker
                         haymakerManuever = actor.items.find(
-                            (item) => item.type === "maneuver" && item.name === "Haymaker",
+                            (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
                         );
 
                         haymakerPreviousActiveState = haymakerManuever.system.active;
@@ -2349,24 +2341,74 @@ export function registerFullTests(quench) {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
                         // Added DCs: Strike 0DC, Haymaker +4DC =>  +4 DC
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
-                        const strikeItem = actor.items.find((item) => item.name === "Strike");
+                        const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
                         assert.equal(getEffectForumulaFromItem(strikeItem, {}), "20d6");
                     });
 
                     it("should not increase the damage of a move through", function () {
-                        // Base DCs: Move Through (STR 10 -> 2d6/2DC), +14d6 HTH -> 14d6/14DC) => 16DC
+                        // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
                         // Added DCs: Haymaker does not apply since we are executing a maneuver and this is not a Strike, velocity 20"/3 -> 6d6/6DC,
-                        // Base + Added = 16DC + 6DC (doubling rule does not apply) = 22 DC. Move Through is 5AP/die => 22d6
-                        const moveThroughItem = actor.items.find((item) => item.name === "Move Through");
-                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { velocity: 20 }), "22d6");
+                        // Base + Added = 2DC + 6DC (doubling rule does not apply) = 8 DC. Move Through is 5AP/die => 8d6
+                        const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
+                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { velocity: 20 }), "8d6");
                     });
                 });
 
                 describe("MANEUVER with Velocity", function () {
-                    // PH: FIXME: TBD
-                    // it("should correctly allow movement DCs to exceed the base DC doubling rule", function () {
-                    //     assert.equal(xxx);
-                    // });
+                    it("should add velocity damage for Move Through", function () {
+                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                        // Added DCs: velocity 30"/3 -> 10DC => +10DC
+                        // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
+                                { effectivestr: 20, velocity: 30 },
+                            ),
+                            "14d6",
+                        );
+                    });
+
+                    it("should add velocity damage for Move Through (not subject to doubling rule)", function () {
+                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                        // Added DCs: velocity 90"/3 -> 30DC => +30DC
+                        // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
+                                { effectivestr: 20, velocity: 90 },
+                            ),
+                            "34d6",
+                        );
+                    });
+
+                    it("should add velocity damage for Move By", function () {
+                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC)  => 2DC
+                        // Added DCs: velocity 10"/5 -> 3DC => +3DC
+                        // Base + Added = 2DC + 3DC (doubling rule does not apply) = 4 DC. Move By is 5AP/die => 4d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                { effectivestr: 20, velocity: 10 },
+                            ),
+                            "4d6",
+                        );
+                    });
+
+                    it("should add velocity damage for Move By (not subject to doubling rule)", function () {
+                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC) => 2DC
+                        // Added DCs: velocity 90"/5 -> 18DC => +18DC
+                        // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                { effectivestr: 20, velocity: 90 },
+                            ),
+                            "20d6",
+                        );
+                    });
+
+                    // TODO: move through with weapon
+                    // TODO: move by with weapon
                 });
 
                 describe("Martial Arts", function () {
@@ -2520,20 +2562,28 @@ export function registerFullTests(quench) {
                         actor.statuses = previousStatuses;
                     });
 
-                    it("should increase the damage of a Strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                    it("should decrease the damage of a Strike", function () {
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
                         // Added DCs: Strike 0DC, Underwater -2DC =>  -2 DC
                         // Base + Added = 16DC - 2DC (doubling rule does not apply) = 14 DC. Martial Strike is 5AP/die => 14d6
-                        const strikeItem = actor.items.find((item) => item.name === "Strike");
+                        const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
                         assert.equal(getEffectForumulaFromItem(strikeItem, {}), "14d6");
                     });
 
                     it("should not increase the damage of a move through", function () {
-                        // Base DCs: Move Through (STR 10 -> 2d6/2DC), +14d6 HTH -> 14d6/14DC) => 16DC
+                        // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
                         // Added DCs: Underwater -2DC, Velocity 20" -> 6DC =>  +4 DC
-                        // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20 DC. Move Through is 5AP/die => 20d6
-                        const moveThroughItem = actor.items.find((item) => item.name === "Move Through");
-                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { velocity: 20 }), "20d6");
+                        // Base + Added = 2DC + 4DC (doubling rule does not apply) = 6 DC. Move Through is 5AP/die => 6d6
+                        const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
+                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { velocity: 20 }), "6d6");
+                    });
+
+                    it("should not be possible to do negative damage", function () {
+                        // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
+                        // Added DCs: Underwater -2DC, velocity 2" -> 0d6 =>  -2 DC
+                        // Base + Added = 1DC - 2DC (doubling rule does not apply) = 0 DC. Move Through is 5AP/die => 0d6
+                        const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
+                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { effectivestr: 5, velocity: 2 }), "0");
                     });
                 });
             });
@@ -3426,7 +3476,7 @@ export function registerFullTests(quench) {
                     beforeEach(function () {
                         // Turn on the haymaker
                         haymakerManuever = actor.items.find(
-                            (item) => item.type === "maneuver" && item.name === "Haymaker",
+                            (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
                         );
 
                         haymakerPreviousActiveState = haymakerManuever.system.active;
@@ -3804,7 +3854,7 @@ export function registerFullTests(quench) {
                     beforeEach(function () {
                         // Turn on the haymaker
                         haymakerManuever = actor.items.find(
-                            (item) => item.type === "maneuver" && item.name === "Haymaker",
+                            (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
                         );
 
                         haymakerPreviousActiveState = haymakerManuever.system.active;

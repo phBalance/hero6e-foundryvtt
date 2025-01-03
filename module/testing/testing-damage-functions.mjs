@@ -254,6 +254,13 @@ export function registerDamageFunctionTests(quench) {
                     };
                 }
 
+                const negativeOneInDiceParts = Object.freeze({
+                    d6Count: 0,
+                    d6Less1DieCount: 0,
+                    halfDieCount: 0,
+                    constant: -1,
+                });
+
                 const zeroInDiceParts = Object.freeze({
                     d6Count: 0,
                     d6Less1DieCount: 0,
@@ -342,6 +349,30 @@ export function registerDamageFunctionTests(quench) {
                         });
                         await normalItem._postUpload();
                         actor.items.set(normalItem.system.XMLID, normalItem);
+                    });
+
+                    describe("-1 DC", function () {
+                        it("-1 DC Killing Attack", function () {
+                            killingItem.system._advantagesDc = 0;
+                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(killingItem, -1)),
+                                negativeOneInDiceParts,
+                            );
+                        });
+                    });
+
+                    describe("0 DC", function () {
+                        it("0 DC Killing Attack", function () {
+                            killingItem.system._advantagesDc = 0;
+                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(killingItem, 0)),
+                                zeroInDiceParts,
+                            );
+                        });
                     });
 
                     describe("1 DC", function () {

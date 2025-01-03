@@ -45,7 +45,7 @@ export function penaltySkillLevelsForAttack(item) {
     const psls = item.actor.items.filter(
         (item) =>
             ["PENALTY_SKILL_LEVELS"].includes(item.system.XMLID) &&
-            (item.system.ADDER || []).find((p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name) &&
+            (item.system.ADDER || []).find((adder) => adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name) &&
             item.isActive != false,
     );
 
@@ -107,14 +107,23 @@ function isNonKillingStrengthBasedManeuver(item) {
         item.system.usesStrength &&
         (item.type === "martialart" ||
             (item.type === "maneuver" &&
-                (item.name === "Strike" ||
-                    item.name === "Disarm" ||
-                    item.name === "Grab By" ||
-                    item.name === "Move Through" ||
-                    item.name === "Move By" ||
-                    item.name === "Pulling A Punch" ||
-                    item.name === "Shove" ||
-                    item.name === "Throw")))
+                (item.system.XMLID === "STRIKE" ||
+                    item.system.XMLID === "DISARM" ||
+                    item.system.XMLID === "GRABBY" ||
+                    item.system.XMLID === "MOVEBY" ||
+                    item.system.XMLID === "MOVETHROUGH" ||
+                    item.system.XMLID === "PULLINGAPUNCH" ||
+                    item.system.XMLID === "SHOVE" ||
+                    item.system.XMLID === "THROW")))
+    );
+}
+
+// Maneuver's EFFECT indicates normal damage or is Strike/Pulling a Punch (exceptions)
+function isManeuverThatDoesNormalDamage(item) {
+    return (
+        item.system.EFFECT.search(/NORMALDC/) > -1 ||
+        item.system.XMLID === "STRIKE" ||
+        item.system.XMLID === "PULLINGAPUNCH"
     );
 }
 
@@ -293,12 +302,15 @@ export function calculateAddedDicePartsFromItem(item, options) {
     // Is there a haymaker active and thus part of this attack? Haymaker is added in without consideration of advantages in 5e but not in 6e.
     // Also in 5e killing haymakers get the DC halved.
     const haymakerManeuverActive = item.actor?.items.find(
-        (item) => item.type === "maneuver" && item.name === "Haymaker" && item.system.active,
+        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
     );
     if (haymakerManeuverActive) {
         // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
         // PH: FIXME: Implement the exceptions: See 6e v2 pg. 99. 5e has none?
-        if (!["maneuver", "martialart"].includes(item.type) || (item.type === "maneuver" && item.name === "Strike")) {
+        if (
+            !["maneuver", "martialart"].includes(item.type) ||
+            (item.type === "maneuver" && item.system.XMLID === "STRIKE")
+        ) {
             const rawHaymakerDc = parseInt(haymakerManeuverActive.system.DC);
 
             let haymakerDC = rawHaymakerDc;
@@ -512,21 +524,25 @@ export function calculateDicePartsFromDcForItem(item, dc) {
                 ? 5 * (1 + item.system._advantagesDc)
                 : item.system.activePointsDc / diceValue;
     } else {
-        apPerDie = baseApPerDie * (1 + item.system._advantagesDc); // PH: FIXME: Shouldn't be able to be advantaged...
+        // NOTE: Maneuvers shouldn't be able to be advantaged but will keep this here because I'm not sure if there are exceptions
+        apPerDie = baseApPerDie * (1 + item.system._advantagesDc);
     }
 
     // MartialArts & Maneuvers have DC and no advantages. Others have active points with some advantages that contribute to DC.
     // See FRed pp 403, 404 6e vol 2 pp 96, 97
-    const diceOfDamage = dc * (5 / apPerDie);
+    // NOTE: Work in positive values and positive 0 for obviousness to users
+    const diceOfDamage = Math.abs(dc * (5 / apPerDie));
+    const diceSign = Math.sign(dc) || 0;
 
-    const d6Count = Math.floor(diceOfDamage);
-    const halfDieCount = (diceOfDamage % fullDieValue) - halfDieValue > -epsilon ? 1 : 0;
+    const d6Count = diceSign * Math.floor(diceOfDamage) || 0;
+    const halfDieCount = diceSign * ((diceOfDamage % fullDieValue) - halfDieValue > -epsilon ? 1 : 0) || 0;
     const constant =
-        item.system.XMLID === "TELEKINESIS"
-            ? 0
-            : (diceOfDamage % fullDieValue) - pipValue > -epsilon && !halfDieCount
-              ? 1
-              : 0;
+        diceSign *
+            (item.system.XMLID === "TELEKINESIS"
+                ? 0
+                : (diceOfDamage % fullDieValue) - pipValue > -epsilon && !halfDieCount
+                  ? 1
+                  : 0) || 0;
 
     return {
         dc,
@@ -637,13 +653,24 @@ export function calculateDicePartsForItem(item, options) {
     // Add velocity contributions too which were excluded from doubling considerations
     sumDiceParts = addDiceParts(item, sumDiceParts, velocityDiceParts, useDieMinusOne);
 
-    // PH: FIXME: Should probably cap
-    // // Doesn't really feel right to allow a total DC of less than 0 so cap it.
-    // const finalDc = Math.max(0, baseDc.dc + addedDc.dc);
+    // Doesn't really feel right to allow a total DC of less than 0 so cap it.
+    const finalDc = Math.max(0, sumDiceParts.dc);
+    let dcClampTags = [];
+    if (finalDc !== sumDiceParts.dc) {
+        const nonClampedEffectFormula = dicePartsToEffectFormula(sumDiceParts);
+        const adjustedDc = finalDc - sumDiceParts.dc;
+        const clampedEffectFormula = dicePartsToEffectFormula(calculateDicePartsFromDcForItem(item, adjustedDc));
+        dcClampTags.push({
+            value: `${clampedEffectFormula}`,
+            name: "No Negative Damage",
+            title: `Damage clamped to 0. ${clampedEffectFormula} added to ${nonClampedEffectFormula}`,
+        });
+        sumDiceParts = zeroDiceParts;
+    }
 
     return {
         diceParts: sumDiceParts,
-        tags: [...baseTags, ...extraTags, ...doubleDamageLimitTags, ...velocityTags],
+        tags: [...baseTags, ...extraTags, ...doubleDamageLimitTags, ...velocityTags, ...dcClampTags],
     };
 }
 
@@ -734,7 +761,8 @@ export function maneuverBaseEffectDiceParts(item, options) {
 
             // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
             // strength for damage purposes.
-            if (str >= 3) {
+            // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
+            if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
                 const hthAttacks = item.actor?.items.filter((item) => item.system.XMLID === "HANDTOHANDATTACK") || [];
                 hthAttacks.forEach((hthAttack) => {
                     const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDiceParts(
