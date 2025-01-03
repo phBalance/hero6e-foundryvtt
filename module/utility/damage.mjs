@@ -225,7 +225,6 @@ export function calculateAddedDicePartsFromItem(item, options) {
 
         // NOTE: intentionally using fractional DC here.
         // PH: FIXME: There are some weird rules around 5e and advantaged powers for adding STR.
-        // PH: FIXME: Confirm that the partial DCs are working as intended.
         const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5);
         const formula = dicePartsToEffectFormula(strDiceParts);
 
@@ -485,7 +484,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
     // It's possible a better algorithm would produce something better but with this one:
     // 0.066666 appears to be too large. (1DC KA @ +1/4)
     // 0.04 appears to be too large. (1DC EA @ +1)
-    // PH: FIXME: It's also possible that this indicates that the rules only use one of the attack types to determine 1/2 vs +1.
+    // Epsilon observations also possibly indicate that the rules only use one of the attack types to determine part dice.
     const epsilon = 0.039;
 
     const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
@@ -539,7 +538,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         // Some ugly stuff to deal with the case where we have adders to the base powers. We need to figure out
         // how much a die actually costs.
         // FIXME: would be nice to pull out the TK exception/special handling.
-        const { diceParts } = item.baseInfo.baseEffectDiceParts(item, {}); // PH: FIXME: Recursion for maneuvers
+        const { diceParts } = item.baseInfo.baseEffectDiceParts(item, {});
         let diceValue = 0;
         diceValue += diceParts.d6Count * fullDieValue;
         diceValue += (diceParts.d6Less1DieCount + diceParts.halfDieCount) * halfDieValue;
@@ -564,9 +563,6 @@ export function calculateDicePartsFromDcForItem(item, dc) {
             : (diceOfDamage % fullDieValue) - pipValue > -epsilon && !halfDieCount
               ? 1
               : 0;
-
-    // PH: FIXME: Need to do up a big table of checks for this it would seem
-    // PH: FIXME: Note that the 6e vol 2 p.97 hints that 1/2d6 < 1d6-1
 
     return {
         dc,
