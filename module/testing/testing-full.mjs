@@ -1894,9 +1894,10 @@ export function registerFullTests(quench) {
                 `;
 
                 let actor;
+                let previousSetting;
 
-                before(async () => {
-                    const previousSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
+                beforeEach(async () => {
+                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
                     actor = new HeroSystem6eActor(
@@ -1908,7 +1909,9 @@ export function registerFullTests(quench) {
                     );
 
                     await actor.uploadFromXml(contents);
+                });
 
+                afterEach(async () => {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
                 });
 
@@ -1944,7 +1947,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for Killing Strike", function () {
                         // Added DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
                         // Base: STR +14 DC (STR 70) => +14 DC  =>  14DC
-                        // Base + Added = 7C + 14DC (doubling rule clamps the strength added DC) = 14DC. Killing strike is 15AP/die => 4½d6
+                        // Base + Added = 7C + 14DC (doubling rule clamps the strength added DC) = 14DC. Killing strike is 14AP/die => 4½d6
                         // NOTE: HD gets 5d6K as it seems to be more than doubling the equivalent HKA. Math rounding problems in HD?
                         assert.equal(
                             actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage,
@@ -1981,12 +1984,97 @@ export function registerFullTests(quench) {
                 });
 
                 describe("Martial Arts with CSLs", function () {
-                    // PH: FIXME: TBD - repeat the above with CSLs?
-                    // PH: FIXME: TBD - repeat above but with HTH levels
+                    let cslItem;
+                    let cslPreviousActiveState;
+                    let cslPreviousAllocation;
+
+                    beforeEach(function () {
+                        // Turn on the CSLs
+                        cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
+                        cslPreviousActiveState = cslItem.system.active;
+                        cslItem.system.active = true;
+
+                        // Set the CSLs for DCs
+                        cslPreviousAllocation = cslItem.system.csl;
+                        cslItem.system.csl = Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc");
+                    });
+
+                    afterEach(function () {
+                        // Turn off the CSLs
+                        cslItem.system.active = cslPreviousActiveState;
+
+                        // Set the CSLs to previous
+                        cslItem.system.csl = cslPreviousAllocation;
+                    });
+
+                    it("should have the correct damage for Nerve Strike", function () {
+                        // Base DCs: Nerve Strike 4DC (aka 2d6), EXTRADC +11DC => 15DC.
+                        // Added DCs: (11 CSL) 2:1 +5DC
+                        // Base + Added = 20DC. Nerve Strike is an NND (10AP/die) => 10d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Nerve Strike"),
+                                {},
+                            ),
+                            "10d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Killing Strike", function () {
+                        // Base DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
+                        // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
+                        // Base + Added = 7C + 5DC (doubling rule not applied) = 12DC. Killing strike is 15AP/die => 4d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Killing Strike"),
+                                { effectivestr: 0 },
+                            ),
+                            "4d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Martial Strike", function () {
+                        assert.equal(
+                            // Base DCs: STR +14 DC (STR 70),  EXTRADC +11DC => +25 DC
+                            // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
+                            // Base + Added = 25DC + 7DC (doubling rule does not apply) = 32DC. Martial Strike is 5AP/die => 32d6
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
+                                {},
+                            ),
+                            "32d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Martial Flash", function () {
+                        // Base DCs: Martial Flash 4DC (aka 2d6), EXTRADC +11DC => 15DC.
+                        // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
+                        // Base + Added = 20DC. Martial Flash is a 5AP/die => 20d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
+                                {},
+                            ),
+                            "20d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Sacrifice Strike", function () {
+                        // Base DCs:  STR +14 DC (STR 70),  EXTRADC +11DC =>  25DC
+                        // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
+                        // Base + Added = 15DC + 9DC (doubling rule does not apply) = 34DC. Sacrifice Strike is 5AP/die => 34d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
+                                {},
+                            ),
+                            "34d6",
+                        );
+                    });
                 });
             });
 
-            describe("5e - base vs added DCs with HTH attacks", function () {
+            describe("5e - Maneuvers - base vs added DCs with HTH attacks", function () {
                 const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -2057,7 +2145,11 @@ export function registerFullTests(quench) {
                         <NOTES />
                         </LEAPING>
                     </CHARACTERISTICS>
-                    <SKILLS />
+                    <SKILLS>
+                        <SKILL XMLID="COMBAT_LEVELS" ID="1735835785525" BASECOST="0.0" LEVELS="11" ALIAS="Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES />
+                        </SKILL>
+                    </SKILLS>
                     <PERKS />
                     <TALENTS />
                     <MARTIALARTS>
@@ -2119,9 +2211,10 @@ export function registerFullTests(quench) {
                 `;
 
                 let actor;
+                let previousSetting;
 
                 beforeEach(async () => {
-                    const previousSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
+                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
                     actor = new HeroSystem6eActor(
@@ -2133,13 +2226,15 @@ export function registerFullTests(quench) {
                     );
 
                     await actor.uploadFromXml(contents);
+                });
 
+                afterEach(async () => {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
                 });
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.system.points, 167);
+                    assert.equal(actor.system.points, 255);
                 });
 
                 it("should match the cost breakdown of HD", function () {
@@ -2147,6 +2242,7 @@ export function registerFullTests(quench) {
                         characteristics: 0,
                         martialart: 25,
                         power: 142,
+                        skill: 88,
                     });
                 });
 
@@ -2259,8 +2355,93 @@ export function registerFullTests(quench) {
                 });
 
                 describe("Martial Arts with CSLs", function () {
-                    // PH: FIXME: TBD - repeat the above with CSLs?
-                    // PH: FIXME: TBD - repeat above but with HTH levels
+                    let cslItem;
+                    let cslPreviousActiveState;
+                    let cslPreviousAllocation;
+
+                    beforeEach(function () {
+                        // Turn on the CSLs
+                        cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
+                        cslPreviousActiveState = cslItem.system.active;
+                        cslItem.system.active = true;
+
+                        // Set the CSLs for DCs
+                        cslPreviousAllocation = cslItem.system.csl;
+                        cslItem.system.csl = Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc");
+                    });
+
+                    afterEach(function () {
+                        // Turn off the CSLs
+                        cslItem.system.active = cslPreviousActiveState;
+
+                        // Set the CSLs to previous
+                        cslItem.system.csl = cslPreviousAllocation;
+                    });
+
+                    it("should have the correct damage for Nerve Strike", function () {
+                        // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
+                        // Added DCs: (11 CSL) 2:1 +5DC
+                        // Base + Added = 4 DC + 5DC (Doubling rule kicks in) => 8DC. Nerve Strike is an NND (10AP/die) => 4d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Nerve Strike"),
+                                {},
+                            ),
+                            "4d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Killing Strike", function () {
+                        // Base DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
+                        // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
+                        // Base + Added = 2DC + 5DC (doubling rule kicks in) = 4DC. Killing strike is 15AP/die => 1d6+1
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Killing Strike"),
+                                { effectivestr: 0 },
+                            ),
+                            "1d6+1",
+                        );
+                    });
+
+                    it("should have the correct damage for Martial Strike", function () {
+                        assert.equal(
+                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
+                            // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
+                            // Base + Added = 16DC + 7DC (doubling rule does not apply) = 23DC. Martial Strike is 5AP/die => 23d6
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
+                                {},
+                            ),
+                            "23d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Martial Flash", function () {
+                        // Base DCs: Martial Flash 4DC (aka 2d6) => 4DC.
+                        // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
+                        // Base + Added = 4DC + 5DC (doubling rule kicks in) => 8DC. Martial Flash is a 5AP/die => 8d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
+                                {},
+                            ),
+                            "8d6",
+                        );
+                    });
+
+                    it("should have the correct damage for Sacrifice Strike", function () {
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
+                        // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
+                        // Base + Added = 16DC + 9DC (doubling rule does not apply) = 25DC. Sacrifice Strike is 5AP/die => 25d6
+                        assert.equal(
+                            getEffectForumulaFromItem(
+                                actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
+                                {},
+                            ),
+                            "25d6",
+                        );
+                    });
                 });
 
                 describe("Underwater", function () {
@@ -2294,7 +2475,7 @@ export function registerFullTests(quench) {
                 });
             });
 
-            describe("5e - base vs added DCs with HTH attacks", function () {
+            describe("5e - Powers - base vs added DCs with HTH attacks", function () {
                 const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -2453,7 +2634,7 @@ export function registerFullTests(quench) {
                 let eightDcTransform;
 
                 beforeEach(async () => {
-                    previousSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
+                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
                     actor = new HeroSystem6eActor(
@@ -3222,7 +3403,7 @@ export function registerFullTests(quench) {
                 });
             });
 
-            describe.only("6e - DC altering advantages", function () {
+            describe("6e - DC altering advantages", function () {
                 const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
