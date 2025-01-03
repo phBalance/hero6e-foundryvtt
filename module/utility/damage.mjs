@@ -88,9 +88,9 @@ const zeroDiceParts = Object.freeze({
 export function characteristicValueToDiceParts(value) {
     return {
         dc: value / 5,
-        d6Count: Math.floor(value / 5),
+        d6Count: Math.trunc(value / 5) || 0,
         d6Less1DieCount: 0,
-        halfDieCount: RoundFavorPlayerUp((value % 5) / 5),
+        halfDieCount: Math.floor((value % 5) / 5) || 0,
         constant: 0,
     };
 }
@@ -261,7 +261,7 @@ export function calculateAddedDicePartsFromItem(item, options) {
     // [NORMALDC] +v/5 Strike, FMove
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
     if ((item.system.EFFECT || "").match(/v\/\d/)) {
-        const velocity = parseInt(options?.velocity || 0);
+        const velocity = parseInt(options.velocity || 0);
         const divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]);
         const velocityDc = Math.floor(velocity / divisor); // There is no rounding
 
