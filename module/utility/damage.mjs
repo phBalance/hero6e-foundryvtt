@@ -101,6 +101,40 @@ function effectiveStrength(item, options) {
     );
 }
 
+export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengthMinimumModifier) {
+    let strMinimumValue = parseInt(strengthMinimumModifier.OPTION_ALIAS?.match(/^\d+$/)?.[0] || 0);
+
+    // Newer HDC files (post 2022?) have OPTION_ALIAS defined to give us the minimum strength range. If players have filled in the exact value
+    // as "<number>" then use that, otherwise fallback to calculating an estimate based on a range. Note a STR minimum of less than 1 is not allowed.
+    if (strMinimumValue === 0) {
+        // Older HDC files seem to have to calculate it based on the limitation value
+        const limitationBaseCost = strengthMinimumModifier.BASECOST;
+        console.warn(
+            `${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
+        );
+
+        if (limitationBaseCost === "-0.25") {
+            // -1/4 limitation is str min 1-5.
+            strMinimumValue = 5;
+        } else if (limitationBaseCost === "-0.5") {
+            // -2/4 limitation is str min 6-14.
+            strMinimumValue = 14;
+        } else if (limitationBaseCost === "-0.75") {
+            // -3/4 limitation is str min 15-17.
+            strMinimumValue = 17;
+        } else if (limitationBaseCost === "-1.0") {
+            // -1 limitation is str min 18+.
+            strMinimumValue = 20;
+        } else {
+            console.error(
+                `${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} has ${strengthMinimumModifier.system.XMLID} with unrecognized limitation of ${limitationBaseCost} levels`,
+            );
+        }
+    }
+
+    return strMinimumValue;
+}
+
 function isNonKillingStrengthBasedManeuver(item) {
     return (
         !item.system.killing &&
@@ -711,36 +745,51 @@ function addStrengthToBundle(item, options, dicePartsBundle) {
     const baseEffectiveStrength = effectiveStrength(item, options);
     let str = baseEffectiveStrength;
 
-    // PH: FIXME: Review the STRMINIMUM stuff in 5e and 6e.
-    // // STRMINIMUM
-    // // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
-    // const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
-    // if (STRMINIMUM) {
-    //     const strMinimum = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
-    //     const strMinDc = Math.ceil(strMinimum / 5);
-    //     addedDamage.dc -= strMinDc;
-    //     addedDamage.tags.push({
-    //         value: `-${strMinDc}DC`,
-    //         name: "STR Minimum",
-    //         title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
-    //     });
-    // }
-
-    // MOVEBY halves STR
-    if (item.system.XMLID === "MOVEBY") {
-        str = RoundFavorPlayerUp(str / 2);
-    }
-
-    // NOTE: intentionally using fractional DC here.
-    const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5);
-    const formula = dicePartsToEffectFormula(strDiceParts);
-
     if (str !== 0) {
+        // NOTE: intentionally using fractional DC here.
+        const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5);
+        const formula = dicePartsToEffectFormula(strDiceParts);
+
         dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
         dicePartsBundle.tags.push({
-            value: `+${formula}`,
+            value: `${formula}`,
             name: "STR",
-            title: `${str} STR${item.system.XMLID === "MOVEBY" ? " halved due to MOVEBY" : ""} -> ${formula}`,
+            title: `${str} STR -> ${formula}`,
+        });
+    }
+
+    // STRMINIMUM
+    // A character using a weapon only adds damage for every full 5 points of STR they has above the weapon’s STR Minimum
+    const strMinimumModifier = item.findModsByXmlid("STRMINIMUM");
+    if (strMinimumModifier) {
+        const strMinimum = calculateStrengthMinimumForItem(item, strMinimumModifier);
+        const strMinDc = Math.ceil(strMinimum / 5);
+
+        const strMinDiceParts = calculateDicePartsFromDcForItem(item, strMinDc / 5);
+        const formula = dicePartsToEffectFormula(strMinDiceParts);
+
+        dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, strMinDiceParts);
+        dicePartsBundle.tags.push({
+            value: `-(${formula})`,
+            name: "STR Minimum",
+            title: `${strMinimumModifier.ALIAS} ${strMinimumModifier.OPTION_ALIAS} -> -(${formula})`,
+        });
+    }
+
+    // MOVEBY halves STR
+    if (str !== 0 && item.system.XMLID === "MOVEBY") {
+        const strBeforeMoveBy = str;
+        str = RoundFavorPlayerUp(str / 2);
+
+        // NOTE: intentionally using fractional DC here.
+        const strDiceParts = calculateDicePartsFromDcForItem(item, (strBeforeMoveBy - str) / 5);
+        const formula = dicePartsToEffectFormula(strDiceParts);
+
+        dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
+        dicePartsBundle.tags.push({
+            value: `-(${formula})`,
+            name: "MOVEBY STR",
+            title: `STR halved to ${str} due to MOVEBY -> ${formula}`,
         });
     }
 
