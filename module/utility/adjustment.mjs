@@ -513,13 +513,20 @@ export async function performAdjustment(
         }
 
         // Halve AP, min 1 for defenses
-        const _multiplier = defensivePowerAdjustmentMultiplier(
+        let _multiplier = defensivePowerAdjustmentMultiplier(
             potentialCharacteristic.toUpperCase(),
             targetActor,
             targetActor?.is5e,
         );
-        if (_multiplier !== 1 && !attackItem.system.INPUT.match(/simplified/i)) {
-            console.log(`Defense multiplier ${_multiplier}`);
+
+        if (
+            attackItem.system.INPUT.match(/simplified/i) &&
+            ["BODY", "STUN"].includes(potentialCharacteristic.toUpperCase())
+        ) {
+            _multiplier = 1;
+        }
+
+        if (_multiplier !== 1) {
             thisAttackActivePointsEffect = Math.max(
                 thisAttackActivePointsEffect === 0 ? 0 : 1,
                 Math.trunc(thisAttackActivePointsEffect / _multiplier),
@@ -556,7 +563,15 @@ export async function performAdjustment(
 
         const actorValue = targetActor.system.characteristics[char].value;
         const actorMax = targetActor.system.characteristics[char].max;
-        const costPerActivePoint = determineCostPerActivePoint(char, null, targetActor);
+        let costPerActivePoint = determineCostPerActivePoint(char, null, targetActor);
+
+        if (
+            attackItem.system.INPUT.match(/simplified/i) &&
+            ["BODY", "STUN"].includes(potentialCharacteristic.toUpperCase())
+        ) {
+            costPerActivePoint = 1;
+        }
+
         const value = Math.max(1, Math.floor(thisAttackActivePointsEffect / costPerActivePoint));
         const newActorValue = Math.min(actorMax, actorValue + value);
         totalPointsDifference = Math.abs(actorValue - newActorValue);
