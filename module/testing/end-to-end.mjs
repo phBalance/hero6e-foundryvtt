@@ -65,7 +65,6 @@ export class HeroSystem6eEndToEndTest {
         // Interactive Testing (change these at will)
         await this.token6.actor.update({ "system.characteristics.end.value": 10 });
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "HEALING", "END"))) return;
-        return;
         if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "OCV"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
