@@ -1,6 +1,6 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
 import {
-    determineCostPerActivePointWithDefenseMultipler,
+    //determineCostPerActivePointWithDefenseMultipler,
     determineCostPerActivePoint,
 } from "../utility/adjustment.mjs";
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
