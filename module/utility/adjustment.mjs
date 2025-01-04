@@ -519,7 +519,10 @@ export async function performAdjustment(
         );
         if (_multiplier !== 1 && !attackItem.system.INPUT.match(/simplified/i)) {
             console.log(`Defense multiplier ${_multiplier}`);
-            thisAttackActivePointsEffect = Math.max(1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
+            thisAttackActivePointsEffect = Math.max(
+                thisAttackActivePointsEffect === 0 ? 0 : 1,
+                Math.trunc(thisAttackActivePointsEffect / _multiplier),
+            );
         }
 
         thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing = thisAttackActivePointsEffect;
