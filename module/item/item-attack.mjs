@@ -2630,7 +2630,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     // Where is the adjustment taking from/giving to?
     const { valid, reducesArray, enhancesArray } = adjustmentItem.splitAdjustmentSourceAndTarget();
-    if (!valid) {
+    if (!valid && token.actor.items.filter((o) => o.type === "power").length > 0) {
         // Show a list of powers from target token
         if (game.settings.get(game.system.id, "alphaTesting")) {
             let html = "<table>";
@@ -2907,6 +2907,7 @@ async function _calcDamage(heroRoller, item, options) {
     let body;
     let stun;
     let bodyForPenetrating = 0;
+    let effects = "";
 
     if (adjustmentPower) {
         // kludge for SIMPLIFIED HEALING
@@ -2950,7 +2951,7 @@ async function _calcDamage(heroRoller, item, options) {
         // Knocked out targets take double STUN damage from attacks
         const targetActor = (game.scenes.current.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
         if (targetActor?.statuses.has("knockedOut")) {
-            effects += "Knocked Out x2 STUN;";
+            effects += "Knocked Out x2 STUN; ";
             stun *= 2;
         }
     }
@@ -2983,9 +2984,8 @@ async function _calcDamage(heroRoller, item, options) {
         }
     }
 
-    let effects = "";
     if (item.system.EFFECT) {
-        effects = item.system.EFFECT + "; ";
+        effects += item.system.EFFECT + "; ";
     }
 
     // VULNERABILITY

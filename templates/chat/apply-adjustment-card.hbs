@@ -37,18 +37,17 @@
       <div class="description-tiny">Defense: {{ defenseDescription }}</div>
     </div>
 
-    {{#if effectsDescription}}
-      <div class="card-section">
-        <div class="description-tiny">Effect</div>
-        <div class="description-medium">{{ activePoints }} Active Points</div>
-        <div class="description-tiny">{{{ effectsDescription }}}</div>
-      </div>
-    {{/if}}
+    <div class="card-section">
+      <div class="description-tiny">Effect</div>
+      <div class="description-medium">{{ activePoints }} Active Points</div>
+      <div class="description-tiny">{{{ effectsDescription }}}</div>
+    </div>
+
   {{/if}}
 
   {{#each adjustments as | adj |}}
     <div class="card-section">
-      {{../item.name}}: {{../item.system.XMLID}} {{#if adj.isFade}}fade of{{/if}} {{abs adj.adjustmentDamageRaw}} Active Points.
+      {{../item.name}}: {{../item.system.XMLID}} {{#if adj.isFade}}fade of{{/if}} {{abs adj.adjustmentDamageRaw}} Character Points.
 
       {{#if (lt adj.adjustmentDamageThisApplication 0)}}
         {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost. 
@@ -60,12 +59,12 @@
         {{/if}}
       {{/if}}
 
-      {{#if (ne adj.activePointEffectNotAppliedDueToMax 0)}} {{abs adj.activePointEffectNotAppliedDueToMax}} Active Points of adjustment action not applied because it exceeded the maximum effect (See MAXIMUM EFFECT rules).{{/if}}
+      {{#if (ne adj.activePointEffectNotAppliedDueToMax 0)}} {{abs adj.activePointEffectNotAppliedDueToMax}} Character Points of adjustment action not applied because it exceeded the maximum effect (See MAXIMUM EFFECT rules).{{/if}}
       {{#if (ne adj.activePointEffectNotAppliedDueToNotExceeding 0)}} 
-        {{abs adj.activePointEffectNotAppliedDueToNotExceeding}} Active Points of adjustment action not applied because it did not exceed the existing effect (See MAXIMUM EFFECT rules).
+        {{abs adj.activePointEffectNotAppliedDueToNotExceeding}} Character Points of adjustment action not applied because it did not exceed the existing effect (See MAXIMUM EFFECT rules).
       {{/if}}
 
-      Total {{../item.system.XMLID}} for this effect is {{abs adj.adjustmentTotalActivePointEffect}} AP.
+      Total temporary adjustments for {{adj.adjustmentTarget}} is {{adj.adjustmentTotalActivePointEffect}} CP.
     </div>
   {{/each}}
 

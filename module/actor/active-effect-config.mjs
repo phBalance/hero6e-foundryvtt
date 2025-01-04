@@ -59,7 +59,7 @@ export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
         data.statuses ??= [];
 
         // Need to collapse the array (get rid of any sparse indexes that can occur when deleting middle indexes)
-        data.system.changes = Array.from(Object.values(data.system.changes || {}));
+        //data.system.changes = Array.from(Object.values(data.system.changes || {}));
         return data;
     }
 }
