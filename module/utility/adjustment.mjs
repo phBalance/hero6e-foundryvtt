@@ -483,7 +483,7 @@ export async function performAdjustment(
     let thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing = 0;
     let isEffectFinished = false;
     const previousChanges = foundry.utils.deepClone(existingEffect?.changes);
-    let totalEffectActivePointsForXmlid;
+    let totalEffectActivePointsForXmlid = 0;
 
     // Healing is special
     if (isHealing) {
@@ -625,7 +625,7 @@ export async function performAdjustment(
                 console.log(`Defense multiplier ${_multiplier}`);
                 if (thisAttackActivePointsEffect > 0) {
                     thisAttackActivePointsEffect = Math.max(1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
-                } else {
+                } else if (thisAttackActivePointsEffect < 0) {
                     thisAttackActivePointsEffect = Math.min(-1, Math.trunc(thisAttackActivePointsEffect / _multiplier));
                 }
             }
@@ -928,7 +928,7 @@ export async function performAdjustment(
     return _generateAdjustmentChatCard(
         attackItem,
         thisAttackActivePointsEffectRaw,
-        totalPointsDifference, //totalActivePointAffectedDifference,
+        totalPointsDifference || 0, //totalActivePointAffectedDifference,
         totalEffectActivePointsForXmlid,
         thisAttackActivePointAdjustmentNotAppliedDueToMax,
         thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,
