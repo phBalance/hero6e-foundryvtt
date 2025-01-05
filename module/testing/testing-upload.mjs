@@ -2708,6 +2708,7 @@ export function registerUploadTests(quench) {
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
+                        type: "martialart",
                     });
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);

@@ -111,7 +111,7 @@ export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengt
         // Older HDC files seem to have to calculate it based on the limitation value
         const limitationBaseCost = strengthMinimumModifier.BASECOST;
         console.warn(
-            `${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
+            `${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
         );
 
         if (limitationBaseCost === "-0.25") {
