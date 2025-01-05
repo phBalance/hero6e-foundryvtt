@@ -96,6 +96,7 @@ export function characteristicValueToDiceParts(value) {
 }
 
 function effectiveStrength(item, options) {
+    // PH: FIXME: Should fix the effectivestr bit. Likely didn't realize how to do sensitivity in HTML.
     return parseInt(
         options?.effectivestr != undefined ? options?.effectivestr : item.actor?.system.characteristics.str.value || 0,
     );
@@ -388,79 +389,93 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         }
     }
 
-    // // WEAPON MASTER (also check that item is present as a custom ADDER)
-    // const weaponMaster = item.actor?.items.find((item) => item.system.XMLID === "WEAPON_MASTER");
-    // if (weaponMaster) {
-    //     const weaponMatch = (weaponMaster.system.ADDER || []).find((o) => o.XMLID === "ADDER" && o.ALIAS === item.name);
-    //     if (weaponMatch) {
-    //         const dcPlus = 3 * Math.max(1, parseInt(weaponMaster.system.LEVELS) || 1);
-    //         addedDc.dc += dcPlus;
-    //         addedDc.tags.push({
-    //             value: `${dcPlus}DC`,
-    //             name: "WeaponMaster",
-    //             title: `${dcPlus.signedString()}DC`,
-    //         });
-    //     }
-    // }
+    // WEAPON MASTER (also check that item is present as a custom ADDER)
+    // PH: FIXME: 6e only? Cost seems to indicate that this is additive to the actual base damage in the case of the damage doubling rule
+    const weaponMaster = item.actor?.items.find((item) => item.system.XMLID === "WEAPON_MASTER");
+    if (weaponMaster) {
+        const weaponMatch = (weaponMaster.system.ADDER || []).find((o) => o.XMLID === "ADDER" && o.ALIAS === item.name);
+        if (weaponMatch) {
+            const weaponMasterDcBonus = 3 * Math.max(1, parseInt(weaponMaster.system.LEVELS) || 1);
+            const weaponMasterDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, weaponMasterDcBonus);
+            const formula = dicePartsToEffectFormula(weaponMasterDiceParts);
 
-    // // DEADLYBLOW
-    // // Only check if it has been turned off
-    // // FIXME: This function should not be changing the item.system. Please fix me by moving to something in the user flow.
-    // // PH: FIXME: this should work for all deadlyBlows
-    // const deadlyBlow = item.actor?.items.find((o) => o.system.XMLID === "DEADLYBLOW");
-    // if (deadlyBlow) {
-    //     item.system.conditionalAttacks ??= {};
-    //     item.system.conditionalAttacks[deadlyBlow.id] = deadlyBlow;
-    //     item.system.conditionalAttacks[deadlyBlow.id].system.checked ??= true;
-    // }
+            addedDamageBundle.diceParts = addDiceParts(
+                baseDamageItem,
+                addedDamageBundle.diceParts,
+                weaponMasterDiceParts,
+            );
+            addedDamageBundle.tags.push({
+                value: `${formula}`,
+                name: "Weapon Master",
+                title: `${weaponMasterDcBonus}DC -> ${formula}`,
+            });
+        }
+    }
 
-    // if (item.actor) {
-    //     for (const key in item.system.conditionalAttacks) {
-    //         const conditionalAttack = item.actor.items.find((item) => item.id === key);
-    //         if (!conditionalAttack) {
-    //             // FIXME: This is the wrong place to be playing with the database. Should be done at the
-    //             //            to hit phase.
-    //             // Quench and other edge cases where item.id is null
-    //             if (item.id) {
-    //                 console.warn("conditionalAttack is empty");
-    //                 delete item.system.conditionalAttacks[key];
-    //                 // NOTE: typically we await here, but this isn't an async function.
-    //                 // Shouldn't be a problem.
-    //                 item.update({
-    //                     [`system.conditionalAttacks`]: item.system.conditionalAttacks,
-    //                 });
-    //             }
-    //             continue;
-    //         }
+    // DEADLYBLOW
+    // Only check if it has been turned off
+    // FIXME: This function should not be changing the item.system. Please fix me by moving this to somewhere in the user flow.
+    const deadlyBlows = item.actor?.items.filter((item) => item.system.XMLID === "DEADLYBLOW") || [];
+    deadlyBlows.forEach((deadlyBlow) => {
+        item.system.conditionalAttacks ??= {};
+        item.system.conditionalAttacks[deadlyBlow.id] = deadlyBlow;
+        item.system.conditionalAttacks[deadlyBlow.id].system.checked ??= true;
+    });
 
-    //         // If unchecked or missing then assume it is enabled
-    //         if (!conditionalAttack.system.checked) continue;
+    if (item.actor) {
+        for (const key in item.system.conditionalAttacks) {
+            const conditionalAttack = item.actor.items.find((item) => item.id === key);
+            if (!conditionalAttack) {
+                // FIXME: This is the wrong place to be playing with the database. Should be done at the
+                //            to hit phase.
+                // Quench and other edge cases where item.id is null
+                if (item.id) {
+                    console.warn("conditionalAttack is empty");
+                    delete item.system.conditionalAttacks[key];
+                    // NOTE: typically we await here, but this isn't an async function.
+                    // Shouldn't be a problem.
+                    item.update({
+                        [`system.conditionalAttacks`]: item.system.conditionalAttacks,
+                    });
+                }
+                continue;
+            }
 
-    //         // Make sure conditionalAttack applies (only for DEADLYBLOW at the moment)
-    //         if (typeof conditionalAttack.baseInfo?.appliesTo === "function") {
-    //             if (!conditionalAttack.baseInfo.appliesTo(item)) continue;
-    //         }
+            // If unchecked or missing then assume it is enabled
+            if (!conditionalAttack.system.checked) continue;
 
-    //         switch (conditionalAttack.system.XMLID) {
-    //             case "DEADLYBLOW": {
-    //                 if (!options?.ignoreDeadlyBlow) {
-    //                     const deadlyDc = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-    //                     addedDc.dc += deadlyDc;
-    //                     addedDc.tags.push({
-    //                         value: `${deadlyDc}DC`,
-    //                         name: "DeadlyBlow",
-    //                         title: conditionalAttack.system.OPTION_ALIAS,
-    //                     });
-    //                 }
+            // Make sure conditionalAttack applies (only for DEADLYBLOW at the moment)
+            if (typeof conditionalAttack.baseInfo?.appliesTo === "function") {
+                if (!conditionalAttack.baseInfo.appliesTo(item)) continue;
+            }
 
-    //                 break;
-    //             }
+            switch (conditionalAttack.system.XMLID) {
+                case "DEADLYBLOW": {
+                    if (!options.ignoreDeadlyBlow) {
+                        const deadlyDc = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
+                        const deadlyBlowDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, deadlyDc);
+                        const formula = dicePartsToEffectFormula(deadlyBlowDiceParts);
 
-    //             default:
-    //                 console.warn("Unhandled conditionalAttack", conditionalAttack);
-    //         }
-    //     }
-    // }
+                        addedDamageBundle.diceParts = subtractDiceParts(
+                            baseDamageItem,
+                            addedDamageBundle.diceParts,
+                            deadlyBlowDiceParts,
+                        );
+                        addedDamageBundle.tags.push({
+                            value: `${formula}`,
+                            name: "DeadlyBlow",
+                            title: `${deadlyDc}DC -> ${formula}`,
+                        });
+                    }
+
+                    break;
+                }
+
+                default:
+                    console.warn("Unhandled conditionalAttack", conditionalAttack);
+            }
+        }
+    }
 
     // FIXME: Environmental Movement: Aquatic Environments should actually counteract this.
     if (item.actor?.statuses?.has("underwater")) {
@@ -781,9 +796,6 @@ function addStrengthToBundle(item, options, dicePartsBundle) {
     const actorStrengthItem = item.actor?.items.find(
         (item) => item.system.XMLID === "__STRENGTHDAMAGE" && item.name === "__InternalStrengthPlaceholder",
     );
-
-    // PH: FIXME: Remove for commit
-    if (!actorStrengthItem) debugger;
 
     const baseEffectiveStrength = effectiveStrength(item, options);
     let str = baseEffectiveStrength;

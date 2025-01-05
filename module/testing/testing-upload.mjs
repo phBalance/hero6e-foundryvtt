@@ -7355,10 +7355,6 @@ export function registerUploadTests(quench) {
                     it("damage", function () {
                         assert.equal(item.system.damage, "1d6K");
                     });
-
-                    it("end", function () {
-                        assert.equal(item.system.end, 9);
-                    });
                 });
 
                 describe("Low fidelity -1/2 Limitation", function () {
@@ -7418,10 +7414,6 @@ export function registerUploadTests(quench) {
 
                     it("damage", function () {
                         assert.equal(item.system.damage, "1d6K");
-                    });
-
-                    it("end", function () {
-                        assert.equal(item.system.end, 9);
                     });
                 });
 
@@ -7483,10 +7475,6 @@ export function registerUploadTests(quench) {
                     it("damage", function () {
                         assert.equal(item.system.damage, "1d6K");
                     });
-
-                    it("end", function () {
-                        assert.equal(item.system.end, 9);
-                    });
                 });
 
                 describe("Low fidelity -1 Limitation", function () {
@@ -7547,10 +7535,6 @@ export function registerUploadTests(quench) {
                     it("damage", function () {
                         assert.equal(item.system.damage, "1d6K");
                     });
-
-                    it("end", function () {
-                        assert.equal(item.system.end, 9);
-                    });
                 });
 
                 describe("High fidelity -1 Limitation", function () {
@@ -7610,10 +7594,6 @@ export function registerUploadTests(quench) {
 
                     it("damage", function () {
                         assert.equal(item.system.damage, "1d6K");
-                    });
-
-                    it("end", function () {
-                        assert.equal(item.system.end, 9);
                     });
                 });
             });

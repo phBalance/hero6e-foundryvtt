@@ -3114,9 +3114,7 @@ export function registerFullTests(quench) {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
                 });
 
-                // PH: FIXME: do 6e with weapons
-
-                describe("straight forward attacks with weapons", function () {
+                describe("straight forward martial maneuvers with weapons", function () {
                     it("should recognize RKA associated with martial arts", function () {
                         // Base: RKA +1k (1 DC) => 1DC
                         // Added: Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
@@ -3142,7 +3140,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe("double damage limit", function () {
+                describe("double damage limit with martial maneuvers", function () {
                     it("should recognize double damage limit for martial maneuver with an RKA", function () {
                         // Base: RKA +1k (1 DC) => 1DC
                         // Added: Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +2 DC
@@ -4141,6 +4139,204 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 HKA", function () {
                         // +4 DC at +1 is 2 DC => 2d6
                         assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3½d6");
+                    });
+                });
+            });
+
+            describe("6e - weapon master and deadly blow", function () {
+                const contents = `
+                    <?xml version="1.0" encoding="UTF-16"?>
+                    <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
+                    <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
+                    <CHARACTER_INFO CHARACTER_NAME="Test Weapon Master And Deadly Blows" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                        <BACKGROUND />
+                        <PERSONALITY />
+                        <QUOTE />
+                        <TACTICS />
+                        <CAMPAIGN_USE />
+                        <APPEARANCE />
+                        <NOTES1 />
+                        <NOTES2 />
+                        <NOTES3 />
+                        <NOTES4 />
+                        <NOTES5 />
+                    </CHARACTER_INFO>
+                    <CHARACTERISTICS>
+                        <STR XMLID="STR" ID="1736091070532" BASECOST="0.0" LEVELS="5" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STR>
+                        <DEX XMLID="DEX" ID="1736091070048" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DEX>
+                        <CON XMLID="CON" ID="1736091070435" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </CON>
+                        <INT XMLID="INT" ID="1736091069828" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </INT>
+                        <EGO XMLID="EGO" ID="1736091070178" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </EGO>
+                        <PRE XMLID="PRE" ID="1736091069821" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PRE>
+                        <OCV XMLID="OCV" ID="1736091070373" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </OCV>
+                        <DCV XMLID="DCV" ID="1736091070297" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DCV>
+                        <OMCV XMLID="OMCV" ID="1736091070396" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </OMCV>
+                        <DMCV XMLID="DMCV" ID="1736091070254" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DMCV>
+                        <SPD XMLID="SPD" ID="1736091070236" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SPD>
+                        <PD XMLID="PD" ID="1736091069932" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PD>
+                        <ED XMLID="ED" ID="1736091070234" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </ED>
+                        <REC XMLID="REC" ID="1736091070334" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </REC>
+                        <END XMLID="END" ID="1736091069933" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </END>
+                        <BODY XMLID="BODY" ID="1736091069878" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </BODY>
+                        <STUN XMLID="STUN" ID="1736091070499" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STUN>
+                        <RUNNING XMLID="RUNNING" ID="1736091069713" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </RUNNING>
+                        <SWIMMING XMLID="SWIMMING" ID="1736091069865" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SWIMMING>
+                        <LEAPING XMLID="LEAPING" ID="1736091069690" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </LEAPING>
+                    </CHARACTERISTICS>
+                    <SKILLS />
+                    <PERKS />
+                    <TALENTS>
+                        <TALENT XMLID="DEADLYBLOW" ID="1736091119815" BASECOST="0.0" LEVELS="4" ALIAS="Deadly Blow:  +4d6" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited circumstances]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                        </TALENT>
+                        <TALENT XMLID="WEAPON_MASTER" ID="1736091131527" BASECOST="0.0" LEVELS="3" ALIAS="Weapon Master:  +3d6" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited group]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            <ADDER XMLID="GENERIC_OBJECT" ID="1736092943424" BASECOST="0.0" LEVELS="0" ALIAS="Big Sword" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                        </TALENT>
+                    </TALENTS>
+                    <MARTIALARTS />
+                    <POWERS>
+                        <POWER XMLID="HKA" ID="1736091852623" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Big Sword" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="FOCUS" ID="1736092723220" BASECOST="-0.25" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="IIF" OPTIONID="IIF" OPTION_ALIAS="IIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="HKA" ID="1736093244686" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Little Sword" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="PLUSONEPIP" ID="1736093256602" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="FOCUS" ID="1736093246312" BASECOST="-0.25" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="IIF" OPTIONID="IIF" OPTION_ALIAS="IIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    </POWERS>
+                    <DISADVANTAGES />
+                    <EQUIPMENT />
+                    <RULES name="Default" path="foo.hdr" BASEPOINTS="200" DISADPOINTS="150" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="90" ATTACKAPMAXRESPONSE="0" DEFENSEAPMAXVALUE="90" DEFENSEAPMAXRESPONSE="0" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="0" AVAILDISADPOINTSRESPONSE="0" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="Yes" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
+                    </CHARACTER>
+                `;
+
+                let actor;
+
+                let bigSwordItem;
+                let littleSwordItem;
+
+                before(async () => {
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+
+                    await actor.uploadFromXml(contents);
+                    bigSwordItem = actor.items.find((item) => item.system.XMLID === "HKA" && item.name === "Big Sword");
+                    littleSwordItem = actor.items.find(
+                        (item) => item.system.XMLID === "HKA" && item.name === "Little Sword",
+                    );
+                });
+
+                describe("Big Sword Killing Attack", function () {
+                    it("should have the correct base damage for the Big Sword HKA", function () {
+                        // Base: Big Sword 2d6K (6 DC) => 6 DC
+                        // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
+                        // Combined: 6 DC + 12 DC (no damage doubling rule) => 18 DC
+                        assert.equal(getEffectForumulaFromItem(bigSwordItem, {}), "6d6");
+                    });
+
+                    it("should add strength for the Big Sword HKA", function () {
+                        // Base: Big Sword 2d6K (6 DC) => 6 DC
+                        // Added: 25 STR (5 DC), Weapon Master x3 for Big Sword (9 DC) => 14 DC
+                        // Combined: 6 DC + 14 DC (no damage doubling rule) => 20 DC
+                        assert.equal(getEffectForumulaFromItem(bigSwordItem, { effectivestr: 25 }), "6½d6");
+                    });
+                });
+
+                describe("Little Sword Killing Attack", function () {
+                    it("should have the correct base damage for the Little Sword HKA", function () {
+                        // Base: Little Sword 1d6+1K (4 DC) => 4 DC
+                        // Added: 15 STR (3 DC)) => 3 DC
+                        // Combined: 4 DC + 3 DC (no damage doubling rule) => 7 DC
+                        assert.equal(getEffectForumulaFromItem(littleSwordItem, {}), "2d6+1");
+                    });
+
+                    it("should add strength for the Little Sword HKA", function () {
+                        // Base: Little Sword 1d6+1K (4 DC) => 4 DC
+                        // Added: 25 STR (5 DC)) => 5 DC
+                        // Combined: 4 DC + 5 DC (no damage doubling rule) => 9 DC
+                        assert.equal(getEffectForumulaFromItem(littleSwordItem, { effectivestr: 25 }), "3d6");
+                    });
+                });
+
+                describe("Big and Little Sword Killing Attacks with damage doubling rules", function () {
+                    let previousSetting;
+
+                    beforeEach(async () => {
+                        previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                    });
+
+                    afterEach(async () => {
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                    });
+
+                    it("should limit total damage for the Big Sword HKA", function () {
+                        // Base: Big Sword 2d6K (6 DC) => 6 DC
+                        // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
+                        // Combined: 6 DC + 12 DC (damage doubling rule) => 12 DC
+                        assert.equal(getEffectForumulaFromItem(bigSwordItem, {}), "4d6");
+                    });
+
+                    it("should add strength for the Little Sword HKA", function () {
+                        // Base: Little Sword 1d6+1K (4 DC) => 4 DC
+                        // Added: 25 STR (5 DC)) => 5 DC
+                        // Combined: 4 DC + 5 DC (damage doubling rule) => 8 DC
+                        assert.equal(getEffectForumulaFromItem(littleSwordItem, { effectivestr: 25 }), "2½d6");
                     });
                 });
             });
