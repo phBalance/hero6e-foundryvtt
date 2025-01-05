@@ -1,6 +1,10 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { combatSkillLevelsForAttack, getEffectForumulaFromItem } from "../utility/damage.mjs";
+import {
+    combatSkillLevelsForAttack,
+    getEffectForumulaFromItem,
+    getFullyQualifiedEffectFormulaFromItem,
+} from "../utility/damage.mjs";
 
 export function registerFullTests(quench) {
     quench.registerBatch(
@@ -2931,6 +2935,249 @@ export function registerFullTests(quench) {
 
                     it("should have the correct damage for an over boosted big Transform", function () {
                         assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 5 }), "4d6");
+                    });
+                });
+            });
+
+            describe("5e - Real Weapons", function () {
+                const contents = `
+                        <?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic.hdt">
+                        <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
+                        <CHARACTER_INFO CHARACTER_NAME="Test Real Weapons" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                            <BACKGROUND />
+                            <PERSONALITY />
+                            <QUOTE />
+                            <TACTICS />
+                            <CAMPAIGN_USE />
+                            <APPEARANCE />
+                            <NOTES1 />
+                            <NOTES2 />
+                            <NOTES3 />
+                            <NOTES4 />
+                            <NOTES5 />
+                        </CHARACTER_INFO>
+                        <CHARACTERISTICS>
+                            <STR XMLID="STR" ID="1735935457317" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </STR>
+                            <DEX XMLID="DEX" ID="1735935456632" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </DEX>
+                            <CON XMLID="CON" ID="1735935457364" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </CON>
+                            <BODY XMLID="BODY" ID="1735935457346" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </BODY>
+                            <INT XMLID="INT" ID="1735935456982" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </INT>
+                            <EGO XMLID="EGO" ID="1735935456855" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </EGO>
+                            <PRE XMLID="PRE" ID="1735935457138" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </PRE>
+                            <COM XMLID="COM" ID="1735935457067" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </COM>
+                            <PD XMLID="PD" ID="1735935456773" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </PD>
+                            <ED XMLID="ED" ID="1735935457089" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </ED>
+                            <SPD XMLID="SPD" ID="1735935457589" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SPD>
+                            <REC XMLID="REC" ID="1735935457342" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </REC>
+                            <END XMLID="END" ID="1735935457206" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </END>
+                            <STUN XMLID="STUN" ID="1735935456609" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </STUN>
+                            <RUNNING XMLID="RUNNING" ID="1735935457044" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </RUNNING>
+                            <SWIMMING XMLID="SWIMMING" ID="1735935457384" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SWIMMING>
+                            <LEAPING XMLID="LEAPING" ID="1735935457540" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </LEAPING>
+                        </CHARACTERISTICS>
+                        <SKILLS />
+                        <PERKS />
+                        <TALENTS />
+                        <MARTIALARTS>
+                            <MANEUVER XMLID="MANEUVER" ID="1735943103238" BASECOST="3.0" LEVELS="0" ALIAS="Basic Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Basic Strike" OCV="+1" DCV="+0" DC="2" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                            <NOTES />
+                            </MANEUVER>
+                            <MANEUVER XMLID="MANEUVER" ID="1735946408484" BASECOST="4.0" LEVELS="0" ALIAS="Martial Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Strike" OCV="+0" DCV="+2" DC="2" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="20" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                            <NOTES />
+                            </MANEUVER>
+                            <MANEUVER XMLID="MANEUVER" ID="1736042211258" BASECOST="3.0" LEVELS="0" ALIAS="Custom 4DC attack" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CUSTOM="Yes" CATEGORY="Ranged" DISPLAY="Custom Maneuver" OCV="+0" DCV="+0" DC="4" PHASE="1/2" EFFECT="Strike" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Strike" RANGE="0">
+                            <NOTES />
+                            </MANEUVER>
+                            <WEAPON_ELEMENT XMLID="WEAPON_ELEMENT" ID="1736042852826" BASECOST="0.0" LEVELS="0" ALIAS="Weapon Element" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            <ADDER XMLID="COMMONMISSILE" ID="1736043697740" BASECOST="0.0" LEVELS="0" ALIAS="Common Missile Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                                <NOTES />
+                                <ADDER XMLID="BOWS" ID="1736043697739" BASECOST="1.0" LEVELS="0" ALIAS="Bows" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </ADDER>
+                            </WEAPON_ELEMENT>
+                        </MARTIALARTS>
+                        <POWERS>
+                            <POWER XMLID="RKA" ID="1735936415724" BASECOST="0.0" LEVELS="0" ALIAS="Killing Attack - Ranged" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Point Bow 1" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <ADDER XMLID="PLUSONEPIP" ID="1736045943020" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <MODIFIER XMLID="FOCUS" ID="1736045943047" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="REALWEAPON" ID="1736045943049" BASECOST="-0.25" LEVELS="0" ALIAS="Real Weapon" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="STRMINIMUM" ID="1736045943057" BASECOST="-0.25" LEVELS="0" ALIAS="STR Minimum (low fidelity)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1-5" OPTIONID="1-5" OPTION_ALIAS="1-5" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="HKA" ID="1736044888537" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="FOCUS" ID="1736045985448" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="REALWEAPON" ID="1736045995578" BASECOST="-0.25" LEVELS="0" ALIAS="Real Weapon" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="STRMINIMUM" ID="1736046001066" BASECOST="-0.5" LEVELS="0" ALIAS="STR Minimum" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="6-14" OPTIONID="6-14" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                        </POWERS>
+                        <DISADVANTAGES />
+                        <EQUIPMENT>
+                            
+                        </EQUIPMENT>
+                        <RULES name="Default" path="foo.hdr" BASEPOINTS="200" DISADPOINTS="150" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="90" ATTACKAPMAXRESPONSE="0" DEFENSEAPMAXVALUE="90" DEFENSEAPMAXRESPONSE="0" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="0" AVAILDISADPOINTSRESPONSE="0" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="Yes" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
+                        </CHARACTER>
+                `;
+                let actor;
+
+                let previousSetting;
+
+                let rkaItem;
+                let hkaItem;
+
+                let moveByManeuverItem;
+                let moveThroughManeuverItem;
+                let martialStrikeManeuverItem;
+                let customMartialFourDcManeuverItem;
+
+                beforeEach(async () => {
+                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+
+                    await actor.uploadFromXml(contents);
+
+                    rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                    hkaItem = actor.items.find((item) => item.system.XMLID === "HKA");
+
+                    moveByManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
+                    moveThroughManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
+
+                    martialStrikeManeuverItem = actor.items.find(
+                        (item) => item.system.XMLID === "MANEUVER" && item.name === "Martial Strike",
+                    );
+
+                    customMartialFourDcManeuverItem = actor.items.find(
+                        (item) => item.system.XMLID === "MANEUVER" && item.name === "Custom 4DC attack",
+                    );
+                });
+
+                afterEach(async function () {
+                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                });
+
+                // PH: FIXME: do 6e with weapons
+
+                describe("straight forward attacks with weapons", function () {
+                    it("should recognize RKA associated with martial arts", function () {
+                        // Base: RKA +1k (1 DC) => 1DC
+                        // Added: Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
+                        // Base + Added 1DC + 1DC (Double rule does not apply) => 2DC at 15AP/die = 1/2d6
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                maWeaponItem: rkaItem,
+                            }),
+                            "½d6K",
+                        );
+                    });
+
+                    it("should recognize HKA associated with martial arts", function () {
+                        // Base: HKA 1d6k (3 DC) => 3DC
+                        // Added: STR 10 = +2 DC, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +3 DC
+                        // Base + Added 3DC + 3DC (Double rule does not apply) => 6 DC at 15AP/die = 2d6
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                maWeaponItem: hkaItem,
+                            }),
+                            "2d6K",
+                        );
+                    });
+                });
+
+                describe("double damage limit", function () {
+                    it("should recognize double damage limit for martial maneuver with an RKA", function () {
+                        // Base: RKA +1k (1 DC) => 1DC
+                        // Added: Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +2 DC
+                        // Base + Added 1DC + 1DC (Double rule applies) => 2DC at 15AP/die = 1/2d6
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(customMartialFourDcManeuverItem, {
+                                maWeaponItem: rkaItem,
+                            }),
+                            "½d6K",
+                        );
+                    });
+
+                    it("should recognize double damage limit for martial maneuver with an HKA", function () {
+                        // Base: HKA +1k (1 DC) => 1DC
+                        // Added: STR 10 = +2 DC, Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +4 DC
+                        // Base + Added 3DC + 4DC (Double rule applies) => 6DC at 15AP/die = 2d6
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(customMartialFourDcManeuverItem, {
+                                maWeaponItem: hkaItem,
+                            }),
+                            "2d6K",
+                        );
+                    });
+
+                    it("should recognize velocity isn't in the double damage limit for move by maneuver with an HKA", function () {
+                        // Base: HKA 1d6k (3 DC) => 3DC
+                        // Added: STR 10 = +2 DC, Move Through (+0 DC halved because it's a killing attack = +0 DC), velocity 30"/5 = 6DC => +8 DC
+                        // Base + Added 3DC + 8DC (Double rule partially applies) => 11 DC at 15AP/die = 31/2d6
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(moveByManeuverItem, {
+                                velocity: 30,
+                                maWeaponItem: hkaItem,
+                            }),
+                            "3½d6K",
+                        );
                     });
                 });
             });

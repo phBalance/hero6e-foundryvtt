@@ -341,6 +341,7 @@ function defaultPowerDiceParts(item, diceParts) {
                 title: `${formula}`,
             },
         ],
+        baseAttackItem: item,
     };
 }
 
@@ -368,6 +369,7 @@ function noDamageBaseEffectDiceParts(item) {
             constant: 0,
         },
         tags: [{ value: "0", name: `BAD TAG`, title: "Should not have been called. Please report." }],
+        baseAttackItem: null,
     };
 }
 
@@ -6201,7 +6203,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: fixedValueFunction(3 / 2),
-            baseEffectDiceParts: function (item, options) {
+            baseEffectDiceParts: (item, options) => {
                 // The damage for TELEKINESIS is based on STR.
                 // Each LEVEL of TELEKINESIS is equal to 1 point of STR.
                 const str =
@@ -6273,6 +6275,29 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             attackDefenseVs: "POWERDEFENSE",
             baseEffectDiceParts: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="TRANSFORM" ID="1709334039303" BASECOST="0.0" LEVELS="1" ALIAS="Transform" POSITION="84" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COSMETIC" OPTIONID="COSMETIC" OPTION_ALIAS="Cosmetic" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
+        },
+        {},
+    );
+})();
+
+(function addFakePowersToPowerList() {
+    // A fake power that can be used for internal placeholders
+    addPower(
+        {
+            key: "__STRENGTHDAMAGE",
+            type: ["attack"],
+            behaviors: ["attack", "dice"],
+            perceivability: "obvious",
+            duration: "instant",
+            range: HERO.RANGE_TYPES.STANDARD,
+            costPerLevel: fixedValueFunction(5),
+            cost: () => {
+                // We want this power to be free
+                return 0;
+            },
+            costEnd: true,
+            baseEffectDiceParts: standardBaseEffectDiceParts,
+            xml: `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );

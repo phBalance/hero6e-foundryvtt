@@ -1992,8 +1992,9 @@ export class HeroSystem6eActor extends Actor {
             await perceptionItem._postUpload({ applyEncumbrance: false });
 
             // MANEUVERS
-            const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+            await this.addAttackPlaceholders();
 
+            const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
             powerList
                 .filter((power) => power.type?.includes("maneuver"))
                 .forEach(async (maneuver) => {
@@ -2050,7 +2051,6 @@ export class HeroSystem6eActor extends Actor {
                           });
 
                     if (maneuverDetails.attack) {
-                        console.warn(`${item.name}/${item.system.XMLID} is being turned into an attack`);
                         await item.makeAttack();
                     }
 
@@ -2061,6 +2061,47 @@ export class HeroSystem6eActor extends Actor {
                     await item._postUpload();
                 });
         }
+    }
+
+    async addAttackPlaceholders() {
+        // Maneuver Strength Placeholder
+        // PH: FIXME: Figure out how to hide this (has name "__strengthPlaceholderWeapon") in the UI
+        const strengthPlaceholderItemContent = `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="__InternalStrengthPlaceholder" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`;
+        const strengthPlaceholderItemData = HeroSystem6eItem.itemDataFromXml(strengthPlaceholderItemContent, this);
+        const strengthPlaceholderItem = this.id
+            ? await HeroSystem6eItem.create(strengthPlaceholderItemData, {
+                  parent: this,
+              })
+            : new HeroSystem6eItem(strengthPlaceholderItemData, {
+                  parent: this,
+              });
+
+        // Work around if temporary actor
+        if (!this.id) {
+            this.items.set(strengthPlaceholderItem.name, strengthPlaceholderItem);
+        }
+        await strengthPlaceholderItem._postUpload();
+
+        // Maneuver Weapon Placeholder
+        // PH: FIXME: Figure out how to hide this (has name "__InternalManeuverPlaceholderWeapon") in the UI
+        const maneuverWeaponPlaceholderItemContent = `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792633" BASECOST="0.0" LEVELS="1" ALIAS="__InternalManeuverPlaceholderWeapon" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="__InternalManeuverPlaceholderWeapon" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`;
+        const maneuverWeaponPlaceholderItemData = HeroSystem6eItem.itemDataFromXml(
+            maneuverWeaponPlaceholderItemContent,
+            this,
+        );
+        const maneuverWeaponPlaceholderItem = this.id
+            ? await HeroSystem6eItem.create(maneuverWeaponPlaceholderItemData, {
+                  parent: this,
+              })
+            : new HeroSystem6eItem(maneuverWeaponPlaceholderItemData, {
+                  parent: this,
+              });
+
+        // Work around if temporary actor
+        if (!this.id) {
+            this.items.set(maneuverWeaponPlaceholderItem.name, maneuverWeaponPlaceholderItem);
+        }
+        await maneuverWeaponPlaceholderItem._postUpload();
     }
 
     static _xmlToJsonNode(json, children) {
