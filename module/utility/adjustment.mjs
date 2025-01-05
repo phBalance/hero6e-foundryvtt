@@ -152,7 +152,7 @@ export function determineMaxAdjustment(item, simplifiedHealing, potentialCharact
         const increaseMax = parseInt(item.system.ADDER?.find((adder) => adder.XMLID === "INCREASEDMAX")?.LEVELS || 0);
 
         // Max pips in a roll is starting max base.
-        const maxAdjustment =
+        const maxAdjustment5e =
             6 * diceParts.d6Count +
             5 * diceParts.d6Less1DieCount +
             3 * diceParts.halfDieCount +
@@ -173,7 +173,6 @@ export function determineMaxAdjustment(item, simplifiedHealing, potentialCharact
         }
 
         // Max pips in a roll is starting max base.
-        const diceParts = calculateDicePartsForItem(item, {});
         let maxAdjustment6e =
             6 * diceParts.d6Count + 5 * diceParts.d6Less1DieCount + 3 * diceParts.halfDieCount + 1 * diceParts.constant;
 
