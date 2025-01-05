@@ -2767,7 +2767,12 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     "None - Beneficial",
                     "",
                     false,
-                    token,
+                    adjustmentItem.system.XMLID !== "TRANSFER"
+                        ? token
+                        : adjustmentItem.actor
+                              .getActiveTokens()
+                              ?.find((t) => t.id === action?.current?.attackerTokenId) ||
+                              adjustmentItem.actor.getActiveTokens?.[0],
                     action,
                 ),
             );
