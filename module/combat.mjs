@@ -379,7 +379,7 @@ export class HeroSystem6eCombat extends Combat {
      */
     async _onStartTurn(combatant) {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onStartTurn: ${combatant.name}`);
+            console.debug(`Hero | _onStartTurn: ${combatant.name} ${game.time.worldTime}`);
         }
 
         // We need a single combatant to store some flags. Like for DragRuler, end tracking, etc.
@@ -408,7 +408,12 @@ export class HeroSystem6eCombat extends Combat {
 
         // Expire Effects
         // We expire on our phase, not on our segment.
-        await expireEffects(combatant.actor);
+        try {
+            await expireEffects(combatant.actor);
+        } catch (e) {
+            console.error(e);
+            debugger;
+        }
 
         // Stop holding
         if (combatant.actor.statuses.has("holding")) {
@@ -775,19 +780,67 @@ export class HeroSystem6eCombat extends Combat {
      * Advance the combat to the next turn
      * @returns {Promise<Combat>}
      */ async nextTurn() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | nextTurn ${game.time.worldTime}`);
+        }
         const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
-        const originalRound = this.round;
-        const _nextTurn = await super.nextTurn();
-        const newRunningSegment = this.round * 12 + this.combatant?.flags.segment;
-        const newRound = this.round;
+        //const originalRound = this.round;
+        //const _nextTurn = await super.nextTurn();
 
-        if (originalRunningSegment != newRunningSegment && originalRound === newRound) {
-            const advanceTime = newRunningSegment - originalRunningSegment;
-            //console.log(originalRunningSegment, newRunningSegment, newRunningSegment - originalRunningSegment);
-            await game.time.advance(advanceTime);
+        let turn = this.turn ?? -1;
+        let skip = this.settings.skipDefeated;
+
+        // Determine the next turn number
+        let next = null;
+        if (skip) {
+            for (let [i, t] of this.turns.entries()) {
+                if (i <= turn) continue;
+                if (t.isDefeated) continue;
+                next = i;
+                break;
+            }
+        } else next = turn + 1;
+
+        // Maybe advance to the next round
+        let round = this.round;
+        if (this.round === 0 || next === null || next >= this.turns.length) {
+            return this.nextRound();
         }
 
-        return _nextTurn;
+        const newRunningSegment = this.round * 12 + this.nextCombatant?.flags.segment;
+        //const newRound = this.round;
+
+        //if (originalRunningSegment != newRunningSegment) {
+        const advanceTime = newRunningSegment - originalRunningSegment;
+        const updateData = { round, turn: next };
+        const updateOptions = { direction: 1, worldTime: { delta: advanceTime } };
+
+        console.log("nextTurn before game.time.advance", game.time.worldTime, advanceTime);
+        Hooks.callAll("combatTurn", this, updateData, updateOptions);
+
+        // Hack to let worldTime update, which we need to expire effects on the correct phase within each segment.
+        const _gt = game.time.worldTime;
+        await this.update(updateData, updateOptions);
+        for (let x = 0; x < 200; x++) {
+            if (game.time.worldTime != _gt) break;
+            await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+        console.log("nextTurn after game.time.advance", game.time.worldTime);
+
+        // && originalRound === newRound) {
+
+        //console.log(originalRunningSegment, newRunningSegment, newRunningSegment - originalRunningSegment);
+        // console.log("nextTurn game.time.advance", game.time.worldTime);
+        // await game.time.advance(advanceTime);
+        // console.log("nextTurn game.time.advance", game.time.worldTime);
+        //}
+
+        //return;
+    }
+
+    async _onUpdate(...args) {
+        console.log("combat._onUpdate", args);
+        super._onUpdate(...args);
     }
 
     /**

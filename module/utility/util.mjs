@@ -173,52 +173,55 @@ export async function expireEffects(actor) {
     let adjustmentChatMessages = [];
     for (const ae of temporaryEffects) {
         // Determine XMLID, ITEM, ACTOR
-        let origin = await fromUuid(ae.origin);
-        let item =
-            origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
-        let aeActor =
-            (origin instanceof HeroSystem6eActor ? origin : item?.actor) ||
-            actor ||
-            ae.parent instanceof HeroSystem6eActor
-                ? ae.parent
-                : null;
-        let XMLID = ae.flags.XMLID || item?.system?.XMLID;
+        // let origin = await fromUuid(ae.origin);
+        // let item =
+        //     origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
+        // let aeActor =
+        //     (origin instanceof HeroSystem6eActor ? origin : item?.actor) ||
+        //     actor ||
+        //     ae.parent instanceof HeroSystem6eActor
+        //         ? ae.parent
+        //         : null;
+        // let XMLID = ae.flags.XMLID || item?.system?.XMLID;
 
-        let powerInfo = getPowerInfo({
-            actor: aeActor,
-            xmlid: XMLID,
-            item: item,
-        });
+        // let powerInfo = getPowerInfo({
+        //     actor: aeActor,
+        //     xmlid: XMLID,
+        //     item: item,
+        // });
 
-        if (
-            !powerInfo &&
-            ae.statuses.size === 0 &&
-            game.settings.get(game.system.id, "alphaTesting") &&
-            ae.duration?.seconds < 3.154e7 * 100
-        ) {
-            //return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
-            // TakeRecovery has no XMLID, not sure why we HAVE to have one, just expire the effect.
-            console.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
-        }
+        // if (
+        //     !powerInfo &&
+        //     ae.statuses.size === 0 &&
+        //     game.settings.get(game.system.id, "alphaTesting") &&
+        //     ae.duration?.seconds < 3.154e7 * 100
+        // ) {
+        //     //return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
+        //     // TakeRecovery has no XMLID, not sure why we HAVE to have one, just expire the effect.
+        //     console.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
+        // }
 
         // With Simple Calendar you can move time ahead in large steps.
         // Need to loop as multiple fades may be required.
-        let d = ae._prepareDuration();
-        while (d.remaining != null && d.remaining <= 0) {
-            // Add duration to startTime
-            ae.duration.startTime += d.duration;
-            d = ae._prepareDuration();
-            await ae.update({ duration: ae.duration });
-
+        //let d = ae._prepareDuration();
+        while (ae._prepareDuration().remaining <= 0) {
             // What is this effect related to?
             if (ae.flags.type === "adjustment") {
                 // Fade by up to 5 Active Points
                 let _fade;
                 if (ae.flags.adjustmentActivePoints >= 0) {
-                    _fade = Math.min(ae.flags.adjustmentActivePoints, 5);
+                    _fade = 5; //Math.min(ae.flags.adjustmentActivePoints, 5);
                 } else {
-                    _fade = Math.max(ae.flags.adjustmentActivePoints, -5);
+                    _fade = -5; //Math.max(ae.flags.adjustmentActivePoints, -5);
                 }
+
+                const origin = fromUuidSync(ae.origin);
+                const item =
+                    origin instanceof HeroSystem6eItem
+                        ? origin
+                        : ae.parent instanceof HeroSystem6eItem
+                          ? ae.parent
+                          : null;
 
                 if (item) {
                     adjustmentChatMessages.push(
@@ -270,6 +273,21 @@ export async function expireEffects(actor) {
                 await ae.delete();
                 break;
                 //}
+            }
+
+            // Add duration to startTime (if ae wasn't deleted)
+            if (ae.parent?.temporaryEffects.find((o) => o.id === ae.id)) {
+                // Sanity delete
+                if (ae.flags.adjustmentActivePoints === 0) {
+                    console.error(`Sanity deleting ${ae.name}. Shouldn't need to do this.`);
+                    await ae.delete();
+                    continue;
+                }
+                ae.duration.startTime += ae.duration.seconds;
+                await ae.update({ duration: ae.duration });
+            } else {
+                console.log(`${ae.name} expired`);
+                continue;
             }
         }
     }

@@ -64,7 +64,7 @@ export class HeroSystem6eEndToEndTest {
 
         // Interactive Testing (change these at will)
         //await this.token6.actor.update({ "system.characteristics.stun.value": 10 });
-        //if (!(await this.testAdjustmentStacking(this.token6, this.token6, "HEALING", "STUN"))) return;
+        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "HEALING", "STUN"))) return;
         if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "OCV"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
@@ -316,8 +316,8 @@ export class HeroSystem6eEndToEndTest {
         }
         const ap = parseInt(
             document
-                .querySelector(`ol#chat-log .chat-message:last-child .card-section:last-child`)
-                ?.textContent.match(/(\d+) Character Points/)[1],
+                .querySelector(`ol#chat-log .chat-message:last-child .description-activePoints`)
+                ?.textContent.match(/(\d+) Character Points/)[0],
         );
 
         // Get Active Effect
