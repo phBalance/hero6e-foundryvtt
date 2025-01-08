@@ -66,8 +66,11 @@ function isStunBasedEffectRoll(item) {
     );
 }
 
-/// Dialog box for AttackOptions
-export async function AttackOptions(item) {
+/**
+ * Dialog box for collectActionDataBeforeToHitOptions. The action doesn't have to be an attack such as
+ * the Block maneuver.
+ */
+export async function collectActionDataBeforeToHitOptions(item) {
     const actor = item.actor;
     const token = actor.getActiveTokens()[0];
     const data = {
@@ -116,15 +119,15 @@ export async function AttackOptions(item) {
     await new ItemAttackFormApplication(data).render(true);
 }
 
-export async function processAttackOptions(item, formData) {
+export async function processActionToHit(item, formData) {
     if (item.getAoeModifier()) {
-        await AttackAoeToHit(item, formData);
+        await doAoeActionToHit(item, formData);
     } else {
-        await AttackToHit(item, formData);
+        await doSingleTargetActionToHit(item, formData);
     }
 }
 
-export async function AttackAoeToHit(item, options) {
+export async function doAoeActionToHit(item, options) {
     if (!item) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
@@ -370,7 +373,7 @@ export async function AttackAoeToHit(item, options) {
 /// chose with the die-roll icon and adjusted with the Attack Options
 /// menu.
 /// There was a die roll, and we display the attack to hit results.
-export async function AttackToHit(item, options) {
+export async function doSingleTargetActionToHit(item, options) {
     if (!item) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
@@ -500,6 +503,9 @@ export async function AttackToHit(item, options) {
     }
 
     const itemData = item.system;
+
+    // PH: FIXME: There are actions which are not attacks that need "uses" as that is the defense mechanism that is targetted. Make sure the targetting stuff is pulled out of MakeAttack.
+    if (itemData.uses == undefined) debugger;
 
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
@@ -1200,7 +1206,7 @@ export async function _onRollAoeDamage(event) {
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const options = { ...button.dataset };
     const item = fromUuidSync(options.itemId);
-    return AttackToHit(item, JSON.parse(options.formData));
+    return doSingleTargetActionToHit(item, JSON.parse(options.formData));
 }
 
 export async function _onRollKnockback(event) {

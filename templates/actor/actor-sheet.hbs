@@ -415,12 +415,12 @@
                                 <td>{{item.system.ocvEstimated}}</td>
                                 <td>{{item.system.dcvEstimated}}</td>
                                 <td>
-                                    {{#if (ne item.system.subType "attack")}}
-                                        <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
-                                            item.system.active}} data-dtype="Boolean" />
-                                    {{else}}
+                                    {{#if (itemHasBehaviours item "to-hit" "dice")}}
                                         <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
                                                 height="24"></i></a>
+                                    {{else}}
+                                        <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
+                                            item.system.active}} data-dtype="Boolean" />
                                     {{/if}}
                                 </td>
                                 <td>

@@ -1,6 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { AttackOptions, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
+import {
+    collectActionDataBeforeToHitOptions,
+    userInteractiveVerifyOptionallyPromptThenSpendResources,
+} from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
 import { enforceManeuverLimits } from "../item/manuever.mjs";
 import {
@@ -38,6 +41,7 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemIsManeuver", itemIsManeuver);
     Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
     Handlebars.registerHelper("filterItem", filterItem);
+    Handlebars.registerHelper("itemHasBehaviours", itemHasBehaviours);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -88,6 +92,18 @@ function filterItem(item, filterString) {
         const match2 =
             child.name?.match(regex) || child.system.description?.match(regex) || child.system.XMLID?.match(regex);
         if (match2) return true;
+    }
+    return false;
+}
+
+// function itemHasBehaviours(item, ...desiredBehavorArgs) {
+function itemHasBehaviours(item, ...desiredBehavorArgs) {
+    const desiredBehaviors = [...desiredBehavorArgs];
+    for (const desiredBehavior of desiredBehaviors) {
+        // Unfortunately handlebars seems to pass metadata in the last argument as an object. We use only strings.
+        if (typeof desiredBehavior === "string" && item.baseInfo.behaviors.includes(desiredBehavior)) {
+            return true;
+        }
     }
     return false;
 }
@@ -259,89 +275,83 @@ export class HeroSystem6eItem extends Item {
     async roll(event) {
         if (!this.actor.canAct(true, event)) return;
 
-        // TODO: Convert to behaviors when powers are fully updated
-        switch (this.system.subType || this.type) {
-            case "attack":
-                switch (this.system.XMLID) {
-                    case "AID":
-                    case "BLOCK":
-                    case "DODGE":
-                    case "DRAIN":
-                    case "EGOATTACK":
-                    case "ENERGYBLAST":
-                    case "ENTANGLE":
-                    case "FLASH":
-                    case "HANDTOHANDATTACK":
-                    case "HAYMAKER":
-                    case "HEALING":
-                    case "HKA":
-                    case "MINDSCAN":
-                    case "RKA":
-                    case "SET":
-                    case "STRIKE":
-                    case "SUCCOR":
-                    case "TELEKINESIS":
-                    case "TRANSFER":
-                    case "TRANSFORM":
-                        return AttackOptions(this, event);
+        if (this.baseInfo.behaviors.includes("dice") || this.baseInfo.behaviors.includes("to-hit")) {
+            // FIXME: Martial manuevers all share the MANEUVER XMLID. Need to extract out things from that (and fix the broken things).
+            switch (this.system.XMLID) {
+                case "AID":
+                case "BLOCK":
+                case "DODGE":
+                case "DRAIN":
+                case "EGOATTACK":
+                case "ENERGYBLAST":
+                case "ENTANGLE":
+                case "FLASH":
+                case "HANDTOHANDATTACK":
+                case "HEALING":
+                case "HKA":
+                case "MINDSCAN":
+                case "MOVEBY":
+                case "MOVETHROUGH":
+                case "RKA":
+                case "SET":
+                case "STRIKE":
+                case "SUCCOR":
+                case "TELEKINESIS":
+                case "TRANSFER":
+                case "TRANSFORM":
+                    return collectActionDataBeforeToHitOptions(this, event);
 
-                    case "ABSORPTION":
-                    case "DISPEL":
-                    case "SUPPRESS":
-                    case "BLAZINGAWAY":
-                    case "BRACE":
-                    case "CHOKE":
-                    case "CLUBWEAPON":
-                    case "COVER":
-                    case "DISARM":
-                    case "DIVEFORCOVER":
-                    case "GRAB":
-                    case "GRABBY":
-                    case "HIPSHOT":
-                    case "HURRY":
-                    case "MOVEBY":
-                    case "MOVETHROUGH":
-                    case "MULTIPLEATTACK":
-                    case "OTHERATTACKS":
-                    case "PULLINGAPUNCH":
-                    case "RAPIDFIRE":
-                    case "ROLLWITHAPUNCH":
-                    case "SETANDBRACE":
-                    case "SHOVE":
-                    case "SNAPSHOT":
-                    case "STRAFE":
-                    case "SUPPRESSIONFIRE":
-                    case "SWEEP":
-                    case "THROW":
-                    case "TRIP":
-                    default:
-                        ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`);
-                        return AttackOptions(this, event);
-                }
+                case "ABSORPTION":
+                case "DISPEL":
+                case "SUPPRESS":
+                case "BLAZINGAWAY":
+                case "BRACE":
+                case "CHOKE":
+                case "CLUBWEAPON":
+                case "COVER":
+                case "DISARM":
+                case "DIVEFORCOVER":
+                case "GRAB":
+                case "GRABBY":
+                case "HIPSHOT":
+                case "HURRY":
+                case "MULTIPLEATTACK":
+                case "OTHERATTACKS":
+                case "PULLINGAPUNCH":
+                case "RAPIDFIRE":
+                case "ROLLWITHAPUNCH":
+                case "SETANDBRACE":
+                case "SHOVE":
+                case "SNAPSHOT":
+                case "STRAFE":
+                case "SUPPRESSIONFIRE":
+                case "SWEEP":
+                case "THROW":
+                case "TRIP":
+                default:
+                    ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`);
+                    return collectActionDataBeforeToHitOptions(this, event);
+            }
+        } else if (this.baseInfo.behaviors.include("defense")) {
+            return this.toggle(event);
+        } else {
+            const powerInfo = getPowerInfo({
+                item: this,
+            });
+            const hasSuccessRoll = this.hasSuccessRoll();
+            const isSkill = powerInfo?.type.includes("skill");
 
-            case "defense":
-                return this.toggle(event);
-
-            case "skill":
-            default: {
-                const powerInfo = getPowerInfo({
-                    item: this,
-                });
-                const hasSuccessRoll = this.hasSuccessRoll();
-                const isSkill = powerInfo?.type.includes("skill");
-
-                if (hasSuccessRoll && isSkill) {
-                    this.updateRoll();
-                    if (!(await RequiresASkillRollCheck(this))) return;
-                    return createSkillPopOutFromItem(this, this.actor);
-                } else if (hasSuccessRoll) {
-                    // Handle any type of non skill based success roll with a basic roll
-                    // TODO: Basic roll.
-                    this.updateRoll();
-                    return createSkillPopOutFromItem(this, this.actor);
-                } else {
-                    ui.notifications.warn(`${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`);
-                }
+            if (hasSuccessRoll && isSkill) {
+                this.updateRoll();
+                if (!(await RequiresASkillRollCheck(this))) return;
+                return createSkillPopOutFromItem(this, this.actor);
+            } else if (hasSuccessRoll) {
+                // Handle any type of non skill based success roll with a basic roll
+                // TODO: Basic roll.
+                this.updateRoll();
+                return createSkillPopOutFromItem(this, this.actor);
+            } else {
+                ui.notifications.warn(`${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`);
             }
         }
     }
@@ -1281,13 +1291,8 @@ export class HeroSystem6eItem extends Item {
         // Endurance
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
-        // Damage
-        if (
-            item.type == "attack" ||
-            item.type == "maneuver" ||
-            item.system.subType === "attack" ||
-            item.system.XMLID === "martialart"
-        ) {
+        // Effect
+        if (item.baseInfo.behaviors.includes("dice")) {
             item.flags.tags = {};
 
             // Combat Skill Levels
@@ -1648,7 +1653,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // SKILLS
-            if (this.baseInfo?.type?.includes("skill")) {
+            if (this.baseInfo?.type.includes("skill")) {
                 const skill = "skill";
                 if (this.system.subType !== skill) {
                     this.system.subType = skill;
@@ -1656,12 +1661,15 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
+            // TO HIT
+            if (this.baseInfo?.behaviors.includes("to-hit")) {
+                this.makeToHit();
+                changed = true; // FIXME: Obviously not always true. Shouldn't be modifying anything in system frankly.
+            }
+
             // ATTACK
-            if (
-                configPowerInfo &&
-                (configPowerInfo.behaviors.includes("attack") || configPowerInfo.behaviors.includes("dice"))
-            ) {
-                // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach. Should probably for anything with range != self
+            if (this.baseInfo?.behaviors.includes("dice")) {
+                // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach.
                 const attack = "attack";
                 if (this.system.subType !== attack) {
                     this.system.subType = attack;
@@ -3612,7 +3620,7 @@ export class HeroSystem6eItem extends Item {
                     system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
 
                     // Provide dice if this is an attack
-                    if (this.baseInfo.behaviors.includes("attack")) {
+                    if (this.baseInfo.behaviors.includes("to-hit")) {
                         const damageFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                         if (damageFormula !== "0") {
                             if (system.description.indexOf(damageFormula) === -1) {
@@ -4233,38 +4241,135 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
-    makeAttack() {
-        // AARON: Do we really need makeAttack?
-        // Many of these properties can converted into get properties on the item and calculated on the fly.
-
+    /**
+     * Add the bits that are responsible for hitting
+     */
+    makeToHit() {
         const xmlid = this.system.XMLID;
 
         // Name
-        let description = this.system.ALIAS;
-        let name = this.system.NAME || description || this.system.name || this.name;
+        const description = this.system.ALIAS;
+        const name = this.system.NAME || description || this.system.name || this.name;
         this.name = name;
+        if (xmlid === "TELEKINESIS") {
+            this.name = name + " (TK strike)";
+        }
 
         const input = this.system.INPUT;
+        this.system.class = input === "ED" ? "energy" : "physical";
+
+        this.system.targets = "dcv";
+        this.system.uses = "ocv";
 
         const ocv = parseInt(this.system.OCV) || 0;
         const dcv = parseInt(this.system.DCV) || 0;
-
-        this.system.subType = "attack";
-        this.system.class = input === "ED" ? "energy" : "physical";
-        this.system.killing = false;
-        this.system.knockbackMultiplier = 1;
-        this.system.targets = "dcv";
-        this.system.uses = "ocv";
-        this.system.usesStrength = true;
-        this.system.areaOfEffect = { type: "none", value: 0 };
-        this.system.piercing = 0;
-        this.system.penetrating = 0;
         this.system.ocv = ocv;
         this.system.dcv = dcv;
+
+        this.system.noHitLocations = false;
+
+        this.system.areaOfEffect = { type: "none", value: 0 };
+
+        // Specific power overrides.
+        // FIXME: We should consider getting rid of this.system.class. Not sure that it adds anything interesting.
+        if (xmlid === "ENTANGLE") {
+            this.system.class = "entangle";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "DARKNESS") {
+            this.system.class = "darkness";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "IMAGES") {
+            this.system.class = "images";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "ABSORPTION") {
+            this.system.class = "adjustment";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "AID" || xmlid === "SUCCOR") {
+            this.system.class = "adjustment";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "DISPEL") {
+            this.system.class = "adjustment";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "DRAIN") {
+            this.system.class = "adjustment";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "HEALING") {
+            this.system.class = "adjustment";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "SUPPRESS") {
+            this.system.class = "adjustment";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "TRANSFER") {
+            this.system.class = "adjustment";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "EGOATTACK") {
+            this.system.class = "mental";
+            this.system.targets = "dmcv";
+            this.system.uses = "omcv";
+            this.system.noHitLocations = true;
+        } else if (
+            xmlid === "MINDCONTROL" ||
+            xmlid === "MENTALILLUSIONS" ||
+            xmlid === "MINDSCAN" ||
+            xmlid === "TELEPATHY"
+        ) {
+            this.system.class = "mental";
+            this.system.targets = "dmcv";
+            this.system.uses = "omcv";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "CHANGEENVIRONMENT") {
+            this.system.class = "change enviro";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "FLASH") {
+            this.system.class = "flash";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "TRANSFORM") {
+            this.system.class = "transform";
+            this.system.noHitLocations = true;
+        } else if (xmlid === "SUSCEPTIBILITY") {
+            this.system.class = this.is5e ? "disadvantage" : "complication";
+        } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
+            this.system.class = "luck";
+        } else if (xmlid === "FORCEWALL") {
+            this.system.class = this.is5e ? "forcewall" : "barrier";
+        }
+
+        // AVAD
+        const avad = this.findModsByXmlid("AVAD");
+        if (avad) {
+            this.system.class = "avad";
+        }
+
+        // Alternate Combat Value (uses OMCV against DCV)
+        const acv = this.findModsByXmlid("ACV");
+        if (acv) {
+            this.system.uses = (acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses).toLowerCase();
+            this.system.targets = (acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] || this.system.targets).toLowerCase();
+        }
+
+        const boecv = this.findModsByXmlid("BOECV");
+        if (boecv) {
+            this.system.targets = "dmcv";
+            this.system.uses = "omcv";
+        }
+    }
+
+    makeAttack() {
+        // AARON: Do we really need makeAttack?
+        // Many of these properties can converted into get properties on the item and calculated on the fly.
+        const xmlid = this.system.XMLID;
+
+        this.system.subType = "attack";
+        this.system.killing = false;
+        this.system.knockbackMultiplier = 1;
+        this.system.usesStrength = true;
+        this.system.piercing = 0;
+        this.system.penetrating = 0;
 
         this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
 
         // Maneuvers and martial arts with FLASHDC, NND, BLOCK, DODGE do not use STR
+        // PH: FIXME: Weapons?
         if (["maneuver", "martialart"].includes(this.type)) {
             if (this.system.ADDSTR != undefined) {
                 this.system.usesStrength = this.system.ADDSTR;
@@ -4281,83 +4386,51 @@ export class HeroSystem6eItem extends Item {
 
         // Specific power overrides
         if (xmlid === "ENTANGLE") {
-            this.system.class = "entangle";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "DARKNESS") {
-            this.system.class = "darkness";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "IMAGES") {
-            this.system.class = "images";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "ABSORPTION") {
-            this.system.class = "adjustment";
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "AID" || xmlid === "SUCCOR") {
-            this.system.class = "adjustment";
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "DISPEL") {
-            this.system.class = "adjustment";
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "DRAIN") {
-            this.system.class = "adjustment";
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "HEALING") {
-            this.system.class = "adjustment";
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "SUPPRESS") {
-            this.system.class = "adjustment";
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "TRANSFER") {
-            this.system.class = "adjustment";
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "EGOATTACK") {
-            this.system.class = "mental";
-            this.system.targets = "dmcv";
-            this.system.uses = "omcv";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
-            this.system.noHitLocations = true;
         } else if (
             xmlid === "MINDCONTROL" ||
             xmlid === "MENTALILLUSIONS" ||
             xmlid === "MINDSCAN" ||
             xmlid === "TELEPATHY"
         ) {
-            this.system.class = "mental";
-            this.system.targets = "dmcv";
-            this.system.uses = "omcv";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "CHANGEENVIRONMENT") {
-            this.system.class = "change enviro";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "FLASH") {
-            this.system.class = "flash";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "ENERGYBLAST") {
             this.system.usesStrength = false;
@@ -4365,29 +4438,10 @@ export class HeroSystem6eItem extends Item {
             this.system.killing = true;
             this.system.usesStrength = false;
         } else if (xmlid === "TRANSFORM") {
-            this.system.class = "transform";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
-            this.system.noHitLocations = true;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-        } else if (xmlid === "SUSCEPTIBILITY") {
-            // FIXME: This XMLIDs aren't really attacks but they have either the attack or dice behaviour which means that,
-            // for the time, being we consider them to be attack like.
-            this.system.class = this.is5e ? "disadvantage" : "complication";
-            this.system.usesStrength = false;
-        } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
-            // FIXME: These XMLIDs aren't really attacks but they have either the attack or dice behaviour which means that,
-            // for the time, being we consider them to be attack like.
-            this.system.class = "luck";
-            this.system.usesStrength = false;
         }
-        // PH: FIXME: See bug report
-
-        // else if (xmlid === "FORCEWALL") {
-        //     // FIXME: This XMLIDs aren't really attacks but they have either the attack or dice behaviour which means that,
-        //     // for the time, being we consider them to be attack like.
-        //     this.system.usesStrength = false;
-        // }
 
         // AVAD
         const avad = this.findModsByXmlid("AVAD");
@@ -4419,26 +4473,9 @@ export class HeroSystem6eItem extends Item {
             this.system.knockbackMultiplier = 2;
         }
 
-        // Alternate Combat Value (uses OMCV against DCV)
-        const acv = this.findModsByXmlid("ACV");
-        if (acv) {
-            this.system.uses = (acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses).toLowerCase();
-            this.system.targets = (acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] || this.system.targets).toLowerCase();
-        }
-
-        const boecv = this.findModsByXmlid("BOECV");
-        if (boecv) {
-            this.system.targets = "dmcv";
-            this.system.uses = "omcv";
-        }
-
-        // PH: TODO: Investigate why this is required. It is wrong for 1/2d6 vs d6-1.
-        //           Only the this.system.killing bit is right.
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
             this.system.killing = true;
         } else if (xmlid === "TELEKINESIS") {
-            // levels is the equivalent strength
-            this.name = name + " (TK strike)";
             this.system.usesStrength = false;
             this.system.usesTk = true;
         }

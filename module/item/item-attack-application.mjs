@@ -1,5 +1,5 @@
 import { combatSkillLevelsForAttack, penaltySkillLevelsForAttack } from "../utility/damage.mjs";
-import { processAttackOptions } from "../item/item-attack.mjs";
+import { processActionToHit } from "../item/item-attack.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -325,7 +325,7 @@ export class ItemAttackFormApplication extends FormApplication {
             canvas.tokens.activate();
             await this.close();
 
-            return processAttackOptions(this.data.item, formData);
+            return processActionToHit(this.data.item, formData);
         }
 
         this.data.formData ??= {};
@@ -345,7 +345,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
 
                 // this is the roll:
-                await processAttackOptions(this.data.item, this.data.formData);
+                await processActionToHit(this.data.item, this.data.formData);
                 this.data.formData.execute = this.data.action.current.execute + 1;
             }
             const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;

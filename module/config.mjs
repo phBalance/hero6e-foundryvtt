@@ -391,12 +391,12 @@ function pdEdCostPerLevel(itemOrActor) {
  * @param {string} base - Base cost in character points
  * @param {string} cost - Cost in character points per additional level
  * @param {Array<string>} type - A list of types associated with this power
- * @param {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "attack" | "activatable" | "adder" | "modifier">} behaviors - A list of the behavior types this power exhibits in the code
+ * @param {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "to-hit" | "activatable" | "adder" | "modifier">} behaviors - A list of the behavior types this power exhibits in the code
  *                                       "non-hd" - this is not an XMLID that comes from Hero Designer
  *                                       "optional-maneuver" - this is an optional combat maneuver
  *                                       "success" - can roll some kind of success roll for this power
  *                                       "dice" - a damage/effect dice roll is associated with this power
- *                                       "attack" - a to-hit dice roll is associated with this power
+ *                                       "to-hit" - a to-hit dice roll is associated with this power
  *                                       "activatable" - this power can be turned on/off/activated/deactivated
  *                                       "adder" - this power is actually a power adder
  *                                       "modifier" - this power is actually a power modifier (aka advantage)
@@ -1034,7 +1034,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "BLAZINGAWAY",
         type: ["maneuver"],
-        behaviors: ["non-hd", "optional-maneuver"],
+        behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
         name: "Blazing Away",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
@@ -1059,7 +1059,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BLOCK",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit"],
             name: "Block",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1114,7 +1114,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CHOKE",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
             name: "Choke",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1141,7 +1141,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLUBWEAPON",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
             name: "Club Weapon",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1197,7 +1197,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DISARM",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Disarm",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1224,7 +1224,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DIVEFORCOVER",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit"],
             name: "Dive For Cover",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1279,7 +1279,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GRAB",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Grab",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1317,7 +1317,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GRABBY",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Grab By",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1433,7 +1433,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MOVEBY",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Move By",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1471,7 +1471,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MOVETHROUGH",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Move Through",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1509,7 +1509,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MULTIPLEATTACK",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Multiple Attack",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1537,7 +1537,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "OTHERATTACKS",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Other Attacks",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1565,7 +1565,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PULLINGAPUNCH",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
             name: "Pulling A Punch",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1592,7 +1592,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "RAPIDFIRE",
         type: ["maneuver"],
-        behaviors: ["non-hd", "optional-maneuver"],
+        behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
         name: "Rapid Fire",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
@@ -1701,7 +1701,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SHOVE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Shove",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1728,7 +1728,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SNAPSHOT",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
             name: "Snap Shot",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1755,7 +1755,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STRAFE",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
             name: "Strafe",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1767,7 +1767,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             maneuverDesc: {
                 phase: "1/2 †",
                 ocv: "-v/6",
-                baseEffectDiceParts: maneuverBaseEffectDiceParts,
                 dcv: "-2",
                 effects: "Make Ranged attack while moving",
                 dc: "0",
@@ -1783,7 +1782,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STRIKE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Strike",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1810,7 +1809,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SUPPRESSIONFIRE",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
             name: "Suppression Fire",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1847,7 +1846,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "SWEEP",
         type: ["maneuver"],
-        behaviors: ["non-hd", "optional-maneuver"],
+        behaviors: ["non-hd", "optional-maneuver", "to-hit"],
         name: "Sweep",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
@@ -1873,7 +1872,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "THROW",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Throw",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1900,7 +1899,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TRIP",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "to-hit", "dice"],
             name: "Trip",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -4665,7 +4664,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "AID",
             type: ["adjustment", "attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
@@ -4715,13 +4714,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CHANGEENVIRONMENT",
             type: ["attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "constant",
             target: "Target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
-            costPerLevel: fixedValueFunction(1),
+            costPerLevel: fixedValueFunction(0),
             baseEffectDiceParts: (item) => {
                 let numPips = 0;
 
@@ -4741,7 +4740,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             xml: `<POWER XMLID="CHANGEENVIRONMENT" ID="1711932803443" BASECOST="0.0" LEVELS="0" ALIAS="Change Environment" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
-        {},
+        { costPerLevel: fixedValueFunction(5) },
     );
     addPower(
         {
@@ -4954,7 +4953,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DARKNESS",
             type: ["sense-affecting", "attack", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["to-hit"],
             perceivability: "obvious",
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
@@ -5036,7 +5035,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DISPEL",
             type: ["adjustment", "attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
@@ -5067,7 +5066,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DRAIN",
             type: ["adjustment", "attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
@@ -5104,7 +5103,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EGOATTACK",
             type: ["attack", "mental"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -5154,7 +5153,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ENERGYBLAST",
             type: ["attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
@@ -5171,7 +5170,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ENTANGLE",
             type: ["attack", "standard"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
@@ -5296,7 +5295,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FLASH",
             type: ["attack", "sense-affecting", "standard"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
@@ -5433,7 +5432,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FORCEWALL", //BARRIER
             type: ["defense", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["to-hit"],
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
@@ -5643,7 +5642,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HEALING",
             type: ["adjustment"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target's dcv",
@@ -5659,7 +5658,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HKA",
             type: ["attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costPerLevel: fixedValueFunction(15),
@@ -5674,7 +5673,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "IMAGES",
             type: ["attack", "sense-affecting", "standard"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             costPerLevel: fixedValueFunction(3),
             perceivability: "obvious",
             duration: "constant",
@@ -5831,7 +5830,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALILLUSIONS",
             type: ["attack", "mental"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -5847,7 +5846,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDCONTROL",
             type: ["attack", "mental"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -5863,7 +5862,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDLINK",
             type: ["mental"],
-            behaviors: ["attack", "activatable", "dice"],
+            behaviors: ["to-hit", "activatable", "dice"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "dmcv",
@@ -5879,7 +5878,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDSCAN",
             type: ["mental", "sense"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "constant",
             target: "dmcv",
@@ -5895,7 +5894,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MISSILEDEFLECTION",
             type: ["defense", "standard"],
-            behaviors: ["attack", "activatable"],
+            behaviors: ["to-hit", "activatable"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
             duration: "instant",
@@ -5966,7 +5965,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "POSSESSION",
             type: ["attack", "mental"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "constant",
             target: "DMCV",
@@ -6019,7 +6018,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REFLECTION",
             type: ["attack", "standard"],
-            behaviors: ["attack", "activatable"],
+            behaviors: ["to-hit", "activatable"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "self only",
@@ -6064,7 +6063,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RKA",
             type: ["attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
@@ -6154,7 +6153,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SUCCOR",
             type: ["adjustment"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             duration: "constant",
             target: "target's DCV",
             range: HERO.RANGE_TYPES.NO_RANGE,
@@ -6181,7 +6180,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "SUPPRESS",
         type: ["adjustment", "attack"],
-        behaviors: ["attack", "dice"],
+        behaviors: ["to-hit", "dice"],
         perceivability: "obvious",
         duration: "constant",
         target: "target’s DCV",
@@ -6196,7 +6195,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TELEKINESIS",
             type: ["attack", "standard"],
-            behaviors: ["attack", "dice", "activatable"],
+            behaviors: ["to-hit", "dice", "activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "target’s DCV",
@@ -6221,7 +6220,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TELEPATHY",
             type: ["mental"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -6236,7 +6235,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "TRANSFER",
         type: ["adjustment", "attack", "dice"],
-        behaviors: ["attack"],
+        behaviors: ["to-hit"],
         perceivability: "obvious",
         duration: "instant",
         target: "target's DCV",
@@ -6250,7 +6249,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TRANSFORM",
             type: ["attack", "standard"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target's DCV",
@@ -6286,7 +6285,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "__STRENGTHDAMAGE",
             type: ["attack"],
-            behaviors: ["attack", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
@@ -6320,7 +6319,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MANEUVER",
             type: ["martial", "attack"], // TODO: Not all of these are attacks
-            behaviors: ["attack", "dice"], // TODO: Not all of these are attacks or do damage
+            behaviors: ["to-hit", "dice"], // TODO: Not all of these are attacks or do damage
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,

@@ -2050,10 +2050,6 @@ export class HeroSystem6eActor extends Actor {
                               parent: this,
                           });
 
-                    if (maneuverDetails.attack) {
-                        await item.makeAttack();
-                    }
-
                     // Work around if temporary actor
                     if (!this.id) {
                         this.items.set(item.system.XMLID, item);
