@@ -663,6 +663,7 @@ export async function performAdjustment(
 
         if (activeEffect.flags.adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
             isEffectFinished = true;
+            await updateCharacteristicValue(activeEffect, { targetSystem, previousChanges });
             await existingEffect.delete();
             const chatCard = _generateAdjustmentChatCard({
                 attackItem,
@@ -1282,6 +1283,7 @@ function _generateAdjustmentChatCard(
             costPerActivePoint,
             maximumEffectActivePoints,
             simplifiedHealing,
+            attackItem,
         },
         isFade,
         //isEffectFinished,
