@@ -563,6 +563,7 @@ let lastDate = 0;
  * @param {string} userId         The ID of the User who advanced the time
  */
 Hooks.on("updateWorldTime", async (worldTime, options) => {
+    console.log(`updateWorldTime`, game.time.worldTime);
     const start = new Date();
 
     // Ensure that this only runs for 1 user to we don't have multiple user attempting to

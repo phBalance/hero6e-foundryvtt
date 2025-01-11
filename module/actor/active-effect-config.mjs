@@ -15,22 +15,28 @@ export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
 
     async getData() {
         const context = await super.getData();
-        for (let i = 0; i < context.data.changes.length; i++) {
-            context.data.changes[i] = { ...context.data.changes[i], ...context.data.system.changes?.[i] };
-        }
-        const originItem = fromUuidSync(context.data.origin);
-        const token = fromUuidSync(context.data.origin?.match(/(.*).Actor/)?.[1]);
-        context.originText = originItem
-            ? `${token?.name || originItem.actor?.name}: ${originItem.name}`
-            : context.data.origin;
-
-        //sourceText
-        for (const change of context.data.changes) {
-            if (change.source) {
-                const sourceItem = fromUuidSync(change.source);
-                const token = fromUuidSync(change.source.match(/(.*).Actor/)?.[1]);
-                change.sourceText = `${token?.name || sourceItem.actor?.name}: ${sourceItem.name}`;
+        try {
+            for (let i = 0; i < context.data.changes.length; i++) {
+                context.data.changes[i] = { ...context.data.changes[i], ...context.data.system.changes?.[i] };
             }
+            const originItem = fromUuidSync(context.data.origin);
+            const token = fromUuidSync(context.data.origin?.match(/(.*).Actor/)?.[1]);
+            context.originText = originItem
+                ? `${token?.name || originItem.actor?.name}: ${originItem.name}`
+                : context.data.origin;
+
+            //sourceText
+            for (const change of context.data.changes) {
+                if (change.source) {
+                    const sourceItem = fromUuidSync(change.source);
+                    const token = fromUuidSync(change.source.match(/(.*).Actor/)?.[1]);
+                    change.sourceText = `${token?.name || sourceItem.actor?.name}: ${sourceItem.name}`;
+                }
+            }
+
+            context.remaining = context.data.duration.startTime + context.data.duration.seconds - game.time.worldTime;
+        } catch (e) {
+            console.error(e);
         }
         return context;
     }
