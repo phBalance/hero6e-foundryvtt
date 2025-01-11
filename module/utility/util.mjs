@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { HeroSystem6eActor } from "../actor/actor.mjs";
+//import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "./adjustment.mjs";
 
 export function getPowerInfo(options) {

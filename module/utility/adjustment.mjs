@@ -240,11 +240,11 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
 function _findExistingMatchingEffect(item, potentialCharacteristic, targetSystem, activePoints) {
     // We will find an existing effect with our item that does not have our potentialCharacteristic.
     // Goal is to reuse a single AE for items that have multiple adjustment targets.
-    const costPerActivePoint = determineCostPerActivePointWithDefenseMultipler(
-        potentialCharacteristic,
-        null,
-        targetSystem,
-    );
+    // const costPerActivePoint = determineCostPerActivePointWithDefenseMultipler(
+    //     potentialCharacteristic,
+    //     null,
+    //     targetSystem,
+    // );
     const _change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
     return targetSystem.effects.find(
         (effect) =>
@@ -638,18 +638,18 @@ export async function performAdjustment(
             );
         }
 
-        const _adjustmentActivePoints = existingEffect.flags.adjustmentActivePoints;
+        //const _adjustmentActivePoints = existingEffect.flags.adjustmentActivePoints;
         existingEffect.flags.adjustmentActivePoints += maximumActivePointsFade;
 
         // Sanity check
-        if (activeEffect.flags.XMLID === "AID" && existingEffect.flags.adjustmentActivePoints < 0) {
-            console.error("AID has negative adjustmentActivePoints");
-            debugger;
-        }
-        if (activeEffect.flags.XMLID === "DRAIN" && existingEffect.flags.adjustmentActivePoints > 0) {
-            console.error("DRAIN has positive adjustmentActivePoints");
-            debugger;
-        }
+        // if (activeEffect.flags.XMLID === "AID" && existingEffect.flags.adjustmentActivePoints < 0) {
+        //     console.error("AID has negative adjustmentActivePoints");
+        //     debugger;
+        // }
+        // if (activeEffect.flags.XMLID === "DRAIN" && existingEffect.flags.adjustmentActivePoints > 0) {
+        //     console.error("DRAIN has positive adjustmentActivePoints");
+        //     debugger;
+        // }
 
         adjustmentDamageThisApplication = parseInt(existingEffect.changes[0].value);
 
@@ -1019,14 +1019,14 @@ export async function performAdjustment(
     }
 
     // Sanity check
-    if (activeEffect.flags.XMLID === "AID" && activeEffect.changes[0]?.value < 0) {
-        console.error("AID has negative change.value");
-        debugger;
-    }
-    if (activeEffect.flags.XMLID === "DRAIN" && activeEffect.changes[0]?.value > 0) {
-        console.error("DRAIN has positive change.value");
-        debugger;
-    }
+    // if (activeEffect.flags.XMLID === "AID" && activeEffect.changes[0]?.value < 0) {
+    //     console.error("AID has negative change.value");
+    //     debugger;
+    // }
+    // if (activeEffect.flags.XMLID === "DRAIN" && activeEffect.changes[0]?.value > 0) {
+    //     console.error("DRAIN has positive change.value");
+    //     debugger;
+    // }
 
     return _generateAdjustmentChatCard({
         attackItem,
@@ -1053,16 +1053,16 @@ export async function performAdjustment(
 async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
     const targetActor = activeEffect.parent;
     const costPerActivePoint = determineCostPerActivePoint(activeEffect.flags.key, null, targetActor);
-    if (costPerActivePoint != activeEffect.flags.initialCostPerActivePoint) {
-        console.warn(`recalcEffectBasedOnTotalApForXmlid costPerActivePoint discrepancy`);
-        debugger;
-    }
+    // if (costPerActivePoint != activeEffect.flags.initialCostPerActivePoint) {
+    //     console.warn(`recalcEffectBasedOnTotalApForXmlid costPerActivePoint discrepancy`);
+    //     debugger;
+    // }
     if (costPerActivePoint === 1) return;
-    if (!costPerActivePoint) {
-        console.error(`costPerActivePoint error`);
-        debugger;
-        return;
-    }
+    // if (!costPerActivePoint) {
+    //     console.error(`costPerActivePoint error`);
+    //     debugger;
+    //     return;
+    // }
 
     let _ap = 0;
     let _value = 0;

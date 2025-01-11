@@ -412,7 +412,7 @@ export class HeroSystem6eCombat extends Combat {
             await expireEffects(combatant.actor);
         } catch (e) {
             console.error(e);
-            debugger;
+            //debugger;
         }
 
         // Stop holding
