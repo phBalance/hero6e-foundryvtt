@@ -140,6 +140,7 @@
         "StatusAsleep": "Asleep",
         "StatusBleeding": "Bleeding",
         "StatusDead": "Dead",
+        "StatusDodging": "Dodging",
         "StatusEntangled": "Entangled",
         "StatusFear": "Fear",
         "StatusFlying": "Flying",

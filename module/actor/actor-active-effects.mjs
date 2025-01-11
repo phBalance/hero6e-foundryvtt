@@ -175,11 +175,6 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.MindControlled"),
                 img: `systems/${module}/icons/mindControlled.svg`,
             },
-            flyingEffect: {
-                id: "fly",
-                name: game.i18n.localize("EFFECT.StatusFlying"),
-                img: "icons/svg/wing.svg",
-            },
             frightenedEffect: {
                 id: "fear",
                 name: game.i18n.localize("EFFECT.StatusFear"),
@@ -210,16 +205,6 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusTargeted"),
                 img: "icons/svg/target.svg",
             },
-            abortEffect: {
-                id: "aborted",
-                name: game.i18n.localize("EFFECT.Aborted"),
-                img: `systems/${module}/icons/aborted.svg`,
-            },
-            holdingEffect: {
-                id: "holding",
-                name: game.i18n.localize("EFFECT.HoldingAnAction"),
-                img: `icons/svg/clockwork.svg`,
-            },
             underwaterEffect: {
                 id: "underwater",
                 name: game.i18n.localize("EFFECT.Underwater"),
@@ -249,17 +234,12 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.HoldingBreath"),
                 img: `systems/${module}/icons/holdingBreath.svg`,
             },
-            grabEffect: {
-                id: "grab",
-                name: "Grabbed",
-                img: `systems/${module}/icons/noun-wrestling-1061808.svg`,
-                changes: [
-                    {
-                        key: "system.characteristics.dcv.value",
-                        value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
-                    },
-                ],
+
+            // Maneuver Effects
+            abortEffect: {
+                id: "aborted",
+                name: game.i18n.localize("EFFECT.Aborted"),
+                img: `systems/${module}/icons/aborted.svg`,
             },
             braceEffect: {
                 id: "brace",
@@ -273,10 +253,15 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
-            nonCombatMovementEffect: {
-                id: "nonCombatMovement",
-                name: "NonCombat Movement",
-                img: `systems/${module}/icons/person-running.svg`,
+            dodgeEffect: {
+                id: "dodge",
+                name: game.i18n.localize("EFFECT.StatusDodging"),
+                img: `systems/${module}/icons/dodge.svg`,
+            },
+            grabEffect: {
+                id: "grab",
+                name: "Grabbed",
+                img: `systems/${module}/icons/noun-wrestling-1061808.svg`,
                 changes: [
                     {
                         key: "system.characteristics.dcv.value",
@@ -297,11 +282,37 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
-            silencedEffect: {
-                id: "silence",
-                name: game.i18n.localize("EFFECT.StatusSilenced"),
-                img: "icons/svg/silenced.svg",
+            holdingEffect: {
+                id: "holding",
+                name: game.i18n.localize("EFFECT.HoldingAnAction"),
+                img: `icons/svg/clockwork.svg`,
             },
+
+            // Movement Effects
+            flyingEffect: {
+                id: "fly",
+                name: game.i18n.localize("EFFECT.StatusFlying"),
+                img: "icons/svg/wing.svg",
+            },
+            nonCombatMovementEffect: {
+                id: "nonCombatMovement",
+                name: "NonCombat Movement",
+                img: `systems/${module}/icons/person-running.svg`,
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                ],
+            },
+            tunnelingEffect: {
+                id: "tunneling",
+                name: game.i18n.localize("EFFECT.StatusTunneling"),
+                img: "icons/svg/mole.svg",
+            },
+
+            // Sense affecting effects
             dangerSenseDisabledEffect: {
                 id: "dangerSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseDangerDisabled"),
@@ -354,6 +365,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            silencedEffect: {
+                id: "silence",
+                name: game.i18n.localize("EFFECT.StatusSilenced"),
+                img: "icons/svg/silenced.svg",
+            },
             smellTasteSenseDisabledEffect: {
                 id: "smellTasteSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseSmellTasteDisabled"),
@@ -374,18 +390,12 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusSenseTouchDisabled"),
                 img: `systems/${module}/icons/senses/touchSenseDisabled.svg`,
             },
-
-            burrowEffect: {
-                id: "tunneling",
-                name: "EFFECT.StatusTunneling",
-                img: "icons/svg/mole.svg",
-            },
         });
 
-        // Return an array of status effects in alphabetical order
-        return Object.keys(HeroSystem6eActorActiveEffects.statusEffectsObj)
-            .sort()
-            .map((key) => HeroSystem6eActorActiveEffects.statusEffectsObj[key]);
+        // Return an array of status effects sorted by property in alphabetical order
+        return Object.values(HeroSystem6eActorActiveEffects.statusEffectsObj).sort((objA, objB) =>
+            objA.name.localeCompare(objB.name),
+        );
     }
 
     /**
