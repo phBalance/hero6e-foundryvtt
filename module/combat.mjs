@@ -818,13 +818,20 @@ export class HeroSystem6eCombat extends Combat {
         console.log("nextTurn before game.time.advance", game.time.worldTime, advanceTime);
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
 
-        // Hack to let worldTime update, which we need to expire effects on the correct phase within each segment.
-        //const _gt = game.time.worldTime;
+        const _gt = game.time.worldTime;
         await this.update(updateData, updateOptions);
-        // for (let x = 0; x < 200; x++) {
-        //     if (game.time.worldTime != _gt) break;
-        //     await new Promise((resolve) => setTimeout(resolve, 10));
-        // }
+
+        // Hack to let worldTime update, which we need to expire effects on the correct phase within each segment.
+        if (advanceTime) {
+            for (let x = 0; x < 200; x++) {
+                if (game.time.worldTime != _gt) break;
+                console.warn("Waiting for game.time.advance", _gt, game.time.worldTime);
+                await new Promise((resolve) => setTimeout(resolve, 10));
+            }
+            if (game.time.worldTime === _gt) {
+                console.warn(`Worldtime did not advance when expected`, _gt, game.time.worldTime);
+            }
+        }
         // console.log("nextTurn after game.time.advance", game.time.worldTime);
 
         // && originalRound === newRound) {

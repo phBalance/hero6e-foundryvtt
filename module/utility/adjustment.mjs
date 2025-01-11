@@ -584,7 +584,7 @@ export async function performAdjustment(
                 thisAttackActivePointsEffectRaw,
                 thisAttackActivePointsEffect,
                 adjustmentDamageThisApplication, //totalActivePointAffectedDifference,
-                totalEffectActivePointsForXmlid,
+                totalEffectActivePointsForXmlid: 0,
                 thisAttackActivePointAdjustmentNotAppliedDueToMax,
                 thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,
                 defenseDescription,
@@ -999,24 +999,25 @@ export async function performAdjustment(
 
     // Sanity check for totalPointsDifference
     // We may have changed it during recalcEffectBasedOnTotalApForXmlid
-    if (!isHealing) {
-        // TODO: put this back in, but it is wrong as is
-        // const _totalPointsDifference = activeEffect.changes.find((c) => c.key === _key)?.value;
-        // if (adjustmentDamageThisApplication != _totalPointsDifference) {
-        //     adjustmentDamageThisApplication = _totalPointsDifference;
-        //     console.warn(`_totalPointsDifference`);
-        // }
+    //if (!isHealing) {
+    // TODO: put this back in, but it is wrong as is
+    // const _totalPointsDifference = activeEffect.changes.find((c) => c.key === _key)?.value;
+    // if (adjustmentDamageThisApplication != _totalPointsDifference) {
+    //     adjustmentDamageThisApplication = _totalPointsDifference;
+    //     console.warn(`_totalPointsDifference`);
+    // }
 
-        totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects)
-            .filter(
-                (ae) =>
-                    ae.changes.find((c) => c.key === _key && parseInt(c.value) !== 0) &&
-                    //ae.flags.XMLID === activeEffect.flags.XMLID &&
-                    ae.flags.type === "adjustment" &&
-                    ae.flags.key === activeEffect.flags.key,
-            )
-            .reduce((accum, curr) => accum + curr.flags.adjustmentActivePoints, 0);
-    }
+    totalEffectActivePointsForXmlid = Array.from(targetActor.temporaryEffects)
+        .filter(
+            (ae) =>
+                ae.changes.find((c) => c.key === _key && parseInt(c.value) !== 0) &&
+                //ae.flags.XMLID === activeEffect.flags.XMLID &&
+                ae.flags.type === "adjustment" &&
+                ae.flags.XMLID !== "HEALING" &&
+                ae.flags.key === activeEffect.flags.key,
+        )
+        .reduce((accum, curr) => accum + curr.flags.adjustmentActivePoints, 0);
+    //}
 
     // Sanity check
     // if (activeEffect.flags.XMLID === "AID" && activeEffect.changes[0]?.value < 0) {
