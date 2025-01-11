@@ -11,7 +11,7 @@ import {
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { HeroSystem6eItem, RequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
+import { HeroSystem6eItem, requiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
@@ -504,9 +504,6 @@ export async function doSingleTargetActionToHit(item, options) {
 
     const itemData = item.system;
 
-    // PH: FIXME: There are actions which are not attacks that need "uses" as that is the defense mechanism that is targetted. Make sure the targetting stuff is pulled out of MakeAttack.
-    if (itemData.uses == undefined) debugger;
-
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
     const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
@@ -909,7 +906,7 @@ export async function doSingleTargetActionToHit(item, options) {
         }
     }
 
-    if (!(await item)) {
+    if (!item) {
         const speaker = ChatMessage.getSpeaker({ actor: item.actor });
         speaker["alias"] = item.actor.name;
 
@@ -1533,12 +1530,17 @@ export async function _onRollDamage(event) {
     const adjustment = getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
-    const senseAffecting = getPowerInfo({
-        item: item,
-    })?.type?.includes("sense-affecting");
+    // Sense affecting power or maneuver with FLASHDC
+    const senseAffecting =
+        !!getPowerInfo({
+            item: item,
+        })?.type?.includes("sense-affecting") ||
+        (item.system.EFFECT && item.system.EFFECT.search(/\[FLASHDC\]/) > -1);
     const isKilling = item.system.killing;
-
-    const entangle = item.system.XMLID === "ENTANGLE";
+    const isEntangle = item.system.XMLID === "ENTANGLE";
+    const isNormalAttack = !senseAffecting && !adjustment && !isKilling;
+    const isKillingAttack = !senseAffecting && !adjustment && isKilling;
+    const isEffectBasedAttack = isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item);
 
     const increasedMultiplierLevels = parseInt(item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0);
     const decreasedMultiplierLevels = parseInt(item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0);
@@ -1554,12 +1556,12 @@ export async function _onRollDamage(event) {
 
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
-        .makeNormalRoll(!senseAffecting && !adjustment && !isKilling)
-        .makeKillingRoll(!senseAffecting && !adjustment && isKilling)
+        .makeNormalRoll(isNormalAttack)
+        .makeKillingRoll(isKillingAttack)
         .makeAdjustmentRoll(!!adjustment)
         .makeFlashRoll(!!senseAffecting)
-        .makeEntangleRoll(!!entangle)
-        .makeEffectRoll(isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item))
+        .makeEntangleRoll(!!isEntangle)
+        .makeEffectRoll(isEffectBasedAttack)
         .addStunMultiplier(increasedMultiplierLevels - decreasedMultiplierLevels)
         .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
         .addHalfDice(diceParts.halfDieCount >= 1 ? diceParts.halfDieCount : 0)
@@ -2033,7 +2035,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
 
     for (const defense of defenseEveryPhase) {
         if (!ignoreDefenseIds.includes(defense.id)) {
-            const success = await RequiresASkillRollCheck(defense);
+            const success = await requiresASkillRollCheck(defense);
             if (!success) {
                 ignoreDefenseIds.push(defense.id);
             }

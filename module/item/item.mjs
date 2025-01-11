@@ -343,7 +343,7 @@ export class HeroSystem6eItem extends Item {
 
             if (hasSuccessRoll && isSkill) {
                 this.updateRoll();
-                if (!(await RequiresASkillRollCheck(this))) return;
+                if (!(await requiresASkillRollCheck(this))) return;
                 return createSkillPopOutFromItem(this, this.actor);
             } else if (hasSuccessRoll) {
                 // Handle any type of non skill based success roll with a basic roll
@@ -502,7 +502,7 @@ export class HeroSystem6eItem extends Item {
                 return ui.notifications.warn(`${item.name} ${resourceWarning}`);
             }
 
-            const success = await RequiresASkillRollCheck(this, event);
+            const success = await requiresASkillRollCheck(this, event);
             if (!success) {
                 const speaker = ChatMessage.getSpeaker({ actor: item.actor });
                 speaker["alias"] = item.actor.name;
@@ -4368,19 +4368,22 @@ export class HeroSystem6eItem extends Item {
 
         this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
 
-        // Maneuvers and martial arts with FLASHDC, NND, BLOCK, DODGE do not use STR
+        // Maneuvers and martial arts may allow strength to be added or have extra effects.
         // PH: FIXME: Weapons?
         if (["maneuver", "martialart"].includes(this.type)) {
             if (this.system.ADDSTR != undefined) {
                 this.system.usesStrength = this.system.ADDSTR;
             } else if (
                 this.system.EFFECT &&
-                (this.system.EFFECT.toLowerCase().indexOf("block") > -1 ||
-                    this.system.EFFECT.toLowerCase().indexOf("dodge") > -1 ||
-                    this.system.EFFECT.search(/\[FLASHDC\]/) > -1 ||
-                    this.system.EFFECT.search(/\[NNDDC\]/) > -1)
+                (this.system.EFFECT.search(/\[FLASHDC\]/) > -1 || this.system.EFFECT.search(/\[NNDDC\]/) > -1)
             ) {
                 this.system.usesStrength = false;
+            }
+
+            if (this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
+                this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
+            } else {
+                this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
             }
         }
 
@@ -5312,7 +5315,7 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     return succeeded;
 }
 
-export async function RequiresASkillRollCheck(item) {
+export async function requiresASkillRollCheck(item) {
     // Toggles don't need a roll to turn off
     //if (item.system?.active === true) return true;
 
