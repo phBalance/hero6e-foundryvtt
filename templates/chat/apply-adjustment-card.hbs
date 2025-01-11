@@ -2,71 +2,57 @@
 <div class="hero chat-card item-card to-hit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
   tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
-  <header class="card-header flexrow">
-    <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-    <h3>vs {{targetActor.name}}</h3>
-  </header>
+    <header class="card-header flexrow">
+        <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
+        <h3>vs {{targetActor.name}}</h3>
+    </header>
 
-  <div>
-    Attacker: <span class="item-name">{{item.actor.name}}</span>
-  </div>
-  <div>
-    Attack: <span class="item-name">{{{itemName item}}}</span>
-  </div>
-
-  <div class="tags">
-    {{#each adjustmentItemTags as |tag id|}}
-        <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
-    {{/each}}
-  </div>
-
-  <hr>
-
-  {{#if defenseDescription}}
-
-    {{!defense tags --}}
-    {{> (getModulePath 'chat/defense-tags-partial.hbs') defenseTags }}
-
-    {{!-- <div class="tags">
-      {{#each defenseTags as |tag id|}}
-        <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}} {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}</span>
-      {{/each}}
-    </div> --}}
-
-    <div class="card-section">
-      <div class="description-tiny">Defense: {{ defenseDescription }}</div>
-    </div>
-
-    <div class="card-section">
-      <div class="description-tiny">Effect</div>
-      <div class="description-medium description-activePoints">{{ activePoints }} Character Points</div>
-      <div class="description-tiny description-effect">{{{ effectsDescription }}}</div>
-    </div>
-
-  {{/if}}
-
-  {{#each adjustments as | adj |}}
-    <div class="card-section" title="
-    {{../item.name}}: {{../item.system.XMLID}} {{#if adj.isFade}}fade of{{/if}} {{abs adj.adjustmentDamageThisApplication}} Character Points of {{adj.adjustmentTarget}}{{#if (ne (abs adj.thisAttackActivePointsEffect) adj.adjustmentDamageRaw)}} (defenses are halved {{adj.adjustmentDamageRaw}}/2={{abs adj.thisAttackActivePointsEffect}}){{/if}}. {{#if adj.costPerActivePoint}}Each point of {{adj.adjustmentTarget}} costs {{adj.costPerActivePoint}}CP. {{/if}}{{#if (lt adj.adjustmentDamageThisApplication 0)}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost. {{else}}{{#if (eq adj.adjustmentDamageThisApplication 0)}}No effect on {{adj.adjustmentTarget}}.{{else}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained.{{/if}}{{/if}}{{#if (ne adj.thisAttackActivePointAdjustmentNotAppliedDueToMax 0)}} {{abs adj.thisAttackActivePointAdjustmentNotAppliedDueToMax}} Character Points of adjustment action not applied because it exceeded the maximum effect (See MAXIMUM EFFECT rules).{{/if}}{{#if (ne adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing 0)}}{{abs adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing}} Character Points of adjustment action not applied because it did not exceed the existing effect (See MAXIMUM EFFECT rules).{{/if}} Total temporary adjustments for {{adj.adjustmentTarget}} is {{adj.adjustmentTotalActivePointEffect}} CP.">
-
-     {{#if (lt adj.adjustmentDamageThisApplication 0)}}
-        {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost. 
-      {{else}}
-        {{#if (eq adj.adjustmentDamageThisApplication 0)}}
-          No effect on {{adj.adjustmentTarget}}.
-        {{else}}
-            {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained.
-        {{/if}}
-      {{/if}}
-      {{#if adj.isEffectFinished}}
-        The effects of this {{../item.system.XMLID}} have ended.
-      {{/if}}
-    </div>
-  {{/each}}
-
-  {{!-- {{#if isEffectFinished}}
     <div>
-      The effects of this {{item.system.XMLID}} have completely faded!
+        Attacker: <span class="item-name">{{attackerToken.name}}</span>
     </div>
-  {{/if}} --}}
+    <div>
+        Attack: <span class="item-name">{{{itemName item}}}</span>
+    </div>
+
+    <div class="tags">
+        {{#each adjustmentItemTags as |tag id|}}
+            <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+        {{/each}}
+    </div>
+
+    <hr>
+
+    {{#if defenseDescription}}
+        {{!defense tags --}}
+        {{> (getModulePath 'chat/defense-tags-partial.hbs') defenseTags }}
+        <div class="card-section">
+            <div class="description-tiny">Defense: {{ defenseDescription }}</div>
+        </div>
+        {{#unless isFade}}
+        <div class="card-section">
+            <div class="description-tiny">Effect</div>
+            <div class="description-medium description-activePoints">{{ activePoints }} Character Points</div>
+            <div class="description-tiny description-effect">{{{ effectsDescription }}}</div>
+        </div>
+        {{/unless}}
+    {{/if}}
+
+    {{#each adjustments as | adj |}}
+        <div class="card-section" title="
+        {{../item.name}}: {{../item.system.XMLID}} {{#if adj.isFade}}fade of{{/if}} {{abs adj.adjustmentDamageThisApplication}} Character Points of {{adj.adjustmentTarget}}{{#if (ne (abs adj.thisAttackActivePointsEffect) adj.adjustmentDamageRaw)}} (defenses are halved {{adj.adjustmentDamageRaw}}/2={{abs adj.thisAttackActivePointsEffect}}){{/if}}. {{#if adj.costPerActivePoint}}Each point of {{#if adj.simplifiedHealing}}SIMPLIFIED HEALING of {{/if}}{{adj.adjustmentTarget}} costs {{adj.costPerActivePoint}}CP. {{/if}}{{#if (lt adj.adjustmentDamageThisApplication 0)}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost. {{else}}{{#if (eq adj.adjustmentDamageThisApplication 0)}}No effect on {{adj.adjustmentTarget}}. {{else}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained. {{/if}}{{/if}}{{#if adj.maximumEffectActivePoints}}Maximum Effect is {{abs adj.maximumEffectActivePoints}}CP. {{/if}}{{#if (ne adj.thisAttackActivePointAdjustmentNotAppliedDueToMax 0)}} {{abs adj.thisAttackActivePointAdjustmentNotAppliedDueToMax}} Character Points of adjustment action not applied because it exceeded the maximum effect (See MAXIMUM EFFECT rules). {{/if}}{{#if (ne adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing 0)}}{{abs adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing}} Character Points of adjustment action not applied because it did not exceed the existing effect (See MAXIMUM EFFECT rules).{{/if}} Total temporary adjustments for {{adj.adjustmentTarget}} is {{adj.adjustmentTotalActivePointEffect}} CP. ">
+            {{#if adj.isEffectFinished}}
+                The {{../item.system.XMLID}} effects of {{adj.adjustmenTarget}} have ended.
+            {{else}}
+                {{#if (lt adj.adjustmentDamageThisApplication 0)}}
+                    {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost. 
+                {{else}}
+                    {{#if (eq adj.adjustmentDamageThisApplication 0)}}
+                        No effect on {{adj.adjustmentTarget}}.
+                    {{else}}
+                        {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained.
+                    {{/if}}
+                {{/if}}
+            {{/if}}
+        </div>
+    {{/each}}
 </div>

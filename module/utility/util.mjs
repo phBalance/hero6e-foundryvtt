@@ -268,9 +268,9 @@ export async function expireEffects(actor) {
                     break;
                 }
             } else {
-                // Default is to delete the expired AE
+                // Default is to delete the expired AE (like prone?, I think NOT)
                 //if (powerInfo) {  // Why do we care about powerInfo?
-                await ae.delete();
+                //await ae.delete();
                 break;
                 //}
             }
@@ -281,13 +281,13 @@ export async function expireEffects(actor) {
                 if (ae.flags.adjustmentActivePoints === 0) {
                     console.error(`Sanity deleting ${ae.name}. Shouldn't need to do this.`);
                     await ae.delete();
-                    continue;
+                    break;
                 }
                 ae.duration.startTime += ae.duration.seconds;
                 await ae.update({ duration: ae.duration });
             } else {
                 console.log(`${ae.name} expired`);
-                continue;
+                break;
             }
         }
     }

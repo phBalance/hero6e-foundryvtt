@@ -2736,6 +2736,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     "",
                     false,
                     token,
+                    action,
                 ),
             );
             // BODY
@@ -2748,6 +2749,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     "",
                     false,
                     token,
+                    action,
                 ),
             );
             adjustmentItemTags.push({

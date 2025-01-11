@@ -63,8 +63,12 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestActors();
 
         // Interactive Testing (change these at will)
-        //await this.token6.actor.update({ "system.characteristics.stun.value": 10 });
-        if (!(await this.testAdjustmentStacking(this.token6, this.token6, "HEALING", "STUN"))) return;
+        // await this.token6.actor.update({ "system.characteristics.stun.value": 10 });
+        // if (!(await this.testAdjustmentStacking(this.token6, this.token6, "HEALING", "STUN"))) return;
+
+        await this.createTestScene();
+        await this.createTestActors();
+
         if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "OCV"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
@@ -329,6 +333,13 @@ export class HeroSystem6eEndToEndTest {
                 ))
             )
                 break;
+
+            // Healing only has 1 AE
+            if (adjustmentItem.system.XMLID === "HEALING") {
+                adjustmentActiveEffect ??= tokenTarget.actor.temporaryEffects.find(
+                    (ae) => fromUuidSync(ae.origin)?.id === adjustmentItem.id,
+                );
+            }
             await this.delay();
         }
         if (!adjustmentActiveEffect) {
@@ -387,6 +398,11 @@ export class HeroSystem6eEndToEndTest {
                 expectToFail = true;
             }
 
+            if (powerXMLID === "HEALING") {
+                actorCharacteristicValue[targetXMLID.toLowerCase()] =
+                    tokenTarget.actor.system.characteristics[targetXMLID.toLowerCase()].value;
+            }
+
             adjustmentValue[`system.characteristics.${targetXMLID.toLowerCase()}.max`] =
                 tokenTarget.actor.system.characteristics?.[targetXMLID.toLowerCase()]?.value;
 
@@ -435,7 +451,7 @@ export class HeroSystem6eEndToEndTest {
             }
 
             for (const change of adjustmentActiveEffect.changes) {
-                const char = change.key.match(/([a-z]+)\.max/)?.[1];
+                const char = change.key.match(/([a-z]+)\.max/)?.[1] || change.key;
                 costPerActivePoint[change.key] = determineCostPerActivePoint(
                     char.toUpperCase(),
                     null,
@@ -457,7 +473,10 @@ export class HeroSystem6eEndToEndTest {
                     );
                     return;
                 }
-                if (tokenTarget.actor.system.characteristics[char].max !== actorCharacteristicValue[change.key]) {
+                if (
+                    tokenTarget.actor.system.characteristics[char].max !== actorCharacteristicValue[change.key] &&
+                    powerXMLID !== "HEALING"
+                ) {
                     this.log(
                         `Actor ${char}.max expecting ${actorCharacteristicValue[change.key]} got ${tokenTarget.actor.system.characteristics[char].max}`,
                         "color:red",
