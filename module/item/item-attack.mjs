@@ -1569,8 +1569,9 @@ export async function _onRollDamage(event) {
         .addNumber(diceParts.constant)
         .modifyToStandardEffect(useStandardEffect)
         .modifyToNoBody(
-            item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
-                item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly,
+            isNormalAttack &&
+                (item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
+                    item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly),
         )
         .addToHitLocation(
             includeHitLocation,
