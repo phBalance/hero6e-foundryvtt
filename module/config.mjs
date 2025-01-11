@@ -6348,7 +6348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TRACKINGSENSE",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: [],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
