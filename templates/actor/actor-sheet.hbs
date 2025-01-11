@@ -230,7 +230,7 @@
                                 </td>
                                 <td>
                                     {{#if this.disabledOIHID}}
-                                        <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                        <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                                     {{else}}
                                         <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
                                     {{/if}}
@@ -283,7 +283,7 @@
                                 <td>
                                     {{#if this.system.showToggle}}
                                         {{#if this.disabledOIHID}}
-                                            <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                            <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                                         {{else}}
                                             <input class="item-toggle" type="checkbox"
                                             Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
@@ -365,7 +365,7 @@
                                 <td>
                                     {{#if item.system.roll}}
                                         {{#if this.disabledOIHID}}
-                                            <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                            <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                                         {{else}}
                                             <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
                                             data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
@@ -468,7 +468,7 @@
                                 <td>
                                     {{#if this.system.showToggle}}
                                         {{#if this.disabledOIHID}}
-                                            <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                            <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                                         {{else}}
                                             <input class="item-toggle" type="checkbox"  
                                         name="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
