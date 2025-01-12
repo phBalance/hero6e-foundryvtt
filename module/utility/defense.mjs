@@ -269,7 +269,7 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
     if (defenseItem.system.XMLID === "VULNERABILITY") {
         // Vulnerability:  Fire (Common)
         for (const sfx of attackingItem.system.SFX?.split("/") || []) {
-            if (defenseItem.system.INPUT.match(new RegExp(sfx, "i"))) {
+            if (defenseItem.system.INPUT?.match(new RegExp(sfx, "i"))) {
                 return true;
             }
         }
