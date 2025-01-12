@@ -780,7 +780,7 @@ export async function performAdjustment(
                 thisAttackActivePointsEffect - activeEffect.flags.adjustmentActivePoints;
 
             //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
-            adjustmentDamageThisApplication = activeEffect.changes[0].value;
+            adjustmentDamageThisApplication = change.value;
         }
 
         // Negative Adjustment
