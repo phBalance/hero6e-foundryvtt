@@ -1491,7 +1491,7 @@ export class HeroRoller {
                 return "BODY";
 
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
-                return "Active Points";
+                return "Character Points";
 
             case HeroRoller.ROLL_TYPE.EFFECT:
                 return "Effect";
@@ -1866,9 +1866,9 @@ export class HeroRoller {
 
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
                 return {
-                    annotatedTerms: `Active point breakdown: [${this.getAdjustmentTerms()}]`,
-                    terms: `[${this.getAdjustmentTerms()}] Active Points`,
-                    total: `${this.getAdjustmentTotal()} Active Points`,
+                    annotatedTerms: `Character point breakdown: [${this.getAdjustmentTerms()}]`,
+                    terms: `[${this.getAdjustmentTerms()}] Character Points`,
+                    total: `${this.getAdjustmentTotal()} Character Points`,
                 };
 
             case HeroRoller.ROLL_TYPE.FLASH:
