@@ -521,6 +521,7 @@ export async function performAdjustment(
     const maximumEffectActivePoints = determineMaxAdjustment(attackItem, simplifiedHealing, potentialCharacteristic);
     //let totalActivePointAffectedDifference = 0;
     let adjustmentDamageThisApplication = 0;
+    let adjustmentDamageThisApplicationArray = [];
     let thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
     let thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing = 0;
     let isEffectFinished = false;
@@ -675,12 +676,17 @@ export async function performAdjustment(
         // }
 
         adjustmentDamageThisApplication = parseInt(existingEffect.changes[0].value);
+        adjustmentDamageThisApplicationArray = existingEffect.changes.map((ae) => parseInt(ae.value) || 0);
 
         // Rough estimate of changes (recalc is more accurate and perhaps should be included here)
+        let i = 0;
         for (const change of activeEffect.changes) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
             const costPerActivePoint2 = determineCostPerActivePoint(char, null, targetActor);
             change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint2);
+            adjustmentDamageThisApplicationArray[i] =
+                existingEffect.changes[0].value - adjustmentDamageThisApplicationArray[i];
+            i++;
         }
         adjustmentDamageThisApplication = existingEffect.changes[0].value - adjustmentDamageThisApplication;
 
@@ -1054,6 +1060,42 @@ export async function performAdjustment(
     //     debugger;
     // }
 
+    if (adjustmentDamageThisApplicationArray.length > 1) {
+        console.log("need adjustmentCard per change");
+        const cards = [];
+        for (let i = 0; i < adjustmentDamageThisApplicationArray.length; i++) {
+            // specific values for each change
+            const _targetUpperCaseName = (
+                activeEffect.changes[i].key.match(/([a-z]+)\.max/)?.[1] || activeEffect.changes[i].key
+            ).toUpperCase();
+            const _costPerActivePoint = simplifiedHealing
+                ? 1
+                : determineCostPerActivePoint(_targetUpperCaseName, null, targetActor);
+
+            const card = _generateAdjustmentChatCard({
+                attackItem,
+                thisAttackActivePointsEffectRaw,
+                thisAttackActivePointsEffect,
+                adjustmentDamageThisApplication: adjustmentDamageThisApplicationArray[i],
+                totalEffectActivePointsForXmlid,
+                thisAttackActivePointAdjustmentNotAppliedDueToMax,
+                thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,
+                defenseDescription,
+                effectsDescription,
+                targetUpperCaseName: _targetUpperCaseName,
+                isFade,
+                isEffectFinished,
+                targetActor,
+                costPerActivePoint: _costPerActivePoint,
+                targetToken,
+                maximumEffectActivePoints,
+                attackerToken,
+            });
+            cards.push(card);
+        }
+        return cards;
+    }
+
     return _generateAdjustmentChatCard({
         attackItem,
         thisAttackActivePointsEffectRaw,
@@ -1334,7 +1376,7 @@ export async function renderAdjustmentChatCards(cardOrCards, adjustmentItemTags,
     }
 
     // Filter out any invalid cards
-    cardOrCards = cardOrCards.filter((card) => card);
+    cardOrCards = cardOrCards.filter((card) => card).flat(); // Fades with multiple changes, so flat
 
     if (cardOrCards.length === 0) return;
 
