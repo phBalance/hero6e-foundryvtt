@@ -161,6 +161,10 @@ export async function getTemporaryEffectsOwnedByActorInCombat(actor) {
 
 /// Check the actor for any effects that should expire, and expire them.
 export async function expireEffects(actor) {
+    if (actor.inCombat) {
+        console.log(`%c ExpireEffects ${actor.name} ${game.time.worldTime}`, "background: #229; color: #bada55");
+    }
+
     let temporaryEffects = [];
 
     // Were looking for active effects that we own.

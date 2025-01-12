@@ -379,7 +379,10 @@ export class HeroSystem6eCombat extends Combat {
      */
     async _onStartTurn(combatant) {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onStartTurn: ${combatant.name} ${game.time.worldTime}`);
+            console.debug(
+                `%c Hero | _onStartTurn: ${combatant.name} ${game.time.worldTime}`,
+                "background: #292; color: #bada55",
+            );
         }
 
         // We need a single combatant to store some flags. Like for DragRuler, end tracking, etc.
@@ -590,7 +593,10 @@ export class HeroSystem6eCombat extends Combat {
      */
     async _onEndTurn(combatant) {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onEndTurn: ${combatant.name}`);
+            console.debug(
+                `%c Hero | _onEndTurn: ${combatant.name} ${game.time.worldTime}`,
+                "background: #292; color: #bada55",
+            );
         }
         super._onEndTurn(combatant);
 
@@ -781,7 +787,7 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */ async nextTurn() {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | nextTurn ${game.time.worldTime}`);
+            console.debug(`%c Hero | nextTurn ${game.time.worldTime}`, "background: #229; color: #bada55");
         }
         const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
         //const originalRound = this.round;
@@ -815,7 +821,7 @@ export class HeroSystem6eCombat extends Combat {
         const updateData = { round, turn: next };
         const updateOptions = { direction: 1, worldTime: { delta: advanceTime } };
 
-        console.log("nextTurn before game.time.advance", game.time.worldTime, advanceTime);
+        //console.log("nextTurn before game.time.advance", game.time.worldTime, advanceTime);
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
 
         const _gt = game.time.worldTime;
@@ -824,8 +830,9 @@ export class HeroSystem6eCombat extends Combat {
         // Hack to let worldTime update, which we need to expire effects on the correct phase within each segment.
         if (advanceTime) {
             for (let x = 0; x < 200; x++) {
-                if (game.time.worldTime != _gt) break;
-                console.warn("Waiting for game.time.advance", _gt, game.time.worldTime);
+                const _gt2 = game.time.worldTime;
+                if (_gt2 != _gt) break;
+                console.warn("Waiting for game.time.advance", _gt, _gt2);
                 await new Promise((resolve) => setTimeout(resolve, 10));
             }
             if (game.time.worldTime === _gt) {
@@ -846,7 +853,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async _onUpdate(...args) {
-        console.log("combat._onUpdate", args);
+        console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
         super._onUpdate(...args);
     }
 
@@ -856,7 +863,7 @@ export class HeroSystem6eCombat extends Combat {
      */
     async previousTurn() {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | previousTurn`);
+            console.debug(`Hero | previousTurn`, "background: #222; color: #bada55");
         }
         if (this.turn === 0 && this.round === 0) return this;
         else if (this.turn <= 0 && this.turn !== null) return this.previousRound();
