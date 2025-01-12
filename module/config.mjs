@@ -4644,7 +4644,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ABSORPTION",
             type: ["adjustment", "standard"],
-            behaviors: ["activatable", "dice"],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
