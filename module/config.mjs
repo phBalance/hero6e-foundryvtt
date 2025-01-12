@@ -4644,7 +4644,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ABSORPTION",
             type: ["adjustment", "standard"],
-            behaviors: ["activatable"],
+            behaviors: ["activatable", "dice"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -4746,11 +4746,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLAIRSENTIENCE",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "imperceptible",
             costPerLevel: fixedValueFunction(1),
             duration: "constant",
             range: HERO.RANGE_TYPES.STANDARD,
+            costEnd: true,
             baseEffectDiceParts: noDamageBaseEffectDiceParts,
             xml: `<POWER XMLID="CLAIRSENTIENCE" ID="1711932894754" BASECOST="20.0" LEVELS="0" ALIAS="Clairsentience" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
@@ -5672,7 +5673,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "IMAGES",
             type: ["attack", "sense-affecting", "standard"],
-            behaviors: ["to-hit", "dice"],
+            behaviors: ["activatable", "to-hit", "dice"],
             costPerLevel: fixedValueFunction(3),
             perceivability: "obvious",
             duration: "constant",
@@ -5829,7 +5830,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALILLUSIONS",
             type: ["attack", "mental"],
-            behaviors: ["to-hit", "dice"],
+            behaviors: ["activatable", "to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -5845,7 +5846,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDCONTROL",
             type: ["attack", "mental"],
-            behaviors: ["to-hit", "dice"],
+            behaviors: ["activatable", "to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -5861,7 +5862,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDLINK",
             type: ["mental"],
-            behaviors: ["to-hit", "activatable", "dice"],
+            behaviors: ["activatable", "to-hit"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "dmcv",
@@ -5877,7 +5878,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDSCAN",
             type: ["mental", "sense"],
-            behaviors: ["to-hit", "dice"],
+            behaviors: ["activatable", "to-hit", "dice"],
             perceivability: "imperceptible",
             duration: "constant",
             target: "dmcv",
@@ -5893,7 +5894,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MISSILEDEFLECTION",
             type: ["defense", "standard"],
-            behaviors: ["to-hit", "activatable"],
+            behaviors: ["activatable", "to-hit"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
             duration: "instant",
@@ -5970,7 +5971,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "DMCV",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
-            costPerLevel: fixedValueFunction(1 / 2),
+            costPerLevel: fixedValueFunction(0),
             baseEffectDiceParts: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="POSSESSION" ID="1711934925655" BASECOST="60.0" LEVELS="0" ALIAS="Possession" POSITION="67" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Human" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
@@ -6358,7 +6359,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACTIVESONAR",
             type: ["sense", "active"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6415,7 +6416,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DETECT",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["activatable"],
             target: "self only",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costPerLevel: fixedValueFunction(1),
@@ -6471,7 +6472,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ENHANCEDPERCEPTION",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["activatable"],
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(3),
@@ -6483,7 +6484,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HRRP", // High Range Radio Perception
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn", "transmitBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "transmitBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6517,7 +6518,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INFRAREDPERCEPTION",
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6545,7 +6546,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALAWARENESS",
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             senseGroup: "mental",
             senseType: "passive",
@@ -6570,7 +6571,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NIGHTVISION",
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6587,7 +6588,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NRAYPERCEPTION",
             type: ["senseBuiltIn", "rangeBuiltIn"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6622,7 +6623,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RADAR",
             type: ["sense", "active"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6633,7 +6634,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RADIOPERCEIVETRANSMIT",
             type: ["sense", "active"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6644,7 +6645,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RADIOPERCEPTION",
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6678,7 +6679,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SPATIALAWARENESS",
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "targetingBuiltIn", "penetrativeBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "targetingBuiltIn", "penetrativeBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6735,7 +6736,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ULTRASONICPERCEPTION",
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6751,7 +6752,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ULTRAVIOLETPERCEPTION",
             type: ["sense", "passive"],
-            behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
