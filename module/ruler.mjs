@@ -316,7 +316,7 @@ export class HeroRuler extends Ruler {
                                             parseInt(actor.system.characteristics.end.value) - costEnd,
                                     });
 
-                                    content += `${token.name} spent ${costEnd} END for ${actor.flags.activeMovement?.toUpperCase() || "movement"}. Total of ${Math.ceil(currentDistance)}m and ${totalEnd} END. Encurance use is capped at ${MaximumEndurance}.`;
+                                    content += `${token.name} spent ${costEnd} END for ${actor.flags.activeMovement?.toUpperCase() || "movement"}. Total of ${Math.ceil(currentDistance)}m and ${totalEnd} END. Endurance use is capped at ${MaximumEndurance}.`;
                                     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
                                     speaker.alias = actor.name;
                                     const chatData = {

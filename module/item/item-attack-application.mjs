@@ -1,5 +1,5 @@
-import { CombatSkillLevelsForAttack, PenaltySkillLevelsForAttack } from "../utility/damage.mjs";
-import { processAttackOptions } from "../item/item-attack.mjs";
+import { combatSkillLevelsForAttack, penaltySkillLevelsForAttack } from "../utility/damage.mjs";
+import { processActionToHit } from "../item/item-attack.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -94,7 +94,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // Penalty Skill Levels
             // Currently only supports range PSL
-            data.psls = PenaltySkillLevelsForAttack(item).filter((o) => o.system.penalty === "range");
+            data.psls = penaltySkillLevelsForAttack(item).filter((o) => o.system.penalty === "range");
 
             // Check all PSLs
             // for (const psl of data.psls) {
@@ -214,7 +214,7 @@ export class ItemAttackFormApplication extends FormApplication {
             // data.cslChoices = null;
             // data.csl = null;
             // data.cslSkill = null;
-            const csls = CombatSkillLevelsForAttack(item);
+            const csls = combatSkillLevelsForAttack(item);
             data.csls = undefined;
             for (const csl of csls) {
                 let entry = {};
@@ -325,7 +325,7 @@ export class ItemAttackFormApplication extends FormApplication {
             canvas.tokens.activate();
             await this.close();
 
-            return processAttackOptions(this.data.item, formData);
+            return processActionToHit(this.data.item, formData);
         }
 
         this.data.formData ??= {};
@@ -345,7 +345,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
 
                 // this is the roll:
-                await processAttackOptions(this.data.item, this.data.formData);
+                await processActionToHit(this.data.item, this.data.formData);
                 this.data.formData.execute = this.data.action.current.execute + 1;
             }
             const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;
@@ -398,7 +398,7 @@ export class ItemAttackFormApplication extends FormApplication {
     async _updateCsl(event, formData) {
         const item = this.data.item;
         // Combat Skill Levels (update SKILL if changed)
-        const csls = CombatSkillLevelsForAttack(item);
+        const csls = combatSkillLevelsForAttack(item);
         for (const key of Object.keys(formData).filter((o) => o.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/))) {
             const value = formData[key];
             const itemId = key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[1];

@@ -8,7 +8,7 @@ import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { CombatSkillLevelsForAttack, convertToDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
+import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
@@ -88,12 +88,12 @@ export class HeroSystemActorSheet extends ActorSheet {
             data.pointsTitle = "";
             data.activePointsTitle = "";
             if (data.actor.system.pointsDetail) {
-                for (let [key, value] of Object.entries(data.actor.system.pointsDetail)) {
+                for (const [key, value] of Object.entries(data.actor.system.pointsDetail)) {
                     data.pointsTitle += `${key.replace("equipment", "[equipment]")}: ${value}\n`;
                 }
             }
             if (data.actor.system.activePointsDetail) {
-                for (let [key, value] of Object.entries(data.actor.system.activePointsDetail)) {
+                for (const [key, value] of Object.entries(data.actor.system.activePointsDetail)) {
                     data.activePointsTitle += `${key}: ${value}\n`;
                 }
             } else {
@@ -101,17 +101,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             }
 
             // // override actor.items (which is a map) to an array with some custom properties
-            // let items = [];
             for (let item of data.actor.items) {
                 // Update Attack Details (estimateOCV, DCV, Damage)
                 item._postUploadDetails();
 
-                if (item.type == "martialart") {
+                if (item.type === "martialart") {
                     data.hasMartialArts = true;
-                    continue;
-                }
-
-                if (item.type == "equipment") {
+                } else if (item.type === "equipment") {
                     data.hasEquipment = true;
                 }
             }
@@ -417,7 +413,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             const defensePowers = data.actor.items.filter(
                 (o) => (o.system.subType || o.type) === "defense" && !o.effects.size,
             );
-            for (let d of defensePowers) {
+            for (const d of defensePowers) {
                 d.disabled = !d.isActive;
                 switch (getPowerInfo({ xmlid: d.system.XMLID, actor: this.actor })?.duration) {
                     case "instant":
@@ -481,29 +477,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     continue;
                 }
 
-                let activePoints = item.system.activePoints;
-
-                if (item.type == "attack" || item.system.subType === "attack" || item.system.XMLID === "martialart") {
-                    const csl = CombatSkillLevelsForAttack(item);
-                    let { dc } = convertToDcFromItem(item, { ignoreDeadlyBlow: true });
-
-                    if (dc > 0) {
-                        let costPerDice =
-                            Math.max(
-                                Math.floor((item.system.activePoints || 0) / dc) || item.baseInfo.costPerLevel(item),
-                            ) || (item.system.targets === "dcv" ? 5 : 10);
-                        dc += csl.dc + Math.floor((csl.ocv + csl.dcv) / 2); // Assume CSL are converted to DCs
-                        let ap = dc * costPerDice;
-
-                        const charges = item.findModsByXmlid("CHARGES");
-                        if (charges) {
-                            ap += (parseInt(charges.OPTION_ALIAS) - 1) * 5;
-                        }
-
-                        activePoints = Math.max(activePoints, ap);
-                    }
-                }
-
+                const activePoints = item.system.activePoints;
                 if (activePoints > 0) {
                     let name = item.name;
                     if (item.name.toUpperCase().indexOf(item.system.XMLID) == -1) {
@@ -925,11 +899,11 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     async _onPrimaryNonStrengthCharacteristicRoll(characteristicValue, flavor) {
         // NOTE: Characteristic rolls can't have +1 to their roll.
-        const diceParts = convertToDiceParts(characteristicValue);
+        const diceParts = characteristicValueToDiceParts(characteristicValue);
         const characteristicRoller = new HeroRoller()
             .makeBasicRoll()
-            .addDice(diceParts.dice)
-            .addHalfDice(diceParts.halfDice ? 1 : 0);
+            .addDice(diceParts.d6Count)
+            .addHalfDice(diceParts.halfDieCount ? 1 : 0);
 
         await characteristicRoller.roll();
 
@@ -976,11 +950,11 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         // NOTE: Characteristic rolls can't have +1 to their roll.
-        const diceParts = convertToDiceParts(characteristicValue);
+        const diceParts = characteristicValueToDiceParts(characteristicValue);
         const characteristicRoller = new HeroRoller()
             .makeNormalRoll()
-            .addDice(diceParts.dice)
-            .addHalfDice(diceParts.halfDice ? 1 : 0);
+            .addDice(diceParts.d6Count)
+            .addHalfDice(diceParts.halfDieCount ? 1 : 0);
 
         await characteristicRoller.roll();
         const damageRenderedResult = await characteristicRoller.render();
