@@ -494,9 +494,6 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
  * NOTE: This is ugly because with floating point calculations we need to use epsilon comparisons (see https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ for instance)
  *       To work around the need for epsilon comparison we just multiply by a large enough number that we're just doing integer math and ignoring the mantissa.
  *
- * A 3AP/die attack: +1 pip is 1 point, +1/2d6 is 2 points, and +1d6 is 3 points.
- * This makes 3 possible breakpoints x.0, x.3333, x.6666 for any whole number x >=0 when we divide by the AP/3 to get the num of dice.
- *
  * A 5AP/die normal attack like energy blast: +1 pip is 2 points, +1/2d6 is 3 points, and +1d6 is 5 points.
  * This makes 3 possible breakpoints x.0, x.4, x.6 for any whole number x >=0 when we divide by the AP/5 to get the num of dice.
  *
@@ -505,19 +502,13 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
  *
  * A 15 AP/die killing attack: +1 pip is 5 points, +1/2d6 or +1d6-1 is 10 points, and +1d6 is 15 points.
  * This makes 3 possible breakpoints x.0, x.3333, x.6666 for any whole number x >=0 when we divide by the AP/15 to get the num of dice.
+ * NOTE: These are the same breaks that 3AP/die and 6AP/die
  *
  * @param {HeroSystem6eItem} item
  * @param {number} dc
  * @returns
  */
 export function calculateDicePartsFromDcForItem(item, dc) {
-    // Since the smallest interval is 0.3 to 0.5 so 0.099 is probably the smallest. However, the results don't match tables we see in 6e vol 2 p.97.
-    // It's possible a better algorithm would produce something better but with this one:
-    // 0.066666 appears to be too large. (1DC KA @ +1/4)
-    // 0.04 appears to be too large. (1DC EA @ +1)
-    // Epsilon observations also possibly indicate that the rules only use one of the attack types to determine part dice.
-    const epsilon = 0.039;
-
     const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
     let martialOrManeuverEquivalentApPerDice = 0;
     if (isMartialOrManeuver) {
@@ -540,19 +531,22 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         (item.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
         item.baseInfo.costPerLevel(item);
 
+    // FIXME: For the time being this is required because we have a few powers that can have damage effects but don't actually roll damage
+    // so they have "dice" behavior but fixed damage. These show up as 0 cost per level. Examples are Possession and change environment.
+    if (baseApPerDie === 0) {
+        return item.baseInfo.baseEffectDiceParts(item, {});
+    }
+
     const fullDieValue = 1;
     let halfDieValue;
     let pipValue;
-    if (baseApPerDie === 3) {
-        halfDieValue = 2 / 3;
-        pipValue = 1 / 3;
-    } else if (baseApPerDie === 5) {
+    if (baseApPerDie === 5) {
         halfDieValue = 3 / 5;
         pipValue = 2 / 5;
     } else if (baseApPerDie === 10) {
         halfDieValue = 5 / 10;
         pipValue = 3 / 10;
-    } else if (baseApPerDie === 15) {
+    } else if (baseApPerDie === 15 || baseApPerDie === 6 || baseApPerDie === 3) {
         halfDieValue = 10 / 15;
         pipValue = 5 / 15;
     } else {
@@ -578,11 +572,17 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         apPerDie = baseApPerDie * (1 + item.system._advantagesDc);
     }
 
-    // MartialArts & Maneuvers have DC and no advantages. Others have active points with some advantages that contribute to DC.
-    // See FRed pp 403, 404 6e vol 2 pp 96, 97
     // NOTE: Work in positive values and positive 0 for obviousness to users
     const diceOfDamage = Math.abs(dc * (5 / apPerDie));
     const diceSign = Math.sign(dc) || 0;
+
+    // Since the smallest interval between 1 pip and 1/2 die is 0.3 to 0.5 so 0.099 is probably the smallest.
+    // However, the results don't match tables we see in 6e vol 2 p.97 if we use that epislon.
+    // It's possible a better algorithm would produce something better but with this one:
+    // 0.066666 appears to be too large. (1DC KA @ +1/4)
+    // 0.04 appears to be too large. (1DC EA @ +1)
+    // Epsilon observations also indicate the possibiliy that the rules (as expressed in the 6e table) only use one of the attack types to determine part dice.
+    const epsilon = 0.039;
 
     const d6Count = diceSign * Math.floor(diceOfDamage) || 0;
     const halfDieCount = diceSign * ((diceOfDamage % fullDieValue) - halfDieValue > -epsilon ? 1 : 0) || 0;
