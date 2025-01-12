@@ -24,8 +24,8 @@ export class HeroProgressBar {
 
         const progressBarLabel = document.querySelector("#loading #context").style;
         progressBarLabel.setProperty("text-overflow", "ellipsis");
-        progressBarLabel.setProperty("overflow", "hidden");
-        progressBarLabel.setProperty("width", "0%");
+        //progressBarLabel.setProperty("overflow", "hidden");
+        //progressBarLabel.setProperty("width", "0%");
 
         if (++HeroProgressBar.#concurrentProgressBarCount > 1) {
             ui.notifications.warn(
@@ -49,18 +49,19 @@ export class HeroProgressBar {
     advance(label = this._label, count = 1) {
         this._count = this._count + count;
 
-        if (this._count < this._max) {
-            const percentage = Math.trunc((100 * this._count) / this._max);
-
-            SceneNavigation.displayProgressBar({
-                label: label,
-                pct: percentage,
-            });
-
-            document.querySelector("#loading #context").style.setProperty("width", `calc(100% - 52px)`);
-        } else {
-            this.close();
+        if (this._count > this._max) {
+            console.warn("ProgressBar: Count > Max");
+            this._max = this._count;
         }
+
+        const percentage = Math.trunc((100 * this._count) / this._max);
+
+        SceneNavigation.displayProgressBar({
+            label: label,
+            pct: percentage,
+        });
+
+        //console.log(`ProgressBar: ${percentage}% ${label}`);
     }
 
     close(label = this._label) {
