@@ -46,7 +46,7 @@
         </td>
         <td>{{this.system.endEstimate}}</td>
         <td>
-            {{#if (or (eq this.system.subType "attack") this.system.roll)}}
+            {{#if (itemHasBehaviours this "to-hit" "dice")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
@@ -54,13 +54,14 @@
                 {{/if}}
             {{/if}}
 
-            {{#if this.system.showToggle}}
+            {{#if (itemHasBehaviours this "activatable")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
                     <input class="item-toggle" type="checkbox"
-                    Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
-                    data-action="toggle" />
+                        Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
+                        data-action="toggle"
+                    />
                 {{/if}}
             {{/if}}
 
