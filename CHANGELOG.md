@@ -3,6 +3,7 @@
 ## Version 4.0.14 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix where 5e AOE NAKEDMODIFIER powers failed to upload. [#1704](https://github.com/dmdorman/hero6e-foundryvtt/issues/1704)
+- Improvements to HDC uploads. Actor sheet now shows "Upload in progress", preventing you from clicking around until the upload is complete. Actor owners are notified of upload in a chat message.
 
 ## Version 4.0.13 20250111
 

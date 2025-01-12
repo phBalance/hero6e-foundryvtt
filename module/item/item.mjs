@@ -1946,13 +1946,19 @@ export class HeroSystem6eItem extends Item {
 
             // Save changes
             if (changed && this.id && this.isEmbedded) {
+                if (options?.uploadProgressBar) {
+                    if (this.system.versionHeroSystem6eCreated === undefined) {
+                        this.system.versionHeroSystem6eCreated = game.system.version;
+                        options.uploadProgressBar.advance(`${this.actor.name}: Adding ${this.name}`);
+                    }
+                }
+
                 const changeObject = { system: this.system };
                 if (oldName !== this.name) {
                     changeObject.name = this.name;
                 }
                 await this.update(changeObject, options);
             }
-            options?.uploadProgressBar?.advance(`${this.actor.name}: Adding ${this.name}`);
 
             // ACTIVE EFFECTS
             if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {

@@ -1531,6 +1531,10 @@ export class HeroSystem6eActor extends Actor {
         // Quench test may need CHARACTERISTICS, which are set in postUpload
         await this._postUpload({ render: false });
 
+        // Need count of maneuvers for progress bar
+        const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+        const freeStuffCount = powerList.filter((power) => power.type.includes("maneuver")).length;
+
         const xmlItemsToProcess =
             1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
             heroJson.CHARACTER.DISADVANTAGES.length +
@@ -1540,12 +1544,12 @@ export class HeroSystem6eActor extends Actor {
             heroJson.CHARACTER.POWERS.length +
             heroJson.CHARACTER.SKILLS.length +
             heroJson.CHARACTER.TALENTS.length +
-            (this.type === "pc" || this.type === "npc" ? 1 : 0) + // Free stuff
+            (this.type === "pc" || this.type === "npc" ? freeStuffCount : 0) + // Free stuff
             1 + // Validating adjustment and powers
             1 + // Images
             1 + // Final save
             1; // Restore retained damage
-        const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 1);
+        const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 0);
 
         promiseArray.push(this.#addFreeStuff(uploadProgressBar));
 
@@ -1960,12 +1964,20 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.totalTime = new Date() - uploadPerformance.startTime;
 
         console.log("Upload Performance", uploadPerformance);
+
+        // Let GM know actor was uploaded
+        ChatMessage.create({
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            author: game.user._id,
+            content: `<b>${game.user.name}</b> uploaded <b>${this.name}</b>`,
+            whisper: whisperUserTargetsForActor(this),
+        });
     }
 
     async #addFreeStuff(uploadProgressBar) {
         // Characters get a few things for free that are not in the HDC.
         if (this.type === "pc" || this.type === "npc") {
-            uploadProgressBar.advance(`${this.name}: Adding non HDC items for PCs and NPCs`, 0);
+            uploadProgressBar.advance(`${this.name}: Adding non HDC items for PCs and NPCs`);
 
             // Perception Skill
             const itemDataPerception = {
