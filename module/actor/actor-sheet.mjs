@@ -8,7 +8,7 @@ import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { combatSkillLevelsForAttack, calculateDcFromItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
+import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
@@ -477,31 +477,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     continue;
                 }
 
-                let activePoints = item.system.activePoints;
-
-                if (item.type == "attack" || item.system.subType === "attack" || item.system.XMLID === "martialart") {
-                    const csl = combatSkillLevelsForAttack(item);
-
-                    // PH: TODO: Look at this. Why does it need to do this here?
-                    let { dc } = calculateDcFromItem(item, { ignoreDeadlyBlow: true });
-
-                    if (dc > 0) {
-                        let costPerDice =
-                            Math.max(
-                                Math.floor((item.system.activePoints || 0) / dc) || item.baseInfo.costPerLevel(item),
-                            ) || (item.system.targets === "dcv" ? 5 : 10);
-                        dc += csl.dc + Math.floor((csl.ocv + csl.dcv) / 2); // Assume CSL are converted to DCs
-                        let ap = dc * costPerDice;
-
-                        const charges = item.findModsByXmlid("CHARGES");
-                        if (charges) {
-                            ap += (parseInt(charges.OPTION_ALIAS) - 1) * 5;
-                        }
-
-                        activePoints = Math.max(activePoints, ap);
-                    }
-                }
-
+                const activePoints = item.system.activePoints;
                 if (activePoints > 0) {
                     let name = item.name;
                     if (item.name.toUpperCase().indexOf(item.system.XMLID) == -1) {

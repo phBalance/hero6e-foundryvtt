@@ -778,9 +778,6 @@ export function dicePartsToEffectFormula(diceParts) {
 
 // FIXME: Should show "N" for normal, "NND" for NND, "AP" for Armour Piercing, etc
 export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
-    // PH: FIXME: Remove for debugging
-    if (item == null) debugger;
-
     return `${dicePartsToEffectFormula(diceParts)}${item.system.killing ? "K" : ""}`;
 }
 
