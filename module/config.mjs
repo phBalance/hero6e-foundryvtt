@@ -391,7 +391,7 @@ function pdEdCostPerLevel(itemOrActor) {
  * @typedef {Object} PowerDescription
  * @param {string} key - Hero Designer XMLID of the power
  * @param {string} name - Human readable name of the power
- * @param {string} base - Base cost in character points
+ * @param {string} base - Base number of levels that are given automatically
  * @param {string} cost - Cost in character points per additional level
  * @param {Array<string>} type - A list of types associated with this power
  * @param {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "to-hit" | "activatable" | "adder" | "modifier">} behaviors - A list of the behavior types this power exhibits in the code
@@ -5626,7 +5626,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HANDTOHANDATTACK",
             type: ["attack"],
-            behaviors: [],
+            behaviors: ["activatable"], // TODO: Probably want it to apply on a per attack basis rather than always
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,
@@ -7579,6 +7579,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "DIFFICULTTODISPEL",
+            behaviors: ["modifier"],
+            cost: (modifier, item) => {
+                const levels = parseInt(modifier.LEVELS);
+
+                return 0.25 + levels * 0.25;
+            },
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="DIFFICULTTODISPEL" ID="1664541509485" BASECOST="0.0" LEVELS="1" ALIAS="Difficult To Dispel" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "DOESBODY",
             behaviors: ["modifier"],
             dcAffecting: fixedValueFunction(true),
@@ -7928,7 +7944,6 @@ HERO.ModifierOverride = {
     CONTINUOUSCONCENTRATION: { BASECOST: -0.25 },
     DAMAGEOVERTIME: { dcAffecting: fixedValueFunction(true) },
     DEFBONUS: { BASECOST: 2 },
-    DIFFICULTTODISPEL: { BASECOST: 0.25 },
     DIMENSIONS: { BASECOST: 5 },
     ENERGY: { BASECOST: 5 }, // DAMAGENEGATION
     IMPROVEDNONCOMBAT: { BASECOST: 5 },
