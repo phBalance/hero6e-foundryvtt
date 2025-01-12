@@ -80,6 +80,8 @@ Hooks.once("init", async function () {
 
     // debug
     // CONFIG.debug.hooks = true;
+    CONFIG.debug.combat = true;
+    CONFIG.debug.time = true;
 
     // Define custom Entity classes
     CONFIG.Actor.documentClass = HeroSystem6eActor;
@@ -620,7 +622,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             }
 
             // Active Effects
-            if (!actor.inCombat || actor.temporaryEffects.find((o) => o.name === "TakeRecovery")) {
+            // When in combat we expire effects on onStartTurn, but for some async reason gameTime cause issues if they are first in the segment.
+            // So we will expireEffects here if this actor is the current combatant.
+            if (
+                !actor.inCombat ||
+                game.combats.viewed.combatant?.actorId === actor.id ||
+                actor.temporaryEffects.find((o) => o.name === "TakeRecovery")
+            ) {
                 await expireEffects(actor);
             }
 

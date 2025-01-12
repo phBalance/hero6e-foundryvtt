@@ -711,7 +711,12 @@ export class HeroSystem6eItem extends Item {
         //     }
         // }
 
-        if (!this.baseInfo?.perceivability && !["skill", "disadvantage"].includes(this.type)) {
+        if (
+            !this.baseInfo?.perceivability &&
+            !["skill", "disadvantage", "perk"].includes(this.type) &&
+            !this.baseInfo?.type.includes("characteristic") &&
+            !this.baseInfo?.type.includes("passive") // passive sense
+        ) {
             console.warn(`Missing perceivability: for ${this.system.XMLID}`, this);
         }
 

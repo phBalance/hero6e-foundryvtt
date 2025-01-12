@@ -38,8 +38,7 @@
     {{/if}}
 
     {{#each adjustments as | adj |}}
-        <div class="card-section" title="
-        {{adj.attackItem.name}}: {{adj.attackItem.system.XMLID}} {{#if adj.isFade}}fade of{{/if}} {{abs adj.adjustmentDamageThisApplication}} Character Points of {{adj.adjustmentTarget}}{{#if (and (not adj.isFade) (ne (abs adj.thisAttackActivePointsEffect) adj.adjustmentDamageRaw))}} (defenses are halved {{adj.adjustmentDamageRaw}}/2={{abs adj.thisAttackActivePointsEffect}}){{/if}}. {{#if adj.costPerActivePoint}}Each point of {{#if adj.simplifiedHealing}}SIMPLIFIED HEALING of {{/if}}{{adj.adjustmentTarget}} costs {{adj.costPerActivePoint}}CP. {{/if}}{{#if (lt adj.adjustmentDamageThisApplication 0)}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost. {{else}}{{#if (eq adj.adjustmentDamageThisApplication 0)}}No effect on {{adj.adjustmentTarget}}. {{else}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained. {{/if}}{{/if}}{{#if (and adj.maximumEffectActivePoints (lt adj.maximumEffectActivePoints 999))}}Maximum Effect is {{abs adj.maximumEffectActivePoints}}CP. {{/if}}{{#if (ne adj.thisAttackActivePointAdjustmentNotAppliedDueToMax 0)}} {{abs adj.thisAttackActivePointAdjustmentNotAppliedDueToMax}} Character Points of adjustment action not applied because it exceeded the maximum effect (See MAXIMUM EFFECT rules). {{/if}}{{#if (ne adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing 0)}}{{abs adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing}} Character Points of adjustment action not applied because it did not exceed the existing effect (See MAXIMUM EFFECT rules).{{/if}} Total temporary adjustments for {{adj.adjustmentTarget}} is {{adj.adjustmentTotalActivePointEffect}} CP. ">
+        <div class="card-section adjustment-summary" title="click to show/hide details">
             {{#if adj.isEffectFinished}}
                 The {{adj.attackItem.system.XMLID}} effects of {{adj.adjustmentTarget}} have ended.
             {{else}}
@@ -52,14 +51,15 @@
                         {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained.
                     {{/if}}
                 {{/if}}
+                {{!-- <i class="fal fa-circle-info"></i> --}}
             {{/if}}
-            <i class="fal fa-circle-info"></i>
-            {{!-- <i class="fa-regular fa-circle-caret-down" >
+            
+            {{#unless adj.isEffectFinished}}
+                <i class="fa-regular fa-circle-caret-right adjustment-tooltip"  ></i>
                 <div class="adjustment-tooltip" style="display:none;">
-                    adjustment-tooltip
+                    {{adj.attackItem.name}}: {{adj.attackItem.system.XMLID}} {{#if adj.isFade}}fade of{{/if}} {{abs adj.adjustmentDamageThisApplication}} Character Points of {{adj.adjustmentTarget}}{{#if (and (not adj.isFade) (ne (abs adj.thisAttackActivePointsEffect) adj.adjustmentDamageRaw))}} (defenses are halved {{adj.adjustmentDamageRaw}}/2={{abs adj.thisAttackActivePointsEffect}}){{/if}}. {{#if adj.costPerActivePoint}}Each point of {{#if adj.simplifiedHealing}}SIMPLIFIED HEALING of {{/if}}{{adj.adjustmentTarget}} costs {{adj.costPerActivePoint}} CP. {{/if}}{{#if (lt adj.adjustmentDamageThisApplication 0)}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost. {{else}}{{#if (eq adj.adjustmentDamageThisApplication 0)}}No effect on {{adj.adjustmentTarget}}. {{else}}{{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained. {{/if}}{{/if}}{{#if (and adj.maximumEffectActivePoints (lt adj.maximumEffectActivePoints 999))}}Maximum Effect is {{abs adj.maximumEffectActivePoints}} CP. {{/if}}{{#if (ne adj.thisAttackActivePointAdjustmentNotAppliedDueToMax 0)}} {{abs adj.thisAttackActivePointAdjustmentNotAppliedDueToMax}} Character Points of adjustment action not applied because it exceeded the maximum effect (See MAXIMUM EFFECT rules). {{/if}}{{#if (ne adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing 0)}} {{abs adj.thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing}} Character Points of adjustment action not applied because it did not exceed the existing effect (See MAXIMUM EFFECT rules).{{/if}}{{#if adj.adjustmentTotalActivePointEffect}} Total temporary adjustments for {{adj.adjustmentTarget}} is {{adj.adjustmentTotalActivePointEffect}} CP. {{/if}}
                 </div>
-            </i> --}}
-            </i>
+            {{/unless}}
         </div>
     {{/each}}
 </div>

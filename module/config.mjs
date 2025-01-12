@@ -4499,6 +4499,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CLAIRSENTIENCE",
             type: ["sense"],
             behaviors: [],
+            perceivability: "imperceptible",
             costPerLevel: costPerLevelFixedValue(1),
             duration: "constant",
             range: HERO.RANGE_TYPES.STANDARD,
@@ -5993,7 +5994,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ACTIVESONAR",
-            type: ["sense"],
+            type: ["sense", "active"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6117,8 +6118,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "HRRP",
-            type: ["sense"],
+            key: "HRRP", // High Range Radio Perception
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn", "transmitBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6152,7 +6153,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "INFRAREDPERCEPTION",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6180,7 +6181,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MENTALAWARENESS",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             senseGroup: "mental",
@@ -6205,7 +6206,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "NIGHTVISION",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6257,7 +6258,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RADAR",
-            type: ["sense"],
+            type: ["sense", "active"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6268,7 +6269,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RADIOPERCEIVETRANSMIT",
-            type: ["sense"],
+            type: ["sense", "active"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6279,7 +6280,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RADIOPERCEPTION",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6313,7 +6314,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "SPATIALAWARENESS",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "targetingBuiltIn", "penetrativeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6347,7 +6348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TRACKINGSENSE",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: [],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6358,7 +6359,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TRANSMIT",
-            type: ["sense"],
+            type: ["sense", "active"],
             behaviors: [],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6370,7 +6371,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ULTRASONICPERCEPTION",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",
@@ -6386,7 +6387,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ULTRAVIOLETPERCEPTION",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
             costPerLevel: costPerLevelFixedValue(0),
             target: "self only",

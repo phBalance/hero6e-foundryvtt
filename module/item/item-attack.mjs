@@ -27,6 +27,7 @@ export async function chatListeners(html) {
     html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
     html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
     html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
+    html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -3704,4 +3705,26 @@ async function spendResourcesToUse(
         resourcesUsedDescription,
         resourcesUsedDescriptionRenderedRoll,
     };
+}
+
+export async function _onAdjustmentToolipExpandCollapse(event) {
+    const divSummary = $(event.currentTarget);
+    const icon = divSummary.children("i.adjustment-tooltip").first();
+    const tooltipDiv = icon.siblings("div.adjustment-tooltip").first();
+    if (!tooltipDiv) {
+        console.warn(`_onAdjustmentToolipExpandCollapse missing div`);
+        return;
+    }
+    console.log(tooltipDiv);
+    const display = tooltipDiv.css("display");
+    if (display === "none") {
+        tooltipDiv.css("display", "block");
+        icon.addClass("fa-circle-caret-down");
+        icon.removeClass("fa-circle-caret-right");
+    } else {
+        tooltipDiv.css("display", "none");
+
+        icon.addClass("fa-circle-caret-right");
+        icon.removeClass("fa-circle-caret-down");
+    }
 }
