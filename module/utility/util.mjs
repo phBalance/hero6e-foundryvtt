@@ -287,8 +287,12 @@ export async function expireEffects(actor) {
                     await ae.delete();
                     break;
                 }
-                ae.duration.startTime += ae.duration.seconds;
-                await ae.update({ duration: ae.duration });
+
+                // Make sure we don't add duration twice
+                if (ae.updateDuration().remaining <= 0) {
+                    ae.duration.startTime += ae.duration.seconds;
+                    await ae.update({ duration: ae.duration });
+                }
             } else {
                 console.log(`${ae.name} expired`);
                 break;
