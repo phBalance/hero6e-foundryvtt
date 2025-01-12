@@ -345,7 +345,7 @@ function defaultPowerDiceParts(item, diceParts) {
     };
 }
 
-function standardBaseEffectDiceParts(item) {
+function standardBaseEffectDiceParts(item /* , options */) {
     const diceParts = {
         dc: item.dcRaw,
         d6Count: parseInt(item.system.LEVELS || 0),
@@ -357,7 +357,10 @@ function standardBaseEffectDiceParts(item) {
     return defaultPowerDiceParts(item, diceParts);
 }
 
-function noDamageBaseEffectDiceParts(item) {
+/**
+ * Shouldn't ever be called. Only here to make sure we don't have to check if baseEffectDiceParts exists
+ */
+function noDamageBaseEffectDiceParts(item /* , _options */) {
     console.error(`${item.name}/${item.system.XMLID} is defined as having no effect but effect is called`);
 
     return {
