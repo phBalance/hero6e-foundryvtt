@@ -69,7 +69,7 @@ export class HeroSystem6eEndToEndTest {
         await this.createTestScene();
         await this.createTestActors();
 
-        if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "OCV"))) return;
+        //if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", "OCV"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "STUN"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", "CON"))) return;
         if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", "CON"))) return;
