@@ -2,6 +2,8 @@
 
 ## Version 4.0.14 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Fix where 5e AOE NAKEDMODIFIER powers failed to upload. [#1704](https://github.com/dmdorman/hero6e-foundryvtt/issues/1704)
+
 ## Version 4.0.13 20250111
 
 - Enhanced Senses improvements:

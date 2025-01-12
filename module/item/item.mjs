@@ -1031,7 +1031,11 @@ export class HeroSystem6eItem extends Item {
 
         // 5e has a slightly different alias for an Explosive Radius in HD.
         // Otherwise, all other shapes seems the same.
-        const type = modifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : modifier.OPTION_ALIAS;
+        // NAKEDMODIFIER has the AOE shape in MODIFIER
+        const type =
+            modifier.OPTION_ALIAS === "Normal (Radius)"
+                ? "Radius"
+                : modifier.OPTION_ALIAS || modifier.MODIFIER?.find((m) => m.XMLID === "AOE").OPTION_ALIAS;
         const newAoe = {
             type: type.toLowerCase(),
             value: levels,
