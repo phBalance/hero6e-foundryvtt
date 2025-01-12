@@ -1,6 +1,8 @@
 # Releases
 
-## Version 4.0.13 2025011 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.14 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+## Version 4.0.13 20250111
 
 - Enhanced Senses improvements:
   - SIGHTGROUP visions now respect the BLIND status. [#1590](https://github.com/dmdorman/hero6e-foundryvtt/issues/1590)
