@@ -1,6 +1,11 @@
 # Releases
 
-## Version 4.0.13 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.14 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix where 5e AOE NAKEDMODIFIER powers failed to upload. [#1704](https://github.com/dmdorman/hero6e-foundryvtt/issues/1704)
+- Improvements to HDC uploads. Actor sheet now shows "Upload in progress", preventing you from clicking around until the upload is complete. Actor owners are notified of upload in a chat message.
+
+## Version 4.0.13 20250111
 
 - Enhanced Senses improvements:
   - SIGHTGROUP visions now respect the BLIND status. [#1590](https://github.com/dmdorman/hero6e-foundryvtt/issues/1590)
@@ -12,6 +17,7 @@
 - Knocked out targets no longer get double adjustment effect. [#1255](https://github.com/dmdorman/hero6e-foundryvtt/issues/1255)
 - Explosions now correctly deal different damage to each token based on distance when using the "Apply Damage to ALL" button. [#1323](https://github.com/dmdorman/hero6e-foundryvtt/issues/1323)
 - Fixed issue where some adders (like EVERYPHASE) were ignored when there were multiple modifiers. [#1634](https://github.com/dmdorman/hero6e-foundryvtt/issues/1634)
+- Fixes several adjustment issues. There are a few issues left. Absorption & transfer are not working. [#1633](https://github.com/dmdorman/hero6e-foundryvtt/issues/1633) [#1600](https://github.com/dmdorman/hero6e-foundryvtt/issues/1600) [#615](https://github.com/dmdorman/hero6e-foundryvtt/issues/615) [#521](https://github.com/dmdorman/hero6e-foundryvtt/issues/521) [#1643](https://github.com/dmdorman/hero6e-foundryvtt/issues/1643) [#1610](https://github.com/dmdorman/hero6e-foundryvtt/issues/1610) [#1587](https://github.com/dmdorman/hero6e-foundryvtt/issues/1587) [#1495](https://github.com/dmdorman/hero6e-foundryvtt/issues/1495) [#1328](https://github.com/dmdorman/hero6e-foundryvtt/issues/1328) [#1325](https://github.com/dmdorman/hero6e-foundryvtt/issues/1325) [#1310](https://github.com/dmdorman/hero6e-foundryvtt/issues/1310) [#1302](https://github.com/dmdorman/hero6e-foundryvtt/issues/1302) [#576](https://github.com/dmdorman/hero6e-foundryvtt/issues/576) [#1655](https://github.com/dmdorman/hero6e-foundryvtt/issues/1655) [#1611](https://github.com/dmdorman/hero6e-foundryvtt/issues/1611) [#1609](https://github.com/dmdorman/hero6e-foundryvtt/issues/1609) [#1609](https://github.com/dmdorman/hero6e-foundryvtt/issues/1609)
 
 ## Version 4.0.12 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

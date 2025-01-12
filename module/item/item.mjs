@@ -1045,7 +1045,11 @@ export class HeroSystem6eItem extends Item {
 
         // 5e has a slightly different alias for an Explosive Radius in HD.
         // Otherwise, all other shapes seems the same.
-        const type = modifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : modifier.OPTION_ALIAS;
+        // NAKEDMODIFIER has the AOE shape in MODIFIER
+        const type =
+            modifier.OPTION_ALIAS === "Normal (Radius)"
+                ? "Radius"
+                : modifier.OPTION_ALIAS || modifier.MODIFIER?.find((m) => m.XMLID === "AOE").OPTION_ALIAS;
         const newAoe = {
             type: type.toLowerCase(),
             value: levels,
@@ -1941,13 +1945,19 @@ export class HeroSystem6eItem extends Item {
 
             // Save changes
             if (changed && this.id && this.isEmbedded) {
+                if (options?.uploadProgressBar) {
+                    if (this.system.versionHeroSystem6eCreated === undefined) {
+                        this.system.versionHeroSystem6eCreated = game.system.version;
+                        options.uploadProgressBar.advance(`${this.actor.name}: Adding ${this.name}`);
+                    }
+                }
+
                 const changeObject = { system: this.system };
                 if (oldName !== this.name) {
                     changeObject.name = this.name;
                 }
                 await this.update(changeObject, options);
             }
-            options?.uploadProgressBar?.advance(`${this.actor.name}: Adding ${this.name}`);
 
             // ACTIVE EFFECTS
             if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {

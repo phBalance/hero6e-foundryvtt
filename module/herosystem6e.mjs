@@ -80,8 +80,8 @@ Hooks.once("init", async function () {
 
     // debug
     // CONFIG.debug.hooks = true;
-    CONFIG.debug.combat = true;
-    CONFIG.debug.time = true;
+    // CONFIG.debug.combat = true;
+    // CONFIG.debug.time = true;
 
     // Define custom Entity classes
     CONFIG.Actor.documentClass = HeroSystem6eActor;
