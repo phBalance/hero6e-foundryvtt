@@ -7758,6 +7758,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDPOWER",
             costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDPOWER" ID="1736707646912" BASECOST="0.0" LEVELS="0" ALIAS="Limited Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1" OPTIONID="1" OPTION_ALIAS="Power loses less than a fourth of its effectiveness" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         undefined,
@@ -7778,6 +7779,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOKB",
             costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOKB" ID="1736707259863" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7849,7 +7851,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REDUCEDPENETRATION",
             costPerLevel: fixedValueFunction(0),
-            dc: true,
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REDUCEDPENETRATION" ID="1736707573869" BASECOST="-0.25" LEVELS="0" ALIAS="Reduced Penetration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7859,7 +7861,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RESTRAINABLE",
             costPerLevel: fixedValueFunction(0),
-            dc: true,
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RESTRAINABLE" ID="1736707497175" BASECOST="-0.5" LEVELS="0" ALIAS="Restrainable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7974,19 +7976,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 // Some MODIFIERS (like EXPANDEDEFFECT) base a BASECOST -0.5 with LEVELS=2 and CostPerLevel 0.5, making them appear to be limitations, but actually advantages.
 // Plan is to remove ModifierOverride and add them to the powers list as modifiers.
 HERO.ModifierOverride = {
-    ADDITIONALED: { BASECOST: 5 / 2 },
-    ADDITIONALPD: { BASECOST: 5 / 2 },
-    ALWAYSOCCURS: { BASECOST: 0, MULTIPLIER: 2 },
+    ADDITIONALED: { dcAffecting: fixedValueFunction(false), BASECOST: 5 / 2 },
+    ADDITIONALPD: { dcAffecting: fixedValueFunction(false), BASECOST: 5 / 2 },
+    ALWAYSOCCURS: { dcAffecting: fixedValueFunction(false), BASECOST: 0, MULTIPLIER: 2 },
     AVAD: { dcAffecting: fixedValueFunction(true) },
     BOOSTABLE: { dcAffecting: fixedValueFunction(true) },
-    CONTINUOUSCONCENTRATION: { BASECOST: -0.25 },
+    CONTINUOUSCONCENTRATION: { dcAffecting: fixedValueFunction(false), BASECOST: -0.25 },
     DAMAGEOVERTIME: { dcAffecting: fixedValueFunction(true) },
-    DEFBONUS: { BASECOST: 2 },
-    DIMENSIONS: { BASECOST: 5 },
-    ENERGY: { BASECOST: 5 }, // DAMAGENEGATION
-    IMPROVEDNONCOMBAT: { BASECOST: 5 },
-    MENTAL: { BASECOST: 5 }, // DAMAGENEGATION
-    PHYSICAL: { BASECOST: 5 }, // DAMAGENEGATION
+    DEFBONUS: { dcAffecting: fixedValueFunction(false), BASECOST: 2 },
+    DIMENSIONS: { dcAffecting: fixedValueFunction(false), BASECOST: 5 },
+    ENERGY: { dcAffecting: fixedValueFunction(false), BASECOST: 5 }, // DAMAGENEGATION
+    IMPROVEDNONCOMBAT: { dcAffecting: fixedValueFunction(false), BASECOST: 5 },
+    MENTAL: { dcAffecting: fixedValueFunction(false), BASECOST: 5 }, // DAMAGENEGATION
+    PHYSICAL: { dcAffecting: fixedValueFunction(false), BASECOST: 5 }, // DAMAGENEGATION
     TIMELIMIT: { dcAffecting: fixedValueFunction(true) },
     TRANSDIMENSIONAL: { dcAffecting: fixedValueFunction(true) },
 };

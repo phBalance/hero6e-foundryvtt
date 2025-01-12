@@ -1533,7 +1533,11 @@ export class HeroSystem6eActor extends Actor {
 
         // Need count of maneuvers for progress bar
         const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-        const freeStuffCount = powerList.filter((power) => power.type.includes("maneuver")).length;
+        const freeStuffCount = powerList.filter(
+            (power) =>
+                !(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
+                power.type.includes("maneuver"),
+        ).length;
 
         const xmlItemsToProcess =
             1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
