@@ -5302,7 +5302,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: function (item) {
-                console.log(this);
                 // FLASH (target group cost 5 per level, non-targeting costs 3 per level)
                 if (item?.system?.OPTIONID === "SIGHTGROUP") {
                     // The only targeting group
@@ -6234,8 +6233,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(undefined, {
         key: "TRANSFER",
-        type: ["adjustment", "attack", "dice"],
-        behaviors: ["to-hit"],
+        type: ["adjustment", "attack"],
+        behaviors: ["to-hit", "dice"],
         perceivability: "obvious",
         duration: "instant",
         target: "target's DCV",
