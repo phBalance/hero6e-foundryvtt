@@ -1292,7 +1292,7 @@ export class HeroSystem6eItem extends Item {
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
         // Effect
-        if (item.baseInfo.behaviors.includes("dice")) {
+        if (item.causesDamageEffect()) {
             item.flags.tags = {};
 
             // Combat Skill Levels
@@ -1534,6 +1534,20 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    rollsToHit() {
+        return (
+            (this.baseInfo?.behaviors.includes("to-hit") && this.system.XMLID !== "MANEUVER") ||
+            (this.system.XMLID === "MANEUVER" && this.system.OCV !== "--")
+        );
+    }
+
+    causesDamageEffect() {
+        return (
+            (this.baseInfo?.behaviors.includes("dice") && this.system.XMLID !== "MANEUVER") ||
+            (this.system.XMLID === "MANEUVER" && this.system.OCV !== "--")
+        );
+    }
+
     async _postUpload(options) {
         try {
             const configPowerInfo = this.baseInfo;
@@ -1662,13 +1676,13 @@ export class HeroSystem6eItem extends Item {
             }
 
             // TO HIT
-            if (this.baseInfo?.behaviors.includes("to-hit")) {
+            if (this.rollsToHit()) {
                 this.makeToHit();
                 changed = true; // FIXME: Obviously not always true. Shouldn't be modifying anything in system frankly.
             }
 
             // ATTACK
-            if (this.baseInfo?.behaviors.includes("dice")) {
+            if (this.causesDamageEffect()) {
                 // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach.
                 const attack = "attack";
                 if (this.system.subType !== attack) {
@@ -3297,30 +3311,33 @@ export class HeroSystem6eItem extends Item {
                     system.description += `, ${dcv.signedString()} DCV`;
                     if (system.EFFECT) {
                         let effect = system.EFFECT;
-                        const { diceParts } = calculateDicePartsForItem(this, { ignoreDeadlyBlow: true });
-                        if (system.EFFECT.search(/\[STRDC\]/) > -1) {
-                            // Cheat a bit. d6Count for strength is ~DC.
-                            const effectiveStrength = diceParts.d6Count * 5;
-                            effect = system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`);
-                        } else if (
-                            diceParts.d6Count +
-                            diceParts.d6Less1DieCount +
-                            diceParts.halfDieCount +
-                            diceParts.constant
-                        ) {
-                            // This does some damage.
-                            const damageFormula = dicePartsToEffectFormula(diceParts);
-                            if (damageFormula) {
-                                const nnd = system.EFFECT.indexOf("NNDDC") > -1;
-                                const killing =
-                                    system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLINGDC") > -1;
 
-                                const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? " HKA" : ""}`;
+                        if (this.causesDamageEffect()) {
+                            const { diceParts } = calculateDicePartsForItem(this, { ignoreDeadlyBlow: true });
+                            if (system.EFFECT.search(/\[STRDC\]/) > -1) {
+                                // Cheat a bit. d6Count for strength is ~DC.
+                                const effectiveStrength = diceParts.d6Count * 5;
+                                effect = system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`);
+                            } else if (
+                                diceParts.d6Count +
+                                diceParts.d6Less1DieCount +
+                                diceParts.halfDieCount +
+                                diceParts.constant
+                            ) {
+                                // This does some damage.
+                                const damageFormula = dicePartsToEffectFormula(diceParts);
+                                if (damageFormula) {
+                                    const nnd = system.EFFECT.indexOf("NNDDC") > -1;
+                                    const killing =
+                                        system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLINGDC") > -1;
 
-                                effect = system.EFFECT.replace("[NORMALDC]", diceFormula)
-                                    .replace("[KILLINGDC]", diceFormula)
-                                    .replace("[FLASHDC]", diceFormula)
-                                    .replace("[NNDDC]", diceFormula);
+                                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? " HKA" : ""}`;
+
+                                    effect = system.EFFECT.replace("[NORMALDC]", diceFormula)
+                                        .replace("[KILLINGDC]", diceFormula)
+                                        .replace("[FLASHDC]", diceFormula)
+                                        .replace("[NNDDC]", diceFormula);
+                                }
                             }
                         }
 
