@@ -32,6 +32,17 @@ async function willNotMigrate(lastMigration) {
     return false;
 }
 
+/**
+ * Run asyncFn against all elements of the provided queue if:
+ *  * a lastMigration isn't provided or if
+ *  * the lastMigration < migratesToVersion
+ *
+ * @param {string} migratesToVersion
+ * @param {string} lastMigration
+ * @param {Array<Object>} queue
+ * @param {string} queueType
+ * @param {async fn(queueElement)} asyncFn
+ */
 async function migrateToVersion(migratesToVersion, lastMigration, queue, queueType, asyncFn) {
     if (!lastMigration || foundry.utils.isNewerVersion(migratesToVersion, lastMigration)) {
         const originalTotal = queue.length;
@@ -81,7 +92,15 @@ export async function migrateWorld() {
     // Create or recreate Compendiums
     CreateHeroCompendiums();
 
-    // Rebuild the database for all actors by recreating actors and all all their items (description, cost, etc)
+    await migrateToVersion(
+        "4.0.14",
+        lastMigration,
+        getAllActorsInGame(),
+        "rebuilding all built in maneuvers",
+        async (actor) => await replaceActorsBuiltInManeuvers(actor),
+    );
+
+    // Always rebuild the database for all actors by recreating actors and all their items (description, cost, etc)
     await migrateToVersion(
         game.system.version,
         undefined,
@@ -93,34 +112,39 @@ export async function migrateWorld() {
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 }
 
+async function replaceActorsBuiltInManeuvers(actor) {
+    try {
+        if (!actor) return false;
+
+        // Remove all built in maneuvers
+        const builtInManeuverDeletePromises = actor.items
+            .filter((power) => power.type?.includes("maneuver"))
+            .map((item) => item.delete());
+        await Promise.all(builtInManeuverDeletePromises);
+
+        // Add in the new placeholder items and all built in maneuvers
+        await actor.addAttackPlaceholders();
+        await actor.addHeroSystemManeuvers();
+    } catch (e) {
+        console.error(e);
+        if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
+            await ui.notifications.warn(`Migration of maneuvers to 4.0.14 failed for ${actor?.name}. Please report.`);
+        }
+    }
+}
+
 async function rebuildActors(actor) {
     try {
         if (!actor) return false;
 
-        const itemsChanged = false;
-        for (let item of actor.items) {
+        // Rebuild all item data
+        for (const item of actor.items) {
             await item._postUpload();
         }
 
-        if (itemsChanged || !actor.system.pointsDetail) {
-            const oldPointsDetail = actor.system.pointsDetail;
-            await actor.CalcActorRealAndActivePoints();
-            if (oldPointsDetail !== actor.system.pointsDetail) {
-                await actor.update(
-                    {
-                        "system.points": actor.system.points,
-                        "system.activePoints": actor.system.activePoints,
-                        "system.pointsDetail": actor.system.pointsDetail,
-                    },
-                    { render: false },
-                    { hideChatMessage: true },
-                );
-            }
-        }
-
-        actor._postUpload();
+        await actor._postUpload();
     } catch (e) {
-        console.log(e);
+        console.error(e);
         if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
             await ui.notifications.warn(`Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`);
         }
