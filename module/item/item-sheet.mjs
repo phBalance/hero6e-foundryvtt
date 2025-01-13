@@ -211,24 +211,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     value: item.system.csl[c],
                 });
             }
-
-            // Enumerate attacks
-            // data.attacks = [];
-            // if (!item.system.attacks) item.system.attacks = {};
-            // for (let attack of item.actor.items.filter(
-            //     (o) =>
-            //         (o.type === "attack" || o.system.subType === "attack") &&
-            //         o.system.uses === _ocv,
-            // )) {
-            //     if (!item.system.attacks[attack.id]) {
-            //         item.system.attacks[attack.id] = false;
-            //     }
-            //     data.attacks.push({
-            //         name: attack.name,
-            //         id: attack.id,
-            //         checked: item.system.attacks[attack.id],
-            //     });
-            // }
         }
 
         if (configPowerInfo?.editOptions?.showAttacks) {
@@ -253,17 +235,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         }: ${attack.system.description.replace(/"/g, "&quot;")}`,
                     });
                 }
-
-                // Not sure if we should SORT or not
-                // data.attacks.sort((a, b) => {
-                //     if (a.name.toUpperCase() < b.name.toUpperCase()) {
-                //         return -1;
-                //     }
-                //     if (a.name.toUpperCase() > b.name.toUpperCase()) {
-                //         return 1;
-                //     }
-                //     return 0;
-                // });
             }
         }
 

@@ -191,7 +191,7 @@ async function CreateHeroItems() {
         },
     );
 
-    for (const power of powers.filter((o) => o.type.includes("perk") && o.xml)) {
+    for (const power of powers.filter((o) => o.type?.includes("perk") && o.xml)) {
         // Only include powers where XML is defined
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
@@ -208,7 +208,7 @@ async function CreateHeroItems() {
         },
     );
 
-    for (const power of powers.filter((o) => o.type.includes("skill") && o.xml)) {
+    for (const power of powers.filter((o) => o.type?.includes("skill") && o.xml)) {
         // Only include powers where XML is defined
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
@@ -225,7 +225,7 @@ async function CreateHeroItems() {
         },
     );
 
-    for (const power of powers.filter((o) => o.type.includes("talent") && o.xml)) {
+    for (const power of powers.filter((o) => o.type?.includes("talent") && o.xml)) {
         // Only include powers where XML is defined
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;

@@ -1983,96 +1983,41 @@ export class HeroSystem6eActor extends Actor {
         if (this.type === "pc" || this.type === "npc") {
             uploadProgressBar.advance(`${this.name}: Adding non HDC items for PCs and NPCs`);
 
-            // Perception Skill
-            const itemDataPerception = {
-                name: "Perception",
-                type: "skill",
-                system: {
-                    XMLID: "PERCEPTION",
-                    ALIAS: "Perception",
-                    CHARACTERISTIC: "INT",
-                    state: "trained",
-                    levels: "0",
-                },
-            };
-            const perceptionItem = this.id
-                ? await HeroSystem6eItem.create(itemDataPerception, {
-                      parent: this,
-                  })
-                : new HeroSystem6eItem(itemDataPerception, {
-                      parent: this,
-                  });
-            if (!this.id) {
-                this.items.set(perceptionItem.system.XMLID, perceptionItem);
-            }
-            await perceptionItem._postUpload({ applyEncumbrance: false });
+            await this.addPerception();
 
             // MANEUVERS
             await this.addAttackPlaceholders();
 
-            const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-            powerList
-                .filter((power) => power.type?.includes("maneuver"))
-                .forEach(async (maneuver) => {
-                    const name = maneuver.name;
-                    const XMLID = maneuver.key;
-
-                    const maneuverDetails = maneuver.maneuverDesc;
-                    const PHASE = maneuverDetails.phase;
-                    const OCV = maneuverDetails.ocv;
-                    const DCV = maneuverDetails.dcv;
-                    const EFFECT = maneuverDetails.effects;
-                    const DC = maneuverDetails.dc;
-                    const ADDSTR = maneuverDetails.addStr;
-                    const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
-                    const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
-
-                    const itemData = {
-                        name,
-                        type: "maneuver",
-                        system: {
-                            PHASE,
-                            OCV,
-                            DCV,
-                            DC,
-                            EFFECT,
-                            active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
-                            description: EFFECT,
-                            XMLID,
-                            // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
-                            // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
-                            //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
-                            //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
-                            //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
-                            //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
-                            //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
-                            DISPLAY: name, // Not sure we should allow editing of basic maneuvers
-                            ADDSTR,
-                            USEWEAPON,
-                            WEAPONEFFECT,
-                        },
-                    };
-
-                    if (!itemData.name) {
-                        console.error("Missing name", itemData);
-                        return;
-                    }
-
-                    const item = this.id
-                        ? await HeroSystem6eItem.create(itemData, {
-                              parent: this,
-                          })
-                        : new HeroSystem6eItem(itemData, {
-                              parent: this,
-                          });
-
-                    // Work around if temporary actor
-                    if (!this.id) {
-                        this.items.set(item.system.XMLID, item);
-                    }
-                    await item._postUpload();
-                });
+            return this.addHeroSystemManeuvers();
         }
+    }
+
+    async addPerception() {
+        // Perception Skill
+        const itemDataPerception = {
+            name: "Perception",
+            type: "skill",
+            system: {
+                XMLID: "PERCEPTION",
+                ALIAS: "Perception",
+                CHARACTERISTIC: "INT",
+                state: "trained",
+                levels: "0",
+            },
+        };
+        const perceptionItem = this.id
+            ? await HeroSystem6eItem.create(itemDataPerception, {
+                  parent: this,
+              })
+            : new HeroSystem6eItem(itemDataPerception, {
+                  parent: this,
+              });
+
+        if (!this.id) {
+            this.items.set(perceptionItem.system.XMLID, perceptionItem);
+        }
+
+        await perceptionItem._postUpload({ applyEncumbrance: false });
     }
 
     async addAttackPlaceholders() {
@@ -2114,6 +2059,74 @@ export class HeroSystem6eActor extends Actor {
             this.items.set(maneuverWeaponPlaceholderItem.name, maneuverWeaponPlaceholderItem);
         }
         await maneuverWeaponPlaceholderItem._postUpload();
+    }
+
+    async addHeroSystemManeuvers() {
+        const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+        const maneuverPromises = powerList
+            .filter((power) => power.type?.includes("maneuver"))
+            .map(async (maneuver) => {
+                const name = maneuver.name;
+                const XMLID = maneuver.key;
+
+                const maneuverDetails = maneuver.maneuverDesc;
+                const PHASE = maneuverDetails.phase;
+                const OCV = maneuverDetails.ocv;
+                const DCV = maneuverDetails.dcv;
+                const EFFECT = maneuverDetails.effects;
+                const DC = maneuverDetails.dc;
+                const ADDSTR = maneuverDetails.addStr;
+                const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
+                const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
+
+                const itemData = {
+                    name,
+                    type: "maneuver",
+                    system: {
+                        PHASE,
+                        OCV,
+                        DCV,
+                        DC,
+                        EFFECT,
+                        active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
+                        description: EFFECT,
+                        XMLID,
+                        // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
+                        // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
+                        //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
+                        //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
+                        //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
+                        //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
+                        //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
+                        DISPLAY: name, // Not sure we should allow editing of basic maneuvers
+                        ADDSTR,
+                        USEWEAPON,
+                        WEAPONEFFECT,
+                    },
+                };
+
+                if (!itemData.name) {
+                    console.error("Missing name", itemData);
+                    return;
+                }
+
+                const item = this.id
+                    ? await HeroSystem6eItem.create(itemData, {
+                          parent: this,
+                      })
+                    : new HeroSystem6eItem(itemData, {
+                          parent: this,
+                      });
+
+                // Work around if temporary actor
+                if (!this.id) {
+                    this.items.set(item.system.XMLID, item);
+                }
+
+                return item._postUpload();
+            });
+
+        await Promise.all(maneuverPromises);
     }
 
     static _xmlToJsonNode(json, children) {
