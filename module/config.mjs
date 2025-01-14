@@ -7469,6 +7469,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
 
     addPower(
+        {
             key: "ACTIVATIONROLL",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -7660,6 +7661,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
 
     addPower(
+        {
             key: "CANNOTATTACK",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -8019,6 +8021,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     });
 
     addPower(
+        {
             key: "LIMITEDRANGE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
