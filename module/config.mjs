@@ -6363,6 +6363,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ACTIVESONAR",
             type: ["sense", "active"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6374,6 +6375,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ADJACENTFIXED",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6385,6 +6387,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ADJACENT",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6396,6 +6399,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ANALYZESENSE",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6408,6 +6412,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONCEALED",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6420,6 +6425,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DETECT",
             type: ["sense"],
             behaviors: ["activatable"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costPerLevel: fixedValueFunction(1),
@@ -6431,6 +6437,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALSINGLE",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6442,6 +6449,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALGROUP",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6453,6 +6461,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALALL",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6464,6 +6473,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DISCRIMINATORY",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
@@ -6476,6 +6486,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ENHANCEDPERCEPTION",
             type: ["sense"],
             behaviors: ["activatable"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(3),
@@ -6488,6 +6499,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HRRP", // High Range Radio Perception
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "transmitBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6500,6 +6512,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INCREASEDARC240",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6511,6 +6524,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INCREASEDARC360",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6522,6 +6536,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INFRAREDPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6539,6 +6554,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MAKEASENSE",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6550,6 +6566,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MENTALAWARENESS",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             senseGroup: "mental",
             senseType: "passive",
@@ -6562,6 +6579,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MICROSCOPIC",
             type: ["sense"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
@@ -6575,6 +6593,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "NIGHTVISION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6604,6 +6623,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PARTIALLYPENETRATIVE",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6615,6 +6635,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PENETRATIVE",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6627,6 +6648,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADAR",
             type: ["sense", "active"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6638,6 +6660,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADIOPERCEIVETRANSMIT",
             type: ["sense", "active"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6649,6 +6672,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADIOPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6660,6 +6684,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RANGE",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.STANDARD,
@@ -6671,6 +6696,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RAPID",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6683,6 +6709,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SPATIALAWARENESS",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "targetingBuiltIn", "penetrativeBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6695,6 +6722,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TARGETINGSENSE",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6706,6 +6734,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TELESCOPIC",
             type: ["sense"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6717,6 +6746,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRACKINGSENSE",
             type: ["sense", "passive"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6728,6 +6758,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRANSMIT",
             type: ["sense", "active"],
             behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6740,6 +6771,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ULTRASONICPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6756,6 +6788,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ULTRAVIOLETPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -7381,6 +7414,39 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addModifiersToPowerList() {
     addPower(
         {
+            key: "ABLATIVE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ABLATIVE" ID="1730531163233" BASECOST="-1.0" LEVELS="0" ALIAS="Ablative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BODYORSTUN" OPTIONID="BODYORSTUN" OPTION_ALIAS="BODY or STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ALWAYSDIRECT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ALWAYSDIRECT" ID="1730530836005" BASECOST="-0.25" LEVELS="0" ALIAS="Always Direct" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ALWAYSON",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ALWAYSON" ID="1730531186125" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "AOE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -7532,6 +7598,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "CANNOTDODAMAGE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="CANNOTDODAMAGE" ID="1730530836004" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Do Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "CHARGES",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0), // TODO: Needs a function
@@ -7548,6 +7625,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0), // TODO: Needs a function
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="COSTSEND" ID="1728919937538" BASECOST="-0.25" LEVELS="0" ALIAS="Costs Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ACTIVATE" OPTIONID="ACTIVATE" OPTION_ALIAS="Only Costs END to Activate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "COSTSENDTOMAINTAIN",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="COSTSENDTOMAINTAIN" ID="1733644749282" BASECOST="-0.5" LEVELS="0" ALIAS="Costs END To Maintain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="Full END Cost" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -7592,6 +7680,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DAMAGESHIELD" ID="1735588757286" BASECOST="0.5" LEVELS="0" ALIAS="Damage Shield" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DECREASEDREUSE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="DECREASEDREUSE" ID="1730531391045" BASECOST="1.5" LEVELS="0" ALIAS="Decreased Re-use Duration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1TURN" OPTIONID="1TURN" OPTION_ALIAS="1 Turn" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -7756,6 +7855,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "INHERENT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="INHERENT" ID="1730531186124" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "IMPENETRABLE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
@@ -7763,6 +7873,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         undefined,
+    );
+
+    addPower(
+        {
+            key: "INCREASEDEND",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="INCREASEDEND" ID="1736874990723" BASECOST="-0.5" LEVELS="0" ALIAS="Increased Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2X" OPTIONID="2X" OPTION_ALIAS="x2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "LIMITEDBODYPARTS",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="LIMITEDBODYPARTS" ID="1730530831066" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Body Parts" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Hands/arms" PRIVATE="No" FORCEALLOW="No">`,
+        },
+        {},
     );
 
     addPower(undefined, {
@@ -7781,6 +7913,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<MODIFIER XMLID="LIMITEDPOWER" ID="1736707646912" BASECOST="0.0" LEVELS="0" ALIAS="Limited Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1" OPTIONID="1" OPTION_ALIAS="Power loses less than a fourth of its effectiveness" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         undefined,
+    );
+
+    addPower(
+        {
+            key: "MODIFIER",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="MODIFIER" ID="1736876900984" BASECOST="0.0" LEVELS="0" ALIAS="Custom Modifier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
     );
 
     addPower(

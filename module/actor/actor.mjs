@@ -1525,7 +1525,14 @@ export class HeroSystem6eActor extends Actor {
         if (this.id) {
             // We can't delay this with the changes array because any items based on this actor needs this value.
             // Specifically compound power is a problem if we don't set is5e properly for a 5e actor.
-            await this.update({ "system.is5e": this.system.is5e });
+            // Caution: Any this.system.* variables are lost if they are not updated here.
+            await this.update({
+                "system.is5e": this.system.is5e,
+                "system.CHARACTER.BASIC_CONFIGURATION": this.system.CHARACTER.BASIC_CONFIGURATION,
+                "system.CHARACTER.CHARACTER_INFO": this.system.CHARACTER.CHARACTER_INFO,
+                "system.CHARACTER.TEMPLATE": this.system.CHARACTER.TEMPLATE,
+                "system.CHARACTER.version": this.system.CHARACTER.version,
+            });
         }
 
         // Quench test may need CHARACTERISTICS, which are set in postUpload
@@ -1552,7 +1559,8 @@ export class HeroSystem6eActor extends Actor {
             1 + // Validating adjustment and powers
             1 + // Images
             1 + // Final save
-            1; // Restore retained damage
+            1 + // Restore retained damage
+            1; // Not really sure why we need an extra +1
         const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 0);
 
         promiseArray.push(this.#addFreeStuff(uploadProgressBar));
@@ -1969,13 +1977,15 @@ export class HeroSystem6eActor extends Actor {
 
         console.log("Upload Performance", uploadPerformance);
 
-        // Let GM know actor was uploaded
-        ChatMessage.create({
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-            author: game.user._id,
-            content: `<b>${game.user.name}</b> uploaded <b>${this.name}</b>`,
-            whisper: whisperUserTargetsForActor(this),
-        });
+        // Let GM know actor was uploaded (unless it is a quench test; missing ID)
+        if (this.id) {
+            ChatMessage.create({
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                author: game.user._id,
+                content: `<b>${game.user.name}</b> uploaded <b>${this.name}</b>`,
+                whisper: whisperUserTargetsForActor(this),
+            });
+        }
     }
 
     async #addFreeStuff(uploadProgressBar) {

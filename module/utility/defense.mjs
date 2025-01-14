@@ -83,6 +83,11 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
         return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, newOptions);
     }
 
+    // Senses are not attacks and thus don't have a valid defenseVsAttack
+    if (actorItemDefense.baseInfo?.type.includes("sense")) {
+        return null;
+    }
+
     console.error(
         `Unable to determine defenseTagVsAttack for ${actorItemDefense.actor.name}::${actorItemDefense.system.XMLID}`,
     );
