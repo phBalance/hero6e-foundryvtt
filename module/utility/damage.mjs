@@ -207,10 +207,6 @@ function addExtraDcsToBundle(item, dicePartsBundle, halve5eKillingAttacks) {
  * @param {Object} options
  */
 export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
-    // PH: FIXME: base is now so simple that we could put it in here.
-
-    // PH: FIXME: Consider some concept of a base attack item for all of the added calculation (the product of the base damage creation)
-
     // PH: FIXME: Consider separating out into maneuver and non maneuver components as much of the complication is realted to that.
 
     const addedDamageBundle = {
@@ -258,7 +254,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     }
 
     // Add in STR if it isn't the base damage type
-    if (item.system.usesStrength && (!isNonKillingStrengthBasedManeuver(item) || isManeuverWithWeapon(item, options))) {
+    if (baseDamageItem.system.usesStrength) {
         addStrengthToBundle(baseDamageItem, options, addedDamageBundle, false);
     }
 

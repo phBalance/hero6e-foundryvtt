@@ -3152,7 +3152,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should recognize double damage limit for martial maneuver with an HKA", function () {
-                        // Base: HKA +1k (1 DC) => 1DC
+                        // Base: HKA +1d6k (3 DC) => 3DC
                         // Added: STR 10 = +2 DC, Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +4 DC
                         // Base + Added 3DC + 4DC (Double rule applies) => 6DC at 15AP/die = 2d6
                         assert.equal(
