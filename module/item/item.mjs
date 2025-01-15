@@ -4394,9 +4394,9 @@ export class HeroSystem6eItem extends Item {
                 this.system.usesStrength = false;
             }
 
-            if (this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
+            if (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
                 this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-            } else {
+            } else if (this.system.EFFECT && this.system.EFFECT.search(/\[NNDDC\]/) > -1) {
                 this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
             }
         }
