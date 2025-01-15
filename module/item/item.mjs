@@ -4308,33 +4308,20 @@ export class HeroSystem6eItem extends Item {
         } else if (xmlid === "IMAGES") {
             this.system.class = "images";
             this.system.noHitLocations = true;
-        } else if (xmlid === "ABSORPTION") {
+        } else if (
+            xmlid === "ABSORPTION" ||
+            xmlid === "AID" ||
+            xmlid === "SUCCOR" ||
+            xmlid === "DISPEL" ||
+            xmlid === "DRAIN" ||
+            xmlid === "HEALING" ||
+            xmlid === "SUPPRESS" ||
+            xmlid === "TRANSFER"
+        ) {
             this.system.class = "adjustment";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "AID" || xmlid === "SUCCOR") {
-            this.system.class = "adjustment";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "DISPEL") {
-            this.system.class = "adjustment";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "DRAIN") {
-            this.system.class = "adjustment";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "HEALING") {
-            this.system.class = "adjustment";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "SUPPRESS") {
-            this.system.class = "adjustment";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "TRANSFER") {
-            this.system.class = "adjustment";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "EGOATTACK") {
-            this.system.class = "mental";
-            this.system.targets = "dmcv";
-            this.system.uses = "omcv";
             this.system.noHitLocations = true;
         } else if (
+            xmlid === "EGOATTACK" ||
             xmlid === "MINDCONTROL" ||
             xmlid === "MENTALILLUSIONS" ||
             xmlid === "MINDSCAN" ||
@@ -4407,9 +4394,9 @@ export class HeroSystem6eItem extends Item {
                 this.system.usesStrength = false;
             }
 
-            if (this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
+            if (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
                 this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-            } else {
+            } else if (this.system.EFFECT && this.system.EFFECT.search(/\[NNDDC\]/) > -1) {
                 this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
             }
         }
@@ -4471,6 +4458,9 @@ export class HeroSystem6eItem extends Item {
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
+        } else if (xmlid === "__STRENGTHDAMAGE") {
+            // This is strength damage so it doesn't double up and add itself.
+            this.system.usesStrength = false;
         }
 
         // AVAD
