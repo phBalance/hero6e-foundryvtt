@@ -92,11 +92,12 @@ export async function migrateWorld() {
     // Create or recreate Compendiums
     CreateHeroCompendiums();
 
+    // Migrate maneuvers for all things that have strength (PC, NPC) but ignore Vehicles and automatons since we don't give them free stuff at this point.
     await migrateToVersion(
         "4.0.14",
         lastMigration,
-        getAllActorsInGame(),
-        "rebuilding all built in maneuvers",
+        getAllActorsInGame().filter((actor) => actor.type === "pc" || actor.type === "npc"),
+        "rebuilding all built in maneuvers for PC and NPCs",
         async (actor) => await replaceActorsBuiltInManeuvers(actor),
     );
 
@@ -126,9 +127,10 @@ async function replaceActorsBuiltInManeuvers(actor) {
         await actor.addAttackPlaceholders();
         await actor.addHeroSystemManeuvers();
     } catch (e) {
-        console.error(e);
+        const msg = `Migration of maneuvers to 4.0.14 failed for ${actor?.name}. Please report.`;
+        console.error(msg, e);
         if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
-            await ui.notifications.warn(`Migration of maneuvers to 4.0.14 failed for ${actor?.name}. Please report.`);
+            await ui.notifications.warn(msg);
         }
     }
 }
@@ -144,9 +146,10 @@ async function rebuildActors(actor) {
 
         await actor._postUpload();
     } catch (e) {
-        console.error(e);
+        const msg = `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`;
+        console.error(msg, e);
         if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
-            await ui.notifications.warn(`Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`);
+            await ui.notifications.warn(msg);
         }
     }
 }
