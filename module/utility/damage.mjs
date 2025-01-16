@@ -256,7 +256,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
 
     // Add in STR if it isn't the base damage type
     if (baseDamageItem.system.usesStrength) {
-        addStrengthToBundle(baseDamageItem, options, addedDamageBundle, false);
+        addStrengthToBundle(baseDamageItem, options, addedDamageBundle, true);
     }
 
     // Boostable Charges
@@ -811,7 +811,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
     dicePartsBundle.tags.push({
         value: `${baseAttackTweaks ? "+" : ""}${formula}`,
         name: "STR",
-        title: `${str} STR -> ${formula}`,
+        title: `${str} STR -> ${baseAttackTweaks ? "+" : ""}${formula}`,
     });
 
     // STRMINIMUM
@@ -845,7 +845,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
         dicePartsBundle.tags.push({
             value: `-(${formula})`,
             name: "MOVEBY STR",
-            title: `STR halved to ${str} due to MOVEBY -> ${formula}`,
+            title: `STR halved to ${str} due to MOVEBY -> -(${formula})`,
         });
     }
 
@@ -863,7 +863,8 @@ export function maneuverBaseEffectDiceParts(item, options) {
     if (isManeuverWithEmptyHand(item, options)) {
         // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
         if (isNonKillingStrengthBasedManeuver(item)) {
-            const str = addStrengthToBundle(item, options, baseDicePartsBundle, true);
+            // PH: FIXME: Ugly that we're adding the baseAttackItem to the dicePartsBundle. Does it make sense there?
+            const str = addStrengthToBundle(item, options, baseDicePartsBundle, false);
 
             // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
             // strength for damage purposes.
