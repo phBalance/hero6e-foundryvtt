@@ -175,7 +175,7 @@ function doubleDamageLimit() {
     return game.settings.get(HEROSYS.module, "DoubleDamageLimit");
 }
 
-function addExtraDcsToBundle(item, dicePartsBundle, halve5eKillingAttacks) {
+function addExtraDcsToBundle(item, dicePartsBundle) {
     const extraDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
 
     // Consider all EXTRADCs as one
@@ -183,7 +183,8 @@ function addExtraDcsToBundle(item, dicePartsBundle, halve5eKillingAttacks) {
     let extraDcLevels = numExtraDcs;
 
     // 5E extraDCLevels are halved for unarmed killing attacks
-    if (item.is5e && item.system.killing && halve5eKillingAttacks) {
+    // PH FIXME: Need better logic here for 6e damage doubling behaviour
+    if (item.is5e && item.system.killing) {
         extraDcLevels = Math.floor(extraDcLevels / 2);
     }
 
@@ -223,7 +224,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     // 6e doesn't have the concept of base and added DCs but do the same in case they turn on the doubling rule.
     if (item.type === "martialart" && options.maWeaponItem) {
         // PH: FIXME: 3rd parameter needs fixing
-        addExtraDcsToBundle(baseDamageItem, addedDamageBundle, false);
+        addExtraDcsToBundle(baseDamageItem, addedDamageBundle);
     }
 
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main base (source of) damage and the maneuver is additional damage.
@@ -905,7 +906,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
 
         // 5e martial arts EXTRADCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
         if (item.type === "martialart" && !item.system.USEWEAPON) {
-            addExtraDcsToBundle(item, baseDicePartsBundle, true);
+            addExtraDcsToBundle(item, baseDicePartsBundle);
         }
 
         return baseDicePartsBundle;
