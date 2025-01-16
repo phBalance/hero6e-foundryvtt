@@ -1320,10 +1320,6 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // PH: FIXME: We no longer provide END. Should we?
-            // const { end } = calculateDcFromItem(item, { ignoreDeadlyBlow: true });
-            // item.system.endEstimate = Math.max(item.system.endEstimate, end);
-
             // text description of damage
             item.system.damage = getFullyQualifiedEffectFormulaFromItem(item, { ignoreDeadlyBlow: true });
 
@@ -1701,10 +1697,6 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 if (changed) {
-                    // PH: FIXME: We no longer provide END. Should we?
-                    // let { end } = calculateDcFromItem(this, { ignoreDeadlyBlow: true });
-                    // this.system.endEstimate = Math.max(this.system.endEstimate, end);
-
                     // text description of damage
                     this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                 }

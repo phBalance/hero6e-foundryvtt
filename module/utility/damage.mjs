@@ -941,10 +941,3 @@ export function maneuverBaseEffectDiceParts(item, options) {
         };
     }
 }
-
-// PH: FIXME: To be removed
-export function calculateDcFromItem(item) {
-    console.error(`${item.name}/${item.system.XMLID} called calculateDcFromItem`);
-
-    return { end: 0 };
-}
