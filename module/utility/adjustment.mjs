@@ -425,9 +425,13 @@ export async function performAdjustment(
     //       us into the thorny question of what powers have been discovered.
     let targetPower;
     if (!targetCharacteristic) {
-        targetPower = targetActor.items.find(
-            (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
-        );
+        // targetPower = targetActor.items.find(
+        //     (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
+        // );
+        // Get the power with the highest adjustedLevels
+        targetPower = targetActor.items
+            .filter((item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower)
+            .sort((a, b) => b.adjustedLevels - a.adjustedLevels)?.[0];
         // if (targetPower) {
         //     // Sometimes we pass an item.id, make sure we output item.name
         //     nameOfCharOrPower = item.name;
