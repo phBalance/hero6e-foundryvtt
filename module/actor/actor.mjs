@@ -1913,6 +1913,12 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.actorPostUpload = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
+        // Kluge to ensure everything has a SPD.
+        // For example a BASE has an implied SPD of three
+        this.system.characteristics.spd ??= {
+            core: 3,
+        };
+
         // For some unknown reason SPD with AE not working during upload.
         // This kludge is a quick fix
         // https://github.com/dmdorman/hero6e-foundryvtt/issues/1439
@@ -2258,7 +2264,7 @@ export class HeroSystem6eActor extends Actor {
             if (isHeroic !== this.system.isHeroic) {
                 changes["system.isHeroic"] = isHeroic;
             }
-            if (typeof isHeroic === "undefined") {
+            if (typeof isHeroic === "undefined" && this.type != "base2") {
                 // Custom Templates
                 // Automations
                 // Barrier
@@ -2334,9 +2340,10 @@ export class HeroSystem6eActor extends Actor {
 
         // Initiative Characteristic
         if (this.system.initiativeCharacteristic === undefined) {
+            // Careful: Not all actors have ego/dex/omcv, such as a base/vehicle.
             if (
-                this.system.characteristics.ego.value > this.system.characteristics.dex.value &&
-                this.system.characteristics.omcv.value >= this.system.characteristics.ocv.value
+                this.system.characteristics.ego?.value > this.system.characteristics.dex?.value &&
+                this.system.characteristics.omcv?.value >= this.system.characteristics.ocv?.value
             ) {
                 if (this.id) {
                     await this.update({
