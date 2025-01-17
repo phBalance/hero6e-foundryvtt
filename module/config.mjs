@@ -1798,7 +1798,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 phase: "1/2",
                 ocv: "+0",
                 dcv: "+0",
-                effects: "STR damage or by weapon type",
+                effects: "[STRDC] damage or by weapon type",
                 dc: "0",
                 attack: true,
                 addStr: true,
