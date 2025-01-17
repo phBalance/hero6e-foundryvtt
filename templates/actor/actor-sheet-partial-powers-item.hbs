@@ -46,7 +46,7 @@
         </td>
         <td>{{this.system.endEstimate}}</td>
         <td>
-            {{#if (itemHasBehaviours this "to-hit" "dice")}}
+            {{#if (itemHasActionBehavior this "to-hit")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
@@ -54,7 +54,7 @@
                 {{/if}}
             {{/if}}
 
-            {{#if (itemHasBehaviours this "activatable")}}
+            {{#if (itemHasActionBehavior this "activatable")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
