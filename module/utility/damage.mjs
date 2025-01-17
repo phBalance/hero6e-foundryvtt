@@ -166,6 +166,7 @@ function isManeuverWithEmptyHand(item, options) {
 function isManeuverThatDoesNormalDamage(item) {
     return (
         item.system.EFFECT.search(/NORMALDC/) > -1 ||
+        item.system.EFFECT.search(/STRDC/) > -1 ||
         item.system.XMLID === "STRIKE" ||
         item.system.XMLID === "PULLINGAPUNCH"
     );
@@ -296,9 +297,10 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     // Move By, Move By, etc - Maneuvers that add in velocity
     // [NORMALDC] +v/5 Strike, FMove
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    if ((item.system.EFFECT || "").match(/v\/\d/)) {
+    const velocityMatch = (item.system.EFFECT || "").match(/v\/(\d+)/);
+    if (velocityMatch) {
         const velocity = parseInt(options.velocity || 0);
-        const divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]);
+        const divisor = parseInt(velocityMatch[1]);
         const velocityDc = Math.floor(velocity / divisor); // There is no rounding
 
         const velocityDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, velocityDc);
@@ -792,7 +794,7 @@ export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
     return `${dicePartsToEffectFormula(diceParts)}${item.killing ? "K" : ""}`;
 }
 
-function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
+function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage) {
     // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage
 
     const actorStrengthItem = item.actor?.items.find(
@@ -809,9 +811,9 @@ function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
     dicePartsBundle.baseAttackItem = actorStrengthItem;
     dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
     dicePartsBundle.tags.push({
-        value: `${baseAttackTweaks ? "+" : ""}${formula}`,
+        value: `${strengthAddsToDamage ? "+" : ""}${formula}`,
         name: "STR",
-        title: `${str} STR -> ${baseAttackTweaks ? "+" : ""}${formula}`,
+        title: `${str} STR -> ${strengthAddsToDamage ? "+" : ""}${formula}`,
     });
 
     // STRMINIMUM
@@ -832,21 +834,26 @@ function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
         });
     }
 
-    // MOVEBY halves STR
-    if (str !== 0 && item.system.XMLID === "MOVEBY") {
-        const strBeforeMoveBy = str;
-        str = RoundFavorPlayerUp(str / 2);
+    // Any STRDC modifiers such as MOVEBY?
+    const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
+    if (strMatch) {
+        // It doesn't make sense to halve negative strength
+        if (str >= 0) {
+            const strBeforeManeuver = str;
+            const divisor = parseInt(strMatch[1]);
+            str = RoundFavorPlayerUp(str / divisor);
 
-        // NOTE: intentionally using fractional DC here.
-        const strDiceParts = calculateDicePartsFromDcForItem(item, (strBeforeMoveBy - str) / 5);
-        const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
+            // NOTE: intentionally using fractional DC here.
+            const strDiceParts = calculateDicePartsFromDcForItem(item, (strBeforeManeuver - str) / 5);
+            const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
 
-        dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
-        dicePartsBundle.tags.push({
-            value: `-(${formula})`,
-            name: "MOVEBY STR",
-            title: `STR halved to ${str} due to MOVEBY -> -(${formula})`,
-        });
+            dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
+            dicePartsBundle.tags.push({
+                value: `-(${formula})`,
+                name: `${item.name} STR`,
+                title: `STR divided to ${str} due to ${item.name} -> -(${formula})`,
+            });
+        }
     }
 
     return str;
@@ -870,7 +877,8 @@ export function maneuverBaseEffectDiceParts(item, options) {
             // strength for damage purposes.
             // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
             if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
-                const hthAttacks = item.actor?.items.filter((item) => item.system.XMLID === "HANDTOHANDATTACK") || [];
+                // const hthAttacks = item.actor?.items.filter((item) => item.system.XMLID === "HANDTOHANDATTACK") || [];
+                const hthAttacks = options.hthAttacks || [];
                 hthAttacks.forEach((hthAttack) => {
                     const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDiceParts(
                         hthAttack,
@@ -881,7 +889,32 @@ export function maneuverBaseEffectDiceParts(item, options) {
                         baseDicePartsBundle.diceParts,
                         hthAttackDiceParts,
                     );
-                    baseDicePartsBundle.tags.push(tags);
+                    baseDicePartsBundle.tags.push(...tags);
+
+                    // Any STRDC modifiers such as MOVEBY?
+                    const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
+                    if (strMatch) {
+                        // It doesn't make sense to halve negative strength
+                        if (str >= 0) {
+                            const divisor = parseInt(strMatch[1]);
+                            const hthDc = hthAttack.dcRaw / divisor;
+
+                            // NOTE: intentionally using fractional DC here.
+                            const hthDiceParts = calculateDicePartsFromDcForItem(hthAttack, hthDc);
+                            const formula = dicePartsToFullyQualifiedEffectFormula(hthAttack, hthDiceParts);
+
+                            baseDicePartsBundle.diceParts = subtractDiceParts(
+                                item,
+                                baseDicePartsBundle.diceParts,
+                                hthDiceParts,
+                            );
+                            baseDicePartsBundle.tags.push({
+                                value: `-(${formula})`,
+                                name: `${item.name} STR (${hthAttack.name})`,
+                                title: `HTH Attack divided to ${hthDc} DC due to ${item.name} -> -(${formula})`,
+                            });
+                        }
+                    }
                 });
             }
         } else {
