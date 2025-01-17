@@ -5626,7 +5626,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HANDTOHANDATTACK",
             type: ["attack"],
-            behaviors: ["to-hit", "dice"], // TODO: Probably want it to apply on a per attack basis rather than always
+            behaviors: ["activatable"], // TODO: Probably want it to apply on a per attack basis rather than always
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,

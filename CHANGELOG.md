@@ -7,6 +7,7 @@
 - Improved damage and DC calculations. [#717](https://github.com/dmdorman/hero6e-foundryvtt/issues/717) [#763](https://github.com/dmdorman/hero6e-foundryvtt/issues/763) [#1182](https://github.com/dmdorman/hero6e-foundryvtt/issues/1182) [#1632](https://github.com/dmdorman/hero6e-foundryvtt/issues/1632)
 - Fix crash on loading items with strength minimum and provide better handling for older HDC files. [#1628](https://github.com/dmdorman/hero6e-foundryvtt/issues/1628)
 - Added dodging effect icon.
+- Fixed BASE uploads.
 
 ## Version 4.0.13 20250111
 
