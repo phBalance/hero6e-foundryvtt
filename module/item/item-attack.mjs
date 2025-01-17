@@ -78,7 +78,7 @@ export async function collectActionDataBeforeToHitOptions(item) {
         actor: actor,
         token: token,
         state: null,
-        str: item.actor.system.characteristics.str.value,
+        str: item.actor.system.characteristics.str?.value,
     };
 
     // Uses Tk
@@ -504,7 +504,12 @@ export async function doSingleTargetActionToHit(item, options) {
 
     const itemData = item.system;
 
-    const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
+    const hitCharacteristic = actor.system.characteristics[itemData.uses]?.value;
+    if (!hitCharacteristic) {
+        return ui.notifications.error(
+            `<b>${item.actor.name}</b> does not have <b>${itemData.uses.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
+        );
+    }
 
     const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
@@ -3311,7 +3316,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     const startingCharges = parseInt(item.system.charges?.value || 0);
     const enduranceReserve = actor.items.find((item) => item.system.XMLID === "ENDURANCERESERVE");
     const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
-    const actorEndurance = actor.system.characteristics.end.value;
+    const actorEndurance = actor.system.characteristics.end?.value || 0;
 
     // Does the actor have enough endurance available?
     let actualStunDamage = 0;
