@@ -1089,7 +1089,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BRACE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "activatable"],
             name: "Brace",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1172,7 +1172,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COVER",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "activatable"],
             name: "Cover",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1254,7 +1254,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DODGE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "activatable"],
             name: "Dodge",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1359,7 +1359,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HAYMAKER",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "activatable"],
             name: "Haymaker",
             costPerLevel: fixedValueFunction(0),
             duration: "instant",
@@ -1384,7 +1384,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HIPSHOT",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "activatable"],
             name: "Hipshot",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1410,7 +1410,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "HURRY",
         type: ["maneuver"],
-        behaviors: ["non-hd", "optional-maneuver"],
+        behaviors: ["non-hd", "optional-maneuver", "activatable"],
         name: "Hurry",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
@@ -1620,7 +1620,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ROLLWITHAPUNCH",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver"],
+            behaviors: ["non-hd", "optional-maneuver", "activatable"],
             name: "Roll With A Punch",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1648,7 +1648,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SET",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "activatable"],
             name: "Set",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1677,7 +1677,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SETANDBRACE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "activatable"],
             name: "Set And Brace",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
