@@ -519,9 +519,14 @@ export class HeroSystem6eItem extends Item {
         if (effect) {
             const maneuverHasAbortTrait = effect.indexOf("abort") > -1;
             const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
+            const currentCombatActorId = game.combat?.combatants.find(
+                (o) => o.tokenId === game.combat.current?.tokenId,
+            )?.actorId;
+            const thisActorsCombatTurn =
+                game.combat?.active && currentCombatActorId != undefined && currentCombatActorId === this.actor?.id;
 
-            // TODO: Abort effect (FIXME: we don't always get an abort effect ... it's just that this can generate the abort effect)
-            if (maneuverHasAbortTrait) {
+            // Abort effect - If in combat and not our turn then this must be an abort
+            if (maneuverHasAbortTrait && game.combat?.active && !thisActorsCombatTurn) {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect);
             }
 
@@ -626,25 +631,6 @@ export class HeroSystem6eItem extends Item {
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await this.activateManeuver();
             }
-
-            // Special Visions
-            //const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
-            //const tokenDocument = token.document || token;
-            // if (this.#baseInfo?.sight) {
-            //     const detectionModes = tokenDocument.detectionModes;
-            //     const basicSight = detectionModes.find((o) => o.id === "basicSight");
-            //     if (basicSight) {
-            //         basicSight.range = null; // Infinite vision range
-            //     }
-            //     if (token) {
-            //         await activateSpecialVision(this, token);
-            //     }
-            // }
-
-            // // CUSTOMPOWER LIGHT
-            // if (this.system.XMLID === "CUSTOMPOWER") {
-            //     await activateSpecialVision(this, token);
-            // }
         } else {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
