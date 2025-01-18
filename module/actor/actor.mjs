@@ -1655,6 +1655,11 @@ export class HeroSystem6eActor extends Actor {
                                     },
                                 };
                                 itemsToCreate.push(itemData2);
+
+                                // Remove any POWER "modifiers" that we created items for
+                                itemData.system.POWER = (itemData.system.POWER || []).filter(
+                                    (p) => p.ID !== itemData2.system.ID,
+                                );
                             }
                         }
                     } else {
