@@ -5362,7 +5362,7 @@ export class HeroSystem6eItem extends Item {
         );
     }
 
-    get killing() {
+    get doesKillingDamage() {
         if (this.system.KILLING === true) {
             return true;
         }

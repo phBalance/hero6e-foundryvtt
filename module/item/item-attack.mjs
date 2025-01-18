@@ -1039,7 +1039,7 @@ function getAttackTags(item) {
         attackTags.push({ name: item.system.class });
     }
 
-    if (item.system.killing) {
+    if (item.doesKillingDamage) {
         attackTags.push({ name: `killing` });
     }
 
@@ -1544,7 +1544,7 @@ export async function _onRollDamage(event) {
             item: item,
         })?.type?.includes("sense-affecting") ||
         (item.system.EFFECT && item.system.EFFECT.search(/\[FLASHDC\]/) > -1);
-    const isKilling = item.system.killing;
+    const isKilling = item.doesKillingDamage;
     const isEntangle = item.system.XMLID === "ENTANGLE";
     const isNormalAttack = !senseAffecting && !adjustment && !isKilling;
     const isKillingAttack = !senseAffecting && !adjustment && isKilling;
@@ -3228,7 +3228,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         }
 
         // Attack did Killing Damage +1d6
-        if (item.system.killing) {
+        if (item.doesKillingDamage) {
             knockbackDice += 1;
             knockbackTags.push({
                 value: "+1d6KB",

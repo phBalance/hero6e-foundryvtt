@@ -2570,7 +2570,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("killing", function () {
-                    assert.equal(item.system.killing, true);
+                    assert.equal(item.doesKillingDamage, true);
                 });
             });
 
@@ -2637,7 +2637,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("killing", function () {
-                    assert.equal(item.system.killing, true);
+                    assert.equal(item.doesKillingDamage, true);
                 });
             });
 
@@ -2845,7 +2845,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("killing", function () {
-                    assert.equal(item.system.killing, false);
+                    assert.equal(item.doesKillingDamage, false);
                 });
             });
 
