@@ -21,8 +21,10 @@
         </tr>
         {{#each items as |item id|}}
             {{!-- Show powers and things in a framework or compound power --}}
-            {{#if (and (eq item.type "power") (not item.parentItem) (filterItem item @root/options.itemFilters.power) (ne item.system.XMLID "__STRENGTHDAMAGE"))}}
-                {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') item }}
+            {{#if (and (eq item.type "power") (not item.parentItem) (ne item.system.XMLID "__STRENGTHDAMAGE"))}}
+                {{#if (filterItem item @root/options.itemFilters.power)}}
+                    {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') item }}
+                {{/if}}
             {{/if}}
         {{/each}}
     </table>
