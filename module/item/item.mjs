@@ -108,6 +108,17 @@ function filterItem(item, filterString) {
             }
         }
     }
+
+    // What about our parent?
+    if (item.parentItem) {
+        const parent = item.parentItem;
+        const match =
+            parent.name?.match(regex) || parent.system.description?.match(regex) || parent.system.XMLID?.match(regex);
+        if (match) {
+            return true;
+        }
+    }
+
     return false;
 }
 
