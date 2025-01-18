@@ -118,10 +118,10 @@ async function replaceActorsBuiltInManeuvers(actor) {
         if (!actor) return false;
 
         // Remove all built in maneuvers
-        const builtInManeuverDeletePromises = actor.items
-            .filter((power) => power.type?.includes("maneuver"))
-            .map((item) => item.delete());
-        await Promise.all(builtInManeuverDeletePromises);
+        await actor.deleteEmbeddedDocuments(
+            "Item",
+            actor.items.filter((power) => power.type?.includes("maneuver")).map((o) => o.id),
+        );
 
         // Add in the new placeholder items and all built in maneuvers
         await actor.addAttackPlaceholders();
