@@ -135,14 +135,19 @@ function itemHasBehaviours(item, ...desiredBehavorArgs) {
 }
 
 function itemHasActionBehavior(item, actionBehavior) {
-    if (actionBehavior === "to-hit") {
-        return item.rollsToHit();
-    } else if (actionBehavior === "activatable") {
-        return item.isActivatable();
-    }
+    try {
+        if (actionBehavior === "to-hit") {
+            return item.rollsToHit();
+        } else if (actionBehavior === "activatable") {
+            return item.isActivatable();
+        }
 
-    console.warn(`Unknown request to get action behavior ${actionBehavior}`);
-    return false;
+        console.warn(`Unknown request to get action behavior ${actionBehavior}`);
+        return false;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
 }
 
 const itemTypeToIcon = {
@@ -1689,10 +1694,15 @@ export class HeroSystem6eItem extends Item {
     }
 
     rollsToHit() {
-        return (
-            (this.system.XMLID !== "MANEUVER" && this.baseInfo?.behaviors.includes("to-hit")) ||
-            (this.system.XMLID === "MANEUVER" && !this.isActivatable())
-        );
+        try {
+            return (
+                (this.system.XMLID !== "MANEUVER" && this.baseInfo?.behaviors.includes("to-hit")) ||
+                (this.system.XMLID === "MANEUVER" && !this.isActivatable())
+            );
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
     }
 
     causesDamageEffect() {
@@ -2553,7 +2563,15 @@ export class HeroSystem6eItem extends Item {
     }
 
     get powers() {
-        return this.system.POWER || [];
+        let powersList = this.system.POWER || [];
+        for (let p of powersList) {
+            const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
+            if (childDuplicate) {
+                console.warn(`${this.actor.name}:${p.ALIAS} is an ITEM and POWER`);
+            }
+        }
+        powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+        return powersList;
     }
 
     calcItemPoints() {
