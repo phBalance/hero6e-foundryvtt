@@ -136,16 +136,16 @@ function itemHasBehaviours(item, ...desiredBehavorArgs) {
 
 function itemHasActionBehavior(item, actionBehavior) {
     try {
-    if (!item) {
-        console.error(`itemHasActionBehavior called with item being falsy`, item);
-        return false;
-    }
+        if (!item) {
+            console.error(`itemHasActionBehavior called with item being falsy`, item);
+            return false;
+        }
 
-    if (actionBehavior === "to-hit") {
-        return item.rollsToHit();
-    } else if (actionBehavior === "activatable") {
-        return item.isActivatable();
-    }
+        if (actionBehavior === "to-hit") {
+            return item.rollsToHit();
+        } else if (actionBehavior === "activatable") {
+            return item.isActivatable();
+        }
         console.warn(`Unknown request to get action behavior ${actionBehavior}`);
         return false;
     } catch (e) {
