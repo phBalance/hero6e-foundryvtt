@@ -7598,6 +7598,62 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("Power with massive negative cost custom adder", function () {
+                const contents = `
+                    <POWER XMLID="ENERGYBLAST" ID="1730436584603" BASECOST="0.0" LEVELS="11" ALIAS="Blast" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Stomp" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="GENERIC_OBJECT" ID="1731737010676" BASECOST="-55.0" LEVELS="0" ALIAS="Custom Adder" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="AOE" ID="1731737010697" BASECOST="0.0" LEVELS="16" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LINE" OPTIONID="LINE" OPTION_ALIAS="Line" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Blast 11d6 (PD; Custom Adder), Area Of Effect (16m Long, 2m Tall, 2m Wide Line; +1/4)",
+                    );
+                });
+
+                it("cost", function () {
+                    assert.equal(item.system.cost, 0);
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.cost, 0);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 69);
+                });
+
+                it("damage", function () {
+                    assert.equal(item.system.damage, "11d6");
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

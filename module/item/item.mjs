@@ -1353,7 +1353,7 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        // Does it use Strength?
+        // Does it use Strength damage?
         else if (effect.search(/\[STRDC\]/) > -1) {
             return false;
         }
@@ -2635,10 +2635,10 @@ export class HeroSystem6eItem extends Item {
 
         // ADDERS
         let adderCost = 0;
+        let customAdderCosts = 0;
         for (const adder of system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
-            //adder.BASECOST_total = adderBaseCost;
 
             if (adder.SELECTED !== false) {
                 //TRANSPORT_FAMILIARITY
@@ -2654,12 +2654,14 @@ export class HeroSystem6eItem extends Item {
                 adder.BASECOST_total = 0;
             }
 
+            // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
+            // we have no idea if they are actually important.
+            customAdderCosts += adder.XMLID === "ADDER" ? adder.BASECOST_total : 0;
             adderCost += adder.BASECOST_total;
 
             adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
 
             let subAdderCost = 0;
-
             for (const adder2 of adder.ADDER || []) {
                 const adder2BaseCost = adder2.BASECOST;
 
@@ -2682,6 +2684,9 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
+            // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
+            // we have no idea if they are actually important.
+            customAdderCosts += adder.XMLID === "ADDER" ? subAdderCost : 0;
             adderCost += subAdderCost;
         }
 
@@ -2699,7 +2704,6 @@ export class HeroSystem6eItem extends Item {
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
             for (const adderPower of system.POWER) {
-                //const adderBaseCost = parseFloat(adderPower.BASECOST);
                 const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
                 const adderPowerInfo = getPowerInfo({
                     item: adderPower,
@@ -2723,7 +2727,6 @@ export class HeroSystem6eItem extends Item {
 
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
-        //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
         if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
             let advantages = 0;
             for (const modifier of this.modifiers.filter((o) => !o.PRIVATE)) {
@@ -2764,6 +2767,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         system.basePointsPlusAdders = cost;
+        system.basePointsPlusAddersForActivePoints = cost - customAdderCosts;
 
         return old !== system.basePointsPlusAdders;
     }
@@ -2891,15 +2895,16 @@ export class HeroSystem6eItem extends Item {
             modifier.advantage = _myAdvantage;
         }
 
-        const _activePoints = system.basePointsPlusAdders * (1 + advantages);
-        system.activePointsDc = system.basePointsPlusAdders * (1 + advantagesAffectingDc);
+        const _activePoints = system.basePointsPlusAddersForActivePoints * (1 + advantages);
+        system.activePointsDc = system.basePointsPlusAddersForActivePoints * (1 + advantagesAffectingDc);
 
         system._advantages = advantages;
         system._advantagesDc = advantagesAffectingDc;
 
         // HALFEND is based on active points without the HALFEND modifier
         if (this.findModsByXmlid("REDUCEDEND")) {
-            system._activePointsWithoutEndMods = system.basePointsPlusAdders * (1 + advantages - endModifierCost);
+            system._activePointsWithoutEndMods =
+                system.basePointsPlusAddersForActivePoints * (1 + advantages - endModifierCost);
         }
 
         let old = system.activePoints;
