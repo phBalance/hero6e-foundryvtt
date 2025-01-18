@@ -2,10 +2,10 @@
 {{#if (filterItem this @root.options.itemFilters.martial)}}
 <tr class="item {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
     data-item-id="{{this._id}}">
-    {{#if (eq item.system.XMLID "LIST")}}
+    {{#if (eq this.system.XMLID "LIST")}}
             <td height="24"></td>
             <td></td>
-            <td class="left">{{{item.system.ALIAS}}}</td>
+            <td class="left">{{{this.system.ALIAS}}}</td>
             <td></td>
             <td></td>
     {{else}}
@@ -58,11 +58,11 @@
 
 
 
-        <td>{{item.system.phase}}</td>
-        <td>{{item.system.ocvEstimated}}</td>
-        <td>{{item.system.dcvEstimated}}</td>
+        <td>{{this.system.phase}}</td>
+        <td>{{this.system.ocvEstimated}}</td>
+        <td>{{this.system.dcvEstimated}}</td>
         <td>
-            {{#if (itemHasActionBehavior item "to-hit")}}
+            {{#if (itemHasActionBehavior this "to-hit")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
@@ -70,7 +70,7 @@
                 {{/if}}
             {{/if}}
 
-            {{#if (itemHasActionBehavior item "activatable")}}
+            {{#if (itemHasActionBehavior this "activatable")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
