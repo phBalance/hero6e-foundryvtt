@@ -495,6 +495,7 @@ export async function doSingleTargetActionToHit(item, options) {
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveItem, {
         ...options,
         ...{ noResourceUse: overrideCanAct },
+        ...{ hthAttackItems: action.hthAttackItems.map((hthAttack) => fromUuidSync(hthAttack.uuid)) },
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -1513,6 +1514,8 @@ export async function _onRollDamage(event) {
     }
 
     const action = JSON.parse(toHitData.actionData);
+    const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
+    toHitData.hthAttackItems = hthAttackItems;
 
     let effectiveItem = item;
 
@@ -3303,6 +3306,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  * @param {boolean} [options.forceStunUsage] - true to force STUN to be used if there is insufficient END
  * @param {number} [options.effectiveStr] - strength used for END calculations
  * @param {number} [options.boostableChargesToUse] - number of boostable charges to use
+ * @param {number} [options.hthAttackItems] - pseudo strength items to use
  *
  * @returns Object - discriminated union based on error or warning being falsy/truthy
  */
@@ -3311,6 +3315,15 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
 
     // What resources are required to activate this power?
     const resourcesRequired = calculateRequiredResourcesToUse(item, options);
+
+    // Merge in any additional resources for HTH attack items being used
+    (options.hthAttackItems || []).forEach((hthAttack) => {
+        const hthAttackResourcesRequired = calculateRequiredResourcesToUse(hthAttack, options);
+        resourcesRequired.totalEnd += hthAttackResourcesRequired.totalEnd;
+        resourcesRequired.end += hthAttackResourcesRequired.end;
+        resourcesRequired.reserveEnd += hthAttackResourcesRequired.reserveEnd;
+        resourcesRequired.charges += hthAttackResourcesRequired.charges;
+    });
 
     const actor = item.actor;
     const startingCharges = parseInt(item.system.charges?.value || 0);

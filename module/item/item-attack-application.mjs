@@ -69,7 +69,6 @@ export class ItemAttackFormApplication extends FormApplication {
         const item = data.item;
 
         try {
-            //data.targets = game.user.targets;
             data.targets = Array.from(game.user.targets);
 
             if (data.targets.length === 0 && item.system.XMLID === "MINDSCAN" && game.user.isGM) {
@@ -95,13 +94,6 @@ export class ItemAttackFormApplication extends FormApplication {
             // Penalty Skill Levels
             // Currently only supports range PSL
             data.psls = penaltySkillLevelsForAttack(item).filter((o) => o.system.penalty === "range");
-
-            // Check all PSLs
-            // for (const psl of data.psls) {
-            //     if (psl.system.checked !== false) {
-            //         await psl.update({ "system.checked": true });
-            //     }
-            // }
 
             // Is there an ENTANGLE on any of the targets
             // If so assume we are targeting the entangle
@@ -149,13 +141,6 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.useHitLoc = true;
             }
 
-            // Allow targeting of ENTANGLES & FOCI
-            // if (data.targets.length === 1) {
-            //     for (const entry of data.targets[0].actor?.targetableItems) {
-            //         data.hitLoc.push({ key: entry.uuid, label: entry.name }); //disabled: true
-            //         data.useHitLoc = true;
-            //     }
-            // }
             if (data.useHitLoc) {
                 data.hitLoc = [{ key: "none", label: "None" }, ...data.hitLoc];
             }
@@ -211,9 +196,6 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // Combat Skill Levels
-            // data.cslChoices = null;
-            // data.csl = null;
-            // data.cslSkill = null;
             const csls = combatSkillLevelsForAttack(item);
             data.csls = undefined;
             for (const csl of csls) {
@@ -250,6 +232,22 @@ export class ItemAttackFormApplication extends FormApplication {
                 item.system.conditionalAttacks[DEADLYBLOW.id] = DEADLYBLOW;
                 item.system.conditionalAttacks[DEADLYBLOW.id].system.checked ??= true;
             }
+
+            const hthAttacks = item.actor.items.filter((item) => item.system.XMLID === "HANDTOHANDATTACK");
+            data.hthAttackItems = hthAttacks.reduce((attacksObj, hthAttack) => {
+                // If already exists we're updating so no need to recreate.
+                if (attacksObj[hthAttack.uuid]) {
+                    return attacksObj;
+                }
+
+                // Default to useable for any attack.
+                attacksObj[hthAttack.uuid] = {
+                    _canUseForAttack: hthAttack.system._canUseForAttack ?? true,
+                    description: hthAttack.system.description,
+                    name: hthAttack.name,
+                };
+                return attacksObj;
+            }, data.hthAttackItems ?? {});
 
             data.action = Attack.getActionInfo(
                 data.item,
@@ -302,8 +300,19 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     async _updateObject(event, formData) {
-        // CSL & PSL format is non-standard, need to deal with those
         const extendedFormData = foundry.utils.expandObject(formData);
+
+        // HTH Attacks format includes the UUID which has periods in it so we can't use extendedFormData. Do a custom merge.
+        delete extendedFormData.hthAttackItems;
+        const hthAttacks = Object.entries(formData).forEach(([key, value]) => {
+            const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
+            if (!match) {
+                return;
+            }
+            this.data.hthAttackItems[match[1]]._canUseForAttack = value;
+        });
+
+        // CSL & PSL format is non-standard, need to deal with those
         const updates = [];
         for (const key of Object.keys(extendedFormData)) {
             if (key.length === 16) {

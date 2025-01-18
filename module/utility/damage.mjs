@@ -877,9 +877,8 @@ export function maneuverBaseEffectDiceParts(item, options) {
             // strength for damage purposes.
             // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
             if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
-                // const hthAttacks = item.actor?.items.filter((item) => item.system.XMLID === "HANDTOHANDATTACK") || [];
-                const hthAttacks = options.hthAttacks || [];
-                hthAttacks.forEach((hthAttack) => {
+                const hthAttackItems = options.hthAttackItems || [];
+                hthAttackItems.forEach((hthAttack) => {
                     const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDiceParts(
                         hthAttack,
                         options,

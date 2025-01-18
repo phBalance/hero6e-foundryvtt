@@ -463,7 +463,21 @@ export class Attack {
         return maneuver;
     }
 
-    static getActionInfo(item, targetedTokens, options) {
+    static getHthAttackInfo(options) {
+        return Object.entries(options)
+            .map(([key, value]) => {
+                const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
+                if (!match || !value) {
+                    return null;
+                }
+                return {
+                    uuid: match[1],
+                };
+            })
+            .filter(Boolean);
+    }
+
+    static getActionInfo(item, targetedTokens, options = {}) {
         // do I need to safety things here?
         if (!item) {
             console.error("There is no attack item!");
@@ -485,13 +499,16 @@ export class Attack {
             system.token[targetedTokens[i].id] = targetedTokens[i];
         }
 
-        const maneuver = Attack.getManeuverInfo(item, targetedTokens, options, system); // this.getManeuverInfo(item, targetedTokens, formData);
+        const maneuver = Attack.getManeuverInfo(item, targetedTokens, options, system);
         const current = Attack.getCurrentManeuverInfo(maneuver, options, system); // get current attack as a 'maneuver' with just the currently executing attack options
+        const hthAttackItems = Attack.getHthAttackInfo(options);
         const action = {
             maneuver,
             current,
             system,
+            hthAttackItems,
         };
+
         return action;
     }
 }

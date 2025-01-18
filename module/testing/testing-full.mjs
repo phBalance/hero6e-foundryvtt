@@ -2324,7 +2324,7 @@ export function registerFullTests(quench) {
                         assert.equal(
                             getEffectForumulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "STRIKE"),
-                                { hthAttacks: [hthAttack] },
+                                { hthAttackItems: [hthAttack] },
                             ),
                             "16d6",
                         );
@@ -2368,7 +2368,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Strike 0DC, Haymaker +4DC =>  +4 DC
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
                         const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        assert.equal(getEffectForumulaFromItem(strikeItem, { hthAttacks: [hthAttack] }), "20d6");
+                        assert.equal(getEffectForumulaFromItem(strikeItem, { hthAttackItems: [hthAttack] }), "20d6");
                     });
 
                     it("should not increase the damage of a move through", function () {
@@ -2414,7 +2414,7 @@ export function registerFullTests(quench) {
                         assert.equal(
                             getEffectForumulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { hthAttacks: [hthAttack], effectivestr: 20, velocity: 10 },
+                                { hthAttackItems: [hthAttack], effectivestr: 20, velocity: 10 },
                             ),
                             "11d6",
                         );
@@ -2445,7 +2445,7 @@ export function registerFullTests(quench) {
                         const moveBy = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
                         assert.equal(
                             getEffectForumulaFromItem(moveBy, {
-                                hthAttacks: [hthAttack],
+                                hthAttackItems: [hthAttack],
                                 effectivestr: 20,
                                 velocity: 90,
                             }),
@@ -2461,7 +2461,7 @@ export function registerFullTests(quench) {
 
                         assert.equal(
                             getEffectForumulaFromItem(moveBy, {
-                                hthAttacks: [hthAttack],
+                                hthAttackItems: [hthAttack],
                                 effectivestr: 20,
                                 velocity: 90,
                             }),
@@ -2475,7 +2475,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
                         const msItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
 
-                        assert.equal(getEffectForumulaFromItem(msItem, { hthAttacks: [hthAttack] }), "18d6");
+                        assert.equal(getEffectForumulaFromItem(msItem, { hthAttackItems: [hthAttack] }), "18d6");
                     });
 
                     it("should have the correct damage for Martial Flash", function () {
@@ -2485,7 +2485,7 @@ export function registerFullTests(quench) {
                         assert.equal(
                             getEffectForumulaFromItem(
                                 actor.items.find((item) => item.system.ALIAS === "Martial Flash"),
-                                { hthAttacks: [hthAttack], effectivestr: 20, velocity: 90 },
+                                { hthAttackItems: [hthAttack], effectivestr: 20, velocity: 90 },
                             ),
                             "4d6",
                         );
@@ -2496,7 +2496,7 @@ export function registerFullTests(quench) {
                         // Added: Sacrifice Strike 4DC =>  4DC
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20DC. Sacrifice Strike is 5AP/die => 20d6
                         const ssItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
-                        assert.equal(getEffectForumulaFromItem(ssItem, { hthAttacks: [hthAttack] }), "20d6");
+                        assert.equal(getEffectForumulaFromItem(ssItem, { hthAttackItems: [hthAttack] }), "20d6");
                     });
                 });
 
@@ -2557,7 +2557,7 @@ export function registerFullTests(quench) {
                             // Base + Added = 16DC + 7DC (doubling rule does not apply) = 23DC. Martial Strike is 5AP/die => 23d6
                             getEffectForumulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
-                                { hthAttacks: [hthAttack] },
+                                { hthAttackItems: [hthAttack] },
                             ),
                             "23d6",
                         );
@@ -2570,7 +2570,7 @@ export function registerFullTests(quench) {
                         assert.equal(
                             getEffectForumulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
-                                { hthAttacks: [hthAttack] },
+                                { hthAttackItems: [hthAttack] },
                             ),
                             "8d6",
                         );
@@ -2583,7 +2583,7 @@ export function registerFullTests(quench) {
                         assert.equal(
                             getEffectForumulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
-                                { hthAttacks: [hthAttack] },
+                                { hthAttackItems: [hthAttack] },
                             ),
                             "25d6",
                         );
@@ -2608,7 +2608,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Strike 0DC, Underwater -2DC =>  -2 DC
                         // Base + Added = 16DC - 2DC (doubling rule does not apply) = 14 DC. Martial Strike is 5AP/die => 14d6
                         const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        assert.equal(getEffectForumulaFromItem(strikeItem, { hthAttacks: [hthAttack] }), "14d6");
+                        assert.equal(getEffectForumulaFromItem(strikeItem, { hthAttackItems: [hthAttack] }), "14d6");
                     });
 
                     it("should decrease the damage of a move through", function () {
