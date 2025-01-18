@@ -2635,7 +2635,7 @@ export class HeroSystem6eItem extends Item {
 
         // ADDERS
         let adderCost = 0;
-        let customAdderCosts = 0;
+        let negativeCustomAdderCosts = 0;
         for (const adder of system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
@@ -2654,9 +2654,9 @@ export class HeroSystem6eItem extends Item {
                 adder.BASECOST_total = 0;
             }
 
-            // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
+            // It is possible to have negative adders although they are perhaps only custom adders. Ignore negative custom adders for the active cost as
             // we have no idea if they are actually important.
-            customAdderCosts += adder.XMLID === "ADDER" ? adder.BASECOST_total : 0;
+            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? Math.min(0, adder.BASECOST_total) : 0;
             adderCost += adder.BASECOST_total;
 
             adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
@@ -2686,7 +2686,7 @@ export class HeroSystem6eItem extends Item {
 
             // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
             // we have no idea if they are actually important.
-            customAdderCosts += adder.XMLID === "ADDER" ? subAdderCost : 0;
+            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? subAdderCost : 0;
             adderCost += subAdderCost;
         }
 
@@ -2767,7 +2767,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         system.basePointsPlusAdders = cost;
-        system.basePointsPlusAddersForActivePoints = cost - customAdderCosts;
+        system.basePointsPlusAddersForActivePoints = cost - negativeCustomAdderCosts;
 
         return old !== system.basePointsPlusAdders;
     }
