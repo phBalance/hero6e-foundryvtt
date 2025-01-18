@@ -82,8 +82,6 @@ function itemIsOptionalManeuver(item) {
 function filterItem(item, filterString) {
     if (!filterString) return item;
 
-    console.log(item.name);
-
     const regex = new RegExp(filterString.trim(), "i");
 
     const match = item.name?.match(regex) || item.system.description?.match(regex) || item.system.XMLID?.match(regex);
