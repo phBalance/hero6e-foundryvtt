@@ -62,7 +62,7 @@
         <td>{{item.system.ocvEstimated}}</td>
         <td>{{item.system.dcvEstimated}}</td>
         <td>
-            {{#if (itemHasBehaviours this "to-hit" "dice")}}
+            {{#if (itemHasActionBehavior item "to-hit")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
@@ -70,7 +70,7 @@
                 {{/if}}
             {{/if}}
 
-            {{#if (itemHasBehaviours this "activatable")}}
+            {{#if (itemHasActionBehavior item "activatable")}}
                 {{#if this.disabledOIHID}}
                     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                 {{else}}
