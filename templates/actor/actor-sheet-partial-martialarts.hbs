@@ -26,7 +26,7 @@
             {{!-- Show powers and things in a framework or compound power --}}
             {{#if (and (eq item.type "martialart") (not item.parentItem) (ne item.system.XMLID "__STRENGTHDAMAGE"))}}
                 {{#if (filterItem item @root/options.itemFilters.martial)}}
-                    {{> (getModulePath 'actor/actor-sheet-partial-martialarts-item.hbs') item }}
+                    {{> (getModulePath 'actor/actor-sheet-partial-martialarts-item.hbs') }}
                 {{/if}}
             {{/if}}
         {{/each}}
