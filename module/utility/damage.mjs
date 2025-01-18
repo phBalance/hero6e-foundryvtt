@@ -166,6 +166,7 @@ function isManeuverWithEmptyHand(item, options) {
 function isManeuverThatDoesNormalDamage(item) {
     return (
         item.system.EFFECT.search(/NORMALDC/) > -1 ||
+        item.system.EFFECT.search(/STRDC/) > -1 ||
         item.system.XMLID === "STRIKE" ||
         item.system.XMLID === "PULLINGAPUNCH"
     );
@@ -175,7 +176,7 @@ function doubleDamageLimit() {
     return game.settings.get(HEROSYS.module, "DoubleDamageLimit");
 }
 
-function addExtraDcsToBundle(item, dicePartsBundle, halve5eKillingAttacks) {
+function addExtraDcsToBundle(item, dicePartsBundle) {
     const extraDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
 
     // Consider all EXTRADCs as one
@@ -183,7 +184,8 @@ function addExtraDcsToBundle(item, dicePartsBundle, halve5eKillingAttacks) {
     let extraDcLevels = numExtraDcs;
 
     // 5E extraDCLevels are halved for unarmed killing attacks
-    if (item.is5e && item.system.killing && halve5eKillingAttacks) {
+    // PH FIXME: Need better logic here for 6e damage doubling behaviour
+    if (item.is5e && item.system.killing) {
         extraDcLevels = Math.floor(extraDcLevels / 2);
     }
 
@@ -223,7 +225,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     // 6e doesn't have the concept of base and added DCs but do the same in case they turn on the doubling rule.
     if (item.type === "martialart" && options.maWeaponItem) {
         // PH: FIXME: 3rd parameter needs fixing
-        addExtraDcsToBundle(baseDamageItem, addedDamageBundle, false);
+        addExtraDcsToBundle(baseDamageItem, addedDamageBundle);
     }
 
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main base (source of) damage and the maneuver is additional damage.
@@ -255,7 +257,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
 
     // Add in STR if it isn't the base damage type
     if (baseDamageItem.system.usesStrength) {
-        addStrengthToBundle(baseDamageItem, options, addedDamageBundle, false);
+        addStrengthToBundle(baseDamageItem, options, addedDamageBundle, true);
     }
 
     // Boostable Charges
@@ -295,9 +297,10 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     // Move By, Move By, etc - Maneuvers that add in velocity
     // [NORMALDC] +v/5 Strike, FMove
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    if ((item.system.EFFECT || "").match(/v\/\d/)) {
+    const velocityMatch = (item.system.EFFECT || "").match(/v\/(\d+)/);
+    if (velocityMatch) {
         const velocity = parseInt(options.velocity || 0);
-        const divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]);
+        const divisor = parseInt(velocityMatch[1]);
         const velocityDc = Math.floor(velocity / divisor); // There is no rounding
 
         const velocityDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, velocityDc);
@@ -791,7 +794,7 @@ export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
     return `${dicePartsToEffectFormula(diceParts)}${item.killing ? "K" : ""}`;
 }
 
-function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
+function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage) {
     // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage
 
     const actorStrengthItem = item.actor?.items.find(
@@ -808,9 +811,9 @@ function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
     dicePartsBundle.baseAttackItem = actorStrengthItem;
     dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
     dicePartsBundle.tags.push({
-        value: `${baseAttackTweaks ? "+" : ""}${formula}`,
+        value: `${strengthAddsToDamage ? "+" : ""}${formula}`,
         name: "STR",
-        title: `${str} STR -> ${formula}`,
+        title: `${str} STR -> ${strengthAddsToDamage ? "+" : ""}${formula}`,
     });
 
     // STRMINIMUM
@@ -831,21 +834,26 @@ function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {
         });
     }
 
-    // MOVEBY halves STR
-    if (str !== 0 && item.system.XMLID === "MOVEBY") {
-        const strBeforeMoveBy = str;
-        str = RoundFavorPlayerUp(str / 2);
+    // Any STRDC modifiers such as MOVEBY?
+    const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
+    if (strMatch) {
+        // It doesn't make sense to halve negative strength
+        if (str >= 0) {
+            const strBeforeManeuver = str;
+            const divisor = parseInt(strMatch[1]);
+            str = RoundFavorPlayerUp(str / divisor);
 
-        // NOTE: intentionally using fractional DC here.
-        const strDiceParts = calculateDicePartsFromDcForItem(item, (strBeforeMoveBy - str) / 5);
-        const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
+            // NOTE: intentionally using fractional DC here.
+            const strDiceParts = calculateDicePartsFromDcForItem(item, (strBeforeManeuver - str) / 5);
+            const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
 
-        dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
-        dicePartsBundle.tags.push({
-            value: `-(${formula})`,
-            name: "MOVEBY STR",
-            title: `STR halved to ${str} due to MOVEBY -> ${formula}`,
-        });
+            dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
+            dicePartsBundle.tags.push({
+                value: `-(${formula})`,
+                name: `${item.name} STR`,
+                title: `STR divided to ${str} due to ${item.name} -> -(${formula})`,
+            });
+        }
     }
 
     return str;
@@ -862,14 +870,15 @@ export function maneuverBaseEffectDiceParts(item, options) {
     if (isManeuverWithEmptyHand(item, options)) {
         // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
         if (isNonKillingStrengthBasedManeuver(item)) {
-            const str = addStrengthToBundle(item, options, baseDicePartsBundle, true);
+            // PH: FIXME: Ugly that we're adding the baseAttackItem to the dicePartsBundle. Does it make sense there?
+            const str = addStrengthToBundle(item, options, baseDicePartsBundle, false);
 
             // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
             // strength for damage purposes.
             // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
             if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
-                const hthAttacks = item.actor?.items.filter((item) => item.system.XMLID === "HANDTOHANDATTACK") || [];
-                hthAttacks.forEach((hthAttack) => {
+                const hthAttackItems = options.hthAttackItems || [];
+                hthAttackItems.forEach((hthAttack) => {
                     const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDiceParts(
                         hthAttack,
                         options,
@@ -879,7 +888,32 @@ export function maneuverBaseEffectDiceParts(item, options) {
                         baseDicePartsBundle.diceParts,
                         hthAttackDiceParts,
                     );
-                    baseDicePartsBundle.tags.push(tags);
+                    baseDicePartsBundle.tags.push(...tags);
+
+                    // Any STRDC modifiers such as MOVEBY?
+                    const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
+                    if (strMatch) {
+                        // It doesn't make sense to halve negative strength
+                        if (str >= 0) {
+                            const divisor = parseInt(strMatch[1]);
+                            const hthDc = hthAttack.dcRaw / divisor;
+
+                            // NOTE: intentionally using fractional DC here.
+                            const hthDiceParts = calculateDicePartsFromDcForItem(hthAttack, hthDc);
+                            const formula = dicePartsToFullyQualifiedEffectFormula(hthAttack, hthDiceParts);
+
+                            baseDicePartsBundle.diceParts = subtractDiceParts(
+                                item,
+                                baseDicePartsBundle.diceParts,
+                                hthDiceParts,
+                            );
+                            baseDicePartsBundle.tags.push({
+                                value: `-(${formula})`,
+                                name: `${item.name} STR (${hthAttack.name})`,
+                                title: `HTH Attack divided to ${hthDc} DC due to ${item.name} -> -(${formula})`,
+                            });
+                        }
+                    }
                 });
             }
         } else {
@@ -905,7 +939,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
 
         // 5e martial arts EXTRADCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
         if (item.type === "martialart" && !item.system.USEWEAPON) {
-            addExtraDcsToBundle(item, baseDicePartsBundle, true);
+            addExtraDcsToBundle(item, baseDicePartsBundle);
         }
 
         return baseDicePartsBundle;
@@ -938,11 +972,4 @@ export function maneuverBaseEffectDiceParts(item, options) {
             baseAttackItem: null,
         };
     }
-}
-
-// PH: FIXME: To be removed
-export function calculateDcFromItem(item) {
-    console.error(`${item.name}/${item.system.XMLID} called calculateDcFromItem`);
-
-    return { end: 0 };
 }

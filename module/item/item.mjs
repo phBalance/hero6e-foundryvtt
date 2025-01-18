@@ -42,6 +42,7 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
     Handlebars.registerHelper("filterItem", filterItem);
     Handlebars.registerHelper("itemHasBehaviours", itemHasBehaviours);
+    Handlebars.registerHelper("itemHasActionBehavior", itemHasActionBehavior);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -96,7 +97,6 @@ function filterItem(item, filterString) {
     return false;
 }
 
-// function itemHasBehaviours(item, ...desiredBehavorArgs) {
 function itemHasBehaviours(item, ...desiredBehavorArgs) {
     const desiredBehaviors = [...desiredBehavorArgs];
     for (const desiredBehavior of desiredBehaviors) {
@@ -105,6 +105,17 @@ function itemHasBehaviours(item, ...desiredBehavorArgs) {
             return true;
         }
     }
+    return false;
+}
+
+function itemHasActionBehavior(item, actionBehavior) {
+    if (actionBehavior === "to-hit") {
+        return item.rollsToHit();
+    } else if (actionBehavior === "activatable") {
+        return item.isActivatable();
+    }
+
+    console.warn(`Unknown request to get action behavior ${actionBehavior}`);
     return false;
 }
 
@@ -475,6 +486,72 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
+     * Activate a basic, optional, or martial maneuver
+     */
+    activateManeuver() {
+        function addDcvTraitToChanges(maneuverDcvChange) {
+            if (maneuverDcvChange !== 0) {
+                return {
+                    key: "system.characteristics.dcv.value",
+                    value: maneuverDcvChange,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                };
+            }
+        }
+
+        function addOcvTraitToChanges(maneuverOcvChange) {
+            if (maneuverOcvChange !== 0) {
+                return {
+                    key: "system.characteristics.ocv.value",
+                    value: maneuverOcvChange,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                };
+            }
+        }
+
+        // TODO: Can the actor activate this maneuver?
+
+        const maneuverDcvTrait = parseInt(this.system.DCV === "--" ? 0 : this.system.DCV || 0);
+        const maneuverOcvTrait = parseInt(this.system.OCV === "--" ? 0 : this.system.OCV || 0);
+
+        // Enable the effect if there is one
+        const effect = this.system.EFFECT?.toLowerCase();
+        if (effect) {
+            const maneuverHasAbortTrait = effect.indexOf("abort") > -1;
+            const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
+            const currentCombatActorId = game.combat?.combatants.find(
+                (combatant) => combatant.tokenId === game.combat.current?.tokenId,
+            )?.actorId;
+            const thisActorsCombatTurn =
+                game.combat?.active && currentCombatActorId != undefined && currentCombatActorId === this.actor?.id;
+
+            // Abort effect - If in combat and not our turn then this must be an abort
+            if (maneuverHasAbortTrait && game.combat?.active && !thisActorsCombatTurn) {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect);
+            }
+
+            if (maneuverHasDodgeTrait) {
+                const dodgeStatusEffect = foundry.utils.deepClone(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect,
+                );
+                dodgeStatusEffect.name = this.name ? `${this.name} (${this.system.XMLID})` : `${this.system.XMLID}`;
+                dodgeStatusEffect.changes = [
+                    addDcvTraitToChanges(maneuverDcvTrait),
+                    addOcvTraitToChanges(maneuverOcvTrait),
+                ].filter(Boolean);
+                this.actor.addActiveEffect(dodgeStatusEffect);
+            }
+        }
+
+        // Turn on any status effects
+        if (this.system.XMLID === "BRACE") {
+            this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
+        } else if (this.system.XMLID === "HAYMAKER") {
+            this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
+        }
+    }
+
+    /**
      *
      * @param {Event} [event]
      * @returns {Promise<any>}
@@ -546,30 +623,9 @@ export class HeroSystem6eItem extends Item {
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
-            } else if (this.system.XMLID === "BRACE") {
-                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
-            } else if (this.system.XMLID === "HAYMAKER") {
-                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
+            } else if (["maneuver", "martialart"].includes(item.type)) {
+                await this.activateManeuver();
             }
-
-            // Special Visions
-            //const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
-            //const tokenDocument = token.document || token;
-            // if (this.#baseInfo?.sight) {
-            //     const detectionModes = tokenDocument.detectionModes;
-            //     const basicSight = detectionModes.find((o) => o.id === "basicSight");
-            //     if (basicSight) {
-            //         basicSight.range = null; // Infinite vision range
-            //     }
-            //     if (token) {
-            //         await activateSpecialVision(this, token);
-            //     }
-            // }
-
-            // // CUSTOMPOWER LIGHT
-            // if (this.system.XMLID === "CUSTOMPOWER") {
-            //     await activateSpecialVision(this, token);
-            // }
         } else {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -1252,6 +1308,84 @@ export class HeroSystem6eItem extends Item {
         return null;
     }
 
+    /**
+     * If activatable return true otherwise it is a damage maneuver and return false.
+     * @returns boolean
+     */
+    isActivatableManeuver() {
+        // Hero designer has a few ways of marking things as doing damage. For the prebuilt ones you can't look at DAMAGETYPE as it's always "0" even
+        // for things like a Flying Dodge. So, we make our decision based on the EFFECT/WEAPONEFFECT. This means that customer maneuvers need to have the
+        // correct EFFECT or WEAPONEFFECT specified for things to work.
+        // NOTE: Doesn't appear that there is a [WEAPONNNDDC] or [WEAPONFLASHDC] but we're going to add it just in case
+        const effect =
+            this.system.USEWEAPON || this.system.USEWEAPON === "Yes" ? this.system.WEAPONEFFECT : this.system.EFFECT;
+
+        // Does it have a recognized damage type?
+        if (
+            effect.search(/\[NORMALDC\]/) > -1 ||
+            effect.search(/\[NNDDC\]/) > -1 ||
+            effect.search(/\[FLASHDC\]/) > -1 ||
+            effect.search(/\[KILLINGDC\]/) > -1 ||
+            effect.search(/\[WEAPONDC\]/) > -1 ||
+            effect.search(/\[WEAPONNNDDC\]/) > -1 ||
+            effect.search(/\[WEAPONFLASHDC\]/) > -1 ||
+            effect.search(/\[WEAPONKILLINGDC\]/) > -1
+        ) {
+            return false;
+        }
+
+        // Does it use Strength damage?
+        else if (effect.search(/\[STRDC\]/) > -1) {
+            return false;
+        }
+
+        // Does it use velocity?
+        else if (effect.search(/v\/\d/) > -1) {
+            return false;
+        }
+
+        // Does it require an attack to hit roll like BLOCK?
+        else if (effect.search(/Block/) > -1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // FIXME: This should be trimmed down
+    isActivatable() {
+        const itemEffects = this.effects.find((ae) => ae.flags.type !== "adjustment");
+        if (itemEffects) {
+            return true;
+        }
+
+        // NOTE: item._id can be null in the case of a temporary/effective item.
+        const actorEffects = this.actor.effects.find((o) => o.origin === this.actor.items.get(this._id)?.uuid);
+        if (actorEffects) {
+            return true;
+        }
+
+        if (
+            this.baseInfo?.behaviors?.includes("activatable") ||
+            (this.system.XMLID === "MANEUVER" && this.isActivatableManeuver())
+        ) {
+            return true;
+        }
+
+        // FIXME: This should not be required as the behaviour should be marked correctly.
+        if (this.baseInfo?.type?.includes("sense")) {
+            return true;
+        }
+
+        // FIXME: This should not be required as the behaviour should be marked correctly.
+        // Talent/Skill/Perk as Powers are technically toggleable
+        if (this.type === "power" && ["talent", "skill", "perk"].find((o) => this.#baseInfo?.type.includes(o))) {
+            return true;
+        }
+
+        return false;
+    }
+
     _postUploadDetails() {
         const item = this;
 
@@ -1261,9 +1395,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         // showToggle
+        item.system.showToggle = this.isActivatable();
+
         const itemEffects = item.effects.find((ae) => ae.flags.type !== "adjustment");
         if (itemEffects) {
-            item.system.showToggle = true;
             item.system.active = !itemEffects.disabled;
         }
 
@@ -1271,20 +1406,8 @@ export class HeroSystem6eItem extends Item {
         const actorEffects = item.actor.effects.find((o) => o.origin === item.actor.items.get(item._id)?.uuid);
         {
             if (actorEffects) {
-                item.system.showToggle = true;
                 item.system.active = !actorEffects.disabled;
             }
-        }
-        if (item.baseInfo?.behaviors?.includes("activatable")) {
-            item.system.showToggle = true;
-        }
-        if (item.baseInfo?.type?.includes("sense")) {
-            item.system.showToggle = true;
-        }
-
-        // Talent/Skill/Perk as Powers are technically toggleable
-        if (item.type === "power" && ["talent", "skill", "perk"].find((o) => item.#baseInfo?.type.includes(o))) {
-            item.system.showToggle = true;
         }
 
         // Penalty Skill Levels are checked by default
@@ -1296,207 +1419,10 @@ export class HeroSystem6eItem extends Item {
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
         // Effect
-        if (item.causesDamageEffect()) {
-            item.flags.tags = {};
-
-            // Combat Skill Levels
-            const csls = combatSkillLevelsForAttack(item);
-            let cslSummary = {};
-
-            for (const csl of csls) {
-                for (const prop of ["ocv", "omcv", "dcv", "dmcv", "dc"]) {
-                    cslSummary[prop] = csl[prop] + parseInt(cslSummary[prop] || 0);
-
-                    if (csl[prop] != 0) {
-                        if (item.flags.tags[prop]) {
-                            item.flags.tags[prop] += "\n";
-                        } else {
-                            item.flags.tags[prop] = "";
-                        }
-                        item.flags.tags[prop] = `${item.flags.tags[prop]}${csl[prop].signedString()} ${
-                            prop === "dc" ? "DC " : ""
-                        }${csl.item.name}`;
-                    }
-                }
-            }
-
-            // PH: FIXME: We no longer provide END. Should we?
-            // const { end } = calculateDcFromItem(item, { ignoreDeadlyBlow: true });
-            // item.system.endEstimate = Math.max(item.system.endEstimate, end);
-
-            // text description of damage
-            item.system.damage = getFullyQualifiedEffectFormulaFromItem(item, { ignoreDeadlyBlow: true });
-
-            if (item.system.cvModifiers === undefined) {
-                item.system.cvModifiers = Attack.parseCvModifiers(item.system.OCV, item.system.DCV, item.system.DC);
-            }
-
-            // Signed OCV and DCV
-            if (item.system.ocv != undefined && item.system.uses === "ocv") {
-                const ocv = parseInt(item.actor?.system.characteristics.ocv?.value || 0);
-                if (parseInt(ocv) != 0) {
-                    if (item.flags.tags.ocv) {
-                        item.flags.tags.ocv += "\n";
-                    } else {
-                        item.flags.tags.ocv = "";
-                    }
-                    item.flags.tags.ocv = `${item.flags.tags.ocv}${ocv.signedString()} OCV`;
-                }
-                switch (item.system.ocv) {
-                    case "--":
-                        item.system.ocvEstimated = "";
-                        break;
-
-                    case "-v/10":
-                        {
-                            item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-");
-
-                            const tokens = item.actor.getActiveTokens();
-                            const token = tokens[0];
-                            const velocity = calculateVelocityInSystemUnits(item.actor, token);
-
-                            item.system.ocvEstimated = `${ocv + parseInt(cslSummary.ocv) + parseInt(velocity / 10)}`;
-
-                            if (parseInt(velocity / 10) != 0) {
-                                if (item.flags.tags.ocv) {
-                                    item.flags.tags.ocv += "\n";
-                                } else {
-                                    item.flags.tags.ocv = "";
-                                }
-                                item.flags.tags.ocv = `${item.flags.tags.ocv}${parseInt(
-                                    velocity / 10,
-                                ).signedString()} Velocity`;
-                            }
-                        }
-                        break;
-
-                    default:
-                        item.system.ocv = parseInt(item.system.ocv).signedString();
-
-                        item.system.ocvEstimated = `${
-                            ocv + parseInt(item.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)
-                        }`;
-
-                        if (parseInt(item.system.ocv) != 0) {
-                            if (item.flags.tags.ocv) {
-                                item.flags.tags.ocv += "\n";
-                            } else {
-                                item.flags.tags.ocv = "";
-                            }
-                            item.flags.tags.ocv += `${item.system.ocv} ${item.name}`;
-                        }
-                }
-            }
-
-            if (item.system.dcv != undefined && item.system.uses === "ocv") {
-                const dcv = parseInt(item.actor?.system.characteristics.dcv?.value || 0);
-                if (parseInt(dcv) !== 0) {
-                    if (item.flags.tags.dcv) {
-                        item.flags.tags.dcv += "\n";
-                    } else {
-                        item.flags.tags.dcv = "";
-                    }
-                    item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
-                }
-                item.system.dcv = parseInt(item.system.dcv).signedString();
-                item.system.dcvEstimated = `${
-                    dcv + parseInt(item.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
-                }`;
-
-                if (parseInt(item.system.dcv) != 0) {
-                    if (item.flags.tags.dcv) {
-                        item.flags.tags.dcv += "\n";
-                    } else {
-                        item.flags.tags.dcv = "";
-                    }
-                    item.flags.tags.dcv = `${item.flags.tags.dcv}${item.system.dcv} ${item.name}`;
-                }
-            }
-
-            if (item.system.uses === "omcv") {
-                const omcv = parseInt(item.actor?.system.characteristics.omcv?.value || 0);
-                item.system.ocvEstimated = `${omcv + parseInt(cslSummary.omcv || 0)}`;
-                if (omcv !== 0) {
-                    if (item.flags.tags.omcv) {
-                        item.flags.tags.omcv += "\n";
-                    } else {
-                        item.flags.tags.omcv = "";
-                    }
-                    item.flags.tags.omcv = `${item.flags.tags.omcv}${omcv.signedString()} OMCV`;
-                }
-
-                const dmcv = parseInt(item.actor?.system.characteristics.dmcv?.value || 0);
-                item.system.dcvEstimated = `${dmcv + parseInt(cslSummary.dmcv || 0)}`;
-                if (dmcv !== 0) {
-                    if (item.flags.tags.dmcv) {
-                        item.flags.tags.dmcv += "\n";
-                    } else {
-                        item.flags.tags.dmcv = "";
-                    }
-                    item.flags.tags.dmcv = `${item.flags.tags.dmcv}${dmcv.signedString()} DMCV`;
-                }
-            }
-
-            // Set +1 OCV
-            const setManeuver = item.actor.items.find(
-                (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
-            );
-            if (setManeuver) {
-                // Some items do not have OCV (like set itself)
-                if (item.system.ocvEstimated !== undefined) {
-                    item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + 1}`;
-
-                    if (item.flags.tags.ocv) {
-                        item.flags.tags.ocv += "\n";
-                    } else {
-                        item.flags.tags.ocv = "";
-                    }
-                    item.flags.tags.ocv += `+1 Set`;
-                }
-            }
-
-            // Haymaker -5 DCV
-            const haymakerManeuver = item.actor.items.find(
-                (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
-            );
-            if (haymakerManeuver) {
-                // Some items do not have DCV (like haymaker itself)
-                if (item.system.dcvEstimated !== undefined) {
-                    item.system.dcvEstimated = `${parseInt(item.system.dcvEstimated) - 5}`;
-
-                    if (item.flags.tags.dcv) {
-                        item.flags.tags.dcv += "\n";
-                    } else {
-                        item.flags.tags.dcv = "";
-                    }
-                    item.flags.tags.dcv += `-5 Haymaker`;
-                }
-            }
-
-            // STRMINIMUM
-            const strengthMinimumModifier = item.findModsByXmlid("STRMINIMUM");
-            if (strengthMinimumModifier) {
-                const strMinimumValue = calculateStrengthMinimumForItem(item, strengthMinimumModifier);
-                const extraStr =
-                    Math.max(0, parseInt(item.actor?.system.characteristics.str.value || 0)) - strMinimumValue;
-                if (extraStr < 0) {
-                    const adjustment = Math.floor(extraStr / 5);
-                    item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + adjustment}`;
-
-                    if (item.flags.tags.ocv) {
-                        item.flags.tags.ocv += "\n";
-                    } else {
-                        item.flags.tags.ocv = "";
-                    }
-                    item.flags.tags.ocv += `${adjustment.signedString()} ${strengthMinimumModifier.ALIAS}`;
-                }
-            }
-
-            item.system.phase = item.system.PHASE;
-        }
+        this.configureAttackParameters(item);
 
         // Defense
-        if (item.type == "defense") {
+        if (item.type === "defense") {
             item.system.description =
                 CONFIG.HERO.defenseTypes[item.system.defenseType] ||
                 CONFIG.HERO.defenseTypes5e[item.system.defenseType];
@@ -1538,17 +1464,215 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    configureAttackParameters() {
+        const maneuver = ["maneuver", "martialart"].includes(this.type);
+
+        // PH: FIXME: Kludge to stick in ocv & dcv
+        if (maneuver) {
+            this.system.uses = "ocv";
+            this.system.ocv = parseInt(this.system.OCV) || 0;
+            this.system.dcv = parseInt(this.system.DCV) || 0;
+        }
+
+        this.flags.tags = {};
+
+        // Combat Skill Levels
+        const csls = combatSkillLevelsForAttack(this);
+        let cslSummary = {};
+
+        for (const csl of csls) {
+            for (const prop of ["ocv", "omcv", "dcv", "dmcv", "dc"]) {
+                cslSummary[prop] = csl[prop] + parseInt(cslSummary[prop] || 0);
+
+                if (csl[prop] != 0) {
+                    if (this.flags.tags[prop]) {
+                        this.flags.tags[prop] += "\n";
+                    } else {
+                        this.flags.tags[prop] = "";
+                    }
+                    this.flags.tags[prop] =
+                        `${this.flags.tags[prop]}${csl[prop].signedString()} ${prop === "dc" ? "DC " : ""}${csl.item.name}`;
+                }
+            }
+        }
+
+        // text description of damage
+        if (this.causesDamageEffect()) {
+            this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
+        }
+
+        if (this.system.cvModifiers === undefined) {
+            this.system.cvModifiers = Attack.parseCvModifiers(this.system.OCV, this.system.DCV, this.system.DC);
+        }
+
+        // Signed OCV and DCV
+        if (this.system.ocv != undefined && this.system.uses === "ocv") {
+            const ocv = parseInt(this.actor?.system.characteristics.ocv?.value || 0);
+            if (parseInt(ocv) != 0) {
+                if (this.flags.tags.ocv) {
+                    this.flags.tags.ocv += "\n";
+                } else {
+                    this.flags.tags.ocv = "";
+                }
+                this.flags.tags.ocv = `${this.flags.tags.ocv}${ocv.signedString()} OCV`;
+            }
+            switch (this.system.ocv) {
+                case "--":
+                    this.system.ocvEstimated = "";
+                    break;
+
+                case "-v/10":
+                    {
+                        this.system.ocv = ("+" + parseInt(this.system.ocv)).replace("+-", "-");
+
+                        const tokens = this.actor.getActiveTokens();
+                        const token = tokens[0];
+                        const velocity = calculateVelocityInSystemUnits(this.actor, token);
+
+                        this.system.ocvEstimated = `${ocv + parseInt(cslSummary.ocv) + parseInt(velocity / 10)}`;
+
+                        if (parseInt(velocity / 10) != 0) {
+                            if (this.flags.tags.ocv) {
+                                this.flags.tags.ocv += "\n";
+                            } else {
+                                this.flags.tags.ocv = "";
+                            }
+                            this.flags.tags.ocv = `${this.flags.tags.ocv}${parseInt(
+                                velocity / 10,
+                            ).signedString()} Velocity`;
+                        }
+                    }
+                    break;
+
+                default:
+                    this.system.ocv = parseInt(this.system.ocv).signedString();
+
+                    this.system.ocvEstimated = `${ocv + parseInt(this.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)}`;
+
+                    if (parseInt(this.system.ocv) != 0) {
+                        if (this.flags.tags.ocv) {
+                            this.flags.tags.ocv += "\n";
+                        } else {
+                            this.flags.tags.ocv = "";
+                        }
+                        this.flags.tags.ocv += `${this.system.ocv} ${this.name}`;
+                    }
+            }
+        }
+
+        if (this.system.dcv != undefined && this.system.uses === "ocv") {
+            const dcv = parseInt(this.actor?.system.characteristics.dcv?.value || 0);
+            if (parseInt(dcv) !== 0) {
+                if (this.flags.tags.dcv) {
+                    this.flags.tags.dcv += "\n";
+                } else {
+                    this.flags.tags.dcv = "";
+                }
+                this.flags.tags.dcv = `${this.flags.tags.dcv}${dcv.signedString()} DCV`;
+            }
+            this.system.dcv = parseInt(this.system.dcv).signedString();
+            this.system.dcvEstimated = `${dcv + parseInt(this.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)}`;
+
+            if (parseInt(this.system.dcv) != 0) {
+                if (this.flags.tags.dcv) {
+                    this.flags.tags.dcv += "\n";
+                } else {
+                    this.flags.tags.dcv = "";
+                }
+                this.flags.tags.dcv = `${this.flags.tags.dcv}${this.system.dcv} ${this.name}`;
+            }
+        }
+
+        if (this.system.uses === "omcv") {
+            const omcv = parseInt(this.actor?.system.characteristics.omcv?.value || 0);
+            this.system.ocvEstimated = `${omcv + parseInt(cslSummary.omcv || 0)}`;
+            if (omcv !== 0) {
+                if (this.flags.tags.omcv) {
+                    this.flags.tags.omcv += "\n";
+                } else {
+                    this.flags.tags.omcv = "";
+                }
+                this.flags.tags.omcv = `${this.flags.tags.omcv}${omcv.signedString()} OMCV`;
+            }
+
+            const dmcv = parseInt(this.actor?.system.characteristics.dmcv?.value || 0);
+            this.system.dcvEstimated = `${dmcv + parseInt(cslSummary.dmcv || 0)}`;
+            if (dmcv !== 0) {
+                if (this.flags.tags.dmcv) {
+                    this.flags.tags.dmcv += "\n";
+                } else {
+                    this.flags.tags.dmcv = "";
+                }
+                this.flags.tags.dmcv = `${this.flags.tags.dmcv}${dmcv.signedString()} DMCV`;
+            }
+        }
+
+        // Set +1 OCV
+        const setManeuver = this.actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
+        if (setManeuver) {
+            // Some items do not have OCV (like set itself)
+            if (this.system.ocvEstimated !== undefined) {
+                this.system.ocvEstimated = `${parseInt(this.system.ocvEstimated) + 1}`;
+
+                if (this.flags.tags.ocv) {
+                    this.flags.tags.ocv += "\n";
+                } else {
+                    this.flags.tags.ocv = "";
+                }
+                this.flags.tags.ocv += `+1 Set`;
+            }
+        }
+
+        // Haymaker -5 DCV
+        const haymakerManeuver = this.actor.items.find(
+            (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
+        );
+        if (haymakerManeuver) {
+            // Some items do not have DCV (like haymaker itself)
+            if (this.system.dcvEstimated !== undefined) {
+                this.system.dcvEstimated = `${parseInt(this.system.dcvEstimated) - 5}`;
+
+                if (this.flags.tags.dcv) {
+                    this.flags.tags.dcv += "\n";
+                } else {
+                    this.flags.tags.dcv = "";
+                }
+                this.flags.tags.dcv += `-5 Haymaker`;
+            }
+        }
+
+        // STRMINIMUM
+        const strengthMinimumModifier = this.findModsByXmlid("STRMINIMUM");
+        if (strengthMinimumModifier) {
+            const strMinimumValue = calculateStrengthMinimumForItem(this, strengthMinimumModifier);
+            const extraStr = Math.max(0, parseInt(this.actor?.system.characteristics.str.value || 0)) - strMinimumValue;
+            if (extraStr < 0) {
+                const adjustment = Math.floor(extraStr / 5);
+                this.system.ocvEstimated = `${parseInt(this.system.ocvEstimated) + adjustment}`;
+
+                if (this.flags.tags.ocv) {
+                    this.flags.tags.ocv += "\n";
+                } else {
+                    this.flags.tags.ocv = "";
+                }
+                this.flags.tags.ocv += `${adjustment.signedString()} ${strengthMinimumModifier.ALIAS}`;
+            }
+        }
+
+        this.system.phase = this.system.PHASE;
+    }
+
     rollsToHit() {
         return (
-            (this.baseInfo?.behaviors.includes("to-hit") && this.system.XMLID !== "MANEUVER") ||
-            (this.system.XMLID === "MANEUVER" && this.system.OCV !== "--")
+            (this.system.XMLID !== "MANEUVER" && this.baseInfo?.behaviors.includes("to-hit")) ||
+            (this.system.XMLID === "MANEUVER" && !this.isActivatable())
         );
     }
 
     causesDamageEffect() {
         return (
-            (this.baseInfo?.behaviors.includes("dice") && this.system.XMLID !== "MANEUVER") ||
-            (this.system.XMLID === "MANEUVER" && this.system.OCV !== "--")
+            (this.system.XMLID !== "MANEUVER" && this.baseInfo?.behaviors.includes("dice")) ||
+            (this.system.XMLID === "MANEUVER" && !this.isActivatable())
         );
     }
 
@@ -1701,10 +1825,6 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 if (changed) {
-                    // PH: FIXME: We no longer provide END. Should we?
-                    // let { end } = calculateDcFromItem(this, { ignoreDeadlyBlow: true });
-                    // this.system.endEstimate = Math.max(this.system.endEstimate, end);
-
                     // text description of damage
                     this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                 }
@@ -2496,10 +2616,10 @@ export class HeroSystem6eItem extends Item {
 
         // ADDERS
         let adderCost = 0;
+        let negativeCustomAdderCosts = 0;
         for (const adder of system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
-            //adder.BASECOST_total = adderBaseCost;
 
             if (adder.SELECTED !== false) {
                 //TRANSPORT_FAMILIARITY
@@ -2515,12 +2635,14 @@ export class HeroSystem6eItem extends Item {
                 adder.BASECOST_total = 0;
             }
 
+            // It is possible to have negative adders although they are perhaps only custom adders. Ignore negative custom adders for the active cost as
+            // we have no idea if they are actually important.
+            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? Math.min(0, adder.BASECOST_total) : 0;
             adderCost += adder.BASECOST_total;
 
             adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
 
             let subAdderCost = 0;
-
             for (const adder2 of adder.ADDER || []) {
                 const adder2BaseCost = adder2.BASECOST;
 
@@ -2543,6 +2665,9 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
+            // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
+            // we have no idea if they are actually important.
+            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? subAdderCost : 0;
             adderCost += subAdderCost;
         }
 
@@ -2560,7 +2685,6 @@ export class HeroSystem6eItem extends Item {
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
             for (const adderPower of system.POWER) {
-                //const adderBaseCost = parseFloat(adderPower.BASECOST);
                 const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
                 const adderPowerInfo = getPowerInfo({
                     item: adderPower,
@@ -2584,7 +2708,6 @@ export class HeroSystem6eItem extends Item {
 
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
-        //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
         if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
             let advantages = 0;
             for (const modifier of this.modifiers.filter((o) => !o.PRIVATE)) {
@@ -2625,6 +2748,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         system.basePointsPlusAdders = cost;
+        system.basePointsPlusAddersForActivePoints = cost - negativeCustomAdderCosts;
 
         return old !== system.basePointsPlusAdders;
     }
@@ -2752,15 +2876,16 @@ export class HeroSystem6eItem extends Item {
             modifier.advantage = _myAdvantage;
         }
 
-        const _activePoints = system.basePointsPlusAdders * (1 + advantages);
-        system.activePointsDc = system.basePointsPlusAdders * (1 + advantagesAffectingDc);
+        const _activePoints = system.basePointsPlusAddersForActivePoints * (1 + advantages);
+        system.activePointsDc = system.basePointsPlusAddersForActivePoints * (1 + advantagesAffectingDc);
 
         system._advantages = advantages;
         system._advantagesDc = advantagesAffectingDc;
 
         // HALFEND is based on active points without the HALFEND modifier
         if (this.findModsByXmlid("REDUCEDEND")) {
-            system._activePointsWithoutEndMods = system.basePointsPlusAdders * (1 + advantages - endModifierCost);
+            system._activePointsWithoutEndMods =
+                system.basePointsPlusAddersForActivePoints * (1 + advantages - endModifierCost);
         }
 
         let old = system.activePoints;
