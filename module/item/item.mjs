@@ -98,6 +98,17 @@ function filterItem(item, filterString) {
         if (match2) {
             return true;
         }
+
+        // Or a child of a child of a parent
+        for (const child2 of child.childItems) {
+            const match3 =
+                child2.name?.match(regex) ||
+                child2.system.description?.match(regex) ||
+                child2.system.XMLID?.match(regex);
+            if (match3) {
+                return true;
+            }
+        }
     }
     return false;
 }
