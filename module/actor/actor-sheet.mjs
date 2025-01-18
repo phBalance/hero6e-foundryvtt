@@ -792,13 +792,17 @@ export class HeroSystemActorSheet extends ActorSheet {
         );
         for (const _char of characteristics) {
             const characteristic = _char.key.toLowerCase();
-            if (
-                this.actor.system.characteristics[characteristic] &&
-                expandedData.Xsystem.characteristics?.[characteristic].value !==
-                    this.actor.system.characteristics[characteristic].value
-            ) {
-                expandedData.system.characteristics[characteristic].value =
-                    expandedData.Xsystem.characteristics[characteristic].value;
+            if (!this.actor.system.characteristics) {
+                console.error("Missing this.actor.system.characteristics");
+            } else {
+                if (
+                    this.actor.system.characteristics[characteristic] &&
+                    expandedData.Xsystem.characteristics?.[characteristic].value !==
+                        this.actor.system.characteristics[characteristic].value
+                ) {
+                    expandedData.system.characteristics[characteristic].value =
+                        expandedData.Xsystem.characteristics[characteristic].value;
+                }
             }
         }
 

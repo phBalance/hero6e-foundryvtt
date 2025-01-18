@@ -747,7 +747,17 @@ export function getEffectForumulaFromItem(item, options) {
 }
 
 export function getFullyQualifiedEffectFormulaFromItem(item, options) {
+    if (!item) {
+        console.error(`Missing required item`);
+        return;
+    }
+
     const { diceParts, baseAttackItem } = calculateDicePartsForItem(item, options);
+
+    if (!baseAttackItem) {
+        console.error(`Missing required baseAttackItem`);
+        return;
+    }
 
     return dicePartsToFullyQualifiedEffectFormula(baseAttackItem, diceParts);
 }
@@ -774,7 +784,11 @@ export function dicePartsToEffectFormula(diceParts) {
 
 // FIXME: Should show "N" for normal, "NND" for NND, "AP" for Armour Piercing, etc
 export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
-    return `${dicePartsToEffectFormula(diceParts)}${item.system.killing ? "K" : ""}`;
+    if (!item) {
+        console.error(`Missing required item`);
+        return;
+    }
+    return `${dicePartsToEffectFormula(diceParts)}${item.killing ? "K" : ""}`;
 }
 
 function addStrengthToBundle(item, options, dicePartsBundle, baseAttackTweaks) {

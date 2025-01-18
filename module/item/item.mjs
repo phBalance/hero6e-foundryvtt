@@ -332,7 +332,7 @@ export class HeroSystem6eItem extends Item {
                     ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`);
                     return collectActionDataBeforeToHitOptions(this, event);
             }
-        } else if (this.baseInfo.behaviors.include("defense")) {
+        } else if (this.baseInfo.behaviors.includes("defense")) {
             return this.toggle(event);
         } else {
             const powerInfo = getPowerInfo({
