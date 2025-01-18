@@ -139,7 +139,7 @@ export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengt
 
 function isNonKillingStrengthBasedManeuver(item) {
     return (
-        !item.system.killing &&
+        !item.doesKillingDamage &&
         item.system.usesStrength &&
         (item.type === "martialart" ||
             (item.type === "maneuver" &&
@@ -185,7 +185,7 @@ function addExtraDcsToBundle(item, dicePartsBundle) {
 
     // 5E extraDCLevels are halved for unarmed killing attacks
     // PH FIXME: Need better logic here for 6e damage doubling behaviour
-    if (item.is5e && item.system.killing) {
+    if (item.is5e && item.doesKillingDamage) {
         extraDcLevels = Math.floor(extraDcLevels / 2);
     }
 
@@ -235,7 +235,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         const rawManeuverDc = parseInt(item.system.DC);
 
         let maneuverDC = rawManeuverDc;
-        if (item.is5e && baseDamageItem.system.killing) {
+        if (item.is5e && baseDamageItem.doesKillingDamage) {
             maneuverDC = Math.floor(rawManeuverDc / 2);
         }
 
@@ -307,7 +307,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, velocityDiceParts);
 
         // Velocity adding to normal damage does not count towards any doubling rules.
-        const bundleToUse = item.system.killing ? addedDamageBundle : velocityDamageBundle;
+        const bundleToUse = item.doesKillingDamage ? addedDamageBundle : velocityDamageBundle;
 
         bundleToUse.diceParts = addDiceParts(baseDamageItem, bundleToUse.diceParts, velocityDiceParts);
         bundleToUse.tags.push({
@@ -350,7 +350,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
             const rawHaymakerDc = parseInt(haymakerManeuverActive.system.DC);
 
             let haymakerDC = rawHaymakerDc;
-            if (item.is5e && item.system.killing) {
+            if (item.is5e && item.doesKillingDamage) {
                 haymakerDC = Math.floor(rawHaymakerDc / 2);
             }
 
@@ -791,7 +791,7 @@ export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
         console.error(`Missing required item`);
         return;
     }
-    return `${dicePartsToEffectFormula(diceParts)}${item.killing ? "K" : ""}`;
+    return `${dicePartsToEffectFormula(diceParts)}${item.doesKillingDamage ? "K" : ""}`;
 }
 
 function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage) {
@@ -921,7 +921,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
             let itemBaseDc = rawItemBaseDc;
 
             // In 5e only, DCs for killing attacks are halved.
-            if (item.is5e && item.system.killing) {
+            if (item.is5e && item.doesKillingDamage) {
                 itemBaseDc = Math.floor(itemBaseDc / 2);
             }
 

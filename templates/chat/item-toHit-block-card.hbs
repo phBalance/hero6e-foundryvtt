@@ -31,7 +31,7 @@
 
         <div class="tags">
             <span class="tag">{{item.system.class}}</span>
-            {{#if item.system.killing}}
+            {{#if item.doesKillingDamage}}
                 <span class="tag">killing</span>
             {{/if}}
             {{#if (ne item.system.stunBodyDamage 'Stun and Body')}}
