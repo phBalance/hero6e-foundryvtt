@@ -304,7 +304,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
         // HTH Attacks format includes the UUID which has periods in it so we can't use extendedFormData. Do a custom merge.
         delete extendedFormData.hthAttackItems;
-        const hthAttacks = Object.entries(formData).forEach(([key, value]) => {
+        Object.entries(formData).forEach(([key, value]) => {
             const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
             if (!match) {
                 return;
