@@ -134,6 +134,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-martialarts.hbs`,
+        `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-martialarts-item.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-powers.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-powers-item.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment.hbs`,

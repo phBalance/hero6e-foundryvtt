@@ -84,14 +84,22 @@ function filterItem(item, filterString) {
 
     const regex = new RegExp(filterString.trim(), "i");
 
-    const match = item.name?.match(regex) || item.system.description?.match(regex) || item.system.XMLID?.match(regex);
-    if (match) return true;
+    const match =
+        item.name?.match(regex) ||
+        item.system.description?.match(regex) ||
+        item.system.XMLID?.match(regex) ||
+        item.system.EFFECT?.match(regex);
+    if (match) {
+        return true;
+    }
 
     // Could be a child of a parent
     for (const child of item.childItems) {
         const match2 =
             child.name?.match(regex) || child.system.description?.match(regex) || child.system.XMLID?.match(regex);
-        if (match2) return true;
+        if (match2) {
+            return true;
+        }
     }
     return false;
 }
@@ -5140,12 +5148,18 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isContainer() {
+        if (this.isSeperator) return false;
         if (this.childItems.length) return true;
 
         // A backpack from MiscEquipment.hdp is a CUSTOMPOWER
         if (this.system.description.match(/can hold \d+kg/i)) return true;
 
         return this.baseInfo?.isContainer;
+    }
+
+    get isSeperator() {
+        // It appears that some seperators can have childItems.  Not sure why this is the case.
+        return this.system.XMLID === "LIST" && this.system.ALIAS.trim() === "";
     }
 
     get isRangedSense() {
@@ -5233,6 +5247,35 @@ export class HeroSystem6eItem extends Item {
 
     get compoundCost() {
         if (this.system?.XMLID !== "COMPOUNDPOWER") return 0;
+        let cost = 0;
+        for (const child of this.childItems) {
+            cost += parseInt(child.system.realCost);
+        }
+
+        let costSuffix = "";
+
+        // Is this in a framework?
+        if (this.parentItem?.system.XMLID === "MULTIPOWER") {
+            // Fixed
+            if (this.system.ULTRA_SLOT) {
+                costSuffix = this.actor?.system.is5e ? "u" : "f";
+                cost /= 10.0;
+            }
+
+            // Variable
+            else {
+                costSuffix = this.actor?.system.is5e ? "m" : "v";
+                cost /= 5.0;
+            }
+        } else if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
+            cost = cost - this.parentItem.system.BASECOST;
+        }
+
+        return RoundFavorPlayerDown(cost) + costSuffix;
+    }
+
+    get listCost() {
+        if (this.system?.XMLID !== "LIST") return 0;
         let cost = 0;
         for (const child of this.childItems) {
             cost += parseInt(child.system.realCost);

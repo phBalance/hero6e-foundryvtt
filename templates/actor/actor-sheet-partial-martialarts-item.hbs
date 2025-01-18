@@ -1,4 +1,4 @@
-{{#if (filterItem this @root/options.itemFilters.power)}}
+{{#if (filterItem this @root/options.itemFilters.martialarts)}}
 <tr class="item {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
     data-item-id="{{this._id}}">
     {{#if (eq item.system.XMLID "LIST")}}
@@ -26,7 +26,7 @@
                 {{/unless}}
             {{/if}}
         </td>
-        <td>
+        <td class="td-cost">
             {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
                 {{this.compoundCost}}
             {{else if this.isSeperator}}
@@ -45,12 +45,21 @@
             {{#if (and this.childIdx this.parentItem)}}
                 {{this.childIdx}})
             {{/if}}
-            {{{itemFullDescription this}}}
-            {{#if this.system.NOTES}}
+            {{{itemName this}}}
+            {{!-- {{#if this.system.NOTES}}
                 <div class="item-notes-elidable-content"><b>Notes:</b> {{{this.system.NOTES}}}</div>
-            {{/if}}
+            {{/if}} --}}
         </td>
-        <td>{{this.system.endEstimate}}</td>
+        <td class="left">{{#if (ne this.system.XMLID "LIST")}}{{this.system.description}}{{/if}}</td>
+        <td>{{this.system.phase}}</td>
+        <td>{{this.system.ocvEstimated}}</td>
+        <td>{{this.system.dcvEstimated}}</td>
+
+
+
+        <td>{{item.system.phase}}</td>
+        <td>{{item.system.ocvEstimated}}</td>
+        <td>{{item.system.dcvEstimated}}</td>
         <td>
             {{#if (itemHasBehaviours this "to-hit" "dice")}}
                 {{#if this.disabledOIHID}}
@@ -89,6 +98,6 @@
 {{/if}}
 {{#if (not this.system.collapse)}}
     {{#each this.childItems }}
-        {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') this }}
+        {{> (getModulePath 'actor/actor-sheet-partial-martialarts-item.hbs') this }}
     {{/each}}
 {{/if}}
