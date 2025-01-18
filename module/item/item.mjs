@@ -530,7 +530,6 @@ export class HeroSystem6eItem extends Item {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect);
             }
 
-            // TODO: Dodge effect
             if (maneuverHasDodgeTrait) {
                 const dodgeStatusEffect = foundry.utils.deepClone(
                     HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect,
@@ -1468,12 +1467,12 @@ export class HeroSystem6eItem extends Item {
     configureAttackParameters() {
         const maneuver = ["maneuver", "martialart"].includes(this.type);
 
-        // // PH: FIXME: Kludge to stick in ocv & dcv
-        // if (maneuver) {
-        //     this.system.uses = "ocv";
-        //     this.system.ocv = parseInt(this.system.OCV) || 0;
-        //     this.system.dcv = parseInt(this.system.DCV) || 0;
-        // }
+        // PH: FIXME: Kludge to stick in ocv & dcv
+        if (maneuver) {
+            this.system.uses = "ocv";
+            this.system.ocv = parseInt(this.system.OCV) || 0;
+            this.system.dcv = parseInt(this.system.DCV) || 0;
+        }
 
         this.flags.tags = {};
 
