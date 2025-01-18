@@ -520,7 +520,7 @@ export class HeroSystem6eItem extends Item {
             const maneuverHasAbortTrait = effect.indexOf("abort") > -1;
             const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
             const currentCombatActorId = game.combat?.combatants.find(
-                (o) => o.tokenId === game.combat.current?.tokenId,
+                (combatant) => combatant.tokenId === game.combat.current?.tokenId,
             )?.actorId;
             const thisActorsCombatTurn =
                 game.combat?.active && currentCombatActorId != undefined && currentCombatActorId === this.actor?.id;
@@ -545,15 +545,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Turn on any status effects
-        // if (this.system.XMLID === "BRACE") {
-        //     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
-        // } else if (this.system.XMLID === "HAYMAKER") {
-        //     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
-        // } else if (this.system.XMLID === "DODGE") {
-        //     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect);
-        // }
-
-        // this.actor.addActiveEffect(statusEffect);
+        if (this.system.XMLID === "BRACE") {
+            this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
+        } else if (this.system.XMLID === "HAYMAKER") {
+            this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
+        }
     }
 
     /**
