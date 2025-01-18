@@ -74,13 +74,22 @@
                 data-label="{{this._id}}">{{numberFormat this.system.roll decimals=0
                 sign=false}}-</button>
         {{/if}}
-        {{#if (eq this.system.subType "attack")}}
-                <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
+        {{#if (itemHasActionBehavior item "to-hit")}}
+            <a class="item-image item-rollable"><i
+                    class="fas fa-dice"
+                    title="{{item.name}}"
+                    width="24"
+                    height="24"
+                ></i></a>
         {{/if}}
-        {{#if this.system.showToggle}}
-            <input class="item-toggle" type="checkbox" 
-                Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
-                data-action="toggle" />
+        {{#if (itemHasActionBehavior item "activatable")}}
+            <input
+                class="item-toggle"
+                type="checkbox"
+                name="item.system.active"
+                {{checked item.system.active}}
+                data-dtype="Boolean"
+            />
         {{/if}}
     </td>
     {{/if}}

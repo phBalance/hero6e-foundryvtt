@@ -1563,7 +1563,8 @@ export class HeroSystem6eActor extends Actor {
             1; // Not really sure why we need an extra +1
         const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 0);
 
-        promiseArray.push(this.#addFreeStuff(uploadProgressBar));
+        // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
+        await this.#addFreeStuff(uploadProgressBar);
 
         uploadPerformance.progressBarFreeStuff = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
