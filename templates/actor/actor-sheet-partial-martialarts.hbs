@@ -2,7 +2,7 @@
     <table>
         <tr class="sticky">
             <th colspan="2" class="right">Filter:</th>
-            <th colspan="10">
+            <th colspan="8">
                 <input class="left" name="itemFilters.martial" type="text"
                     value="{{options.itemFilters.martial}}">
             </th>
@@ -16,10 +16,10 @@
             <th>{{localize "ActorSheet.OCV"}}</th>
             <th>{{localize "ActorSheet.DCV"}}</th>
             <th>{{localize "ActorSheet.Roll"}}</th>
-            {{! <th>
-                <a class="item-control item-create" title="Create Martial Art" data-type="martialArt">
-                    <i class="fas fa-plus"></i> Add MartialArt</a>
-            </th> }}
+            <th>
+                {{!-- <a class="item-control item-create" title="Create Martial Art" data-type="martialArt">
+                    <i class="fas fa-plus"></i> Add MartialArt</a> --}}
+            </th> 
         </tr>
 
         {{#each items as |item id|}}
