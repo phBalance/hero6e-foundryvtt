@@ -578,11 +578,31 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Turn on any status effects
+        // Turn on any status effects that we have implemented
         if (this.system.XMLID === "BRACE") {
             this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
         } else if (this.system.XMLID === "HAYMAKER") {
             this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
+        }
+    }
+
+    /**
+     * Deactivate a basic, optional, or martial maneuver
+     */
+    deactivateManeuver() {
+        const effect = this.system.EFFECT?.toLowerCase();
+        if (effect) {
+            const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
+            if (maneuverHasDodgeTrait) {
+                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
+            }
+        }
+
+        // Turn off any status effects that we have implemented
+        if (this.system.XMLID === "BRACE") {
+            this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
+        } else if (this.system.XMLID === "HAYMAKER") {
+            this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
         }
     }
 
@@ -687,10 +707,8 @@ export class HeroSystem6eItem extends Item {
                 if (this.actor.statuses.has("fly")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
-            } else if (this.system.XMLID === "BRACE") {
-                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
-            } else if (this.system.XMLID === "HAYMAKER") {
-                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
+            } else if (["maneuver", "martialart"].includes(item.type)) {
+                await this.deactivateManeuver();
             }
         }
 
@@ -733,9 +751,9 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "martialart":
             case "maneuver":
-                await enforceManeuverLimits(this.actor, item.id, item.name);
-                //await updateCombatAutoMod(item.actor, item)
+                await enforceManeuverLimits(this.actor, this);
                 break;
 
             case "talent": // COMBAT_LUCK
@@ -751,11 +769,6 @@ export class HeroSystem6eItem extends Item {
         if (this.system.XMLID === "DENSITYINCREASE") {
             await this.actor.applyEncumbrancePenalty();
         }
-
-        // Charges expire
-        // if (charges) {
-        //     // Find the active effect
-        // }
 
         // If we have control of this token, re-acquire to update movement types
         const myToken = this.actor?.getActiveTokens()?.[0];
