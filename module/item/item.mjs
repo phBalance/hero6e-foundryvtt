@@ -3443,10 +3443,16 @@ export class HeroSystem6eItem extends Item {
             case "ENERGYBLAST":
             case "EGOATTACK":
             case "MINDCONTROL":
-            case "HANDTOHANDATTACK":
                 {
                     const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${system.ALIAS} ${diceFormula}`;
+                }
+                break;
+
+            case "HANDTOHANDATTACK":
+                {
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    system.description = `${system.ALIAS} +${diceFormula}${diceFormula === "1" || diceFormula === "0" ? " point" : ""}`;
                 }
                 break;
 
@@ -5385,19 +5391,16 @@ export class HeroSystem6eItem extends Item {
     get doesKillingDamage() {
         if (this.system.KILLING === true) {
             return true;
-        }
-
-        if (this.system.KILLING === false) {
+        } else if (this.system.KILLING === false) {
             return false;
-        }
-
-        if (this.system.WEAPONEFFECT?.includes("KILLING")) {
+        } else if (this.system.WEAPONEFFECT?.includes("KILLING")) {
             return true;
         }
 
         // Legacy check
-        if (this.system.killing) {
-            console.error(`Unable to determine KILLING property for ${this.name}`);
+        else if (this.system.killing) {
+            // TODO: We should get off the system.killing drug.
+            console.warn(`Unable to determine KILLING property for ${this.name}`);
             return true;
         }
 
