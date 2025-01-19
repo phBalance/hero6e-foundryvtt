@@ -1,24 +1,27 @@
-export async function enforceManeuverLimits(actor, itemId) {
-    const maneuverItems = actor.items.filter((e) => e.type === "maneuver");
+/**
+ * Manuevers have some rules of their own that should be considered.
+ *
+ * @param {*} actor
+ * @param {*} item
+ */
+export async function enforceManeuverLimits(actor, item) {
+    // const maneuverItems = actor.items.filter((e) => ["maneuver", "martialart"].includes(e.type));
 
-    const relevantItem = actor.items.get(itemId);
+    await item.update({ "system.active": !item.system.active });
 
-    await relevantItem.update({ "system.active": !relevantItem.system.active });
-
-    if (relevantItem.system.active) {
-        if (relevantItem.name === "Block" && relevantItem.system.active) {
-            for (const maneuver of maneuverItems) {
-                if (maneuver.system.active && maneuver.name != "Block") {
-                    await maneuver.update({ "system.active": false });
-                }
-            }
-        } else {
-            let block = maneuverItems.find((o) => o.name === "Block");
-            if (block && block?.system?.active) {
-                await block.update({ "system.active": false });
-            }
-        }
-    }
-
-    return;
+    // PH: FIXME: Not sure this is correct
+    //     if (item.system.active) {
+    //         if (item.name === "Block") {
+    //             for (const maneuver of maneuverItems) {
+    //                 if (maneuver.system.active && maneuver.name !== "Block") {
+    //                     await maneuver.update({ "system.active": false });
+    //                 }
+    //             }
+    //         } else {
+    //             const block = maneuverItems.find((maneuver) => maneuver.name === "Block");
+    //             if (block && block?.system?.active) {
+    //                 await block.update({ "system.active": false });
+    //             }
+    //         }
+    //     }
 }
