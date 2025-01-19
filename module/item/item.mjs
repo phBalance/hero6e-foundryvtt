@@ -5385,19 +5385,16 @@ export class HeroSystem6eItem extends Item {
     get doesKillingDamage() {
         if (this.system.KILLING === true) {
             return true;
-        }
-
-        if (this.system.KILLING === false) {
+        } else if (this.system.KILLING === false) {
             return false;
-        }
-
-        if (this.system.WEAPONEFFECT?.includes("KILLING")) {
+        } else if (this.system.WEAPONEFFECT?.includes("KILLING")) {
             return true;
         }
 
         // Legacy check
-        if (this.system.killing) {
-            console.error(`Unable to determine KILLING property for ${this.name}`);
+        else if (this.system.killing) {
+            // TODO: We should get off the system.killing drug.
+            console.warn(`Unable to determine KILLING property for ${this.name}`);
             return true;
         }
 
