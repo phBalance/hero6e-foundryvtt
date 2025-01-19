@@ -4419,7 +4419,14 @@ export class HeroSystem6eItem extends Item {
                 fraction += BASECOST_total % 1;
         }
 
-        result += fraction.trim() + ")";
+        result += fraction.trim();
+
+        //FORCEALLOW="Yes"
+        if (modifier.FORCEALLOW) {
+            result += "*";
+        }
+
+        result += ")";
 
         // Highly summarized
         if (["FOCUS"].includes(modifier.XMLID)) {

@@ -8,7 +8,7 @@
 - Fix crash on loading items with strength minimum and provide better handling for older HDC files. [#1628](https://github.com/dmdorman/hero6e-foundryvtt/issues/1628)
 - Added dodging effect icon.
 - Fixed HDC uploads of type BASE.
-- Actor sheet display improvements (Seperators, Lists, Martial Arts) [#1723] (https://github.com/dmdorman/hero6e-foundryvtt/issues/1723)
+- Actor sheet display improvements (Seperators, Lists, Martial Arts, filters) [#1723] (https://github.com/dmdorman/hero6e-foundryvtt/issues/1723)
 
 ## Version 4.0.13 20250111
 

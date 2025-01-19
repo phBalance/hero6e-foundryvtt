@@ -93,6 +93,7 @@ export async function migrateWorld() {
     CreateHeroCompendiums();
 
     // Migrate maneuvers for all things that have strength (PC, NPC) but ignore Vehicles and automatons since we don't give them free stuff at this point.
+    let _start = Date.now();
     await migrateToVersion(
         "4.0.14",
         lastMigration,
@@ -100,8 +101,10 @@ export async function migrateWorld() {
         "rebuilding all built in maneuvers for PC and NPCs",
         async (actor) => await replaceActorsBuiltInManeuvers(actor),
     );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.14`, "background: #1111FF; color: #FFFFFF");
 
     // Always rebuild the database for all actors by recreating actors and all their items (description, cost, etc)
+    _start = Date.now();
     await migrateToVersion(
         game.system.version,
         undefined,
@@ -109,6 +112,7 @@ export async function migrateWorld() {
         "rebuilding actors and their items",
         async (actor) => await rebuildActors(actor),
     );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to latest version`, "background: #1111FF; color: #FFFFFF");
 
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 }
@@ -117,15 +121,29 @@ async function replaceActorsBuiltInManeuvers(actor) {
     try {
         if (!actor) return false;
 
+        const timer = {};
+
         // Remove all built in maneuvers
+        timer.deleteStart = Date.now();
         await actor.deleteEmbeddedDocuments(
             "Item",
             actor.items.filter((power) => power.type?.includes("maneuver")).map((o) => o.id),
         );
+        timer.deleteEnd = Date.now();
 
         // Add in the new placeholder items and all built in maneuvers
+        timer.placeholdersStart = Date.now();
         await actor.addAttackPlaceholders();
+        timer.placeholdersEnd = Date.now();
+
+        timer.maneuversStart = Date.now();
         await actor.addHeroSystemManeuvers();
+        //await actor.addHeroSystemManeuversBulk();
+        timer.maneuversEnd = Date.now();
+
+        // console.log(
+        //     `${timer.deleteEnd - timer.deleteStart} ${timer.placeholdersEnd - timer.placeholdersStart} ${timer.maneuversEnd - timer.maneuversStart}`,
+        // );
     } catch (e) {
         const msg = `Migration of maneuvers to 4.0.14 failed for ${actor?.name}. Please report.`;
         console.error(msg, e);

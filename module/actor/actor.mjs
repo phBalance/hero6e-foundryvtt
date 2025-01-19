@@ -1928,9 +1928,13 @@ export class HeroSystem6eActor extends Actor {
         // For some unknown reason SPD with AE not working during upload.
         // This kludge is a quick fix
         // https://github.com/dmdorman/hero6e-foundryvtt/issues/1439
+        // All characteristics?
+        // https://github.com/dmdorman/hero6e-foundryvtt/issues/1746
         if (this.id) {
-            await this.update({ "system.characteristics.spd.max": this.system.characteristics.spd.core });
-            await this.update({ "system.characteristics.spd.value": this.system.characteristics.spd.max });
+            for (const char of Object.keys(this.system.characteristics)) {
+                await this.update({ [`system.characteristics.${char}.max`]: this.system.characteristics[char].core });
+                await this.update({ [`system.characteristics.${char}.value`]: this.system.characteristics[char].max });
+            }
         }
 
         // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
@@ -2010,7 +2014,12 @@ export class HeroSystem6eActor extends Actor {
             // MANEUVERS
             await this.addAttackPlaceholders();
 
-            return this.addHeroSystemManeuvers();
+            const start = Date.now();
+            await this.addHeroSystemManeuvers();
+            //await this.addHeroSystemManeuversBulk();
+            const end = Date.now();
+            console.log("addHeroSystemManeuvers/Bluk", end - start);
+            return;
         }
     }
 
@@ -2150,6 +2159,76 @@ export class HeroSystem6eActor extends Actor {
 
         await Promise.all(maneuverPromises);
     }
+
+    // async addHeroSystemManeuversBulk() {
+    //     const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+    //     const itemsToCreate = powerList
+    //         .filter((power) => power.type?.includes("maneuver"))
+    //         .map((maneuver) => {
+    //             const name = maneuver.name;
+    //             const XMLID = maneuver.key;
+    //             const maneuverDetails = maneuver.maneuverDesc;
+    //             const PHASE = maneuverDetails.phase;
+    //             const OCV = maneuverDetails.ocv;
+    //             const DCV = maneuverDetails.dcv;
+    //             const EFFECT = maneuverDetails.effects;
+    //             const DC = maneuverDetails.dc;
+    //             const ADDSTR = maneuverDetails.addStr;
+    //             const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
+    //             const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
+
+    //             const itemData = {
+    //                 name,
+    //                 type: "maneuver",
+    //                 system: {
+    //                     PHASE,
+    //                     OCV,
+    //                     DCV,
+    //                     DC,
+    //                     EFFECT,
+    //                     active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
+    //                     description: EFFECT,
+    //                     XMLID,
+    //                     // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
+    //                     // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
+    //                     //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
+    //                     //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
+    //                     //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
+    //                     //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
+    //                     //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
+    //                     DISPLAY: name, // Not sure we should allow editing of basic maneuvers
+    //                     ADDSTR,
+    //                     USEWEAPON,
+    //                     WEAPONEFFECT,
+    //                 },
+    //             };
+
+    //             if (!itemData.name) {
+    //                 console.error("Missing name", itemData);
+    //                 return;
+    //             }
+
+    //             return itemData;
+    //         });
+
+    //     const itemsCreated = await this.createEmbeddedDocuments("Item", itemsToCreate, {
+    //         render: false,
+    //         renderSheet: false,
+    //     });
+
+    //     // _postUpload gets called on all items at end of upload, so not really needed.
+    //     // _postUpload gets called as a final migration, so not really needed.
+    //     // AARON has chosen to skip _postUpload here.
+
+    //     // const postUploadPromises = [];
+    //     for (const item of itemsCreated) {
+    //         //const preItem = foundry.utils.deepClone(item.system);
+    //         //postUploadPromises.push(item._postUpload());
+    //         item._postUpload();
+    //         //debugger;
+    //     }
+    //     // await Promise.all(postUploadPromises);
+    // }
 
     static _xmlToJsonNode(json, children) {
         if (children.length === 0) return;

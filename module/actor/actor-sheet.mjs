@@ -794,6 +794,8 @@ export class HeroSystemActorSheet extends ActorSheet {
             const characteristic = _char.key.toLowerCase();
             if (!this.actor.system.characteristics) {
                 console.error("Missing this.actor.system.characteristics");
+            } else if (!this.actor.system.characteristics?.[characteristic]) {
+                console.warn(`Missing this.actor.system.characteristics[${characteristic}]`);
             } else {
                 if (
                     this.actor.system.characteristics[characteristic] &&
