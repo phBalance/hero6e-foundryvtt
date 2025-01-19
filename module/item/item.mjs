@@ -3443,10 +3443,16 @@ export class HeroSystem6eItem extends Item {
             case "ENERGYBLAST":
             case "EGOATTACK":
             case "MINDCONTROL":
-            case "HANDTOHANDATTACK":
                 {
                     const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${system.ALIAS} ${diceFormula}`;
+                }
+                break;
+
+            case "HANDTOHANDATTACK":
+                {
+                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    system.description = `${system.ALIAS} +${diceFormula}${diceFormula === "1" || diceFormula === "0" ? " point" : ""}`;
                 }
                 break;
 
