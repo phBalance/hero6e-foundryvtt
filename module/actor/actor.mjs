@@ -1852,7 +1852,7 @@ export class HeroSystem6eActor extends Actor {
             try {
                 await FilePicker.createDirectory("user", path);
             } catch (error) {
-                console.log("create directory error", error);
+                console.debug("create directory error", error);
             }
 
             // Set the image, uploading if not already in the file system
@@ -1991,7 +1991,7 @@ export class HeroSystem6eActor extends Actor {
 
         uploadPerformance.totalTime = new Date() - uploadPerformance.startTime;
 
-        console.log("Upload Performance", uploadPerformance);
+        //console.log("Upload Performance", uploadPerformance);
 
         // Let GM know actor was uploaded (unless it is a quench test; missing ID)
         if (this.id) {
@@ -2013,12 +2013,7 @@ export class HeroSystem6eActor extends Actor {
 
             // MANEUVERS
             await this.addAttackPlaceholders();
-
-            const start = Date.now();
             await this.addHeroSystemManeuvers();
-            //await this.addHeroSystemManeuversBulk();
-            const end = Date.now();
-            console.log("addHeroSystemManeuvers/Bluk", end - start);
             return;
         }
     }
