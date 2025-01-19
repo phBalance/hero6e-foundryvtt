@@ -163,12 +163,13 @@ function isManeuverWithEmptyHand(item, options) {
 }
 
 // Maneuver's EFFECT indicates normal damage or is Strike/Pulling a Punch (exceptions)
-function isManeuverThatDoesNormalDamage(item) {
+export function isManeuverThatDoesNormalDamage(item) {
     return (
-        item.system.EFFECT.search(/NORMALDC/) > -1 ||
-        item.system.EFFECT.search(/STRDC/) > -1 ||
-        item.system.XMLID === "STRIKE" ||
-        item.system.XMLID === "PULLINGAPUNCH"
+        (item.type === "martialart" || item.type === "maneuver") &&
+        (item.system.EFFECT.search(/NORMALDC/) > -1 ||
+            item.system.EFFECT.search(/STRDC/) > -1 ||
+            item.system.XMLID === "STRIKE" ||
+            item.system.XMLID === "PULLINGAPUNCH")
     );
 }
 
