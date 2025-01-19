@@ -1993,6 +1993,10 @@ export class HeroSystem6eItem extends Item {
                                     case "ALL":
                                         addMe = true;
                                         break;
+                                    default:
+                                        console.error(`Unknown OPTIONID ${this.system.OPTIONID}`);
+                                        addMe = false;
+                                        break;
                                 }
                                 break;
                             case "PENALTY_SKILL_LEVELS":
@@ -2079,11 +2083,11 @@ export class HeroSystem6eItem extends Item {
                                 console.warn("Unhandled attack automatic selection", this);
                         }
 
-                        if (addMe && !this.adders.find((a) => a.ALIAS === attackItem.name || attackItem.system.ALIAS)) {
+                        if (addMe && !this.adders.find((adder) => adder.ALIAS === attackItem.name)) {
                             const newAdder = {
                                 XMLID: "ADDER",
                                 ID: new Date().getTime().toString(),
-                                ALIAS: attackItem.name || attackItem.system.ALIAS,
+                                ALIAS: attackItem.name,
                                 BASECOST: "0.0",
                                 LEVELS: "0",
                                 NAME: "",
