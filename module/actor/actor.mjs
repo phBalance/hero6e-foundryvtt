@@ -2013,12 +2013,7 @@ export class HeroSystem6eActor extends Actor {
 
             // MANEUVERS
             await this.addAttackPlaceholders();
-
-            const start = Date.now();
             await this.addHeroSystemManeuvers();
-            //await this.addHeroSystemManeuversBulk();
-            const end = Date.now();
-            console.log("addHeroSystemManeuvers/Bluk", end - start);
             return;
         }
     }
