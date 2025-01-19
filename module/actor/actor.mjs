@@ -1852,7 +1852,7 @@ export class HeroSystem6eActor extends Actor {
             try {
                 await FilePicker.createDirectory("user", path);
             } catch (error) {
-                console.log("create directory error", error);
+                console.debug("create directory error", error);
             }
 
             // Set the image, uploading if not already in the file system
