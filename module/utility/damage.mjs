@@ -667,7 +667,9 @@ export function calculateDicePartsForItem(item, options) {
 
     // PH: FIXME: This can be removed when we don't create damage for things that aren't attacks.
     if (!baseAttackItem) {
-        console.error(`${item.name}/${item.system.XMLID} links to a base attack item of ${baseAttackItem}.`);
+        console.error(
+            `Actor=${item.actor?.name}. Actor.type=${item.actor?.type}. ${item.name}/${item.system.XMLID} links to a base attack item of ${baseAttackItem}.`,
+        );
         return {
             diceParts: zeroDiceParts,
             tags: [],
@@ -756,7 +758,9 @@ export function getFullyQualifiedEffectFormulaFromItem(item, options) {
     const { diceParts, baseAttackItem } = calculateDicePartsForItem(item, options);
 
     if (!baseAttackItem) {
-        console.error(`Missing required baseAttackItem`);
+        console.error(
+            `Actor=${item.actor?.name}. Actor.type=${item.actor?.type}. ${item.name} is missing required baseAttackItem`,
+        );
         return;
     }
 
