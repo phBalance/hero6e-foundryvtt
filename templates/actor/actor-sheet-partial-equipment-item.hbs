@@ -1,11 +1,10 @@
+{{#if (filterItem this @root.options.itemFilters.equipment)}}
 <tr class="item {{#if (gt this.system.value this.system.max)}} over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
     data-item-id="{{this._id}}">
 
     {{#if (eq this.system.XMLID "LIST")}}
         <td height="24"></td>
         <td class="left">{{this.system.ALIAS}}</td>
-        <td></td>
-        <td></td>
         <td></td>
         <td></td>
         <td></td>
@@ -106,9 +105,9 @@
     </td>
     
 </tr>
-
+{{/if}}
 {{#if (not this.system.collapse)}}
     {{#each this.childItems}}
-        {{> (getModulePath 'actor/actor-sheet-partial-equipment-item.hbs') this }}
+        {{> (getModulePath 'actor/actor-sheet-partial-equipment-item.hbs') }}
     {{/each}}
 {{/if}}
