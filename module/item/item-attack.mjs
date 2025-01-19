@@ -932,7 +932,10 @@ export async function doSingleTargetActionToHit(item, options) {
     const block = item.system.EFFECT?.toLowerCase().indexOf("block");
     if (block > -1) {
         if (targetsArray.length === 1) {
-            const hitRollTotal = targetData[0].toHitRollTotal;
+            const hitRollTotal = targetData?.[0]?.toHitRollTotal;
+            if (!hitRollTotal) {
+                return ui.notifications.error(`Block target cannot be found.`);
+            }
             const hitRollText = `Block roll of ${hitRollTotal} vs. OCV of pending attack.`;
             targetData[0].hitRollText = hitRollText;
         } else {
