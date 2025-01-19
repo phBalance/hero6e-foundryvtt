@@ -1928,9 +1928,13 @@ export class HeroSystem6eActor extends Actor {
         // For some unknown reason SPD with AE not working during upload.
         // This kludge is a quick fix
         // https://github.com/dmdorman/hero6e-foundryvtt/issues/1439
+        // All characteristics?
+        // https://github.com/dmdorman/hero6e-foundryvtt/issues/1746
         if (this.id) {
-            await this.update({ "system.characteristics.spd.max": this.system.characteristics.spd.core });
-            await this.update({ "system.characteristics.spd.value": this.system.characteristics.spd.max });
+            for (const char of Object.keys(this.system.characteristics)) {
+                await this.update({ [`system.characteristics.${char}.max`]: this.system.characteristics[char].core });
+                await this.update({ [`system.characteristics.${char}.value`]: this.system.characteristics[char].max });
+            }
         }
 
         // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
