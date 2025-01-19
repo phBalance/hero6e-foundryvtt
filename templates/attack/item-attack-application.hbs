@@ -215,7 +215,7 @@
                     <label title="{{{this.description}}}">
                       {{this.name}}
                     </label>
-                    <input class="item-toggle" id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
+                    <input class="item-toggle" {{#if (lt @root.effectiveStr 3)}}disabled title="Must use at least 3 (½d6) STR to add a hand-to-hand attack"{{/if}} id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
                   </li>
               {{/each}}
               </ol>

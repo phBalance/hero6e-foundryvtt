@@ -332,6 +332,8 @@ export class ItemAttackFormApplication extends FormApplication {
         // Take all the data we updated in the form and apply it.
         this.data = foundry.utils.mergeObject(this.data, extendedFormData);
 
+        const limitedByStrength = this.data.effectiveStr < 3;
+        let hthAttackDisabledDueToStrength = false;
         Object.entries(formData).forEach(([key, value]) => {
             const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
             if (!match) {
@@ -339,8 +341,12 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // HTH attacks should not be enabled if there is not enough STR
-            this.data.hthAttackItems[match[1]]._canUseForAttack = this.data.effectiveStr >= 3 ? value : false;
+            hthAttackDisabledDueToStrength = hthAttackDisabledDueToStrength || value;
+            this.data.hthAttackItems[match[1]]._canUseForAttack = limitedByStrength ? false : value;
         });
+        if (limitedByStrength && hthAttackDisabledDueToStrength) {
+            ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
+        }
 
         if (event.submitter?.name === "roll") {
             canvas.tokens.activate();
