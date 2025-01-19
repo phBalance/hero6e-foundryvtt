@@ -1913,9 +1913,10 @@ export class HeroSystem6eItem extends Item {
                     let count = 0;
                     for (const attackItem of this.actor.items.filter(
                         (o) =>
-                            (o.type === "attack" || o.system.subType === "attack") &&
+                            o.rollsToHit() &&
                             (!o.baseInfo.behaviors.includes("optional-maneuver") ||
-                                game.settings.get(HEROSYS.module, "optionalManeuvers")),
+                                game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
+                            !o.system.XMLID.startsWith("__"), // TODO: Should we allow __STRENGTHDAMAGE to have a "to-hit" behaviour when it isn't player facing?
                     )) {
                         let addMe = false;
 
@@ -2078,9 +2079,7 @@ export class HeroSystem6eItem extends Item {
                                 console.warn("Unhandled attack automatic selection", this);
                         }
 
-                        if (addMe) {
-                            // FIXME: This should check that it doesn't already exist. Frequently there are multiple entries.
-
+                        if (addMe && !this.adders.find((a) => a.ALIAS === attackItem.name || attackItem.system.ALIAS)) {
                             const newAdder = {
                                 XMLID: "ADDER",
                                 ID: new Date().getTime().toString(),
