@@ -337,17 +337,14 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
 
     // Is there a haymaker active and thus part of this attack? Haymaker is added in without consideration of advantages in 5e but not in 6e.
     // Also in 5e killing haymakers get the DC halved.
-    const haymakerManeuverActive = item.actor?.items.find(
-        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
-    );
-    if (haymakerManeuverActive) {
+    if (options.haymakerManeuverActiveItem) {
         // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
         // PH: FIXME: Implement the exceptions: See 6e v2 pg. 99. 5e has none?
         if (
             !["maneuver", "martialart"].includes(item.type) ||
             (item.type === "maneuver" && item.system.XMLID === "STRIKE")
         ) {
-            const rawHaymakerDc = parseInt(haymakerManeuverActive.system.DC);
+            const rawHaymakerDc = parseInt(options.haymakerManeuverActiveItem.system.DC);
 
             let haymakerDC = rawHaymakerDc;
             if (item.is5e && item.doesKillingDamage) {

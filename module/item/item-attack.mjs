@@ -1519,6 +1519,10 @@ export async function _onRollDamage(event) {
 
     let effectiveItem = item;
 
+    const haymakerManeuverActiveItem = item.actor?.items.find(
+        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
+    );
+
     // Create a temporary item based on effectiveLevels
     if (toHitData?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
         toHitData.effectiveLevels = parseInt(toHitData.effectiveLevels) || 0;
@@ -1558,6 +1562,7 @@ export async function _onRollDamage(event) {
     const { diceParts, tags } = calculateDicePartsForItem(effectiveItem, {
         isAction: true,
         ...toHitData,
+        ...{ haymakerManeuverActiveItem },
     });
 
     const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations;
