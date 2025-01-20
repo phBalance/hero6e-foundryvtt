@@ -2013,7 +2013,7 @@ export class HeroSystem6eItem extends Item {
                                     // diff erent attacks, a 5-point DCV CSL provides +1
                                     // DCV versus all of them.
                                     case "DCV":
-                                        ddMe = true;
+                                        addMe = true;
                                         break;
                                     case "ALL":
                                         addMe = true;
