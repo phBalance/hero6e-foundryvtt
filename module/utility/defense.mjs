@@ -127,6 +127,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     // Basic characteristics (PD & ED)
     if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {
         let value = targetActor.system.characteristics[attackDefenseVs.toLowerCase()].value;
+        const newOptions = foundry.utils.deepClone(options);
 
         // back out any Active Effects
         for (const ae of targetActor.appliedEffects) {
@@ -134,6 +135,14 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
                 (o) => o.key === `system.characteristics.${attackDefenseVs.toLowerCase()}.max`,
             )) {
                 value -= parseInt(change.value) || 0;
+                actorDefenses.defenseTags = [
+                    ...actorDefenses.defenseTags,
+                    ...createDefenseProfile(ae, attackItem, parseInt(change.value), {
+                        ...newOptions,
+                        title: ae.flags?.XMLID,
+                        shortDesc: `${ae.flags?.XMLID}: ${ae.name}`,
+                    }),
+                ];
             }
         }
         // back out 5e DAMAGERESISTANCE
@@ -151,8 +160,6 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
                     console.error(`Unsupported DAMAGERESISTANCE`, attackDefenseVs);
             }
         }
-
-        const newOptions = foundry.utils.deepClone(options);
 
         // Check for ADD MODIFIERS TO BASE CHARACTERISTIC (RESISTANT)
         const resistantBase = targetActor?.items.find(
