@@ -2,6 +2,8 @@
 
 ## Version 4.0.15 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- PD and ED from AID is now applying to defenses. [#1695](https://github.com/dmdorman/hero6e-foundryvtt/issues/1695)
+
 ## Version 4.0.14 20250119
 
 - Migrations will take longer than normal.
