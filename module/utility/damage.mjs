@@ -47,7 +47,7 @@ export function penaltySkillLevelsForAttack(item) {
         (itm) =>
             ["PENALTY_SKILL_LEVELS"].includes(itm.system.XMLID) &&
             itm.adders.find((adder) => adder.ALIAS === item.name) &&
-            item.isActive != false,
+            itm.isActive != false,
     );
 
     return psls;
