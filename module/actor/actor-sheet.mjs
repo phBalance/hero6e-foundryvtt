@@ -251,16 +251,6 @@ export class HeroSystemActorSheet extends ActorSheet {
             // Make a fake actor to hold the fake attacks we're going to create. Give it the
             // same HERO system version as the actor related to this sheet.
             // TODO: Is there a better way to calculate defense without creating fake attacks?
-            const defenseCalculationActorKey = `defenseCalculationActor${this.actor.is5e ? "5e" : "6e"}`;
-            HeroSystemActorSheet.sampleAttacks[defenseCalculationActorKey] ??= new HeroSystem6eActor(
-                {
-                    name: "Defense Calculation Actor",
-                    type: "pc",
-                    system: { is5e: this.actor.is5e },
-                },
-                {},
-            );
-            const defenseCalculationActor = HeroSystemActorSheet.sampleAttacks[defenseCalculationActorKey];
 
             // Defense PD
             const pdAttack = await this.#createStaticFakeAttack(
