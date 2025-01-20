@@ -29,7 +29,7 @@
     "@foundryvtt/foundryvtt-cli": "^1.0.3",
     "@stylistic/eslint-plugin-js": "^2.13.0",
     "eslint": "^9.18.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-formatter-compact": "^8.40.0",
     "globals": "^15.14.0",
     "gulp": "^5.0.0",
