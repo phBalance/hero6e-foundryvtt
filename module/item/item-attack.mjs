@@ -928,45 +928,20 @@ export async function doSingleTargetActionToHit(item, options) {
         return;
     }
 
-    // Block (which is a repeatable abort)
-    const block = item.system.EFFECT?.toLowerCase().indexOf("block");
-    if (block > -1) {
-        if (targetsArray.length === 1) {
-            const hitRollTotal = targetData?.[0]?.toHitRollTotal;
-            if (!hitRollTotal) {
-                return ui.notifications.error(`Block target cannot be found.`);
-            }
-            const hitRollText = `Block roll of ${hitRollTotal} vs. OCV of pending attack.`;
+    // Block (which is a repeatable abort) has a different to-hit behaviour
+    const blockIndex = item.system.EFFECT?.toLowerCase().indexOf("block");
+    if (blockIndex > -1) {
+        if (targetData.length === 1) {
+            const hitRollTotal = targetData[0].toHitRollTotal;
+            const hitRollText = `Block roll of ${hitRollTotal} vs. OCV of pending attack`;
             targetData[0].hitRollText = hitRollText;
         } else {
             return ui.notifications.error(`Block requires a target.`);
         }
     }
 
-    // Abort
-    if (item.system.EFFECT?.toLowerCase().indexOf("abort") > -1) {
-        item.actor.addActiveEffect({
-            ...HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect,
-            name: `Aborted [${item.name}]`,
-            flags: {
-                itemId: item.uuid,
-            },
-        });
-    }
-
-    // Dodge (which is a repeatable abort)
-    if (item.system.EFFECT?.toLowerCase().indexOf("dodge") > -1) {
-        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-        speaker["alias"] = item.actor.name;
-
-        const chatData = {
-            author: game.user._id,
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-            content: `${item.name} ${dcv.signedString()} DCV`,
-            speaker,
-        };
-        await ChatMessage.create(chatData);
-        return;
+    if (["maneuver", "martialart"].includes(item.type)) {
+        item.activateManeuver();
     }
 
     const cardData = {
@@ -1003,7 +978,7 @@ export async function doSingleTargetActionToHit(item, options) {
 
     // render card
     const template =
-        block > -1
+        blockIndex > -1
             ? `systems/${HEROSYS.module}/templates/chat/item-toHit-block-card.hbs`
             : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);

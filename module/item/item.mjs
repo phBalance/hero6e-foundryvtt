@@ -554,6 +554,8 @@ export class HeroSystem6eItem extends Item {
         if (effect) {
             const maneuverHasAbortTrait = effect.indexOf("abort") > -1;
             const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
+            const maneuverHasBlockTrait = effect.indexOf("block") > -1;
+
             const currentCombatActorId = game.combat?.combatants.find(
                 (combatant) => combatant.tokenId === game.combat.current?.tokenId,
             )?.actorId;
@@ -565,6 +567,7 @@ export class HeroSystem6eItem extends Item {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect);
             }
 
+            // Dodge effect
             if (maneuverHasDodgeTrait) {
                 const dodgeStatusEffect = foundry.utils.deepClone(
                     HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect,
@@ -575,6 +578,19 @@ export class HeroSystem6eItem extends Item {
                     addOcvTraitToChanges(maneuverOcvTrait),
                 ].filter(Boolean);
                 this.actor.addActiveEffect(dodgeStatusEffect);
+            }
+
+            // Block effect
+            if (maneuverHasBlockTrait) {
+                const blockStatusEffect = foundry.utils.deepClone(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect,
+                );
+                blockStatusEffect.name = this.name ? `${this.name} (${this.system.XMLID})` : `${this.system.XMLID}`;
+                blockStatusEffect.changes = [
+                    addDcvTraitToChanges(maneuverDcvTrait),
+                    addOcvTraitToChanges(maneuverOcvTrait),
+                ].filter(Boolean);
+                this.actor.addActiveEffect(blockStatusEffect);
             }
         }
 
