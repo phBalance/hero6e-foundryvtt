@@ -77,6 +77,12 @@
     }
 }
 
-.hand-to-hand-attacks input.item-toggle {
-    margin-left: 4px !important;
+.hand-to-hand-attacks {
+    ol {
+        padding: 0;
+    }
+
+    li {
+        list-style-type: none;
+    }
 }
