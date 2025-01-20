@@ -198,7 +198,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     // Sort tags by value, shortDesc.  Get rid of 0 values.
     actorDefenses.defenseTags = actorDefenses.defenseTags
         .sort((a, b) => b.value - a.value || a.shortDesc.localeCompare(b.shortDesc))
-        .filter((o) => o.value);
+        .filter((o) => o.value > 0);
 
     // Totals
     for (const tag of actorDefenses.defenseTags) {
