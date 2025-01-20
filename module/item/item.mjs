@@ -2001,10 +2001,19 @@ export class HeroSystem6eItem extends Item {
                                             addMe = true;
                                         }
                                         break;
+
                                     case "RANGED":
                                         if (attackItem.baseInfo.range === "Standard") {
                                             addMe = true;
                                         }
+                                        break;
+                                    /// 5e only: +1 DCV against all attacks (HTH and Ranged)
+                                    // — no matter how many opponents attack a
+                                    // character in a given Segment, or with how many
+                                    // diff erent attacks, a 5-point DCV CSL provides +1
+                                    // DCV versus all of them.
+                                    case "DCV":
+                                        addMe = true;
                                         break;
                                     case "ALL":
                                         addMe = true;
