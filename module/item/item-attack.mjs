@@ -2944,7 +2944,7 @@ async function _calcDamage(heroRoller, item, options) {
         stun = heroRoller.getStunTotal();
 
         // TODO: Doesn't handle a 1 point killing attack which is explicitly called out as doing 1 penetrating BODY.
-        if (itemData.killing) {
+        if (item.doesKillingDamage) {
             bodyForPenetrating = (await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).getBodyTotal();
         } else {
             bodyForPenetrating = body;
@@ -2960,7 +2960,7 @@ async function _calcDamage(heroRoller, item, options) {
 
     const noHitLocationsPower = !!item.system.noHitLocations;
     const useHitLocations = game.settings.get(HEROSYS.module, "hit locations") && !noHitLocationsPower;
-    const hasStunMultiplierRoll = itemData.killing && !useHitLocations;
+    const hasStunMultiplierRoll = item.doesKillingDamage && !useHitLocations;
 
     const stunMultiplier = hasStunMultiplierRoll ? heroRoller.getStunMultiplier() : 1;
 
@@ -3013,7 +3013,7 @@ async function _calcDamage(heroRoller, item, options) {
     // kludge: Apply body defense twice.
     let REDUCEDPENETRATION = item.findModsByXmlid("REDUCEDPENETRATION");
     if (REDUCEDPENETRATION) {
-        if (item.killing) {
+        if (item.doesKillingDamage) {
             body = Math.max(0, body - (options.resistantValue || 0));
         }
         body = Math.max(0, body - (options.defenseValue || 0));
@@ -3033,7 +3033,7 @@ async function _calcDamage(heroRoller, item, options) {
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
-    if (itemData.killing) {
+    if (item.doesKillingDamage) {
         stun = stun - (options.defenseValue || 0) - (options.resistantValue || 0);
         body = body - (options.resistantValue || 0);
     } else {
@@ -3049,7 +3049,7 @@ async function _calcDamage(heroRoller, item, options) {
         const hitLocationBodyMultiplier = heroRoller.getHitLocation().bodyMultiplier;
         const hitLocationStunMultiplier = heroRoller.getHitLocation().stunMultiplier;
 
-        if (itemData.killing) {
+        if (item.doesKillingDamage) {
             // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
             // Location : [x Stun, x N Stun, x Body, OCV modifier]
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
@@ -3072,10 +3072,10 @@ async function _calcDamage(heroRoller, item, options) {
     }
 
     // Penetrating attack minimum damage
-    if (itemData.killing && penetratingBody > body) {
+    if (item.doesKillingDamage && penetratingBody > body) {
         body = penetratingBody;
         effects += "penetrating damage; ";
-    } else if (!itemData.killing && penetratingBody > stun) {
+    } else if (!item.doesKillingDamage && penetratingBody > stun) {
         stun = penetratingBody;
         effects += "penetrating damage; ";
     }

@@ -4723,6 +4723,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "Target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            doesKillingDamage: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(0),
             baseEffectDiceParts: (item) => {
                 let numPips = 0;
@@ -4853,6 +4855,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            afterDefenses: true,
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
@@ -5113,6 +5116,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "dmcv",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
+            doesKillingDamage: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(10),
             baseEffectDiceParts: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="EGOATTACK" ID="1709333954550" BASECOST="0.0" LEVELS="1" ALIAS="Mental Blast" POSITION="58" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
@@ -5163,6 +5168,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
+            doesKillingDamage: false,
+            usesStrength: false,
             baseEffectDiceParts: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="ENERGYBLAST" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -5630,6 +5637,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,
+            doesKillingDamage: false,
+            usesStrength: true,
             costPerLevel: fixedValueFunction(5),
             baseEffectDiceParts: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="HANDTOHANDATTACK" ID="1711934318209" BASECOST="0.0" LEVELS="1" ALIAS="Hand-To-Hand Attack" POSITION="48" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -5666,6 +5675,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
+            doesKillingDamage: true,
+            usesStrength: true,
             baseEffectDiceParts: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="HKA" ID="1711934431692" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="52" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
@@ -6072,6 +6083,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
+            doesKillingDamage: true,
+            usesStrength: true,
             sheet: {
                 INPUT: {
                     label: "Vs.",
@@ -6204,6 +6217,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            doesKillingDamage: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(3 / 2),
             baseEffectDiceParts: (item, options) => {
                 // The damage for TELEKINESIS is based on STR.

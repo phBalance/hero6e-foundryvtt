@@ -36,6 +36,8 @@ export function createDefenseProfile(actorItemDefense, attackItem, value, option
             shortDesc: itemNameExpanded,
             operation: options.operation || "add",
             options: { ...options, knockback: null },
+            defenseItemId: actorItemDefense?.id,
+            attackItemId: attackItem?.id,
         });
     }
 
@@ -135,14 +137,18 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
                 (o) => o.key === `system.characteristics.${attackDefenseVs.toLowerCase()}.max`,
             )) {
                 value -= parseInt(change.value) || 0;
-                actorDefenses.defenseTags = [
-                    ...actorDefenses.defenseTags,
-                    ...createDefenseProfile(ae, attackItem, parseInt(change.value), {
-                        ...newOptions,
-                        title: ae.flags?.XMLID,
-                        shortDesc: `${ae.flags?.XMLID}: ${ae.name}`,
-                    }),
-                ];
+
+                // Add back in temporary effects (such as AID) as a seperate tag
+                if (ae.isTemporary) {
+                    actorDefenses.defenseTags = [
+                        ...actorDefenses.defenseTags,
+                        ...createDefenseProfile(ae, attackItem, parseInt(change.value), {
+                            ...newOptions,
+                            title: ae.flags?.XMLID,
+                            shortDesc: `${ae.flags?.XMLID}: ${ae.name}`,
+                        }),
+                    ];
+                }
             }
         }
         // back out 5e DAMAGERESISTANCE
@@ -219,10 +225,16 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             if (tag.options?.hardened >= armorPiercing) {
                 //actorDefenses.impenetrableValue += tag?.value || 0;
             } else {
-                tag.options.strikethrough = true;
-                tag.name2 = tag.name.replace(/i\d+/, "");
-                //tag.valueText2 = tag.valueText;
-                tag.value2 = RoundFavorPlayerUp(tag.value / 2);
+                const tagDefenseItem = activeDefenses.find((itm) => itm.id === tag.defenseItemId);
+                // Damage Reduction isn't halved.
+                if (tagDefenseItem?.baseInfo?.afterDefenses) {
+                    tag.options.afterDefenses = true;
+                } else {
+                    tag.options.strikethrough = true;
+                    tag.name2 = tag.name.replace(/i\d+/, "");
+                    //tag.valueText2 = tag.valueText;
+                    tag.value2 = RoundFavorPlayerUp(tag.value / 2);
+                }
             }
         }
 
