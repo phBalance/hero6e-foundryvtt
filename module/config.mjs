@@ -4723,6 +4723,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "Target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            doesKillingDamage: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(0),
             baseEffectDiceParts: (item) => {
                 let numPips = 0;

@@ -1052,15 +1052,14 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async FullHealth() {
-        // Remove all status effects
-        for (const status of this.statuses) {
-            const ae = Array.from(this.effects).find((effect) => effect.statuses.has(status));
+        // Remove temporary effects
+        for (const ae of this.temporaryEffects) {
             await ae.delete();
         }
 
-        // Remove temporary effects
-        const tempEffects = Array.from(this.effects).filter((effect) => parseInt(effect.duration?.seconds || 0) > 0);
-        for (const ae of tempEffects) {
+        // Remove all status effects
+        for (const status of this.statuses) {
+            const ae = Array.from(this.effects).find((effect) => effect.statuses.has(status));
             await ae.delete();
         }
 
@@ -1097,7 +1096,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // We just cleared encumbrance, check if it applies again
-        this.applyEncumbrancePenalty();
+        await this.applyEncumbrancePenalty();
     }
 
     // Raw base is insufficient for 5e characters
