@@ -5421,8 +5421,8 @@ export class HeroSystem6eItem extends Item {
         if (this.system.XMLID.startsWith("__")) {
             return false;
         }
-        if (this.#baseInfo.killing !== undefined) {
-            return this.#baseInfo.killing;
+        if (this.#baseInfo.doesKillingDamage !== undefined) {
+            return this.#baseInfo.doesKillingDamage;
         }
         if (this.#baseInfo.nonDmgEffect) {
             return false;
