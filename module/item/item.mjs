@@ -5417,19 +5417,41 @@ export class HeroSystem6eItem extends Item {
     }
 
     get doesKillingDamage() {
-        if (this.system.KILLING === true) {
-            return true;
-        } else if (this.system.KILLING === false) {
+        // Preferred Methods to determine KILLING
+        if (this.system.XMLID.startsWith("__")) {
             return false;
-        } else if (this.system.WEAPONEFFECT?.includes("KILLING")) {
-            return true;
+        }
+        if (this.#baseInfo.killing !== undefined) {
+            return this.#baseInfo.killing;
+        }
+        if (this.#baseInfo.nonDmgEffect) {
+            return false;
+        }
+        if (this.#baseInfo.type.includes("sense-affecting")) {
+            return false;
+        }
+        if (this.#baseInfo.type.includes("adjustment")) {
+            return false;
+        }
+        if (this.#baseInfo.type.includes("mental")) {
+            return false;
+        }
+        if (this.system.WEAPONEFFECT) {
+            return this.system.WEAPONEFFECT.includes("KILLING");
+        }
+        if (this.system.EFFECT) {
+            return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
         }
 
-        // Legacy check
-        else if (this.system.killing) {
-            // TODO: We should get off the system.killing drug.
-            console.warn(`Unable to determine KILLING property for ${this.name}`);
+        // Legacy KILLING support
+        console.warn(
+            `${this.actor.name}: Unable to determine KILLING property for ${this.system.XMLID}/${this.name}, using legacy values.`,
+        );
+        if (this.system.killing === true) {
             return true;
+        }
+        if (this.system.killing === false) {
+            return false;
         }
 
         return false;
