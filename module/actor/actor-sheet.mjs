@@ -758,22 +758,26 @@ export class HeroSystemActorSheet extends ActorSheet {
         const characteristics = getCharacteristicInfoArrayForActor(this.actor).filter((o) =>
             ["BODY", "STUN", "END"].includes(o.key),
         );
-        for (const _char of characteristics) {
-            const characteristic = _char.key.toLowerCase();
-            if (!this.actor.system.characteristics) {
-                console.error("Missing this.actor.system.characteristics");
-            } else if (!this.actor.system.characteristics?.[characteristic]) {
-                console.warn(`Missing this.actor.system.characteristics[${characteristic}]`);
-            } else {
-                if (
-                    this.actor.system.characteristics[characteristic] &&
-                    expandedData.Xsystem.characteristics?.[characteristic].value !==
-                        this.actor.system.characteristics[characteristic].value
-                ) {
-                    expandedData.system.characteristics[characteristic].value =
-                        expandedData.Xsystem.characteristics[characteristic].value;
+        try {
+            for (const _char of characteristics) {
+                const characteristic = _char.key.toLowerCase();
+                if (!this.actor.system.characteristics) {
+                    console.error("Missing this.actor.system.characteristics");
+                } else if (!this.actor.system.characteristics?.[characteristic]) {
+                    console.warn(`Missing this.actor.system.characteristics[${characteristic}]`);
+                } else {
+                    if (
+                        this.actor.system.characteristics[characteristic] &&
+                        expandedData.Xsystem.characteristics?.[characteristic].value !==
+                            this.actor.system.characteristics[characteristic].value
+                    ) {
+                        expandedData.system.characteristics[characteristic].value =
+                            expandedData.Xsystem.characteristics[characteristic].value;
+                    }
                 }
             }
+        } catch (e) {
+            console.error(e);
         }
 
         // Left Sidebar may have EndReserve
@@ -1373,10 +1377,24 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     async #createStaticFakeAttack(damageType, xml) {
         const is5e = this.actor.is5e;
-        if (is5e === undefined) {
-            console.error(`Undefined is5e`);
-        }
+        const attackKey = `${damageType}Attack${is5e ? "5e" : "6e"}`;
         const defenseCalculationActorKey = `defenseCalculationActor${is5e ? "5e" : "6e"}`;
+
+        // This typically happens during upload.  Don't save anything in static.
+        if (is5e === undefined) {
+            const defenseCalculationActor = new HeroSystem6eActor({
+                name: "Defense Calculation Actor",
+                type: "pc",
+                system: { is5e },
+            });
+            const attack = (HeroSystemActorSheet.sampleAttacks[attackKey] = new HeroSystem6eItem(
+                HeroSystem6eItem.itemDataFromXml(xml, defenseCalculationActor),
+                { parent: defenseCalculationActor },
+            ));
+            await attack._postUpload();
+            console.debug(`${attackKey}: Undefined is5e`);
+        }
+
         HeroSystemActorSheet.sampleAttacks[defenseCalculationActorKey] ??= new HeroSystem6eActor(
             {
                 name: "Defense Calculation Actor",
@@ -1387,7 +1405,6 @@ export class HeroSystemActorSheet extends ActorSheet {
         );
         const defenseCalculationActor = HeroSystemActorSheet.sampleAttacks[defenseCalculationActorKey];
 
-        const attackKey = `${damageType}Attack${is5e ? "5e" : "6e"}`;
         if (!HeroSystemActorSheet.sampleAttacks[attackKey]) {
             HeroSystemActorSheet.sampleAttacks[attackKey] = new HeroSystem6eItem(
                 HeroSystem6eItem.itemDataFromXml(xml, defenseCalculationActor),
