@@ -484,7 +484,8 @@ export class HeroRoller {
             this.#addOperatorTerm(value > 0 ? "+" : "-");
         }
 
-        value = this._formulaTerms.length > 0 ? Math.abs(value) : value;
+        //value = this._formulaTerms.length > 0 ? Math.abs(value) : value;
+        value = this._formulaTerms.length > 0 ? Number(value).signedString() : value;
         this._formulaTerms.push(
             new NumericTerm({
                 number: value,
