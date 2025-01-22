@@ -112,17 +112,33 @@ export function setPerceptionModes() {
         /// Override
         _testLOS(visionSource, mode, target, test) {
             // Kluge to let PARTIALLYPENETRATIVE see thru walls.
+            // Although DESOLIDIFICATION make you undetectable via touch group
             // TODO: Make wall materials and check each wall to see if we can see thru it.
+            const DESOLIDIFICATION = target?.actor?.items.find(
+                (i) => i.isActive && i.system.XMLID === "DESOLIDIFICATION",
+            );
             const PARTIALLYPENETRATIVE = visionSource.object?.actor?.items.find(
                 (i) =>
                     i.isActive &&
                     i.isSense &&
                     i.isRangedSense &&
-                    i.adders.find((a) => a.XMLID === "PARTIALLYPENETRATIVE"),
+                    i.adders.find(
+                        (a) =>
+                            a.XMLID === "PARTIALLYPENETRATIVE" && (!DESOLIDIFICATION || i.system.GROUP != "TOUCHGROUP"),
+                    ),
             );
-            const PENETRATIVE = visionSource.object?.actor?.items.find(
-                (i) => i.isActive && i.isSense && i.isRangedSense && i.adders.find((a) => a.XMLID === "PENETRATIVE"),
-            );
+            const PENETRATIVE =
+                !DESOLIDIFICATION &&
+                visionSource.object?.actor?.items.find(
+                    (i) =>
+                        i.isActive &&
+                        i.isSense &&
+                        i.isRangedSense &&
+                        i.adders.find(
+                            (a) => a.XMLID === "PENETRATIVE" && (!DESOLIDIFICATION || i.system.GROUP != "TOUCHGROUP"),
+                        ),
+                );
+
             if (!this.walls || PARTIALLYPENETRATIVE || PENETRATIVE)
                 return this._testAngle(visionSource, mode, target, test);
             const type = visionSource.constructor.sourceType;
