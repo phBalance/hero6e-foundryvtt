@@ -782,7 +782,7 @@ export async function performAdjustment(
 
             thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
             //totalActivePointAffectedDifference = activeEffect.flags.adjustmentActivePoints;
-            adjustmentDamageThisApplication = activeEffect.changes[0].value;
+            adjustmentDamageThisApplication = change.value; //activeEffect.changes[0].value;
         }
     }
 
