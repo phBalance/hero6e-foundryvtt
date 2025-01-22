@@ -694,6 +694,8 @@ export class HeroSystem6eItem extends Item {
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
+            } else if (this.system.XMLID === "DESOLIDIFICATION") {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect);
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await this.activateManeuver();
             }
@@ -723,6 +725,10 @@ export class HeroSystem6eItem extends Item {
                 if (this.actor.statuses.has("fly")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
+            } else if (this.system.XMLID === "DESOLIDIFICATION") {
+                await this.actor.removeActiveEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
+                );
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await this.deactivateManeuver();
             }
