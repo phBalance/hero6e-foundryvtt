@@ -381,7 +381,7 @@ export async function performAdjustment(
 
     const isHealing = attackItem.system.XMLID === "HEALING";
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
-    const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
+    let potentialCharacteristic = nameOfCharOrPower.toLowerCase();
     const simplifiedHealing =
         attackItem.system.INPUT.match(/simplified/i) &&
         ["BODY", "STUN"].includes(potentialCharacteristic.toUpperCase());
@@ -396,17 +396,18 @@ export async function performAdjustment(
     // a character’s Combat Value derived from DEX, and
     // so forth).
     if (targetActor.is5e) {
-        switch (nameOfCharOrPower.toLowerCase()) {
+        switch (potentialCharacteristic.toLowerCase()) {
             case "ocv":
             case "dcv":
-                console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using DEX instead.`);
-                nameOfCharOrPower = "dex";
-
+                console.warn(`${potentialCharacteristic.toUpperCase()} is invalid for a 5e actor, using DEX instead.`);
+                potentialCharacteristic = nameOfCharOrPower = "dex";
+                targetUpperCaseName = nameOfCharOrPower.toUpperCase();
                 break;
             case "omcv":
             case "dmcv":
-                console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using EGO instead.`);
-                nameOfCharOrPower = "ego";
+                console.warn(`${potentialCharacteristic.toUpperCase()} is invalid for a 5e actor, using EGO instead.`);
+                potentialCharacteristic = nameOfCharOrPower = "ego";
+                targetUpperCaseName = nameOfCharOrPower.toUpperCase();
                 break;
         }
     }
