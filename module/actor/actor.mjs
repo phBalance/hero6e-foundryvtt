@@ -1910,11 +1910,20 @@ export class HeroSystem6eActor extends Actor {
         }
 
         await Promise.all(promiseArray);
+
         uploadPerformance.nonItems = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
         // Set base values to HDC LEVELs and calculate costs of things.
         await this._postUpload({ render: false });
+
+        // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
+        if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
+            for (const flight of this.items.filter((i) => i.system.XMLID === "FLIGHT")) {
+                await flight.toggle();
+            }
+        }
+
         uploadPerformance.actorPostUpload = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
