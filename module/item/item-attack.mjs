@@ -106,8 +106,6 @@ export async function collectActionDataBeforeToHitOptions(item) {
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
-    const aoe = item.getAoeModifier();
-
     await new ItemAttackFormApplication(data).render(true);
 }
 
