@@ -117,6 +117,8 @@ export function setPerceptionModes() {
             const DESOLIDIFICATION = target?.actor?.items.find(
                 (i) => i.isActive && i.system.XMLID === "DESOLIDIFICATION",
             );
+            const FLIGHT = target?.actor?.items.find((i) => i.isActive && i.system.XMLID === "FLIGHT");
+            const hideFromTouchGroup = DESOLIDIFICATION || FLIGHT;
             const PARTIALLYPENETRATIVE = visionSource.object?.actor?.items.find(
                 (i) =>
                     i.isActive &&
@@ -124,7 +126,8 @@ export function setPerceptionModes() {
                     i.isRangedSense &&
                     i.adders.find(
                         (a) =>
-                            a.XMLID === "PARTIALLYPENETRATIVE" && (!DESOLIDIFICATION || i.system.GROUP != "TOUCHGROUP"),
+                            a.XMLID === "PARTIALLYPENETRATIVE" &&
+                            (!hideFromTouchGroup || i.system.GROUP != "TOUCHGROUP"),
                     ),
             );
             const PENETRATIVE =
@@ -135,7 +138,7 @@ export function setPerceptionModes() {
                         i.isSense &&
                         i.isRangedSense &&
                         i.adders.find(
-                            (a) => a.XMLID === "PENETRATIVE" && (!DESOLIDIFICATION || i.system.GROUP != "TOUCHGROUP"),
+                            (a) => a.XMLID === "PENETRATIVE" && (!hideFromTouchGroup || i.system.GROUP != "TOUCHGROUP"),
                         ),
                 );
 
