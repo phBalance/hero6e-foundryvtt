@@ -82,8 +82,8 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // Initialize aim to the default option values
-            this.data.aim ??= "none";
-            this.data.aimSide ??= "none";
+            data.aim ??= "none";
+            data.aimSide ??= "none";
 
             // We are using the numberInput handlebar helper which requires NUMBERS, thus the parseInt
             // Set the initial values on the form
@@ -135,18 +135,38 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.targetEntangle = false;
             }
 
-            data.hitLoc = [];
-            data.useHitLoc = false;
             const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels });
-            if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
-                for (const key of Object.keys(CONFIG.HERO.hitLocations)) {
-                    data.hitLoc.push({ key: key, label: key });
-                }
-                data.useHitLoc = true;
-            }
+            data.hitLocationsEnabled = game.settings.get(HEROSYS.module, "hit locations");
+            data.hitLocationSideEnabled =
+                data.hitLocationsEnabled && game.settings.get(HEROSYS.module, "hitLocTracking") === "all";
 
-            if (data.useHitLoc) {
-                data.hitLoc = [{ key: "none", label: "None" }, ...data.hitLoc];
+            // If there are no hit locations for the power or this is an AoE then the user cannot
+            // place a shot. If they can't place a shot the only options should be "none"
+            if (data.hitLocationsEnabled) {
+                data.hitLoc = [];
+                data.hitLocSide = [];
+
+                if (!item.system.noHitLocations && !aoe) {
+                    for (const key of Object.keys(CONFIG.HERO.hitLocations)) {
+                        data.hitLoc.push({ key: key, label: key });
+                    }
+
+                    if (data.hitLocationSideEnabled) {
+                        for (const key of Object.keys(CONFIG.HERO.hitLocationSide)) {
+                            data.hitLocSide.push({ key: key, label: key });
+                        }
+                    }
+                }
+
+                const noneReason = item.system.noHitLocations
+                    ? `does not allow hit locations`
+                    : aoe
+                      ? `has an area of effect`
+                      : undefined;
+
+                const noneLabel = `None${noneReason ? ` - ${noneReason}` : ""}`;
+                data.hitLoc = [{ key: "none", label: `${noneLabel}` }, ...data.hitLoc];
+                data.hitLocSide = [{ key: "none", label: `${noneLabel}` }, ...data.hitLocSide];
             }
 
             if (aoe) {
