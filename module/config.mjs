@@ -3990,11 +3990,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "PD":
-                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 3;
+                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * 3;
                         break;
 
                     case "ED":
-                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 3;
+                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * 3;
                         break;
                 }
                 if (value > 0) {
@@ -5000,15 +5000,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "PD":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = parseInt(actorItemDefense.adjustedLevels) || 0;
                         break;
 
                     case "ED":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = parseInt(actorItemDefense.adjustedLevels) || 0;
                         break;
 
                     case "KB":
-                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 2;
+                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * 2;
                         break;
                 }
                 if (value > 0) {
@@ -5189,7 +5189,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             nonDmgEffect: true,
             defense: function (item) {
-                const baseDef = parseInt(item.system.LEVELS || 0);
+                const baseDef = parseInt(item.adjustedLevels || 0);
 
                 const additionalDef = parseInt(item.findModsByXmlid("ADDITIONALDEF")?.LEVELS || 0);
                 const additionalPD = parseInt(item.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
@@ -5217,7 +5217,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 };
             },
             baseEffectDiceParts: (item) => {
-                const baseBodyDice = parseInt(item.system.LEVELS || 0);
+                const baseBodyDice = parseInt(item.adjustedLevels || 0);
                 let baseHalfDice = 0;
                 let additionalBodyDice = 0;
 
@@ -5376,7 +5376,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "FLASHDEFENSE":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = parseInt(actorItemDefense.adjustedLevels) || 0;
                         break;
                 }
                 if (value > 0) {
@@ -5735,7 +5735,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "KB":
-                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * (actorItemDefense.is5e ? 2 : 1);
+                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * (actorItemDefense.is5e ? 2 : 1);
                         break;
                 }
                 if (value > 0) {
@@ -5820,7 +5820,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "MD":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = parseInt(actorItemDefense.adjustedLevels) || 0;
                         break;
                 }
                 if (value > 0) {
@@ -6065,7 +6065,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     d6Count: 0,
                     d6Less1DieCount: 0,
                     halfDieCount: 0,
-                    constant: parseInt(item.system.LEVELS || 0),
+                    constant: parseInt(item.adjustedLevels || 0),
                 };
                 return defaultPowerDiceParts(item, diceParts);
             },
@@ -6131,7 +6131,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "KB":
-                        value = -(parseInt(actorItemDefense.system.LEVELS) || 0) * (this.is5e ? 3 : 6);
+                        value = -(parseInt(actorItemDefense.adjustedLevels) || 0) * (this.is5e ? 3 : 6);
                         break;
                 }
                 if (value != 0) {
@@ -6226,7 +6226,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const str =
                     options.effectivestr != undefined
                         ? parseInt(options.effectivestr)
-                        : parseInt(item.system.LEVELS || 0);
+                        : parseInt(item.adjustedLevels || 0);
 
                 return defaultPowerDiceParts(item, characteristicValueToDiceParts(str));
             },

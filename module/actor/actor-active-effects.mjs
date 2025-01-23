@@ -265,6 +265,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            desolidificationEffect: {
+                id: "desolidification",
+                name: game.i18n.localize("EFFECT.StatusDesolidification"),
+                img: `icons/svg/mystery-man.svg`,
+            },
             dodgeEffect: {
                 id: "dodge",
                 name: game.i18n.localize("EFFECT.StatusDodging"),

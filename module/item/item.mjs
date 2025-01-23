@@ -694,6 +694,8 @@ export class HeroSystem6eItem extends Item {
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
+            } else if (this.system.XMLID === "DESOLIDIFICATION") {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect);
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await this.activateManeuver();
             }
@@ -723,6 +725,10 @@ export class HeroSystem6eItem extends Item {
                 if (this.actor.statuses.has("fly")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
+            } else if (this.system.XMLID === "DESOLIDIFICATION") {
+                await this.actor.removeActiveEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
+                );
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await this.deactivateManeuver();
             }
@@ -5109,7 +5115,7 @@ export class HeroSystem6eItem extends Item {
         // the character's characteristics/powers (i.e. they can't create new characteristics or powers). All others just
         // have to match actual possible characteristics/powers.
         const validator =
-            this.system.XMLID === "AID" ||
+            //this.system.XMLID === "AID" || //You can AID another person that has a power you don't have
             this.system.XMLID === "ABSORPTION" ||
             this.system.XMLID === "SUCCOR" ||
             (this.system.XMLID === "TRANSFER" && mustBeStrict)
@@ -5165,11 +5171,12 @@ export class HeroSystem6eItem extends Item {
         } else {
             valid = this._areAllAdjustmentTargetsInListValid(
                 this.system.INPUT,
-                this.system.XMLID === "AID" || this.system.XMLID === "ABSORPTION" || this.system.XMLID === "SUCCOR",
+                //this.system.XMLID === "AID" || //You can AID another person that has a power you don't have
+                this.system.XMLID === "ABSORPTION" || this.system.XMLID === "SUCCOR",
             );
 
             if (
-                this.system.XMLID === "AID" ||
+                //this.system.XMLID === "AID" || //You can AID another person that has a power you don't have
                 this.system.XMLID === "ABSORPTION" ||
                 this.system.XMLID === "HEALING" ||
                 this.system.XMLID === "SUCCOR"
