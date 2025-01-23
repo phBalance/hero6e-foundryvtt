@@ -4,6 +4,7 @@
 
 - PD and ED from AID is now applying to defenses. [#1695](https://github.com/dmdorman/hero6e-foundryvtt/issues/1695)
 - Fixed Penalty Skill Levels for range. [#1734](https://github.com/dmdorman/hero6e-foundryvtt/issues/1734)
+- Fixed AoE with Hit Locations and now show more hit location info in to-hit dialog. [#1768](https://github.com/dmdorman/hero6e-foundryvtt/issues/1768)
 
 ## Version 4.0.14 20250119
 
