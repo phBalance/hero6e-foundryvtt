@@ -766,13 +766,17 @@ export class HeroSystemActorSheet extends ActorSheet {
                 } else if (!this.actor.system.characteristics?.[characteristic]) {
                     console.warn(`Missing this.actor.system.characteristics[${characteristic}]`);
                 } else {
-                    if (
-                        this.actor.system.characteristics[characteristic] &&
-                        expandedData.Xsystem.characteristics?.[characteristic].value !==
-                            this.actor.system.characteristics[characteristic].value
-                    ) {
-                        expandedData.system.characteristics[characteristic].value =
-                            expandedData.Xsystem.characteristics[characteristic].value;
+                    try {
+                        if (
+                            this.actor.system.characteristics[characteristic] &&
+                            expandedData.Xsystem.characteristics?.[characteristic].value !==
+                                this.actor.system.characteristics[characteristic].value
+                        ) {
+                            expandedData.system.characteristics[characteristic].value =
+                                expandedData.Xsystem.characteristics[characteristic].value;
+                        }
+                    } catch (e) {
+                        console.error(e);
                     }
                 }
             }
