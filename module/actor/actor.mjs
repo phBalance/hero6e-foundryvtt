@@ -1547,11 +1547,14 @@ export class HeroSystem6eActor extends Actor {
 
         // Need count of maneuvers for progress bar
         const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-        const freeStuffCount = powerList.filter(
-            (power) =>
-                !(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
-                power.type.includes("maneuver"),
-        ).length;
+        const freeStuffCount =
+            powerList.filter(
+                (power) =>
+                    !(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
+                    power.type.includes("maneuver"),
+            ).length +
+            1 + // Perception
+            2; // STR and Weapon placeholder
 
         const xmlItemsToProcess =
             1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
@@ -1572,7 +1575,10 @@ export class HeroSystem6eActor extends Actor {
 
         // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
         if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
-            uploadProgressBar.advance(`${this.name}: Adding non HDC items for PCs, NPCs, and Automatons`);
+            uploadProgressBar.advance(
+                `${this.name}: Adding non HDC items for PCs, NPCs, and Automatons`,
+                freeStuffCount,
+            );
             await this.addFreeStuff();
         }
 
