@@ -19,6 +19,7 @@ import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
+import { activateManeuver } from "./maneuver.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -931,7 +932,7 @@ export async function doSingleTargetActionToHit(item, options) {
     }
 
     if (["maneuver", "martialart"].includes(item.type)) {
-        item.activateManeuver();
+        activateManeuver(item);
     }
 
     const cardData = {
