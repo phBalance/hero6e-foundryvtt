@@ -1562,7 +1562,7 @@ export class HeroSystem6eActor extends Actor {
             heroJson.CHARACTER.POWERS.length +
             heroJson.CHARACTER.SKILLS.length +
             heroJson.CHARACTER.TALENTS.length +
-            (this.type === "pc" || this.type === "npc" ? freeStuffCount : 0) + // Free stuff
+            (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
             1 + // Validating adjustment and powers
             1 + // Images
             1 + // Final save
@@ -1571,7 +1571,10 @@ export class HeroSystem6eActor extends Actor {
         const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 0);
 
         // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
-        await this.#addFreeStuff(uploadProgressBar);
+        if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
+            uploadProgressBar.advance(`${this.name}: Adding non HDC items for PCs, NPCs, and Automatons`);
+            await this.addFreeStuff();
+        }
 
         uploadPerformance.progressBarFreeStuff = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
@@ -2020,18 +2023,16 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
-    async #addFreeStuff(uploadProgressBar) {
-        // Characters get a few things for free that are not in the HDC.
-        if (this.type === "pc" || this.type === "npc") {
-            uploadProgressBar.advance(`${this.name}: Adding non HDC items for PCs and NPCs`);
+    /**
+     * Characters get a few things for free that are not in the HDC.
+     * @returns
+     */
+    async addFreeStuff() {
+        await this.addPerception();
 
-            await this.addPerception();
-
-            // MANEUVERS
-            await this.addAttackPlaceholders();
-            await this.addHeroSystemManeuvers();
-            return;
-        }
+        // MANEUVERS
+        await this.addAttackPlaceholders();
+        await this.addHeroSystemManeuvers();
     }
 
     async addPerception() {
