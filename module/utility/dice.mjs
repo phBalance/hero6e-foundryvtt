@@ -484,8 +484,8 @@ export class HeroRoller {
             this.#addOperatorTerm(value > 0 ? "+" : "-");
         }
 
-        //value = this._formulaTerms.length > 0 ? Math.abs(value) : value;
-        value = this._formulaTerms.length > 0 ? Number(value).signedString() : value;
+        // TODO: We can have negative values, why are we ABSing here?
+        value = this._formulaTerms.length > 0 ? Math.abs(value) : value;
         this._formulaTerms.push(
             new NumericTerm({
                 number: value,

@@ -5171,12 +5171,11 @@ export class HeroSystem6eItem extends Item {
         } else {
             valid = this._areAllAdjustmentTargetsInListValid(
                 this.system.INPUT,
-                //this.system.XMLID === "AID" || //You can AID another person that has a power you don't have
-                this.system.XMLID === "ABSORPTION" || this.system.XMLID === "SUCCOR",
+                this.system.XMLID === "AID" || this.system.XMLID === "ABSORPTION" || this.system.XMLID === "SUCCOR",
             );
 
             if (
-                //this.system.XMLID === "AID" || //You can AID another person that has a power you don't have
+                this.system.XMLID === "AID" ||
                 this.system.XMLID === "ABSORPTION" ||
                 this.system.XMLID === "HEALING" ||
                 this.system.XMLID === "SUCCOR"
