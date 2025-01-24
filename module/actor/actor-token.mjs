@@ -12,6 +12,27 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         //data.bars.bar3 = bars.addChild(new PIXI.Graphics());
     }
 
+    async _preCreate(data, options, user) {
+        await super._preCreate(data, options, user);
+
+        // Make sure the number is not duplicated
+        if (data.appendNumber) {
+            const initialNumber = parseInt(this.name.match(/\((\d+)\)/)?.[1]);
+            if (initialNumber) {
+                const baseName = this.name.replace(this.name.match(/\((\d+)\)/)?.[0], "").trim();
+                for (let n = initialNumber; n < initialNumber + 100; n++) {
+                    const sisterToken = canvas.scene.tokens.find((t) => t.name === `${baseName} (${n})`);
+                    if (!sisterToken) {
+                        this.updateSource({
+                            name: `${baseName} (${n})`,
+                        });
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     // getBarAttribute(barName, alternative) {
     //     //HEROSYS.log(false, "getBarAttribute")
     //     let data = super.getBarAttribute(barName, alternative);

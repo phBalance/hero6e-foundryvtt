@@ -2686,51 +2686,51 @@ export class HeroSystem6eActor extends Actor {
      * @param {object} [options={}]         The options passed to the TokenDocument constructor
      * @returns {Promise<TokenDocument>}    The created TokenDocument instance
      */
-    async getTokenDocument(data = {}, options = {}) {
-        const tokenData = this.prototypeToken.toObject();
-        tokenData.actorId = this.id;
+    // async getTokenDocument(data = {}, options = {}) {
+    //     const tokenData = this.prototypeToken.toObject();
+    //     tokenData.actorId = this.id;
 
-        if (tokenData.randomImg && !data.texture?.src) {
-            let images = await this.getTokenImages();
-            if (images.length > 1 && this._lastWildcard) {
-                images = images.filter((i) => i !== this._lastWildcard);
-            }
-            const image = images[Math.floor(Math.random() * images.length)];
-            tokenData.texture.src = this._lastWildcard = image;
-        }
+    //     if (tokenData.randomImg && !data.texture?.src) {
+    //         let images = await this.getTokenImages();
+    //         if (images.length > 1 && this._lastWildcard) {
+    //             images = images.filter((i) => i !== this._lastWildcard);
+    //         }
+    //         const image = images[Math.floor(Math.random() * images.length)];
+    //         tokenData.texture.src = this._lastWildcard = image;
+    //     }
 
-        if (!tokenData.actorLink) {
-            if (tokenData.appendNumber) {
-                // Count how many tokens are already linked to this actor
-                const tokens = canvas.scene.tokens.filter((t) => t.actorId === this.id);
-                // let n = tokens.length + 1;
-                // tokenData.name = `${tokenData.name} (${n})`;
+    //     if (!tokenData.actorLink) {
+    //         if (tokenData.appendNumber) {
+    //             // Count how many tokens are already linked to this actor
+    //             const tokens = canvas.scene.tokens.filter((t) => t.actorId === this.id);
+    //             // let n = tokens.length + 1;
+    //             // tokenData.name = `${tokenData.name} (${n})`;
 
-                // And make sure we don't already have this token name in this scene
-                for (let n = tokens.length + 1; n < 100; n++) {
-                    const sisterToken = canvas.scene.tokens.find(
-                        (t) => t.actorId === this.id && t.name === `${tokenData.name} (${n})`,
-                    );
-                    if (!sisterToken) {
-                        tokenData.name = `${tokenData.name} (${n})`;
-                        break;
-                    }
-                }
-            }
+    //             // And make sure we don't already have this token name in this scene
+    //             for (let n = tokens.length + 1; n < 100; n++) {
+    //                 const sisterToken = canvas.scene.tokens.find(
+    //                     (t) => t.actorId === this.id && t.name === `${tokenData.name} (${n})`,
+    //                 );
+    //                 if (!sisterToken) {
+    //                     tokenData.name = `${tokenData.name} (${n})`;
+    //                     break;
+    //                 }
+    //             }
+    //         }
 
-            if (tokenData.prependAdjective) {
-                const adjectives = Object.values(
-                    foundry.utils.getProperty(game.i18n.translations, CONFIG.Token.adjectivesPrefix) ||
-                        foundry.utils.getProperty(game.i18n._fallback, CONFIG.Token.adjectivesPrefix) ||
-                        {},
-                );
-                const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-                tokenData.name = `${adjective} ${tokenData.name}`;
-            }
-        }
+    //         if (tokenData.prependAdjective) {
+    //             const adjectives = Object.values(
+    //                 foundry.utils.getProperty(game.i18n.translations, CONFIG.Token.adjectivesPrefix) ||
+    //                     foundry.utils.getProperty(game.i18n._fallback, CONFIG.Token.adjectivesPrefix) ||
+    //                     {},
+    //             );
+    //             const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    //             tokenData.name = `${adjective} ${tokenData.name}`;
+    //         }
+    //     }
 
-        foundry.utils.mergeObject(tokenData, data);
-        const cls = getDocumentClass("Token");
-        return new cls(tokenData, options);
-    }
+    //     foundry.utils.mergeObject(tokenData, data);
+    //     const cls = getDocumentClass("Token");
+    //     return new cls(tokenData, options);
+    // }
 }
