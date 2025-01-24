@@ -3160,10 +3160,25 @@ export class HeroSystem6eItem extends Item {
         return changed;
     }
 
+    /**
+     * Returns the base cost of an item. It's possible that it costs more beyond there (e.g. STR added etc)
+     * @returns number
+     */
+    getBaseEndCost() {
+        // PERKS, TALENTS, COMPLICATIONS, and martial maneuvers do not use endurance.
+        if (["perk", "talent", "complication", "martialart"].includes(this.type)) {
+            return 0;
+        }
+
+        // Combat maneuvers cost 1 END and everything else is based on active points
+        const endCost = this.type === "maneuver" ? 1 : RoundFavorPlayerDown((this.system.activePoints || 0) / 10);
+
+        return Math.max(1, endCost);
+    }
+
     updateItemDescription() {
         // Description (eventual goal is to largely match Hero Designer)
         const system = this.system;
-        const type = this.type;
         const is5e = !!this.actor?.system.is5e;
 
         // Reset the description and build it up again.
@@ -4212,7 +4227,7 @@ export class HeroSystem6eItem extends Item {
             .trim();
 
         // Endurance
-        system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0);
+        system.end = this.getBaseEndCost();
         const increasedEnd = this.findModsByXmlid("INCREASEDEND");
         if (increasedEnd) {
             system.end *= parseInt(increasedEnd.OPTION.replace("x", ""));
@@ -4253,11 +4268,6 @@ export class HeroSystem6eItem extends Item {
 
         // MOVEMENT only costs endurance when used.  Typically per round.
         if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
-            system.end = 0;
-        }
-
-        // PERKS, TALENTS, COMPLICATIONS do not use endurance.
-        if (["perk", "talent", "complication"]?.includes(type)) {
             system.end = 0;
         }
     }
