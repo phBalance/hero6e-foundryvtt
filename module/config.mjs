@@ -1043,7 +1043,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         perceivability: "obvious",
         duration: "instant",
         range: HERO.RANGE_TYPES.STANDARD,
-        costEnd: false,
+        costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
         ignoreFor: ["base2", "computer", "ai"],
         maneuverDesc: {
@@ -1068,7 +1068,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1095,7 +1095,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.SELF,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1123,7 +1123,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1178,7 +1178,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.SELF,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1233,7 +1233,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.SELF,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1260,7 +1260,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.SELF,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1364,7 +1364,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
                 phase: "1/2 *",
@@ -1390,7 +1390,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1416,7 +1416,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         perceivability: "obvious",
         duration: "instant",
         range: HERO.RANGE_TYPES.SELF,
-        costEnd: false,
+        costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
         ignoreFor: ["base2", "computer", "ai"],
         maneuverDesc: {
@@ -1518,7 +1518,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all possible
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1546,7 +1546,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all possible.
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1568,7 +1568,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PULLINGAPUNCH",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
+            behaviors: ["non-hd", "optional-maneuver", "activatable"],
             name: "Pulling A Punch",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -1601,7 +1601,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         perceivability: "obvious",
         duration: "instant",
         range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all
-        costEnd: false,
+        costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
         ignoreFor: ["base2", "computer", "ai"],
         maneuverDesc: {
@@ -1626,7 +1626,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.SELF,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1654,7 +1654,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.SELF,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1683,7 +1683,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.SELF,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1737,7 +1737,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1764,7 +1764,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -1818,7 +1818,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
-            costEnd: false,
+            costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
             maneuverDesc: {
@@ -6343,6 +6343,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            costEnd: true,
             baseEffectDiceParts: maneuverBaseEffectDiceParts,
         },
         {},
