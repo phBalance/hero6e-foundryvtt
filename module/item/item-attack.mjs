@@ -106,16 +106,6 @@ export async function collectActionDataBeforeToHitOptions(item) {
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
-    const aoe = item.getAoeModifier();
-
-    // TODO: This needs to be considered. AOE does not preclude hit locations.
-    if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
-        data.useHitLoc = true;
-        //data.hitLoc = CONFIG.HERO.hitLocations;
-        data.hitLocSide =
-            game.settings.get(HEROSYS.module, "hitLocTracking") === "all" ? CONFIG.HERO.hitLocationSide : null;
-    }
-
     await new ItemAttackFormApplication(data).render(true);
 }
 
