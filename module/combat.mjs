@@ -415,7 +415,6 @@ export class HeroSystem6eCombat extends Combat {
             await expireEffects(combatant.actor);
         } catch (e) {
             console.error(e);
-            //debugger;
         }
 
         // Stop holding
@@ -428,12 +427,6 @@ export class HeroSystem6eCombat extends Combat {
         if (combatant.actor.statuses.has("nonCombatMovement")) {
             const ae = combatant.actor.effects.find((effect) => effect.statuses.has("nonCombatMovement"));
             combatant.actor.removeActiveEffect(ae);
-        }
-
-        // Stop SET
-        const SET = combatant.actor.items.find((i) => i.system.XMLID === "SET");
-        if (SET?.system.active === true) {
-            await SET.toggle();
         }
 
         // Stop BRACE
