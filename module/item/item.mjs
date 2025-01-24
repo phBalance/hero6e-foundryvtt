@@ -1776,6 +1776,7 @@ export class HeroSystem6eItem extends Item {
                 this.system.charges = {
                     ...this.system.charges,
                     max: parseInt(CHARGES.OPTION_ALIAS),
+                    value: parseInt(CHARGES.OPTION_ALIAS),
                     clipsMax: Math.pow(
                         parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1),
                         2,
@@ -1788,10 +1789,10 @@ export class HeroSystem6eItem extends Item {
                 };
 
                 // The first time through, on creation, there will be no value (number of charges) defined.
-                if (this.system.charges?.value == null) {
-                    this.system.charges.value = this.system.charges.max;
-                    changed = true;
-                }
+                // if (this.system.charges?.value == null) {
+                //     this.system.charges.value = this.system.charges.max;
+                //     changed = true;
+                // }
             } else {
                 // When CHARGES is manually deleted
                 if (this.system.charges) {
