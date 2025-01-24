@@ -478,6 +478,19 @@ export async function getConditionalDefenses(token, item, avad) {
                 if (avad?.INPUT?.match(/power/i) && parseInt(defense.system.POWDLEVELS || 0) > 0) option.checked = true;
             }
 
+            // CONDITIONALPOWER
+            if (option.checked) {
+                const conditionalPower = defense.findModsByXmlid("CONDITIONALPOWER");
+                if (conditionalPower?.OPTION_ALIAS?.match(/not work/i)) {
+                    const re = new RegExp(item.system.sfx, "i");
+                    for (const sfx of item.system.SFX.split("/")) {
+                        if (sfx?.match(re)) {
+                            option.checked = false;
+                        }
+                    }
+                }
+            }
+
             option.description = defense.system.description;
             options.push(option);
         }

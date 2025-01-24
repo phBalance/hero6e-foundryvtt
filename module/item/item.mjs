@@ -397,7 +397,9 @@ export class HeroSystem6eItem extends Item {
                 this.updateRoll();
                 return createSkillPopOutFromItem(this, this.actor);
             } else {
-                ui.notifications.warn(`${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`);
+                ui.notifications.warn(
+                    `${this.actor.name}: ${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`,
+                );
             }
         }
     }
