@@ -2221,22 +2221,25 @@ export function registerFullTests(quench) {
                     <TALENTS />
                     <MARTIALARTS>
                         <MANEUVER XMLID="MANEUVER" ID="1735337587944" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="4" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
-                        <NOTES />
+                            <NOTES />
                         </MANEUVER>
                         <MANEUVER XMLID="MANEUVER" ID="1735337623705" BASECOST="4.0" LEVELS="0" ALIAS="Martial Strike" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Strike" OCV="+0" DCV="+2" DC="2" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="20" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
-                        <NOTES />
+                            <NOTES />
                         </MANEUVER>
                         <MANEUVER XMLID="MANEUVER" ID="1735337570473" BASECOST="4.0" LEVELS="0" ALIAS="Nerve Strike" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Nerve Strike" OCV="-1" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NNDDC]" ADDSTR="No" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[NNDDC]">
-                        <NOTES />
+                            <NOTES />
                         </MANEUVER>
                         <MANEUVER XMLID="MANEUVER" ID="1735337662832" BASECOST="4.0" LEVELS="0" ALIAS="Martial Flash" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Hearing" CATEGORY="Hand To Hand" DISPLAY="Martial Flash" OCV="-1" DCV="-1" DC="4" PHASE="1/2" EFFECT="[FLASHDC]" ADDSTR="No" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[FLASHDC]">
-                        <NOTES />
+                            <NOTES />
                         </MANEUVER>
                         <MANEUVER XMLID="MANEUVER" ID="1735337713693" BASECOST="5.0" LEVELS="0" ALIAS="Sacrifice Strike" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Sacrifice Strike" OCV="+1" DCV="-2" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
-                        <NOTES />
+                            <NOTES />
                         </MANEUVER>
                         <MANEUVER XMLID="MANEUVER" ID="1735422272832" BASECOST="4.0" LEVELS="0" ALIAS="Martial Strike" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Strike" OCV="+0" DCV="+2" DC="2" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="20" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
-                        <NOTES />
+                            <NOTES />
+                        </MANEUVER>
+                        <MANEUVER XMLID="MANEUVER" ID="1736741448829" BASECOST="5.0" LEVELS="0" ALIAS="Flying Dodge" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Flying Dodge" OCV="--" DCV="+4" DC="0" PHASE="1/2" EFFECT="Dodge All Attacks, Abort; FMove" ADDSTR="No" ACTIVECOST="50" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No">
+                            <NOTES />
                         </MANEUVER>
                     </MARTIALARTS>
                     <POWERS>
@@ -2304,15 +2307,43 @@ export function registerFullTests(quench) {
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.system.points, 255);
+                    assert.equal(actor.system.points, 260);
                 });
 
                 it("should match the cost breakdown of HD", function () {
                     assert.deepEqual(actor.system.pointsDetail, {
                         characteristics: 0,
-                        martialart: 25,
+                        martialart: 30,
                         power: 142,
                         skill: 88,
+                    });
+                });
+
+                describe("maneuver END usage", function () {
+                    // Non strength combat maneuvers use 1 END
+                    describe("BLOCK Combat Maneuver", function () {
+                        it("should use 1 END", function () {
+                            const blockCombatManeuver = actor.items.find((item) => item.system.XMLID === "BLOCK");
+                            assert.equal(blockCombatManeuver.system.end, 1);
+                        });
+                    });
+
+                    // Non strength combat maneuvers use 1 END
+                    describe("DODGE Combat Maneuver", function () {
+                        it("should use 1 END", function () {
+                            const dodgeCombatManeuver = actor.items.find((item) => item.system.XMLID === "DODGE");
+                            assert.equal(dodgeCombatManeuver.system.end, 1);
+                        });
+                    });
+
+                    // Martial maneuvers use 0 END
+                    describe("Flying Dodge Martial Art Maneuver", function () {
+                        it("should use 0 END", function () {
+                            const blockCombatManeuver = actor.items.find(
+                                (item) => item.system.XMLID === "MANEUVER" && item.name === "Flying Dodge",
+                            );
+                            assert.equal(blockCombatManeuver.system.end, 0);
+                        });
                     });
                 });
 
@@ -2345,11 +2376,11 @@ export function registerFullTests(quench) {
                 });
 
                 describe("Haymaker", function () {
-                    let haymakerManuever;
+                    let haymakerManeuver;
 
                     beforeEach(function () {
                         // Turn on the haymaker
-                        haymakerManuever = actor.items.find(
+                        haymakerManeuver = actor.items.find(
                             (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
                         );
                     });
@@ -2361,7 +2392,7 @@ export function registerFullTests(quench) {
                         const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
                         assert.equal(
                             getEffectForumulaFromItem(strikeItem, {
-                                haymakerManeuverActiveItem: haymakerManuever,
+                                haymakerManeuverActiveItem: haymakerManeuver,
                                 hthAttackItems: [hthAttack],
                             }),
                             "20d6",
@@ -2375,7 +2406,7 @@ export function registerFullTests(quench) {
                         const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
                         assert.equal(
                             getEffectForumulaFromItem(moveThroughItem, {
-                                haymakerManeuverActiveItem: haymakerManuever,
+                                haymakerManeuverActiveItem: haymakerManeuver,
                                 velocity: 20,
                             }),
                             "8d6",
@@ -3753,39 +3784,39 @@ export function registerFullTests(quench) {
 
                 // Confirm that we add straight dice in 5e for haymakers.
                 describe("Haymaker", function () {
-                    let haymakerManuever;
+                    let haymakerManeuver;
 
                     before(function () {
                         // Turn on the haymaker
-                        haymakerManuever = actor.items.find(
+                        haymakerManeuver = actor.items.find(
                             (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
                         );
                     });
 
                     it("should have the correct damage for the +1/2 EB", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "8d6",
                         );
                     });
 
                     it("should have the correct damage for the +1 EB", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "8d6",
                         );
                     });
 
                     it("should have the correct damage for the +1/2 EA", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6d6",
                         );
                     });
 
                     it("should have the correct damage for the +1 EA", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6d6",
                         );
                     });
@@ -3794,7 +3825,7 @@ export function registerFullTests(quench) {
                         // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
                         assert.equal(
                             getEffectForumulaFromItem(rkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManuever,
+                                haymakerManeuverActiveItem: haymakerManeuver,
                             }),
                             "3½d6",
                         );
@@ -3804,7 +3835,7 @@ export function registerFullTests(quench) {
                         // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
                         assert.equal(
                             getEffectForumulaFromItem(hkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManuever,
+                                haymakerManeuverActiveItem: haymakerManeuver,
                                 effectivestr: 0,
                             }),
                             "3½d6",
@@ -4145,11 +4176,11 @@ export function registerFullTests(quench) {
 
                 // Confirm that we add straight dice in 5e for haymakers.
                 describe("Haymaker", function () {
-                    let haymakerManuever;
+                    let haymakerManeuver;
 
                     before(function () {
                         // Turn on the haymaker
-                        haymakerManuever = actor.items.find(
+                        haymakerManeuver = actor.items.find(
                             (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
                         );
                     });
@@ -4157,7 +4188,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 EB", function () {
                         // +4 DC at +1/2 is 2.66 DC => 2½d6
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6½d6",
                         );
                     });
@@ -4165,7 +4196,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1 EB", function () {
                         // +4 DC at +1 is 2 DC => 2d6
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6d6",
                         );
                     });
@@ -4173,7 +4204,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 EA", function () {
                         // +4 DC at +1/2 is 2.66 DC => 1d6+1
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "5d6+1",
                         );
                     });
@@ -4181,7 +4212,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1 EA", function () {
                         // +4 DC at +1 is 2 DC => 1d6
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManuever }),
+                            getEffectForumulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "5d6",
                         );
                     });
@@ -4190,7 +4221,7 @@ export function registerFullTests(quench) {
                         // +4 DC at +1/2 is 2.66 DC => ½d6
                         assert.equal(
                             getEffectForumulaFromItem(rkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManuever,
+                                haymakerManeuverActiveItem: haymakerManeuver,
                             }),
                             "3½d6",
                         );
@@ -4200,7 +4231,7 @@ export function registerFullTests(quench) {
                         // +4 DC at +1 is 2 DC => 2d6
                         assert.equal(
                             getEffectForumulaFromItem(hkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManuever,
+                                haymakerManeuverActiveItem: haymakerManeuver,
                                 effectivestr: 0,
                             }),
                             "3½d6",
