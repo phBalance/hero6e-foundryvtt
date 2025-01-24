@@ -5,7 +5,7 @@ import {
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
-import { enforceManeuverLimits } from "../item/manuever.mjs";
+import { activateManeuver, deactivateManeuver, enforceManeuverLimits } from "./maneuver.mjs";
 import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,
@@ -322,7 +322,7 @@ export class HeroSystem6eItem extends Item {
         if (!this.actor.canAct(true, event)) return;
 
         if (this.baseInfo.behaviors.includes("dice") || this.baseInfo.behaviors.includes("to-hit")) {
-            // FIXME: Martial manuevers all share the MANEUVER XMLID. Need to extract out things from that (and fix the broken things).
+            // FIXME: Martial maneuvers all share the MANEUVER XMLID. Need to extract out things from that (and fix the broken things).
             switch (this.system.XMLID) {
                 case "AID":
                 case "BLOCK":
@@ -521,108 +521,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
-     * Activate a basic, optional, or martial maneuver
-     */
-    activateManeuver() {
-        function addDcvTraitToChanges(maneuverDcvChange) {
-            if (maneuverDcvChange !== 0) {
-                return {
-                    key: "system.characteristics.dcv.value",
-                    value: maneuverDcvChange,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                };
-            }
-        }
-
-        function addOcvTraitToChanges(maneuverOcvChange) {
-            if (maneuverOcvChange !== 0) {
-                return {
-                    key: "system.characteristics.ocv.value",
-                    value: maneuverOcvChange,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                };
-            }
-        }
-
-        // TODO: Can the actor activate this maneuver?
-
-        const maneuverDcvTrait = parseInt(this.system.DCV === "--" ? 0 : this.system.DCV || 0);
-        const maneuverOcvTrait = parseInt(this.system.OCV === "--" ? 0 : this.system.OCV || 0);
-
-        // Enable the effect if there is one
-        const effect = this.system.EFFECT?.toLowerCase();
-        if (effect) {
-            const maneuverHasAbortTrait = effect.indexOf("abort") > -1;
-            const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
-            const maneuverHasBlockTrait = effect.indexOf("block") > -1;
-
-            const currentCombatActorId = game.combat?.combatants.find(
-                (combatant) => combatant.tokenId === game.combat.current?.tokenId,
-            )?.actorId;
-            const thisActorsCombatTurn =
-                game.combat?.active && currentCombatActorId != undefined && currentCombatActorId === this.actor?.id;
-
-            // Abort effect - If in combat and not our turn then this must be an abort
-            if (maneuverHasAbortTrait && game.combat?.active && !thisActorsCombatTurn) {
-                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect);
-            }
-
-            // Dodge effect
-            if (maneuverHasDodgeTrait) {
-                const dodgeStatusEffect = foundry.utils.deepClone(
-                    HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect,
-                );
-                dodgeStatusEffect.name = this.name ? `${this.name} (${this.system.XMLID})` : `${this.system.XMLID}`;
-                dodgeStatusEffect.changes = [
-                    addDcvTraitToChanges(maneuverDcvTrait),
-                    addOcvTraitToChanges(maneuverOcvTrait),
-                ].filter(Boolean);
-                this.actor.addActiveEffect(dodgeStatusEffect);
-            }
-
-            // Block effect
-            if (maneuverHasBlockTrait) {
-                const blockStatusEffect = foundry.utils.deepClone(
-                    HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect,
-                );
-                blockStatusEffect.name = this.name ? `${this.name} (${this.system.XMLID})` : `${this.system.XMLID}`;
-                blockStatusEffect.changes = [
-                    addDcvTraitToChanges(maneuverDcvTrait),
-                    addOcvTraitToChanges(maneuverOcvTrait),
-                ].filter(Boolean);
-                this.actor.addActiveEffect(blockStatusEffect);
-            }
-        }
-
-        // Turn on any status effects that we have implemented
-        if (this.system.XMLID === "BRACE") {
-            this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
-        } else if (this.system.XMLID === "HAYMAKER") {
-            this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
-        }
-    }
-
-    /**
-     * Deactivate a basic, optional, or martial maneuver
-     */
-    deactivateManeuver() {
-        const effect = this.system.EFFECT?.toLowerCase();
-        if (effect) {
-            const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
-            if (maneuverHasDodgeTrait) {
-                this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
-            }
-        }
-
-        // Turn off any status effects that we have implemented
-        if (this.system.XMLID === "BRACE") {
-            this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect);
-        } else if (this.system.XMLID === "HAYMAKER") {
-            this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect);
-        }
-    }
-
-    /**
      *
      * @param {Event} [event]
      * @returns {Promise<any>}
@@ -697,7 +595,7 @@ export class HeroSystem6eItem extends Item {
             } else if (this.system.XMLID === "DESOLIDIFICATION") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect);
             } else if (["maneuver", "martialart"].includes(item.type)) {
-                await this.activateManeuver();
+                await activateManeuver(this);
             }
         } else {
             // Let GM know power was deactivated
@@ -730,7 +628,7 @@ export class HeroSystem6eItem extends Item {
                     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
                 );
             } else if (["maneuver", "martialart"].includes(item.type)) {
-                await this.deactivateManeuver();
+                await deactivateManeuver(this);
             }
         }
 
