@@ -5477,7 +5477,11 @@ export class HeroSystem6eItem extends Item {
         // Notice that we are only looking for DRAINS on "this" item.  If there are more than one item with the same XMLID then we don't know which item is getting the drain.
         for (const ae of this.effects) {
             //console.log(ae);
-            _adjustedLevels += parseInt(ae.changes?.[0].value || 0);
+            for (const change of ae.changes) {
+                if (change.key.match(new RegExp(this.system.XMLID, "i"))) {
+                    _adjustedLevels += parseInt(change.value || 0);
+                }
+            }
         }
 
         // TODO: Should we be MAXing it here, or when we apply the defense?
