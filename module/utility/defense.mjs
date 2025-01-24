@@ -340,6 +340,12 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
 }
 
 export async function getConditionalDefenses(token, item, avad) {
+    // Some attacks have no defenses
+    if (item.baseInfo.hasNoDefense) {
+        console.debug(`${item.name}/${item.system.XMLID} has no defense`);
+        return { ignoreDefenseIds: [], conditionalDefenses: [] };
+    }
+
     let ignoreDefenseIds = [];
     let conditionalDefenses = token.actor.items.filter(
         (o) =>
@@ -470,6 +476,19 @@ export async function getConditionalDefenses(token, item, avad) {
                 )
                     option.checked = true;
                 if (avad?.INPUT?.match(/power/i) && parseInt(defense.system.POWDLEVELS || 0) > 0) option.checked = true;
+            }
+
+            // CONDITIONALPOWER
+            if (option.checked) {
+                const conditionalPower = defense.findModsByXmlid("CONDITIONALPOWER");
+                if (conditionalPower?.OPTION_ALIAS?.match(/not work/i)) {
+                    const re = new RegExp(item.system.sfx, "i");
+                    for (const sfx of item.system.SFX.split("/")) {
+                        if (sfx?.match(re)) {
+                            option.checked = false;
+                        }
+                    }
+                }
             }
 
             option.description = defense.system.description;

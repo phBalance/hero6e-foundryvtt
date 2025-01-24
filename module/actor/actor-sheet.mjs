@@ -765,6 +765,8 @@ export class HeroSystemActorSheet extends ActorSheet {
                     console.error("Missing this.actor.system.characteristics");
                 } else if (!this.actor.system.characteristics?.[characteristic]) {
                     console.warn(`Missing this.actor.system.characteristics[${characteristic}]`);
+                } else if (!expandedData.Xsystem.characteristics?.[characteristic]) {
+                    console.warn(`Missing expandedData.Xsystem.characteristics[${characteristic}]`);
                 } else {
                     try {
                         if (
