@@ -4175,7 +4175,7 @@ export class HeroSystem6eItem extends Item {
 
     createPowerDescriptionModifier(modifier) {
         const item = this;
-        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
+        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID, actor: this.actor });
         const system = item.system;
         let result = "";
 
@@ -4351,7 +4351,7 @@ export class HeroSystem6eItem extends Item {
                 .replace("(; ", "(");
         }
 
-        if (modifierInfo.descriptionModifierFactory) {
+        if (modifierInfo?.descriptionModifierFactory) {
             result += modifierInfo.descriptionModifierFactory(modifier, item);
         }
 

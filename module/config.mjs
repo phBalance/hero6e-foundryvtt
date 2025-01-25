@@ -7368,6 +7368,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "OBLIVIOUS",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="OBLIVIOUS" ID="1736008610985" BASECOST="-0.25" LEVELS="0" ALIAS="Character is totally unaware of nearby events" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "OFFENSIVE",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
