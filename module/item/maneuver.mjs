@@ -49,6 +49,10 @@ function addOcvTraitToChanges(maneuverOcvChange) {
     }
 }
 
+function buildManeuverNextPhaseFlags(item) {
+    return { type: "maneuverNextPhaseEffect", itemUuid: item.uuid, toggle: item.isActivatable() };
+}
+
 /**
  * Activate a combat or martial maneuver
  */
@@ -73,6 +77,7 @@ export async function activateManeuver(item) {
     if (maneuverHasDodgeTrait) {
         const dodgeStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
         dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        dodgeStatusEffect.flags = buildManeuverNextPhaseFlags(item);
         dodgeStatusEffect.changes = [
             addDcvTraitToChanges(maneuverDcvTrait),
             addOcvTraitToChanges(maneuverOcvTrait),
@@ -84,6 +89,7 @@ export async function activateManeuver(item) {
     else if (maneuverHasBlockTrait) {
         const blockStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect);
         blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        blockStatusEffect.flags = buildManeuverNextPhaseFlags(item);
         blockStatusEffect.changes = [
             addDcvTraitToChanges(maneuverDcvTrait),
             addOcvTraitToChanges(maneuverOcvTrait),
@@ -94,6 +100,7 @@ export async function activateManeuver(item) {
     // Other maneuvers with effects
     // Turn on any status effects that we have implemented
     else if (item.system.XMLID === "BRACE") {
+        // NOTE: This effect is special and doesn't come off as the start of the next phase
         newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
     } else if (item.system.XMLID === "HAYMAKER") {
         newActiveEffects.push(
@@ -111,7 +118,7 @@ export async function activateManeuver(item) {
     } else {
         // PH: FIXME: Assume this is a martial maneuver and give it a default effect
         const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
-        maneuverEffect.flags = { type: "maneuver" };
+        maneuverEffect.flags = buildManeuverNextPhaseFlags(item);
         maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         maneuverEffect.changes = [
             addDcvTraitToChanges(maneuverDcvTrait),
@@ -127,15 +134,23 @@ export async function activateManeuver(item) {
 /**
  * Deactivate a combat or martial maneuver
  */
-export function deactivateManeuver(item) {
+export async function deactivateManeuver(item) {
     const removedEffects = [];
 
     const effect = item.system.EFFECT?.toLowerCase();
     if (effect) {
         const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
+        const maneuverHasBlockTrait = effect.indexOf("block") > -1;
+
         if (maneuverHasDodgeTrait) {
             removedEffects.push(
                 item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect),
+            );
+        }
+
+        if (maneuverHasBlockTrait) {
+            removedEffects.push(
+                item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect),
             );
         }
     }

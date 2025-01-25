@@ -441,11 +441,17 @@ export class HeroSystem6eCombat extends Combat {
             await HAYMAKER.toggle();
         }
 
-        // Stop other maneuvers' active effects
-        const maneuverAeDeletePromises = combatant.actor.effects
-            .filter((ae) => ae.flags?.type === "maneuver")
-            .map((maneuverAe) => maneuverAe.delete());
-        await Promise.all(maneuverAeDeletePromises);
+        // Stop dodges and other maneuvers' active effects that expire automatically
+        const maneuverNextPhaseAes = combatant.actor.effects.filter(
+            (ae) => ae.flags?.type === "maneuverNextPhaseEffect",
+        );
+        const maneuverNextPhaseTogglePromises = maneuverNextPhaseAes
+            .filter((ae) => ae.flags.toggle)
+            .map((toggleAes) => fromUuidSync(toggleAes.flags.itemUuid).toggle());
+        const maneuverNextPhaseNonTogglePromises = maneuverNextPhaseAes
+            .filter((ae) => !ae.flags.toggle)
+            .map((maneuverAes) => maneuverAes.delete());
+        await Promise.all(maneuverNextPhaseTogglePromises, maneuverNextPhaseNonTogglePromises);
 
         // PH: FIXME: stop abort under certain circumstances
 
