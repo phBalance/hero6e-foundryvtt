@@ -1332,6 +1332,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
     for (const vuln of conditionalDefenses.filter(
         (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
     )) {
+        damageData.VulnDesc ??= [];
+        damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
         if (vuln.system.MODIFIER) {
             for (const modifier of vuln.system.MODIFIER || []) {
                 switch (modifier.OPTIONID) {
@@ -2064,6 +2066,8 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     for (const vuln of conditionalDefenses.filter(
         (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
     )) {
+        damageData.VulnDesc ??= [];
+        damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
         if (vuln.system.MODIFIER) {
             for (const modifier of vuln.system.MODIFIER || []) {
                 switch (modifier.OPTIONID) {
@@ -2991,6 +2995,9 @@ async function _calcDamage(heroRoller, item, options) {
         const vulnBodyDamage = Math.floor(stun * (options.vulnBodyMultiplier - 1));
         body += vulnBodyDamage;
         effects += `Vunlerability x${options.vulnBodyMultiplier} BODY (${vulnBodyDamage});`;
+    }
+    for (const desc of options.VulnDesc || []) {
+        effects += ` ${desc};`;
     }
 
     let bodyDamage = body;

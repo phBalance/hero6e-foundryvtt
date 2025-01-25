@@ -5487,6 +5487,18 @@ export class HeroSystem6eItem extends Item {
         // TODO: Should we be MAXing it here, or when we apply the defense?
         return Math.max(0, _adjustedLevels);
     }
+
+    get conditionalDefenseShortDescription() {
+        let shortDesc = this.name;
+        if (this.system.XMLID === "VULNERABILITY") {
+            shortDesc += ` (${this.system.INPUT})`;
+        }
+        const ONLYAGAINSTLIMITEDTYPE = this.findModsByXmlid("ONLYAGAINSTLIMITEDTYPE");
+        if (ONLYAGAINSTLIMITEDTYPE) {
+            shortDesc += ` (${ONLYAGAINSTLIMITEDTYPE.ALIAS})`;
+        }
+        return shortDesc;
+    }
 }
 
 export function getItem(id) {
