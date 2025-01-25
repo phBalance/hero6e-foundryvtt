@@ -734,10 +734,11 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
                 // Double check maneuver to make sure it is a flash
                 if (
-                    senseAffectingItem.system.XMLID === "MANEUVER" &&
-                    !senseAffectingItem.system.EFFECT.includes("FLASH")
-                )
+                    senseAffectingItem?.system.XMLID === "MANEUVER" &&
+                    !senseAffectingItem?.system.EFFECT.includes("FLASH")
+                ) {
                     break;
+                }
                 if (senseAffectingItem) {
                     const d = flashAe._prepareDuration();
                     if (d.remaining > 0) {
