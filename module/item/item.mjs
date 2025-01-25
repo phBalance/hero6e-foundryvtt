@@ -4175,6 +4175,7 @@ export class HeroSystem6eItem extends Item {
 
     createPowerDescriptionModifier(modifier) {
         const item = this;
+        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
         const system = item.system;
         let result = "";
 
@@ -4238,7 +4239,11 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             default:
-                if (modifier.ALIAS) result += ", " + modifier.ALIAS || "?";
+                if (modifierInfo?.descriptionFactory) {
+                    result += `, ${modifierInfo.descriptionFactory(modifier)}`;
+                } else {
+                    if (modifier.ALIAS) result += ", " + modifier.ALIAS || "?";
+                }
                 break;
         }
 
@@ -4344,6 +4349,10 @@ export class HeroSystem6eItem extends Item {
                 .replace(/ {2}/g, " ")
                 .replace("( ", "(")
                 .replace("(; ", "(");
+        }
+
+        if (modifierInfo.descriptionModifierFactory) {
+            result += modifierInfo.descriptionModifierFactory(modifier, item);
         }
 
         let fraction = "";
