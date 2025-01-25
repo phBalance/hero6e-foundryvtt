@@ -294,7 +294,7 @@ export class HeroRoller {
             if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
                 this._noBody = true;
             } else {
-                console.error(`Doesn't make sense to make non normal attack STUN only`);
+                console.error(`Doesn't make sense to make non normal attack STUN only`, this);
             }
         }
         return this;
