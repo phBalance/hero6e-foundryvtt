@@ -258,4 +258,11 @@ export class HeroSystem6eToken extends Token {
         }
         return super._onRelease(options);
     }
+
+    // _canHover(user, event) {
+    //     if (!game.user.isGM && !this.visible) {
+    //         return false;
+    //     }
+    //     return super._canHover(user, event);
+    // }
 }

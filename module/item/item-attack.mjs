@@ -157,7 +157,7 @@ export async function doAoeActionToHit(item, options) {
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, item.system.uses)
-        .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
+        .addNumber(Math.max(0, parseInt(options.ocvMod) || 0), "OCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
 
     if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
@@ -496,9 +496,9 @@ export async function doSingleTargetActionToHit(item, options) {
 
     const itemData = item.system;
 
-    const hitCharacteristic = actor.system.characteristics[itemData.uses]?.value;
-    if (!hitCharacteristic) {
-        return ui.notifications.error(
+    const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.uses]?.value);
+    if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.uses.toUpperCase())) {
+        ui.notifications.warn(
             `<b>${item.actor.name}</b> does not have <b>${itemData.uses.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
         );
     }

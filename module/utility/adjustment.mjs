@@ -239,11 +239,15 @@ function _createAEChangeBlock(targetCharOrPower, targetSystem, item) {
     let key =
         targetSystem.system.characteristics?.[targetCharOrPower.toLowerCase()] != null
             ? `system.characteristics.${targetCharOrPower.toLowerCase()}.max`
-            : "system.max";
+            : targetSystem?.system?.XMLID?.toLowerCase() || "system.max";
 
     // It would be nice to show the HEALING max values, but we really don't want them added
     if (item?.system.XMLID === "HEALING") {
         key = targetCharOrPower.toLowerCase();
+    }
+
+    if (key === "system.max") {
+        console.error(`Unknown key for active effect`);
     }
 
     return {
