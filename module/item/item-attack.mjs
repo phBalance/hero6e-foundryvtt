@@ -1332,6 +1332,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
     for (const vuln of conditionalDefenses.filter(
         (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
     )) {
+        damageData.VulnDesc ??= [];
+        damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
         if (vuln.system.MODIFIER) {
             for (const modifier of vuln.system.MODIFIER || []) {
                 switch (modifier.OPTIONID) {
@@ -2064,6 +2066,8 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     for (const vuln of conditionalDefenses.filter(
         (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
     )) {
+        damageData.VulnDesc ??= [];
+        damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
         if (vuln.system.MODIFIER) {
             for (const modifier of vuln.system.MODIFIER || []) {
                 switch (modifier.OPTIONID) {
@@ -2944,8 +2948,9 @@ async function _calcDamage(heroRoller, item, options) {
         // Knocked out targets take double STUN damage from attacks
         const targetActor = (game.scenes.current.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
         if (targetActor?.statuses.has("knockedOut")) {
-            effects += "Knocked Out x2 STUN; ";
+            const preStun = stun;
             stun *= 2;
+            effects += `Knocked Out x2 STUN (${preStun}x2=${stun});`;
         }
     }
 
@@ -2983,14 +2988,17 @@ async function _calcDamage(heroRoller, item, options) {
 
     // VULNERABILITY
     if (options.vulnStunMultiplier) {
-        const vulnStunDamage = Math.floor(stun * (options.vulnStunMultiplier - 1));
-        stun += vulnStunDamage;
-        effects += `Vunlerability x${options.vulnStunMultiplier} STUN (${vulnStunDamage});`;
+        const preStun = stun;
+        stun = Math.floor(stun * options.vulnStunMultiplier);
+        effects += `Vunlerability x${options.vulnStunMultiplier} STUN (${preStun}x${options.vulnStunMultiplier}=${stun});`;
     }
     if (options.vulnBodyMultiplier) {
-        const vulnBodyDamage = Math.floor(stun * (options.vulnBodyMultiplier - 1));
-        body += vulnBodyDamage;
-        effects += `Vunlerability x${options.vulnBodyMultiplier} BODY (${vulnBodyDamage});`;
+        const preBody = body;
+        body = Math.floor(body * options.vulnBodyMultiplier);
+        effects += `Vunlerability x${options.vulnBodyMultiplier} BODY (${preBody}x${options.vulnBodyMultiplier}=${body});`;
+    }
+    for (const desc of options.VulnDesc || []) {
+        effects += ` ${desc};`;
     }
 
     let bodyDamage = body;

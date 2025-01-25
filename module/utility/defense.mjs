@@ -548,9 +548,7 @@ export async function getConditionalDefenses(token, item, avad) {
                 "",
             )}: ${item.system.description.replace(/"/g, "")}">${item.name}</span>:<ul>`;
             for (let def of defenses) {
-                content += `<li title="${def.name.replace(/"/g, "")}: ${def.system.description.replace(/"/g, "")}">${
-                    def.name
-                }</li>`;
+                content += `<li title="${def.system.description.replace(/"/g, "")}">${def.conditionalDefenseShortDescription}</li>`;
             }
             content += "</ul>";
 

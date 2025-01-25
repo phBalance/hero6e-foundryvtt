@@ -4175,6 +4175,7 @@ export class HeroSystem6eItem extends Item {
 
     createPowerDescriptionModifier(modifier) {
         const item = this;
+        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID, actor: this.actor });
         const system = item.system;
         let result = "";
 
@@ -4238,7 +4239,11 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             default:
-                if (modifier.ALIAS) result += ", " + modifier.ALIAS || "?";
+                if (modifierInfo?.descriptionFactory) {
+                    result += `, ${modifierInfo.descriptionFactory(modifier)}`;
+                } else {
+                    if (modifier.ALIAS) result += ", " + modifier.ALIAS || "?";
+                }
                 break;
         }
 
@@ -4344,6 +4349,10 @@ export class HeroSystem6eItem extends Item {
                 .replace(/ {2}/g, " ")
                 .replace("( ", "(")
                 .replace("(; ", "(");
+        }
+
+        if (modifierInfo?.descriptionModifierFactory) {
+            result += modifierInfo.descriptionModifierFactory(modifier, item);
         }
 
         let fraction = "";
@@ -5486,6 +5495,18 @@ export class HeroSystem6eItem extends Item {
 
         // TODO: Should we be MAXing it here, or when we apply the defense?
         return Math.max(0, _adjustedLevels);
+    }
+
+    get conditionalDefenseShortDescription() {
+        let shortDesc = this.name;
+        if (this.system.XMLID === "VULNERABILITY") {
+            shortDesc += ` (${this.system.INPUT})`;
+        }
+        const ONLYAGAINSTLIMITEDTYPE = this.findModsByXmlid("ONLYAGAINSTLIMITEDTYPE");
+        if (ONLYAGAINSTLIMITEDTYPE) {
+            shortDesc += ` (${ONLYAGAINSTLIMITEDTYPE.ALIAS})`;
+        }
+        return shortDesc;
     }
 }
 

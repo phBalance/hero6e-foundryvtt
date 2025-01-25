@@ -37,6 +37,30 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     /** @override */
     async getData() {
+        // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
+        // KLUDGE fix
+        let klugeDeleteItems = false;
+        for (const item of this.actor.items) {
+            try {
+                const item2 = this.actor.items.find(
+                    (i) =>
+                        i.system.ID === item.system.ID && i.id !== item.id && (item.system.ID || item.name === i.name),
+                );
+                if (item2) {
+                    if (item2.link.includes("Scene.")) {
+                        console.warn(`Deleting duplicate item ${item2.name} from linked ${this.actor.name}`);
+                        await item2.delete();
+                        klugeDeleteItems = true;
+                    }
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        if (klugeDeleteItems) {
+            ui.notifications.warn(`${this.actor.name} had duplicate items which were deleted.`);
+        }
+
         const data = super.getData();
         data.system = data.actor.system;
 
@@ -768,17 +792,13 @@ export class HeroSystemActorSheet extends ActorSheet {
                 } else if (!expandedData.Xsystem.characteristics?.[characteristic]) {
                     console.warn(`Missing expandedData.Xsystem.characteristics[${characteristic}]`);
                 } else {
-                    try {
-                        if (
-                            this.actor.system.characteristics[characteristic] &&
-                            expandedData.Xsystem.characteristics?.[characteristic].value !==
-                                this.actor.system.characteristics[characteristic].value
-                        ) {
-                            expandedData.system.characteristics[characteristic].value =
-                                expandedData.Xsystem.characteristics[characteristic].value;
-                        }
-                    } catch (e) {
-                        console.error(e);
+                    if (
+                        this.actor.system.characteristics[characteristic] &&
+                        expandedData.Xsystem.characteristics?.[characteristic].value !==
+                            this.actor.system.characteristics[characteristic].value
+                    ) {
+                        expandedData.system.characteristics[characteristic].value =
+                            expandedData.Xsystem.characteristics[characteristic].value;
                     }
                 }
             }
