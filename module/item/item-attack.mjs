@@ -497,8 +497,8 @@ export async function doSingleTargetActionToHit(item, options) {
     const itemData = item.system;
 
     const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.uses]?.value);
-    if (!hitCharacteristic) {
-        return ui.notifications.error(
+    if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.uses.toUpperCase())) {
+        ui.notifications.warn(
             `<b>${item.actor.name}</b> does not have <b>${itemData.uses.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
         );
     }
