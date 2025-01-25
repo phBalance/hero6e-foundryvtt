@@ -58,7 +58,8 @@ export async function activateManeuver(item) {
         return;
     }
 
-    const newEffects = [];
+    // PH: FIXME: This could be simplified as it's really just an effect + the same modifiers
+    const newActiveEffects = [];
 
     // FIXME: These are supposed to be for HTH only and not apply to ranged combat by default
     const maneuverDcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
@@ -76,7 +77,7 @@ export async function activateManeuver(item) {
             addDcvTraitToChanges(maneuverDcvTrait),
             addOcvTraitToChanges(maneuverOcvTrait),
         ].filter(Boolean);
-        newEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
+        newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
     // Block effect
@@ -87,15 +88,17 @@ export async function activateManeuver(item) {
             addDcvTraitToChanges(maneuverDcvTrait),
             addOcvTraitToChanges(maneuverOcvTrait),
         ].filter(Boolean);
-        newEffects.push(item.actor.addActiveEffect(blockStatusEffect));
+        newActiveEffects.push(item.actor.addActiveEffect(blockStatusEffect));
     }
 
     // Other maneuvers with effects
     // Turn on any status effects that we have implemented
     else if (item.system.XMLID === "BRACE") {
-        newEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
+        newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
     } else if (item.system.XMLID === "HAYMAKER") {
-        newEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect));
+        newActiveEffects.push(
+            item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect),
+        );
     } else if (
         item.system.XMLID === "COVER" ||
         item.system.XMLID === "HIPSHOT" ||
@@ -108,16 +111,17 @@ export async function activateManeuver(item) {
     } else {
         // PH: FIXME: Assume this is a martial maneuver and give it a default effect
         const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
+        maneuverEffect.flags = { type: "maneuver" };
         maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         maneuverEffect.changes = [
             addDcvTraitToChanges(maneuverDcvTrait),
             addOcvTraitToChanges(maneuverOcvTrait),
         ].filter(Boolean);
 
-        newEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
+        newActiveEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
     }
 
-    return Promise.all(newEffects);
+    return Promise.all(newActiveEffects);
 }
 
 /**

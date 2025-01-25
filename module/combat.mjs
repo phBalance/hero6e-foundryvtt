@@ -441,6 +441,14 @@ export class HeroSystem6eCombat extends Combat {
             await HAYMAKER.toggle();
         }
 
+        // Stop other maneuvers' active effects
+        const maneuverAeDeletePromises = combatant.actor.effects
+            .filter((ae) => ae.flags?.type === "maneuver")
+            .map((maneuverAe) => maneuverAe.delete());
+        await Promise.all(maneuverAeDeletePromises);
+
+        // PH: FIXME: stop abort under certain circumstances
+
         // Reset movement history
         if (window.dragRuler) {
             if (masterCombatant) {
