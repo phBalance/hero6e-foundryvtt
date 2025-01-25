@@ -28,6 +28,7 @@ export async function enforceManeuverLimits(actor, item) {
     //     }
 }
 
+// FIXME: DCV should only be effective against HTH attacks unless it's a Dodge
 function addDcvTraitToChanges(maneuverDcvChange) {
     if (maneuverDcvChange !== 0) {
         return {
@@ -52,7 +53,10 @@ function addOcvTraitToChanges(maneuverOcvChange) {
  * Activate a combat or martial maneuver
  */
 export async function activateManeuver(item) {
-    // TODO: Can the actor activate this maneuver?
+    const effect = item.system.EFFECT?.toLowerCase();
+    if (!effect) {
+        return;
+    }
 
     const newEffects = [];
 
@@ -61,52 +65,34 @@ export async function activateManeuver(item) {
     const maneuverOcvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
 
     // Enable the effect if there is one
-    const effect = item.system.EFFECT?.toLowerCase();
-    if (effect) {
-        const maneuverHasAbortTrait = effect.indexOf("abort") > -1;
-        const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
-        const maneuverHasBlockTrait = effect.indexOf("block") > -1;
+    const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
+    const maneuverHasBlockTrait = effect.indexOf("block") > -1;
 
-        const currentCombatActorId = game.combat?.combatants.find(
-            (combatant) => combatant.tokenId === game.combat.current?.tokenId,
-        )?.actorId;
-        const thisActorsCombatTurn =
-            game.combat?.active && currentCombatActorId != undefined && currentCombatActorId === item.actor?.id;
-
-        // Abort effect - If in combat and not our turn then this must be an abort
-        if (maneuverHasAbortTrait && game.combat?.active && !thisActorsCombatTurn) {
-            newEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect));
-        }
-
-        // Dodge effect
-        if (maneuverHasDodgeTrait) {
-            const dodgeStatusEffect = foundry.utils.deepClone(
-                HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect,
-            );
-            dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
-            dodgeStatusEffect.changes = [
-                addDcvTraitToChanges(maneuverDcvTrait),
-                addOcvTraitToChanges(maneuverOcvTrait),
-            ].filter(Boolean);
-            newEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
-        }
-
-        // Block effect
-        if (maneuverHasBlockTrait) {
-            const blockStatusEffect = foundry.utils.deepClone(
-                HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect,
-            );
-            blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
-            blockStatusEffect.changes = [
-                addDcvTraitToChanges(maneuverDcvTrait),
-                addOcvTraitToChanges(maneuverOcvTrait),
-            ].filter(Boolean);
-            newEffects.push(item.actor.addActiveEffect(blockStatusEffect));
-        }
+    // Dodge effect
+    if (maneuverHasDodgeTrait) {
+        const dodgeStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
+        dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        dodgeStatusEffect.changes = [
+            addDcvTraitToChanges(maneuverDcvTrait),
+            addOcvTraitToChanges(maneuverOcvTrait),
+        ].filter(Boolean);
+        newEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
+    // Block effect
+    else if (maneuverHasBlockTrait) {
+        const blockStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect);
+        blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        blockStatusEffect.changes = [
+            addDcvTraitToChanges(maneuverDcvTrait),
+            addOcvTraitToChanges(maneuverOcvTrait),
+        ].filter(Boolean);
+        newEffects.push(item.actor.addActiveEffect(blockStatusEffect));
+    }
+
+    // Other maneuvers with effects
     // Turn on any status effects that we have implemented
-    if (item.system.XMLID === "BRACE") {
+    else if (item.system.XMLID === "BRACE") {
         newEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
     } else if (item.system.XMLID === "HAYMAKER") {
         newEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect));
@@ -120,8 +106,15 @@ export async function activateManeuver(item) {
     ) {
         console.error(`Unsupported maneuver ${item.name}/${item.system.XMLID}`);
     } else {
-        // PH: FIXME: Assume this is a generic maneuver and give it a default effect
-        newEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect));
+        // PH: FIXME: Assume this is a martial maneuver and give it a default effect
+        const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
+        maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        maneuverEffect.changes = [
+            addDcvTraitToChanges(maneuverDcvTrait),
+            addOcvTraitToChanges(maneuverOcvTrait),
+        ].filter(Boolean);
+
+        newEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
     }
 
     return Promise.all(newEffects);
