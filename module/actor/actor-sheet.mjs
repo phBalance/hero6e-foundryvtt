@@ -786,11 +786,11 @@ export class HeroSystemActorSheet extends ActorSheet {
             for (const _char of characteristics) {
                 const characteristic = _char.key.toLowerCase();
                 if (!this.actor.system.characteristics) {
-                    console.error("Missing this.actor.system.characteristics");
+                    console.log("Missing this.actor.system.characteristics");
                 } else if (!this.actor.system.characteristics?.[characteristic]) {
-                    console.warn(`Missing this.actor.system.characteristics[${characteristic}]`);
-                } else if (!expandedData.Xsystem.characteristics?.[characteristic]) {
-                    console.warn(`Missing expandedData.Xsystem.characteristics[${characteristic}]`);
+                    console.log(`Missing this.actor.system.characteristics[${characteristic}]`);
+                } else if (!expandedData.Xsystem?.characteristics?.[characteristic]) {
+                    console.log(`Missing expandedData.Xsystem.characteristics[${characteristic}]`);
                 } else {
                     if (
                         this.actor.system.characteristics[characteristic] &&
@@ -807,7 +807,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         // Left Sidebar may have EndReserve
-        if (expandedData.endReserve) {
+        if (expandedData?.endReserve) {
             const endReserveId = Object.keys(expandedData.endReserve)?.[0];
             const endReserve = this.actor.items.find((o) => o.id === endReserveId);
             if (endReserve) {
