@@ -2538,7 +2538,7 @@ export class HeroSystem6eItem extends Item {
             const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
             if (childDuplicate) {
                 console.warn(
-                    `${this.actor.name}:${p.ALIAS} is and ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
+                    `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
                 );
                 this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
             }
@@ -3783,6 +3783,13 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}`;
                 break;
 
+            case "POSSESSION":
+                {
+                    system.description = `${system.ALIAS}`;
+                }
+
+                break;
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
@@ -3999,6 +4006,20 @@ export class HeroSystem6eItem extends Item {
                         // Otherwise add it to the list of ADDERS as normal.
                         if (adder.ALIAS.trim()) {
                             _adderArray.push(adder.ALIAS);
+                        }
+                        break;
+
+                    case "MINDCONTROLEFFECT":
+                        {
+                            const mindControlEffect = 40 + (parseInt(adder.LEVELS) || 0);
+                            _adderArray.push(`Mind Control Effect ${mindControlEffect} points`);
+                        }
+                        break;
+
+                    case "TELEPATHYEFFECT":
+                        {
+                            const telepathyEffect = 30 + (parseInt(adder.LEVELS) || 0);
+                            _adderArray.push(`Telepathy Effect ${telepathyEffect} points`);
                         }
                         break;
 
@@ -4610,7 +4631,8 @@ export class HeroSystem6eItem extends Item {
             xmlid === "MINDCONTROL" ||
             xmlid === "MENTALILLUSIONS" ||
             xmlid === "MINDSCAN" ||
-            xmlid === "TELEPATHY"
+            xmlid === "TELEPATHY" ||
+            xmlid === "POSSESSION"
         ) {
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
