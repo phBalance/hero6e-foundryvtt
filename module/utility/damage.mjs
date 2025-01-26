@@ -520,7 +520,6 @@ export function calculateDicePartsFromDcForItem(item, dc) {
             // FIXME: We shouldn't be calculating damage dice for things that don't do damage
             // Most maneuvers don't do damage. However there are some that use STR as a base so assume normal damage.
             martialOrManeuverEquivalentApPerDice = 5;
-            console.error(`Unhandled equivalent ap per dice cost ${item.name}/${item.system.XMLID}`);
         }
     }
 

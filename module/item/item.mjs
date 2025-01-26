@@ -2538,7 +2538,7 @@ export class HeroSystem6eItem extends Item {
             const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
             if (childDuplicate) {
                 console.warn(
-                    `${this.actor.name}:${p.ALIAS} is and ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
+                    `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
                 );
                 this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
             }
