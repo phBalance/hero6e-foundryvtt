@@ -407,7 +407,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             for (const d of defensePowers) {
                 d.disabled = !d.isActive;
-                switch (getPowerInfo({ xmlid: d.system.XMLID, actor: this.actor })?.duration) {
+                switch (d.baseInfo?.duration) {
                     case "instant":
                         // Might Vary
                         switch (d.system.XMLID) {
@@ -429,14 +429,16 @@ export class HeroSystemActorSheet extends ActorSheet {
                         data.allConstantEffects.push(d);
 
                         if (game.settings.get(game.system.id, "alphaTesting")) {
-                            const powerInfo = getPowerInfo({
-                                xmlid: d.system.XMLID,
-                                actor: this.actor,
-                            });
-                            if (!powerInfo) {
-                                ui.notifications.warn(`${d.system.XMLID} has no powerInfo/config.`);
+                            if (!d.baseInfo) {
+                                ui.notifications.warn(
+                                    `${this.actor.name}: ${d.name}/${d.system.XMLID} has no powerInfo/config.`,
+                                    d,
+                                );
                             } else {
-                                ui.notifications.warn(`${d.system.XMLID} has no duration specified.`);
+                                ui.notifications.warn(
+                                    `${this.actor.name}: ${d.name}/${d.system.XMLID} has no duration specified.`,
+                                    d,
+                                );
                             }
                         }
                 }

@@ -4953,10 +4953,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 if (value > maxValue) {
-                    ui.notifications.warn(
-                        `${actorItemDefense.name} has more ${options.attackDefenseVs} LEVELS (${value}) than natural LEVELS (${maxValue}). Defenses may not properly represent this defense. Consider ARMOR if you want resistant defenses.`,
-                        actorItemDefense,
-                    );
+                    const msg = `${actorItemDefense.name} has more ${options.attackDefenseVs} LEVELS (${value}) than natural LEVELS (${maxValue}). Defenses may not properly represent this defense. Consider ARMOR if you want resistant defenses.`;
+                    // Attempt some sort of spam control
+                    if ($(ui.notifications.active).first("li:contains('than natural LEVELS')").length === 0) {
+                        // if (!ui.notifications.queue.find((n) => n.message === msg)) {
+                        ui.notifications.warn(msg, actorItemDefense);
+                    }
                     //value = maxValue;
                 }
                 if (value > 0) {
@@ -8274,14 +8276,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
     addPower(
         {
             key: "LIMITEDBODYPARTS",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="LIMITEDBODYPARTS" ID="1730530831066" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Body Parts" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Hands/arms" PRIVATE="No" FORCEALLOW="No">`,
+            xml: `<MODIFIER XMLID="LIMITEDBODYPARTS" ID="1730530831066" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Body Parts" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Hands/arms" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
