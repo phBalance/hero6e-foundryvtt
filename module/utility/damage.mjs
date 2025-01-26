@@ -547,7 +547,10 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         halfDieValue = 10 / 15;
         pipValue = 5 / 15;
     } else {
-        console.error(`Unhandled die of damage cost ${baseApPerDie} for ${item.name}/${item.system.XMLID}`);
+        console.error(
+            `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.name}/${item.system.XMLID}`,
+            item,
+        );
     }
 
     let apPerDie;

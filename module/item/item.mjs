@@ -3824,7 +3824,7 @@ export class HeroSystem6eItem extends Item {
                         // PH: FIXME: Why is this not based purely on behaviour?
                         if (!["skill", "talent", "perk"].includes(this.type)) {
                             console.error(
-                                `${this.name}/${this.system.XMLID} has a success behavior but isn't a skill, talent, or perk`,
+                                `${this.actor?.name}: ${this.name}/${this.system.XMLID} has a success behavior but isn't a skill, talent, or perk`,
                             );
                         }
                         system.description += ` ${system.roll}`;
