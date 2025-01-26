@@ -508,9 +508,7 @@ export async function doSingleTargetActionToHit(item, options) {
     const adjustment = getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
-    const senseAffecting = getPowerInfo({
-        item: item,
-    })?.type?.includes("sense-affecting");
+    const senseAffecting = item.isSenseAffecting();
 
     // TODO: Much of this looks similar to the AOE stuff above. Any way to combine?
     // -------------------------------------------------
@@ -1514,11 +1512,7 @@ export async function _onRollDamage(event) {
         item: item,
     })?.type?.includes("adjustment");
     // Sense affecting power or maneuver with FLASHDC
-    const senseAffecting =
-        !!getPowerInfo({
-            item: item,
-        })?.type?.includes("sense-affecting") ||
-        (item.system.EFFECT && item.system.EFFECT.search(/\[FLASHDC\]/) > -1);
+    const senseAffecting = item.isSenseAffecting();
     const isKilling = item.doesKillingDamage;
     const isEntangle = item.system.XMLID === "ENTANGLE";
     const isNormalAttack = !senseAffecting && !adjustment && !isKilling;
@@ -1733,7 +1727,7 @@ export async function _onRollMindScanEffectRoll(event) {
     const targetEgo = targetsEgo + egoAdder;
 
     const adjustment = item.baseInfo?.type?.includes("adjustment");
-    const senseAffecting = item.baseInfo?.type?.includes("sense-affecting");
+    const senseAffecting = item.isSenseAffecting();
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
@@ -2149,10 +2143,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
     }
-    const senseAffecting =
-        getPowerInfo({
-            item: item,
-        })?.type?.includes("sense-affecting") || item.system.EFFECT?.includes("FLASHDC");
+    const senseAffecting = item.isSenseAffecting();
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(item, token, damageDetail, defense);
     }
@@ -2894,9 +2885,7 @@ async function _calcDamage(heroRoller, item, options) {
     const adjustmentPower = getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
-    const senseAffectingPower = getPowerInfo({
-        item: item,
-    })?.type?.includes("sense-affecting");
+    const senseAffectingPower = item.isSenseAffecting();
     const entangle = item.system.XMLID === "ENTANGLE";
     const bodyBasedEffectRollItem = isBodyBasedEffectRoll(item);
     const stunBasedEffectRollItem = isStunBasedEffectRoll(item);

@@ -5255,7 +5255,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Flash
-        if (this.baseInfo?.type.includes("sense-affecting")) {
+        if (this.isSenseAffecting()) {
             return "FLASHDEFENSE";
         }
 
@@ -5346,29 +5346,21 @@ export class HeroSystem6eItem extends Item {
         // Preferred Methods to determine KILLING
         if (this.system.XMLID.startsWith("__")) {
             return false;
-        }
-        if (this.#baseInfo.doesKillingDamage !== undefined) {
+        } else if (this.#baseInfo.doesKillingDamage != undefined) {
             return this.#baseInfo.doesKillingDamage;
-        }
-        if (this.#baseInfo.nonDmgEffect) {
+        } else if (this.#baseInfo.nonDmgEffect) {
             return false;
-        }
-        if (this.#baseInfo.type.includes("sense-affecting")) {
+        } else if (this.isSenseAffecting()) {
             return false;
-        }
-        if (this.#baseInfo.type.includes("adjustment")) {
+        } else if (this.#baseInfo.type.includes("adjustment")) {
             return false;
-        }
-        if (this.#baseInfo.type.includes("mental")) {
+        } else if (this.#baseInfo.type.includes("mental")) {
             return false;
-        }
-        if (this.system.WEAPONEFFECT) {
+        } else if (this.system.WEAPONEFFECT) {
             return this.system.WEAPONEFFECT.includes("KILLING");
-        }
-        if (this.system.EFFECT) {
+        } else if (this.system.EFFECT) {
             return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
-        }
-        if (this.type === "disadvantage") {
+        } else if (this.type === "disadvantage") {
             return false;
         }
 
@@ -5507,6 +5499,20 @@ export class HeroSystem6eItem extends Item {
             shortDesc += ` (${ONLYAGAINSTLIMITEDTYPE.ALIAS})`;
         }
         return shortDesc;
+    }
+
+    /**
+     * Is the item a sense affecting power or maneuver?
+     *
+     * @returns {boolean}
+     */
+    isSenseAffecting() {
+        return (
+            !!getPowerInfo({
+                item: this,
+            })?.type?.includes("sense-affecting") ||
+            (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
+        );
     }
 }
 
