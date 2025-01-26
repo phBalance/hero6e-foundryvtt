@@ -111,6 +111,18 @@ export async function collectActionDataBeforeToHitOptions(item) {
 }
 
 export async function processActionToHit(item, formData) {
+    const haymakerManeuverActive = item.actor?.items.find(
+        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
+    );
+    if (haymakerManeuverActive) {
+        // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
+        if (item.type === "martialart" || (item.type === "maneuver" && item.system.XMLID !== "STRIKE")) {
+            return ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
+                localize: true,
+            });
+        }
+    }
+
     if (item.getAoeModifier()) {
         await doAoeActionToHit(item, formData);
     } else {
@@ -207,6 +219,7 @@ export async function doAoeActionToHit(item, options) {
         }
     }
 
+    // FIXME: Why do we have this? We don't do anything with it.
     let dcv = parseInt(item.system.dcv || 0);
 
     const cvModifiers = action.current.cvModifiers;
@@ -270,11 +283,6 @@ export async function doAoeActionToHit(item, options) {
         );
         cvModifiers.push(cvMod);
     });
-    // Haymaker -5 DCV
-    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
-    if (haymakerManeuver) {
-        dcv -= 5;
-    }
 
     cvModifiers.forEach((cvModifier) => {
         if (cvModifier.cvMod.ocv) {
