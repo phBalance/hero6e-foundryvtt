@@ -302,6 +302,14 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
             return true;
         }
 
+        // Mental
+        if (
+            attackingItem.baseInfo?.type.includes("mental") &&
+            defenseItem.system.INPUT?.match(new RegExp("mental", "i"))
+        ) {
+            return true;
+        }
+
         return false;
     }
 
@@ -532,7 +540,9 @@ export async function getConditionalDefenses(token, item, avad) {
         }
 
         const inputs = await getDialogOutput();
-        if (inputs === null) return;
+        if (inputs === null) {
+            return { ignoreDefenseIds: null, conditionalDefenses: null };
+        }
 
         let defenses = [];
         for (let input of inputs) {
