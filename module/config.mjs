@@ -5989,7 +5989,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
             costPerLevel: fixedValueFunction(0),
-            baseEffectDiceParts: standardBaseEffectDiceParts,
+            baseEffectDiceParts: (item) => {
+                const mindControlEffectAdder = item.system.ADDER.find((adder) => adder.XMLID === "MINDCONTROLEFFECT");
+                const extraMindControlEffect = parseInt(mindControlEffectAdder?.LEVELS) || 0;
+                const diceParts = {
+                    dc: item.dcRaw,
+                    d6Count: 0,
+                    d6Less1DieCount: 0,
+                    halfDieCount: 0,
+                    constant: 40 + extraMindControlEffect,
+                };
+                return defaultPowerDiceParts(item, diceParts);
+            },
             xml: `<POWER XMLID="POSSESSION" ID="1711934925655" BASECOST="60.0" LEVELS="0" ALIAS="Possession" POSITION="67" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Human" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
             <ADDER XMLID="MINDCONTROLEFFECT" ID="1711935222251" BASECOST="0.0" LEVELS="0" ALIAS="+0 Points of Mind Control effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
@@ -7321,6 +7332,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            // POSSESSION related
+            key: "MINDCONTROLEFFECT",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(1 / 2),
+            xml: `<ADDER XMLID="MINDCONTROLEFFECT" ID="1737915448080" BASECOST="0.0" LEVELS="20" ALIAS="+20 Points of Mind Control effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "MINUSONEPIP",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
@@ -7451,6 +7472,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // POSSESSION related
+            key: "TELEPATHYEFFECT",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(1 / 2),
+            xml: `<ADDER XMLID="TELEPATHYEFFECT" ID="1737915448081" BASECOST="0.0" LEVELS="10" ALIAS="+10 Points of Telepathy effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // TRIGGER related

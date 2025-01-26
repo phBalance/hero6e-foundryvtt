@@ -7656,6 +7656,58 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.damage, "11d6");
                 });
             });
+
+            describe("POSSESSION", function () {
+                const contents = `
+                    <POWER XMLID="POSSESSION" ID="1737915263534" BASECOST="60.0" LEVELS="0" ALIAS="Possession" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="MINDCONTROLEFFECT" ID="1737915448080" BASECOST="0.0" LEVELS="20" ALIAS="+20 Points of Mind Control effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="TELEPATHYEFFECT" ID="1737915448081" BASECOST="0.0" LEVELS="10" ALIAS="+10 Points of Telepathy effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Possession (Mind Control Effect 60 points; Telepathy Effect 40 points)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 75);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 75);
+                });
+
+                it("damage", function () {
+                    assert.equal(item.system.damage, "60");
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

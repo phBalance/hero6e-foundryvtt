@@ -3783,6 +3783,13 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}`;
                 break;
 
+            case "POSSESSION":
+                {
+                    system.description = `${system.ALIAS}`;
+                }
+
+                break;
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
@@ -3999,6 +4006,20 @@ export class HeroSystem6eItem extends Item {
                         // Otherwise add it to the list of ADDERS as normal.
                         if (adder.ALIAS.trim()) {
                             _adderArray.push(adder.ALIAS);
+                        }
+                        break;
+
+                    case "MINDCONTROLEFFECT":
+                        {
+                            const mindControlEffect = 40 + (parseInt(adder.LEVELS) || 0);
+                            _adderArray.push(`Mind Control Effect ${mindControlEffect} points`);
+                        }
+                        break;
+
+                    case "TELEPATHYEFFECT":
+                        {
+                            const telepathyEffect = 30 + (parseInt(adder.LEVELS) || 0);
+                            _adderArray.push(`Telepathy Effect ${telepathyEffect} points`);
                         }
                         break;
 
