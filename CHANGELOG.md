@@ -5,6 +5,7 @@
 - Improved default selection of conditional mental defenses/vulnerabilities. [#1782](https://github.com/dmdorman/hero6e-foundryvtt/issues/1695)
 - Fix issue where some ActiveEffects (AID/DRAIN/etc) were not expiring. [#1737](https://github.com/dmdorman/hero6e-foundryvtt/issues/1737)
 - Support for 5e PD/ED purchased as characteristics along with RESISTANT DEFENSES is not supported. Instead use ARMOR. We do not allow RESISTANT DEFENSES to exceed your natural PD/ED. A warning is shown every time the actor sheet is opened. [#1795](https://github.com/dmdorman/hero6e-foundryvtt/issues/1795)
+- Fixed martial flash effect application.
 
 ## Version 4.0.15 20250125
 

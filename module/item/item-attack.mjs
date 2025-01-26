@@ -111,6 +111,18 @@ export async function collectActionDataBeforeToHitOptions(item) {
 }
 
 export async function processActionToHit(item, formData) {
+    const haymakerManeuverActive = item.actor?.items.find(
+        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
+    );
+    if (haymakerManeuverActive) {
+        // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
+        if (item.type === "martialart" || (item.type === "maneuver" && item.system.XMLID !== "STRIKE")) {
+            return ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
+                localize: true,
+            });
+        }
+    }
+
     if (item.getAoeModifier()) {
         await doAoeActionToHit(item, formData);
     } else {
@@ -207,6 +219,7 @@ export async function doAoeActionToHit(item, options) {
         }
     }
 
+    // FIXME: Why do we have this? We don't do anything with it.
     let dcv = parseInt(item.system.dcv || 0);
 
     const cvModifiers = action.current.cvModifiers;
@@ -270,11 +283,6 @@ export async function doAoeActionToHit(item, options) {
         );
         cvModifiers.push(cvMod);
     });
-    // Haymaker -5 DCV
-    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
-    if (haymakerManeuver) {
-        dcv -= 5;
-    }
 
     cvModifiers.forEach((cvModifier) => {
         if (cvModifier.cvMod.ocv) {
@@ -508,9 +516,7 @@ export async function doSingleTargetActionToHit(item, options) {
     const adjustment = getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
-    const senseAffecting = getPowerInfo({
-        item: item,
-    })?.type?.includes("sense-affecting");
+    const senseAffecting = item.isSenseAffecting();
 
     // TODO: Much of this looks similar to the AOE stuff above. Any way to combine?
     // -------------------------------------------------
@@ -1514,11 +1520,7 @@ export async function _onRollDamage(event) {
         item: item,
     })?.type?.includes("adjustment");
     // Sense affecting power or maneuver with FLASHDC
-    const senseAffecting =
-        !!getPowerInfo({
-            item: item,
-        })?.type?.includes("sense-affecting") ||
-        (item.system.EFFECT && item.system.EFFECT.search(/\[FLASHDC\]/) > -1);
+    const senseAffecting = item.isSenseAffecting();
     const isKilling = item.doesKillingDamage;
     const isEntangle = item.system.XMLID === "ENTANGLE";
     const isNormalAttack = !senseAffecting && !adjustment && !isKilling;
@@ -1733,7 +1735,7 @@ export async function _onRollMindScanEffectRoll(event) {
     const targetEgo = targetsEgo + egoAdder;
 
     const adjustment = item.baseInfo?.type?.includes("adjustment");
-    const senseAffecting = item.baseInfo?.type?.includes("sense-affecting");
+    const senseAffecting = item.isSenseAffecting();
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
@@ -2154,10 +2156,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
     }
-    const senseAffecting =
-        getPowerInfo({
-            item: item,
-        })?.type?.includes("sense-affecting") || item.system.EFFECT?.includes("FLASHDC");
+    const senseAffecting = item.isSenseAffecting();
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(item, token, damageDetail, defense);
     }
@@ -2899,9 +2898,7 @@ async function _calcDamage(heroRoller, item, options) {
     const adjustmentPower = getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
-    const senseAffectingPower = getPowerInfo({
-        item: item,
-    })?.type?.includes("sense-affecting");
+    const senseAffectingPower = item.isSenseAffecting();
     const entangle = item.system.XMLID === "ENTANGLE";
     const bodyBasedEffectRollItem = isBodyBasedEffectRoll(item);
     const stunBasedEffectRollItem = isStunBasedEffectRoll(item);
