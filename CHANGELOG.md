@@ -2,7 +2,7 @@
 
 ## Version 4.0.16 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Fixed martial flash.
+- Fixed martial flash effect application.
 
 ## Version 4.0.15 20250125
 
