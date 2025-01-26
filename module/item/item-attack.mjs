@@ -2012,6 +2012,11 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     // Check for conditional defenses
     const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, item, avad);
 
+    // If we had conditional defenses and showed the UI to select them, but canceled, getConditionalDefenses returns null values
+    if (ignoreDefenseIds === null) {
+        return;
+    }
+
     // Some defenses require a roll not just to active, but on each use.  6e EVERYPHASE.  5e ACTIVATIONROLL
     const defenseEveryPhase = token.actor.items.filter(
         (o) =>

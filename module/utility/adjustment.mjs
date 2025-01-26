@@ -794,7 +794,14 @@ export async function performAdjustment(
     // Add new activeEffect
     if (!existingEffect && activeEffect.flags.adjustmentActivePoints !== 0) {
         updateEffectName(activeEffect);
-        const createdEffects = await targetSystem.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        const createdEffects = await targetActor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+
+        if (!createdEffects[0].duration.startTime) {
+            console.warn(
+                `${targetSystem?.name}: ${createdEffects[0].name} has no duration.startTime and will likely never expire.`,
+                createdEffects[0],
+            );
+        }
 
         if (!isHealing) {
             await recalcEffectBasedOnTotalApForXmlid(createdEffects[0]);

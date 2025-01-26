@@ -694,7 +694,7 @@ export class HeroSystem6eItem extends Item {
 
         // If we have control of this token, re-acquire to update movement types
         const myToken = this.actor?.getActiveTokens()?.[0];
-        if (canvas.tokens.controlled?.find((t) => t.id == myToken.id)) {
+        if (canvas.tokens.controlled?.find((t) => t.id == myToken?.id)) {
             myToken.release();
             myToken.control();
         }
@@ -705,8 +705,25 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        if (this.system.XMLID.startsWith("__")) {
+            return false;
+        }
+
         // Power must be turned on
-        if (this.system.active === false) return false;
+        if (this.baseInfo?.behaviors.includes("activatable") && !this.system.active) {
+            return false;
+        }
+
+        // Combat Maneuvers and Martial Arts are only perceivable when used
+        if (["maneuver", "martialarts"].includes(this.type)) {
+            return false;
+        }
+
+        // If you roll dice the power isn't perceivable just by looking at you.
+        // The power must be rolled to be perceivable.
+        if (this.baseInfo?.type.includes("attack") || this.baseInfo?.behaviors.includes("to-hit")) {
+            return false;
+        }
 
         // Only In ALternate Identity
         if (this.findModsByXmlid("OIHID") && this.actor.system.heroicIdentity === false) return false;
@@ -731,40 +748,35 @@ export class HeroSystem6eItem extends Item {
             return true; // 5e?
         }
 
-        // Parent that's visible?
-        // if (this.parentItem) {
-        //     const VISIBLE = this.parentItem.system.MODIFIER?.find((o) => o.XMLID === "VISIBLE");
-        //     if (VISIBLE) {
-        //         if (VISIBLE?.OPTION.endsWith("OBVIOUS")) {
-        //             return true;
-        //         } else if (VISIBLE?.OPTION.endsWith("INOBVIOUS")) {
-        //             return perceptionSuccess;
-        //         }
-        //     }
-        // }
+        // Default values
+        if (this.baseInfo?.perceivability?.toLowerCase() === "imperceptible") {
+            return false;
+        } else if (this.baseInfo?.perceivability?.toLowerCase() === "obvious") {
+            return true;
+        } else if (this.baseInfo?.perceivability?.toLowerCase() === "inobvious") {
+            return perceptionSuccess;
+        }
+
+        // Movement Powers are Inobvious most of the time
+        if (this.baseInfo?.type.includes("movement")) {
+            return perceptionSuccess;
+        }
+
+        // MULTIPOWERs are likely not preceivable by default
+        if (["MULTIPOWER"].includes(this.system.XMLID)) {
+            return false;
+        }
 
         if (
-            !this.baseInfo?.perceivability &&
-            !["skill", "disadvantage", "perk"].includes(this.type) &&
-            !this.baseInfo?.type.includes("characteristic") &&
-            !this.baseInfo?.type.includes("passive") // passive sense
+            ["skill", "disadvantage", "perk"].includes(this.type) ||
+            this.baseInfo?.type.includes("characteristic") ||
+            this.baseInfo?.type.includes("passive") // passive sense
         ) {
-            console.warn(`Missing perceivability: for ${this.system.XMLID}`, this);
+            return false;
         }
 
         if (this.baseInfo?.duration?.toLowerCase() === "instant") {
             return false;
-        }
-
-        if (!this.baseInfo?.perceivability) {
-            // TODO: Should it say that it's not perceivable if we haven't set it.
-            return false;
-        } else if (this.baseInfo?.perceivability.toLowerCase() === "imperceptible") {
-            return false;
-        } else if (this.baseInfo?.perceivability.toLowerCase() === "obvious") {
-            return true;
-        } else if (this.baseInfo?.perceivability.toLowerCase() === "inobvious") {
-            return perceptionSuccess;
         }
 
         if (["INVISIBILITY"].includes(this.system.XMLID)) {
@@ -773,6 +785,7 @@ export class HeroSystem6eItem extends Item {
 
         if (game.settings.get(game.system.id, "alphaTesting")) {
             ui.notifications.warn(`${this.name} has undetermined perceivability`);
+            console.log(this);
         }
 
         return false;
@@ -3811,7 +3824,7 @@ export class HeroSystem6eItem extends Item {
                         // PH: FIXME: Why is this not based purely on behaviour?
                         if (!["skill", "talent", "perk"].includes(this.type)) {
                             console.error(
-                                `${this.name}/${this.system.XMLID} has a success behavior but isn't a skill, talent, or perk`,
+                                `${this.actor?.name}: ${this.name}/${this.system.XMLID} has a success behavior but isn't a skill, talent, or perk`,
                             );
                         }
                         system.description += ` ${system.roll}`;
