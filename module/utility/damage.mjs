@@ -364,12 +364,6 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
                 name: "Haymaker",
                 title: `${rawHaymakerDc}DC${haymakerDC !== rawHaymakerDc ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
             });
-        } else {
-            // PH: FIXME: This is a poor location for this. Better off in the to hit code and reject immediately.
-            if (options?.isAction)
-                ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
-                    localize: true,
-                });
         }
     }
 
