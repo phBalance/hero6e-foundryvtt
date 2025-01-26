@@ -34,6 +34,8 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mj
 import { Attack } from "../utility/attack.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
+import { HeroSystem6eAdder } from "./adder.mjs";
+import { HeroSystem6eModifier } from "./modifier.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -982,7 +984,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get is5e() {
-        return this.actor?.is5e || this.system?.is5e;
+        if (this.actor?.is5e !== undefined) {
+            return this.actor.is5e;
+        }
+        return this.system?.is5e;
     }
 
     get dc() {
@@ -2507,7 +2512,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get modifiers() {
-        const _modifiers = this.system.MODIFIER || [];
+        const _modifiers = [];
+        for (const _adderMod of this.system.MODIFIER || []) {
+            _modifiers.push(new HeroSystem6eModifier(_adderMod, { _itemUuid: this.uuid }));
+        }
         if (this.parentItem) {
             // Include common modifiers from parent that are not private.
             // <i>Crossbow:</i>  Multipower, 50-point reserve,  (50 Active Points); all slots OAF (-1)
@@ -2516,7 +2524,8 @@ export class HeroSystem6eItem extends Item {
                 if (!_modifiers.find((mod) => mod.ID === pMod.ID)) {
                     // We may want the parent reference at some point (like for ingame editing of items)
                     pMod.parentId ??= this.parentItem.system.ID;
-                    _modifiers.push(pMod);
+                    //_modifiers.push(pMod);
+                    _modifiers.push(new HeroSystem6eModifier(pMod, { _itemUuid: this.uuid }));
                 }
             }
         }
@@ -2524,7 +2533,11 @@ export class HeroSystem6eItem extends Item {
     }
 
     get adders() {
-        return this.system.ADDER || [];
+        const _addres = [];
+        for (const _adderJson of this.system.ADDER || []) {
+            _addres.push(new HeroSystem6eAdder(_adderJson, { _itemUuid: this.uuid }));
+        }
+        return _addres;
     }
 
     get powers() {
