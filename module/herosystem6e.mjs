@@ -38,7 +38,6 @@ import "./testing/testing-main.mjs";
 import { EffectsPanel } from "./effects-panel.mjs";
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
-import { Attack } from "./utility/attack.mjs";
 
 Hooks.once("init", async function () {
     // Custom HeroSystem VisionMode
