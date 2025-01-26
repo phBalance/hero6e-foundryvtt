@@ -4938,8 +4938,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 if (value > maxValue) {
-                    console.warn(
-                        `${actorItemDefense.name} has more ${options.attackDefenseVs} LEVELS than natural LEVELS. Defense summary may show negative values. This is OK when additional characteristics are purchased, which isn't currently checked for.`,
+                    ui.notifications.warn(
+                        `${actorItemDefense.name} has more ${options.attackDefenseVs} LEVELS (${value}) than natural LEVELS (${maxValue}). Defenses may not properly represent this defense. Consider ARMOR if you want resistant defenses.`,
                         actorItemDefense,
                     );
                     //value = maxValue;
