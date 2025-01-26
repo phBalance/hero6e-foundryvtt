@@ -7754,12 +7754,8 @@ export function registerUploadTests(quench) {
                     );
                 });
 
-                it("cost", function () {
-                    assert.equal(item.system.cost, 0);
-                });
-
                 it("realCost", function () {
-                    assert.equal(item.system.cost, 0);
+                    assert.equal(item.system.realCost, 0);
                 });
 
                 it("activePoints", function () {
