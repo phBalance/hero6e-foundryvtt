@@ -4631,7 +4631,8 @@ export class HeroSystem6eItem extends Item {
             xmlid === "MINDCONTROL" ||
             xmlid === "MENTALILLUSIONS" ||
             xmlid === "MINDSCAN" ||
-            xmlid === "TELEPATHY"
+            xmlid === "TELEPATHY" ||
+            xmlid === "POSSESSION"
         ) {
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
