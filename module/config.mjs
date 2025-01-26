@@ -5029,6 +5029,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DESOLIDIFICATION",
             type: ["body-affecting", "standard"],
             behaviors: ["activatable"],
+            perceivability: "obvious",
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
@@ -7716,7 +7717,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="CONDITIONALPOWER" ID="1732312708337" BASECOST="-0.25" LEVELS="0" ALIAS="Conditional Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UNCOMMON" OPTIONID="UNCOMMON" OPTION_ALIAS="Power does not work in Uncommon Circumstances" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Affects Desolidified" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+            xml: `<MODIFIER XMLID="CONDITIONALPOWER" ID="1732312708337" BASECOST="-0.25" LEVELS="0" ALIAS="Conditional Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UNCOMMON" OPTIONID="UNCOMMON" OPTION_ALIAS="Power does not work in Uncommon Circumstances" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
