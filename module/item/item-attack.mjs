@@ -20,6 +20,7 @@ import { Attack } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { activateManeuver } from "./maneuver.mjs";
+import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -1881,6 +1882,40 @@ export async function _onApplyDamage(event) {
             return ui.notifications.warn(`You must select at least one token before applying damage.`);
         }
 
+        const item = fromUuidSync(damageData.itemId);
+        const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
+
+        if (!item && action?.damageType) {
+            action.defense = await Dialog.wait({
+                title: "Generic Damage",
+                content: `You used the generic "Roll Damage" button. Select the defense you want applied.`,
+                buttons: {
+                    PD: {
+                        label: "PD",
+                        callback: () => {
+                            return "PD";
+                        },
+                    },
+                    ED: {
+                        label: "ED",
+                        callback: () => {
+                            return "ED";
+                        },
+                    },
+                    // MD: {
+                    //     label: "MD",
+                    //     callback: () => {
+                    //         return "MD";
+                    //     },
+                    // },
+                },
+                close: () => {
+                    return null;
+                },
+            });
+            damageData.actionData = JSON.stringify(action);
+        }
+
         for (const token of canvas.tokens.controlled) {
             await _onApplyDamageToSpecificToken(toHitData, damageData, {
                 tokenId: token.id,
@@ -1909,7 +1944,40 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         );
     }
 
-    const item = fromUuidSync(damageData.itemId);
+    const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
+    let item = fromUuidSync(damageData.itemId);
+
+    // Generic Damage Roll - create a fake item
+    if (!item && action.damageType) {
+        let xml;
+        switch (action.defense) {
+            case "PD":
+            case "ED": {
+                const _xmlid = action.damageType === "KILLING" ? "RKA" : "ENERGYBLAST";
+                xml = `<POWER XMLID="${_xmlid}" ID="1735535975123" BASECOST="0.0" LEVELS="0" ALIAS="Generic Damage" INPUT="${action.defense}">
+                    </POWER>`;
+                break;
+            }
+            case null:
+                return;
+            default:
+                ui.notifications.error(`Generic ${action.defense} damage is not supported.`);
+                return;
+        }
+
+        const actor = new HeroSystem6eActor({
+            name: `Generic Actor`,
+            type: "npc",
+        });
+        actor.system.is5e = token?.actor?.is5e;
+        await actor._postUpload();
+        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor), {
+            parent: actor,
+        });
+        await item._postUpload();
+        actor.items.set(item.system.XMLID, item);
+    }
+
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
@@ -1949,7 +2017,6 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     const baseDamageRoller = damageRoller.clone();
 
     const automation = game.settings.get(HEROSYS.module, "automation");
-    const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
 
     if (item.system.XMLID === "ENTANGLE") {
         return _onApplyEntangleToSpecificToken(item, token, damageRoller, action);

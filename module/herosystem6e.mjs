@@ -38,6 +38,7 @@ import "./testing/testing-main.mjs";
 import { EffectsPanel } from "./effects-panel.mjs";
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
+import { Attack } from "./utility/attack.mjs";
 
 Hooks.once("init", async function () {
     // Custom HeroSystem VisionMode
@@ -950,6 +951,19 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     break;
                 }
 
+                // Create a fake actor & item to pass to damage routines
+                // const xml = `<POWER XMLID="EGOATTACK" LEVELS="1" ALIAS="Ego Attack"></POWER>`;
+                // const actor = new HeroSystem6eActor(
+                //     {
+                //         name: "Roll Damage",
+                //         type: "npc",
+                //     },
+                //     {},
+                // );
+                // const fakeItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor), {
+                //     parent: actor,
+                // });
+
                 //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
                     .addDice(userSelection.dice, "DICE")
@@ -966,7 +980,23 @@ Hooks.on("renderSidebarTab", async (app, html) => {
 
                 await heroRoller.roll();
 
-                const cardHtml = await heroRoller.render(`Roll Generic ${userSelection.damageType} Damage`);
+                let cardHtml = await heroRoller.render(`Roll Generic ${userSelection.damageType} Damage`);
+
+                if (["NORMAL", "KILLING"].includes(userSelection.damageType)) {
+                    const action = { damageType: userSelection.damageType };
+                    cardHtml += `
+                    <div data-visibility="gm">
+                        <button class="apply-damage"
+                            title="Apply damage to selected tokens."
+                            data-action-data='${JSON.stringify(action)}'
+                            data-roller='${heroRoller.toJSON()}'
+                            data-target-tokens='${JSON.stringify([])}'
+                        >
+                            Apply ${userSelection.damageType} Damage
+                        </button>
+                    </div>
+                `;
+                }
 
                 const chatData = {
                     style: CONST.CHAT_MESSAGE_STYLES.OTHER,
