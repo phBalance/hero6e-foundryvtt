@@ -104,7 +104,7 @@ export function getCharacteristicInfoArrayForActor(actor) {
     );
     if (AUTOMATON && powers.find((o) => o.key === "STUN")) {
         if (["pc", "npc"].includes(actor.type)) {
-            console.warn(`${actor.name} has the wrong actor type ${actor.type}`, actor);
+            console.debug(`${actor.name} has the wrong actor type ${actor.type}`, actor);
         }
 
         // TODO: change actor type to AUTOMATON or whatever is appropriate?
@@ -204,6 +204,15 @@ export async function expireEffects(actor) {
         //     // TakeRecovery has no XMLID, not sure why we HAVE to have one, just expire the effect.
         //     console.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
         // }
+
+        // Sanity Check
+        if (ae._prepareDuration().remaining > 0 && !ae.duration.startTime) {
+            console.warn(
+                `${actor.name}: ${ae.name} has ${ae._prepareDuration().remaining}s remaining.  It has no duration.startTime and will likely never expire.`,
+                ae,
+            );
+            //await ae.update({ [`duration.startTime`]: game.time.worldTime });
+        }
 
         // With Simple Calendar you can move time ahead in large steps.
         // Need to loop as multiple fades may be required.
@@ -382,6 +391,7 @@ export function hdcTimeOptionIdToSeconds(durationOptionId) {
             break;
 
         default:
+            console.warn(`Unhandled duration ${durationOptionId}`);
             seconds = -1;
             break;
     }

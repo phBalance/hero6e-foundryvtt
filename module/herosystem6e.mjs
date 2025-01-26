@@ -628,7 +628,16 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 game.combats.viewed.combatant?.actorId === actor.id ||
                 actor.temporaryEffects.find((o) => o.name === "TakeRecovery")
             ) {
+                if (actor.inCombat) {
+                    console.debug(`calling expireEffects for ${actor.name} who is inCombat`);
+                }
                 await expireEffects(actor);
+            } else {
+                if (actor.inCombat) {
+                    console.debug(
+                        `skipping expireEffects for ${actor.name} who is inCombat. ${game.combats.viewed.combatant?.actorId !== actor.id ? "Not active combatant" : ""}`,
+                    );
+                }
             }
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
