@@ -1437,9 +1437,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                 { parent: defenseCalculationActor },
             );
             await HeroSystemActorSheet.sampleAttacks[attackKey]._postUpload();
-            console.debug(`${attackKey}: Created`);
+            //console.debug(`${attackKey}: Created`);
         } else {
-            console.debug(`${attackKey}: used cache`);
+            //console.debug(`${attackKey}: used cache`);
         }
         return HeroSystemActorSheet.sampleAttacks[attackKey];
     }
