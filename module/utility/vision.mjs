@@ -124,11 +124,8 @@ export function setPerceptionModes() {
                     i.isActive &&
                     i.isSense &&
                     i.isRangedSense &&
-                    i.adders.find(
-                        (a) =>
-                            a.XMLID === "PARTIALLYPENETRATIVE" &&
-                            (!hideFromTouchGroup || i.system.GROUP != "TOUCHGROUP"),
-                    ),
+                    i.adders.find((a) => a.XMLID === "PARTIALLYPENETRATIVE") &&
+                    (!hideFromTouchGroup || i.system.GROUP != "TOUCHGROUP"),
             );
             const PENETRATIVE =
                 !DESOLIDIFICATION &&
@@ -137,9 +134,8 @@ export function setPerceptionModes() {
                         i.isActive &&
                         i.isSense &&
                         i.isRangedSense &&
-                        i.adders.find(
-                            (a) => a.XMLID === "PENETRATIVE" && (!hideFromTouchGroup || i.system.GROUP != "TOUCHGROUP"),
-                        ),
+                        i.adders.find((a) => a.XMLID === "PENETRATIVE") &&
+                        (!hideFromTouchGroup || i.system.GROUP != "TOUCHGROUP"),
                 );
 
             if (!this.walls || PARTIALLYPENETRATIVE || PENETRATIVE)

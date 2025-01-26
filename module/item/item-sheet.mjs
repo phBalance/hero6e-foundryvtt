@@ -225,7 +225,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         !o.system.XMLID.startsWith("__"),
                 )) {
                     // Check if there is an adder (if so attack is checked)
-                    const adder = (this.item.system.ADDER || []).find((o) => o.ALIAS == attack.name);
+                    const adder = this.item.adders.find((o) => o.ALIAS == attack.name);
 
                     data.attacks.push({
                         id: attack.id,

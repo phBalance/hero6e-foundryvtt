@@ -6417,7 +6417,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ANALYZESENSE",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6443,7 +6443,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DETECT",
             type: ["sense"],
-            behaviors: ["activatable"],
+            behaviors: ["activatable", "adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.NO_RANGE,
@@ -6491,7 +6491,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DISCRIMINATORY",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6530,7 +6530,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCREASEDARC240",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
@@ -6542,7 +6542,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCREASEDARC360",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
@@ -6599,7 +6599,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MICROSCOPIC",
             type: ["sense"],
             duration: "persistent", // Enhanced Senses are typically persistent
-            behaviors: [],
+            behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -6641,11 +6641,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PARTIALLYPENETRATIVE",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="PARTIALLYPENETRATIVE" ID="1737917249842" BASECOST="5.0" LEVELS="0" ALIAS="Partially Penetrative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+            </ADDR>`,
         },
         undefined,
     );
@@ -6653,11 +6655,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PENETRATIVE",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="PENETRATIVE" ID="1737574847298" BASECOST="10.0" LEVELS="0" ALIAS="Penetrative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+            </ADDER>`,
         },
         undefined,
     );
@@ -6702,7 +6706,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RANGE",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
@@ -6714,7 +6718,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RAPID",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
@@ -6740,7 +6744,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TARGETINGSENSE",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
@@ -6752,7 +6756,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TELESCOPIC",
             type: ["sense"],
-            behaviors: [],
+            behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
@@ -7379,7 +7383,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "OFFENSIVE",
+            key: "PLUSONEHALFDIE",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></<ADDER XMLID="OFFENSIVE" ID="1735589940604" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
