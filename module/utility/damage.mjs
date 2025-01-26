@@ -503,12 +503,18 @@ export function calculateDicePartsFromDcForItem(item, dc) {
     const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
     let martialOrManeuverEquivalentApPerDice = 0;
     if (isMartialOrManeuver) {
+        // PH: FIXME: Need to handle weapons
         const effect = item.system.EFFECT;
-        if (effect.search("NORMALDC") !== -1) {
+        if (
+            effect.search(/\[NORMALDC\]/) !== -1 ||
+            effect.search(/\[FLASHDC\]/) !== -1 ||
+            effect.search(/\[STRDC\]/) !== -1 ||
+            effect.search(/STR/) !== -1
+        ) {
             martialOrManeuverEquivalentApPerDice = 5;
-        } else if (effect.search("NNDDC") !== -1) {
+        } else if (effect.search(/\[NNDDC\]/) !== -1) {
             martialOrManeuverEquivalentApPerDice = 10;
-        } else if (effect.search("KILLINGDC") !== -1) {
+        } else if (effect.search(/\[KILLINGDC\]/) !== -1) {
             martialOrManeuverEquivalentApPerDice = 15;
         } else {
             // FIXME: We shouldn't be calculating damage dice for things that don't do damage
@@ -517,17 +523,19 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         }
     }
 
+    // Some powers have "fixed" damage that doesn't get modified by advantages and DC modifiers.
+    // Examples are 6e's Absorption, Possession, and change environment.
+    if (item.baseInfo.unusualDicePerDc) {
+        const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
+        return diceParts;
+    }
+
     const baseApPerDie =
         martialOrManeuverEquivalentApPerDice ||
         (item.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
         item.baseInfo.costPerLevel(item);
 
-    // FIXME: For the time being this is required because we have a few powers that can have damage effects but don't actually roll damage
-    // so they have "dice" behavior but fixed damage. These show up as 0 cost per level. Examples are Possession and change environment.
-    if (baseApPerDie === 0) {
-        return item.baseInfo.baseEffectDiceParts(item, {});
-    }
-
+    // What break points do we have for 1 pip and 1/2 die?
     const fullDieValue = 1;
     let halfDieValue;
     let pipValue;
@@ -545,6 +553,10 @@ export function calculateDicePartsFromDcForItem(item, dc) {
             `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.name}/${item.system.XMLID}`,
             item,
         );
+
+        // Don't know how to process this. Just return the base diceParts.
+        const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
+        return diceParts;
     }
 
     let apPerDie;
@@ -552,7 +564,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         // Some ugly stuff to deal with the case where we have adders to the base powers. We need to figure out
         // how much a die actually costs.
         // FIXME: would be nice to pull out the TK exception/special handling.
-        const { diceParts } = item.baseInfo.baseEffectDiceParts(item, {});
+        const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
         let diceValue = 0;
         diceValue += diceParts.d6Count * fullDieValue;
         diceValue += (diceParts.d6Less1DieCount + diceParts.halfDieCount) * halfDieValue;
@@ -570,12 +582,13 @@ export function calculateDicePartsFromDcForItem(item, dc) {
     const diceOfDamage = Math.abs(dc * (5 / apPerDie));
     const diceSign = Math.sign(dc) || 0;
 
-    // Since the smallest interval between 1 pip and 1/2 die is 0.3 to 0.5 so 0.099 is probably the smallest.
-    // However, the results don't match tables we see in 6e vol 2 p.97 if we use that epislon.
+    // Since the smallest interval is between 1 pip and 1/2 die (0.3 to 0.5) so 0.099 is probably the smallest possible epsilon.
+    // However, the results don't match tables we see in 6e vol 2 p.97 if we use that epsilon.
     // It's possible a better algorithm would produce something better but with this one:
     // 0.066666 appears to be too large. (1DC KA @ +1/4)
     // 0.04 appears to be too large. (1DC EA @ +1)
-    // Epsilon observations also indicate the possibiliy that the rules (as expressed in the 6e table) only use one of the attack types to determine part dice.
+    // Epsilon observations also indicate the possibiliy that the rules (as expressed in the 6e table) only use one of the attack types (e.g. killing) to determine part dice
+    // or that they were just done willy nilly and trying to fit them into a formula is a fool's game.
     const epsilon = 0.039;
 
     const d6Count = diceSign * Math.floor(diceOfDamage) || 0;
@@ -660,7 +673,7 @@ export function calculateDicePartsForItem(item, options) {
         diceParts: baseDiceParts,
         tags: baseTags,
         baseAttackItem,
-    } = item.baseInfo.baseEffectDiceParts(item, options);
+    } = item.baseInfo.baseEffectDicePartsBundle(item, options);
 
     // PH: FIXME: This can be removed when we don't create damage for things that aren't attacks.
     if (!baseAttackItem) {
@@ -775,12 +788,8 @@ export function dicePartsToEffectFormula(diceParts) {
             : ""
     }${
         diceParts.constant
-            ? diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount > 0
-                ? "+1"
-                : "1"
-            : diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount > 0
-              ? `${diceParts.d6Less1DieCount > 0 ? "-1" : ""}`
-              : "0"
+            ? `${diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount > 0 ? "+" : ""}${diceParts.constant}`
+            : `${diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount > 0 ? `${diceParts.d6Less1DieCount > 0 ? "-1" : ""}` : "0"}`
     }`;
 }
 
@@ -858,7 +867,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     return str;
 }
 
-export function maneuverBaseEffectDiceParts(item, options) {
+export function maneuverbaseEffectDicePartsBundle(item, options) {
     const baseDicePartsBundle = {
         diceParts: zeroDiceParts,
         tags: [],
@@ -878,7 +887,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
             if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
                 const hthAttackItems = options.hthAttackItems || [];
                 hthAttackItems.forEach((hthAttack) => {
-                    const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDiceParts(
+                    const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDicePartsBundle(
                         hthAttack,
                         options,
                     );
@@ -955,7 +964,7 @@ export function maneuverBaseEffectDiceParts(item, options) {
 
         // Base damage of this maneuver with a weapon is the weapon itself.
         // PH: FIXME: getFullyQualifiedEffectFormulaFromItem
-        const { diceParts, tags } = weaponItem.baseInfo.baseEffectDiceParts(weaponItem, options);
+        const { diceParts, tags } = weaponItem.baseInfo.baseEffectDicePartsBundle(weaponItem, options);
 
         return {
             diceParts,
