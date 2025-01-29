@@ -2513,8 +2513,9 @@ export class HeroSystem6eItem extends Item {
 
     get modifiers() {
         const _modifiers = [];
-        for (const _adderMod of this.system.MODIFIER || []) {
-            _modifiers.push(new HeroSystem6eModifier(_adderMod, { _itemUuid: this.uuid }));
+        for (const _mod of this.system.MODIFIER || []) {
+            //_modifiers.push(_mod);
+            _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
         }
         if (this.parentItem) {
             // Include common modifiers from parent that are not private.
@@ -2525,7 +2526,7 @@ export class HeroSystem6eItem extends Item {
                     // We may want the parent reference at some point (like for ingame editing of items)
                     pMod.parentId ??= this.parentItem.system.ID;
                     //_modifiers.push(pMod);
-                    _modifiers.push(new HeroSystem6eModifier(pMod, { _itemUuid: this.uuid }));
+                    _modifiers.push(new HeroSystem6eModifier(pMod, { item: this }));
                 }
             }
         }
@@ -2535,7 +2536,7 @@ export class HeroSystem6eItem extends Item {
     get adders() {
         const _addres = [];
         for (const _adderJson of this.system.ADDER || []) {
-            _addres.push(new HeroSystem6eAdder(_adderJson, { _itemUuid: this.uuid }));
+            _addres.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
         }
         return _addres;
     }
@@ -2565,6 +2566,12 @@ export class HeroSystem6eItem extends Item {
         changed = this.calcBasePointsPlusAdders() || changed;
         changed = this.calcActivePoints() || changed;
         changed = this.calcRealCost() || changed;
+        if (this.system.basePointsPlusAdders != this._basePoints + this._addersCost) {
+            console.warn(
+                `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
+                    `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
+            );
+        }
         return changed;
     }
 
@@ -2644,10 +2651,16 @@ export class HeroSystem6eItem extends Item {
             cost *= multiplier;
         }
 
+        // Cost override
+        if (typeof this.baseInfo?.cost === "function") {
+            cost = this.baseInfo.cost(this);
+            baseCost = 0;
+        }
+
         // ADDERS
         let adderCost = 0;
         let negativeCustomAdderCosts = 0;
-        for (const adder of system.ADDER || []) {
+        for (const adder of this.adders) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
 
@@ -2729,12 +2742,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         cost += adderCost;
-
-        // Cost override
-        if (typeof this.baseInfo?.cost === "function") {
-            cost = this.baseInfo.cost(this);
-            baseCost = 0;
-        }
 
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
@@ -2830,6 +2837,14 @@ export class HeroSystem6eItem extends Item {
                 modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
             }
 
+            // if (modifier.cost !== undefined) {
+            //     if (modCost != modifier.cost) {
+            //         console.error(`HeroSystem6eModifier ${modifier.XMLID} as cost mismatch`, modCost, modifier);
+            //     } else {
+            //         modCost = modifier.cost;
+            //     }
+            // }
+
             _myAdvantage += modCost;
 
             // We are only intertested in Advantages
@@ -2907,6 +2922,11 @@ export class HeroSystem6eItem extends Item {
 
             // Save _myAdvantage
             modifier.advantage = _myAdvantage;
+
+            // Check old vs new cost code
+            if (modifier.cost !== _myAdvantage) {
+                console.warn(`modifier.cost (${modifier.cost} !== _myAdvantage (${_myAdvantage})`);
+            }
         }
 
         const _activePoints = system.basePointsPlusAddersForActivePoints * (1 + advantages);
@@ -3903,7 +3923,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (system.ADDER?.length > 0 || _adderArray.length > 0) {
-            for (const adder of system?.ADDER || []) {
+            for (const adder of this.adders) {
                 switch (adder.XMLID) {
                     case "HEALEDBY":
                         {
@@ -4141,9 +4161,12 @@ export class HeroSystem6eItem extends Item {
 
         // Advantages sorted low to high
         for (let modifier of this.modifiers
-            .filter((o) => o.BASECOST_total >= 0)
+            .filter((m) => m.BASECOST_total >= 0 || m.isAdvantage)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
+            })
+            .sort((a, b) => {
+                return a.cost - b.cost;
             })) {
             // This might be a limitation with an unusually positive value
             const modPowerInfo = getPowerInfo({
@@ -4166,9 +4189,12 @@ export class HeroSystem6eItem extends Item {
 
         // MULTIPOWER slots typically include limitations
         const modifiers = this.modifiers
-            .filter((o) => o.BASECOST_total < 0)
+            .filter((m) => m.BASECOST_total < 0 || m.isDisadvantage)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
+            })
+            .sort((a, b) => {
+                return a.cost - b.cost;
             });
 
         // Disadvantages sorted low to high
@@ -5570,6 +5596,48 @@ export class HeroSystem6eItem extends Item {
             })?.type?.includes("sense-affecting") ||
             (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
         );
+    }
+
+    get _basePoints() {
+        if (!this.system.XMLID) return 0;
+        if (this.system.XMLID.startsWith("__")) return 0;
+        if (this.system.EVERYMAN) return 0;
+        if (this.system.NATIVE_TONGUE) return 0;
+
+        // Custom basePoints
+        if (this.baseInfo?.cost) {
+            return this.baseInfo?.cost(this);
+        }
+
+        const baseCost = parseFloat(this.system.BASECOST) || 0;
+        let _basePoints = baseCost;
+
+        const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
+        const levels = parseInt(this.system.LEVELS) || 0;
+        _basePoints += levels * costPerLevel;
+
+        return _basePoints;
+    }
+
+    get _addersCost() {
+        let _addersCost = 0;
+
+        for (const adder of this.adders) {
+            _addersCost += adder.cost;
+        }
+        return _addersCost;
+    }
+
+    get _advantageCost() {
+        return null;
+    }
+
+    get _activeCost() {
+        return null;
+    }
+
+    get _limitationCost() {
+        return null;
     }
 }
 

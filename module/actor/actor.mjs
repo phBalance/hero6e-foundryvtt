@@ -2027,6 +2027,13 @@ export class HeroSystem6eActor extends Actor {
                 whisper: whisperUserTargetsForActor(this),
             });
         }
+
+        // Sanity check HDC character points vs our character points
+        // const basePoints = parseInt(this.system.CHARACTER.BASIC_CONFIGURATION.BASE_POINTS);
+        // const experience = parseInt(this.system.CHARACTER.BASIC_CONFIGURATION.EXPERIENCE);
+        // if (this.system.points != basePoints + experience) {
+        //     console.warn(`Calculated CP (${this.system.points} is different than HDC plan (${basePoints + experience})`);
+        // }
     }
 
     /**

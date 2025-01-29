@@ -62,6 +62,8 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         const data = super.getData();
+        if (data.actor.flags.uploading) return data;
+
         data.system = data.actor.system;
 
         try {
