@@ -10,7 +10,7 @@
                 <i class="fas fa-plus"></i></a>
         </th>
     </tr>
-    {{#each item.system.ADDER as |adder XMLID|}}
+    {{#each item.adders as |adder XMLID|}}
     <tr data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
         <td class="left">{{adder.ALIAS}}</td>
         <td>{{#if adder.SELECTED}}{{adder.BASECOST_total}}{{/if}}</td>
@@ -49,7 +49,7 @@
         </th>
         {{!-- <th>Add</th> --}}
     </tr>
-    {{#each item.system.MODIFIER as |mod id|}}
+    {{#each item.modifiers as |mod id|}}
     <tr data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
         <td class="left">{{mod.ALIAS}}</td>
         <td>{{mod.BASECOST_total}}</td>
