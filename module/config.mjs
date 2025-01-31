@@ -6335,6 +6335,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return 1;
             },
             costEnd: true,
+            doesKillingDamage: false,
+            usesStrength: false,
             attackDefenseVs: "POWERDEFENSE",
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="TRANSFORM" ID="1709334039303" BASECOST="0.0" LEVELS="1" ALIAS="Transform" POSITION="84" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COSMETIC" OPTIONID="COSMETIC" OPTION_ALIAS="Cosmetic" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
@@ -7344,12 +7346,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DOUBLEHEIGHT",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(1 / 4),
-            cost: function (adder) {
-                const levels = parseInt(adder.LEVELS);
-                const baseCost = parseFloat(adder.BASECOST);
-                adder.BASECOST_total = baseCost + levels * 0.25;
-                return adder.BASECOST_total;
-            },
+            // cost: function (adder) {
+            //     const levels = parseInt(adder.LEVELS);
+            //     const baseCost = parseFloat(adder.BASECOST);
+            //     adder.BASECOST_total = baseCost + levels * 0.25;
+            //     return adder.BASECOST_total;
+            // },
             xml: `<ADDER XMLID="DOUBLEHEIGHT" ID="1707357448496" BASECOST="-0.5" LEVELS="3" ALIAS="Height (m)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -7358,12 +7360,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "DOUBLELENGTH",
         behaviors: ["adder"],
         costPerLevel: fixedValueFunction(1 / 4),
-        cost: function (adder) {
-            const levels = parseInt(adder.LEVELS);
-            const baseCost = parseFloat(adder.BASECOST);
-            adder.BASECOST_total = baseCost + levels * 0.25;
-            return adder.BASECOST_total;
-        },
+        // cost: function (adder) {
+        //     const levels = parseInt(adder.LEVELS);
+        //     const baseCost = parseFloat(adder.BASECOST);
+        //     adder.BASECOST_total = baseCost + levels * 0.25;
+        //     return adder.BASECOST_total;
+        // },
         xml: `<ADDER XMLID="DOUBLEHEIGHT" ID="1731170688389" BASECOST="0.0" LEVELS="4" ALIAS="x16 Height" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
     });
     addPower(
@@ -7371,12 +7373,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DOUBLEWIDTH",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(1 / 4),
-            cost: function (adder) {
-                const levels = parseInt(adder.LEVELS);
-                const baseCost = parseFloat(adder.BASECOST);
-                adder.BASECOST_total = baseCost + levels * 0.25;
-                return adder.BASECOST_total;
-            },
+            // cost: function (adder) {
+            //     const levels = parseInt(adder.LEVELS);
+            //     const baseCost = parseFloat(adder.BASECOST);
+            //     adder.BASECOST_total = baseCost + levels * 0.25;
+            //     return adder.BASECOST_total;
+            // },
             xml: `<ADDER XMLID="DOUBLEWIDTH" ID="1707357449336" BASECOST="-0.5" LEVELS="3" ALIAS="Width (m)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -7536,12 +7538,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MOBILE",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(1 / 4),
-            cost: function (adder) {
-                const levels = parseInt(adder.LEVELS);
-                const baseCost = parseFloat(adder.BASECOST);
-                adder.BASECOST_total = baseCost + Math.ceil(levels / 12) * 0.25;
-                return adder.BASECOST_total;
-            },
+            // cost: function (adder) {
+            //     const levels = parseInt(adder.LEVELS);
+            //     const baseCost = parseFloat(adder.BASECOST);
+            //     adder.BASECOST_total = baseCost + Math.ceil(levels / 12) * 0.25;
+            //     return adder.BASECOST_total;
+            // },
             xml: `<ADDER XMLID="MOBILE" ID="1707357530522" BASECOST="0.25" LEVELS="1" ALIAS="Mobile" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -7552,12 +7554,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MOBILITY",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(1 / 4),
-            cost: function (adder) {
-                const levels = parseInt(adder.LEVELS);
-                const baseCost = parseFloat(adder.BASECOST);
-                adder.BASECOST_total = baseCost + Math.ceil(levels / 12) * 0.25;
-                return adder.BASECOST_total;
-            },
+            // cost: function (adder) {
+            //     const levels = parseInt(adder.LEVELS);
+            //     const baseCost = parseFloat(adder.BASECOST);
+            //     adder.BASECOST_total = baseCost + Math.ceil(levels / 12) * 0.25;
+            //     return adder.BASECOST_total;
+            // },
             xml: `<ADDER XMLID="MOBILITY" ID="1737920494694" BASECOST="-0.25" LEVELS="0" ALIAS="Mobility" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ARRANGEMENT" OPTIONID="ARRANGEMENT" OPTION_ALIAS="Arrangement" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
