@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { HeroSystem6eItem } from "./item.mjs";
+//import { HeroSystem6eItem } from "./item.mjs";
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../utility/adjustment.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 
