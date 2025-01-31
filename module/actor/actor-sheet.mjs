@@ -819,10 +819,10 @@ export class HeroSystemActorSheet extends ActorSheet {
             }
         }
 
-        this.options.itemFilters.power = expandedData.itemFilters.power;
-        this.options.itemFilters.skill = expandedData.itemFilters.skill;
-        this.options.itemFilters.equipment = expandedData.itemFilters.equipment;
-        this.options.itemFilters.martial = expandedData.itemFilters.martial;
+        this.options.itemFilters.power = expandedData.itemFilters?.power;
+        this.options.itemFilters.skill = expandedData.itemFilters?.skill;
+        this.options.itemFilters.equipment = expandedData.itemFilters?.equipment;
+        this.options.itemFilters.martial = expandedData.itemFilters?.martial;
 
         // If core characteristics changed the re-calculate costs
         let recalculateCosts = false;

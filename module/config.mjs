@@ -2347,6 +2347,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
+                    case "SINGLESINGLE":
+                        console.debug(
+                            `${item.actor?.name}/${item.name}/${item.system.XMLID}: SINGLESINGLE doesn't appear to be a currently supported OPTIONID`,
+                        );
+                        return 1;
                     case "SINGLE":
                         return 2;
                     case "TIGHT":
@@ -8305,7 +8310,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: function (modifier, item) {
                 let _cost = parseFloat(modifier.BASECOST);
                 // If cost is only for activation, then increased end is worth 1/2.
-                const costsEndOnlyToActivate = item.findModsByXmlid("COSTSENDONLYTOACTIVATE");
+                const costsEndOnlyToActivate =
+                    item.findModsByXmlid("COSTSENDONLYTOACTIVATE") ||
+                    item.findModsByXmlid("COSTSEND")?.OPTIONID === "ACTIVATE";
                 if (costsEndOnlyToActivate) {
                     _cost = _cost / 2;
                 }

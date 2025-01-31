@@ -1899,8 +1899,8 @@ export class HeroSystem6eItem extends Item {
                                 }
 
                                 switch (this.system.OPTIONID) {
+                                    case "SINGLESINGLE": // Depricated ?
                                     case "SINGLE":
-                                    case "SINGLESINGLE":
                                         if (count === 0) {
                                             // Is this part of a framework/compound power/list?
                                             if (this.parentItem) {
@@ -2913,7 +2913,7 @@ export class HeroSystem6eItem extends Item {
             // No negative advantages and minimum is 1/4
             _myAdvantage = Math.max(minAdvantage, _myAdvantage);
             advantages += _myAdvantage;
-            modifier.BASECOST_total = _myAdvantage;
+            //modifier.BASECOST_total = _myAdvantage;
 
             // For attacks with Advantages, determine the DCs by
             // making a special Active Point calculation that only counts
@@ -3031,18 +3031,19 @@ export class HeroSystem6eItem extends Item {
             }
 
             // There are some special cases with the increased endurance modifier not found in the HDC's XML
-            if (modifier.XMLID === "INCREASEDEND") {
-                // If cost is only for activation, then increased end is worth 1/2.
-                const activationOnlyEndCost = modifiers.find(
-                    (otherModifier) =>
-                        (otherModifier.XMLID === "COSTSEND" &&
-                            otherModifier.OPTION_ALIAS === "Only Costs END to Activate") ||
-                        otherModifier.XMLID === "COSTSENDONLYTOACTIVATE",
-                );
-                if (activationOnlyEndCost) {
-                    _myLimitation = _myLimitation / 2;
-                }
-            }
+            // INCREASEDEND moved to config.mjs
+            // if (modifier.XMLID === "INCREASEDEND") {
+            //     // If cost is only for activation, then increased end is worth 1/2.
+            //     const activationOnlyEndCost = modifiers.find(
+            //         (otherModifier) =>
+            //             (otherModifier.XMLID === "COSTSEND" &&
+            //                 otherModifier.OPTION_ALIAS === "Only Costs END to Activate") ||
+            //             otherModifier.XMLID === "COSTSENDONLYTOACTIVATE",
+            //     );
+            //     if (activationOnlyEndCost) {
+            //         _myLimitation = _myLimitation / 2;
+            //     }
+            // }
 
             // We are only intertested in limitations and some limitations can turn into advantages (or at least -0 limitations),
             // like charges, once adders are applied.
