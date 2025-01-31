@@ -1,5 +1,7 @@
 import { getModifierInfo } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
+import { HeroSystem6eAdder } from "./adder.mjs";
+
 export class HeroSystem6ePower {
     #baseInfo = null;
     constructor(json, options) {
@@ -43,7 +45,7 @@ export class HeroSystem6ePower {
             _cost += levels * costPerLevel;
         }
 
-        // Some MODIFIERs have ADDERs
+        // POWER-adders do not have ADDER (that we are aware of)
         for (const adder of this.adders) {
             _cost += adder.cost;
         }
@@ -54,6 +56,14 @@ export class HeroSystem6ePower {
         }
 
         return _cost;
+    }
+
+    get adders() {
+        const _addres = [];
+        for (const _adderJson of this.ADDER || []) {
+            _addres.push(new HeroSystem6eAdder(_adderJson, { item: this.item, parent: this }));
+        }
+        return _addres;
     }
 
     get BASECOST_total() {

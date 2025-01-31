@@ -260,12 +260,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Roll handlers, click handlers, etc. would go here.
         html.find(".rollable").click(this._onSheetAction.bind(this));
 
-        // Update Inventory Item
-        html.find(".item-edit").click(this._onEditItem.bind(this));
-
-        // Delete Inventory Item
-        html.find(".item-delete").click(this._onDeleteItem.bind(this));
-
         // Active Effects
         html.find(".effect-create").click(this._onEffectCreate.bind(this));
         html.find(".effect-delete").click(this._onEffectDelete.bind(this));

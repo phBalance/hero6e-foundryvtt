@@ -5639,6 +5639,12 @@ export class HeroSystem6eItem extends Item {
         for (const adder of this.adders) {
             _addersCost += adder.cost;
         }
+
+        // ENDURANCERESERVEREC is a power, we can treat it like an adder
+        for (const power of this.powers) {
+            _addersCost += power.cost;
+        }
+
         return _addersCost;
     }
 
