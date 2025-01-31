@@ -5646,6 +5646,10 @@ export class HeroSystem6eItem extends Item {
     get _limitationCost() {
         return null;
     }
+
+    get costPerLevel() {
+        return this.baseInfo?.costPerLevel(this);
+    }
 }
 
 export function getItem(id) {

@@ -5987,6 +5987,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
+            cost: function (item) {
+                const _levels = parseInt(item.system.LEVELS);
+                let _modifier = 0;
+                for (const modifier of item.modifiers.filter((a) => !a.PRIVATE)) {
+                    _modifier += modifier.cost;
+                }
+                return _levels * _modifier;
+            },
             privateAsAdder: true,
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
