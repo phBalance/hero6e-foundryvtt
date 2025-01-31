@@ -1,6 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
-import { editSubItem, deleteSubItem } from "../powers/powers.mjs";
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../utility/adjustment.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 
@@ -687,14 +686,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         changes[`system.subItems.${type}.${id}._id`] = this.item._id + "-" + id;
 
         return await this.item.update(changes);
-    }
-
-    async _onEditItem(event) {
-        await editSubItem(event, this.item);
-    }
-
-    async _onDeleteItem(event) {
-        await deleteSubItem(event, this.item);
     }
 
     async _onEffectCreate(event) {
