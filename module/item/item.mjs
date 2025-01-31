@@ -36,6 +36,7 @@ import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 import { HeroSystem6eModifier } from "./modifier.mjs";
+import { HeroSystem6ePower } from "./powers.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -2548,18 +2549,24 @@ export class HeroSystem6eItem extends Item {
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
         // A quick sanity check warns of this issue and removes the offending POWER from the array.
         // There was an issue where findModsByXmlid(, "STRMINIMUM") would return the COMPOUNDPOWER instead of the RKA (Oceana Silverheart.HDC)
-        let powersList = this.system.POWER || [];
-        for (let p of powersList) {
-            const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
-            if (childDuplicate) {
-                console.warn(
-                    `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
-                );
-                this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
-            }
+        // let powersList = this.system.POWER || [];
+        // for (let p of powersList) {
+        //     const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
+        //     if (childDuplicate) {
+        //         console.warn(
+        //             `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
+        //         );
+        //         this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+        //     }
+        // }
+        // powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+        // return powersList;
+
+        const _powers = [];
+        for (const _powerJson of this.system.POWER || []) {
+            _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
         }
-        powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
-        return powersList;
+        return _powers;
     }
 
     calcItemPoints() {
