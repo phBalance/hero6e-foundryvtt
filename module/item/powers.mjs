@@ -50,12 +50,7 @@ export class HeroSystem6ePower {
             _cost += adder.cost;
         }
 
-        // Some modifiers have a minimumLimitation (REQUIRESASKILLROLL)
-        if (this.baseInfo?.minimumLimitation) {
-            _cost = Math.min(this.baseInfo?.minimumLimitation, _cost);
-        }
-
-        return _cost;
+        return Math.ceil(_cost);
     }
 
     get adders() {
