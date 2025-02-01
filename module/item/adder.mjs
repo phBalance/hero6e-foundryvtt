@@ -37,8 +37,14 @@ export class HeroSystem6eAdder {
             // Generic cost calculations
             _cost = parseFloat(this.BASECOST);
 
-            const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
+            let costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
             const levels = parseInt(this.LEVELS) || 0;
+            if (!costPerLevel && this.LVLCOST) {
+                console.warn(
+                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: is missing costPerLevel, using LVLCOST & LVLVAL`,
+                );
+                costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
+            }
             _cost += levels * costPerLevel;
         }
 

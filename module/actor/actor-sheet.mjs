@@ -780,6 +780,12 @@ export class HeroSystemActorSheet extends ActorSheet {
     async _updateObject(event, formData) {
         event.preventDefault();
 
+        // If we are updating, don't bother with anything special
+        if (this.actor.flags.updating) {
+            await super._updateObject(event, expandedData);
+            return;
+        }
+
         let expandedData = foundry.utils.expandObject(formData);
 
         // Left Sidebar of actor sheet has Xsystem characteristics

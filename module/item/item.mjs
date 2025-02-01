@@ -2769,39 +2769,39 @@ export class HeroSystem6eItem extends Item {
 
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
-        if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
-            let advantages = 0;
-            for (const modifier of this.modifiers.filter((o) => !o.PRIVATE)) {
-                const modPowerInfo = getPowerInfo({
-                    item: modifier,
-                    actor: this.actor,
-                });
+        // if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
+        //     let advantages = 0;
+        //     for (const modifier of this.modifiers.filter((o) => !o.PRIVATE)) {
+        //         const modPowerInfo = getPowerInfo({
+        //             item: modifier,
+        //             actor: this.actor,
+        //         });
 
-                if (!modPowerInfo) {
-                    console.warn("Missing modPowerInfo", modifier);
-                }
+        //         if (!modPowerInfo) {
+        //             console.warn("Missing modPowerInfo", modifier);
+        //         }
 
-                // Is there a cost function
-                let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
+        //         // Is there a cost function
+        //         let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
 
-                // If not use a the default cost formula
-                if (!modCost) {
-                    const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
-                    modCost += modifierBaseCost;
+        //         // If not use a the default cost formula
+        //         if (!modCost) {
+        //             const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
+        //             modCost += modifierBaseCost;
 
-                    // TODO: Add all modifiers into the system so that we can simplify this
-                    const modifierCostPerLevel =
-                        typeof modPowerInfo?.costPerLevel === "function"
-                            ? modPowerInfo.costPerLevel(modifier)
-                            : modPowerInfo?.costPerLevel || 0;
-                    modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
-                }
+        //             // TODO: Add all modifiers into the system so that we can simplify this
+        //             const modifierCostPerLevel =
+        //                 typeof modPowerInfo?.costPerLevel === "function"
+        //                     ? modPowerInfo.costPerLevel(modifier)
+        //                     : modPowerInfo?.costPerLevel || 0;
+        //             modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+        //         }
 
-                modifier.BASECOST_total = modCost;
-                advantages += modCost;
-            }
-            cost = cost * advantages;
-        }
+        //         modifier.BASECOST_total = modCost;
+        //         advantages += modCost;
+        //     }
+        //     cost = cost * advantages;
+        // }
 
         // COMPOUNDPOWER itself costs 0, other ITEMS will handle COMPOUNDPOWER sub-powers
         if (this.system.XMLID === "COMPOUNDPOWER") {
