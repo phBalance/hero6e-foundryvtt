@@ -1193,6 +1193,7 @@ export class HeroSystem6eItem extends Item {
         return originalRange === this.system.range;
     }
 
+    // FIXME: Take this function out back and kill it. It's too similar to buildAoeAttackParameters
     AoeAttackParameters(options) {
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
@@ -1222,16 +1223,16 @@ export class HeroSystem6eItem extends Item {
                     effectiveItemData.calcItemPoints();
                 }
 
-                if (aoeModifier.XMLID === "AOE") {
-                    // not counting the Area Of Effect Advantage.
-                    // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
-                    //       come up short. We need a raw active cost and build up the advantage multipliers from there.
-                    //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+                // not counting the Area Of Effect Advantage.
+                // TODO: This is not quite correct as item.system.activePoints are already rounded so this can
+                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
+                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+                const activePointsWithoutAoeAdvantage = Math.max(
+                    effectiveItemData.system.basePointsPlusAdders,
+                    effectiveItemData.system.activePoints / (1 + aoeModifier.BASECOST_total),
+                );
 
-                    const activePointsWithoutAoeAdvantage = Math.max(
-                        effectiveItemData.system.basePointsPlusAdders,
-                        effectiveItemData.system.activePoints / (1 + aoeModifier.BASECOST_total),
-                    );
+                if (aoeModifier.XMLID === "AOE") {
                     switch (aoeModifier.OPTIONID) {
                         case "CONE":
                             levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
@@ -1278,7 +1279,8 @@ export class HeroSystem6eItem extends Item {
                         ? parseInt(options?.LEVELS || aoeModifier.LEVELS)
                         : dcFalloff;
 
-                    levels = this.dc * dcFalloff;
+                    const effectiveDc = Math.floor(activePointsWithoutAoeAdvantage / 5);
+                    levels = effectiveDc * dcFalloff;
                 }
             } else {
                 levels = parseInt(options?.LEVELS || aoeModifier.LEVELS);
