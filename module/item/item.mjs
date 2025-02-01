@@ -1003,6 +1003,18 @@ export class HeroSystem6eItem extends Item {
         return this.system.activePointsDc;
     }
 
+    activePointsWithoutAoeAdvantage(aoeModifier) {
+        // FIXME: This is not quite correct as it item.system.activePoints are already rounded so this can
+        //        come up short. We need a raw active cost and build up the advantage multipliers from there.
+        //        Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+        const activePointsWithoutAoeAdvantage = Math.max(
+            this.system.basePointsPlusAdders,
+            this.system.activePoints / (1 + aoeModifier.BASECOST_total),
+        );
+
+        return activePointsWithoutAoeAdvantage;
+    }
+
     /**
      * Calculate all the AOE related parameters.
      *
@@ -1028,15 +1040,8 @@ export class HeroSystem6eItem extends Item {
 
         // 5e has a calculated size
         if (is5e) {
+            const activePointsWithoutAoeAdvantage = this.activePointsWithoutAoeAdvantage(modifier);
             if (modifier.XMLID === "AOE") {
-                // not counting the Area Of Effect Advantage.
-                // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
-                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
-                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
-                const activePointsWithoutAoeAdvantage = Math.max(
-                    this.system.basePointsPlusAdders,
-                    this.system.activePoints / (1 + modifier.BASECOST_total),
-                );
                 switch (modifier.OPTIONID) {
                     case "CONE":
                         levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
@@ -1081,7 +1086,11 @@ export class HeroSystem6eItem extends Item {
                 }
                 dcFalloff = modifier.LEVELS ? parseInt(modifier.LEVELS) : dcFalloff;
 
-                levels = this.dc * dcFalloff;
+                // The description in FRed is poorly written as it talks about AP of the power but it doesn't exclude
+                // the contribution of the explosion advantage itself although its example does. We will remove the explosion contribution to
+                // the power's DC.
+                const effectiveDc = Math.floor(activePointsWithoutAoeAdvantage / 5);
+                levels = effectiveDc * dcFalloff;
             }
         } else {
             levels = parseInt(modifier.LEVELS || 0);
