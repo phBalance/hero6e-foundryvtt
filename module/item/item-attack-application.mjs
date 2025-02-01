@@ -469,8 +469,6 @@ export class ItemAttackFormApplication extends FormApplication {
      */
     async _spawnAreaOfEffect() {
         const item = this.data.item;
-        // const aoeModifier = item.getAoeModifier();
-        // const areaOfEffect = item.system.areaOfEffect;
 
         const areaOfEffect = item.AoeAttackParameters({ levels: this.data.effectiveLevels });
         if (!areaOfEffect) return;

@@ -155,7 +155,7 @@ export async function doAoeActionToHit(item, options) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
 
-    const distanceToken = calculateDistanceBetween(aoeTemplate, token);
+    const distanceToken = calculateDistanceBetween(aoeTemplate, token).distance;
     let dcvTargetNumber = 0;
     if (distanceToken > (actor.system.is5e ? 1 : 2)) {
         dcvTargetNumber = 3;
@@ -570,7 +570,7 @@ export async function doSingleTargetActionToHit(item, options) {
         }
 
         const target = targets[0];
-        const distance = token ? calculateDistanceBetween(token, target) : 0;
+        const distance = token ? calculateDistanceBetween(token, target).distance : 0;
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
@@ -746,8 +746,8 @@ export async function doSingleTargetActionToHit(item, options) {
     // If AOE then sort by distance from center
     if (explosion) {
         targetsArray.sort(function (a, b) {
-            const distanceA = calculateDistanceBetween(aoeTemplate, a);
-            const distanceB = calculateDistanceBetween(aoeTemplate, b);
+            const distanceA = calculateDistanceBetween(aoeTemplate, a).distance;
+            const distanceB = calculateDistanceBetween(aoeTemplate, b).distance;
             return distanceA - distanceB;
         });
     }
@@ -767,7 +767,7 @@ export async function doSingleTargetActionToHit(item, options) {
         // Mind Scan defers DMCV so use 3 for now
         if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
             const _token = actor.token || actor.getActiveTokens()[0];
-            if (!target.actor || calculateDistanceBetween(_token, target) > 2) {
+            if (!target.actor || calculateDistanceBetween(_token, target).distance > 2) {
                 targetDefenseValue = 3;
             } else {
                 targetDefenseValue = 0;
@@ -812,7 +812,7 @@ export async function doSingleTargetActionToHit(item, options) {
         if (aoeModifier) {
             // Distance from aoeTemplate origin to target/token center
             if (aoeTemplate && target.id) {
-                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center);
+                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center).distance;
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from template origin)`;
@@ -1999,15 +1999,36 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
             // hex distance from center. Works fine when radius = dice,
             // but that isn't always the case.
 
-            // Remove highest terms based on distance
-            const distance = calculateDistanceBetween(aoeTemplate, token.object.center);
-            const pct = distance / aoeTemplate.distance;
+            let distance;
+            let pct;
+            let termsToRemove;
 
-            // TODO: This assumes that the number of terms equals the DC/5 AP. This is
-            //       true for normal attacks but not always.
-            // TODO: This ignores explosion modifiers for DC falloff.
-            const termsToRemove = Math.floor(pct * (damageRoller.getBaseTerms().length - 1));
+            // 5e distance measurements are not the same as 6e which just uses euclidian measurements. If the game
+            // is being played with 5e measurements use them to figure the distance correctly.
+            const HexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+            const hexGrid = !(
+                game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
+                game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
+            );
 
+            if (HexTemplates && hexGrid) {
+                const gridSizeInMeters = game.scenes.current.grid.distance;
+                distance = calculateDistanceBetween(aoeTemplate, token.object.center).gridSpaces * gridSizeInMeters;
+
+                // NOTE: That the grid size is half a hex smaller since the centre hex counts as 1" so template is 1m smaller (see measuredtemplate.mjs)
+                pct = distance / (aoeTemplate.distance + 1);
+
+                // TODO: We could improve this by dropping part terms for situations where we have >5AP/die
+                termsToRemove = Math.floor(pct * damageRoller.getBaseTerms().length);
+            } else {
+                distance = calculateDistanceBetween(aoeTemplate, token.object.center).distance;
+                pct = distance / aoeTemplate.distance;
+
+                // TODO: We could improve this by dropping part terms for situations where we have >5AP/die
+                termsToRemove = Math.floor(pct * (damageRoller.getBaseTerms().length - 1));
+            }
+
+            // Remove highest N terms
             damageRoller.removeNHighestRankTerms(termsToRemove);
         }
     }
