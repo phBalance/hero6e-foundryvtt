@@ -101,7 +101,7 @@ export function setPerceptionModes() {
             // Invisibility Fringe
             const INVISIBILITY = target?.actor?.items.find((i) => i.system.XMLID === "INVISIBILITY");
             if (INVISIBILITY && !INVISIBILITY.findModsByXmlid("NOFRINGE")) {
-                const distance = calculateDistanceBetween(visionSource.token, target);
+                const distance = calculateDistanceBetween(visionSource.token, target).distance;
                 if (distance < 2.1) {
                     return true;
                 }
