@@ -1583,7 +1583,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 1);
+                            assert.equal(item.costPerLevel, 1);
                         });
 
                         it("end", function () {
@@ -1630,7 +1630,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 2);
+                            assert.equal(item.costPerLevel, 2);
                         });
 
                         it("end", function () {
@@ -1677,7 +1677,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 3);
+                            assert.equal(item.costPerLevel, 3);
                         });
 
                         it("end", function () {
@@ -1724,7 +1724,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 3);
+                            assert.equal(item.costPerLevel, 3);
                         });
 
                         it("end", function () {
@@ -1771,7 +1771,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 3);
+                            assert.equal(item.costPerLevel, 3);
                         });
 
                         it("end", function () {
@@ -1821,7 +1821,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 4);
+                            assert.equal(item.costPerLevel, 4);
                         });
 
                         it("end", function () {
@@ -1871,7 +1871,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 4);
+                            assert.equal(item.costPerLevel, 4);
                         });
 
                         it("end", function () {
@@ -1921,7 +1921,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 4);
+                            assert.equal(item.costPerLevel, 4);
                         });
 
                         it("end", function () {
@@ -1968,7 +1968,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 5);
+                            assert.equal(item.costPerLevel, 5);
                         });
 
                         it("end", function () {
@@ -2015,7 +2015,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 5);
+                            assert.equal(item.costPerLevel, 5);
                         });
 
                         it("end", function () {
@@ -2065,7 +2065,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 4);
+                            assert.equal(item.costPerLevel, 4);
                         });
 
                         it("end", function () {
@@ -2115,7 +2115,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 4);
+                            assert.equal(item.costPerLevel, 4);
                         });
 
                         it("end", function () {
@@ -2162,7 +2162,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 6);
+                            assert.equal(item.costPerLevel, 6);
                         });
 
                         it("end", function () {
@@ -2209,7 +2209,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 6);
+                            assert.equal(item.costPerLevel, 6);
                         });
 
                         it("end", function () {
@@ -2259,7 +2259,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("costPerLevel", function () {
-                            assert.equal(item.system.costPerLevel, 6);
+                            assert.equal(item.costPerLevel, 6);
                         });
 
                         it("end", function () {
