@@ -5582,6 +5582,17 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        if (this.actor) {
+            for (const ae of this.actor.temporaryEffects) {
+                //console.log(ae);
+                for (const change of ae.changes) {
+                    if (change.key.match(new RegExp(this.system.XMLID, "i"))) {
+                        _adjustedLevels += parseInt(change.value || 0);
+                    }
+                }
+            }
+        }
+
         // TODO: Should we be MAXing it here, or when we apply the defense?
         return Math.max(0, _adjustedLevels);
     }
