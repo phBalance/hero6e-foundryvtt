@@ -8510,7 +8510,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCREASEDSTUNMULTIPLIER",
             behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INCREASEDSTUNMULTIPLIER" ID="1642201338997" BASECOST="0.0" LEVELS="1" ALIAS="+1 Increased STUN Multiplier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
