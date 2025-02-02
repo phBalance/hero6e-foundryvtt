@@ -3046,7 +3046,7 @@ export class HeroSystem6eItem extends Item {
                 });
 
                 if (!adderPowerInfo) {
-                    console.warn(
+                    console.info(
                         `${this.actor?.name}: ${this.name}/${this.system?.XMLID}/${modifier.XMLID} is missing powerInfo for adder ${adder.XMLID}`,
                         adder,
                     );
@@ -3094,7 +3094,7 @@ export class HeroSystem6eItem extends Item {
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
             if (_myLimitation > -0.25) {
-                console.warn(`${modifier.XMLID} Limitation clamped to -1/4`, modifier, this);
+                console.info(`${modifier.XMLID} Limitation clamped to -1/4`, modifier, this);
                 _myLimitation = -0.25;
                 system.title =
                     (system.title || "") +
