@@ -3013,7 +3013,7 @@ export class HeroSystem6eItem extends Item {
             let _myLimitation = 0;
 
             const modPowerInfo = modifier.baseInfo;
-            if (!modPowerInfo) {
+            if (!modPowerInfo && !modifier.BASECOST) {
                 console.warn(
                     `${this.actor?.name}/${this.name}/${this.system.XMLID} is missing powerInfo for modifier ${modifier.XMLID}`,
                     modifier,

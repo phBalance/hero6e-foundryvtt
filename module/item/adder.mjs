@@ -85,10 +85,10 @@ export class HeroSystem6eAdder {
             _cost += adder.cost;
         }
 
-        // TRANSPORT_FAMILIARITY (possibly others) have a maximum cost per category
+        // TRANSPORT_FAMILIARITY (possibly others) may have a maximum cost per category
         if (this.SELECTED === false && this.item?.type === "skill") {
             const maxCost = parseFloat(this.BASECOST) || 0;
-            if (_cost > maxCost) {
+            if (maxCost > 0 && _cost > maxCost) {
                 console.log(
                     `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} category clamped from ${_cost} down to ${maxCost}`,
                 );
