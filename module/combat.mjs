@@ -496,7 +496,7 @@ export class HeroSystem6eCombat extends Combat {
                     item.baseInfo.duration !== "instant" && // Is the power non instant
                     ((parseInt(item.system.end || 0) > 0 && // Does the power use END?
                         !item.system.MODIFIER?.find((o) => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE")) || // Does the power use END continuously?
-                        item.system.charges), // Does the power use charges?
+                        (item.system.charges && !item.system.charges.continuing)), // Does the power use charges but is not continuous (as that is tracked by an effect when made active)?
             )) {
                 const {
                     error,
