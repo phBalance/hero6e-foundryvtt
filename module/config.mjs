@@ -8376,16 +8376,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(
-        {
-            key: "IMPENETRABLE",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(1 / 4),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        undefined,
-    );
+    // DUPLICATE?
+    // addPower(
+    //     {
+    //         key: "IMPENETRABLE",
+    //         behaviors: ["modifier"],
+    //         costPerLevel: fixedValueFunction(1 / 4),
+    //         dcAffecting: fixedValueFunction(false),
+    //         xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    //     },
+    //     undefined,
+    // );
     addPower(
         {
             key: "INCANTATIONS",
