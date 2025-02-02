@@ -9075,6 +9075,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "TRANSDIMENSIONAL",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(true),
+            xml: `<MODIFIER XMLID="TRANSDIMENSIONAL" ID="1738534122034" BASECOST="0.5" LEVELS="0" ALIAS="Transdimensional" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "TRIGGER",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -9179,7 +9189,6 @@ HERO.ModifierOverride = {
     ALWAYSOCCURS: { dcAffecting: fixedValueFunction(false), BASECOST: 0, MULTIPLIER: 2 },
     CONTINUOUSCONCENTRATION: { dcAffecting: fixedValueFunction(false), BASECOST: -0.25 },
     DEFBONUS: { dcAffecting: fixedValueFunction(false), BASECOST: 2 },
-    TRANSDIMENSIONAL: { dcAffecting: fixedValueFunction(true) },
 };
 
 HERO.ModifierOverride5e = {
