@@ -31,7 +31,7 @@ export class HeroSystem6eAdder {
 
         if (!this.#baseInfo) {
             if (!window.warnAdder?.includes(this.XMLID)) {
-                console.warn(
+                console.info(
                     `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
                     this,
                 );
@@ -72,6 +72,11 @@ export class HeroSystem6eAdder {
                 costPerLevel = _costPerLevel;
             }
             _cost += levels * costPerLevel;
+        }
+
+        // Some parent modifiers need to override/tweak the adder costs (WEAPONSMITH)
+        if (this.parent?.baseInfo?.adderCostAdjustment) {
+            _cost = this.parent.baseInfo.adderCostAdjustment({ adder: this, adderCost: _cost });
         }
 
         if (this.parent instanceof HeroSystem6eItem) {
