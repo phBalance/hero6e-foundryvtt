@@ -2698,7 +2698,7 @@ export class HeroSystem6eItem extends Item {
         // ADDERS
         let adderCost = 0;
         let negativeCustomAdderCosts = 0;
-        for (const adder of this.adders) {
+        for (const adder of this.system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
 

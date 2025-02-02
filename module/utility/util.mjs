@@ -129,7 +129,7 @@ export function getModifierInfo(options) {
     if (Object.entries(modifierOverrideInfo).length == 0) {
         modifierOverrideInfo = getPowerInfo(options);
     } else {
-        console.warn("modifierOverrideInfo using older format", xmlid);
+        console.warn(`modifierOverrideInfo using older format`, xmlid, options);
     }
 
     return modifierOverrideInfo;
