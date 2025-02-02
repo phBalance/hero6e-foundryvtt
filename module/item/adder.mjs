@@ -29,9 +29,12 @@ export class HeroSystem6eAdder {
             this[key] = options[key];
         }
 
-        if (!this.#baseInfo) {
+        // We really don't NEED every adder, for example SWIMMINGBEASTS from the RIDINGADNIMALS category of TRANSPORT_FAMILIARITY.
+        // Without these adders we will eventually have issues with in-game editing.
+        // However, if we have no data to base the cost from, we should investigate
+        if (!this.#baseInfo && !this.BASECOST && !this.LVLCOST) {
             if (!window.warnAdder?.includes(this.XMLID)) {
-                console.info(
+                console.warn(
                     `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
                     this,
                 );
@@ -80,6 +83,17 @@ export class HeroSystem6eAdder {
         // Some ADDERs have ADDERs (for example TRANSPORT_FAMILIARITY)
         for (const adder of this.adders) {
             _cost += adder.cost;
+        }
+
+        // TRANSPORT_FAMILIARITY (possibly others) have a maximum cost per category
+        if (this.SELECTED === false && this.item?.type === "skill") {
+            const maxCost = parseFloat(this.BASECOST) || 0;
+            if (_cost > maxCost) {
+                console.log(
+                    `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} category clamped from ${_cost} down to ${maxCost}`,
+                );
+                _cost = Math.min(maxCost, _cost);
+            }
         }
 
         if (this.parent instanceof HeroSystem6eItem) {

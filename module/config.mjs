@@ -3454,6 +3454,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
+            // adderCostAdjustment: function ({ adder, adderCost }) {
+            //     if (adderCost !== 2) {
+            //         console.error(`${adder.XMLID} cost was ${adderCost} but expected it to be 2`);
+            //     }
+            //     // First adder is full cost
+            //     if (adder.parent.adders[0].ID === adder.ID) {
+            //         return adderCost;
+            //     }
+            //     // Additional adders cost 1
+            //     return 1;
+            // },
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,

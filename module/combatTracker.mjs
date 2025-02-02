@@ -172,8 +172,8 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         }
     }
 
-    async render(...args) {
-        console.log(`combatTracker:render`);
-        super.render(args);
-    }
+    // async render(...args) {
+    //     console.log(`combatTracker:render`);
+    //     super.render(args);
+    // }
 }
