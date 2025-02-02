@@ -7339,7 +7339,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const ADDITIONALPD = item.findModsByXmlid("ADDITIONALPD");
                 const defenseLevels = parseInt(ADDITIONALPD?.LEVELS || 0) + parseInt(adder.LEVELS);
                 const _combinedCost = defenseLevels * this.costPerLevel();
-                const _cost = _combinedCost - ADDITIONALPD?.cost;
+                const _cost = _combinedCost - (ADDITIONALPD?.cost || 0);
                 return _cost;
             },
             xml: `<ADDER XMLID="ADDITIONALED" ID="1738019117629" BASECOST="0.0" LEVELS="1" ALIAS="+1 Additional ED" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
