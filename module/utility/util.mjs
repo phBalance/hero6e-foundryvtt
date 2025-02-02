@@ -29,6 +29,8 @@ export function getPowerInfo(options) {
                 options.xmlTag = "SKILL";
             } else if (options?.item?.type === "talent") {
                 options.xmlTag = "TALENT";
+            } else if (options?.item?.type === "complication" || options?.item?.type === "disadvantage") {
+                options.xmlTag = "DISAD";
             } else if (options?.item?.type === "perk") {
                 if (options.item.system.XMLID === "WELL_CONNECTED") {
                     options.xmlTag = "WELL_CONNECTED"; // PERK ENHANCER
@@ -71,7 +73,7 @@ export function getPowerInfo(options) {
     if (powerInfo.length > 1) {
         if (!window.warnGetPowerInfo?.includes(xmlid)) {
             console.error(
-                `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Multiple powerInfo results.`,
+                `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Multiple powerInfo results. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
                 powerInfo,
                 options,
             );
@@ -86,13 +88,13 @@ export function getPowerInfo(options) {
         if (powerInfo) {
             if (powerInfo.type.some((t) => ["movement", "skill", "characteristic"].includes(t))) {
                 console.debug(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
                     powerInfo,
                     options,
                 );
             } else {
                 console.error(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
                     powerInfo,
                     options,
                 );
