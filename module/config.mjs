@@ -6724,7 +6724,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             duration: "persistent", // Enhanced Senses are typically persistent
             behaviors: ["adder"],
-            costPerLevel: fixedValueFunction(1 / 3),
+            costPerLevel: fixedValueFunction(3),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
@@ -6854,7 +6854,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
-            costPerLevel: fixedValueFunction(1 / 3),
+            costPerLevel: fixedValueFunction(3),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
@@ -8211,7 +8211,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
+    addPower(
+        {
+            key: "DAMAGEOVERTIME",
+            behaviors: ["modifier"],
+            dcAffecting: fixedValueFunction(true),
+            costPerLevel: fixedValueFunction(0),
+            xml: `<MODIFIER XMLID="DAMAGEOVERTIME" ID="1738533900123" BASECOST="1.0" LEVELS="0" ALIAS="Damage Over Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(
         {
             key: "DAMAGESHIELD",
@@ -9169,7 +9178,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 HERO.ModifierOverride = {
     ALWAYSOCCURS: { dcAffecting: fixedValueFunction(false), BASECOST: 0, MULTIPLIER: 2 },
     CONTINUOUSCONCENTRATION: { dcAffecting: fixedValueFunction(false), BASECOST: -0.25 },
-    DAMAGEOVERTIME: { dcAffecting: fixedValueFunction(true) },
     DEFBONUS: { dcAffecting: fixedValueFunction(false), BASECOST: 2 },
     TRANSDIMENSIONAL: { dcAffecting: fixedValueFunction(true) },
 };
