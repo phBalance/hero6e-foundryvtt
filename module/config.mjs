@@ -5456,6 +5456,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(3 / 2),
+            cost: function (item) {
+                // 3 CP per 2 points of Resistant Defense
+                const levels = parseInt(item.system.LEVELS);
+                return Math.ceil(levels / 2) * 3;
+            },
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
