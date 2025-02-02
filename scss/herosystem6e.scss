@@ -19,10 +19,10 @@
 
 /* Styles limited to hero sheets */
 .hero {
-    /* V13ADDITION START - Moved from global as these should be scoped */
+    /* V13 - Moved from global as these should be scoped */
     @include meta.load-css("global/grid");
     @include meta.load-css("global/flex");
-    /* V13ADDITION END - Moved from global as these should be scoped */
+
     @include meta.load-css("components/forms");
     @include meta.load-css("components/resource");
     @include meta.load-css("components/tabs");
