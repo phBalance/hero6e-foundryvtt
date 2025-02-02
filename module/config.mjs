@@ -150,7 +150,7 @@ HERO.hitLocations = {
     Hand: [1, 0.5, 0.5, -6],
     Arm: [2, 0.5, 0.5, -5],
     Shoulder: [3, 1, 1, -5],
-    Chest: [3, 1, 1, -5],
+    Chest: [3, 1, 1, -3],
     Stomach: [4, 1.5, 1, -7],
     Vitals: [4, 1.5, 2, -8],
     Thigh: [2, 1, 1, -4],

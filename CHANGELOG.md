@@ -9,6 +9,8 @@
 - Generic "Roll Damage" button can now apply PD & ED damage to tokens. [#1614](https://github.com/dmdorman/hero6e-foundryvtt/issues/1614)
 - Add Other Attacks maneuver to 5e. [#1814](https://github.com/dmdorman/hero6e-foundryvtt/issues/1814)
 - Correct 5e explosion radius and DC falloff. [#1811](https://github.com/dmdorman/hero6e-foundryvtt/issues/1811)
+- Called shot to the chest now, correctly, has a -3 OCV.
+- Continuing charges no longer use charges per phase. [#1823](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
 
 ## Version 4.0.15 20250125
 
