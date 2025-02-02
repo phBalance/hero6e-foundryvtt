@@ -74,6 +74,11 @@ export class HeroSystem6eAdder {
             _cost += levels * costPerLevel;
         }
 
+        // Some parent modifiers need to override/tweak the adder costs (WEAPONSMITH)
+        if (this.parent?.baseInfo?.adderCostAdjustment) {
+            _cost = this.parent.baseInfo.adderCostAdjustment({ adder: this, adderCost: _cost });
+        }
+
         if (this.parent instanceof HeroSystem6eItem) {
             _cost = Math.ceil(_cost);
         }

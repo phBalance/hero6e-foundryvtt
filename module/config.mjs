@@ -3525,6 +3525,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
+            cost: function (item) {
+                // BASECOST is 3 when there are no adders or 0 when there are adders.
+                // For some reason HDC doens't update BASECOST.
+                // TODO: Check FAMALIERITY ONLY possibilities
+                const baseCost = parseFloat(item.system.BASECOST) || (item.adders.length === 0 ? 3 : 0);
+                const levels = parseInt(item.system.LEVELS);
+                return baseCost + levels * this.costPerLevel();
+            },
+            adderCostAdjustment: function ({ adder, adderCost }) {
+                if (adderCost !== 2) {
+                    console.error(`${adder.XMLID} cost was ${adderCost} but expected it to be 2`);
+                }
+                // First adder is full cost
+                if (adder.parent.adders[0].ID === adder.ID) {
+                    return adderCost;
+                }
+                // Additional adders cost 1
+                return 1;
+            },
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
