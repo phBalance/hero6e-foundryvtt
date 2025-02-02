@@ -22,7 +22,8 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { activateManeuver } from "./maneuver.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 
-export async function chatListeners(html) {
+export async function chatListeners(_html) {
+    const html = $(_html); // v13 compatibility
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
     html.on("click", "button.apply-damage", this._onApplyDamage.bind(this));
     html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));

@@ -149,12 +149,13 @@ Hooks.once("init", async function () {
     loadTemplates(templatePaths);
 
     // Assign the Sidebar subclasses
-    //CONFIG.ui.actors =
     CONFIG.ui.items = HeroSystem6eItemDirectory;
-    CONFIG.ui.combat = HeroSystem6eCombatTracker;
-    //CONFIG.ui.chat =
     CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
-    //CONFIG.ui.hotbar =
+
+    // Custom combat tracker doesn't work in v13 (yet)
+    if (!foundry.utils.isNewerVersion(game.version, "13.000")) {
+        CONFIG.ui.combat = HeroSystem6eCombatTracker;
+    }
 
     // Insert templates into DOM tree so Applications can render into
     if (document.querySelector("#ui-top") !== null) {
@@ -804,19 +805,6 @@ Hooks.once("setup", function () {
     console.log(`Hooks.on "setup"`);
     // Apply custom application for Compendiums for parent/child features
     game.packs.filter((p) => p.metadata.type === "Item").forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
-});
-
-// An errant "bar3" reference causes v12 to crash.
-// Hopefully we are in v11 and can fix the problem before GM decides to migrate to v12.
-// If we are already in v12 then we have to manually revert to v11 to delete the problem property.
-// REF: https://github.com/dmdorman/hero6e-foundryvtt/issues/1187
-Hooks.once("ready", async function () {
-    let _defaultToken = game.settings.get("core", DefaultTokenConfig.SETTING) ?? {};
-    if (_defaultToken.bar3) {
-        delete _defaultToken.bar3;
-        game.settings.set("core", DefaultTokenConfig.SETTING, _defaultToken);
-        console.warn("Removing errant bar3 setting as it will prevent loading of world in FoundryVTT V12+");
-    }
 });
 
 Hooks.on("getCombatTrackerEntryContext", function (html, menu) {
