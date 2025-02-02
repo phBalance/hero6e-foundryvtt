@@ -9,7 +9,13 @@ export class HeroSystem6eAdder {
         // if (!this.item) {
         //     debugger;
         // }
-        this.#baseInfo = getModifierInfo({ xmlid: json.XMLID, actor: this.item?.actor, is5e: this.item?.is5e });
+        this.#baseInfo = getModifierInfo({
+            xmlid: json.XMLID,
+            actor: this.item?.actor,
+            is5e: this.item?.is5e,
+            item: this.item,
+            xmlTag: "ADDER",
+        });
 
         for (const key of Object.keys(json)) {
             if (foundry.utils.hasProperty(this, key)) {
@@ -22,6 +28,17 @@ export class HeroSystem6eAdder {
         for (const key of Object.keys(options)) {
             this[key] = options[key];
         }
+
+        if (!this.#baseInfo) {
+            if (!window.warnAdder?.includes(this.XMLID)) {
+                console.warn(
+                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
+                    this,
+                );
+                window.warnAdder ??= [];
+                window.warnAdder.push(this.XMLID);
+            }
+        }
     }
 
     get baseInfo() {
@@ -29,16 +46,31 @@ export class HeroSystem6eAdder {
     }
 
     get cost() {
+        if (this.SELECTED === false) {
+            return 0;
+        }
+
         let _cost = 0;
         // Custom costs calculations
-        if (this.baseInfo?.cost) {
-            _cost = this.baseInfo.cost(this, this.item);
+        if (this.#baseInfo?.cost) {
+            _cost = this.#baseInfo.cost(this, this.item);
         } else {
             // Generic cost calculations
             _cost = parseFloat(this.BASECOST);
 
-            const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
+            let costPerLevel = this.#baseInfo?.costPerLevel(this) || 0;
             const levels = parseInt(this.LEVELS) || 0;
+            // Override default costPerLevel?
+            if (this.LVLCOST && levels > 0) {
+                const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
+                if (costPerLevel !== _costPerLevel && this.#baseInfo) {
+                    console.warn(
+                        `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
+                        this,
+                    );
+                }
+                costPerLevel = _costPerLevel;
+            }
             _cost += levels * costPerLevel;
         }
 
@@ -59,11 +91,12 @@ export class HeroSystem6eAdder {
     }
 
     set BASECOST_total(value) {
-        if (this.cost != value) {
-            //debugger;
+        // ADDITIONALED is prorated based on ADDITIONALPD, which the legacy code does not do properly.
+        if (this.cost != value && this.XMLID !== "ADDITIONALED") {
             console.error(
                 `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} BASECOST_total (${value}) did not match cost ${this.BASECOST_total}`,
             );
+            return;
         }
     }
 }

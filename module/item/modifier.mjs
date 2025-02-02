@@ -7,7 +7,12 @@ export class HeroSystem6eModifier {
     constructor(json, options) {
         // Item first so we can get baseInfo
         this.item = options?.item;
-        this.#baseInfo = getModifierInfo({ xmlid: json.XMLID, actor: this.item?.actor, is5e: this.item?.is5e });
+        this.#baseInfo = getModifierInfo({
+            xmlid: json.XMLID,
+            actor: this.item?.actor,
+            is5e: this.item?.is5e,
+            xmlTag: "MODIFIER",
+        });
 
         for (const key of Object.keys(json)) {
             if (foundry.utils.hasProperty(this, key)) {
@@ -24,10 +29,16 @@ export class HeroSystem6eModifier {
         if (!(this.item instanceof HeroSystem6eItem)) {
             console.warn(`${this.XMLID} item not found`);
         }
+
         if (!this.#baseInfo) {
-            console.warn(
-                `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} baseInfo not found`,
-            );
+            if (!window.warnAdder?.includes(this.XMLID)) {
+                console.warn(
+                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
+                    this,
+                );
+                window.warnAdder ??= [];
+                window.warnAdder.push(this.XMLID);
+            }
         }
     }
 
@@ -51,8 +62,14 @@ export class HeroSystem6eModifier {
             // Generic cost calculations
             _cost = parseFloat(this.BASECOST);
 
-            const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
+            let costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
             const levels = parseInt(this.LEVELS) || 0;
+            if (!costPerLevel && this.LVLCOST) {
+                console.warn(
+                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: is missing costPerLevel, using LVLCOST & LVLVAL`,
+                );
+                costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
+            }
             _cost += levels * costPerLevel;
         }
 

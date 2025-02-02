@@ -314,6 +314,7 @@ export class HeroSystem6eItem extends Item {
     hasSuccessRoll() {
         const powerInfo = getPowerInfo({
             item: this,
+            xmlTag: this.system.xmlTag,
         });
         return (
             powerInfo?.behaviors.includes("success") ||
@@ -813,13 +814,22 @@ export class HeroSystem6eItem extends Item {
 
             // recurse part
             for (const mod of this.modifiers || this.MODIFIER || []) {
-                if (recursiveFindByXmlid.call(mod, xmlid)) return mod;
+                const mod2 = recursiveFindByXmlid.call(mod, xmlid);
+                if (mod2) {
+                    return mod2;
+                }
             }
             for (const adder of this.adders || this.ADDER || []) {
-                if (recursiveFindByXmlid.call(adder, xmlid)) return adder;
+                const adder2 = recursiveFindByXmlid.call(adder, xmlid);
+                if (adder2) {
+                    return adder2;
+                }
             }
             for (const power of this.powers || this.POWER || []) {
-                if (recursiveFindByXmlid.call(power, xmlid)) return power;
+                const power2 = recursiveFindByXmlid.call(power, xmlid);
+                if (power2) {
+                    return power2;
+                }
             }
         }
 
@@ -975,7 +985,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     // An attempt to cache getPowerInfo for performance reasons.
-    #baseInfo = getPowerInfo({ item: this });
+    #baseInfo = getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
     getBaseInfo() {
         console.warn("Use baseInfo instead of getBaseInfo");
         return this.#baseInfo;
@@ -2455,7 +2465,7 @@ export class HeroSystem6eItem extends Item {
                         type: powerList.filter((o) => o.type?.includes("characteristic")).map((o) => o.key)
                             ? "power"
                             : itemTag.toLowerCase().replace(/s$/, ""),
-                        system: { ...system, is5e: itemData.system.is5e },
+                        system: { ...system, is5e: itemData.system.is5e, xmlTag: itemSubTag },
                     };
 
                     return itemData;
@@ -2582,6 +2592,9 @@ export class HeroSystem6eItem extends Item {
 
     calcItemPoints() {
         let changed = false;
+        // if (this.system.ID === "1726444520895") {
+        //     debugger;
+        // }
         changed = this.calcBasePointsPlusAdders() || changed;
         changed = this.calcActivePoints() || changed;
         changed = this.calcRealCost() || changed;
@@ -2595,152 +2608,153 @@ export class HeroSystem6eItem extends Item {
     }
 
     calcBasePointsPlusAdders() {
-        const oldValue = this.system.basePointsPlusAdders;
-        this.system.basePointsPlusAdders = this._basePoints + this._addersCost;
-        this.system.basePointsPlusAddersForActivePoints = this.system.basePointsPlusAdders;
-        return oldValue != this.system.basePointsPlusAdders;
+        // const oldValue = this.system.basePointsPlusAdders;
+        // this.system.basePointsPlusAdders = this._basePoints + this._addersCost;
+        // this.system.basePointsPlusAddersForActivePoints = this.system.basePointsPlusAdders;
+        // return oldValue != this.system.basePointsPlusAdders;
 
-        // const system = this.system;
-        // const actor = this.actor;
+        const system = this.system;
+        const actor = this.actor;
 
-        // const old = system.basePointsPlusAdders;
+        const old = system.basePointsPlusAdders;
 
-        // if (!system.XMLID) return 0;
+        if (!system.XMLID) return 0;
 
-        // // Everyman skills are free
-        // if (system.EVERYMAN) {
-        //     system.basePointsPlusAdders = 0;
-        //     return { changed: old != system.basePointsPlusAdders };
-        // }
+        // Everyman skills are free
+        if (system.EVERYMAN) {
+            system.basePointsPlusAdders = 0;
+            return { changed: old != system.basePointsPlusAdders };
+        }
 
-        // // Native Tongue
-        // if (system.NATIVE_TONGUE) {
-        //     system.basePointsPlusAdders = 0;
-        //     return { changed: old != system.basePointsPlusAdders };
-        // }
+        // Native Tongue
+        if (system.NATIVE_TONGUE) {
+            system.basePointsPlusAdders = 0;
+            return { changed: old != system.basePointsPlusAdders };
+        }
 
-        // // Check if we have CONFIG info about this power
-        // const configPowerInfo = getPowerInfo({
-        //     item: this,
-        //     actor: actor,
-        // });
+        // Check if we have CONFIG info about this power
+        const configPowerInfo = getPowerInfo({
+            item: this,
+            actor: actor,
+            xmlTag: this.system.xmlTag,
+        });
 
-        // // Base Cost is typically extracted directly from HDC
-        // let baseCost = parseFloat(system.BASECOST) || 0;
+        // Base Cost is typically extracted directly from HDC
+        let baseCost = parseFloat(system.BASECOST) || 0;
 
-        // // Cost per level is NOT included in the HDC file.
-        // // We will try to get cost per level via config.mjs
-        // // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
+        // Cost per level is NOT included in the HDC file.
+        // We will try to get cost per level via config.mjs
+        // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
 
-        // if (!configPowerInfo?.costPerLevel) {
-        //     console.error(
-        //         `Unable to calculate costs for ${this.system.XMLID}: ${configPowerInfo} && ${configPowerInfo?.costPerLevel}`,
-        //     );
-        // }
+        if (!configPowerInfo?.costPerLevel) {
+            console.error(
+                `Unable to calculate costs for ${this.system.XMLID}: ${configPowerInfo} && ${configPowerInfo?.costPerLevel}`,
+            );
+        }
 
-        // const costPerLevel = configPowerInfo?.costPerLevel(this) || 0;
-        // this.system.costPerLevel = costPerLevel;
+        const costPerLevel = configPowerInfo?.costPerLevel(this) || 0;
+        this.system.costPerLevel = costPerLevel;
 
-        // // The number of levels for cost is based on the original power, not
-        // // not any additional modifications or adjustments.
-        // const levels = parseInt(system.LEVELS) || 0;
+        // The number of levels for cost is based on the original power, not
+        // not any additional modifications or adjustments.
+        const levels = parseInt(system.LEVELS) || 0;
 
-        // let subCost = costPerLevel * levels;
+        let subCost = costPerLevel * levels;
 
-        // // 3 CP per 2 points
-        // if (costPerLevel == 3 / 2 && subCost % 1) {
-        //     let _threePerTwo = Math.ceil(costPerLevel * levels) + 1;
-        //     subCost = _threePerTwo;
-        //     system.title = (system.title || "") + "3 CP per 2 points; \n+1 level may cost nothing. ";
-        // }
+        // 3 CP per 2 points
+        if (costPerLevel == 3 / 2 && subCost % 1) {
+            let _threePerTwo = Math.ceil(costPerLevel * levels) + 1;
+            subCost = _threePerTwo;
+            system.title = (system.title || "") + "3 CP per 2 points; \n+1 level may cost nothing. ";
+        }
 
-        // if (system.XMLID === "FORCEWALL") {
-        //     // FORCEWALL/BARRIER
-        //     baseCost += parseInt(system.BODYLEVELS) || 0; // 6e only
-        //     baseCost += (parseInt(system.LENGTHLEVELS) || 0) * (system.is5e ? 2 : 1);
-        //     baseCost += (parseInt(system.HEIGHTLEVELS) || 0) * (system.is5e ? 2 : 1);
-        //     baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness (6e only)
-        // } else if (system.XMLID === "DUPLICATION") {
-        //     const points = parseInt(system.POINTS || 0);
-        //     const cost = points * configPowerInfo?.costPerLevel(this) || 0;
-        //     baseCost += cost;
-        // }
+        if (system.XMLID === "FORCEWALL") {
+            // FORCEWALL/BARRIER
+            baseCost += parseInt(system.BODYLEVELS) || 0; // 6e only
+            baseCost += (parseInt(system.LENGTHLEVELS) || 0) * (system.is5e ? 2 : 1);
+            baseCost += (parseInt(system.HEIGHTLEVELS) || 0) * (system.is5e ? 2 : 1);
+            baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness (6e only)
+        } else if (system.XMLID === "DUPLICATION") {
+            const points = parseInt(system.POINTS || 0);
+            const cost = points * configPowerInfo?.costPerLevel(this) || 0;
+            baseCost += cost;
+        }
 
-        // // Start adding up the costs
-        // let cost = baseCost + subCost;
+        // Start adding up the costs
+        let cost = baseCost + subCost;
 
-        // if (system.XMLID === "FOLLOWER") {
-        //     cost = Math.ceil((parseInt(system.BASEPOINTS) || 5) / 5);
-        //     let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER) || 0)) + 1;
-        //     cost *= multiplier;
-        // }
+        if (system.XMLID === "FOLLOWER") {
+            cost = Math.ceil((parseInt(system.BASEPOINTS) || 5) / 5);
+            let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER) || 0)) + 1;
+            cost *= multiplier;
+        }
 
-        // // Cost override
-        // if (typeof this.baseInfo?.cost === "function") {
-        //     cost = this.baseInfo.cost(this);
-        //     baseCost = 0;
-        // }
+        // Cost override
+        if (typeof this.baseInfo?.cost === "function") {
+            cost = this.baseInfo.cost(this);
+            baseCost = 0;
+        }
 
-        // // ADDERS
-        // let adderCost = 0;
-        // let negativeCustomAdderCosts = 0;
-        // for (const adder of this.adders) {
-        //     // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
-        //     const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
+        // ADDERS
+        let adderCost = 0;
+        let negativeCustomAdderCosts = 0;
+        for (const adder of this.adders) {
+            // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
+            const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
 
-        //     if (adder.SELECTED !== false) {
-        //         //TRANSPORT_FAMILIARITY
-        //         const adderCostPerLevel = parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) || 1;
-        //         const adderLevels = parseInt(adder.LEVELS);
-        //         adder.BASECOST_total = adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
+            if (adder.SELECTED !== false) {
+                //TRANSPORT_FAMILIARITY
+                const adderCostPerLevel = parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) || 1;
+                const adderLevels = parseInt(adder.LEVELS);
+                adder.BASECOST_total = adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
 
-        //         // WEAPONSMITH (selections over 1 cost only 1)
-        //         if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
-        //             adder.BASECOST_total = 1;
-        //         }
-        //     } else {
-        //         adder.BASECOST_total = 0;
-        //     }
+                // WEAPONSMITH (selections over 1 cost only 1)
+                if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
+                    adder.BASECOST_total = 1;
+                }
+            } else {
+                adder.BASECOST_total = 0;
+            }
 
-        //     // It is possible to have negative adders although they are perhaps only custom adders. Ignore negative custom adders for the active cost as
-        //     // we have no idea if they are actually important.
-        //     negativeCustomAdderCosts += adder.XMLID === "ADDER" ? Math.min(0, adder.BASECOST_total) : 0;
-        //     adderCost += adder.BASECOST_total;
+            // It is possible to have negative adders although they are perhaps only custom adders. Ignore negative custom adders for the active cost as
+            // we have no idea if they are actually important.
+            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? Math.min(0, adder.BASECOST_total) : 0;
+            adderCost += adder.BASECOST_total;
 
-        //     adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
+            adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
 
-        //     let subAdderCost = 0;
-        //     for (const adder2 of adder.ADDER || []) {
-        //         const adder2BaseCost = adder2.BASECOST;
+            let subAdderCost = 0;
+            for (const adder2 of adder.ADDER || []) {
+                const adder2BaseCost = adder2.BASECOST;
 
-        //         if (adder2.SELECTED != false) {
-        //             let adderLevels = Math.max(1, parseInt(adder2.LEVELS));
-        //             subAdderCost += Math.ceil(adder2BaseCost * adderLevels);
-        //             adder2.BASECOST_total = Math.ceil(adder2BaseCost * adderLevels);
-        //         }
-        //     }
+                if (adder2.SELECTED != false) {
+                    let adderLevels = Math.max(1, parseInt(adder2.LEVELS));
+                    subAdderCost += Math.ceil(adder2BaseCost * adderLevels);
+                    adder2.BASECOST_total = Math.ceil(adder2BaseCost * adderLevels);
+                }
+            }
 
-        //     // TRANSPORT_FAMILIARITY checking more than 2 animals costs same as entire category
-        //     if (!adder.SELECTED && subAdderCost > (adderBaseCost || 99)) {
-        //         subAdderCost = adderBaseCost;
-        //     }
+            // TRANSPORT_FAMILIARITY checking more than 2 animals costs same as entire category
+            if (!adder.SELECTED && subAdderCost > (adderBaseCost || 99)) {
+                subAdderCost = adderBaseCost;
+            }
 
-        //     // Riding discount
-        //     if (this.system.XMLID === "TRANSPORT_FAMILIARITY" && this.actor && subAdderCost > 0) {
-        //         if (adder.XMLID === "RIDINGANIMALS" && this.actor.items.find((o) => o.system.XMLID === "RIDING")) {
-        //             subAdderCost -= 1;
-        //         }
-        //     }
+            // Riding discount
+            if (this.system.XMLID === "TRANSPORT_FAMILIARITY" && this.actor && subAdderCost > 0) {
+                if (adder.XMLID === "RIDINGANIMALS" && this.actor.items.find((o) => o.system.XMLID === "RIDING")) {
+                    subAdderCost -= 1;
+                }
+            }
 
-        //     // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
-        //     // we have no idea if they are actually important.
-        //     negativeCustomAdderCosts += adder.XMLID === "ADDER" ? subAdderCost : 0;
-        //     adderCost += subAdderCost;
-        // }
+            // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
+            // we have no idea if they are actually important.
+            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? subAdderCost : 0;
+            adderCost += subAdderCost;
+        }
 
-        // //HACK for ENTANGLE +1PD/ED in 6e
-        // //Normallly we would use a function in CONFIG.mjs
-        // // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
+        //HACK for ENTANGLE +1PD/ED in 6e
+        //Normallly we would use a function in CONFIG.mjs
+        // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
         // if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
         //     const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
         //     const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
@@ -2749,26 +2763,26 @@ export class HeroSystem6eItem extends Item {
         //     }
         // }
 
-        // // POWERS (likely ENDURANCERESERVEREC)
-        // if (system.POWER) {
-        //     for (const adderPower of system.POWER) {
-        //         const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
-        //         const adderPowerInfo = getPowerInfo({
-        //             item: adderPower,
-        //             actor: this.actor,
-        //             is5e: this.is5e,
-        //         });
+        // POWERS (likely ENDURANCERESERVEREC)
+        if (system.POWER) {
+            for (const adderPower of system.POWER) {
+                const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
+                const adderPowerInfo = getPowerInfo({
+                    item: adderPower,
+                    actor: this.actor,
+                    is5e: this.is5e,
+                });
 
-        //         // TODO: Add all adders into the system so that we can simplify this
-        //         const adderCostPerLevel = adderPowerInfo?.costPerLevel(adderPower) || 0;
-        //         adderCost += Math.ceil(adderCostPerLevel * adderLevels);
-        //     }
-        // }
+                // TODO: Add all adders into the system so that we can simplify this
+                const adderCostPerLevel = adderPowerInfo?.costPerLevel(adderPower) || 0;
+                adderCost += Math.ceil(adderCostPerLevel * adderLevels);
+            }
+        }
 
-        // cost += adderCost;
+        cost += adderCost;
 
-        // // INDEPENDENT ADVANTAGE (aka Naked Advantage)
-        // // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
+        // INDEPENDENT ADVANTAGE (aka Naked Advantage)
+        // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
         // if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
         //     let advantages = 0;
         //     for (const modifier of this.modifiers.filter((o) => !o.PRIVATE)) {
@@ -2803,15 +2817,15 @@ export class HeroSystem6eItem extends Item {
         //     cost = cost * advantages;
         // }
 
-        // // COMPOUNDPOWER itself costs 0, other ITEMS will handle COMPOUNDPOWER sub-powers
-        // if (this.system.XMLID === "COMPOUNDPOWER") {
-        //     cost = 0;
-        // }
+        // COMPOUNDPOWER itself costs 0, other ITEMS will handle COMPOUNDPOWER sub-powers
+        if (this.system.XMLID === "COMPOUNDPOWER") {
+            cost = 0;
+        }
 
-        // system.basePointsPlusAdders = cost;
-        // system.basePointsPlusAddersForActivePoints = cost - negativeCustomAdderCosts;
+        system.basePointsPlusAdders = cost;
+        system.basePointsPlusAddersForActivePoints = cost - negativeCustomAdderCosts;
 
-        // return old !== system.basePointsPlusAdders;
+        return old !== system.basePointsPlusAdders;
     }
 
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
@@ -2832,6 +2846,7 @@ export class HeroSystem6eItem extends Item {
                 item: modifier,
                 actor: this.actor,
                 is5e: this.system.is5e,
+                xmlTag: "MODIFIER",
             });
 
             // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)
@@ -2939,9 +2954,16 @@ export class HeroSystem6eItem extends Item {
             const modifierInfo = getModifierInfo({
                 xmlid: modifier.XMLID,
                 item: this,
+                xmlTag: "MODIFIER",
             });
-            if (modifierInfo?.dcAffecting(modifier)) {
-                advantagesAffectingDc += Math.max(0, _myAdvantage);
+            if (modifierInfo && !modifierInfo?.dcAffecting) {
+                console.error(
+                    `${this.actor?.name}/${this.name}/${this.system.XMLID}/${modifier.XMLID}: Missing dcAffecting function in config.mjs`,
+                );
+            } else {
+                if (modifierInfo?.dcAffecting(modifier)) {
+                    advantagesAffectingDc += Math.max(0, _myAdvantage);
+                }
             }
 
             // Save _myAdvantage
@@ -2949,7 +2971,10 @@ export class HeroSystem6eItem extends Item {
 
             // Check old vs new cost code
             if (modifier.cost !== _myAdvantage) {
-                console.warn(`modifier.cost (${modifier.cost} !== _myAdvantage (${_myAdvantage})`);
+                console.warn(
+                    `${this.actor?.name}/${this.name}/${this.system.XMLID}/${modifier.ALIAS}: modifier.cost (${modifier.cost} !== _myAdvantage (${_myAdvantage})`,
+                    modifier,
+                );
             }
         }
 
@@ -2985,14 +3010,10 @@ export class HeroSystem6eItem extends Item {
         for (const modifier of modifiers) {
             let _myLimitation = 0;
 
-            const modPowerInfo = getPowerInfo({
-                item: modifier,
-                actor: this.actor,
-                is5e: this.is5e,
-            });
+            const modPowerInfo = modifier.baseInfo;
             if (!modPowerInfo) {
                 console.warn(
-                    `${this.actor?.name}: ${this.name} is missing powerInfo for modifier ${modifier.XMLID}`,
+                    `${this.actor?.name}/${this.name}/${this.system.XMLID} is missing powerInfo for modifier ${modifier.XMLID}`,
                     modifier,
                 );
             }
@@ -4194,10 +4215,7 @@ export class HeroSystem6eItem extends Item {
                 return a.cost - b.cost;
             })) {
             // This might be a limitation with an unusually positive value
-            const modPowerInfo = getPowerInfo({
-                item: modifier,
-                actor: this.actor,
-            });
+            const modPowerInfo = modifier.baseInfo;
             if (modPowerInfo?.minimumLimitation) {
                 continue;
             }
@@ -4282,7 +4300,7 @@ export class HeroSystem6eItem extends Item {
 
     createPowerDescriptionModifier(modifier) {
         const item = this;
-        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID, actor: this.actor });
+        const modifierInfo = modifier.baseInfo;
         const system = item.system;
         let result = "";
 
@@ -4514,11 +4532,11 @@ export class HeroSystem6eItem extends Item {
             result = result.replace(`Focus (${modifier.OPTION}; `, `${modifier.OPTION} (`);
         }
 
-        const configPowerInfo = getPowerInfo({
-            xmlid: system.XMLID,
-            actor: item?.actor,
-            is5e: this.is5e,
-        });
+        const configPowerInfo = this.baseInfo; //getPowerInfo({
+        //     xmlid: system.XMLID,
+        //     actor: item?.actor,
+        //     is5e: this.is5e,
+        // });
 
         // All Slots? This may be a slot in a framework if so get parent
         if (configPowerInfo && configPowerInfo.type?.includes("framework")) {
@@ -5470,6 +5488,8 @@ export class HeroSystem6eItem extends Item {
             return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
         } else if (this.type === "disadvantage") {
             return false;
+        } else if (this.#baseInfo.type.includes("disadvantage")) {
+            return false;
         }
 
         // Legacy KILLING support
@@ -5627,9 +5647,7 @@ export class HeroSystem6eItem extends Item {
      */
     isSenseAffecting() {
         return (
-            !!getPowerInfo({
-                item: this,
-            })?.type?.includes("sense-affecting") ||
+            !!this.baseInfo?.type?.includes("sense-affecting") ||
             (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
         );
     }

@@ -429,6 +429,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription6e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription6e.type ??= [];
                 powerDescription6e.behaviors ??= [xml.children[0].tagName.toLowerCase()];
+                powerDescription6e.xmlTag ??= xml.children[0].tagName.toUpperCase();
             } else {
                 //debugger;
             }
@@ -438,6 +439,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             return;
         }
         HERO.powers6e.push(foundry.utils.deepClone(powerDescription6e));
+
+        // Talents can be purchased as powers (duplicate them)
+        if (powerDescription6e.xmlTag === "TALENT") {
+            const talentPower = foundry.utils.deepClone(powerDescription6e);
+            talentPower.xmlTag = "POWER";
+            talentPower.xml.replace("<TALENT", "<POWER");
+            HERO.powers6e.push(talentPower);
+        }
     }
 
     if (powerOverrideFor5e) {
@@ -453,6 +462,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription5e.type ??= [];
                 powerDescription5e.behaviors ??= [xml.children[0].tagName.toLowerCase()];
+                powerDescription5e.xmlTag ??= xml.children[0].tagName.toUpperCase();
             } else {
                 //debugger;
             }
@@ -5472,6 +5482,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: fixedValueFunction(3 / 2), // LEVELS are the sum of rPD and rED
+            cost: function (item) {
+                let _cost = parseFloat(item.system.BASECOST);
+                _cost += parseInt(item.system.LEVELS) * this.costPerLevel();
+                _cost += parseInt(item.system.BODYLEVELS) || 0; // 6e only
+                _cost += (parseInt(item.system.LENGTHLEVELS) || 0) * (item.system.is5e ? 2 : 1);
+                _cost += (parseInt(item.system.HEIGHTLEVELS) || 0) * (item.system.is5e ? 2 : 1);
+                _cost += Math.ceil(parseFloat(item.system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness (6e only)
+                return _cost;
+            },
             defenseTagVsAttack: function () {
                 // We really shouldn't include this as a defense.
                 // TODO: Implement FORCEWALL englobing like we do with ENTANGLE
@@ -6011,6 +6030,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         undefined,
     );
 
+    addPower(
+        {
+            key: "PARTIALLYPENETRATIVE",
+            type: ["sense"],
+            behaviors: [],
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costEnd: true,
+            costPerLevel: fixedValueFunction(0),
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            xml: `<POWER XMLID="PARTIALLYPENETRATIVE" ID="1738470412569" BASECOST="10.0" LEVELS="0" ALIAS="Partially Penetrative" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "PENETRATIVE",
+            type: ["sense"],
+            behaviors: [],
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costEnd: true,
+            costPerLevel: fixedValueFunction(0),
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            xml: `<POWER XMLID="PENETRATIVE" ID="1738469314018" BASECOST="15.0" LEVELS="0" ALIAS="Penetrative" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
     addPower(
         {
             key: "POSSESSION",
@@ -6558,6 +6605,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(3),
+            xml: `<POWER XMLID="ENHANCEDPERCEPTION" ID="1738452641594" BASECOST="0.0" LEVELS="1" ALIAS="Enhanced Perception" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
@@ -6712,7 +6760,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         undefined,
     );
-
+    addPower(
+        {
+            // DAMAGENEGATION related
+            key: "PHYSICAL",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(5),
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="PHYSICAL" ID="1738019507454" BASECOST="0.0" LEVELS="1" ALIAS="Physical DCs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+            </ADDER>`,
+        },
+        undefined,
+    );
     addPower(
         {
             key: "RADAR",
@@ -7239,6 +7299,36 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ENTANGLE related
+            key: "ADDITIONALPD",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(5 / 2),
+            xml: `<ADDER XMLID="ADDITIONALPD" ID="1738019116299" BASECOST="0.0" LEVELS="1" ALIAS="+1 Additional PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ENTANGLE related
+            key: "ADDITIONALED",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(5 / 2),
+            cost: function (adder, item) {
+                // +5 CP per +2 defense (ADDITIONALPD or ADDITIONALED)
+                const ADDITIONALPD = item.findModsByXmlid("ADDITIONALPD");
+                const defenseLevels = parseInt(ADDITIONALPD?.LEVELS || 0) + parseInt(adder.LEVELS);
+                const _combinedCost = defenseLevels * this.costPerLevel();
+                const _cost = _combinedCost - ADDITIONALPD?.cost;
+                return _cost;
+            },
+            xml: `<ADDER XMLID="ADDITIONALED" ID="1738019117629" BASECOST="0.0" LEVELS="1" ALIAS="+1 Additional ED" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "AFFECTSBOTH",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
@@ -7265,13 +7355,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         xml: `<ADDER XMLID="BOOSTABLE" ID="1736721766918" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
 
-    addPower(undefined, {
-        // Gestures related
-        key: "BOTHHAND",
-        behaviors: ["adder"],
-        costPerLevel: fixedValueFunction(0),
-        xml: `<ADDER XMLID="BOTHHAND" ID="1734110256180" BASECOST="-0.25" LEVELS="0" ALIAS="Requires both hands" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-    });
+    addPower(
+        {
+            // Gestures related
+            key: "BOTHHAND",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="BOTHHAND" ID="1734110256180" BASECOST="-0.25" LEVELS="0" ALIAS="Requires both hands" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
 
     addPower(
         {
@@ -7280,6 +7373,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="CLIPS" ID="1737920256938" BASECOST="0.5" LEVELS="1" ALIAS="2 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // FLASH related
+            key: "COMBAT_SENSE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="COMBAT_SENSE" ID="1738457943820" BASECOST="5.0" LEVELS="0" ALIAS="Combat Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7294,6 +7397,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // INVISIBILITY related
+            key: "DANGER_SENSE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="DANGER_SENSE" ID="1738457617013" BASECOST="3.0" LEVELS="0" ALIAS="Danger Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(undefined, {
         key: "DOUBLEAREA",
         behaviors: ["adder"],
@@ -7352,6 +7465,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            // MINDSCAN efffects related
+            key: "ECVBONUS",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(2),
+            xml: `<ADDER XMLID="ECVBONUS" ID="1738448289783" BASECOST="0.0" LEVELS="1" ALIAS="+1 OMCV" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="2.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // INVISIBLE power efffects related
             key: "EFFECTSTARGET",
             behaviors: ["adder"],
@@ -7370,7 +7493,35 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
+    addPower(
+        {
+            // CHANGE ENVIRONMENT related
+            key: "EGO",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(5),
+            xml: `<ADDER XMLID="EGO" ID="1738458050930" BASECOST="0.0" LEVELS="1" ALIAS="-1 point of EGO" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DAMAGENEGATION related
+            key: "ENERGY",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(5),
+            xml: `<ADDER XMLID="ENERGY" ID="1738019507455" BASECOST="0.0" LEVELS="2" ALIAS="Energy DCs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ENHANCEDPERCEPTION",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(1),
+            xml: `<ADDER XMLID="ENHANCEDPERCEPTION" ID="1738452075059" BASECOST="0.0" LEVELS="1" ALIAS="+1 to PER Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // TRIGGER related
@@ -7378,6 +7529,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="EXPIRE" ID="1735590172478" BASECOST="-0.25" LEVELS="0" ALIAS="Trigger can expire (it has a time limit)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // AOE related
+            key: "EXPLOSION",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(true),
+            xml: `<ADDER XMLID="EXPLOSION" ID="1738457272027" BASECOST="-0.5" LEVELS="0" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7398,6 +7560,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INCREASEDRELOAD" ID="1737923202328" BASECOST="-0.25" LEVELS="0" ALIAS="Increased Reloading Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="2 Full Phases" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // MOVEMENT related
+            key: "IMPROVEDNONCOMBAT",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(5),
+            xml: `<ADDER XMLID="IMPROVEDNONCOMBAT" ID="1738018484005" BASECOST="0.0" LEVELS="1" ALIAS="x4 Noncombat" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7432,7 +7604,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
+    addPower(
+        {
+            // DAMAGENEGATION related
+            key: "MENTAL",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(5),
+            xml: `<ADDER XMLID="MENTAL" ID="1738019507456" BASECOST="0.0" LEVELS="3" ALIAS="Mental DCs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // POSSESSION related
@@ -7527,15 +7708,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(
-        {
-            key: "PLUSONEHALFDIE",
-            behaviors: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></<ADDER XMLID="OFFENSIVE" ID="1735589940604" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-        },
-        {},
-    );
+    // DUPLICATE?
+    // addPower(
+    //     {
+    //         key: "PLUSONEHALFDIE",
+    //         behaviors: ["adder"],
+    //         costPerLevel: fixedValueFunction(0),
+    //         xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></<ADDER XMLID="OFFENSIVE" ID="1735589940604" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    //     },
+    //     {},
+    // );
 
     addPower(
         {
@@ -7953,17 +8135,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "COSTSENDTOMAINTAIN",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="COSTSENDTOMAINTAIN" ID="1733644749282" BASECOST="-0.5" LEVELS="0" ALIAS="Costs END To Maintain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="Full END Cost" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        {},
-    );
-
-    addPower(
-        {
             key: "CONCENTRATION",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -8112,59 +8283,55 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    addPower(
-        {
-            key: "EXPLOSION",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            cost: function (modifier, item) {
-                const baseCost = parseFloat(modifier.BASECOST);
-                const levels = parseInt(modifier.LEVELS);
-                let baseDCFalloffFromShape = 1;
-                // 6e and 5e define AOE & EXPLOSION differently
-                const AOE = item.findModsByXmlid("AOE");
-                switch ((AOE || modifier).OPTIONID) {
-                    case "CONE":
-                        baseDCFalloffFromShape = 2;
-                        break;
-                    case "LINE":
-                        baseDCFalloffFromShape = 3;
-                        break;
-                    case "NORMAL":
-                    case "RADIUS":
-                        baseDCFalloffFromShape = 1;
-                        break;
-                    default:
-                        console.error(`unknown 5e explosion shape ${AOE || modifier}`, item);
-                        break;
-                }
-                const adjustedLevels = Math.max(0, levels - baseDCFalloffFromShape);
-                return baseCost + adjustedLevels * 0.25;
-            },
-            dcAffecting: fixedValueFunction(true),
-            editOptions: {
-                choices: [
-                    {
-                        OPTIONID: "NORMAL",
-                        OPTION: "NORMAL",
-                        OPTION_ALIAS: "Normal (Radius)",
-                    },
-                    {
-                        OPTIONID: "CONE",
-                        OPTION: "CONE",
-                        OPTION_ALIAS: "Cone",
-                    },
-                    {
-                        OPTIONID: "LINE",
-                        OPTION: "LINE",
-                        OPTION_ALIAS: "LINE",
-                    },
-                ],
-            },
-            xml: `<MODIFIER XMLID="EXPLOSION" ID="1713379744211" BASECOST="0.5" LEVELS="1" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="Normal (Radius)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    addPower(undefined, {
+        key: "EXPLOSION",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        cost: function (modifier, item) {
+            const baseCost = parseFloat(modifier.BASECOST);
+            const levels = parseInt(modifier.LEVELS);
+            let baseDCFalloffFromShape = 1;
+            // 6e and 5e define AOE & EXPLOSION differently. This is the 5E MODIFIER.
+            switch (modifier.OPTIONID) {
+                case "CONE":
+                    baseDCFalloffFromShape = 2;
+                    break;
+                case "LINE":
+                    baseDCFalloffFromShape = 3;
+                    break;
+                case "NORMAL":
+                case "RADIUS":
+                    baseDCFalloffFromShape = 1;
+                    break;
+                default:
+                    console.error(`unknown 5e explosion shape ${modifier.OPTIONID}`, modifier, item);
+                    break;
+            }
+            const adjustedLevels = Math.max(0, levels - baseDCFalloffFromShape);
+            return baseCost + adjustedLevels * 0.25;
         },
-        {},
-    );
+        dcAffecting: fixedValueFunction(true),
+        editOptions: {
+            choices: [
+                {
+                    OPTIONID: "NORMAL",
+                    OPTION: "NORMAL",
+                    OPTION_ALIAS: "Normal (Radius)",
+                },
+                {
+                    OPTIONID: "CONE",
+                    OPTION: "CONE",
+                    OPTION_ALIAS: "Cone",
+                },
+                {
+                    OPTIONID: "LINE",
+                    OPTION: "LINE",
+                    OPTION_ALIAS: "LINE",
+                },
+            ],
+        },
+        xml: `<MODIFIER XMLID="EXPLOSION" ID="1713379744211" BASECOST="0.5" LEVELS="1" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="Normal (Radius)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
 
     addPower(
         {
@@ -8190,6 +8357,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "HANDTOHANDATTACK",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="HANDTOHANDATTACK" ID="1711934557552" BASECOST="-0.25" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "HARDENED",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
@@ -8199,16 +8376,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(
-        {
-            key: "IMPENETRABLE",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(1 / 4),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        undefined,
-    );
+    // DUPLICATE?
+    // addPower(
+    //     {
+    //         key: "IMPENETRABLE",
+    //         behaviors: ["modifier"],
+    //         costPerLevel: fixedValueFunction(1 / 4),
+    //         dcAffecting: fixedValueFunction(false),
+    //         xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    //     },
+    //     undefined,
+    // );
     addPower(
         {
             key: "INCANTATIONS",
@@ -8290,16 +8468,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         undefined,
     );
 
-    addPower(
-        {
-            key: "INCREASEDEND",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="INCREASEDEND" ID="1736874990723" BASECOST="-0.5" LEVELS="0" ALIAS="Increased Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2X" OPTIONID="2X" OPTION_ALIAS="x2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        {},
-    );
+    // DUPLICATE?
+    // addPower(
+    //     {
+    //         key: "INCREASEDEND",
+    //         behaviors: ["modifier"],
+    //         costPerLevel: fixedValueFunction(0),
+    //         dcAffecting: fixedValueFunction(false),
+    //         xml: `<MODIFIER XMLID="INCREASEDEND" ID="1736874990723" BASECOST="-0.5" LEVELS="0" ALIAS="Increased Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2X" OPTIONID="2X" OPTION_ALIAS="x2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    //     },
+    //     {},
+    // );
     addPower(
         {
             key: "LIMITEDBODYPARTS",
@@ -8351,15 +8530,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         undefined,
     );
-    addPower(
-        {
-            key: "LINKED",
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: ` <MODIFIER XMLID="LINKED" ID="1580691372338" BASECOST="-0.5" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No" LINKED_ID="1577313774747"></MODIFIER>`,
-        },
-        undefined,
-    );
+    // DUPLICATE?
+    // addPower(
+    //     {
+    //         key: "LINKED",
+    //         costPerLevel: fixedValueFunction(0),
+    //         dcAffecting: fixedValueFunction(false),
+    //         xml: ` <MODIFIER XMLID="LINKED" ID="1580691372338" BASECOST="-0.5" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No" LINKED_ID="1577313774747"></MODIFIER>`,
+    //     },
+    //     undefined,
+    // );
     addPower(
         {
             key: "LOS",
@@ -8381,13 +8561,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(undefined, {
-        key: "MODIFIER",
-        behaviors: ["modifier"],
-        costPerLevel: fixedValueFunction(0),
-        dcAffecting: fixedValueFunction(true),
-        xml: `<MODIFIER XMLID="MODIFIER" ID="1729971743152" BASECOST="0.0" LEVELS="0" ALIAS="Last For One Hour or Until Destroyed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-    });
+    // DUPLICATE?
+    // addPower(undefined, {
+    //     key: "MODIFIER",
+    //     behaviors: ["modifier"],
+    //     costPerLevel: fixedValueFunction(0),
+    //     dcAffecting: fixedValueFunction(true),
+    //     xml: `<MODIFIER XMLID="MODIFIER" ID="1729971743152" BASECOST="0.0" LEVELS="0" ALIAS="Last For One Hour or Until Destroyed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    // });
 
     addPower(undefined, {
         key: "NND",
@@ -8756,6 +8937,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "SENSEAFFECTEDASMORETHANONESENSE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="SENSEAFFECTEDASMORETHANONESENSE" ID="1738018247799" BASECOST="-0.5" LEVELS="0" ALIAS="Sense Affected As More Than One Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYCOMMON" OPTIONID="VERYCOMMON" OPTION_ALIAS="[very common Sense]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "SIDEEFFECTS",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -8928,18 +9119,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 // Some MODIFIERS (like EXPANDEDEFFECT) base a BASECOST -0.5 with LEVELS=2 and CostPerLevel 0.5, making them appear to be limitations, but actually advantages.
 // Plan is to remove ModifierOverride and add them to the powers list as modifiers.
 HERO.ModifierOverride = {
-    ADDITIONALED: { dcAffecting: fixedValueFunction(false), BASECOST: 5 / 2 },
-    ADDITIONALPD: { dcAffecting: fixedValueFunction(false), BASECOST: 5 / 2 },
     ALWAYSOCCURS: { dcAffecting: fixedValueFunction(false), BASECOST: 0, MULTIPLIER: 2 },
-    AVAD: { dcAffecting: fixedValueFunction(true) },
     CONTINUOUSCONCENTRATION: { dcAffecting: fixedValueFunction(false), BASECOST: -0.25 },
     DAMAGEOVERTIME: { dcAffecting: fixedValueFunction(true) },
     DEFBONUS: { dcAffecting: fixedValueFunction(false), BASECOST: 2 },
     DIMENSIONS: { dcAffecting: fixedValueFunction(false), BASECOST: 5 },
-    ENERGY: { dcAffecting: fixedValueFunction(false), BASECOST: 5 }, // DAMAGENEGATION
-    IMPROVEDNONCOMBAT: { dcAffecting: fixedValueFunction(false), BASECOST: 5 },
-    MENTAL: { dcAffecting: fixedValueFunction(false), BASECOST: 5 }, // DAMAGENEGATION
-    PHYSICAL: { dcAffecting: fixedValueFunction(false), BASECOST: 5 }, // DAMAGENEGATION
     TIMELIMIT: { dcAffecting: fixedValueFunction(true) },
     TRANSDIMENSIONAL: { dcAffecting: fixedValueFunction(true) },
 };
