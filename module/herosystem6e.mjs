@@ -157,7 +157,7 @@ Hooks.once("init", async function () {
         CONFIG.ui.combat = HeroSystem6eCombatTracker;
     }
 
-    // Insert templates into DOM tree so Applications can render into
+    // Insert EffectsPanel template into DOM tree so it can render
     if (document.querySelector("#ui-top") !== null) {
         // Template element for effects-panel
         const uiTop = document.querySelector("#ui-top");
