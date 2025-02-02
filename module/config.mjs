@@ -6152,8 +6152,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            costPerLevel: fixedValueFunction(3 / 2),
+            costPerLevel: fixedValueFunction(2 / 3),
+            cost: function (item) {
+                // 2 CP per 3 Active Points'
+                const levels = parseInt(item.system.LEVELS);
+                return Math.ceil((levels * this.costPerLevel()) / 3) * 2;
+            },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            descriptionFactory: function (item) {
+                return `${item.system.ALIAS} (${parseInt(item.system.LEVELS)} Active Points' worth)`;
+            },
             xml: `<POWER XMLID="REFLECTION" ID="1709333998486" BASECOST="0.0" LEVELS="1" ALIAS="Reflection" POSITION="69" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         undefined,

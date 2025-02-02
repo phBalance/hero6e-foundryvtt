@@ -7708,6 +7708,43 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.damage, "60");
                 });
             });
+
+            describe("REFLECTION", function () {
+                const contents = `
+                    <POWER XMLID="REFLECTION" ID="1709333998486" BASECOST="0.0" LEVELS="1" ALIAS="Reflection" POSITION="69" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Reflection (1 Active Points' worth)");
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 2);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 2);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

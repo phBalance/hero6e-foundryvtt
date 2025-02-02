@@ -2602,6 +2602,7 @@ export class HeroSystem6eItem extends Item {
             console.warn(
                 `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
                     `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
+                this,
             );
         }
         return changed;
@@ -3881,6 +3882,11 @@ export class HeroSystem6eItem extends Item {
 
             default:
                 {
+                    if (this.baseInfo?.descriptionFactory) {
+                        system.description = this.baseInfo.descriptionFactory(this);
+                        break;
+                    }
+
                     if (configPowerInfo?.type?.includes("characteristic")) {
                         system.description = "+" + system.value + " " + system.ALIAS;
                         break;
