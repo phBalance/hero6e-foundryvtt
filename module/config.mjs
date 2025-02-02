@@ -5505,6 +5505,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "constant",
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
+            cost: undefined,
             xml: `<POWER XMLID="FORCEFIELD" ID="1709342634480" BASECOST="0.0" LEVELS="0" ALIAS="Force Field" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0"><NOTES/></POWER>`,
         },
     );
