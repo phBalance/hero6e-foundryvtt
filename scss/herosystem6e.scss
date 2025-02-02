@@ -19,10 +19,8 @@
 
 /* Styles limited to hero sheets */
 .hero {
-    /* V13 - Moved from global as these should be scoped */
-    @include meta.load-css("global/grid");
-    @include meta.load-css("global/flex");
-
+    @include meta.load-css("global/grid"); /* V13 - Moved from global as these should be scoped */
+    @include meta.load-css("global/flex"); /* V13 - Moved from global as these should be scoped */
     @include meta.load-css("components/forms");
     @include meta.load-css("components/resource");
     @include meta.load-css("components/tabs");
