@@ -6724,7 +6724,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             duration: "persistent", // Enhanced Senses are typically persistent
             behaviors: ["adder"],
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1 / 3),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
@@ -6854,7 +6854,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1 / 3),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
@@ -6892,7 +6892,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
