@@ -2756,13 +2756,13 @@ export class HeroSystem6eItem extends Item {
         //HACK for ENTANGLE +1PD/ED in 6e
         //Normallly we would use a function in CONFIG.mjs
         // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
-        // if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
-        //     const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
-        //     const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
-        //     if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
-        //         adderCost -= 1;
-        //     }
-        // }
+        if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
+            const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+            const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+            if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
+                adderCost -= 1;
+            }
+        }
 
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
