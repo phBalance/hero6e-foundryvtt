@@ -32,7 +32,7 @@ export class HeroSystem6eModifier {
 
         if (!this.#baseInfo) {
             if (!window.warnAdder?.includes(this.XMLID)) {
-                console.warn(
+                console.info(
                     `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
                     this,
                 );
