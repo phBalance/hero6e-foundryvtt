@@ -429,6 +429,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription6e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription6e.type ??= [];
                 powerDescription6e.behaviors ??= [xml.children[0].tagName.toLowerCase()];
+                powerDescription6e.xmlTag ??= xml.children[0].tagName.toUpperCase();
             } else {
                 //debugger;
             }
@@ -453,6 +454,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription5e.type ??= [];
                 powerDescription5e.behaviors ??= [xml.children[0].tagName.toLowerCase()];
+                powerDescription5e.xmlTag ??= xml.children[0].tagName.toUpperCase();
             } else {
                 //debugger;
             }
@@ -6567,6 +6569,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(3),
+            xml: `<POWER XMLID="ENHANCEDPERCEPTION" ID="1738452641594" BASECOST="0.0" LEVELS="1" ALIAS="Enhanced Perception" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
@@ -7339,6 +7342,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // FLASH related
+            key: "COMBAT_SENSE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="COMBAT_SENSE" ID="1738457943820" BASECOST="5.0" LEVELS="0" ALIAS="Combat Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // CHARGES related
             key: "CONTINUING",
             behaviors: ["adder"],
@@ -7348,6 +7361,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // INVISIBILITY related
+            key: "DANGER_SENSE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="DANGER_SENSE" ID="1738457617013" BASECOST="3.0" LEVELS="0" ALIAS="Danger Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(undefined, {
         key: "DOUBLEAREA",
         behaviors: ["adder"],
@@ -7434,6 +7457,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // CHANGE ENVIRONMENT related
+            key: "EGO",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="EGO" ID="1738458050930" BASECOST="0.0" LEVELS="1" ALIAS="-1 point of EGO" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // DAMAGENEGATION related
             key: "ENERGY",
             behaviors: ["adder"],
@@ -7444,11 +7477,30 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "ENHANCEDPERCEPTION",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(1),
+            xml: `<ADDER XMLID="ENHANCEDPERCEPTION" ID="1738452075059" BASECOST="0.0" LEVELS="1" ALIAS="+1 to PER Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TRIGGER related
             key: "EXPIRE",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="EXPIRE" ID="1735590172478" BASECOST="-0.25" LEVELS="0" ALIAS="Trigger can expire (it has a time limit)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // AOE related
+            key: "EXPLOSION",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="EXPLOSION" ID="1738457272027" BASECOST="-0.5" LEVELS="0" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8202,59 +8254,56 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    addPower(
-        {
-            key: "EXPLOSION",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            cost: function (modifier, item) {
-                const baseCost = parseFloat(modifier.BASECOST);
-                const levels = parseInt(modifier.LEVELS);
-                let baseDCFalloffFromShape = 1;
-                // 6e and 5e define AOE & EXPLOSION differently
-                const AOE = item.findModsByXmlid("AOE");
-                switch ((AOE || modifier).OPTIONID) {
-                    case "CONE":
-                        baseDCFalloffFromShape = 2;
-                        break;
-                    case "LINE":
-                        baseDCFalloffFromShape = 3;
-                        break;
-                    case "NORMAL":
-                    case "RADIUS":
-                        baseDCFalloffFromShape = 1;
-                        break;
-                    default:
-                        console.error(`unknown 5e explosion shape ${AOE || modifier}`, item);
-                        break;
-                }
-                const adjustedLevels = Math.max(0, levels - baseDCFalloffFromShape);
-                return baseCost + adjustedLevels * 0.25;
-            },
-            dcAffecting: fixedValueFunction(true),
-            editOptions: {
-                choices: [
-                    {
-                        OPTIONID: "NORMAL",
-                        OPTION: "NORMAL",
-                        OPTION_ALIAS: "Normal (Radius)",
-                    },
-                    {
-                        OPTIONID: "CONE",
-                        OPTION: "CONE",
-                        OPTION_ALIAS: "Cone",
-                    },
-                    {
-                        OPTIONID: "LINE",
-                        OPTION: "LINE",
-                        OPTION_ALIAS: "LINE",
-                    },
-                ],
-            },
-            xml: `<MODIFIER XMLID="EXPLOSION" ID="1713379744211" BASECOST="0.5" LEVELS="1" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="Normal (Radius)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    addPower(undefined, {
+        key: "EXPLOSION",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        cost: function (modifier, item) {
+            const baseCost = parseFloat(modifier.BASECOST);
+            const levels = parseInt(modifier.LEVELS);
+            let baseDCFalloffFromShape = 1;
+            // 6e and 5e define AOE & EXPLOSION differently
+            const AOE = item.findModsByXmlid("AOE");
+            switch ((AOE || modifier).OPTIONID) {
+                case "CONE":
+                    baseDCFalloffFromShape = 2;
+                    break;
+                case "LINE":
+                    baseDCFalloffFromShape = 3;
+                    break;
+                case "NORMAL":
+                case "RADIUS":
+                    baseDCFalloffFromShape = 1;
+                    break;
+                default:
+                    console.error(`unknown 5e explosion shape ${AOE || modifier}`, item);
+                    break;
+            }
+            const adjustedLevels = Math.max(0, levels - baseDCFalloffFromShape);
+            return baseCost + adjustedLevels * 0.25;
         },
-        {},
-    );
+        dcAffecting: fixedValueFunction(true),
+        editOptions: {
+            choices: [
+                {
+                    OPTIONID: "NORMAL",
+                    OPTION: "NORMAL",
+                    OPTION_ALIAS: "Normal (Radius)",
+                },
+                {
+                    OPTIONID: "CONE",
+                    OPTION: "CONE",
+                    OPTION_ALIAS: "Cone",
+                },
+                {
+                    OPTIONID: "LINE",
+                    OPTION: "LINE",
+                    OPTION_ALIAS: "LINE",
+                },
+            ],
+        },
+        xml: `<MODIFIER XMLID="EXPLOSION" ID="1713379744211" BASECOST="0.5" LEVELS="1" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="Normal (Radius)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
 
     addPower(
         {
@@ -8278,6 +8327,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            key: "HANDTOHANDATTACK",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="HANDTOHANDATTACK" ID="1711934557552" BASECOST="-0.25" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(
         {
             key: "HARDENED",

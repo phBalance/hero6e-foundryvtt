@@ -31,7 +31,22 @@ export function getPowerInfo(options) {
     }
 
     const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-    let powerInfo = powerList.find((o) => o.key === xmlid);
+
+    // ENHANCEDPERCEPTION is a POWER and an ADDER, we can pass in xmlTag to get the right one
+    let powerInfo = powerList.find(
+        (o) => o.key === xmlid && (!options?.xmlTag || !o.xmlTag || o.xmlTag === options?.xmlTag),
+    );
+
+    if (!powerInfo) {
+        powerInfo = powerList.find((o) => o.key === xmlid);
+        if (powerInfo) {
+            console.error(
+                `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}`,
+                powerInfo,
+            );
+            debugger;
+        }
+    }
 
     // TODO: Why are we modifying the power entries from config here?
     if (powerInfo) {

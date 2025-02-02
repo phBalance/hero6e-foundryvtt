@@ -5473,6 +5473,8 @@ export class HeroSystem6eItem extends Item {
             return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
         } else if (this.type === "disadvantage") {
             return false;
+        } else if (this.#baseInfo.type.includes("disadvantage")) {
+            return false;
         }
 
         // Legacy KILLING support

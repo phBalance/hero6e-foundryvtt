@@ -9,7 +9,13 @@ export class HeroSystem6eAdder {
         // if (!this.item) {
         //     debugger;
         // }
-        this.#baseInfo = getModifierInfo({ xmlid: json.XMLID, actor: this.item?.actor, is5e: this.item?.is5e });
+        this.#baseInfo = getModifierInfo({
+            xmlid: json.XMLID,
+            actor: this.item?.actor,
+            is5e: this.item?.is5e,
+            item: this.item,
+            xmlTag: "ADDER",
+        });
 
         for (const key of Object.keys(json)) {
             if (foundry.utils.hasProperty(this, key)) {
@@ -39,11 +45,14 @@ export class HeroSystem6eAdder {
 
             let costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
             const levels = parseInt(this.LEVELS) || 0;
-            if (!costPerLevel && this.LVLCOST) {
-                console.warn(
-                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: is missing costPerLevel, using LVLCOST & LVLVAL`,
-                );
-                costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
+            if (this.LVLCOST) {
+                const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
+                if (costPerLevel != _costPerLevel) {
+                    console.warn(
+                        `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency`,
+                    );
+                    costPerLevel = _costPerLevel;
+                }
             }
             _cost += levels * costPerLevel;
         }
@@ -65,8 +74,8 @@ export class HeroSystem6eAdder {
     }
 
     set BASECOST_total(value) {
-        if (this.cost != value) {
-            //debugger;
+        // ADDITIONALED is prorated based on ADDITIONALPD, which the legacy code does not do properly.
+        if (this.cost != value && this.XMLID !== "ADDITIONALED") {
             console.error(
                 `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} BASECOST_total (${value}) did not match cost ${this.BASECOST_total}`,
             );
