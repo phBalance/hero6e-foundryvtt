@@ -453,6 +453,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 const powerInfo = getPowerInfo({
                     xmlid: key.toUpperCase(),
                     actor: this.actor,
+                    xmlTag: key.toUpperCase(),
                 });
                 let valueTop = Math.max(char.value, char.max);
                 let activePoints = valueTop * (powerInfo?.cost || 0);

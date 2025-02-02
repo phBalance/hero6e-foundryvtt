@@ -975,7 +975,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     // An attempt to cache getPowerInfo for performance reasons.
-    #baseInfo = getPowerInfo({ item: this });
+    #baseInfo = getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
     getBaseInfo() {
         console.warn("Use baseInfo instead of getBaseInfo");
         return this.#baseInfo;
@@ -2455,7 +2455,7 @@ export class HeroSystem6eItem extends Item {
                         type: powerList.filter((o) => o.type?.includes("characteristic")).map((o) => o.key)
                             ? "power"
                             : itemTag.toLowerCase().replace(/s$/, ""),
-                        system: { ...system, is5e: itemData.system.is5e },
+                        system: { ...system, is5e: itemData.system.is5e, xmlTag: itemSubTag },
                     };
 
                     return itemData;
@@ -2582,6 +2582,9 @@ export class HeroSystem6eItem extends Item {
 
     calcItemPoints() {
         let changed = false;
+        // if (this.system.ID === "1726444520895") {
+        //     debugger;
+        // }
         changed = this.calcBasePointsPlusAdders() || changed;
         changed = this.calcActivePoints() || changed;
         changed = this.calcRealCost() || changed;
@@ -2741,13 +2744,13 @@ export class HeroSystem6eItem extends Item {
         //HACK for ENTANGLE +1PD/ED in 6e
         //Normallly we would use a function in CONFIG.mjs
         // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
-        if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
-            const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
-            const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
-            if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
-                adderCost -= 1;
-            }
-        }
+        // if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
+        //     const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+        //     const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+        //     if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
+        //         adderCost -= 1;
+        //     }
+        // }
 
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
@@ -2832,6 +2835,7 @@ export class HeroSystem6eItem extends Item {
                 item: modifier,
                 actor: this.actor,
                 is5e: this.system.is5e,
+                xmlTag: "MODIFIER",
             });
 
             // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)
@@ -2940,8 +2944,14 @@ export class HeroSystem6eItem extends Item {
                 xmlid: modifier.XMLID,
                 item: this,
             });
-            if (modifierInfo?.dcAffecting(modifier)) {
-                advantagesAffectingDc += Math.max(0, _myAdvantage);
+            if (modifierInfo && !modifierInfo?.dcAffecting) {
+                console.error(
+                    `${this.actor?.name}/${this.name}/${this.system.XMLID}/${modifier.XMLID}: Missing dcAffecting function in config.mjs`,
+                );
+            } else {
+                if (modifierInfo?.dcAffecting(modifier)) {
+                    advantagesAffectingDc += Math.max(0, _myAdvantage);
+                }
             }
 
             // Save _myAdvantage

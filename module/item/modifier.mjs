@@ -29,10 +29,16 @@ export class HeroSystem6eModifier {
         if (!(this.item instanceof HeroSystem6eItem)) {
             console.warn(`${this.XMLID} item not found`);
         }
+
         if (!this.#baseInfo) {
-            console.warn(
-                `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} baseInfo not found`,
-            );
+            if (!window.warnAdder?.includes(this.XMLID)) {
+                console.warn(
+                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
+                    this,
+                );
+                window.warnAdder ??= [];
+                window.warnAdder.push(this.XMLID);
+            }
         }
     }
 

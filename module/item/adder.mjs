@@ -28,6 +28,17 @@ export class HeroSystem6eAdder {
         for (const key of Object.keys(options)) {
             this[key] = options[key];
         }
+
+        if (!this.#baseInfo) {
+            if (!window.warnAdder?.includes(this.XMLID)) {
+                console.warn(
+                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
+                    this,
+                );
+                window.warnAdder ??= [];
+                window.warnAdder.push(this.XMLID);
+            }
+        }
     }
 
     get baseInfo() {
@@ -35,24 +46,30 @@ export class HeroSystem6eAdder {
     }
 
     get cost() {
+        if (this.SELECTED === false) {
+            return 0;
+        }
+
         let _cost = 0;
         // Custom costs calculations
-        if (this.baseInfo?.cost) {
-            _cost = this.baseInfo.cost(this, this.item);
+        if (this.#baseInfo?.cost) {
+            _cost = this.#baseInfo.cost(this, this.item);
         } else {
             // Generic cost calculations
             _cost = parseFloat(this.BASECOST);
 
-            let costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
+            let costPerLevel = this.#baseInfo?.costPerLevel(this) || 0;
             const levels = parseInt(this.LEVELS) || 0;
-            if (this.LVLCOST) {
+            // Override default costPerLevel?
+            if (this.LVLCOST && levels > 0) {
                 const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
-                if (costPerLevel != _costPerLevel) {
+                if (costPerLevel !== _costPerLevel && this.#baseInfo) {
                     console.warn(
-                        `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency`,
+                        `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
+                        this,
                     );
-                    costPerLevel = _costPerLevel;
                 }
+                costPerLevel = _costPerLevel;
             }
             _cost += levels * costPerLevel;
         }
@@ -79,6 +96,7 @@ export class HeroSystem6eAdder {
             console.error(
                 `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} BASECOST_total (${value}) did not match cost ${this.BASECOST_total}`,
             );
+            return;
         }
     }
 }

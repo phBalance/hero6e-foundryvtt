@@ -23,7 +23,13 @@ export function adjustmentSourcesPermissive(actor, is5e) {
 
     const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(
-        (power) => !power.type?.includes("skill") && !power.type?.includes("perk") && !power.type?.includes("talent"),
+        (power) =>
+            !power.type?.includes("skill") &&
+            !power.type?.includes("perk") &&
+            !power.type?.includes("talent") &&
+            power?.xmlTag !== "ADDER" &&
+            power?.xmlTag !== "DISAD" &&
+            power?.xmlTag !== "MODIFIER",
     );
 
     for (const power of powers) {
@@ -109,6 +115,7 @@ export function defensivePowerAdjustmentMultiplier(XMLID, actor, is5e) {
         xmlid: XMLID,
         actor: actor,
         is5e: is5e,
+        xmlTag: "POWER",
     });
     if (!configPowerInfo) {
         if (actor) {

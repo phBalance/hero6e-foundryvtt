@@ -12,6 +12,21 @@ export function getPowerInfo(options) {
 
     const actor = options?.actor || options?.item?.actor;
 
+    // Legacy init of an item
+    if (!options?.xmlTag && !options?.xmlid) {
+        if (options?.item?.system.XMLID === "FOCUS") {
+            options.xmlTag = "MODIFIER";
+        } else if (["power", "equipment"].includes(options?.item?.type)) {
+            options.xmlTag = "POWER";
+        } else if (options?.item?.type === "skill") {
+            options.xmlTag = "SKILL";
+        } else if (options?.item?.type === "talent") {
+            options.xmlTag = "TALENT";
+        } else if (options?.item?.system.XMLID === "HANDTOHANDATTACK" && options.item.type === "attack") {
+            options.xmlTag = "POWER";
+        }
+    }
+
     // Determine is5e
     let is5e = actor?.is5e; //?.system?.is5e;
     if (is5e === undefined) {
@@ -33,18 +48,35 @@ export function getPowerInfo(options) {
     const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
 
     // ENHANCEDPERCEPTION is a POWER and an ADDER, we can pass in xmlTag to get the right one
-    let powerInfo = powerList.find(
+    let powerInfo = powerList.filter(
         (o) => o.key === xmlid && (!options?.xmlTag || !o.xmlTag || o.xmlTag === options?.xmlTag),
     );
+
+    if (powerInfo.length > 1) {
+        console.error(
+            `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Multiple powerInfo results.`,
+            powerInfo,
+            options,
+        );
+    }
+    powerInfo = powerInfo?.[0];
 
     if (!powerInfo) {
         powerInfo = powerList.find((o) => o.key === xmlid);
         if (powerInfo) {
-            console.error(
-                `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}`,
-                powerInfo,
-            );
-            debugger;
+            if (powerInfo.type.some((t) => ["movement", "skill", "characteristic"].includes(t))) {
+                console.debug(
+                    `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    powerInfo,
+                    options,
+                );
+            } else {
+                console.error(
+                    `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    powerInfo,
+                    options,
+                );
+            }
         }
     }
 
