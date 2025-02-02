@@ -1197,6 +1197,7 @@ export class HeroSystem6eActor extends Actor {
                     getPowerInfo({
                         xmlid: characteristicUpperCase,
                         actor: this,
+                        xmlTag: characteristicUpperCase,
                     })?.base,
                 ) || 0)
             );
@@ -2497,6 +2498,7 @@ export class HeroSystem6eActor extends Actor {
         const charPowerEntry = getPowerInfo({
             xmlid: key.toUpperCase(),
             actor: this,
+            xmlTag: key.toUpperCase(),
         });
 
         if (characteristic && charPowerEntry?.behaviors.includes("success")) {

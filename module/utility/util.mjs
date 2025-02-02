@@ -12,9 +12,9 @@ export function getPowerInfo(options) {
 
     const actor = options?.actor || options?.item?.actor;
 
-    // Legacy init of an item
+    // Legacy init of an item (we now include xmlTag during upload process)
     if (!options?.xmlTag && !options?.xmlid) {
-        if (options?.item?.system.XMLID === "FOCUS") {
+        if (options?.item?.system?.XMLID === "FOCUS") {
             options.xmlTag = "MODIFIER";
         } else if (["power", "equipment"].includes(options?.item?.type)) {
             options.xmlTag = "POWER";
@@ -22,7 +22,7 @@ export function getPowerInfo(options) {
             options.xmlTag = "SKILL";
         } else if (options?.item?.type === "talent") {
             options.xmlTag = "TALENT";
-        } else if (options?.item?.system.XMLID === "HANDTOHANDATTACK" && options.item.type === "attack") {
+        } else if (options?.item?.system?.XMLID === "HANDTOHANDATTACK" && options.item.type === "attack") {
             options.xmlTag = "POWER";
         }
     }
@@ -54,7 +54,7 @@ export function getPowerInfo(options) {
 
     if (powerInfo.length > 1) {
         console.error(
-            `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Multiple powerInfo results.`,
+            `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Multiple powerInfo results.`,
             powerInfo,
             options,
         );
@@ -66,13 +66,13 @@ export function getPowerInfo(options) {
         if (powerInfo) {
             if (powerInfo.type.some((t) => ["movement", "skill", "characteristic"].includes(t))) {
                 console.debug(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
                     powerInfo,
                     options,
                 );
             } else {
                 console.error(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
                     powerInfo,
                     options,
                 );

@@ -8135,17 +8135,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "COSTSENDTOMAINTAIN",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="COSTSENDTOMAINTAIN" ID="1733644749282" BASECOST="-0.5" LEVELS="0" ALIAS="Costs END To Maintain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="Full END Cost" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        {},
-    );
-
-    addPower(
-        {
             key: "CONCENTRATION",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -8571,13 +8560,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(undefined, {
-        key: "MODIFIER",
-        behaviors: ["modifier"],
-        costPerLevel: fixedValueFunction(0),
-        dcAffecting: fixedValueFunction(true),
-        xml: `<MODIFIER XMLID="MODIFIER" ID="1729971743152" BASECOST="0.0" LEVELS="0" ALIAS="Last For One Hour or Until Destroyed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-    });
+    // DUPLICATE?
+    // addPower(undefined, {
+    //     key: "MODIFIER",
+    //     behaviors: ["modifier"],
+    //     costPerLevel: fixedValueFunction(0),
+    //     dcAffecting: fixedValueFunction(true),
+    //     xml: `<MODIFIER XMLID="MODIFIER" ID="1729971743152" BASECOST="0.0" LEVELS="0" ALIAS="Last For One Hour or Until Destroyed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    // });
 
     addPower(undefined, {
         key: "NND",

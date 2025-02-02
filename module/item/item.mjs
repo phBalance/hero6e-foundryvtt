@@ -314,6 +314,7 @@ export class HeroSystem6eItem extends Item {
     hasSuccessRoll() {
         const powerInfo = getPowerInfo({
             item: this,
+            xmlTag: this.system.xmlTag,
         });
         return (
             powerInfo?.behaviors.includes("success") ||
@@ -813,13 +814,22 @@ export class HeroSystem6eItem extends Item {
 
             // recurse part
             for (const mod of this.modifiers || this.MODIFIER || []) {
-                if (recursiveFindByXmlid.call(mod, xmlid)) return mod;
+                const mod2 = recursiveFindByXmlid.call(mod, xmlid);
+                if (mod2) {
+                    return mod2;
+                }
             }
             for (const adder of this.adders || this.ADDER || []) {
-                if (recursiveFindByXmlid.call(adder, xmlid)) return adder;
+                const adder2 = recursiveFindByXmlid.call(adder, xmlid);
+                if (adder2) {
+                    return adder2;
+                }
             }
             for (const power of this.powers || this.POWER || []) {
-                if (recursiveFindByXmlid.call(power, xmlid)) return power;
+                const power2 = recursiveFindByXmlid.call(power, xmlid);
+                if (power2) {
+                    return power2;
+                }
             }
         }
 
@@ -2626,6 +2636,7 @@ export class HeroSystem6eItem extends Item {
         const configPowerInfo = getPowerInfo({
             item: this,
             actor: actor,
+            xmlTag: this.system.xmlTag,
         });
 
         // Base Cost is typically extracted directly from HDC
@@ -2943,6 +2954,7 @@ export class HeroSystem6eItem extends Item {
             const modifierInfo = getModifierInfo({
                 xmlid: modifier.XMLID,
                 item: this,
+                xmlTag: "MODIFIER",
             });
             if (modifierInfo && !modifierInfo?.dcAffecting) {
                 console.error(
@@ -2998,11 +3010,7 @@ export class HeroSystem6eItem extends Item {
         for (const modifier of modifiers) {
             let _myLimitation = 0;
 
-            const modPowerInfo = getPowerInfo({
-                item: modifier,
-                actor: this.actor,
-                is5e: this.is5e,
-            });
+            const modPowerInfo = modifier.baseInfo;
             if (!modPowerInfo) {
                 console.warn(
                     `${this.actor?.name}/${this.name}/${this.system.XMLID} is missing powerInfo for modifier ${modifier.XMLID}`,
@@ -4207,10 +4215,7 @@ export class HeroSystem6eItem extends Item {
                 return a.cost - b.cost;
             })) {
             // This might be a limitation with an unusually positive value
-            const modPowerInfo = getPowerInfo({
-                item: modifier,
-                actor: this.actor,
-            });
+            const modPowerInfo = modifier.baseInfo;
             if (modPowerInfo?.minimumLimitation) {
                 continue;
             }
@@ -4295,7 +4300,7 @@ export class HeroSystem6eItem extends Item {
 
     createPowerDescriptionModifier(modifier) {
         const item = this;
-        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID, actor: this.actor });
+        const modifierInfo = modifier.baseInfo;
         const system = item.system;
         let result = "";
 
@@ -4527,11 +4532,11 @@ export class HeroSystem6eItem extends Item {
             result = result.replace(`Focus (${modifier.OPTION}; `, `${modifier.OPTION} (`);
         }
 
-        const configPowerInfo = getPowerInfo({
-            xmlid: system.XMLID,
-            actor: item?.actor,
-            is5e: this.is5e,
-        });
+        const configPowerInfo = this.baseInfo; //getPowerInfo({
+        //     xmlid: system.XMLID,
+        //     actor: item?.actor,
+        //     is5e: this.is5e,
+        // });
 
         // All Slots? This may be a slot in a framework if so get parent
         if (configPowerInfo && configPowerInfo.type?.includes("framework")) {
@@ -5642,9 +5647,7 @@ export class HeroSystem6eItem extends Item {
      */
     isSenseAffecting() {
         return (
-            !!getPowerInfo({
-                item: this,
-            })?.type?.includes("sense-affecting") ||
+            !!this.baseInfo?.type?.includes("sense-affecting") ||
             (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
         );
     }
