@@ -2218,6 +2218,16 @@ export class HeroSystem6eActor extends Actor {
                             jsonChild[attribute.name] = attribute.value.trim();
                     }
                 }
+
+                // There can be confusion if the item is a MODIFIER or ADDER (EXPLOSION 5e/6e and others).
+                // So keep track of the tagName, which we use in getPowerInfo to help filter when there are duplicate XMLID keys.
+                if (child.attributes.length > 0) {
+                    try {
+                        jsonChild.xmlTag = tagName;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
             }
 
             if (child.children.length > 0) {

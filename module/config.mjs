@@ -5456,6 +5456,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(3 / 2),
+            cost: function (item) {
+                // 3 CP per 2 points of Resistant Defense
+                const levels = parseInt(item.system.LEVELS);
+                return Math.ceil(levels / 2) * 3;
+            },
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
@@ -6152,8 +6157,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            costPerLevel: fixedValueFunction(3 / 2),
+            costPerLevel: fixedValueFunction(2 / 3),
+            cost: function (item) {
+                // 2 CP per 3 Active Points'
+                const levels = parseInt(item.system.LEVELS);
+                return Math.ceil((levels * this.costPerLevel()) / 3) * 2;
+            },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            descriptionFactory: function (item) {
+                return `${item.system.ALIAS} (${parseInt(item.system.LEVELS)} Active Points' worth)`;
+            },
             xml: `<POWER XMLID="REFLECTION" ID="1709333998486" BASECOST="0.0" LEVELS="1" ALIAS="Reflection" POSITION="69" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         undefined,
@@ -6716,7 +6729,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             duration: "persistent", // Enhanced Senses are typically persistent
             behaviors: ["adder"],
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(3),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
@@ -6846,7 +6859,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(3),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
@@ -6884,7 +6897,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
         },
@@ -7162,6 +7175,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "REPUTATION",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Negative Reputation",
+            costPerLevel: fixedValueFunction(0), // TODO: needs function
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            xml: `<DISAD XMLID="REPUTATION" ID="1738534326877" BASECOST="0.0" LEVELS="0" ALIAS="Negative Reputation" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+            <ADDER XMLID="RECOGNIZED" ID="1738534824035" BASECOST="5.0" LEVELS="0" ALIAS="Recognized" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SOMETIMES" OPTIONID="SOMETIMES" OPTION_ALIAS="Infrequently" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+            </ADDER>
+            </DISAD>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "RIVALRY",
             type: ["disadvantage"],
             behaviors: [],
@@ -7426,6 +7455,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // STRETCHING related
+            key: "DIMENSIONS",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<ADDER XMLID="DIMENSIONS" ID="1733644749271" BASECOST="0.0" LEVELS="4" ALIAS="x16 body dimension" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(undefined, {
         key: "DOUBLEAREA",
         behaviors: ["adder"],
@@ -7579,6 +7619,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INCREASEDRELOAD" ID="1737923202328" BASECOST="-0.25" LEVELS="0" ALIAS="Increased Reloading Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="2 Full Phases" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DAMAGEOVERTIME related
+            key: "INCREMENTS",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="INCREMENTS" ID="1738534117222" BASECOST="0.25" LEVELS="0" ALIAS="Number of Damage Increments" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2" OPTIONID="2" OPTION_ALIAS="2" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7818,6 +7868,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(1 / 2),
             xml: `<ADDER XMLID="TELEPATHYEFFECT" ID="1737915448081" BASECOST="0.0" LEVELS="10" ALIAS="+10 Points of Telepathy effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DAMAGEOVERTIME related
+            key: "TIMEBETWEEN",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="TIMEBETWEEN" ID="1738534117245" BASECOST="2.0" LEVELS="0" ALIAS="damage occurs every" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEGMENT" OPTIONID="SEGMENT" OPTION_ALIAS="Segment" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8192,7 +8252,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
+    addPower(
+        {
+            key: "DAMAGEOVERTIME",
+            behaviors: ["modifier"],
+            dcAffecting: fixedValueFunction(true),
+            costPerLevel: fixedValueFunction(0),
+            xml: `<MODIFIER XMLID="DAMAGEOVERTIME" ID="1738533900123" BASECOST="1.0" LEVELS="0" ALIAS="Damage Over Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(
         {
             key: "DAMAGESHIELD",
@@ -9037,6 +9106,26 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "TIMELIMIT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(true),
+            xml: `<MODIFIER XMLID="TIMELIMIT" ID="1738525037034" BASECOST="0.25" LEVELS="0" ALIAS="Time Limit" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="Extra Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRANSDIMENSIONAL",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(true),
+            xml: `<MODIFIER XMLID="TRANSDIMENSIONAL" ID="1738534122034" BASECOST="0.5" LEVELS="0" ALIAS="Transdimensional" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "TRIGGER",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -9140,11 +9229,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 HERO.ModifierOverride = {
     ALWAYSOCCURS: { dcAffecting: fixedValueFunction(false), BASECOST: 0, MULTIPLIER: 2 },
     CONTINUOUSCONCENTRATION: { dcAffecting: fixedValueFunction(false), BASECOST: -0.25 },
-    DAMAGEOVERTIME: { dcAffecting: fixedValueFunction(true) },
     DEFBONUS: { dcAffecting: fixedValueFunction(false), BASECOST: 2 },
-    DIMENSIONS: { dcAffecting: fixedValueFunction(false), BASECOST: 5 },
-    TIMELIMIT: { dcAffecting: fixedValueFunction(true) },
-    TRANSDIMENSIONAL: { dcAffecting: fixedValueFunction(true) },
 };
 
 HERO.ModifierOverride5e = {

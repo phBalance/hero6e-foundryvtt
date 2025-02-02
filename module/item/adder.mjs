@@ -46,32 +46,30 @@ export class HeroSystem6eAdder {
     }
 
     get cost() {
-        if (this.SELECTED === false) {
-            return 0;
-        }
-
         let _cost = 0;
-        // Custom costs calculations
-        if (this.#baseInfo?.cost) {
-            _cost = this.#baseInfo.cost(this, this.item);
-        } else {
-            // Generic cost calculations
-            _cost = parseFloat(this.BASECOST);
+        if (this.SELECTED !== false) {
+            // Custom costs calculations
+            if (this.#baseInfo?.cost) {
+                _cost = this.#baseInfo.cost(this, this.item);
+            } else {
+                // Generic cost calculations
+                _cost = parseFloat(this.BASECOST);
 
-            let costPerLevel = this.#baseInfo?.costPerLevel(this) || 0;
-            const levels = parseInt(this.LEVELS) || 0;
-            // Override default costPerLevel?
-            if (this.LVLCOST && levels > 0) {
-                const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
-                if (costPerLevel !== _costPerLevel && this.#baseInfo) {
-                    console.warn(
-                        `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
-                        this,
-                    );
+                let costPerLevel = this.#baseInfo?.costPerLevel(this) || 0;
+                const levels = parseInt(this.LEVELS) || 0;
+                // Override default costPerLevel?
+                if (this.LVLCOST && levels > 0) {
+                    const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
+                    if (costPerLevel !== _costPerLevel && this.#baseInfo) {
+                        console.warn(
+                            `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
+                            this,
+                        );
+                    }
+                    costPerLevel = _costPerLevel;
                 }
-                costPerLevel = _costPerLevel;
+                _cost += levels * costPerLevel;
             }
-            _cost += levels * costPerLevel;
         }
 
         // Some parent modifiers need to override/tweak the adder costs (WEAPONSMITH)
@@ -79,11 +77,24 @@ export class HeroSystem6eAdder {
             _cost = this.parent.baseInfo.adderCostAdjustment({ adder: this, adderCost: _cost });
         }
 
+        // Some ADDERs have ADDERs (for example TRANSPORT_FAMILIARITY)
+        for (const adder of this.adders) {
+            _cost += adder.cost;
+        }
+
         if (this.parent instanceof HeroSystem6eItem) {
             _cost = Math.ceil(_cost);
         }
 
         return _cost;
+    }
+
+    get adders() {
+        const _addres = [];
+        for (const _adderJson of this.ADDER || []) {
+            _addres.push(new HeroSystem6eAdder(_adderJson, { item: this.item, parent: this }));
+        }
+        return _addres;
     }
 
     get BASECOST_total() {

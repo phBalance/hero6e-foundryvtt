@@ -2602,6 +2602,7 @@ export class HeroSystem6eItem extends Item {
             console.warn(
                 `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
                     `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
+                this,
             );
         }
         return changed;
@@ -2698,7 +2699,7 @@ export class HeroSystem6eItem extends Item {
         // ADDERS
         let adderCost = 0;
         let negativeCustomAdderCosts = 0;
-        for (const adder of this.adders) {
+        for (const adder of this.system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
 
@@ -2756,13 +2757,13 @@ export class HeroSystem6eItem extends Item {
         //HACK for ENTANGLE +1PD/ED in 6e
         //Normallly we would use a function in CONFIG.mjs
         // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
-        // if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
-        //     const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
-        //     const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
-        //     if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
-        //         adderCost -= 1;
-        //     }
-        // }
+        if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
+            const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+            const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+            if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
+                adderCost -= 1;
+            }
+        }
 
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
@@ -3045,7 +3046,7 @@ export class HeroSystem6eItem extends Item {
                 });
 
                 if (!adderPowerInfo) {
-                    console.warn(
+                    console.info(
                         `${this.actor?.name}: ${this.name}/${this.system?.XMLID}/${modifier.XMLID} is missing powerInfo for adder ${adder.XMLID}`,
                         adder,
                     );
@@ -3093,7 +3094,7 @@ export class HeroSystem6eItem extends Item {
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
             if (_myLimitation > -0.25) {
-                console.warn(`${modifier.XMLID} Limitation clamped to -1/4`, modifier, this);
+                console.info(`${modifier.XMLID} Limitation clamped to -1/4`, modifier, this);
                 _myLimitation = -0.25;
                 system.title =
                     (system.title || "") +
@@ -3881,6 +3882,11 @@ export class HeroSystem6eItem extends Item {
 
             default:
                 {
+                    if (this.baseInfo?.descriptionFactory) {
+                        system.description = this.baseInfo.descriptionFactory(this);
+                        break;
+                    }
+
                     if (configPowerInfo?.type?.includes("characteristic")) {
                         system.description = "+" + system.value + " " + system.ALIAS;
                         break;

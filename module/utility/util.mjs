@@ -13,18 +13,36 @@ export function getPowerInfo(options) {
     const actor = options?.actor || options?.item?.actor;
 
     // Legacy init of an item (we now include xmlTag during upload process)
-    if (!options?.xmlTag && !options?.xmlid) {
-        if (options?.item?.system?.XMLID === "FOCUS") {
-            options.xmlTag = "MODIFIER";
-        } else if (["power", "equipment"].includes(options?.item?.type)) {
-            options.xmlTag = "POWER";
-        } else if (options?.item?.type === "skill") {
-            options.xmlTag = "SKILL";
-        } else if (options?.item?.type === "talent") {
-            options.xmlTag = "TALENT";
-        } else if (options?.item?.system?.XMLID === "HANDTOHANDATTACK" && options.item.type === "attack") {
-            options.xmlTag = "POWER";
+    try {
+        if (!options?.xmlTag && !options?.xmlid) {
+            if (options?.item?.system?.xmlTag) {
+                // Excellent we have a positive source for xmlTag!
+                options.xmlTag = options.item.system.xmlTag;
+            } else if (options?.item?.xmlTag) {
+                // Excellent we have a positive source for xmlTag!
+                options.xmlTag = options.item.xmlTag;
+            } else if (options?.item?.system?.XMLID === "FOCUS") {
+                options.xmlTag = "MODIFIER";
+            } else if (["power", "equipment"].includes(options?.item?.type)) {
+                options.xmlTag = "POWER";
+            } else if (options?.item?.type === "skill") {
+                options.xmlTag = "SKILL";
+            } else if (options?.item?.type === "talent") {
+                options.xmlTag = "TALENT";
+            } else if (options?.item?.type === "complication" || options?.item?.type === "disadvantage") {
+                options.xmlTag = "DISAD";
+            } else if (options?.item?.type === "perk") {
+                if (options.item.system.XMLID === "WELL_CONNECTED") {
+                    options.xmlTag = "WELL_CONNECTED"; // PERK ENHANCER
+                } else {
+                    options.xmlTag = "PERK";
+                }
+            } else if (options?.item?.system?.XMLID === "HANDTOHANDATTACK" && options.item.type === "attack") {
+                options.xmlTag = "POWER";
+            }
         }
+    } catch (e) {
+        console.error(e);
     }
 
     // Determine is5e
@@ -55,7 +73,7 @@ export function getPowerInfo(options) {
     if (powerInfo.length > 1) {
         if (!window.warnGetPowerInfo?.includes(xmlid)) {
             console.error(
-                `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Multiple powerInfo results.`,
+                `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Multiple powerInfo results. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
                 powerInfo,
                 options,
             );
@@ -70,13 +88,13 @@ export function getPowerInfo(options) {
         if (powerInfo) {
             if (powerInfo.type.some((t) => ["movement", "skill", "characteristic"].includes(t))) {
                 console.debug(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
                     powerInfo,
                     options,
                 );
             } else {
                 console.error(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
                     powerInfo,
                     options,
                 );
@@ -129,7 +147,7 @@ export function getModifierInfo(options) {
     if (Object.entries(modifierOverrideInfo).length == 0) {
         modifierOverrideInfo = getPowerInfo(options);
     } else {
-        console.warn("modifierOverrideInfo using older format", xmlid);
+        console.warn(`modifierOverrideInfo using older format`, xmlid, options);
     }
 
     return modifierOverrideInfo;
