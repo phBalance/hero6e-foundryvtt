@@ -1646,23 +1646,11 @@ export class HeroSystem6eActor extends Actor {
                         // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
                         if (system.XMLID === "COMPOUNDPOWER") {
                             const compoundItems = [];
-                            for (const [key, value] of Object.entries(system)) {
+                            for (const [value] of Object.values(system)) {
                                 // We only care about arrays and objects (array of 1)
                                 if (typeof value === "object") {
                                     const values = value.length ? value : [value];
                                     for (const system2 of values) {
-                                        // if (key === "MODIFIER") {
-                                        //     ui.notifications.warn(
-                                        //         `${this.name}/${system.ALIAS}/${system.XMLID}/${system2.XMLID}/${system2.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER.`,
-                                        //     );
-                                        //     continue;
-                                        // }
-                                        // if (key === "ADDER") {
-                                        //     ui.notifications.warn(
-                                        //         `${this.name}/${system.ALIAS}/${system.XMLID}/${system2.XMLID}/${system2.ID} was excluded from upload because ADDERs are not supported on a COMPOUNDPOWER.`,
-                                        //     );
-                                        //     continue;
-                                        // }
                                         if (system2.XMLID) {
                                             const power = getPowerInfo({
                                                 xmlid: system2.XMLID,
