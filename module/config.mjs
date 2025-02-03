@@ -330,7 +330,7 @@ function validatePowers() {
     }
     numViolations += modifiersWithoutDcAffectingFunction.length;
 
-    // All attack powers have a effect rolling function
+    // All effect causing powers have a effect rolling function that is async
     const powersOrManeuversWithoutEffectsDicePartsFunction = this.filter(
         (power) =>
             !(power.behaviors.includes("modifier") || power.behaviors.includes("adder")) &&

@@ -71,14 +71,15 @@ function isStunBasedEffectRoll(item) {
 }
 
 /**
- * Dialog box for collectActionDataBeforeToHitOptions. The action doesn't have to be an attack such as
- * the Block maneuver.
+ * Dialog box for collectActionDataBeforeToHitOptions. The action doesn't have to be an attack (such as
+ * the Block maneuver).
  */
 export async function collectActionDataBeforeToHitOptions(item) {
     const actor = item.actor;
     const token = actor.getActiveTokens()[0];
     const data = {
-        item: item,
+        originalItem: item,
+        effectiveItem: item,
         actor: actor,
         token: token,
         state: null,
