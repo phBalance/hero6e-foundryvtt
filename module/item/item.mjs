@@ -2462,14 +2462,25 @@ export class HeroSystem6eItem extends Item {
                     : [heroJson[itemSubTag]]) {
                     itemData = {
                         name: system?.NAME || system?.ALIAS || system?.XMLID || itemTag, // simplistic name for now
-                        type: powerList
-                            .filter((o) => o.type?.includes("characteristic"))
-                            .map((o) => o.key)
-                            .includes(system.XMLID)
-                            ? "power"
-                            : itemTag.toLowerCase().replace(/s$/, ""),
+                        type:
+                            powerList
+                                .filter((o) => o.type?.includes("characteristic"))
+                                .map((o) => o.key)
+                                .includes(system.XMLID) || ["MULTIPOWER", "ELEMENTAL_CONTROL"].includes(system.XMLID)
+                                ? "power"
+                                : itemTag.toLowerCase().replace(/s$/, ""),
                         system: { ...system, is5e: itemData.system.is5e, xmlTag: itemSubTag },
                     };
+
+                    // Skill Enhancers
+                    if (["JACK_OF_ALL_TRADES", "LINGUIST", "SCIENTIST", "SCHOLAR", "TRAVELER"].includes(system.XMLID)) {
+                        itemData.type = "skill";
+                    }
+
+                    // Perk Enhancers
+                    if (["WELL_CONNECTED"].includes(system.XMLID)) {
+                        itemData.type = "perk";
+                    }
 
                     return itemData;
                 }
@@ -2573,21 +2584,20 @@ export class HeroSystem6eItem extends Item {
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
         // A quick sanity check warns of this issue and removes the offending POWER from the array.
         // There was an issue where findModsByXmlid(, "STRMINIMUM") would return the COMPOUNDPOWER instead of the RKA (Oceana Silverheart.HDC)
-        // let powersList = this.system.POWER || [];
-        // for (let p of powersList) {
-        //     const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
-        //     if (childDuplicate) {
-        //         console.warn(
-        //             `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
-        //         );
-        //         this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
-        //     }
-        // }
-        // powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
-        // return powersList;
+        let powersList = this.system.POWER || [];
+        for (let p of powersList) {
+            const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
+            if (childDuplicate) {
+                console.warn(
+                    `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file should resolve this issue.`,
+                );
+                this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+            }
+        }
+        powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
 
         const _powers = [];
-        for (const _powerJson of this.system.POWER || []) {
+        for (const _powerJson of powersList) {
             _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
         }
         return _powers;
@@ -2921,7 +2931,7 @@ export class HeroSystem6eItem extends Item {
                     actor: this.actor,
                 });
 
-                if (!adderPowerInfo) {
+                if (!adderPowerInfo && !modifier.BASECOST) {
                     console.warn(
                         `${this.actor?.name}: ${this.name}/${this.system.XMLID}/${modifier.XMLID} is missing powerInfo for adder ${adder.XMLID}`,
                         adder,
