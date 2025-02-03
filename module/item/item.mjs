@@ -2462,7 +2462,10 @@ export class HeroSystem6eItem extends Item {
                     : [heroJson[itemSubTag]]) {
                     itemData = {
                         name: system?.NAME || system?.ALIAS || system?.XMLID || itemTag, // simplistic name for now
-                        type: powerList.filter((o) => o.type?.includes("characteristic")).map((o) => o.key)
+                        type: powerList
+                            .filter((o) => o.type?.includes("characteristic"))
+                            .map((o) => o.key)
+                            .includes(system.XMLID)
                             ? "power"
                             : itemTag.toLowerCase().replace(/s$/, ""),
                         system: { ...system, is5e: itemData.system.is5e, xmlTag: itemSubTag },

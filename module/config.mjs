@@ -3472,6 +3472,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             editOptions: {
                 hideLEVELS: true,
             },
+            xml: `<SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1738541497153" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
         {},
     );
