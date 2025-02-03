@@ -1594,6 +1594,22 @@ export class HeroSystem6eActor extends Actor {
             sortBase += 1000;
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
+                    if (system.XMLID === "COMPOUNDPOWER") {
+                        for (const _modifier of system.MODIFIER || []) {
+                            ui.notifications.info(
+                                `${this.name}/${system.ALIAS}/${system.XMLID}/${_modifier.XMLID}/${_modifier.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
+                            );
+                        }
+                        delete system.MODIFIER;
+
+                        for (const _adder of system.ADDER || []) {
+                            ui.notifications.info(
+                                `${this.name}/${system.ALIAS}/${system.XMLID}/${_adder.XMLID}/${_adder.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
+                            );
+                        }
+                        delete system.ADDER;
+                    }
+
                     const itemData = {
                         name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                         type: itemTag.toLowerCase().replace(/s$/, ""),
@@ -1635,24 +1651,24 @@ export class HeroSystem6eActor extends Actor {
                                 if (typeof value === "object") {
                                     const values = value.length ? value : [value];
                                     for (const system2 of values) {
-                                        if (key === "MODIFIER") {
-                                            ui.notifications.warn(
-                                                `${this.name}/${system.ALIAS}/${system.XMLID}/${system2.XMLID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER.`,
-                                            );
-                                            continue;
-                                        }
-                                        if (key === "ADDER") {
-                                            ui.notifications.warn(
-                                                `${this.name}/${system.ALIAS}/${system.XMLID}/${system2.XMLID} was excluded from upload because ADDERs are not supported on a COMPOUNDPOWER.`,
-                                            );
-                                            continue;
-                                        }
+                                        // if (key === "MODIFIER") {
+                                        //     ui.notifications.warn(
+                                        //         `${this.name}/${system.ALIAS}/${system.XMLID}/${system2.XMLID}/${system2.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER.`,
+                                        //     );
+                                        //     continue;
+                                        // }
+                                        // if (key === "ADDER") {
+                                        //     ui.notifications.warn(
+                                        //         `${this.name}/${system.ALIAS}/${system.XMLID}/${system2.XMLID}/${system2.ID} was excluded from upload because ADDERs are not supported on a COMPOUNDPOWER.`,
+                                        //     );
+                                        //     continue;
+                                        // }
                                         if (system2.XMLID) {
                                             const power = getPowerInfo({
                                                 xmlid: system2.XMLID,
                                                 actor: this,
                                             });
-                                            if (!power) {
+                                            if (!power || ["MODIFIER", "ADDER"].includes(power.xmlTag)) {
                                                 await ui.notifications.error(
                                                     `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
                                                     {

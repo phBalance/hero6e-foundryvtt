@@ -3988,219 +3988,213 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (system.ADDER?.length > 0 || _adderArray.length > 0) {
-            for (const adder of this.adders) {
-                switch (adder.XMLID) {
-                    case "HEALEDBY":
-                        {
-                            _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS || "unknown"}`);
-                        }
-                        break;
+        for (const adder of this.adders) {
+            switch (adder.XMLID) {
+                case "HEALEDBY":
+                    {
+                        _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS || "unknown"}`);
+                    }
+                    break;
 
-                    case "DIMENSIONS":
-                        system.description += `, ${adder.ALIAS}`;
-                        break;
+                case "DIMENSIONS":
+                    system.description += `, ${adder.ALIAS}`;
+                    break;
 
-                    case "ATTACK":
-                    case "EATING":
-                    case "EXTENDEDBREATHING":
-                    case "IMMUNITY":
-                    case "LONGEVITY":
-                    case "RECOGNIZED":
-                    case "SLEEPING":
-                    case "USEFUL":
-                        if (system.XMLID === "VULNERABILITY") {
-                            system.description += ` (${adder.OPTION_ALIAS})`.replace("((", "("); // Unclear why there is a parand in the OPTION_ALIAS
-                            break;
-                        }
-                        _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS}`);
+                case "ATTACK":
+                case "EATING":
+                case "EXTENDEDBREATHING":
+                case "IMMUNITY":
+                case "LONGEVITY":
+                case "RECOGNIZED":
+                case "SLEEPING":
+                case "USEFUL":
+                    if (system.XMLID === "VULNERABILITY") {
+                        system.description += ` (${adder.OPTION_ALIAS})`.replace("((", "("); // Unclear why there is a parand in the OPTION_ALIAS
                         break;
+                    }
+                    _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS}`);
+                    break;
 
-                    case "ADDITIONALPD":
-                    case "ADDITIONALED":
-                    case "DEFBONUS":
-                        break;
+                case "ADDITIONALPD":
+                case "ADDITIONALED":
+                case "DEFBONUS":
+                    break;
 
-                    case "DAMAGE":
-                        // Unfortunately DAMAGE is used as an adder for both SUSCEPTIBILITY and CHANGEENVIRONMENT. They do not
-                        // share a structure.
-                        if (powerXmlId === "CHANGEENVIRONMENT") {
-                            _adderArray.push(`, ${adder.ALIAS}`);
-                        } else {
-                            _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
-                        }
-                        break;
-
-                    case "APPEARANCE":
-                    case "AREA":
-                    case "CAPABILITIES":
-                    case "CHANCETOGO":
-                    case "CHANCETORECOVER":
-                    case "CIRCUMSTANCES":
-                    case "CONCEALABILITY":
-                    case "CONDITION":
-                    case "DESCRIPTION":
-                    case "DICE":
-                    case "EFFECT":
-                    case "EFFECTS":
-                    case "FIERCENESS":
-                    case "HOWWELL":
-                    case "HOWWIDE":
-                    case "IMPAIRS":
-                    case "INTENSITY":
-                    case "KNOWLEDGE":
-                    case "LEVEL":
-                    case "MOTIVATION":
-                    case "OCCUR":
-                    case "OCCURS":
-                    case "POWER":
-                    case "REACTION":
-                    case "SENSING":
-                    case "SENSITIVITY":
-                    case "SITUATION":
-                    case "SUBSTANCE":
-                    case "TIME":
-                    case "USEFULNESS":
+                case "DAMAGE":
+                    // Unfortunately DAMAGE is used as an adder for both SUSCEPTIBILITY and CHANGEENVIRONMENT. They do not
+                    // share a structure.
+                    if (powerXmlId === "CHANGEENVIRONMENT") {
+                        _adderArray.push(`, ${adder.ALIAS}`);
+                    } else {
                         _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
-                        break;
+                    }
+                    break;
 
-                    case "PHYSICAL":
-                    case "ENERGY":
-                    case "MENTAL":
-                        // Damage Negation (-1 DCs Energy)
-                        if (system.XMLID === "DAMAGENEGATION") {
-                            if (parseInt(adder.LEVELS) != 0)
-                                _adderArray.push(
-                                    "-" + parseInt(adder.LEVELS) + " DCs " + adder.ALIAS.replace(" DCs", ""),
-                                );
-                        } else {
-                            if (parseInt(adder.LEVELS) != 0)
-                                _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS);
+                case "APPEARANCE":
+                case "AREA":
+                case "CAPABILITIES":
+                case "CHANCETOGO":
+                case "CHANCETORECOVER":
+                case "CIRCUMSTANCES":
+                case "CONCEALABILITY":
+                case "CONDITION":
+                case "DESCRIPTION":
+                case "DICE":
+                case "EFFECT":
+                case "EFFECTS":
+                case "FIERCENESS":
+                case "HOWWELL":
+                case "HOWWIDE":
+                case "IMPAIRS":
+                case "INTENSITY":
+                case "KNOWLEDGE":
+                case "LEVEL":
+                case "MOTIVATION":
+                case "OCCUR":
+                case "OCCURS":
+                case "POWER":
+                case "REACTION":
+                case "SENSING":
+                case "SENSITIVITY":
+                case "SITUATION":
+                case "SUBSTANCE":
+                case "TIME":
+                case "USEFULNESS":
+                    _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
+                    break;
+
+                case "PHYSICAL":
+                case "ENERGY":
+                case "MENTAL":
+                    // Damage Negation (-1 DCs Energy)
+                    if (system.XMLID === "DAMAGENEGATION") {
+                        if (parseInt(adder.LEVELS) != 0)
+                            _adderArray.push("-" + parseInt(adder.LEVELS) + " DCs " + adder.ALIAS.replace(" DCs", ""));
+                    } else {
+                        if (parseInt(adder.LEVELS) != 0)
+                            _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS);
+                    }
+                    break;
+
+                case "PLUSONEPIP":
+                case "MINUSONEPIP":
+                case "PLUSONEHALFDIE":
+                    // Don't show the +1, 1/2d6, 1d6-1 modifier as it's already included in the description's dice formula
+                    break;
+
+                case "COMMONMOTORIZED":
+                case "RIDINGANIMALS":
+                    // Both of these Transport Familiarity adders may contain subadders. If they do, then use the subadders
+                    // otherwise use the adder.
+                    if (adder.SELECTED) {
+                        _adderArray.push(adder.ALIAS);
+                    } else {
+                        for (const adder2 of adder?.ADDER || []) {
+                            _adderArray.push(adder2.ALIAS);
                         }
-                        break;
+                    }
+                    break;
 
-                    case "PLUSONEPIP":
-                    case "MINUSONEPIP":
-                    case "PLUSONEHALFDIE":
-                        // Don't show the +1, 1/2d6, 1d6-1 modifier as it's already included in the description's dice formula
-                        break;
+                case "INCREASEDMAX":
+                    // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
+                    // Can Add Maximum Of 34 Points
+                    system.description += `, Can Add Maximum Of ${determineMaxAdjustment(this)} Points`;
+                    break;
 
-                    case "COMMONMOTORIZED":
-                    case "RIDINGANIMALS":
-                        // Both of these Transport Familiarity adders may contain subadders. If they do, then use the subadders
-                        // otherwise use the adder.
-                        if (adder.SELECTED) {
-                            _adderArray.push(adder.ALIAS);
-                        } else {
-                            for (const adder2 of adder?.ADDER || []) {
-                                _adderArray.push(adder2.ALIAS);
-                            }
-                        }
-                        break;
+                case "ADDER":
+                    // This is likely a CSL adder that we use to specificy which attacks the CSL applies to.
+                    // If the CLS applies to ALL attacks, don't bother to list them all.
+                    if (this.system.XMLID === "COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+                    if (this.system.XMLID === "MENTAL_COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+                    if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.OPTIONID === "ALL") break;
 
-                    case "INCREASEDMAX":
-                        // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
-                        // Can Add Maximum Of 34 Points
-                        system.description += `, Can Add Maximum Of ${determineMaxAdjustment(this)} Points`;
-                        break;
+                    // Otherwise add it to the list of ADDERS as normal.
+                    if (adder.ALIAS.trim()) {
+                        _adderArray.push(adder.ALIAS);
+                    }
+                    break;
 
-                    case "ADDER":
-                        // This is likely a CSL adder that we use to specificy which attacks the CSL applies to.
-                        // If the CLS applies to ALL attacks, don't bother to list them all.
-                        if (this.system.XMLID === "COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
-                        if (this.system.XMLID === "MENTAL_COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
-                        if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.OPTIONID === "ALL") break;
+                case "MINDCONTROLEFFECT":
+                    {
+                        const mindControlEffect = 40 + (parseInt(adder.LEVELS) || 0);
+                        _adderArray.push(`Mind Control Effect ${mindControlEffect} points`);
+                    }
+                    break;
 
-                        // Otherwise add it to the list of ADDERS as normal.
-                        if (adder.ALIAS.trim()) {
-                            _adderArray.push(adder.ALIAS);
-                        }
-                        break;
+                case "TELEPATHYEFFECT":
+                    {
+                        const telepathyEffect = 30 + (parseInt(adder.LEVELS) || 0);
+                        _adderArray.push(`Telepathy Effect ${telepathyEffect} points`);
+                    }
+                    break;
 
-                    case "MINDCONTROLEFFECT":
-                        {
-                            const mindControlEffect = 40 + (parseInt(adder.LEVELS) || 0);
-                            _adderArray.push(`Mind Control Effect ${mindControlEffect} points`);
-                        }
-                        break;
-
-                    case "TELEPATHYEFFECT":
-                        {
-                            const telepathyEffect = 30 + (parseInt(adder.LEVELS) || 0);
-                            _adderArray.push(`Telepathy Effect ${telepathyEffect} points`);
-                        }
-                        break;
-
-                    default:
-                        if (adder.ALIAS.trim()) {
-                            _adderArray.push(adder.ALIAS);
-                        }
-                        break;
-                }
+                default:
+                    if (adder.ALIAS.trim()) {
+                        _adderArray.push(adder.ALIAS);
+                    }
+                    break;
             }
+        }
 
-            if (_adderArray.length > 0) {
-                switch (powerXmlId) {
-                    case "TRANSPORT_FAMILIARITY":
-                        system.description += _adderArray.sort().join(", ");
-                        break;
+        if (_adderArray.length > 0) {
+            switch (powerXmlId) {
+                case "TRANSPORT_FAMILIARITY":
+                    system.description += _adderArray.sort().join(", ");
+                    break;
 
-                    case "DARKNESS":
-                    case "INVISIBILITY":
-                        {
-                            system.description += system.ALIAS + " to ";
-                            // Groups
-                            let _groups = _adderArray.filter((o) => o.indexOf("Group") > -1);
-                            if (_groups.length === 1) {
-                                system.description += _groups[0];
-                            } else {
-                                system.description += _groups
-                                    .slice(0, -1)
-                                    .join(", ")
-                                    .replace(/ Group/g, "");
-                                system.description += " and " + _groups.slice(-1) + "s";
-                            }
-
-                            // singles
-                            let _singles = _adderArray.filter((o) => o.indexOf("Group") === -1);
-                            // spacing
-                            if (_groups.length > 0 && _singles.length > 0) {
-                                system.description += ", ";
-                            }
-
-                            if (_singles.length === 1) {
-                                system.description += _singles[0];
-                            } else if (_singles.length > 1) {
-                                system.description += _singles.slice(0, -1).join(", ");
-                                system.description += " and " + _singles.slice(-1);
-                            }
+                case "DARKNESS":
+                case "INVISIBILITY":
+                    {
+                        system.description += system.ALIAS + " to ";
+                        // Groups
+                        let _groups = _adderArray.filter((o) => o.indexOf("Group") > -1);
+                        if (_groups.length === 1) {
+                            system.description += _groups[0];
+                        } else {
+                            system.description += _groups
+                                .slice(0, -1)
+                                .join(", ")
+                                .replace(/ Group/g, "");
+                            system.description += " and " + _groups.slice(-1) + "s";
                         }
 
-                        // DARKNESS radius
-                        // Darkness to Hearing Group 16m radius
-                        if (powerXmlId === "DARKNESS") {
-                            system.description += ` ${system.LEVELS}${getSystemDisplayUnits(this.is5e)} radius`;
+                        // singles
+                        let _singles = _adderArray.filter((o) => o.indexOf("Group") === -1);
+                        // spacing
+                        if (_groups.length > 0 && _singles.length > 0) {
+                            system.description += ", ";
                         }
 
-                        break;
+                        if (_singles.length === 1) {
+                            system.description += _singles[0];
+                        } else if (_singles.length > 1) {
+                            system.description += _singles.slice(0, -1).join(", ");
+                            system.description += " and " + _singles.slice(-1);
+                        }
+                    }
 
-                    case "FLASH":
-                        // The senses are already in the description
-                        system.description +=
-                            " (" +
-                            _adderArray
-                                .filter(
-                                    (o) => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i),
-                                )
-                                .join("; ") +
-                            ")";
-                        system.description = system.description.replace("()", "");
-                        break;
+                    // DARKNESS radius
+                    // Darkness to Hearing Group 16m radius
+                    if (powerXmlId === "DARKNESS") {
+                        system.description += ` ${system.LEVELS}${getSystemDisplayUnits(this.is5e)} radius`;
+                    }
 
-                    default:
-                        system.description += " (" + _adderArray.join("; ") + ")";
-                        break;
-                }
+                    break;
+
+                case "FLASH":
+                    // The senses are already in the description
+                    system.description +=
+                        " (" +
+                        _adderArray
+                            .filter((o) => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i))
+                            .join("; ") +
+                        ")";
+                    system.description = system.description.replace("()", "");
+                    break;
+
+                default:
+                    system.description += " (" + _adderArray.join("; ") + ")";
+                    break;
             }
         }
 
