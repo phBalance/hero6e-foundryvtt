@@ -23,7 +23,7 @@ export class ItemAttackFormApplication extends FormApplication {
     constructor(data) {
         super();
         this.data = data;
-        this.options.title = `${this.data?.item?.actor?.name} roll to hit`;
+        this.options.title = `${this.data.originalItem.actor?.name} roll to hit`;
 
         const _targetToken = async function () {
             // Necessary for situations where it is not possible
@@ -70,15 +70,17 @@ export class ItemAttackFormApplication extends FormApplication {
 
     async getData() {
         const data = this.data;
-        const item = data.item;
+        const originalItem = data.originalItem;
+        const effectiveItem = data.effectiveItem;
+        // PH: FIXME: Need to also consider effectiveItem and where it should be used. The original code didn't distinguish
 
         try {
             data.targets = Array.from(game.user.targets);
 
-            if (data.targets.length === 0 && item.system.XMLID === "MINDSCAN" && game.user.isGM) {
+            if (data.targets.length === 0 && originalItem.system.XMLID === "MINDSCAN" && game.user.isGM) {
                 data.targets = foundry.utils
                     .deepClone(canvas.tokens.controlled)
-                    .filter((t) => t.actor?.id != item.actor?.id);
+                    .filter((t) => t.actor?.id != originalItem.actor?.id);
             }
 
             // Initialize aim to the default option values
@@ -87,17 +89,19 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // We are using the numberInput handlebar helper which requires NUMBERS, thus the parseInt
             // Set the initial values on the form
-            data.ocvMod ??= parseInt(item.system.ocv);
-            data.dcvMod ??= parseInt(item.system.dcv);
-            data.omcvMod ??= parseInt(item.system.ocv); //TODO: May need to make a distinction between OCV/OMCV
-            data.dmcvMod ??= parseInt(item.system.dcv);
+            data.ocvMod ??= parseInt(originalItem.system.ocv);
+            data.dcvMod ??= parseInt(originalItem.system.dcv);
+            data.omcvMod ??= parseInt(originalItem.system.ocv); //TODO: May need to make a distinction between OCV/OMCV
+            data.dmcvMod ??= parseInt(originalItem.system.dcv);
+
             data.effectiveStr ??= parseInt(data.str);
             data.effectiveStr = Math.max(0, data.effectiveStr);
-            data.effectiveLevels ??= parseInt(data.item.system.LEVELS);
+
+            data.effectiveActivePoints ??= originalItem.system.activePoints; // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
 
             // Penalty Skill Levels
             // Currently only supports range PSL
-            data.psls = penaltySkillLevelsForAttack(item).filter((o) => o.system.penalty === "range");
+            data.psls = penaltySkillLevelsForAttack(originalItem).filter((o) => o.system.penalty === "range");
 
             // Is there an ENTANGLE on any of the targets
             // If so assume we are targeting the entangle
@@ -118,7 +122,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 if (entangle) {
                     // Mental attacks typically bypass entangles
-                    if (item.attackDefenseVs === "MD" && entangle.flags.entangleDefense.rMD === 0) {
+                    if (originalItem.attackDefenseVs === "MD" && entangle.flags.entangleDefense.rMD === 0) {
                         data.targetEntangle = false;
                     }
 
@@ -130,18 +134,18 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // But an ENTANGLE attack doesn't target an ENTANGLE
-            if (data.item.system.XMLID === "ENTANGLE") {
+            if (data.originalItem.system.XMLID === "ENTANGLE") {
                 data.entangleExists = false;
                 data.targetEntangle = false;
             }
 
             // Adjustment attacks do not target an ENTANGLE
-            if (data.item.baseInfo?.type.includes("adjustment")) {
+            if (data.originalItem.baseInfo?.type.includes("adjustment")) {
                 data.entangleExists = false;
                 data.targetEntangle = false;
             }
 
-            const aoe = item.aoeAttackParameters({ levels: data.effectiveLevels });
+            const aoe = originalItem.aoeAttackParameters({ levels: data.effectiveLevels });
             data.hitLocationsEnabled = game.settings.get(HEROSYS.module, "hit locations");
             data.hitLocationSideEnabled =
                 data.hitLocationsEnabled && game.settings.get(HEROSYS.module, "hitLocTracking") === "all";
@@ -152,7 +156,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.hitLoc = [];
                 data.hitLocSide = [];
 
-                if (!item.system.noHitLocations && !aoe) {
+                if (!originalItem.system.noHitLocations && !aoe) {
                     for (const key of Object.keys(CONFIG.HERO.hitLocations)) {
                         data.hitLoc.push({ key: key, label: key });
                     }
@@ -164,7 +168,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     }
                 }
 
-                const noneReason = item.system.noHitLocations
+                const noneReason = originalItem.system.noHitLocations
                     ? `does not allow hit locations`
                     : aoe
                       ? `has an area of effect`
@@ -179,7 +183,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.aoeText = aoe.type;
                 const levels = aoe.value;
                 if (levels) {
-                    data.aoeText += ` (${levels}${getSystemDisplayUnits(item.actor.is5e)})`;
+                    data.aoeText += ` (${levels}${getSystemDisplayUnits(originalItem.actor.is5e)})`;
                 }
 
                 if (this.getAoeTemplate() || game.user.targets.size > 0) {
@@ -194,13 +198,13 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // Boostable Charges - a maximum of 4 can be spent
             data.boostableChargesAvailable =
-                item.system.charges?.boostable && item.system.charges?.value > 1
-                    ? Math.min(4, item.system.charges.value - 1)
+                originalItem.system.charges?.boostable && originalItem.system.charges?.value > 1
+                    ? Math.min(4, originalItem.system.charges.value - 1)
                     : 0;
             data.boostableChargesToUse ??= 0;
 
             // MINDSCAN
-            if (item.system.XMLID === "MINDSCAN") {
+            if (originalItem.system.XMLID === "MINDSCAN") {
                 data.mindScanChoices = CONFIG.HERO.mindScanChoices;
 
                 data.mindScanFamiliarOptions = [];
@@ -223,7 +227,7 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // Combat Skill Levels
-            const csls = combatSkillLevelsForAttack(item);
+            const csls = combatSkillLevelsForAttack(originalItem);
             data.csls = undefined;
             for (const csl of csls) {
                 let entry = {};
@@ -253,16 +257,16 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // DEADLYBLOW
-            const DEADLYBLOW = item.actor.items.find((o) => o.system.XMLID === "DEADLYBLOW");
+            const DEADLYBLOW = originalItem.actor.items.find((o) => o.system.XMLID === "DEADLYBLOW");
             if (DEADLYBLOW) {
-                item.system.conditionalAttacks ??= {};
-                item.system.conditionalAttacks[DEADLYBLOW.id] = DEADLYBLOW;
-                item.system.conditionalAttacks[DEADLYBLOW.id].system.checked ??= true;
+                originalItem.system.conditionalAttacks ??= {};
+                originalItem.system.conditionalAttacks[DEADLYBLOW.id] = DEADLYBLOW;
+                originalItem.system.conditionalAttacks[DEADLYBLOW.id].system.checked ??= true;
             }
 
             // Hand-to-hand attacks only apply to things that are strength damage
-            if (isManeuverThatDoesNormalDamage(item)) {
-                const hthAttacks = item.actor.items.filter(
+            if (isManeuverThatDoesNormalDamage(originalItem)) {
+                const hthAttacks = originalItem.actor.items.filter(
                     (item) => item.system.XMLID === "HANDTOHANDATTACK" && !(item.system.CARRIED && !item.system.active),
                 );
                 data.hthAttackItems = hthAttacks.reduce((attacksObj, hthAttack) => {
@@ -282,7 +286,7 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             data.action = Attack.getActionInfo(
-                data.item,
+                data.effectiveItem,
                 data.targets,
                 data.formData, // use formData to include player options from the form
             );
@@ -299,6 +303,7 @@ export class ItemAttackFormApplication extends FormApplication {
         } catch (error) {
             console.error(error);
         }
+
         return data;
     }
 
@@ -371,11 +376,19 @@ export class ItemAttackFormApplication extends FormApplication {
             ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
         }
 
+        // Has anything changed since last time?
+        // PH: FIXME: Need to consider HTH Attacks
+        // PH: FIXME: Need to consider Naked Advantages
+        const hasBeenUpdated = true;
+        if (hasBeenUpdated) {
+        }
+
         if (event.submitter?.name === "roll") {
             canvas.tokens.activate();
             await this.close();
 
-            return processActionToHit(this.data.item, formData);
+            // PH: FIXME: This originally was passing formData which seems wholy wrong as it's missing information (say from the actions etc - it's only what's overridden and not in the right form).
+            return processActionToHit(this.data.effectiveItem, formData);
         }
 
         this.data.formData ??= {};
@@ -383,7 +396,7 @@ export class ItemAttackFormApplication extends FormApplication {
         if (event.submitter?.name === "continueMultiattack") {
             this.data.formData.continueMultiattack = true;
         } else if (event.submitter?.name === "executeMultiattack") {
-            // todo: cancel a missed and continue anyway
+            // TODO: cancel a missed and continue anyway
 
             const begin = this.data.action.current.execute === undefined;
             // we pressed the button to execute multiple attacks
@@ -395,11 +408,12 @@ export class ItemAttackFormApplication extends FormApplication {
                 // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
 
                 // this is the roll:
-                await processActionToHit(this.data.item, this.data.formData);
+                await processActionToHit(this.data.effectiveItem, this.data.formData);
                 this.data.formData.execute = this.data.action.current.execute + 1;
             }
+
+            // Is this is the last step?
             const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;
-            // this is the last step
             if (end) {
                 canvas.tokens.activate();
                 await this.close();
@@ -417,7 +431,7 @@ export class ItemAttackFormApplication extends FormApplication {
             await this.close();
             return;
         } else if (event.submitter?.name === "aoe") {
-            return this._spawnAreaOfEffect(this.data);
+            return this._spawnAreaOfEffect();
         }
 
         // A max of 4 boostable charges may be used and a min of 0.
@@ -428,15 +442,29 @@ export class ItemAttackFormApplication extends FormApplication {
             );
         }
 
+        // Can only push so much
+        if (formData.effectiveActivePoints) {
+            const desiredEffectiveActivePoints = formData.effectiveActivePoints;
+            // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
+            this.data.effectiveActivePoints = Math.min(
+                desiredEffectiveActivePoints,
+                this.data.originalItem.system.activePoints + Math.min(10, this.data.originalItem.system.activePoints),
+            );
+
+            if (this.data.effectiveActivePoints < desiredEffectiveActivePoints) {
+                ui.notifications.warn(
+                    `Pushing is limited to the lesser of 10 active points or the original total active points`,
+                );
+            }
+        }
+
         // collect the changed data; all of these changes can go into get data
         this.data.formData = { ...this.data.formData, ...formData };
 
         // Save conditionalAttack check
         const expandedData = foundry.utils.expandObject(formData);
         for (const ca in expandedData?.system?.conditionalAttacks) {
-            // this.data.item.system.conditionalAttacks[ca].system.checked =
-            //     expandedData.system.conditionalAttacks[ca].system.checked;
-            await this.data.item.system.conditionalAttacks[ca].update({
+            await this.data.effectiveItem.system.conditionalAttacks[ca].update({
                 [`system.checked`]: expandedData.system.conditionalAttacks[ca].system.checked,
             });
         }
@@ -446,7 +474,7 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     async _updateCsl(event, formData) {
-        const item = this.data.item;
+        const item = this.data.effectiveItem;
         // Combat Skill Levels (update SKILL if changed)
         const csls = combatSkillLevelsForAttack(item);
         for (const key of Object.keys(formData).filter((o) => o.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/))) {
@@ -471,7 +499,7 @@ export class ItemAttackFormApplication extends FormApplication {
      *
      */
     async _spawnAreaOfEffect() {
-        const item = this.data.item;
+        const item = this.data.effectiveItem;
 
         const areaOfEffect = item.aoeAttackParameters({ levels: this.data.effectiveLevels });
         if (!areaOfEffect) return;
@@ -588,7 +616,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     getAoeTemplate() {
         return Array.from(canvas.templates.getDocuments()).find(
-            (o) => o.author.id === game.user.id && o.flags.itemId === this.data.item.id,
+            (o) => o.author.id === game.user.id && o.flags.itemId === this.data.effectiveItem.id,
         );
     }
 }
