@@ -1,7 +1,7 @@
 import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "./utility/units.mjs";
 import * as heroDice from "./utility/dice.mjs";
 import { createDefenseProfile } from "./utility/defense.mjs";
-import { RoundFavorPlayerUp } from "./utility/round.mjs";
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import {
     characteristicValueToDiceParts,
@@ -3833,6 +3833,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             costPerLevel: fixedValueFunction(1 / 5),
+            cost: function (item) {
+                const basePoints = parseInt(item.system.BASEPOINTS) || 0;
+                const number = parseInt(item.system.NUMBER) || 1;
+                const doublingCost = (number - 1) * 5;
+                return RoundFavorPlayerDown(basePoints / 5 + doublingCost);
+            },
             name: "Follower",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -5161,6 +5167,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 5),
+            cost: function (item) {
+                const points = parseInt(item.system.POINTS) || 0;
+                return points * this.costPerLevel();
+            },
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
