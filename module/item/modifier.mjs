@@ -30,7 +30,7 @@ export class HeroSystem6eModifier {
             console.warn(`${this.XMLID} item not found`);
         }
 
-        if (!this.#baseInfo) {
+        if (!this.#baseInfo && !this.BASECOST) {
             if (!window.warnAdder?.includes(this.XMLID)) {
                 console.info(
                     `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,

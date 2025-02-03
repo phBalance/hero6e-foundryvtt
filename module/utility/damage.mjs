@@ -106,6 +106,11 @@ function effectiveStrength(item, options) {
 export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengthMinimumModifier) {
     let strMinimumValue = parseInt(strengthMinimumModifier.OPTION_ALIAS?.match(/^\d+$/)?.[0] || 0);
 
+    // Aaron's attempt to parse OPTIONID="9-13" as found in Julia (Red) Augusta.hdc
+    if (!strMinimumValue) {
+        strMinimumValue = parseInt(strengthMinimumModifier.OPTIONID?.match(/^\d+-(\d+)$/)?.[1] || 0);
+    }
+
     // Newer HDC files (post 2022?) have OPTION_ALIAS defined to give us the minimum strength range. If players have filled in the exact value
     // as "<number>" then use that, otherwise fallback to calculating an estimate based on a range. Note a STR minimum of less than 1 is not allowed.
     if (strMinimumValue === 0) {
