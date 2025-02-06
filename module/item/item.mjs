@@ -2585,22 +2585,28 @@ export class HeroSystem6eItem extends Item {
         // A quick sanity check warns of this issue and removes the offending POWER from the array.
         // There was an issue where findModsByXmlid(, "STRMINIMUM") would return the COMPOUNDPOWER instead of the RKA (Oceana Silverheart.HDC)
         let powersList = this.system.POWER || [];
-        for (let p of powersList) {
-            const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
-            if (childDuplicate) {
-                console.warn(
-                    `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file should resolve this issue.`,
-                );
-                this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+        try {
+            for (let p of powersList) {
+                const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
+                if (childDuplicate) {
+                    console.warn(
+                        `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file should resolve this issue.`,
+                    );
+                    this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+                }
             }
-        }
-        powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+            powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
 
-        const _powers = [];
-        for (const _powerJson of powersList) {
-            _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
+            const _powers = [];
+            for (const _powerJson of powersList) {
+                _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
+            }
+            return _powers;
+        } catch (e) {
+            console.error(e);
+            debugger;
+            return [];
         }
-        return _powers;
     }
 
     calcItemPoints() {
@@ -5703,6 +5709,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _advantageCost() {
+        // ADD_MODIFIERS_TO_BASE
+        // if (this.item?.system.ADD_MODIFIERS_TO_BASE) {
+        //     const _base =
+        //         parseInt(this.item.actor?.system.characteristics[this.item.system.XMLID.toLowerCase()].core) || 0;
+        //     const _parentCostPerLevel = this.item.baseInfo.costPerLevel(this.item);
+        //     _cost += _base * _parentCostPerLevel;
+        // }
         return null;
     }
 
