@@ -3836,7 +3836,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: function (item) {
                 const basePoints = parseInt(item.system.BASEPOINTS) || 0;
                 const number = parseInt(item.system.NUMBER) || 1;
-                const doublingCost = (number - 1) * 5;
+                // A character can have double the number of
+                // Followers for +5 CP (twice as many for +5 CP, four times as
+                // many for +10 CP, and so on)
+                const doublingCost = Math.log2(number, 2) * 5;
                 return RoundFavorPlayerDown(basePoints / 5 + doublingCost);
             },
             name: "Follower",
@@ -6044,13 +6047,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
-            cost: function (item) {
+            cost: function () {
+                return 0;
+            },
+            activePoints: function (item) {
                 const _levels = parseInt(item.system.LEVELS);
-                let _modifier = 0;
-                for (const modifier of item.modifiers.filter((a) => !a.PRIVATE)) {
-                    _modifier += modifier.cost;
-                }
-                return _levels * _modifier;
+                //return (item._basePoints + item._addersCost) * (1 + item._advantageCost);
+                return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
             },
             privateAsAdder: true,
             defenseTagVsAttack: function () {
@@ -8388,6 +8391,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EXTRATIME",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
+            cost: function (modifier, item) {
+                const baseCost = parseFloat(modifier.BASECOST);
+                if (item.findModsByXmlid("ACTIVATEONLY")) {
+                    // Extra Time normally applies every time the power is
+                    // activated. If the power has a lengthy activation time, but can be
+                    // used every Phase thereafter (usually for Constant or Persistent
+                    // Powers), halve the Limitation value (to a minimum of -¼).
+                    return Math.min(-0.25, baseCost / 2);
+                }
+                return baseCost;
+            },
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="EXTRATIME" ID="1596334078813" BASECOST="-0.25" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PHASE" OPTIONID="PHASE" OPTION_ALIAS="Delayed Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },

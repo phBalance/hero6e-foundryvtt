@@ -93,7 +93,7 @@ export function getPowerInfo(options) {
                     options,
                 );
             } else {
-                console.error(
+                console.warn(
                     `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
                     powerInfo,
                     options,

@@ -7649,7 +7649,11 @@ export function registerUploadTests(quench) {
                 });
 
                 it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 69);
+                    assert.equal(item.system.activePoints, 0);
+                });
+
+                it("basePointsPlusAddersForActivePoints", function () {
+                    assert.equal(item.system.basePointsPlusAddersForActivePoints, 69);
                 });
 
                 it("damage", function () {

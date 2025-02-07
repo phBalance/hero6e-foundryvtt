@@ -1459,6 +1459,7 @@ export class HeroSystem6eActor extends Actor {
         );
         const _system = _actor.system;
 
+        // remove any system properties that are not part of system.json
         const schemaKeys = Object.keys(_system);
         for (const key of Object.keys(this.system)) {
             if (!schemaKeys.includes(key)) {
@@ -1471,7 +1472,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
         if (this.id) {
-            for (let prop of Object.keys(this.flags)) {
+            for (let prop of Object.keys(this.flags).filter((f) => f !== "uploading")) {
                 changes[`flags.-=${prop}`] = null;
             }
 

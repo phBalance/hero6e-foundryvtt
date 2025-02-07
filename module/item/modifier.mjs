@@ -80,19 +80,23 @@ export class HeroSystem6eModifier {
 
         // Some modifiers have a minimumLimitation (REQUIRESASKILLROLL)
         if (this.baseInfo?.minimumLimitation) {
-            _cost = Math.min(this.baseInfo?.minimumLimitation, _cost);
+            if (this.baseInfo?.minimumLimitation < 0) {
+                _cost = Math.min(this.baseInfo?.minimumLimitation, _cost);
+            } else {
+                _cost = Math.max(this.baseInfo?.minimumLimitation, _cost);
+            }
         }
 
         return _cost;
     }
 
-    get isAdvantage() {
-        return this.cost >= 0;
-    }
+    // get isAdvantage() {
+    //     return this.cost >= 0;
+    // }
 
-    get isDisadvantage() {
-        return this.cost < 0;
-    }
+    // get isDisadvantage() {
+    //     return this.cost < 0;
+    // }
 
     get adders() {
         const _addres = [];

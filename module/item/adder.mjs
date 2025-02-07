@@ -52,18 +52,18 @@ export class HeroSystem6eAdder {
         let _cost = 0;
         if (this.SELECTED !== false) {
             // Custom costs calculations
-            if (this.#baseInfo?.cost) {
+            if (this.baseInfo?.cost) {
                 _cost = this.#baseInfo.cost(this, this.item);
             } else {
                 // Generic cost calculations
                 _cost = parseFloat(this.BASECOST);
 
-                let costPerLevel = this.#baseInfo?.costPerLevel(this) || 0;
+                let costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
                 const levels = parseInt(this.LEVELS) || 0;
                 // Override default costPerLevel?
                 if (this.LVLCOST && levels > 0) {
                     const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
-                    if (costPerLevel !== _costPerLevel && this.#baseInfo) {
+                    if (costPerLevel !== _costPerLevel && this.baseInfo) {
                         console.warn(
                             `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
                             this,
