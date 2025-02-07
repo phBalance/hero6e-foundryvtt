@@ -223,6 +223,55 @@ export class HeroSystem6eItem extends Item {
         super.prepareData();
     }
 
+    prepareDerivedData() {
+        super.prepareDerivedData();
+
+        if (this.actor?.is5e === undefined) {
+            //console.warn(`${this.actor.name}/${this.name}: Skipping prepareDerivedData because is5e === undefined`);
+            return;
+        }
+
+        // Base points plus adders
+        const _basePointsPlusAdders = this._basePoints + this._addersCost;
+        if (_basePointsPlusAdders !== this.system.basePointsPlusAdders) {
+            if (this.system.basePointsPlusAdders) {
+                console.warn(
+                    `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData basePointsPlusAdders. Legacy (${this.system.basePointsPlusAdders}) vs new (${_basePointsPlusAdders})`,
+                );
+            }
+        }
+        this.system.basePointsPlusAdders = _basePointsPlusAdders;
+        this.system.basePointsPlusAddersForActivePoints = _basePointsPlusAdders - this._negativeCustomAddersCost;
+
+        //calcActivePoints
+        // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
+        const _activePoints = this._activePoints;
+        if (_activePoints !== this.system.activePoints) {
+            if (this.system.activePoints) {
+                console.warn(
+                    `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData activePoints. Legacy (${this.system.activePoints}) vs new (${_activePoints})`,
+                );
+            }
+        }
+        this.system.activePoints = _activePoints;
+        this.system._activePointsWithoutEndMods = this._activePointsForEnd;
+        this.system.activePointsDc = this._activePointsDcAffecting;
+        this.system._advantages = this._advantageCost;
+        this.system._advantagesDc = this._advantagesAffectingDc;
+
+        //calcRealCost
+        const _realCost = this._realCost;
+        if (_realCost !== this.system.realCost) {
+            if (this.system.realCost) {
+                console.warn(
+                    `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData realCost. Legacy (${this.system.realCost}) vs new (${_realCost})`,
+                );
+            }
+            // system.realCost = _realCost + costSuffix;
+            this.system.realCost = _realCost;
+        }
+    }
+
     async _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
 
@@ -985,13 +1034,15 @@ export class HeroSystem6eItem extends Item {
     }
 
     // An attempt to cache getPowerInfo for performance reasons.
-    #baseInfo = getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
+    //_baseInfo ??= getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
     getBaseInfo() {
         console.warn("Use baseInfo instead of getBaseInfo");
-        return this.#baseInfo;
+        return this.baseInfo;
     }
     get baseInfo() {
-        return this.#baseInfo;
+        // cache getPowerInfo
+        this._baseInfo ??= getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
+        return this._baseInfo;
     }
 
     get is5e() {
@@ -1389,7 +1440,7 @@ export class HeroSystem6eItem extends Item {
 
         // FIXME: This should not be required as the behaviour should be marked correctly.
         // Talent/Skill/Perk as Powers are technically toggleable
-        if (this.type === "power" && ["talent", "skill", "perk"].find((o) => this.#baseInfo?.type.includes(o))) {
+        if (this.type === "power" && ["talent", "skill", "perk"].find((o) => this.baseInfo?.type.includes(o))) {
             return true;
         }
 
@@ -1708,7 +1759,7 @@ export class HeroSystem6eItem extends Item {
 
             this.updateRoll();
 
-            changed = this.determinePointCosts() || changed;
+            //changed = this.determinePointCosts() || changed;  // Moved to prepareDerivedData
 
             // CHARGES
             const CHARGES = this.findModsByXmlid("CHARGES");
@@ -2462,11 +2513,25 @@ export class HeroSystem6eItem extends Item {
                     : [heroJson[itemSubTag]]) {
                     itemData = {
                         name: system?.NAME || system?.ALIAS || system?.XMLID || itemTag, // simplistic name for now
-                        type: powerList.filter((o) => o.type?.includes("characteristic")).map((o) => o.key)
-                            ? "power"
-                            : itemTag.toLowerCase().replace(/s$/, ""),
+                        type:
+                            powerList
+                                .filter((o) => o.type?.includes("characteristic"))
+                                .map((o) => o.key)
+                                .includes(system.XMLID) || ["MULTIPOWER", "ELEMENTAL_CONTROL"].includes(system.XMLID)
+                                ? "power"
+                                : itemTag.toLowerCase().replace(/s$/, ""),
                         system: { ...system, is5e: itemData.system.is5e, xmlTag: itemSubTag },
                     };
+
+                    // Skill Enhancers
+                    if (["JACK_OF_ALL_TRADES", "LINGUIST", "SCIENTIST", "SCHOLAR", "TRAVELER"].includes(system.XMLID)) {
+                        itemData.type = "skill";
+                    }
+
+                    // Perk Enhancers
+                    if (["WELL_CONNECTED"].includes(system.XMLID)) {
+                        itemData.type = "perk";
+                    }
 
                     return itemData;
                 }
@@ -2535,7 +2600,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get modifiers() {
-        const _modifiers = [];
+        let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             //_modifiers.push(_mod);
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -2548,12 +2613,23 @@ export class HeroSystem6eItem extends Item {
                 if (!_modifiers.find((mod) => mod.ID === pMod.ID)) {
                     // We may want the parent reference at some point (like for ingame editing of items)
                     pMod.parentId ??= this.parentItem.system.ID;
-                    //_modifiers.push(pMod);
+
+                    // Sometimes the same modifiers is applied to item and items parent, we only keep the parent one
+                    _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
                     _modifiers.push(new HeroSystem6eModifier(pMod, { item: this }));
                 }
             }
         }
+
         return _modifiers;
+    }
+
+    get advantages() {
+        return this.modifiers.filter((o) => o.cost >= 0);
+    }
+
+    get limitations() {
+        return this.modifiers.filter((o) => o.cost < 0);
     }
 
     get adders() {
@@ -2570,42 +2646,45 @@ export class HeroSystem6eItem extends Item {
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
         // A quick sanity check warns of this issue and removes the offending POWER from the array.
         // There was an issue where findModsByXmlid(, "STRMINIMUM") would return the COMPOUNDPOWER instead of the RKA (Oceana Silverheart.HDC)
-        // let powersList = this.system.POWER || [];
-        // for (let p of powersList) {
-        //     const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
-        //     if (childDuplicate) {
-        //         console.warn(
-        //             `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file will permenantly resolve this issue.`,
-        //         );
-        //         this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
-        //     }
-        // }
-        // powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
-        // return powersList;
+        let powersList = this.system.POWER || [];
+        try {
+            for (let p of powersList) {
+                const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
+                if (childDuplicate) {
+                    console.warn(
+                        `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file should resolve this issue.`,
+                    );
+                    this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
+                }
+            }
+            powersList = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
 
-        const _powers = [];
-        for (const _powerJson of this.system.POWER || []) {
-            _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
+            const _powers = [];
+            for (const _powerJson of powersList) {
+                _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
+            }
+            return _powers;
+        } catch (e) {
+            console.error(e);
+            return [];
         }
-        return _powers;
     }
 
     calcItemPoints() {
-        let changed = false;
-        // if (this.system.ID === "1726444520895") {
-        //     debugger;
+        console.warn(`Cost calculations moved to prepareDerivedData. Should no longer call this function`);
+        return false;
+        // let changed = false;
+        // changed = this.calcBasePointsPlusAdders() || changed;
+        // changed = this.calcActivePoints() || changed;
+        // changed = this.calcRealCost() || changed;
+        // if (this.system.basePointsPlusAdders != this._basePoints + this._addersCost) {
+        //     console.warn(
+        //         `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
+        //             `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
+        //         this,
+        //     );
         // }
-        changed = this.calcBasePointsPlusAdders() || changed;
-        changed = this.calcActivePoints() || changed;
-        changed = this.calcRealCost() || changed;
-        if (this.system.basePointsPlusAdders != this._basePoints + this._addersCost) {
-            console.warn(
-                `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
-                    `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
-                this,
-            );
-        }
-        return changed;
+        // return changed;
     }
 
     calcBasePointsPlusAdders() {
@@ -2918,7 +2997,7 @@ export class HeroSystem6eItem extends Item {
                     actor: this.actor,
                 });
 
-                if (!adderPowerInfo) {
+                if (!adderPowerInfo && !modifier.BASECOST) {
                     console.warn(
                         `${this.actor?.name}: ${this.name}/${this.system.XMLID}/${modifier.XMLID} is missing powerInfo for adder ${adder.XMLID}`,
                         adder,
@@ -3013,7 +3092,7 @@ export class HeroSystem6eItem extends Item {
             let _myLimitation = 0;
 
             const modPowerInfo = modifier.baseInfo;
-            if (!modPowerInfo) {
+            if (!modPowerInfo && !modifier.BASECOST) {
                 console.warn(
                     `${this.actor?.name}/${this.name}/${this.system.XMLID} is missing powerInfo for modifier ${modifier.XMLID}`,
                     modifier,
@@ -3975,219 +4054,213 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (system.ADDER?.length > 0 || _adderArray.length > 0) {
-            for (const adder of this.adders) {
-                switch (adder.XMLID) {
-                    case "HEALEDBY":
-                        {
-                            _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS || "unknown"}`);
-                        }
-                        break;
+        for (const adder of this.adders) {
+            switch (adder.XMLID) {
+                case "HEALEDBY":
+                    {
+                        _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS || "unknown"}`);
+                    }
+                    break;
 
-                    case "DIMENSIONS":
-                        system.description += `, ${adder.ALIAS}`;
-                        break;
+                case "DIMENSIONS":
+                    system.description += `, ${adder.ALIAS}`;
+                    break;
 
-                    case "ATTACK":
-                    case "EATING":
-                    case "EXTENDEDBREATHING":
-                    case "IMMUNITY":
-                    case "LONGEVITY":
-                    case "RECOGNIZED":
-                    case "SLEEPING":
-                    case "USEFUL":
-                        if (system.XMLID === "VULNERABILITY") {
-                            system.description += ` (${adder.OPTION_ALIAS})`.replace("((", "("); // Unclear why there is a parand in the OPTION_ALIAS
-                            break;
-                        }
-                        _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS}`);
+                case "ATTACK":
+                case "EATING":
+                case "EXTENDEDBREATHING":
+                case "IMMUNITY":
+                case "LONGEVITY":
+                case "RECOGNIZED":
+                case "SLEEPING":
+                case "USEFUL":
+                    if (system.XMLID === "VULNERABILITY") {
+                        system.description += ` (${adder.OPTION_ALIAS})`.replace("((", "("); // Unclear why there is a parand in the OPTION_ALIAS
                         break;
+                    }
+                    _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS}`);
+                    break;
 
-                    case "ADDITIONALPD":
-                    case "ADDITIONALED":
-                    case "DEFBONUS":
-                        break;
+                case "ADDITIONALPD":
+                case "ADDITIONALED":
+                case "DEFBONUS":
+                    break;
 
-                    case "DAMAGE":
-                        // Unfortunately DAMAGE is used as an adder for both SUSCEPTIBILITY and CHANGEENVIRONMENT. They do not
-                        // share a structure.
-                        if (powerXmlId === "CHANGEENVIRONMENT") {
-                            _adderArray.push(`, ${adder.ALIAS}`);
-                        } else {
-                            _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
-                        }
-                        break;
-
-                    case "APPEARANCE":
-                    case "AREA":
-                    case "CAPABILITIES":
-                    case "CHANCETOGO":
-                    case "CHANCETORECOVER":
-                    case "CIRCUMSTANCES":
-                    case "CONCEALABILITY":
-                    case "CONDITION":
-                    case "DESCRIPTION":
-                    case "DICE":
-                    case "EFFECT":
-                    case "EFFECTS":
-                    case "FIERCENESS":
-                    case "HOWWELL":
-                    case "HOWWIDE":
-                    case "IMPAIRS":
-                    case "INTENSITY":
-                    case "KNOWLEDGE":
-                    case "LEVEL":
-                    case "MOTIVATION":
-                    case "OCCUR":
-                    case "OCCURS":
-                    case "POWER":
-                    case "REACTION":
-                    case "SENSING":
-                    case "SENSITIVITY":
-                    case "SITUATION":
-                    case "SUBSTANCE":
-                    case "TIME":
-                    case "USEFULNESS":
+                case "DAMAGE":
+                    // Unfortunately DAMAGE is used as an adder for both SUSCEPTIBILITY and CHANGEENVIRONMENT. They do not
+                    // share a structure.
+                    if (powerXmlId === "CHANGEENVIRONMENT") {
+                        _adderArray.push(`, ${adder.ALIAS}`);
+                    } else {
                         _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
-                        break;
+                    }
+                    break;
 
-                    case "PHYSICAL":
-                    case "ENERGY":
-                    case "MENTAL":
-                        // Damage Negation (-1 DCs Energy)
-                        if (system.XMLID === "DAMAGENEGATION") {
-                            if (parseInt(adder.LEVELS) != 0)
-                                _adderArray.push(
-                                    "-" + parseInt(adder.LEVELS) + " DCs " + adder.ALIAS.replace(" DCs", ""),
-                                );
-                        } else {
-                            if (parseInt(adder.LEVELS) != 0)
-                                _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS);
+                case "APPEARANCE":
+                case "AREA":
+                case "CAPABILITIES":
+                case "CHANCETOGO":
+                case "CHANCETORECOVER":
+                case "CIRCUMSTANCES":
+                case "CONCEALABILITY":
+                case "CONDITION":
+                case "DESCRIPTION":
+                case "DICE":
+                case "EFFECT":
+                case "EFFECTS":
+                case "FIERCENESS":
+                case "HOWWELL":
+                case "HOWWIDE":
+                case "IMPAIRS":
+                case "INTENSITY":
+                case "KNOWLEDGE":
+                case "LEVEL":
+                case "MOTIVATION":
+                case "OCCUR":
+                case "OCCURS":
+                case "POWER":
+                case "REACTION":
+                case "SENSING":
+                case "SENSITIVITY":
+                case "SITUATION":
+                case "SUBSTANCE":
+                case "TIME":
+                case "USEFULNESS":
+                    _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
+                    break;
+
+                case "PHYSICAL":
+                case "ENERGY":
+                case "MENTAL":
+                    // Damage Negation (-1 DCs Energy)
+                    if (system.XMLID === "DAMAGENEGATION") {
+                        if (parseInt(adder.LEVELS) != 0)
+                            _adderArray.push("-" + parseInt(adder.LEVELS) + " DCs " + adder.ALIAS.replace(" DCs", ""));
+                    } else {
+                        if (parseInt(adder.LEVELS) != 0)
+                            _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS);
+                    }
+                    break;
+
+                case "PLUSONEPIP":
+                case "MINUSONEPIP":
+                case "PLUSONEHALFDIE":
+                    // Don't show the +1, 1/2d6, 1d6-1 modifier as it's already included in the description's dice formula
+                    break;
+
+                case "COMMONMOTORIZED":
+                case "RIDINGANIMALS":
+                    // Both of these Transport Familiarity adders may contain subadders. If they do, then use the subadders
+                    // otherwise use the adder.
+                    if (adder.SELECTED) {
+                        _adderArray.push(adder.ALIAS);
+                    } else {
+                        for (const adder2 of adder?.ADDER || []) {
+                            _adderArray.push(adder2.ALIAS);
                         }
-                        break;
+                    }
+                    break;
 
-                    case "PLUSONEPIP":
-                    case "MINUSONEPIP":
-                    case "PLUSONEHALFDIE":
-                        // Don't show the +1, 1/2d6, 1d6-1 modifier as it's already included in the description's dice formula
-                        break;
+                case "INCREASEDMAX":
+                    // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
+                    // Can Add Maximum Of 34 Points
+                    system.description += `, Can Add Maximum Of ${determineMaxAdjustment(this)} Points`;
+                    break;
 
-                    case "COMMONMOTORIZED":
-                    case "RIDINGANIMALS":
-                        // Both of these Transport Familiarity adders may contain subadders. If they do, then use the subadders
-                        // otherwise use the adder.
-                        if (adder.SELECTED) {
-                            _adderArray.push(adder.ALIAS);
-                        } else {
-                            for (const adder2 of adder?.ADDER || []) {
-                                _adderArray.push(adder2.ALIAS);
-                            }
-                        }
-                        break;
+                case "ADDER":
+                    // This is likely a CSL adder that we use to specificy which attacks the CSL applies to.
+                    // If the CLS applies to ALL attacks, don't bother to list them all.
+                    if (this.system.XMLID === "COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+                    if (this.system.XMLID === "MENTAL_COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+                    if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.OPTIONID === "ALL") break;
 
-                    case "INCREASEDMAX":
-                        // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
-                        // Can Add Maximum Of 34 Points
-                        system.description += `, Can Add Maximum Of ${determineMaxAdjustment(this)} Points`;
-                        break;
+                    // Otherwise add it to the list of ADDERS as normal.
+                    if (adder.ALIAS.trim()) {
+                        _adderArray.push(adder.ALIAS);
+                    }
+                    break;
 
-                    case "ADDER":
-                        // This is likely a CSL adder that we use to specificy which attacks the CSL applies to.
-                        // If the CLS applies to ALL attacks, don't bother to list them all.
-                        if (this.system.XMLID === "COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
-                        if (this.system.XMLID === "MENTAL_COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
-                        if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.OPTIONID === "ALL") break;
+                case "MINDCONTROLEFFECT":
+                    {
+                        const mindControlEffect = 40 + (parseInt(adder.LEVELS) || 0);
+                        _adderArray.push(`Mind Control Effect ${mindControlEffect} points`);
+                    }
+                    break;
 
-                        // Otherwise add it to the list of ADDERS as normal.
-                        if (adder.ALIAS.trim()) {
-                            _adderArray.push(adder.ALIAS);
-                        }
-                        break;
+                case "TELEPATHYEFFECT":
+                    {
+                        const telepathyEffect = 30 + (parseInt(adder.LEVELS) || 0);
+                        _adderArray.push(`Telepathy Effect ${telepathyEffect} points`);
+                    }
+                    break;
 
-                    case "MINDCONTROLEFFECT":
-                        {
-                            const mindControlEffect = 40 + (parseInt(adder.LEVELS) || 0);
-                            _adderArray.push(`Mind Control Effect ${mindControlEffect} points`);
-                        }
-                        break;
-
-                    case "TELEPATHYEFFECT":
-                        {
-                            const telepathyEffect = 30 + (parseInt(adder.LEVELS) || 0);
-                            _adderArray.push(`Telepathy Effect ${telepathyEffect} points`);
-                        }
-                        break;
-
-                    default:
-                        if (adder.ALIAS.trim()) {
-                            _adderArray.push(adder.ALIAS);
-                        }
-                        break;
-                }
+                default:
+                    if (adder.ALIAS.trim()) {
+                        _adderArray.push(adder.ALIAS);
+                    }
+                    break;
             }
+        }
 
-            if (_adderArray.length > 0) {
-                switch (powerXmlId) {
-                    case "TRANSPORT_FAMILIARITY":
-                        system.description += _adderArray.sort().join(", ");
-                        break;
+        if (_adderArray.length > 0) {
+            switch (powerXmlId) {
+                case "TRANSPORT_FAMILIARITY":
+                    system.description += _adderArray.sort().join(", ");
+                    break;
 
-                    case "DARKNESS":
-                    case "INVISIBILITY":
-                        {
-                            system.description += system.ALIAS + " to ";
-                            // Groups
-                            let _groups = _adderArray.filter((o) => o.indexOf("Group") > -1);
-                            if (_groups.length === 1) {
-                                system.description += _groups[0];
-                            } else {
-                                system.description += _groups
-                                    .slice(0, -1)
-                                    .join(", ")
-                                    .replace(/ Group/g, "");
-                                system.description += " and " + _groups.slice(-1) + "s";
-                            }
-
-                            // singles
-                            let _singles = _adderArray.filter((o) => o.indexOf("Group") === -1);
-                            // spacing
-                            if (_groups.length > 0 && _singles.length > 0) {
-                                system.description += ", ";
-                            }
-
-                            if (_singles.length === 1) {
-                                system.description += _singles[0];
-                            } else if (_singles.length > 1) {
-                                system.description += _singles.slice(0, -1).join(", ");
-                                system.description += " and " + _singles.slice(-1);
-                            }
+                case "DARKNESS":
+                case "INVISIBILITY":
+                    {
+                        system.description += system.ALIAS + " to ";
+                        // Groups
+                        let _groups = _adderArray.filter((o) => o.indexOf("Group") > -1);
+                        if (_groups.length === 1) {
+                            system.description += _groups[0];
+                        } else {
+                            system.description += _groups
+                                .slice(0, -1)
+                                .join(", ")
+                                .replace(/ Group/g, "");
+                            system.description += " and " + _groups.slice(-1) + "s";
                         }
 
-                        // DARKNESS radius
-                        // Darkness to Hearing Group 16m radius
-                        if (powerXmlId === "DARKNESS") {
-                            system.description += ` ${system.LEVELS}${getSystemDisplayUnits(this.is5e)} radius`;
+                        // singles
+                        let _singles = _adderArray.filter((o) => o.indexOf("Group") === -1);
+                        // spacing
+                        if (_groups.length > 0 && _singles.length > 0) {
+                            system.description += ", ";
                         }
 
-                        break;
+                        if (_singles.length === 1) {
+                            system.description += _singles[0];
+                        } else if (_singles.length > 1) {
+                            system.description += _singles.slice(0, -1).join(", ");
+                            system.description += " and " + _singles.slice(-1);
+                        }
+                    }
 
-                    case "FLASH":
-                        // The senses are already in the description
-                        system.description +=
-                            " (" +
-                            _adderArray
-                                .filter(
-                                    (o) => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i),
-                                )
-                                .join("; ") +
-                            ")";
-                        system.description = system.description.replace("()", "");
-                        break;
+                    // DARKNESS radius
+                    // Darkness to Hearing Group 16m radius
+                    if (powerXmlId === "DARKNESS") {
+                        system.description += ` ${system.LEVELS}${getSystemDisplayUnits(this.is5e)} radius`;
+                    }
 
-                    default:
-                        system.description += " (" + _adderArray.join("; ") + ")";
-                        break;
-                }
+                    break;
+
+                case "FLASH":
+                    // The senses are already in the description
+                    system.description +=
+                        " (" +
+                        _adderArray
+                            .filter((o) => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i))
+                            .join("; ") +
+                        ")";
+                    system.description = system.description.replace("()", "");
+                    break;
+
+                default:
+                    system.description += " (" + _adderArray.join("; ") + ")";
+                    break;
             }
         }
 
@@ -4213,8 +4286,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Advantages sorted low to high
-        for (let modifier of this.modifiers
-            .filter((m) => m.BASECOST_total >= 0 || m.isAdvantage)
+        for (let modifier of this.advantages
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             })
@@ -4222,10 +4294,10 @@ export class HeroSystem6eItem extends Item {
                 return a.cost - b.cost;
             })) {
             // This might be a limitation with an unusually positive value
-            const modPowerInfo = modifier.baseInfo;
-            if (modPowerInfo?.minimumLimitation) {
-                continue;
-            }
+            // const modPowerInfo = modifier.baseInfo;
+            // if (modPowerInfo?.minimumLimitation) {
+            //     continue;
+            // }
 
             system.description += this.createPowerDescriptionModifier(modifier);
         }
@@ -4238,8 +4310,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MULTIPOWER slots typically include limitations
-        const modifiers = this.modifiers
-            .filter((m) => m.BASECOST_total < 0 || m.isDisadvantage)
+        const modifiers = this.limitations
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             })
@@ -4436,6 +4507,9 @@ export class HeroSystem6eItem extends Item {
                     break;
                 case "FOCUS":
                     break;
+                // case "TRIGGER":
+                //     // All the important stuff is in the TRIGGER adders
+                //     break;
                 case "CONDITIONALPOWER":
                     result += `${modifier.OPTION_ALIAS}; (`;
                     break;
@@ -4453,7 +4527,7 @@ export class HeroSystem6eItem extends Item {
             result += modifier.COMMENTS + "; ";
         }
 
-        for (const adder of modifier.ADDER || []) {
+        for (const adder of modifier.adders) {
             switch (adder.XMLID) {
                 case "DOUBLELENGTH":
                 case "DOUBLEWIDTH":
@@ -4465,6 +4539,11 @@ export class HeroSystem6eItem extends Item {
                 case "BREAKABILITY":
                     result += `${adder.OPTION_ALIAS} `;
                     break;
+
+                // case "ACTIVATION":
+                // case "RESET":
+                //     result += `${adder.OPTION_ALIAS}, `;
+                //     break;
 
                 case "EXPLOSION":
                     result += adder.ALIAS + "; ";
@@ -5479,15 +5558,15 @@ export class HeroSystem6eItem extends Item {
         // Preferred Methods to determine KILLING
         if (this.system.XMLID.startsWith("__")) {
             return false;
-        } else if (this.#baseInfo.doesKillingDamage != undefined) {
-            return this.#baseInfo.doesKillingDamage;
-        } else if (this.#baseInfo.nonDmgEffect) {
+        } else if (this.baseInfo.doesKillingDamage != undefined) {
+            return this.baseInfo.doesKillingDamage;
+        } else if (this.baseInfo.nonDmgEffect) {
             return false;
         } else if (this.isSenseAffecting()) {
             return false;
-        } else if (this.#baseInfo.type.includes("adjustment")) {
+        } else if (this.baseInfo.type.includes("adjustment")) {
             return false;
-        } else if (this.#baseInfo.type.includes("mental")) {
+        } else if (this.baseInfo.type.includes("mental")) {
             return false;
         } else if (this.system.WEAPONEFFECT) {
             return this.system.WEAPONEFFECT.includes("KILLING");
@@ -5495,7 +5574,7 @@ export class HeroSystem6eItem extends Item {
             return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
         } else if (this.type === "disadvantage") {
             return false;
-        } else if (this.#baseInfo.type.includes("disadvantage")) {
+        } else if (this.baseInfo.type.includes("disadvantage")) {
             return false;
         }
 
@@ -5681,30 +5760,115 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _addersCost() {
-        let _addersCost = 0;
+        let _cost = 0;
 
         for (const adder of this.adders) {
-            _addersCost += adder.cost;
+            _cost += adder.cost;
         }
 
         // ENDURANCERESERVEREC is a power, we can treat it like an adder
         for (const power of this.powers) {
-            _addersCost += power.cost;
+            _cost += power.cost;
         }
 
-        return _addersCost;
+        return _cost;
+    }
+
+    get _negativeCustomAddersCost() {
+        let _cost = 0;
+
+        for (const adder of this.adders.filter((a) => a.cost < 0)) {
+            _cost += adder.cost;
+        }
+        return _cost;
     }
 
     get _advantageCost() {
-        return null;
+        let _cost = 0;
+        for (const advantage of this.advantages) {
+            _cost += advantage.cost;
+        }
+        return _cost;
     }
 
-    get _activeCost() {
-        return null;
+    get _advantageCostWithoutEnd() {
+        let _cost = 0;
+        for (const advantage of this.advantages.filter((a) => a.XMLID !== "REDUCEDEND")) {
+            _cost += advantage.cost;
+        }
+        return _cost;
+    }
+
+    get _activePoints() {
+        // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
+        if (this.baseInfo?.activePoints) {
+            return this.baseInfo.activePoints(this);
+        }
+        return RoundFavorPlayerDown((this._basePoints + this._addersCost) * (1 + this._advantageCost));
+    }
+
+    get _activePointsForEnd() {
+        //return RoundFavorPlayerDown((this._basePoints + this._addersCost) * (1 + this._advantageCostWithoutEnd));
+        return RoundFavorPlayerDown(
+            (this._basePoints + this._addersCost - this._negativeCustomAddersCost) *
+                (1 + this._advantageCostWithoutEnd),
+        );
+    }
+
+    get _advantagesAffectingDc() {
+        let _cost = 0;
+        for (const advantage of this.advantages.filter((a) => a.baseInfo?.dcAffecting)) {
+            _cost += advantage.cost;
+        }
+        return _cost;
+    }
+
+    get _activePointsDcAffecting() {
+        //return RoundFavorPlayerDown((this._basePoints + this._addersCost) * (1 + this._advantagesAffectingDc));
+        return RoundFavorPlayerDown(
+            (this._basePoints + this._addersCost - this._negativeCustomAddersCost) * (1 + this._advantagesAffectingDc),
+        );
     }
 
     get _limitationCost() {
-        return null;
+        let _cost = 0;
+        for (const limitation of this.limitations) {
+            _cost += limitation.cost;
+        }
+        return -_cost;
+    }
+
+    get _realCost() {
+        // Real Cost = Active Cost / (1 + total value of all Limitations)
+        let _cost = this._activePoints;
+
+        // Skill Enhancer
+        if (this.parentItem?.baseInfo?.type.includes("enhancer")) {
+            _cost = Math.max(1, _cost - 1);
+        }
+
+        // Power cost in Power Framework is applied before limitations
+        let costSuffix = "";
+        if (this.parentItem) {
+            if (this.parentItem.system.XMLID === "MULTIPOWER") {
+                // Fixed
+                if (this.system.ULTRA_SLOT) {
+                    costSuffix = this.actor?.system.is5e ? "u" : "f";
+                    _cost = _cost / 10.0;
+                }
+
+                // Variable
+                else {
+                    costSuffix = this.actor?.system.is5e ? "m" : "v";
+                    _cost = _cost / 5.0;
+                }
+            } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
+                const baseCost = (this.parentItem.system.BASECOST = parseFloat(this.parentItem.system.BASECOST));
+                _cost = Math.max(baseCost, _cost - baseCost);
+            }
+        }
+        _cost = RoundFavorPlayerDown(_cost / (1 + this._limitationCost));
+        return _cost + costSuffix;
     }
 
     get costPerLevel() {

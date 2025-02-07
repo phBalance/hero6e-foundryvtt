@@ -30,7 +30,7 @@ export class HeroSystem6eModifier {
             console.warn(`${this.XMLID} item not found`);
         }
 
-        if (!this.#baseInfo) {
+        if (!this.#baseInfo && !this.BASECOST) {
             if (!window.warnAdder?.includes(this.XMLID)) {
                 console.info(
                     `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
@@ -80,19 +80,23 @@ export class HeroSystem6eModifier {
 
         // Some modifiers have a minimumLimitation (REQUIRESASKILLROLL)
         if (this.baseInfo?.minimumLimitation) {
-            _cost = Math.min(this.baseInfo?.minimumLimitation, _cost);
+            if (this.baseInfo?.minimumLimitation < 0) {
+                _cost = Math.min(this.baseInfo?.minimumLimitation, _cost);
+            } else {
+                _cost = Math.max(this.baseInfo?.minimumLimitation, _cost);
+            }
         }
 
         return _cost;
     }
 
-    get isAdvantage() {
-        return this.cost >= 0;
-    }
+    // get isAdvantage() {
+    //     return this.cost >= 0;
+    // }
 
-    get isDisadvantage() {
-        return this.cost < 0;
-    }
+    // get isDisadvantage() {
+    //     return this.cost < 0;
+    // }
 
     get adders() {
         const _addres = [];

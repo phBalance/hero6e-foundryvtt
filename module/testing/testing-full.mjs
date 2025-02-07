@@ -1008,7 +1008,7 @@ export function registerFullTests(quench) {
                     assert.equal(actor.system.characteristics.leaping.realCost, 0);
                 });
 
-                it("realCost", async function () {
+                it("total points spent", async function () {
                     assert.equal(actor.system.realCost, 657);
                 });
             });
@@ -3449,6 +3449,13 @@ export function registerFullTests(quench) {
                     energyBlastItem = actor.items.find((o) => o.system.XMLID === "ENERGYBLAST");
                     entangleItem = actor.items.find((o) => o.system.XMLID === "ENTANGLE");
                     flightItem = actor.items.find((o) => o.system.XMLID === "FLIGHT");
+                });
+
+                it("Description", async function () {
+                    assert.equal(
+                        energyBlastItem.system.description,
+                        `Energy Blast 4d6 (ED), Trigger (Activating the Trigger requires a Zero Phase Action, Trigger requires a Turn or more to reset, Trigger can expire (it has a time limit), Character does not control activation of personal Trigger, Misfire, Two activation conditions apply simultaneously; +1/4), Area Of Effect (One Hex; +1/2), Armor Piercing (+1/2), Penetrating (+1/2), Does x1 1/2 Knockback (+1/2), Uncontrolled (+1/2), Variable Special Effects (Any SFX; +1/2), Attack Versus Limited Defense (+3/4), Continuous (+1), Does BODY (+1), Autofire (2 shots; +1/4), Non-Standard Attack Power (+1), Based On EGO Combat Value (Mental Defense applies; +1), Range Modifiers Apply (-1/4), Attacker Chooses Defense (+1/2), Variable Advantage (+1 Advantages; Limited Group of Advantages; +1 3/4) (225 Active Points)`,
+                    );
                 });
 
                 it("should recognize the cost of the energy blast", async function () {

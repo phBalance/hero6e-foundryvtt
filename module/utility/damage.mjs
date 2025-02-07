@@ -106,14 +106,25 @@ function effectiveStrength(item, options) {
 export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengthMinimumModifier) {
     let strMinimumValue = parseInt(strengthMinimumModifier.OPTION_ALIAS?.match(/^\d+$/)?.[0] || 0);
 
+    // Aaron's attempt to parse OPTIONID="9-13" as found in Julia (Red) Augusta.hdc
+    if (!strMinimumValue) {
+        strMinimumValue = parseInt(strengthMinimumModifier.OPTIONID?.match(/^\d+-(\d+)$/)?.[1] || 0);
+    }
+
     // Newer HDC files (post 2022?) have OPTION_ALIAS defined to give us the minimum strength range. If players have filled in the exact value
     // as "<number>" then use that, otherwise fallback to calculating an estimate based on a range. Note a STR minimum of less than 1 is not allowed.
     if (strMinimumValue === 0) {
         // Older HDC files seem to have to calculate it based on the limitation value
         const limitationBaseCost = strengthMinimumModifier.BASECOST;
-        console.warn(
-            `${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
-        );
+        if (itemWithStrengthMinimum.id) {
+            console.warn(
+                `${itemWithStrengthMinimum.actor?.name}/${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
+            );
+        } else {
+            console.info(
+                `${itemWithStrengthMinimum.actor?.name}/${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
+            );
+        }
 
         if (limitationBaseCost === "-0.25") {
             // -1/4 limitation is str min 1-5.

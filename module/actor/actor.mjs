@@ -1459,6 +1459,7 @@ export class HeroSystem6eActor extends Actor {
         );
         const _system = _actor.system;
 
+        // remove any system properties that are not part of system.json
         const schemaKeys = Object.keys(_system);
         for (const key of Object.keys(this.system)) {
             if (!schemaKeys.includes(key)) {
@@ -1471,7 +1472,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
         if (this.id) {
-            for (let prop of Object.keys(this.flags)) {
+            for (let prop of Object.keys(this.flags).filter((f) => f !== "uploading")) {
                 changes[`flags.-=${prop}`] = null;
             }
 
@@ -1594,6 +1595,22 @@ export class HeroSystem6eActor extends Actor {
             sortBase += 1000;
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
+                    if (system.XMLID === "COMPOUNDPOWER") {
+                        for (const _modifier of system.MODIFIER || []) {
+                            console.warn(
+                                `${this.name}/${system.ALIAS}/${system.XMLID}/${_modifier.XMLID}/${_modifier.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
+                            );
+                        }
+                        delete system.MODIFIER;
+
+                        for (const _adder of system.ADDER || []) {
+                            ui.notifications.warn(
+                                `${this.name}/${system.ALIAS}/${system.XMLID}/${_adder.XMLID}/${_adder.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
+                            );
+                        }
+                        delete system.ADDER;
+                    }
+
                     const itemData = {
                         name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                         type: itemTag.toLowerCase().replace(/s$/, ""),
@@ -1622,117 +1639,141 @@ export class HeroSystem6eActor extends Actor {
                             break;
                     }
 
-                    if (this.id) {
-                        itemsToCreate.push(itemData);
+                    // Note that we create COMPOUNDPOWER subitems before creating the parent
+                    // so that we can remove the subitems from the parent COMPOUNDPOWER attributes
 
-                        // COMPOUNDPOWER is similar to a MULTIPOWER.
-                        // MULTIPOWER uses PARENTID references.
-                        // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
-                        if (system.XMLID === "COMPOUNDPOWER") {
-                            const compoundItems = [];
-                            for (const value of Object.values(system)) {
-                                // We only care about arrays and objects (array of 1)
-                                if (typeof value === "object") {
-                                    const values = value.length ? value : [value];
-                                    for (const system2 of values) {
-                                        if (system2.XMLID) {
-                                            const power = getPowerInfo({
-                                                xmlid: system2.XMLID,
-                                                actor: this,
-                                            });
-                                            if (!power) {
-                                                await ui.notifications.error(
-                                                    `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                                    {
-                                                        console: true,
-                                                        permanent: true,
-                                                    },
-                                                );
-                                                continue;
-                                            }
-                                            compoundItems.push(system2);
+                    // COMPOUNDPOWER is similar to a MULTIPOWER.
+                    // MULTIPOWER uses PARENTID references.
+                    // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
+                    if (system.XMLID === "COMPOUNDPOWER") {
+                        const compoundItems = [];
+                        for (const [key, value] of Object.entries(system)) {
+                            // We only care about arrays and objects (array of 1)
+                            // These are expected to be POWERS, SKILLS, etc that make up the COMPOUNDPOWER
+                            // Instead of COMPOUNDPOWER attributes, they should be separate items, with PARENT/CHILD
+                            if (typeof value === "object") {
+                                const values = value.length ? value : [value];
+                                for (const system2 of values) {
+                                    if (system2.XMLID) {
+                                        const power = getPowerInfo({
+                                            xmlid: system2.XMLID,
+                                            actor: this,
+                                        });
+                                        if (!power || ["MODIFIER", "ADDER"].includes(power.xmlTag)) {
+                                            await ui.notifications.error(
+                                                `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                {
+                                                    console: true,
+                                                    permanent: true,
+                                                },
+                                            );
+                                            continue;
                                         }
+                                        compoundItems.push(system2);
                                     }
                                 }
-                            }
-                            compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
-                            for (const system2 of compoundItems) {
-                                const power = getPowerInfo({
-                                    xmlid: system2.XMLID,
-                                    actor: this,
-                                });
-                                let itemData2 = {
-                                    name: system2.NAME || system2.ALIAS || system2.XMLID,
-                                    type: power.type.includes("skill") ? "skill" : "power",
-                                    system: {
-                                        ...system2,
-                                        PARENTID: system.ID,
-                                        POSITION: parseInt(system2.POSITION),
-                                        sort: itemData.sort + 100 + parseInt(system2.POSITION),
-                                    },
-                                };
-                                itemsToCreate.push(itemData2);
-
-                                // Remove any POWER "modifiers" that we created items for
-                                itemData.system.POWER = (itemData.system.POWER || []).filter(
-                                    (p) => p.ID !== itemData2.system.ID,
-                                );
+                                // Remove attribute/property since we just created items for it
+                                delete system[key];
                             }
                         }
-                    } else {
-                        const item = new HeroSystem6eItem(itemData, {
-                            parent: this,
-                        });
-                        this.items.set(item.system.XMLID + item.system.POSITION, item);
-                        if (system.XMLID === "COMPOUNDPOWER") {
-                            const compoundItems = [];
-                            for (const value of Object.values(system)) {
-                                // We only care about arrays and objects (array of 1)
-                                if (typeof value === "object") {
-                                    const values = value.length ? value : [value];
-                                    for (const system2 of values) {
-                                        if (system2.XMLID) {
-                                            const power = getPowerInfo({
-                                                xmlid: system2.XMLID,
-                                                actor: this,
-                                            });
-                                            if (!power) {
-                                                await ui.notifications.error(
-                                                    `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                                    {
-                                                        console: true,
-                                                        permanent: true,
-                                                    },
-                                                );
-                                                continue;
-                                            }
-                                            compoundItems.push(system2);
-                                        }
-                                    }
-                                }
-                            }
+                        compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
+                        for (const system2 of compoundItems) {
+                            const power = getPowerInfo({
+                                xmlid: system2.XMLID,
+                                actor: this,
+                            });
+                            let itemData2 = {
+                                name: system2.NAME || system2.ALIAS || system2.XMLID,
+                                type: power.type.includes("skill") ? "skill" : "power",
+                                system: {
+                                    ...system2,
+                                    PARENTID: system.ID,
+                                    POSITION: parseInt(system2.POSITION),
+                                    sort: itemData.sort + 100 + parseInt(system2.POSITION),
+                                },
+                            };
 
-                            compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
-                            for (const system2 of compoundItems) {
-                                const power = getPowerInfo({
-                                    xmlid: system2.XMLID,
-                                    actor: this,
-                                });
-                                const itemData2 = {
-                                    name: system2.NAME || system2.ALIAS || system2.XMLID,
-                                    type: power.type.includes("skill") ? "skill" : "power",
-                                    system: {
-                                        ...system2,
-                                        PARENTID: system.ID,
-                                        POSITION: parseInt(system2.POSITION),
-                                    },
-                                };
+                            // Remove any POWER "modifiers" that we created items for
+                            // itemData.system.POWER = (itemData.system.POWER || []).filter(
+                            //     (p) => p.ID !== itemData2.system.ID,
+                            // );
+
+                            if (this.id) {
+                                itemsToCreate.push(itemData2);
+                            } else {
                                 const item = new HeroSystem6eItem(itemData2, {
                                     parent: this,
                                 });
                                 this.items.set(item.system.XMLID + item.system.POSITION, item);
                             }
                         }
+                    }
+                    // } else {
+                    //     const item = new HeroSystem6eItem(itemData, {
+                    //         parent: this,
+                    //     });
+                    //     this.items.set(item.system.XMLID + item.system.POSITION, item);
+                    //     if (system.XMLID === "COMPOUNDPOWER") {
+                    //         const compoundItems = [];
+                    //         for (const [key, value] of Object.entries(system)) {
+                    //             // We only care about arrays and objects (array of 1)
+                    //             if (typeof value === "object") {
+                    //                 debugger;
+                    //                 const values = value.length ? value : [value];
+                    //                 for (const system2 of values) {
+                    //                     if (system2.XMLID) {
+                    //                         const power = getPowerInfo({
+                    //                             xmlid: system2.XMLID,
+                    //                             actor: this,
+                    //                         });
+                    //                         if (!power) {
+                    //                             await ui.notifications.error(
+                    //                                 `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                    //                                 {
+                    //                                     console: true,
+                    //                                     permanent: true,
+                    //                                 },
+                    //                             );
+                    //                             continue;
+                    //                         }
+                    //                         compoundItems.push(system2);
+                    //                     }
+                    //                 }
+                    //                 // Remove property since we just created an item.
+                    //                 delete system[key];
+                    //             }
+                    //         }
+
+                    //         compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
+                    //         for (const system2 of compoundItems) {
+                    //             const power = getPowerInfo({
+                    //                 xmlid: system2.XMLID,
+                    //                 actor: this,
+                    //             });
+                    //             const itemData2 = {
+                    //                 name: system2.NAME || system2.ALIAS || system2.XMLID,
+                    //                 type: power.type.includes("skill") ? "skill" : "power",
+                    //                 system: {
+                    //                     ...system2,
+                    //                     PARENTID: system.ID,
+                    //                     POSITION: parseInt(system2.POSITION),
+                    //                 },
+                    //             };
+                    //             const item = new HeroSystem6eItem(itemData2, {
+                    //                 parent: this,
+                    //             });
+                    //             this.items.set(item.system.XMLID + item.system.POSITION, item);
+                    //         }
+                    //     }
+                    // }
+
+                    if (this.id) {
+                        itemsToCreate.push(itemData);
+                    } else {
+                        const item = new HeroSystem6eItem(itemData, {
+                            parent: this,
+                        });
+                        this.items.set(item.system.XMLID + item.system.POSITION, item);
                     }
 
                     uploadPerformance.items ??= [];

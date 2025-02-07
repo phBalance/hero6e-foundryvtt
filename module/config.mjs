@@ -1,7 +1,7 @@
 import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "./utility/units.mjs";
 import * as heroDice from "./utility/dice.mjs";
 import { createDefenseProfile } from "./utility/defense.mjs";
-import { RoundFavorPlayerUp } from "./utility/round.mjs";
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import {
     characteristicValueToDiceParts,
@@ -3454,6 +3454,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
+            // adderCostAdjustment: function ({ adder, adderCost }) {
+            //     if (adderCost !== 2) {
+            //         console.error(`${adder.XMLID} cost was ${adderCost} but expected it to be 2`);
+            //     }
+            //     // First adder is full cost
+            //     if (adder.parent.adders[0].ID === adder.ID) {
+            //         return adderCost;
+            //     }
+            //     // Additional adders cost 1
+            //     return 1;
+            // },
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -3461,6 +3472,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             editOptions: {
                 hideLEVELS: true,
             },
+            xml: `<SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1738541497153" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
         {},
     );
@@ -3821,6 +3833,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             costPerLevel: fixedValueFunction(1 / 5),
+            cost: function (item) {
+                const basePoints = parseInt(item.system.BASEPOINTS) || 0;
+                const number = parseInt(item.system.NUMBER) || 1;
+                // A character can have double the number of
+                // Followers for +5 CP (twice as many for +5 CP, four times as
+                // many for +10 CP, and so on)
+                const doublingCost = Math.log2(number, 2) * 5;
+                return RoundFavorPlayerDown(basePoints / 5 + doublingCost);
+            },
             name: "Follower",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -5149,6 +5170,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 5),
+            cost: function (item) {
+                const points = parseInt(item.system.POINTS) || 0;
+                return points * this.costPerLevel();
+            },
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
@@ -5494,6 +5519,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "constant",
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
+            cost: undefined,
             xml: `<POWER XMLID="FORCEFIELD" ID="1709342634480" BASECOST="0.0" LEVELS="0" ALIAS="Force Field" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0"><NOTES/></POWER>`,
         },
     );
@@ -6021,13 +6047,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
-            cost: function (item) {
+            cost: function () {
+                return 0;
+            },
+            activePoints: function (item) {
                 const _levels = parseInt(item.system.LEVELS);
-                let _modifier = 0;
-                for (const modifier of item.modifiers.filter((a) => !a.PRIVATE)) {
-                    _modifier += modifier.cost;
-                }
-                return _levels * _modifier;
+                //return (item._basePoints + item._addersCost) * (1 + item._advantageCost);
+                return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
             },
             privateAsAdder: true,
             defenseTagVsAttack: function () {
@@ -7614,6 +7640,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // FORCEFIELD related
+            key: "FLASHDEFENSE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(3 / 2),
+            xml: `<ADDER XMLID="FLASHDEFENSE" ID="1736295402655" BASECOST="0.0" LEVELS="1" ALIAS="Flash Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // CLIPS related
             key: "INCREASEDRELOAD",
             behaviors: ["adder"],
@@ -7660,6 +7696,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(1 / 4),
             xml: `<ADDER XMLID="LIMITEDGROUP" ID="1735590835179" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Group of Advantages" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // SKILL related?  Found on Julia (Red) Agusta.hdc
+            key: "LIMITEDRANGE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="LIMITEDRANGE" ID="1736301555959" BASECOST="0.25" LEVELS="0" ALIAS="Recipient must be within Limited Range of the Grantor for power to be granted" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8345,6 +8391,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EXTRATIME",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
+            cost: function (modifier, item) {
+                const baseCost = parseFloat(modifier.BASECOST);
+                if (item.findModsByXmlid("ACTIVATEONLY")) {
+                    // Extra Time normally applies every time the power is
+                    // activated. If the power has a lengthy activation time, but can be
+                    // used every Phase thereafter (usually for Constant or Persistent
+                    // Powers), halve the Limitation value (to a minimum of -¼).
+                    return Math.min(-0.25, baseCost / 2);
+                }
+                return baseCost;
+            },
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="EXTRATIME" ID="1596334078813" BASECOST="-0.25" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PHASE" OPTIONID="PHASE" OPTION_ALIAS="Delayed Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
@@ -9130,6 +9187,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
+            minimumLimitation: 0.25,
             xml: `<MODIFIER XMLID="TRIGGER" ID="1735590829092" BASECOST="0.25" LEVELS="0" ALIAS="Trigger" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SET" OPTIONID="SET" OPTION_ALIAS="Set Trigger" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},

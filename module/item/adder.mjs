@@ -29,9 +29,12 @@ export class HeroSystem6eAdder {
             this[key] = options[key];
         }
 
-        if (!this.#baseInfo) {
+        // We really don't NEED every adder, for example SWIMMINGBEASTS from the RIDINGADNIMALS category of TRANSPORT_FAMILIARITY.
+        // Without these adders we will eventually have issues with in-game editing.
+        // However, if we have no data to base the cost from, we should investigate
+        if (!this.#baseInfo && !this.BASECOST && !this.LVLCOST) {
             if (!window.warnAdder?.includes(this.XMLID)) {
-                console.info(
+                console.warn(
                     `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: missing baseInfo.`,
                     this,
                 );
@@ -49,18 +52,18 @@ export class HeroSystem6eAdder {
         let _cost = 0;
         if (this.SELECTED !== false) {
             // Custom costs calculations
-            if (this.#baseInfo?.cost) {
+            if (this.baseInfo?.cost) {
                 _cost = this.#baseInfo.cost(this, this.item);
             } else {
                 // Generic cost calculations
                 _cost = parseFloat(this.BASECOST);
 
-                let costPerLevel = this.#baseInfo?.costPerLevel(this) || 0;
+                let costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
                 const levels = parseInt(this.LEVELS) || 0;
                 // Override default costPerLevel?
                 if (this.LVLCOST && levels > 0) {
                     const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
-                    if (costPerLevel !== _costPerLevel && this.#baseInfo) {
+                    if (costPerLevel !== _costPerLevel && this.baseInfo) {
                         console.warn(
                             `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
                             this,
@@ -80,6 +83,20 @@ export class HeroSystem6eAdder {
         // Some ADDERs have ADDERs (for example TRANSPORT_FAMILIARITY)
         for (const adder of this.adders) {
             _cost += adder.cost;
+        }
+
+        // TRANSPORT_FAMILIARITY (possibly others) may have a maximum cost per category
+        if (this.SELECTED === false && this.item?.type === "skill") {
+            const maxCost = parseFloat(this.BASECOST) || 0;
+            if (maxCost > 0 && _cost > maxCost) {
+                console.log(
+                    `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} category clamped from ${_cost} down to ${maxCost}`,
+                );
+                if (this.item?.system.XMLID != "TRANSPORT_FAMILIARITY") {
+                    console.warn(`We found another example of a skill with category limitations ${this.system.XMLID}`);
+                }
+                _cost = Math.min(maxCost, _cost);
+            }
         }
 
         if (this.parent instanceof HeroSystem6eItem) {
