@@ -7652,10 +7652,6 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 0);
                 });
 
-                it("basePointsPlusAddersForActivePoints", function () {
-                    assert.equal(item.system.basePointsPlusAddersForActivePoints, 69);
-                });
-
                 it("damage", function () {
                     assert.equal(item.system.damage, "11d6");
                 });

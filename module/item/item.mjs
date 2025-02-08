@@ -234,11 +234,11 @@ export class HeroSystem6eItem extends Item {
         // Base points plus adders
         const _basePointsPlusAdders = this._basePoints + this._addersCost;
         if (_basePointsPlusAdders !== this.system.basePointsPlusAdders) {
-            if (this.system.basePointsPlusAdders) {
-                console.warn(
-                    `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData basePointsPlusAdders. Legacy (${this.system.basePointsPlusAdders}) vs new (${_basePointsPlusAdders})`,
-                );
-            }
+            // if (this.system.basePointsPlusAdders) {
+            //     console.warn(
+            //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData basePointsPlusAdders. Legacy (${this.system.basePointsPlusAdders}) vs new (${_basePointsPlusAdders})`,
+            //     );
+            // }
         }
         this.system.basePointsPlusAdders = _basePointsPlusAdders;
         this.system.basePointsPlusAddersForActivePoints = _basePointsPlusAdders - this._negativeCustomAddersCost;
@@ -247,11 +247,11 @@ export class HeroSystem6eItem extends Item {
         // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
         const _activePoints = this._activePoints;
         if (_activePoints !== this.system.activePoints) {
-            if (this.system.activePoints) {
-                console.warn(
-                    `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData activePoints. Legacy (${this.system.activePoints}) vs new (${_activePoints})`,
-                );
-            }
+            // if (this.system.activePoints) {
+            //     console.warn(
+            //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData activePoints. Legacy (${this.system.activePoints}) vs new (${_activePoints})`,
+            //     );
+            // }
         }
         this.system.activePoints = _activePoints;
         this.system._activePointsWithoutEndMods = this._activePointsForEnd;
@@ -262,11 +262,11 @@ export class HeroSystem6eItem extends Item {
         //calcRealCost
         const _realCost = this._realCost;
         if (_realCost !== this.system.realCost) {
-            if (this.system.realCost) {
-                console.warn(
-                    `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData realCost. Legacy (${this.system.realCost}) vs new (${_realCost})`,
-                );
-            }
+            // if (this.system.realCost) {
+            //     console.warn(
+            //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData realCost. Legacy (${this.system.realCost}) vs new (${_realCost})`,
+            //     );
+            // }
             // system.realCost = _realCost + costSuffix;
             this.system.realCost = _realCost;
         }
