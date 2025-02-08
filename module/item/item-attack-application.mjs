@@ -522,15 +522,9 @@ export class ItemAttackFormApplication extends FormApplication {
             case "cone":
                 {
                     if ((areaOfEffect.ADDER || []).find((adder) => adder.XMLID === "THINCONE")) {
-                        // TODO: The extra 0.1 degree helps with approximating the correct hex counts when not
-                        //       not oriented in one of the prime 6 directions. This is because we're not
-                        //       hex counting. The extra degree is more incorrect the larger the cone is.
-                        templateData.angle = 30.1;
+                        templateData.angle = 30;
                     } else {
-                        // TODO: The extra 0.1 degree helps with approximating the correct hex counts when not
-                        //       not oriented in one of the prime 6 directions. This is because we're not
-                        //       hex counting. The extra degree is more incorrect the larger the cone is.
-                        templateData.angle = 60.1;
+                        templateData.angle = 60;
                     }
                 }
 
