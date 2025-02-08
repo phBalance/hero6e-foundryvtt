@@ -7,7 +7,7 @@
 - Support for 5e PD/ED purchased as characteristics along with RESISTANT DEFENSES is not supported. Instead use ARMOR. We do not allow RESISTANT DEFENSES to exceed your natural PD/ED. A warning is shown every time the actor sheet is opened. [#1795](https://github.com/dmdorman/hero6e-foundryvtt/issues/1795)
 - Fixed martial flash effect application.
 - Generic "Roll Damage" button can now apply PD & ED damage to tokens. [#1614](https://github.com/dmdorman/hero6e-foundryvtt/issues/1614)
-- Add Other Attacks maneuver to 5e. [#1814](https://github.com/dmdorman/hero6e-foundryvtt/issues/1814)
+- Add "Other Attacks" maneuver to 5e. [#1814](https://github.com/dmdorman/hero6e-foundryvtt/issues/1814)
 - Correct 5e explosion radius and DC falloff. [#1811](https://github.com/dmdorman/hero6e-foundryvtt/issues/1811)
 - Called shot to the chest now, correctly, has a -3 OCV.
 - Continuing charges no longer use charges per phase. [#1823](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)

@@ -219,9 +219,9 @@ export class HeroSystem6eItem extends Item {
      * Augment the basic Item data model with additional dynamic data.
      */
 
-    prepareData() {
-        super.prepareData();
-    }
+    // prepareData() {
+    //     super.prepareData();
+    // }
 
     prepareDerivedData() {
         const performanceStart = new Date().getTime();
