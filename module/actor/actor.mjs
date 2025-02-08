@@ -1658,6 +1658,7 @@ export class HeroSystem6eActor extends Actor {
                                         const power = getPowerInfo({
                                             xmlid: system2.XMLID,
                                             actor: this,
+                                            xmlTag: key,
                                         });
                                         if (!power || ["MODIFIER", "ADDER"].includes(power.xmlTag)) {
                                             await ui.notifications.error(

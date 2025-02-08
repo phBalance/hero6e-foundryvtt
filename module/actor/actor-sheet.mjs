@@ -833,7 +833,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // If core characteristics changed the re-calculate costs
         let recalculateCosts = false;
-        for (const char of Object.keys(expandedData.system?.characteristics)) {
+        for (const char of Object.keys(expandedData?.system?.characteristics)) {
             if (this.actor.system.characteristics[char].core !== expandedData.system.characteristics[char].core) {
                 recalculateCosts = true;
             }

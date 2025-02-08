@@ -7,7 +7,7 @@ export class HeroSystem6ePower {
     constructor(json, options) {
         // Item first so we can get baseInfo
         this.item = options?.item;
-        this.#baseInfo = getModifierInfo({ xmlid: json.XMLID, actor: this.item?.actor, is5e: this.item?.is5e });
+        this.#baseInfo = getModifierInfo({ xmlid: json.XMLID, actor: options.item?.actor, is5e: options.item?.is5e });
 
         for (const key of Object.keys(json)) {
             if (foundry.utils.hasProperty(this, key)) {
