@@ -473,7 +473,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const areaOfEffect = item.aoeAttackParameters({ levels: this.data.effectiveLevels });
         if (!areaOfEffect) return;
 
-        const aoeType = areaOfEffect.OPTION.toLowerCase();
+        const aoeType = areaOfEffect.type;
         const aoeValue = areaOfEffect.value;
 
         const actor = item.actor;
