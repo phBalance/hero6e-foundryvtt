@@ -1262,7 +1262,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     // FIXME: Take this function out back and kill it. It's too similar to buildAoeAttackParameters
-    AoeAttackParameters(options) {
+    aoeAttackParameters(options) {
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
             const is5e = !!this.actor?.system?.is5e;

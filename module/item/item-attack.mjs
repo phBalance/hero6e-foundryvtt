@@ -2002,7 +2002,6 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
 
             let distance;
             let pct;
-            let termsToRemove;
 
             // 5e distance measurements are not the same as 6e which just uses euclidian measurements. If the game
             // is being played with 5e measurements use them to figure the distance correctly.
@@ -2016,20 +2015,16 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
                 const gridSizeInMeters = game.scenes.current.grid.distance;
                 distance = calculateDistanceBetween(aoeTemplate, token.object.center).gridSpaces * gridSizeInMeters;
 
-                // NOTE: That the grid size is half a hex smaller since the centre hex counts as 1" so template is 1m smaller (see measuredtemplate.mjs)
+                // NOTE: The grid size is half a hex smaller since the centre hex counts as 1" so template is 1m smaller (see item-attack-application.mjs)
                 pct = distance / (aoeTemplate.distance + 1);
-
-                // TODO: We could improve this by dropping part terms for situations where we have >5AP/die
-                termsToRemove = Math.floor(pct * damageRoller.getBaseTerms().length);
             } else {
-                distance = calculateDistanceBetween(aoeTemplate, token.object.center).distance;
+                distance = calculateDistanceBetween(aoeTemplate, token.object.center).distance; // PH: FIXME: cost?
                 pct = distance / aoeTemplate.distance;
-
-                // TODO: We could improve this by dropping part terms for situations where we have >5AP/die
-                termsToRemove = Math.floor(pct * (damageRoller.getBaseTerms().length - 1));
             }
 
             // Remove highest N terms
+            // TODO: We could improve this by dropping part terms for situations where we have >5AP/die
+            const termsToRemove = Math.floor(pct * damageRoller.getBaseTerms().length);
             damageRoller.removeNHighestRankTerms(termsToRemove);
         }
     }
