@@ -58,7 +58,7 @@ export class HeroSystem6eAdder {
                 // Generic cost calculations
                 _cost = parseFloat(this.BASECOST);
 
-                let costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
+                let costPerLevel = this.baseInfo?.costPerLevel ? this.baseInfo?.costPerLevel(this) : 0;
                 const levels = parseInt(this.LEVELS) || 0;
                 // Override default costPerLevel?
                 if (this.LVLCOST && levels > 0) {

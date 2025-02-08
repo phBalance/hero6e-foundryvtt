@@ -635,6 +635,8 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 await expireEffects(actor);
             } else {
                 if (actor.inCombat) {
+                    // We are only expiring temporary effects in expireEffects.
+                    // Drains should expire on worldTime regardless of combat status, which we currently don't do.
                     console.debug(
                         `skipping expireEffects for ${actor.name} who is inCombat. ${game.combats.viewed.combatant?.actorId !== actor.id ? "Not active combatant" : ""}`,
                     );
