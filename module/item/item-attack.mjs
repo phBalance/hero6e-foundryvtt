@@ -2024,7 +2024,8 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
 
             // Remove highest N terms
             // TODO: We could improve this by dropping part terms for situations where we have >5AP/die
-            const termsToRemove = Math.floor(pct * damageRoller.getBaseTerms().length);
+            const originalNumberOfTerms = damageRoller.getFullBaseTerms().base.length;
+            const termsToRemove = Math.floor(pct * originalNumberOfTerms);
             damageRoller.removeNHighestRankTerms(termsToRemove);
         }
     }
