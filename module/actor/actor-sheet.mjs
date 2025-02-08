@@ -813,39 +813,41 @@ export class HeroSystemActorSheet extends ActorSheet {
                     }
                 }
             }
+
+            // Left Sidebar may have EndReserve
+            if (expandedData?.endReserve) {
+                const endReserveId = Object.keys(expandedData.endReserve)?.[0];
+                const endReserve = this.actor.items.find((o) => o.id === endReserveId);
+                if (endReserve) {
+                    await endReserve.update({
+                        "system.value": parseInt(expandedData.endReserve[endReserveId].value || 0),
+                    });
+                }
+            }
+
+            this.options.itemFilters.power = expandedData.itemFilters?.power;
+            this.options.itemFilters.skill = expandedData.itemFilters?.skill;
+            this.options.itemFilters.equipment = expandedData.itemFilters?.equipment;
+            this.options.itemFilters.martial = expandedData.itemFilters?.martial;
+
+            // If core characteristics changed the re-calculate costs
+            // let recalculateCosts = false;
+            // for (const char of Object.keys(expandedData?.system?.characteristics)) {
+            //     if (this.actor.system.characteristics[char].core !== expandedData.system.characteristics[char].core) {
+            //         recalculateCosts = true;
+            //     }
+            // }
         } catch (e) {
             console.error(e);
-        }
-
-        // Left Sidebar may have EndReserve
-        if (expandedData?.endReserve) {
-            const endReserveId = Object.keys(expandedData.endReserve)?.[0];
-            const endReserve = this.actor.items.find((o) => o.id === endReserveId);
-            if (endReserve) {
-                await endReserve.update({ "system.value": parseInt(expandedData.endReserve[endReserveId].value || 0) });
-            }
-        }
-
-        this.options.itemFilters.power = expandedData.itemFilters?.power;
-        this.options.itemFilters.skill = expandedData.itemFilters?.skill;
-        this.options.itemFilters.equipment = expandedData.itemFilters?.equipment;
-        this.options.itemFilters.martial = expandedData.itemFilters?.martial;
-
-        // If core characteristics changed the re-calculate costs
-        let recalculateCosts = false;
-        for (const char of Object.keys(expandedData.system?.characteristics)) {
-            if (this.actor.system.characteristics[char].core !== expandedData.system.characteristics[char].core) {
-                recalculateCosts = true;
-            }
         }
 
         // Do all the standard things like updating item properties that match the name of input boxes
         await super._updateObject(event, expandedData); //formData);
 
-        if (recalculateCosts) {
-            await this.actor.calcCharacteristicsCost();
-            await this.actor.CalcActorRealAndActivePoints();
-        }
+        // if (recalculateCosts) {
+        //     await this.actor.calcCharacteristicsCost();
+        //     await this.actor.CalcActorRealAndActivePoints();
+        // }
 
         await this.render();
     }

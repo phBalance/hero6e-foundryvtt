@@ -674,13 +674,14 @@ export async function performAdjustment(
             const costPerActivePoint2 = determineCostPerActivePoint(char, null, targetActor);
             change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint2);
             adjustmentDamageThisApplicationArray[i] =
-                existingEffect.changes[0].value - adjustmentDamageThisApplicationArray[i];
+                existingEffect.changes[i].value - adjustmentDamageThisApplicationArray[i];
             i++;
         }
         adjustmentDamageThisApplication = existingEffect.changes[0].value - adjustmentDamageThisApplication;
 
         if (activeEffect.flags.adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
             isEffectFinished = true;
+            await existingEffect.update({ name: "pending delete", changes: existingEffect.changes });
             await updateCharacteristicValue(activeEffect, { targetSystem, previousChanges });
             await existingEffect.delete();
             const chatCard = _generateAdjustmentChatCard({

@@ -1365,11 +1365,6 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async uploadFromXml(xml) {
-        const uploadPerformance = {
-            startTime: new Date(),
-            _d: new Date(),
-        };
-
         // Convert xml string to xml document (if necessary)
         if (typeof xml === "string") {
             const parser = new DOMParser();
@@ -1420,6 +1415,21 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        const uploadPerformance = {
+            startTime: new Date(),
+            _d: new Date(),
+        };
+
+        // Let GM know actor is being uploaded (unless it is a quench test; missing ID)
+        if (this.id) {
+            ChatMessage.create({
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                author: game.user._id,
+                content: `<b>${game.user.name}</b> is uploading <b>${this.name}</b>`,
+                whisper: whisperUserTargetsForActor(this),
+            });
+        }
+
         // Remove all existing effects
         let promiseArray = [];
         promiseArray.push(
@@ -1440,8 +1450,8 @@ export class HeroSystem6eActor extends Actor {
 
         // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
         const characterName = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
-        uploadPerformance.removeEffects = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
         this.name = characterName;
         changes["name"] = this.name;
         changes["flags"] = {
@@ -1481,8 +1491,8 @@ export class HeroSystem6eActor extends Actor {
 
         // Wait for promiseArray to finish
         await Promise.all(promiseArray);
-        uploadPerformance.resetToDefault = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.resetToDefault = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
         promiseArray = [];
         changes = {};
 
@@ -1574,6 +1584,7 @@ export class HeroSystem6eActor extends Actor {
             1 + // Restore retained damage
             1; // Not really sure why we need an extra +1
         const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 0);
+        uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
 
         // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
         if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
@@ -1584,8 +1595,8 @@ export class HeroSystem6eActor extends Actor {
             await this.addFreeStuff();
         }
 
-        uploadPerformance.progressBarFreeStuff = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.progressBarFreeStuff - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         // ITEMS
         let itemPromiseArray = [];
@@ -1658,6 +1669,7 @@ export class HeroSystem6eActor extends Actor {
                                         const power = getPowerInfo({
                                             xmlid: system2.XMLID,
                                             actor: this,
+                                            xmlTag: key,
                                         });
                                         if (!power || ["MODIFIER", "ADDER"].includes(power.xmlTag)) {
                                             await ui.notifications.error(
@@ -1778,21 +1790,23 @@ export class HeroSystem6eActor extends Actor {
 
                     uploadPerformance.items ??= [];
                     uploadPerformance.items.push({ name: itemData.name, d: new Date() - uploadPerformance._d });
-                    uploadPerformance._d = new Date();
+                    uploadPerformance._d = new Date().getTime();
                 }
                 delete heroJson.CHARACTER[itemTag];
             }
         }
 
-        uploadPerformance.preItems = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.itemsToCreateActual = itemsToCreate.length;
+
+        uploadPerformance.preItems = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
         await this.createEmbeddedDocuments("Item", itemsToCreate, { render: false, renderSheet: false });
-        uploadPerformance.createItems = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.createItems = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         await Promise.all(itemPromiseArray);
-        uploadPerformance.itemPromiseArray = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.itemPromiseArray = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         // Do CSLs last so we can property select the attacks
         // TODO: infinite loop of _postUpload until no changes?
@@ -1838,8 +1852,8 @@ export class HeroSystem6eActor extends Actor {
                 await ui.notifications.warn(`Unable to locate ${item.ALIAS} to consume charges after upload.`);
             }
         }
-        uploadPerformance.postUpload = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.postUpload = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         uploadProgressBar.advance(`${this.name}: Validating powers`);
 
@@ -1861,8 +1875,8 @@ export class HeroSystem6eActor extends Actor {
             }
         });
 
-        uploadPerformance.validate = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.validate = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         // Warn about invalid adjustment targets
         for (const item of this.items.filter((item) => item.baseInfo?.type?.includes("adjustment"))) {
@@ -1891,8 +1905,8 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        uploadPerformance.invalidTargets = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.invalidTargets = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         uploadProgressBar.advance(`${this.name}: Uploading image`);
 
@@ -1946,8 +1960,8 @@ export class HeroSystem6eActor extends Actor {
             // If they really want the image to stay, they should put it in the HDC file.
             changes["img"] = CONST.DEFAULT_TOKEN;
         }
-        uploadPerformance.image = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.image = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         uploadProgressBar.advance(`${this.name}: Saving core changes`);
 
@@ -1970,8 +1984,8 @@ export class HeroSystem6eActor extends Actor {
 
         await Promise.all(promiseArray);
 
-        uploadPerformance.nonItems = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.nonItems = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         // Set base values to HDC LEVELs and calculate costs of things.
         await this._postUpload({ render: false });
@@ -1983,8 +1997,8 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        uploadPerformance.actorPostUpload = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.actorPostUpload = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         // Kluge to ensure everything has a SPD.
         // For example a BASE has an implied SPD of three
@@ -2019,8 +2033,8 @@ export class HeroSystem6eActor extends Actor {
             });
 
         uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
-        uploadPerformance.postUpload2 = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.postUpload2 = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         // Apply retained damage
         if (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end) {
@@ -2042,8 +2056,8 @@ export class HeroSystem6eActor extends Actor {
         if (this.id) {
             await this.update({ "flags.-=uploading": null });
         }
-        uploadPerformance.retainedDamage = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.retainedDamage = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         // If we have control of this token, reacquire to update movement types
         const myToken = this.getActiveTokens()?.[0];
@@ -2051,21 +2065,21 @@ export class HeroSystem6eActor extends Actor {
             myToken.release();
             myToken.control();
         }
-        uploadPerformance.tokenControl = new Date() - uploadPerformance._d;
-        uploadPerformance._d = new Date();
+        uploadPerformance.tokenControl = new Date().getTime() - uploadPerformance._d;
+        uploadPerformance._d = new Date().getTime();
 
         uploadProgressBar.close(`Done uploading ${this.name}`);
 
-        uploadPerformance.totalTime = new Date() - uploadPerformance.startTime;
+        uploadPerformance.totalTime = new Date().getTime() - uploadPerformance.startTime;
 
-        //console.log("Upload Performance", uploadPerformance);
+        console.log("Upload Performance", uploadPerformance);
 
         // Let GM know actor was uploaded (unless it is a quench test; missing ID)
         if (this.id) {
             ChatMessage.create({
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 author: game.user._id,
-                content: `<b>${game.user.name}</b> uploaded <b>${this.name}</b>`,
+                content: `Took ${Math.ceil(uploadPerformance.totalTime / 1000)} seconds for <b>${game.user.name}</b> to upload <b>${this.name}</b>.`,
                 whisper: whisperUserTargetsForActor(this),
             });
         }

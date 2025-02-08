@@ -196,7 +196,7 @@ function addExtraDcsToBundle(item, dicePartsBundle) {
     let extraDcLevels = numExtraDcs;
 
     // 5E extraDCLevels are halved for unarmed killing attacks
-    // PH FIXME: Need better logic here for 6e damage doubling behaviour
+    // PH FIXME: Need better logic here for 6e damage doubling behavior
     if (item.is5e && item.doesKillingDamage) {
         extraDcLevels = Math.floor(extraDcLevels / 2);
     }

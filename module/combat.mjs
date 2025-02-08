@@ -860,7 +860,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async _onUpdate(...args) {
-        console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
+        //console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
         super._onUpdate(...args);
     }
 
