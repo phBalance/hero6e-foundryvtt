@@ -135,7 +135,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.targetEntangle = false;
             }
 
-            const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels });
+            const aoe = item.aoeAttackParameters({ levels: data.effectiveLevels });
             data.hitLocationsEnabled = game.settings.get(HEROSYS.module, "hit locations");
             data.hitLocationSideEnabled =
                 data.hitLocationsEnabled && game.settings.get(HEROSYS.module, "hitLocTracking") === "all";
@@ -470,7 +470,7 @@ export class ItemAttackFormApplication extends FormApplication {
     async _spawnAreaOfEffect() {
         const item = this.data.item;
 
-        const areaOfEffect = item.AoeAttackParameters({ levels: this.data.effectiveLevels });
+        const areaOfEffect = item.aoeAttackParameters({ levels: this.data.effectiveLevels });
         if (!areaOfEffect) return;
 
         const aoeType = areaOfEffect.OPTION.toLowerCase();
