@@ -1525,8 +1525,8 @@ export async function _onRollDamage(event) {
     const senseAffecting = item.isSenseAffecting();
     const isKilling = item.doesKillingDamage;
     const isEntangle = item.system.XMLID === "ENTANGLE";
-    const isNormalAttack = !senseAffecting && !adjustment && !isKilling;
-    const isKillingAttack = !senseAffecting && !adjustment && isKilling;
+    const isNormalAttack = !isEntangle && !senseAffecting && !adjustment && !isKilling;
+    const isKillingAttack = !isEntangle && !senseAffecting && !adjustment && isKilling;
     const isEffectBasedAttack = isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item);
 
     const increasedMultiplierLevels = parseInt(item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0);
@@ -2896,26 +2896,38 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     // TODO: Need loop for multiple sense groups.
     // TODO: Flash defense should target approprate sense group
     let senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect;
-    switch (senseAffectingItem.system.OPTIONID) {
+
+    // OPTIONID comes from FLASH POWER, INPUT comes from Martial Flash
+    const targetGroup = senseAffectingItem.system.OPTIONID || senseAffectingItem.system.INPUT;
+    switch (targetGroup) {
         case "SIGHTGROUP":
+        case "Sight":
             break; // This is already the default
         case "HEARINGGROUP":
+        case "Hearing":
             senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.hearingSenseDisabledEffect;
             break;
         case "MENTALGROUP":
+        case "Mental":
             senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.mentalSenseDisabledEffect;
             break;
         case "RADIOGROUP":
+        case "Radio":
             senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.radioSenseDisabledEffect;
             break;
         case "SMELLGROUP":
+        case "Smell/Taste":
             senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.smellTasteSenseDisabledEffect;
             break;
         case "TOUCHGROUP":
+        case "Touch":
             senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect;
             break;
+        case "Unusual":
+            ui.notifications.warn(`FLASHing ${targetGroup} is unsupported`);
+            break;
         default:
-            ui.notifications.warn(`Unable to determine FLASH effect for ${senseAffectingItem.system.OPTIONID}`);
+            ui.notifications.warn(`Unable to determine FLASH effect for ${targetGroup}`);
     }
 
     // Create new ActiveEffect

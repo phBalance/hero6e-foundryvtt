@@ -3547,7 +3547,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             adderCostAdjustment: function ({ adder, adderCost }) {
                 if (adderCost !== 2) {
-                    console.error(`${adder.XMLID} cost was ${adderCost} but expected it to be 2`);
+                    console.warn(`${adder.XMLID} cost was ${adderCost} but expected it to be 2`);
                 }
                 // First adder is full cost
                 if (adder.parent.adders[0].ID === adder.ID) {

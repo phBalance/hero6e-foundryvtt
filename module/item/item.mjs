@@ -219,9 +219,9 @@ export class HeroSystem6eItem extends Item {
      * Augment the basic Item data model with additional dynamic data.
      */
 
-    prepareData() {
-        super.prepareData();
-    }
+    // prepareData() {
+    //     super.prepareData();
+    // }
 
     prepareDerivedData() {
         const performanceStart = new Date().getTime();
@@ -4680,6 +4680,12 @@ export class HeroSystem6eItem extends Item {
         this.system.dcv = dcv;
 
         this.system.noHitLocations = false;
+
+        if (["maneuver", "martialart"].includes(this.type)) {
+            if (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
+                this.system.noHitLocations = true;
+            }
+        }
 
         this.system.areaOfEffect = { type: "none", value: 0 };
 

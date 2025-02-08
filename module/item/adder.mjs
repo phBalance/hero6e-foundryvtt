@@ -63,12 +63,12 @@ export class HeroSystem6eAdder {
                 // Override default costPerLevel?
                 if (this.LVLCOST && levels > 0) {
                     const _costPerLevel = parseFloat(this.LVLCOST || 0) / parseFloat(this.LVLVAL || 1) || 1;
-                    if (costPerLevel !== _costPerLevel && this.baseInfo) {
-                        console.warn(
-                            `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
-                            this,
-                        );
-                    }
+                    // if (costPerLevel !== _costPerLevel && this.baseInfo) {
+                    //     console.warn(
+                    //         `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID}: costPerLevel inconsistency ${costPerLevel} vs ${_costPerLevel}`,
+                    //         this,
+                    //     );
+                    // }
                     costPerLevel = _costPerLevel;
                 }
                 _cost += levels * costPerLevel;
@@ -89,9 +89,9 @@ export class HeroSystem6eAdder {
         if (this.SELECTED === false && this.item?.type === "skill") {
             const maxCost = parseFloat(this.BASECOST) || 0;
             if (maxCost > 0 && _cost > maxCost) {
-                console.log(
-                    `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} category clamped from ${_cost} down to ${maxCost}`,
-                );
+                // console.log(
+                //     `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} category clamped from ${_cost} down to ${maxCost}`,
+                // );
                 if (this.item?.system.XMLID != "TRANSPORT_FAMILIARITY") {
                     console.warn(`We found another example of a skill with category limitations ${this.system.XMLID}`);
                 }
@@ -115,21 +115,21 @@ export class HeroSystem6eAdder {
     }
 
     get BASECOST_total() {
-        if (this._BASECOST_total !== undefined) {
-            if (this._BASECOST_total !== this.cost) {
-                console.error(`BASECOST_total (${this.cost}) did not match cost ${this._BASECOST_total}`);
-            }
-        }
+        // if (this._BASECOST_total !== undefined) {
+        //     if (this._BASECOST_total !== this.cost) {
+        //         console.error(`BASECOST_total (${this.cost}) did not match cost ${this._BASECOST_total}`);
+        //     }
+        // }
         return this.cost;
     }
 
     set BASECOST_total(value) {
         // ADDITIONALED is prorated based on ADDITIONALPD, which the legacy code does not do properly.
-        if (this.cost != value && this.XMLID !== "ADDITIONALED") {
-            console.error(
-                `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} BASECOST_total (${value}) did not match cost ${this.BASECOST_total}`,
-            );
-            return;
-        }
+        // if (this.cost != value && this.XMLID !== "ADDITIONALED") {
+        //     console.error(
+        //         `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} BASECOST_total (${value}) did not match cost ${this.BASECOST_total}`,
+        //     );
+        //     return;
+        // }
     }
 }
