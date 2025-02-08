@@ -481,7 +481,6 @@ export class ItemAttackFormApplication extends FormApplication {
         if (!token) {
             return ui.notifications.error(`${actor.name} has no token in this scene.  Unable to place AOE template.`);
         }
-        const is5e = actor.system.is5e;
 
         // Close all windows except us
         for (let id of Object.keys(ui.windows)) {
@@ -494,9 +493,15 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
 
-        // NOTE: The target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
+        const HexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+        const hexGrid = !(
+            game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
+            game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
+        );
+
+        // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
         //       for distance we need to subtract 0.5"/1m.
-        const distance = aoeValue * sizeConversionToMeters - (is5e ? 1 : 0);
+        const distance = aoeValue * sizeConversionToMeters - (HexTemplates && hexGrid ? 1 : 0);
 
         const templateData = {
             t: templateType,
@@ -511,7 +516,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 aoeType,
                 aoeValue,
                 sizeConversionToMeters,
-                is5e,
+                usesHexTemplate: HexTemplates && hexGrid,
             },
         };
 
