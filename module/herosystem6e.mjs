@@ -202,6 +202,14 @@ Hooks.once("ready", async function () {
         console.log(SimpleCalendar.api.getCurrentCalendar().general.gameWorldTimeIntegration);
         return ui.notifications.warn(`Recommend setting Simple Calendar GameWorldTimeIntegration = Mixed`);
     }
+
+    // When using a square grid for scenes, the system needs the realistic square diagonals. Warn users if they don't have that setting.
+    if (game.settings.get("core", "gridDiagonals") !== CONST.GRID_DIAGONALS.EXACT) {
+        ui.notifications.warn(
+            'The Core FoundryVTT setting, "Square Grid Diagonals", needs to be "Exact (√2)" for correct measurement and behaviour for scenes with square grids.',
+            { permanent: true },
+        );
+    }
 });
 
 Hooks.on("renderChatMessage", (app, html, data) => {
@@ -940,19 +948,6 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     break;
                 }
 
-                // Create a fake actor & item to pass to damage routines
-                // const xml = `<POWER XMLID="EGOATTACK" LEVELS="1" ALIAS="Ego Attack"></POWER>`;
-                // const actor = new HeroSystem6eActor(
-                //     {
-                //         name: "Roll Damage",
-                //         type: "npc",
-                //     },
-                //     {},
-                // );
-                // const fakeItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor), {
-                //     parent: actor,
-                // });
-
                 //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
                     .addDice(userSelection.dice, "DICE")
@@ -1001,25 +996,3 @@ Hooks.on("renderSidebarTab", async (app, html) => {
         }
     });
 });
-
-// Hooks.on("renderActiveEffectConfig", (activeEffectConfig, html, data) => {
-//     console.log(activeEffectConfig, html, data);
-
-//     const effectsTab = html.find("section[data-tab='effects']");
-//     const header = effectsTab.find("header");
-//     const headerValue = header.find("div.value");
-//     headerValue.after("<div>Seconds</div>");
-
-//     const changesList = effectsTab.find("ol.changes-list");
-//     changesList.find("li").each(function (idx) {
-//         const liValue = $(this).find("div.value");
-//         //const idx = liValue.name.match(/changes\.(\d+)/)[1];
-//         liValue.after(`<input type="text" class="seconds" name="changes.${idx}.seconds" value="">`);
-//     });
-
-//     const submitButton = html.find("button[type='submit']");
-//     submitButton.one("submit", function () {
-//         debugger;
-//         console.log(this);
-//     });
-// });
