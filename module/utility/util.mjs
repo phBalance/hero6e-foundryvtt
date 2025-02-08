@@ -88,11 +88,11 @@ export function getPowerInfo(options) {
         powerInfo = powerList.find((o) => o.key === xmlid);
         if (powerInfo) {
             if (powerInfo.type.some((t) => ["movement", "skill", "characteristic"].includes(t))) {
-                console.debug(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
-                    powerInfo,
-                    options,
-                );
+                // console.debug(
+                //     `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,
+                //     powerInfo,
+                //     options,
+                // );
             } else {
                 console.warn(
                     `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again should resolve this issue.`,

@@ -1365,11 +1365,6 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async uploadFromXml(xml) {
-        const uploadPerformance = {
-            startTime: new Date(),
-            _d: new Date(),
-        };
-
         // Convert xml string to xml document (if necessary)
         if (typeof xml === "string") {
             const parser = new DOMParser();
@@ -1419,6 +1414,11 @@ export class HeroSystem6eActor extends Actor {
                 retainValuesOnUpload.charges = [];
             }
         }
+
+        const uploadPerformance = {
+            startTime: new Date(),
+            _d: new Date(),
+        };
 
         // Let GM know actor is being uploaded (unless it is a quench test; missing ID)
         if (this.id) {
@@ -1584,6 +1584,7 @@ export class HeroSystem6eActor extends Actor {
             1 + // Restore retained damage
             1; // Not really sure why we need an extra +1
         const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 0);
+        uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
 
         // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
         if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
@@ -1594,7 +1595,7 @@ export class HeroSystem6eActor extends Actor {
             await this.addFreeStuff();
         }
 
-        uploadPerformance.progressBarFreeStuff.getTime() - uploadPerformance._d;
+        uploadPerformance.progressBarFreeStuff - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
         // ITEMS
@@ -1794,6 +1795,8 @@ export class HeroSystem6eActor extends Actor {
                 delete heroJson.CHARACTER[itemTag];
             }
         }
+
+        uploadPerformance.itemsToCreateActual = itemsToCreate.length;
 
         uploadPerformance.preItems = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
@@ -2069,7 +2072,7 @@ export class HeroSystem6eActor extends Actor {
 
         uploadPerformance.totalTime = new Date().getTime() - uploadPerformance.startTime;
 
-        //console.log("Upload Performance", uploadPerformance);
+        console.log("Upload Performance", uploadPerformance);
 
         // Let GM know actor was uploaded (unless it is a quench test; missing ID)
         if (this.id) {

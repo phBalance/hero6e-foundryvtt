@@ -274,7 +274,7 @@ export class HeroSystem6eItem extends Item {
 
         const performanceDuration = new Date().getTime() - performanceStart;
         if (performanceDuration > 1000) {
-            console.warn(`Took ${performanceDuration} to perpareDerivedData`, this);
+            console.warn(`Performance concern. Took ${performanceDuration} to prepareDerivedData`, this);
         }
     }
 
@@ -2477,6 +2477,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     static itemDataFromXml(xml, actor) {
+        const performanceStart = new Date().getTime();
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xml, "text/xml");
         const heroJson = {};
@@ -2551,6 +2552,13 @@ export class HeroSystem6eItem extends Item {
                 is5e: itemData.system.is5e,
             };
             itemData.name = itemData.system?.ALIAS || itemData.system?.XMLID;
+        }
+
+        const performanceDuration = new Date().getTime() - performanceStart;
+        if (performanceDuration > 1000) {
+            console.warn(
+                `${this.actor?.name}/${this.name}/${this.system.XMLID}: Performance concernt. Took ${performanceDuration} seconds to upload.`,
+            );
         }
 
         return itemData;
