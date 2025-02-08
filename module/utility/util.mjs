@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+import { HeroSystem6eItem } from "../item/item.mjs";
 //import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "./adjustment.mjs";
 
@@ -277,9 +278,15 @@ export async function expireEffects(actor) {
         // Sanity Check
         if (ae._prepareDuration().remaining > 0 && !ae.duration.startTime) {
             console.warn(
-                `${actor.name}: ${ae.name} has ${ae._prepareDuration().remaining}s remaining.  It has no duration.startTime and will likely never expire.`,
+                `${actor.name}/${ae.name} has ${ae._prepareDuration().remaining}s remaining.  It has no duration.startTime and will likely never expire.`,
                 ae,
             );
+            if (ae.parent instanceof HeroSystem6eItem) {
+                console.error(
+                    `${actor.name}/${ae.parent.name}/${ae.parent.system.XMLID}/${ae.name} is a temporary effect associated with an item. This is super unusual. Try uploading the HDC file again.  If that doesn't resolve the issue then this could be a coding error and should be reported.`,
+                    ae,
+                );
+            }
             //await ae.update({ [`duration.startTime`]: game.time.worldTime });
         }
 

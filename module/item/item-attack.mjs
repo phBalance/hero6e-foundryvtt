@@ -927,7 +927,7 @@ export async function doSingleTargetActionToHit(item, options) {
         return;
     }
 
-    // Block (which is a repeatable abort) has a different to-hit behaviour
+    // Block (which is a repeatable abort) has a different to-hit behavior
     const blockIndex = item.system.EFFECT?.toLowerCase().indexOf("block");
     if (blockIndex > -1) {
         if (targetData.length === 1) {

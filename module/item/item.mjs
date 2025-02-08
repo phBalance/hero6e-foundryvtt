@@ -126,11 +126,11 @@ function filterItem(item, filterString) {
     return false;
 }
 
-function itemHasBehaviours(item, ...desiredBehavorArgs) {
-    const desiredBehaviors = [...desiredBehavorArgs];
-    for (const desiredBehavior of desiredBehaviors) {
+function itemHasBehaviours(item, ...desiredBehaviourArgs) {
+    const desiredBehaviours = [...desiredBehaviourArgs];
+    for (const desiredbehaviour of desiredBehaviours) {
         // Unfortunately handlebars seems to pass metadata in the last argument as an object. We use only strings.
-        if (typeof desiredBehavior === "string" && item.baseInfo.behaviors.includes(desiredBehavior)) {
+        if (typeof desiredbehaviour === "string" && item.baseInfo.behaviors.includes(desiredbehaviour)) {
             return true;
         }
     }
@@ -224,6 +224,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     prepareDerivedData() {
+        const performanceStart = new Date().getTime();
         super.prepareDerivedData();
 
         if (this.actor?.is5e === undefined) {
@@ -270,6 +271,11 @@ export class HeroSystem6eItem extends Item {
             // system.realCost = _realCost + costSuffix;
             this.system.realCost = _realCost;
         }
+
+        const performanceDuration = new Date().getTime() - performanceStart;
+        if (performanceDuration > 1000) {
+            console.warn(`Took ${performanceDuration} to perpareDerivedData`, this);
+        }
     }
 
     async _onUpdate(changed, options, userId) {
@@ -283,7 +289,7 @@ export class HeroSystem6eItem extends Item {
         // If our value has changed, we need to rebuild this item.
         if (changed.system?.value != null) {
             // TODO: Update everything!
-            changed = this.calcItemPoints() || changed;
+            //changed = this.calcItemPoints() || changed;
 
             // DESCRIPTION
             const oldDescription = this.system.description;
@@ -1433,12 +1439,12 @@ export class HeroSystem6eItem extends Item {
             return true;
         }
 
-        // FIXME: This should not be required as the behaviour should be marked correctly.
+        // FIXME: This should not be required as the behavior should be marked correctly.
         if (this.baseInfo?.type?.includes("sense")) {
             return true;
         }
 
-        // FIXME: This should not be required as the behaviour should be marked correctly.
+        // FIXME: This should not be required as the behavior should be marked correctly.
         // Talent/Skill/Perk as Powers are technically toggleable
         if (this.type === "power" && ["talent", "skill", "perk"].find((o) => this.baseInfo?.type.includes(o))) {
             return true;
@@ -1930,7 +1936,7 @@ export class HeroSystem6eItem extends Item {
                             o.rollsToHit() &&
                             (!o.baseInfo.behaviors.includes("optional-maneuver") ||
                                 game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
-                            !o.system.XMLID.startsWith("__"), // TODO: Should we allow __STRENGTHDAMAGE to have a "to-hit" behaviour when it isn't player facing?
+                            !o.system.XMLID.startsWith("__"), // TODO: Should we allow __STRENGTHDAMAGE to have a "to-hit" behavior when it isn't player facing?
                     )) {
                         let addMe = false;
 
@@ -4002,7 +4008,7 @@ export class HeroSystem6eItem extends Item {
 
                     // Add a success roll, if it has one, but only for skills, talents, or perks
                     if (configPowerInfo?.behaviors?.includes("success")) {
-                        // PH: FIXME: Why is this not based purely on behaviour?
+                        // PH: FIXME: Why is this not based purely on behavior?
                         if (!["skill", "talent", "perk"].includes(this.type)) {
                             console.error(
                                 `${this.actor?.name}: ${this.name}/${this.system.XMLID} has a success behavior but isn't a skill, talent, or perk`,
