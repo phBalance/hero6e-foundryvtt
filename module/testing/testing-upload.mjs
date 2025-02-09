@@ -3963,7 +3963,11 @@ export function registerUploadTests(quench) {
                     });
 
                     it("power realCost", function () {
-                        assert.equal(item.system.realCost, "1u");
+                        assert.equal(item.system.realCost, "10");
+                    });
+
+                    it("power characterPointCostPlusSuffix", function () {
+                        assert.equal(item.characterPointCostPlusSuffix, "1u");
                     });
 
                     it("power activePoints", function () {
@@ -4043,7 +4047,11 @@ export function registerUploadTests(quench) {
                     });
 
                     it("power realCost", function () {
-                        assert.equal(item.system.realCost, "1f");
+                        assert.equal(item.system.realCost, "13");
+                    });
+
+                    it("power characterPointCostPlusSuffix", function () {
+                        assert.equal(item.characterPointCostPlusSuffix, "1f");
                     });
 
                     it("power activePoints", function () {
@@ -4125,7 +4133,11 @@ export function registerUploadTests(quench) {
                     });
 
                     it("power realCost", function () {
-                        assert.equal(item.system.realCost, 15);
+                        assert.equal(item.system.realCost, 20);
+                    });
+
+                    it("power characterPointCostPlusSuffix", function () {
+                        assert.equal(item.characterPointCostPlusSuffix, "10");
                     });
 
                     it("power activePoints", function () {

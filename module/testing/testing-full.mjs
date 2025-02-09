@@ -1757,11 +1757,11 @@ export function registerFullTests(quench) {
                     );
                 });
 
-                it("realCost", async function () {
+                it("Actor realCost", async function () {
                     assert.equal(actor.system.realCost, 0);
                 });
 
-                it("activePoints", async function () {
+                it("Actor activePoints", async function () {
                     assert.equal(actor.system.activePoints, 4);
                 });
             });

@@ -28,16 +28,16 @@
         </td>
         <td>
             {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
-                {{this.compoundCost}}
+                {{this.system.characterPointCost}}
             {{else if this.isSeperator}}
                 {{!-- Show no cost--}}
             {{else if (eq this.system.XMLID "LIST")}}
                 <span style="opacity: 0.5">{{this.listCost}}</span>
             {{else}}
                 {{#if (eq this.parentItem.system.XMLID "COMPOUNDPOWER")}}
-                    <span style="opacity: 0.5">{{this.system.realCost}}</span>
+                    <span style="opacity: 0.5">{{this.system.characterPointCost}}</span>
                 {{else}}
-                    {{this.system.realCost}}
+                    {{this.characterPointCostPlusSuffix}}
                 {{/if}}
             {{/if}}
         </td>
