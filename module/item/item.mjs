@@ -276,6 +276,13 @@ export class HeroSystem6eItem extends Item {
             this.system.realCost = _realCost;
         }
 
+        // CharacterPointCost
+        const _characterPointCost = this._characterPointCost;
+        if (_characterPointCost !== this.system.characterPointCost) {
+            changed = true;
+        }
+        this.system.characterPointCost = this._characterPointCost;
+
         const performanceDuration = new Date().getTime() - performanceStart;
         if (performanceDuration > 1000) {
             console.warn(`Performance concern. Took ${performanceDuration} to prepareDerivedData`, this);
@@ -5714,6 +5721,22 @@ export class HeroSystem6eItem extends Item {
         return RoundFavorPlayerDown(cost) + costSuffix;
     }
 
+    get characterPointCostPlusSuffix() {
+        const cost = this.system.characterPointCost || parseInt(this.system.realCost);
+        if (this.parentItem?.system.XMLID === "MULTIPOWER") {
+            // Fixed
+            if (this.system.ULTRA_SLOT) {
+                return cost + (this.actor?.system.is5e ? "u" : "f");
+            }
+
+            // Variable
+            else {
+                return cost + (tthis.actor?.system.is5e ? "m" : "v");
+            }
+        }
+        return cost;
+    }
+
     get listCost() {
         if (this.system?.XMLID !== "LIST") return 0;
         let cost = 0;
@@ -5907,18 +5930,41 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Power cost in Power Framework is applied before limitations
-        let costSuffix = "";
+        // let costSuffix = "";
+        // if (this.parentItem) {
+        //     if (this.parentItem.system.XMLID === "MULTIPOWER") {
+        //         // Fixed
+        //         if (this.system.ULTRA_SLOT) {
+        //             //costSuffix = this.actor?.system.is5e ? "u" : "f";
+        //             _cost = _cost / 10.0;
+        //         }
+
+        //         // Variable
+        //         else {
+        //             //costSuffix = this.actor?.system.is5e ? "m" : "v";
+        //             _cost = _cost / 5.0;
+        //         }
+        //     } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
+        //         const baseCost = (this.parentItem.system.BASECOST = parseFloat(this.parentItem.system.BASECOST));
+        //         _cost = Math.max(baseCost, _cost - baseCost);
+        //     }
+        // }
+        _cost = RoundFavorPlayerDown(_cost / (1 + this._limitationCost));
+        return _cost; // + costSuffix;
+    }
+
+    get _characterPointCost() {
+        let _cost = this.system.realCost;
+        // Power cost in Power Framework is applied before limitations
         if (this.parentItem) {
             if (this.parentItem.system.XMLID === "MULTIPOWER") {
                 // Fixed
                 if (this.system.ULTRA_SLOT) {
-                    costSuffix = this.actor?.system.is5e ? "u" : "f";
                     _cost = _cost / 10.0;
                 }
 
                 // Variable
                 else {
-                    costSuffix = this.actor?.system.is5e ? "m" : "v";
                     _cost = _cost / 5.0;
                 }
             } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
@@ -5926,8 +5972,7 @@ export class HeroSystem6eItem extends Item {
                 _cost = Math.max(baseCost, _cost - baseCost);
             }
         }
-        _cost = RoundFavorPlayerDown(_cost / (1 + this._limitationCost));
-        return _cost + costSuffix;
+        return RoundFavorPlayerDown(_cost);
     }
 
     get costPerLevel() {
