@@ -349,6 +349,8 @@ export class HeroSystem6eItem extends Item {
         this.effects.map(async (effect) => {
             if (effect.origin) {
                 await effect.delete();
+            } else {
+                await effect.update({ disabled: true });
             }
         });
 
