@@ -30,6 +30,15 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
  * @returns {number} distanceInMetres
  */
 export function calculateDistanceBetween(origin, target) {
+    if (
+        game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE &&
+        game.settings.get("core", "gridDiagonals") !== CONST.GRID_DIAGONALS.EXACT
+    ) {
+        ui.notifications.warn(
+            'The Core FoundryVTT setting, "Square Grid Diagonals", needs to be "Exact (√2)" for correct measurement and behavior for this scene because it has square grid.',
+        );
+    }
+
     const path = [];
     try {
         path.push({ x: origin.x, y: origin.y });
