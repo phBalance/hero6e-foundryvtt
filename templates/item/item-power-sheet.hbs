@@ -12,7 +12,7 @@
     </header>
 
     {{!-- Sheet Body --}}
-    <section class="sheet-body">
+    <section class="sheet-body" style="flex:unset">
 
         {{!-- Common --}}
         {{> (getModulePath 'item/item-partial-common.hbs') }}
@@ -24,4 +24,5 @@
         {{> (getModulePath 'item/item-partial-adders-modifiers.hbs') }}
 
     </section>
+    <button class="convert-to-equipment" style="flex:unset;width:unset">Convert to a EQUIPMENT</button>
 </form>

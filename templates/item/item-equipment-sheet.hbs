@@ -1,4 +1,4 @@
-{{log 'HEROSYS-EQUIPMENT ITEM' this}}
+{{log 'item-equipment-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off" data-id="{{item._id}}" data-realId="{{item.system.realId}}">
     <header class="sheet-header flexrow">
         <img class="profile" name="img" src="{{item.img}}" title="{{item.name}}" data-edit="img" />
@@ -41,5 +41,5 @@
         {{!-- Adders & Modifiers --}}
         {{> (getModulePath 'item/item-partial-adders-modifiers.hbs') }}
     </section>
-
+    <button class="convert-to-power">Convert to POWER</button>
 </form>

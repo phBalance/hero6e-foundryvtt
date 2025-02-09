@@ -270,6 +270,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         html.find(".modifier-create").click(this._onModifierCreate.bind(this));
         html.find(".modifier-edit").click(this._onModifierEdit.bind(this));
         html.find(".modifier-delete").click(this._onModifierDelete.bind(this));
+
+        // Misc
+        html.find("button.convert-to-power").click(this._onConvertToPower.bind(this));
+        html.find("button.convert-to-equipment").click(this._onConvertToEquipment.bind(this));
     }
 
     async _onModifierCreate(event) {
@@ -660,5 +664,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         }
 
         effect.sheet.render(true);
+    }
+
+    async _onConvertToPower(event) {
+        event.preventDefault();
+        await this.item.update({ type: "power" });
+    }
+
+    async _onConvertToEquipment(event) {
+        event.preventDefault();
+        await this.item.update({ type: "equipment" });
     }
 }
