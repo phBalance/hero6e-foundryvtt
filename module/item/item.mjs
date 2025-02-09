@@ -5731,7 +5731,7 @@ export class HeroSystem6eItem extends Item {
 
             // Variable
             else {
-                return cost + (tthis.actor?.system.is5e ? "m" : "v");
+                return cost + (this.actor?.system.is5e ? "m" : "v");
             }
         }
         return cost;

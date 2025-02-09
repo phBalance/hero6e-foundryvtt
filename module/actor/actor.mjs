@@ -2582,7 +2582,7 @@ export class HeroSystem6eActor extends Actor {
     async CalcActorRealAndActivePoints() {
         // Calculate realCost & Active Points for bought as characteristics
         let characterPointCost = 0;
-        let activePoints = characterPointCost;
+        let activePoints = 0;
 
         this.system.pointsDetail = {};
         this.system.activePointsDetail = {};
@@ -2603,7 +2603,7 @@ export class HeroSystem6eActor extends Actor {
             (o) => o.type != "attack" && o.type != "defense" && o.type != "movement",
         )) {
             let _characterPointCost = parseInt(item.system?.characterPointCost || item.system?.realCost) || 0;
-            const _activePoints = parseInt(item.system?.characterPointCost || item.system?.activePoints) || 0;
+            const _activePoints = parseInt(item.system?.activePoints) || 0;
 
             // if ((item.parentItem?.type || item.type) != "equipment") {
             //     if (item.system.XMLID === "COMPOUNDPOWER") {
