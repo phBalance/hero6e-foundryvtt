@@ -1472,14 +1472,8 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
-        const before = item.system.showToggle;
-
         // showToggle
         item.system.showToggle = this.isActivatable();
-
-        // if (this.system.XMLID === "STR") {
-        //     console.log(`showToggle`, before, this.isActivatable());
-        // }
 
         const itemEffects = item.effects.find((ae) => ae.flags.type !== "adjustment");
         if (itemEffects) {
