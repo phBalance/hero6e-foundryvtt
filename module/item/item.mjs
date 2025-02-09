@@ -4532,6 +4532,9 @@ export class HeroSystem6eItem extends Item {
                 case "TRIGGER":
                     // All the important stuff is in the TRIGGER adders
                     break;
+                case "DOUBLEKB":
+                    // ALIAS already has what we need
+                    break;
                 case "CONDITIONALPOWER":
                     result += `${modifier.OPTION_ALIAS}; (`;
                     break;
