@@ -5,6 +5,7 @@
 - Fixed an issue where the effects panel could make it difficult to interact with tokens on the far right side of the canvas map. [#1875](https://github.com/dmdorman/hero6e-foundryvtt/issues/1875)
 - Effects panel now shows duration in hours, minutes and seconds. [#1872](https://github.com/dmdorman/hero6e-foundryvtt/issues/1872)
 - Continuing charges now expire properly. [#1876](https://github.com/dmdorman/hero6e-foundryvtt/issues/1876) [#1823](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
+- The PRONE condition is now applied (if appropriate) when damage is applied. Previously you had to roll the knock down damage before the token was made PRONE. [#1878](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
 
 ## Version 4.0.16 20250208
 
