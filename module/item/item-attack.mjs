@@ -1995,6 +1995,15 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     if (explosion) {
         // Distance from center
         if (aoeTemplate) {
+            if (
+                game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE &&
+                game.settings.get("core", "gridDiagonals") !== CONST.GRID_DIAGONALS.EXACT
+            ) {
+                ui.notifications.warn(
+                    'The Core FoundryVTT setting, "Square Grid Diagonals", needs to be "Exact (√2)" for correct measurement and behavior for this scene because it has square grid.',
+                );
+            }
+
             // Explosion
             // Simple rules is to remove the hightest dice term for each
             // hex distance from center. Works fine when radius = dice,
@@ -2027,6 +2036,10 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
             const originalNumberOfTerms = damageRoller.getFullBaseTerms().base.length;
             const termsToRemove = Math.floor(pct * originalNumberOfTerms);
             damageRoller.removeNHighestRankTerms(termsToRemove);
+        } else {
+            ui.notifications.warn(
+                `No Area Of Effect template was found, will apply FULL EFFECT to ${targetToken.name}.`,
+            );
         }
     }
 
