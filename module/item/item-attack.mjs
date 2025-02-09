@@ -1995,6 +1995,15 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
     if (explosion) {
         // Distance from center
         if (aoeTemplate) {
+            if (
+                game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE &&
+                game.settings.get("core", "gridDiagonals") !== CONST.GRID_DIAGONALS.EXACT
+            ) {
+                ui.notifications.warn(
+                    'The Core FoundryVTT setting, "Square Grid Diagonals", needs to be "Exact (√2)" for correct measurement and behavior for this scene because it has square grid.',
+                );
+            }
+
             // Explosion
             // Simple rules is to remove the hightest dice term for each
             // hex distance from center. Works fine when radius = dice,
@@ -2018,7 +2027,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
                 // NOTE: The grid size is half a hex smaller since the centre hex counts as 1" so template is 1m smaller (see item-attack-application.mjs)
                 pct = distance / (aoeTemplate.distance + 1);
             } else {
-                distance = calculateDistanceBetween(aoeTemplate, token.object.center).distance; // PH: FIXME: cost?
+                distance = calculateDistanceBetween(aoeTemplate, token.object.center).distance;
                 pct = distance / aoeTemplate.distance;
             }
 
@@ -2027,6 +2036,10 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
             const originalNumberOfTerms = damageRoller.getFullBaseTerms().base.length;
             const termsToRemove = Math.floor(pct * originalNumberOfTerms);
             damageRoller.removeNHighestRankTerms(termsToRemove);
+        } else {
+            ui.notifications.warn(
+                `No Area Of Effect template was found, will apply FULL EFFECT to ${targetToken.name}.`,
+            );
         }
     }
 
@@ -2420,6 +2433,42 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     const entangleDefense = item.baseInfo.defense(item);
     let body = originalRoll.getEntangleTotal();
 
+    if (body <= 0) {
+        const cardData = {
+            item: item,
+
+            // Incoming Damage Information
+            incomingDamageSummary: originalRoll.getTotalSummary(),
+            incomingAnnotatedDamageTerms: originalRoll.getAnnotatedTermsSummary(),
+
+            // dice rolls
+            roller: originalRoll,
+
+            // damage info
+            effects: `${token.name} is not affected by the 0 BODY entangle.`,
+
+            // misc
+            attackTags: getAttackTags(item),
+            targetToken: token,
+        };
+
+        // render card
+        const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
+        const cardHtml = await renderTemplate(template, cardData);
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+        speaker.alias = item.actor.name;
+
+        const chatData = {
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+            author: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        ChatMessage.create(chatData);
+        return;
+    }
+
     // Entangle Active Effect
     // Get current or a base Entangle Effect
     // If a character is affected by more than one Entangle, use the
@@ -2437,7 +2486,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
                 ? `${entangleDefense.rMD} rMD`
                 : `${entangleDefense.rPD} rPD/${entangleDefense.rED} rED`
         }`),
-            (body = Math.max(body, prevBody + 1));
+            (body = Math.max(body, prevBody) + 1);
     }
     const effectData = {
         id: "entangled",

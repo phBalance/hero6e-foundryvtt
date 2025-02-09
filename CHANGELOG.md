@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.16 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.16 20250208 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved default selection of conditional mental defenses/vulnerabilities. [#1782](https://github.com/dmdorman/hero6e-foundryvtt/issues/1695)
 - Fix issue where some ActiveEffects (AID/DRAIN/etc) were not expiring. [#1737](https://github.com/dmdorman/hero6e-foundryvtt/issues/1737)
@@ -9,10 +9,12 @@
 - Generic "Roll Damage" button can now apply PD & ED damage to tokens. [#1614](https://github.com/dmdorman/hero6e-foundryvtt/issues/1614)
 - Add "Other Attacks" maneuver to 5e. [#1814](https://github.com/dmdorman/hero6e-foundryvtt/issues/1814)
 - Correct 5e explosion radius and DC falloff. [#1811](https://github.com/dmdorman/hero6e-foundryvtt/issues/1811)
+- Zero BODY entangles have no effect.
+- Two entangles now result in highest BODY entangle +1. [#1825](https://github.com/dmdorman/hero6e-foundryvtt/issues/1825)
 - Called shot to the chest now, correctly, has a -3 OCV.
 - Continuing charges no longer use charges per phase. [#1823](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
 - Fixed issue where the final fade of AID/DRAIN wasn't adjusting VALUE properly. [#1854](https://github.com/dmdorman/hero6e-foundryvtt/issues/1854)
-- Overhauled and simplified the code that determines costs, modifies, adders, etc. Includes several cost corrections.
+- Overhauled and simplified the code that determines costs, modifies, adders, etc. Several cost corrections. Slightly improved UI when you edit an item.
 
 ## Version 4.0.15 20250125
 
