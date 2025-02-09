@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.16 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.16 20250208 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved default selection of conditional mental defenses/vulnerabilities. [#1782](https://github.com/dmdorman/hero6e-foundryvtt/issues/1695)
 - Fix issue where some ActiveEffects (AID/DRAIN/etc) were not expiring. [#1737](https://github.com/dmdorman/hero6e-foundryvtt/issues/1737)
