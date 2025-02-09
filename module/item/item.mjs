@@ -344,16 +344,13 @@ export class HeroSystem6eItem extends Item {
             await this._postUpload();
         }
 
-        // Remove temporary effects
-        const temporaryEffectPromises = Promise.all(
-            this.effects.map(async (effect) => {
-                if (parseInt(effect.duration?.seconds || 0) > 0) {
-                    await effect.delete();
-                }
-            }),
-        );
-
-        await temporaryEffectPromises;
+        // Remove temporary effects that have an origin.
+        // Actor items with built in effects should have no origin and we want to keep those (POWER STR +30 for example)
+        this.effects.map(async (effect) => {
+            if (effect.origin) {
+                await effect.delete();
+            }
+        });
 
         if (this.system.value !== this.system.max) {
             await this.update({ ["system.value"]: this.system.max });
@@ -1473,8 +1470,14 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
+        const before = item.system.showToggle;
+
         // showToggle
         item.system.showToggle = this.isActivatable();
+
+        // if (this.system.XMLID === "STR") {
+        //     console.log(`showToggle`, before, this.isActivatable());
+        // }
 
         const itemEffects = item.effects.find((ae) => ae.flags.type !== "adjustment");
         if (itemEffects) {
