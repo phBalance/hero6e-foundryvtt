@@ -1,5 +1,5 @@
 #effects-panel {
-    pointer-events: initial;
+    pointer-events: none;
     position: absolute;
     top: 5px;
     right: 0;
@@ -8,6 +8,7 @@
     height: calc(100% - 10px);
 
     .effect-item {
+        pointer-events: auto;
         display: flex;
         justify-content: end;
         height: 52px;

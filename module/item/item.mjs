@@ -344,16 +344,15 @@ export class HeroSystem6eItem extends Item {
             await this._postUpload();
         }
 
-        // Remove temporary effects
-        const temporaryEffectPromises = Promise.all(
-            this.effects.map(async (effect) => {
-                if (parseInt(effect.duration?.seconds || 0) > 0) {
-                    await effect.delete();
-                }
-            }),
-        );
-
-        await temporaryEffectPromises;
+        // Remove temporary effects that have an origin.
+        // Actor items with built in effects should have no origin and we want to keep those (POWER STR +30 for example)
+        this.effects.map(async (effect) => {
+            if (effect.origin) {
+                await effect.delete();
+            } else {
+                await effect.update({ disabled: true });
+            }
+        });
 
         if (this.system.value !== this.system.max) {
             await this.update({ ["system.value"]: this.system.max });
@@ -6210,7 +6209,13 @@ async function _startIfIsAContinuingCharge(item) {
                 seconds = 1;
             }
 
-            console.log(await ae.update({ "duration.seconds": seconds, "flags.startTime": game.time.worldTime }));
+            console.log(
+                await ae.update({
+                    "duration.seconds": seconds,
+                    "duration.startTime": game.time.worldTime,
+                    "flags.startTime": game.time.worldTime,
+                }),
+            );
         } else {
             console.log("No associated Active Effect", item);
         }

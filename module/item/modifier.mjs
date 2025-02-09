@@ -9,9 +9,10 @@ export class HeroSystem6eModifier {
         this.item = options?.item;
         this.#baseInfo = getModifierInfo({
             xmlid: json.XMLID,
-            actor: this.item?.actor,
-            is5e: this.item?.is5e,
+            actor: options?.item?.actor,
+            is5e: options?.item?.is5e,
             xmlTag: "MODIFIER",
+            item: options?.item,
         });
 
         for (const key of Object.keys(json)) {

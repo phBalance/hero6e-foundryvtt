@@ -1,6 +1,14 @@
 # Releases
 
-## Version 4.0.16 20250208 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.17 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed an issue where the effects panel could make it difficult to interact with tokens on the far right side of the canvas map. [#1875](https://github.com/dmdorman/hero6e-foundryvtt/issues/1875)
+- Effects panel now shows duration in hours, minutes and seconds. [#1872](https://github.com/dmdorman/hero6e-foundryvtt/issues/1872)
+- Continuing charges now expire properly. [#1876](https://github.com/dmdorman/hero6e-foundryvtt/issues/1876) [#1823](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
+- The PRONE condition is now applied (if appropriate) when damage is applied. Previously you had to roll the knock down damage before the token was made PRONE. [#1878](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
+- The damage card can be popped out into a modal window to more easily step thru applying damage to multiple targets. [#1877](https://github.com/dmdorman/hero6e-foundryvtt/issues/1877)
+
+## Version 4.0.16 20250208
 
 - Improved default selection of conditional mental defenses/vulnerabilities. [#1782](https://github.com/dmdorman/hero6e-foundryvtt/issues/1695)
 - Fix issue where some ActiveEffects (AID/DRAIN/etc) were not expiring. [#1737](https://github.com/dmdorman/hero6e-foundryvtt/issues/1737)

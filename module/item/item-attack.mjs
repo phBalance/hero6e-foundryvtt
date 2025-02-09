@@ -31,6 +31,7 @@ export async function chatListeners(_html) {
     html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
     html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
     html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
+    html.on("click", "span.modal-damage-card", this._onModalDamageCard.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -1872,6 +1873,9 @@ export async function _onApplyDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
 
+    // change font color to indicate this button has already been pressed
+    $(button).css("color", "#A9A9A9");
+
     // PH: FIXME: Is toHitData actually needed?
     const damageData = { ...button.dataset };
     const toHitData = damageData.toHitData;
@@ -3402,11 +3406,13 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             knockbackMessage = "No Knockback";
         } else if (knockbackResultTotal + shrinkingKB == 0) {
             knockbackMessage = "Inflicts Knockdown";
+            actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
         } else {
             // If the result is positive, the target is Knocked Back 1" or 2m times the result
             knockbackMessage = `Knocked Back ${
                 (knockbackResultTotal + shrinkingKB) * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
             }${getSystemDisplayUnits(item.actor?.is5e || item.system.is5e)}`;
+            actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
         }
     }
 
@@ -3878,4 +3884,33 @@ export async function _onAdjustmentToolipExpandCollapse(event) {
         icon.addClass("fa-circle-caret-right");
         icon.removeClass("fa-circle-caret-down");
     }
+}
+
+export async function _onModalDamageCard(event) {
+    const target = $(event.currentTarget);
+    console.log(target);
+
+    let content = target.closest(".message-content").clone();
+    content.find(".modal-damage-card").remove();
+    content = content.html();
+
+    const data = {
+        title: `Modal Damage`,
+        content,
+        buttons: {
+            cancel: {
+                label: "Close",
+            },
+        },
+        default: "Cancel",
+        render: (html) => {
+            this.chatListeners(html);
+        },
+        //close: () => resolve({ cancelled: true }),
+    };
+    const d = new Dialog(data, { form: { closeOnSubmit: false } });
+    await d.render(true);
+
+    //this.chatListeners(d.element);
+    console.log(d);
 }

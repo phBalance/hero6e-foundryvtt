@@ -453,4 +453,31 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
     }
+
+    _prepareDuration() {
+        const d = this.duration;
+
+        // Time-based duration
+        if (Number.isNumeric(d.seconds)) {
+            const wt = game.time.worldTime;
+            const start = d.startTime || wt;
+            const elapsed = wt - start;
+            const remaining = d.seconds - elapsed;
+
+            const sec_num = parseInt(remaining, 10);
+            const hours = Math.floor(sec_num / 3600);
+            const minutes = Math.floor(sec_num / 60) % 60;
+            const seconds = sec_num % 60;
+
+            return {
+                type: "seconds",
+                duration: d.seconds,
+                remaining: remaining,
+                label: `${hours ? `${hours}h` : ""} ${minutes ? `${minutes}m` : ""} ${seconds ? `${seconds}s` : ""}`,
+                _worldTime: wt,
+            };
+        }
+
+        return super._prepareDuration();
+    }
 }
