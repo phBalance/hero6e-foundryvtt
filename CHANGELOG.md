@@ -6,6 +6,7 @@
 - Effects panel now shows duration in hours, minutes and seconds. [#1872](https://github.com/dmdorman/hero6e-foundryvtt/issues/1872)
 - Continuing charges now expire properly. [#1876](https://github.com/dmdorman/hero6e-foundryvtt/issues/1876) [#1823](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
 - The PRONE condition is now applied (if appropriate) when damage is applied. Previously you had to roll the knock down damage before the token was made PRONE. [#1878](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
+- The damage card can be popped out into a modal window to more easily step thru applying damage to multiple targets. [#1877](https://github.com/dmdorman/hero6e-foundryvtt/issues/1877)
 
 ## Version 4.0.16 20250208
 
