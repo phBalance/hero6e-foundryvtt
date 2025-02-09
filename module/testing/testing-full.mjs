@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import {
     combatSkillLevelsForAttack,
-    getEffectForumulaFromItem,
+    getEffectFormulaFromItem,
     getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
 
@@ -1939,7 +1939,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 30"/3 -> 10DC => +10DC
                         // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
                                 { effectivestr: 20, velocity: 30 },
                             ),
@@ -1952,7 +1952,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 90"/3 -> 30DC => +30DC
                         // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
                                 { effectivestr: 20, velocity: 90 },
                             ),
@@ -1965,7 +1965,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 10"/5 -> 3DC => +3DC
                         // Base + Added = 2DC + 3DC (doubling rule does not apply) = 4 DC. Move By is 5AP/die => 4d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { effectivestr: 20, velocity: 10 },
                             ),
@@ -1978,7 +1978,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 90"/5 -> 18DC => +18DC
                         // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { effectivestr: 20, velocity: 90 },
                             ),
@@ -2066,7 +2066,7 @@ export function registerFullTests(quench) {
                         // Added DCs: (11 CSL) 2:1 +5DC
                         // Base + Added = 20DC. Nerve Strike is an NND (10AP/die) => 10d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Nerve Strike"),
                                 {},
                             ),
@@ -2079,7 +2079,7 @@ export function registerFullTests(quench) {
                         // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
                         // Base + Added = 7C + 5DC (doubling rule not applied) = 12DC. Killing strike is 15AP/die => 4d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Killing Strike"),
                                 { effectivestr: 0 },
                             ),
@@ -2092,7 +2092,7 @@ export function registerFullTests(quench) {
                             // Base DCs: STR +14 DC (STR 70),  EXTRADC +11DC => +25 DC
                             // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
                             // Base + Added = 25DC + 7DC (doubling rule does not apply) = 32DC. Martial Strike is 5AP/die => 32d6
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
                                 {},
                             ),
@@ -2105,7 +2105,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
                         // Base + Added = 20DC. Martial Flash is a 5AP/die => 20d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
                                 {},
                             ),
@@ -2118,7 +2118,7 @@ export function registerFullTests(quench) {
                         // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
                         // Base + Added = 15DC + 9DC (doubling rule does not apply) = 34DC. Sacrifice Strike is 5AP/die => 34d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
                                 {},
                             ),
@@ -2131,7 +2131,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 10"/5 -> 2DC, (11 CSL) 2:1 +5DC => +7DC
                         // Base + Added = 2DC + 7DC (doubling rule does apply but not to velocity) = 6 DC. Move By is 5AP/die => 6d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { effectivestr: 20, velocity: 10 },
                             ),
@@ -2353,7 +2353,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Strike 0DC =>  +0 DC
                         // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 16d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "STRIKE"),
                                 { hthAttackItems: [hthAttack] },
                             ),
@@ -2366,7 +2366,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Strike 0DC =>  +0 DC
                         // Base + Added = 2DC + 0DC (doubling rule does not apply) = 2 DC. Martial Strike is 5AP/die => 2d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "STRIKE"),
                                 {},
                             ),
@@ -2391,7 +2391,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
                         const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
                         assert.equal(
-                            getEffectForumulaFromItem(strikeItem, {
+                            getEffectFormulaFromItem(strikeItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
                                 hthAttackItems: [hthAttack],
                             }),
@@ -2405,7 +2405,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 2DC + 6DC (doubling rule does not apply) = 8 DC. Move Through is 5AP/die => 8d6
                         const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
                         assert.equal(
-                            getEffectForumulaFromItem(moveThroughItem, {
+                            getEffectFormulaFromItem(moveThroughItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
                                 velocity: 20,
                             }),
@@ -2420,7 +2420,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 30"/3 -> 10DC => +10DC
                         // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
                                 { effectivestr: 20, velocity: 30 },
                             ),
@@ -2433,7 +2433,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 90"/3 -> 30DC => +30DC
                         // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
                                 { effectivestr: 20, velocity: 90 },
                             ),
@@ -2446,7 +2446,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 10"/5 -> 2DC => +2DC
                         // Base + Added = 9DC + 2DC (doubling rule does not apply) = 11 DC. Move By is 5AP/die => 11d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { hthAttackItems: [hthAttack], effectivestr: 20, velocity: 10 },
                             ),
@@ -2459,7 +2459,7 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 90"/5 -> 18DC => +18DC
                         // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.XMLID === "MOVEBY"),
                                 { effectivestr: 20, velocity: 90 },
                             ),
@@ -2478,7 +2478,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 4DC. Nerve Strike is an NND (10AP/die) => 2d6
                         const moveBy = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
                         assert.equal(
-                            getEffectForumulaFromItem(moveBy, {
+                            getEffectFormulaFromItem(moveBy, {
                                 hthAttackItems: [hthAttack],
                                 effectivestr: 20,
                                 velocity: 90,
@@ -2494,7 +2494,7 @@ export function registerFullTests(quench) {
                         const moveBy = actor.items.find((item) => item.system.ALIAS === "Killing Strike");
 
                         assert.equal(
-                            getEffectForumulaFromItem(moveBy, {
+                            getEffectFormulaFromItem(moveBy, {
                                 hthAttackItems: [hthAttack],
                                 effectivestr: 20,
                                 velocity: 90,
@@ -2509,7 +2509,7 @@ export function registerFullTests(quench) {
                         // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
                         const msItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
 
-                        assert.equal(getEffectForumulaFromItem(msItem, { hthAttackItems: [hthAttack] }), "18d6");
+                        assert.equal(getEffectFormulaFromItem(msItem, { hthAttackItems: [hthAttack] }), "18d6");
                     });
 
                     it("should have the correct damage for Martial Flash", function () {
@@ -2517,7 +2517,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Does not use STR and no HTH Attack  => +0 DC
                         // Base + Added = 4DC. Martial Flash is a 5AP/die => 4d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((item) => item.system.ALIAS === "Martial Flash"),
                                 { hthAttackItems: [hthAttack], effectivestr: 20, velocity: 90 },
                             ),
@@ -2530,7 +2530,7 @@ export function registerFullTests(quench) {
                         // Added: Sacrifice Strike 4DC =>  4DC
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20DC. Sacrifice Strike is 5AP/die => 20d6
                         const ssItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
-                        assert.equal(getEffectForumulaFromItem(ssItem, { hthAttackItems: [hthAttack] }), "20d6");
+                        assert.equal(getEffectFormulaFromItem(ssItem, { hthAttackItems: [hthAttack] }), "20d6");
                     });
                 });
 
@@ -2563,7 +2563,7 @@ export function registerFullTests(quench) {
                         // Added DCs: (11 CSL) 2:1 +5DC
                         // Base + Added = 4 DC + 5DC (Doubling rule kicks in) => 8DC. Nerve Strike is an NND (10AP/die) => 4d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Nerve Strike"),
                                 {},
                             ),
@@ -2576,7 +2576,7 @@ export function registerFullTests(quench) {
                         // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
                         // Base + Added = 2DC + 5DC (doubling rule kicks in) = 4DC. Killing strike is 15AP/die => 1d6+1
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Killing Strike"),
                                 { effectivestr: 0 },
                             ),
@@ -2589,7 +2589,7 @@ export function registerFullTests(quench) {
                             // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
                             // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
                             // Base + Added = 16DC + 7DC (doubling rule does not apply) = 23DC. Martial Strike is 5AP/die => 23d6
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
                                 { hthAttackItems: [hthAttack] },
                             ),
@@ -2602,7 +2602,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
                         // Base + Added = 4DC + 5DC (doubling rule kicks in) => 8DC. Martial Flash is a 5AP/die => 8d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
                                 { hthAttackItems: [hthAttack] },
                             ),
@@ -2615,7 +2615,7 @@ export function registerFullTests(quench) {
                         // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
                         // Base + Added = 16DC + 9DC (doubling rule does not apply) = 25DC. Sacrifice Strike is 5AP/die => 25d6
                         assert.equal(
-                            getEffectForumulaFromItem(
+                            getEffectFormulaFromItem(
                                 actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
                                 { hthAttackItems: [hthAttack] },
                             ),
@@ -2642,7 +2642,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Strike 0DC, Underwater -2DC =>  -2 DC
                         // Base + Added = 16DC - 2DC (doubling rule does not apply) = 14 DC. Martial Strike is 5AP/die => 14d6
                         const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        assert.equal(getEffectForumulaFromItem(strikeItem, { hthAttackItems: [hthAttack] }), "14d6");
+                        assert.equal(getEffectFormulaFromItem(strikeItem, { hthAttackItems: [hthAttack] }), "14d6");
                     });
 
                     it("should decrease the damage of a move through", function () {
@@ -2650,7 +2650,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Underwater -2DC, Velocity 20" -> 6DC =>  +4 DC
                         // Base + Added = 2DC + 4DC (doubling rule does not apply) = 6 DC. Move Through is 5AP/die => 6d6
                         const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
-                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { velocity: 20 }), "6d6");
+                        assert.equal(getEffectFormulaFromItem(moveThroughItem, { velocity: 20 }), "6d6");
                     });
 
                     it("should not be possible to do negative damage", function () {
@@ -2658,7 +2658,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Underwater -2DC, velocity 2" -> 0d6 =>  -2 DC
                         // Base + Added = 1DC - 2DC (doubling rule does not apply) = 0 DC. Move Through is 5AP/die => 0d6
                         const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
-                        assert.equal(getEffectForumulaFromItem(moveThroughItem, { effectivestr: 5, velocity: 2 }), "0");
+                        assert.equal(getEffectFormulaFromItem(moveThroughItem, { effectivestr: 5, velocity: 2 }), "0");
                     });
                 });
             });
@@ -2881,15 +2881,15 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the little EB", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcEnergyBlast, { boostableCharges: 0 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 0 }), "3d6");
                     });
 
                     it("should have the correct damage for a minimally boosted little EB", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcEnergyBlast, { boostableCharges: 1 }), "4d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 1 }), "4d6");
                     });
 
                     it("should have the correct damage for a fully boosted little EB", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcEnergyBlast, { boostableCharges: 4 }), "6d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 4 }), "6d6");
                     });
 
                     it("should have the correct cost for the big EB", function () {
@@ -2901,19 +2901,19 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the big EB", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 0 }), "4d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 0 }), "4d6");
                     });
 
                     it("should have the correct damage for a minimally boosted little EB", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 1 }), "5d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 1 }), "5d6");
                     });
 
                     it("should have the correct damage for a fully boosted big EB", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 4 }), "8d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 4 }), "8d6");
                     });
 
                     it("should have the correct damage for an over boosted big EB", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEnergyBlast, { boostableCharges: 5 }), "8d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 5 }), "8d6");
                     });
                 });
 
@@ -2927,15 +2927,15 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the little Ego Attack", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcEgoAttack, { boostableCharges: 0 }), "1½d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 0 }), "1½d6");
                     });
 
                     it("should have the correct damage for a minimally boosted little Ego Attack", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcEgoAttack, { boostableCharges: 1 }), "2d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 1 }), "2d6");
                     });
 
                     it("should have the correct damage for a fully boosted little Ego Attack", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcEgoAttack, { boostableCharges: 4 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 4 }), "3d6");
                     });
 
                     it("should have the correct cost for the big Ego Attack", function () {
@@ -2947,19 +2947,19 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the big Ego Attack", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 0 }), "2d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 0 }), "2d6");
                     });
 
                     it("should have the correct damage for a minimally boosted little Ego Attack", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 1 }), "2½d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 1 }), "2½d6");
                     });
 
                     it("should have the correct damage for a fully boosted big Ego Attack", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 4 }), "4d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 4 }), "4d6");
                     });
 
                     it("should have the correct damage for an over boosted big Ego Attack", function () {
-                        assert.equal(getEffectForumulaFromItem(fourDcEgoAttack, { boostableCharges: 5 }), "4d6");
+                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 5 }), "4d6");
                     });
                 });
 
@@ -2973,15 +2973,15 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the little Transform", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcTransform, { boostableCharges: 0 }), "1d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 0 }), "1d6");
                     });
 
                     it("should have the correct damage for a minimally boosted little Transform", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcTransform, { boostableCharges: 1 }), "1d6+1");
+                        assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 1 }), "1d6+1");
                     });
 
                     it("should have the correct damage for a fully boosted little Transform", function () {
-                        assert.equal(getEffectForumulaFromItem(threeDcTransform, { boostableCharges: 4 }), "2d6");
+                        assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 4 }), "2d6");
                     });
 
                     it("should have the correct cost for the big Transform", function () {
@@ -2993,19 +2993,19 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the big Transform", function () {
-                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 0 }), "2½d6");
+                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 0 }), "2½d6");
                     });
 
                     it("should have the correct damage for a minimally boosted big Transform", function () {
-                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 1 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 1 }), "3d6");
                     });
 
                     it("should have the correct damage for a fully boosted big Transform", function () {
-                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 4 }), "4d6");
+                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 4 }), "4d6");
                     });
 
                     it("should have the correct damage for an over boosted big Transform", function () {
-                        assert.equal(getEffectForumulaFromItem(eightDcTransform, { boostableCharges: 5 }), "4d6");
+                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 5 }), "4d6");
                     });
                 });
             });
@@ -3662,7 +3662,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1/2 EB", function () {
-                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4d6");
                     });
 
                     it("should have the correct cost for the +1 EB", function () {
@@ -3674,7 +3674,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1 EB", function () {
-                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6");
                     });
                 });
 
@@ -3688,7 +3688,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1/2 EA", function () {
-                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6");
                     });
 
                     it("should have the correct cost for the +1 EA", function () {
@@ -3700,7 +3700,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1 EA", function () {
-                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
                     });
                 });
 
@@ -3714,7 +3714,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1/2 RKA", function () {
-                        assert.equal(getEffectForumulaFromItem(rkaPlusHalfItem, { effectivestr: 15 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(rkaPlusHalfItem, { effectivestr: 15 }), "3d6");
                     });
 
                     it("should have the correct cost for the +1/2 HKA", function () {
@@ -3727,7 +3727,7 @@ export function registerFullTests(quench) {
 
                     it("should have the correct damage for the +1/2 HKA", function () {
                         // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
-                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 15 }), "3½d6");
+                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectivestr: 15 }), "3½d6");
                     });
                 });
 
@@ -3757,22 +3757,22 @@ export function registerFullTests(quench) {
 
                     it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
                         // 2 CSLs is 1DC (ignores advantage). 4d6 + 1 DC = 5d6
-                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "5d6");
+                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "5d6");
                     });
 
                     it("should have the correct damage for the +1 EB with 2 CSLs", function () {
                         // 2 CSLs is 2DCs (ignores advantage). 3d6 + 2 DC = 3d6+1
-                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "5d6");
+                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "5d6");
                     });
 
                     it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
                         // 2 CSLs at +1/2 is 1DC (ignores advantages). + 1 DC = +½d6
-                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4½d6");
+                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4½d6");
                     });
 
                     it("should have the correct damage for the +1 EA with 2 CSLs", function () {
                         // 2 CSLs at +1/2 is 1DC  (ignores advantages). + 1 DC = +1
-                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4½d6");
+                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4½d6");
                     });
 
                     it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
@@ -3780,12 +3780,12 @@ export function registerFullTests(quench) {
                         cslItem.system.csl = ["dc", "ocv"];
 
                         // 1 CSLs is 0DC (ignores advantage). 3d6 + 0 DC = 3d6
-                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
                     });
 
                     it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
                         // 2 CSLs is 1DC (ignores advantage). 3d6 + 1 DC = 3d6+1
-                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6+1");
+                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6+1");
                     });
                 });
 
@@ -3802,28 +3802,28 @@ export function registerFullTests(quench) {
 
                     it("should have the correct damage for the +1/2 EB", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "8d6",
                         );
                     });
 
                     it("should have the correct damage for the +1 EB", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "8d6",
                         );
                     });
 
                     it("should have the correct damage for the +1/2 EA", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6d6",
                         );
                     });
 
                     it("should have the correct damage for the +1 EA", function () {
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6d6",
                         );
                     });
@@ -3831,7 +3831,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 RKA", function () {
                         // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
                         assert.equal(
-                            getEffectForumulaFromItem(rkaPlusHalfItem, {
+                            getEffectFormulaFromItem(rkaPlusHalfItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
                             }),
                             "3½d6",
@@ -3841,7 +3841,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 HKA", function () {
                         // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
                         assert.equal(
-                            getEffectForumulaFromItem(hkaPlusHalfItem, {
+                            getEffectFormulaFromItem(hkaPlusHalfItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
                                 effectivestr: 0,
                             }),
@@ -4042,7 +4042,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1/2 EB", function () {
-                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4d6");
                     });
 
                     it("should have the correct cost for the +1 EB", function () {
@@ -4054,7 +4054,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1 EB", function () {
-                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6");
                     });
                 });
 
@@ -4068,7 +4068,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1/2 EA", function () {
-                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6");
                     });
 
                     it("should have the correct cost for the +1 EA", function () {
@@ -4080,7 +4080,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1 EA", function () {
-                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
                     });
                 });
 
@@ -4094,7 +4094,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("should have the correct damage for the +1/2 RKA", function () {
-                        assert.equal(getEffectForumulaFromItem(rkaPlusHalfItem, { effectivestr: 15 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(rkaPlusHalfItem, { effectivestr: 15 }), "3d6");
                     });
 
                     it("should have the correct cost for the +1/2 HKA", function () {
@@ -4107,7 +4107,7 @@ export function registerFullTests(quench) {
 
                     it("should have the correct damage for the +1/2 HKA", function () {
                         // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
-                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 15 }), "3½d6");
+                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectivestr: 15 }), "3½d6");
                     });
                 });
 
@@ -4149,22 +4149,22 @@ export function registerFullTests(quench) {
 
                     it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
                         // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +½d6
-                        assert.equal(getEffectForumulaFromItem(ebPlusHalfItem, {}), "4½d6");
+                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4½d6");
                     });
 
                     it("should have the correct damage for the +1 EB with 2 CSLs", function () {
                         // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +1
-                        assert.equal(getEffectForumulaFromItem(ebPlusOneItem, {}), "4d6+1");
+                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6+1");
                     });
 
                     it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
                         // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +1
-                        assert.equal(getEffectForumulaFromItem(eaPlusHalfItem, {}), "4d6+1");
+                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6+1");
                     });
 
                     it("should have the correct damage for the +1 EA with 2 CSLs", function () {
                         // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +0
-                        assert.equal(getEffectForumulaFromItem(eaPlusOneItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
                     });
 
                     it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
@@ -4172,12 +4172,12 @@ export function registerFullTests(quench) {
                         cslCombatItem.system.csl = ["dc", "ocv"];
 
                         // 1 CSLs is 0DC. 3d6 + 0 DC = 0d6
-                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
                     });
 
                     it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
                         // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = 0d6
-                        assert.equal(getEffectForumulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectivestr: 0 }), "3d6");
                     });
                 });
 
@@ -4195,7 +4195,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 EB", function () {
                         // +4 DC at +1/2 is 2.66 DC => 2½d6
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6½d6",
                         );
                     });
@@ -4203,7 +4203,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1 EB", function () {
                         // +4 DC at +1 is 2 DC => 2d6
                         assert.equal(
-                            getEffectForumulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "6d6",
                         );
                     });
@@ -4211,7 +4211,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 EA", function () {
                         // +4 DC at +1/2 is 2.66 DC => 1d6+1
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "5d6+1",
                         );
                     });
@@ -4219,7 +4219,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1 EA", function () {
                         // +4 DC at +1 is 2 DC => 1d6
                         assert.equal(
-                            getEffectForumulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
+                            getEffectFormulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
                             "5d6",
                         );
                     });
@@ -4227,7 +4227,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 RKA", function () {
                         // +4 DC at +1/2 is 2.66 DC => ½d6
                         assert.equal(
-                            getEffectForumulaFromItem(rkaPlusHalfItem, {
+                            getEffectFormulaFromItem(rkaPlusHalfItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
                             }),
                             "3½d6",
@@ -4237,7 +4237,7 @@ export function registerFullTests(quench) {
                     it("should have the correct damage for the +1/2 HKA", function () {
                         // +4 DC at +1 is 2 DC => 2d6
                         assert.equal(
-                            getEffectForumulaFromItem(hkaPlusHalfItem, {
+                            getEffectFormulaFromItem(hkaPlusHalfItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
                                 effectivestr: 0,
                             }),
@@ -4390,14 +4390,14 @@ export function registerFullTests(quench) {
                         // Base: Big Sword 2d6K (6 DC) => 6 DC
                         // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
                         // Combined: 6 DC + 12 DC (no damage doubling rule) => 18 DC
-                        assert.equal(getEffectForumulaFromItem(bigSwordItem, {}), "6d6");
+                        assert.equal(getEffectFormulaFromItem(bigSwordItem, {}), "6d6");
                     });
 
                     it("should add strength for the Big Sword HKA", function () {
                         // Base: Big Sword 2d6K (6 DC) => 6 DC
                         // Added: 25 STR (5 DC), Weapon Master x3 for Big Sword (9 DC) => 14 DC
                         // Combined: 6 DC + 14 DC (no damage doubling rule) => 20 DC
-                        assert.equal(getEffectForumulaFromItem(bigSwordItem, { effectivestr: 25 }), "6½d6");
+                        assert.equal(getEffectFormulaFromItem(bigSwordItem, { effectivestr: 25 }), "6½d6");
                     });
                 });
 
@@ -4406,14 +4406,14 @@ export function registerFullTests(quench) {
                         // Base: Little Sword 1d6+1K (4 DC) => 4 DC
                         // Added: 15 STR (3 DC)) => 3 DC
                         // Combined: 4 DC + 3 DC (no damage doubling rule) => 7 DC
-                        assert.equal(getEffectForumulaFromItem(littleSwordItem, {}), "2d6+1");
+                        assert.equal(getEffectFormulaFromItem(littleSwordItem, {}), "2d6+1");
                     });
 
                     it("should add strength for the Little Sword HKA", function () {
                         // Base: Little Sword 1d6+1K (4 DC) => 4 DC
                         // Added: 25 STR (5 DC)) => 5 DC
                         // Combined: 4 DC + 5 DC (no damage doubling rule) => 9 DC
-                        assert.equal(getEffectForumulaFromItem(littleSwordItem, { effectivestr: 25 }), "3d6");
+                        assert.equal(getEffectFormulaFromItem(littleSwordItem, { effectivestr: 25 }), "3d6");
                     });
                 });
 
@@ -4433,14 +4433,14 @@ export function registerFullTests(quench) {
                         // Base: Big Sword 2d6K (6 DC) => 6 DC
                         // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
                         // Combined: 6 DC + 12 DC (damage doubling rule) => 12 DC
-                        assert.equal(getEffectForumulaFromItem(bigSwordItem, {}), "4d6");
+                        assert.equal(getEffectFormulaFromItem(bigSwordItem, {}), "4d6");
                     });
 
                     it("should add strength for the Little Sword HKA", function () {
                         // Base: Little Sword 1d6+1K (4 DC) => 4 DC
                         // Added: 25 STR (5 DC)) => 5 DC
                         // Combined: 4 DC + 5 DC (damage doubling rule) => 8 DC
-                        assert.equal(getEffectForumulaFromItem(littleSwordItem, { effectivestr: 25 }), "2½d6");
+                        assert.equal(getEffectFormulaFromItem(littleSwordItem, { effectivestr: 25 }), "2½d6");
                     });
                 });
             });
