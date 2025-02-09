@@ -50,7 +50,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Naked Advantage for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)",
+                            "Naked Advantage for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands; -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)",
                         );
                     });
 
@@ -118,7 +118,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Naked Advantage for up to 53 Active points of STR (STR), Area Of Effect (8m Radius; +1/2) (26 Active Points); Linked (Greater Power is Constant or in use most or all of the time, Lesser Power can only be used when character uses greater Power at full value, -1/2), Linked (Greater Power is Constant or in use most or all of the time, Lesser Power can only be used when character uses greater Power at full value, -1/2), Only In Alternate Identity (-1/4), Perceivable (-1/4)",
+                            "Naked Advantage for up to 53 Active points of STR (STR), Area Of Effect (8m Radius; +1/2) (26 Active Points); Linked (Greater Power is Constant or in use most or all of the time, Lesser Power can only be used when character uses greater Power at full value; -1/2), Linked (Greater Power is Constant or in use most or all of the time, Lesser Power can only be used when character uses greater Power at full value; -1/2), Only In Alternate Identity (-1/4), Perceivable (-1/4)",
                         );
                     });
 
@@ -714,7 +714,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                'Energy Blast 22d6 (ED), Area Of Effect (1" One Hex; +1/2) (165 Active Points); Activation Roll (15-; Burnout, Jammed, -1/2)',
+                                'Energy Blast 22d6 (ED), Area Of Effect (1" One Hex; +1/2) (165 Active Points); Activation Roll (15-; Burnout, Jammed; -1/2)',
                             );
                         });
 
@@ -779,7 +779,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                'Energy Blast 22d6 (ED), Area Of Effect (2" Radius; +3/4) (192 Active Points); Activation Roll (15-; Burnout, Jammed, -1/2)',
+                                'Energy Blast 22d6 (ED), Area Of Effect (2" Radius; +3/4) (192 Active Points); Activation Roll (15-; Burnout, Jammed; -1/2)',
                             );
                         });
 
@@ -6881,7 +6881,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Barrier 6 rPD/6 rED/3 BODY(up to 5m long, and 5m tall, and 1m thick) (Dismissable), Limited Power (Damages Environment; +0), Last For One Hour or Until Destroyed (+0) (38 Active Points); 2 Charges (Recovers after 2 Hours of Study, -2), Requires A Roll (Magic Skill roll; -1/2), Increased Endurance Cost (x3 END; -1/2), Costs Endurance (Only Costs END to Activate; -1/4), Gestures (-1/4), IIF (Component - Dirt From The Elemental Plane of Earth; -1/4), Incantations (-1/4)",
+                            "Barrier 6 rPD/6 rED/3 BODY(up to 5m long, and 5m tall, and 1m thick) (Dismissable), Limited Power (Damages Environment; +0), Last For One Hour or Until Destroyed (+0) (38 Active Points); 2 Charges (Recovers after 2 Hours of Study; -2), Requires A Roll (Magic Skill roll; -1/2), Increased Endurance Cost (x3 END; -1/2), Costs Endurance (Only Costs END to Activate; -1/4), Gestures (-1/4), IIF (Component - Dirt From The Elemental Plane of Earth; -1/4), Incantations (-1/4)",
                         );
                     });
 
