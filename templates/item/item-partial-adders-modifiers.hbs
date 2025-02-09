@@ -66,7 +66,7 @@
 
         {{#each mod.adders as |adder id|}}
         <tr class="hero modifier-adder indent"data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
-            <td class="left">{{adder.ALIAS}} [{{adder.XMLID}}]</td>
+            <td class="left" title="{{adder.XMLID}}">{{adder.ALIAS}}</td>
             <td>{{adder.cost}}</td>
             <td class="right">
                 {{!-- <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
