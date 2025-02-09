@@ -726,7 +726,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     let value = parseInt(item.system.charges.value);
                     let max = parseInt(item.system.charges.max);
                     if (value < max) {
-                        content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
+                        content += `Charges recover at midnight:  ${actor.name}/${item.name} ${value} to ${max} charges.  `;
                         item.update({ "system.charges.value": max });
                     }
                 }
