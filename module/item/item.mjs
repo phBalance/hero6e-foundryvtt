@@ -5841,6 +5841,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _addersCost() {
+        if (this.system.EVERYMAN) return 0;
         let _cost = 0;
 
         for (const adder of this.adders) {
