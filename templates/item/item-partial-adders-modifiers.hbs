@@ -50,7 +50,7 @@
         {{!-- <th>Add</th> --}}
     </tr>
     {{#each item.modifiers as |mod id|}}
-        <tr class="{{#if mod.parentId}} fromParent{{/if}}" data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
+        <tr class="{{#if mod.parentId}} from-parent{{/if}}" data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
             <td class="left" title="{{mod.XMLID}}">{{mod.ALIAS}}</td>
             <td>{{mod.cost}}</td>
             <td class="right">
