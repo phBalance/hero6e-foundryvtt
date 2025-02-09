@@ -763,7 +763,7 @@ export function calculateDicePartsForItem(item, options) {
     };
 }
 
-export function getEffectForumulaFromItem(item, options) {
+export function getEffectFormulaFromItem(item, options) {
     // PH: FIXME: Need to start looking at end returned from other functions.
     const { diceParts } = calculateDicePartsForItem(item, options);
 

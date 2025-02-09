@@ -24,7 +24,7 @@ import {
     calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
     dicePartsToEffectFormula,
-    getEffectForumulaFromItem,
+    getEffectFormulaFromItem,
     getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
@@ -223,18 +223,20 @@ export class HeroSystem6eItem extends Item {
     //     super.prepareData();
     // }
 
-    prepareDerivedData() {
+    calcItemPointsNew() {
         const performanceStart = new Date().getTime();
-        super.prepareDerivedData();
+        let changed = false;
+        //super.prepareDerivedData();
 
         if (this.actor?.is5e === undefined) {
             //console.warn(`${this.actor.name}/${this.name}: Skipping prepareDerivedData because is5e === undefined`);
-            return;
+            return false;
         }
 
         // Base points plus adders
         const _basePointsPlusAdders = this._basePoints + this._addersCost;
         if (_basePointsPlusAdders !== this.system.basePointsPlusAdders) {
+            changed = true;
             // if (this.system.basePointsPlusAdders) {
             //     console.warn(
             //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData basePointsPlusAdders. Legacy (${this.system.basePointsPlusAdders}) vs new (${_basePointsPlusAdders})`,
@@ -248,6 +250,7 @@ export class HeroSystem6eItem extends Item {
         // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
         const _activePoints = this._activePoints;
         if (_activePoints !== this.system.activePoints) {
+            changed = true;
             // if (this.system.activePoints) {
             //     console.warn(
             //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData activePoints. Legacy (${this.system.activePoints}) vs new (${_activePoints})`,
@@ -263,6 +266,7 @@ export class HeroSystem6eItem extends Item {
         //calcRealCost
         const _realCost = this._realCost;
         if (_realCost !== this.system.realCost) {
+            changed = true;
             // if (this.system.realCost) {
             //     console.warn(
             //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData realCost. Legacy (${this.system.realCost}) vs new (${_realCost})`,
@@ -276,6 +280,7 @@ export class HeroSystem6eItem extends Item {
         if (performanceDuration > 1000) {
             console.warn(`Performance concern. Took ${performanceDuration} to prepareDerivedData`, this);
         }
+        return changed;
     }
 
     async _onUpdate(changed, options, userId) {
@@ -289,7 +294,7 @@ export class HeroSystem6eItem extends Item {
         // If our value has changed, we need to rebuild this item.
         if (changed.system?.value != null) {
             // TODO: Update everything!
-            //changed = this.calcItemPoints() || changed;
+            changed = this.calcItemPoints() || changed;
 
             // DESCRIPTION
             const oldDescription = this.system.description;
@@ -1765,7 +1770,7 @@ export class HeroSystem6eItem extends Item {
 
             this.updateRoll();
 
-            //changed = this.determinePointCosts() || changed;  // Moved to prepareDerivedData
+            changed = this.determinePointCosts() || changed; // Moved to prepareDerivedData
 
             // CHARGES
             const CHARGES = this.findModsByXmlid("CHARGES");
@@ -2685,20 +2690,23 @@ export class HeroSystem6eItem extends Item {
     }
 
     calcItemPoints() {
-        console.warn(`Cost calculations moved to prepareDerivedData. Should no longer call this function`);
-        return false;
-        // let changed = false;
-        // changed = this.calcBasePointsPlusAdders() || changed;
-        // changed = this.calcActivePoints() || changed;
-        // changed = this.calcRealCost() || changed;
-        // if (this.system.basePointsPlusAdders != this._basePoints + this._addersCost) {
-        //     console.warn(
-        //         `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
-        //             `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
-        //         this,
-        //     );
-        // }
-        // return changed;
+        // console.warn(`Cost calculations moved to prepareDerivedData. Should no longer call this function`);
+        // return false;
+
+        return this.calcItemPointsNew();
+
+        //     let changed = false;
+        //     changed = this.calcBasePointsPlusAdders() || changed;
+        //     changed = this.calcActivePoints() || changed;
+        //     changed = this.calcRealCost() || changed;
+        //     // if (this.system.basePointsPlusAdders != this._basePoints + this._addersCost) {
+        //     //     console.warn(
+        //     //         `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
+        //     //             `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
+        //     //         this,
+        //     //     );
+        //     // }
+        //     return changed;
     }
 
     calcBasePointsPlusAdders() {
@@ -3363,7 +3371,7 @@ export class HeroSystem6eItem extends Item {
 
             case "MINDSCAN":
                 {
-                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${diceFormula} ${system.ALIAS}`;
                 }
                 break;
@@ -3405,7 +3413,7 @@ export class HeroSystem6eItem extends Item {
             case "ABSORPTION":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
 
                     system.description = `${system.ALIAS} ${is5e ? `${diceFormula}` : `${system.value} BODY`} (${
                         system.OPTION_ALIAS
@@ -3425,7 +3433,7 @@ export class HeroSystem6eItem extends Item {
             case "HEALING":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
 
                     system.description = `${system.ALIAS} ${
                         reduceAndEnhanceTargets.valid
@@ -3440,7 +3448,7 @@ export class HeroSystem6eItem extends Item {
             case "TRANSFER":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
 
                     system.description = `${system.ALIAS} ${diceFormula} from ${
                         reduceAndEnhanceTargets.valid ? reduceAndEnhanceTargets.reduces : "unknown"
@@ -3450,7 +3458,7 @@ export class HeroSystem6eItem extends Item {
 
             case "TRANSFORM":
                 {
-                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${system.OPTION_ALIAS} ${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -3590,14 +3598,14 @@ export class HeroSystem6eItem extends Item {
             case "EGOATTACK":
             case "MINDCONTROL":
                 {
-                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${system.ALIAS} ${diceFormula}`;
                 }
                 break;
 
             case "HANDTOHANDATTACK":
                 {
-                    const diceFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description = `${system.ALIAS} +${diceFormula}${diceFormula === "1" || diceFormula === "0" ? " point" : ""}`;
                 }
                 break;
@@ -3822,7 +3830,7 @@ export class HeroSystem6eItem extends Item {
                         system.description += " and " + _singles.slice(-1);
                     }
 
-                    const damageFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                    const damageFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                     system.description += ` ${system.ALIAS} ${damageFormula}`;
                 }
                 break;
@@ -4006,7 +4014,7 @@ export class HeroSystem6eItem extends Item {
 
                     // Provide dice if this is an attack
                     if (this.baseInfo.behaviors.includes("dice")) {
-                        const damageFormula = getEffectForumulaFromItem(this, { ignoreDeadlyBlow: true });
+                        const damageFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                         if (damageFormula !== "0") {
                             if (system.description.indexOf(damageFormula) === -1) {
                                 system.description = ` ${damageFormula} ${system.class || ""}`;
