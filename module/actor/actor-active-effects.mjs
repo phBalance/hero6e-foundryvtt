@@ -464,7 +464,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             const elapsed = wt - start;
             const remaining = d.seconds - elapsed;
 
-            const sec_num = parseInt(d.seconds, 10);
+            const sec_num = parseInt(remaining, 10);
             const hours = Math.floor(sec_num / 3600);
             const minutes = Math.floor(sec_num / 60) % 60;
             const seconds = sec_num % 60;

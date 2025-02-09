@@ -6215,7 +6215,13 @@ async function _startIfIsAContinuingCharge(item) {
                 seconds = 1;
             }
 
-            console.log(await ae.update({ "duration.seconds": seconds, "flags.startTime": game.time.worldTime }));
+            console.log(
+                await ae.update({
+                    "duration.seconds": seconds,
+                    "duration.startTime": game.time.worldTime,
+                    "flags.startTime": game.time.worldTime,
+                }),
+            );
         } else {
             console.log("No associated Active Effect", item);
         }
