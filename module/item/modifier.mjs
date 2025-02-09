@@ -90,20 +90,24 @@ export class HeroSystem6eModifier {
         return _cost;
     }
 
-    // get isAdvantage() {
-    //     return this.cost >= 0;
-    // }
-
-    // get isDisadvantage() {
-    //     return this.cost < 0;
-    // }
-
     get adders() {
         const _addres = [];
         for (const _adderJson of this.ADDER || []) {
             _addres.push(new HeroSystem6eAdder(_adderJson, { item: this.item, parent: this }));
         }
         return _addres;
+    }
+
+    get addersDescription() {
+        const textArray = [];
+        for (const _adder of this.adders) {
+            if (_adder.addersDescription) {
+                textArray.push(_adder.addersDescription(_adder));
+            } else {
+                textArray.push(_adder.OPTION_ALIAS || _adder.ALIAS);
+            }
+        }
+        return textArray.join(", ");
     }
 
     get BASECOST_total() {

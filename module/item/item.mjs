@@ -4529,9 +4529,9 @@ export class HeroSystem6eItem extends Item {
                     break;
                 case "FOCUS":
                     break;
-                // case "TRIGGER":
-                //     // All the important stuff is in the TRIGGER adders
-                //     break;
+                case "TRIGGER":
+                    // All the important stuff is in the TRIGGER adders
+                    break;
                 case "CONDITIONALPOWER":
                     result += `${modifier.OPTION_ALIAS}; (`;
                     break;
@@ -4549,32 +4549,60 @@ export class HeroSystem6eItem extends Item {
             result += modifier.COMMENTS + "; ";
         }
 
-        for (const adder of modifier.adders) {
-            switch (adder.XMLID) {
-                case "DOUBLELENGTH":
-                case "DOUBLEWIDTH":
-                case "DOUBLEHEIGHT":
-                case "DOUBLEAREA":
-                    // These adders relate to AOE and so are displayed as a part of that
-                    break;
+        switch (modifier.XMLID) {
+            case "AOE":
+                for (const adder of modifier.adders) {
+                    switch (adder.XMLID) {
+                        case "DOUBLELENGTH":
+                        case "DOUBLEWIDTH":
+                        case "DOUBLEHEIGHT":
+                        case "DOUBLEAREA":
+                            // These adders relate to AOE and so are displayed as a part of that
+                            break;
 
-                case "BREAKABILITY":
-                    result += `${adder.OPTION_ALIAS} `;
-                    break;
+                        case "EXPLOSION":
+                            result += adder.ALIAS + "; ";
 
-                // case "ACTIVATION":
-                // case "RESET":
-                //     result += `${adder.OPTION_ALIAS}, `;
-                //     break;
-
-                case "EXPLOSION":
-                    result += adder.ALIAS + "; ";
-
-                    break;
-                default:
-                    result += adder.ALIAS + ", ";
+                            break;
+                        default:
+                            result += adder.ALIAS + ", ";
+                    }
+                }
+                break;
+            default: {
+                const addersDescription = modifier.addersDescription;
+                if (addersDescription) {
+                    result += `${modifier.addersDescription}; `;
+                }
             }
         }
+
+        // for (const adder of modifier.adders) {
+        //     switch (adder.XMLID) {
+        //         case "DOUBLELENGTH":
+        //         case "DOUBLEWIDTH":
+        //         case "DOUBLEHEIGHT":
+        //         case "DOUBLEAREA":
+        //             // These adders relate to AOE and so are displayed as a part of that
+        //             break;
+
+        //         case "BREAKABILITY":
+        //             result += `${adder.OPTION_ALIAS} `;
+        //             break;
+
+        //         // case "ACTIVATION":
+        //         // case "RESET":
+        //         //     result += `${adder.OPTION_ALIAS}, `;
+        //         //     break;
+
+        //         case "EXPLOSION":
+        //             result += adder.ALIAS + "; ";
+
+        //             break;
+        //         default:
+        //             result += adder.ALIAS + ", ";
+        //     }
+        // }
 
         if (modifier.XMLID === "FOCUS") {
             // Sometimes the focus description is in the ALIAS, sometimes it is in the COMMENTS

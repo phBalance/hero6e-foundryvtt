@@ -2072,7 +2072,7 @@ export class HeroSystem6eActor extends Actor {
 
         uploadPerformance.totalTime = new Date().getTime() - uploadPerformance.startTime;
 
-        console.log("Upload Performance", uploadPerformance);
+        //console.log("Upload Performance", uploadPerformance);
 
         // Let GM know actor was uploaded (unless it is a quench test; missing ID)
         if (this.id) {
