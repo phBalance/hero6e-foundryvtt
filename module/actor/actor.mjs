@@ -513,7 +513,10 @@ export class HeroSystem6eActor extends Actor {
     }
 
     // Only used by _canDragLeftStart to prevent ENTANGLED tokens from moving
-    canMove(uiNotice) {
+    canMove(uiNotice, event) {
+        // Let GM move if holding ALT key
+        if (event?.altKey && game.user.isGM) return true;
+
         let result = true;
         let badStatus = [];
 

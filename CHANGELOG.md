@@ -8,6 +8,7 @@
 - The PRONE condition is now applied (if appropriate) when damage is applied. Previously you had to roll the knock down damage before the token was made PRONE. [#1878](https://github.com/dmdorman/hero6e-foundryvtt/issues/1823)
 - The damage card can be popped out into a modal window to more easily step thru applying damage to multiple targets. [#1877](https://github.com/dmdorman/hero6e-foundryvtt/issues/1877)
 - You can now change a POWER to a piece of EQUIPMENT and vice versa. Edit the item and there is a button at the bottom. [#1852](https://github.com/dmdorman/hero6e-foundryvtt/issues/1852)
+- GM can hold ALT to force move tokens. This was added because the override key features provided are sometimes insufficient to move defeated tokens thru walls or off the main map area. [#1846](https://github.com/dmdorman/hero6e-foundryvtt/issues/1846)
 
 ## Version 4.0.16 20250208
 
