@@ -237,11 +237,6 @@ export class HeroSystem6eItem extends Item {
         const _basePointsPlusAdders = this._basePoints + this._addersCost;
         if (_basePointsPlusAdders !== this.system.basePointsPlusAdders) {
             changed = true;
-            // if (this.system.basePointsPlusAdders) {
-            //     console.warn(
-            //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData basePointsPlusAdders. Legacy (${this.system.basePointsPlusAdders}) vs new (${_basePointsPlusAdders})`,
-            //     );
-            // }
         }
         this.system.basePointsPlusAdders = _basePointsPlusAdders;
         this.system.basePointsPlusAddersForActivePoints = _basePointsPlusAdders - this._negativeCustomAddersCost;
@@ -251,11 +246,6 @@ export class HeroSystem6eItem extends Item {
         const _activePoints = this._activePoints;
         if (_activePoints !== this.system.activePoints) {
             changed = true;
-            // if (this.system.activePoints) {
-            //     console.warn(
-            //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData activePoints. Legacy (${this.system.activePoints}) vs new (${_activePoints})`,
-            //     );
-            // }
         }
         this.system.activePoints = _activePoints;
         this.system._activePointsWithoutEndMods = this._activePointsForEnd;
@@ -267,12 +257,6 @@ export class HeroSystem6eItem extends Item {
         const _realCost = this._realCost;
         if (_realCost !== this.system.realCost) {
             changed = true;
-            // if (this.system.realCost) {
-            //     console.warn(
-            //         `${this.actor.name}/${this.name}/${this.system.XMLID} prepareDerivedData realCost. Legacy (${this.system.realCost}) vs new (${_realCost})`,
-            //     );
-            // }
-            // system.realCost = _realCost + costSuffix;
             this.system.realCost = _realCost;
         }
 
@@ -5841,6 +5825,8 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _addersCost() {
+        if (this.system.EVERYMAN) return 0;
+        if (this.system.NATIVE_TONGUE) return 0;
         let _cost = 0;
 
         for (const adder of this.adders) {
@@ -5928,27 +5914,18 @@ export class HeroSystem6eItem extends Item {
             _cost = Math.max(1, _cost - 1);
         }
 
-        // Power cost in Power Framework is applied before limitations
-        // let costSuffix = "";
-        // if (this.parentItem) {
-        //     if (this.parentItem.system.XMLID === "MULTIPOWER") {
-        //         // Fixed
-        //         if (this.system.ULTRA_SLOT) {
-        //             //costSuffix = this.actor?.system.is5e ? "u" : "f";
-        //             _cost = _cost / 10.0;
-        //         }
+        // Need to be careful about NAKEDMODIFIER PRIVATE (part of cost) vs !PRIVATE (part of naked limitation)
+        // Considering moving this into CONFIG.MJS, but need to see if this applies anywhere else.
+        // Would be nice to have something generic to handle all cases
+        let _limitationCost = this._limitationCost;
+        if (this.system.XMLID === "NAKEDMODIFIER") {
+            _limitationCost = 0;
+            for (const limitation of this.limitations.filter((o) => o.PRIVATE)) {
+                _limitationCost -= limitation.cost;
+            }
+        }
 
-        //         // Variable
-        //         else {
-        //             //costSuffix = this.actor?.system.is5e ? "m" : "v";
-        //             _cost = _cost / 5.0;
-        //         }
-        //     } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
-        //         const baseCost = (this.parentItem.system.BASECOST = parseFloat(this.parentItem.system.BASECOST));
-        //         _cost = Math.max(baseCost, _cost - baseCost);
-        //     }
-        // }
-        _cost = RoundFavorPlayerDown(_cost / (1 + this._limitationCost));
+        _cost = RoundFavorPlayerDown(_cost / (1 + _limitationCost));
         return _cost; // + costSuffix;
     }
 
