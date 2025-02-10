@@ -494,6 +494,14 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     async _updateObject(event, formData) {
         event.preventDefault();
 
+        // Remove NaN properties, which should revert back to original value
+        const keys = Object.keys(formData);
+        for (const key of keys) {
+            if (isNaN(formData[key])) {
+                delete formData[key];
+            }
+        }
+
         const expandedData = foundry.utils.expandObject(formData);
 
         const clickedElement = $(event.currentTarget);
