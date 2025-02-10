@@ -51,7 +51,7 @@
     </tr>
     {{#each item.modifiers as |mod id|}}
         <tr class="{{#if mod.parentId}} from-parent{{/if}}" data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
-            <td class="left" title="{{mod.XMLID}}">{{mod.ALIAS}}{{#if mod.PRIVATE}} p{{/if}}</td>
+            <td class="left" title="{{mod.XMLID}}">{{mod.ALIAS}} {{mod.OPTION_ALIAS}} {{#if mod.PRIVATE}}p{{/if}}</td>
             <td>{{mod.cost}}</td>
             <td class="right">
                 {{#unless mod.parentId}}
