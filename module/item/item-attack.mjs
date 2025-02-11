@@ -1873,9 +1873,6 @@ export async function _onApplyDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
 
-    // change font color to indicate this button has already been pressed
-    $(button).css("color", "#A9A9A9");
-
     // PH: FIXME: Is toHitData actually needed?
     const damageData = { ...button.dataset };
     const toHitData = damageData.toHitData;
@@ -1935,6 +1932,9 @@ export async function _onApplyDamage(event) {
             await _onApplyDamageToSpecificToken(toHitData, damageData, targetToken);
         }
     }
+
+    // change font color to indicate this button has already been pressed
+    $(button).css("color", "#A9A9A9");
 }
 
 export async function _onApplyDamageToSpecificToken(toHitData, damageData, targetToken) {
