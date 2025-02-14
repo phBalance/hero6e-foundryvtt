@@ -1948,10 +1948,6 @@ export class HeroSystem6eActor extends Actor {
                         relativePathName = `https://assets.forge-vtt.com/${forgeUser}/${relativePathName}`;
                     }
 
-                    await token.document.update({
-                        "texture.src": relativePathName,
-                    });
-
                     // Update any tokens images that might exist
                     for (const token of this.getActiveTokens()) {
                         await token.document.update({
