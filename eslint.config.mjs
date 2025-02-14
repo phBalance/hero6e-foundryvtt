@@ -40,6 +40,8 @@ export default [
                 Folder: "readonly",
                 FormApplication: "readonly",
                 FormDataExtended: "readonly",
+                ForgeAPI: "readonly",
+                ForgeUser: "readonly",
                 foundry: "readonly",
                 game: "readonly",
                 getDocumentClass: "readonly",
