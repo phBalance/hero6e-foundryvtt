@@ -5884,14 +5884,13 @@ export class HeroSystem6eItem extends Item {
 
     get _advantagesAffectingDc() {
         let _cost = 0;
-        for (const advantage of this.advantages.filter((a) => a.baseInfo?.dcAffecting)) {
+        for (const advantage of this.advantages.filter((a) => a.baseInfo?.dcAffecting())) {
             _cost += advantage.cost;
         }
         return _cost;
     }
 
     get _activePointsDcAffecting() {
-        //return RoundFavorPlayerDown((this._basePoints + this._addersCost) * (1 + this._advantagesAffectingDc));
         return RoundFavorPlayerDown(
             (this._basePoints + this._addersCost - this._negativeCustomAddersCost) * (1 + this._advantagesAffectingDc),
         );
