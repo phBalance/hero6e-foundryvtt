@@ -114,7 +114,10 @@ export class HeroSystem6eModifier {
     get BASECOST_total() {
         if (this._BASECOST_total !== undefined) {
             if (this._BASECOST_total !== this.cost) {
-                console.warn(`BASECOST_total (${this.cost}) did not match cost ${this._BASECOST_total}`);
+                console.warn(
+                    `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} BASECOST_total (${this.cost}) did not match cost ${this._BASECOST_total}`,
+                    this,
+                );
             }
         }
         return this.cost;
