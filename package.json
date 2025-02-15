@@ -26,11 +26,11 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^2.13.0",
-    "eslint": "^9.18.0",
+    "@stylistic/eslint-plugin-js": "^3.1.0",
+    "eslint": "^9.20.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-formatter-compact": "^8.40.0",
-    "globals": "^15.14.0",
+    "globals": "^15.15.0",
     "gulp": "^5.0.0",
     "gulp-autoprefixer": "^9.0.0",
     "gulp-eslint-new": "^2.4.0",
@@ -39,10 +39,10 @@
     "gulp-stylelint-esm": "^3.0.0",
     "mkdirp": "^3.0.1",
     "npm-run-all": "^4.1.5",
-    "sass": "^1.83.4",
-    "stylelint": "^16.13.2",
+    "sass": "^1.85.0",
+    "stylelint": "^16.14.1",
     "stylelint-config-standard-scss": "14.0.0",
-    "stylelint-prettier": "^5.0.2"
+    "stylelint-prettier": "^5.0.3"
   },
   "engines": {
     "node": ">=18.18.0"
