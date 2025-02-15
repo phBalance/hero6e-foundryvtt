@@ -1944,7 +1944,7 @@ export class HeroSystem6eActor extends Actor {
 
                     // FORGE stuff
                     if (ForgeAPI) {
-                        forgeUser = (await ForgeAPI.status()).user;
+                        const forgeUser = (await ForgeAPI.status()).user;
                         relativePathName = `https://assets.forge-vtt.com/${forgeUser}/${relativePathName}`;
                     }
 

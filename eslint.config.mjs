@@ -41,7 +41,6 @@ export default [
                 FormApplication: "readonly",
                 FormDataExtended: "readonly",
                 ForgeAPI: "readonly",
-                forgeUser: "readonly",
                 foundry: "readonly",
                 game: "readonly",
                 getDocumentClass: "readonly",
