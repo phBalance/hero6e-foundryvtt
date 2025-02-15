@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.17 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.17 20250214 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed an issue where the effects panel could make it difficult to interact with tokens on the far right side of the canvas map. [#1875](https://github.com/dmdorman/hero6e-foundryvtt/issues/1875)
 - Effects panel now shows duration in hours, minutes and seconds. [#1872](https://github.com/dmdorman/hero6e-foundryvtt/issues/1872)
