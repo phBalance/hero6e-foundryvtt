@@ -5884,7 +5884,7 @@ export class HeroSystem6eItem extends Item {
 
     get _advantagesAffectingDc() {
         let _cost = 0;
-        for (const advantage of this.advantages.filter((a) => a.baseInfo?.dcAffecting())) {
+        for (const advantage of this.advantages.filter((a) => a.baseInfo?.dcAffecting(a, this))) {
             _cost += advantage.cost;
         }
         return _cost;
