@@ -1921,7 +1921,7 @@ export class HeroSystem6eActor extends Actor {
         } else if (heroJson.CHARACTER.IMAGE) {
             const filename = heroJson.CHARACTER.IMAGE?.FileName;
             const path = "worlds/" + game.world.id + "/tokens";
-            const relativePathName = path + "/" + filename;
+            let relativePathName = path + "/" + filename;
 
             // Create a directory if it doesn't already exist
             try {
@@ -1941,6 +1941,12 @@ export class HeroSystem6eActor extends Actor {
                         "data:image/" + extension + ";base64," + xml.getElementsByTagName("IMAGE")[0].textContent;
 
                     await ImageHelper.uploadBase64(base64, filename, path);
+
+                    // FORGE stuff
+                    if (ForgeAPI) {
+                        const forgeUser = (await ForgeAPI.status()).user;
+                        relativePathName = `https://assets.forge-vtt.com/${forgeUser}/${relativePathName}`;
+                    }
 
                     // Update any tokens images that might exist
                     for (const token of this.getActiveTokens()) {

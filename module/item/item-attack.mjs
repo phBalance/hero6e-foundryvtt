@@ -1873,9 +1873,6 @@ export async function _onApplyDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
 
-    // change font color to indicate this button has already been pressed
-    $(button).css("color", "#A9A9A9");
-
     // PH: FIXME: Is toHitData actually needed?
     const damageData = { ...button.dataset };
     const toHitData = damageData.toHitData;
@@ -1935,6 +1932,9 @@ export async function _onApplyDamage(event) {
             await _onApplyDamageToSpecificToken(toHitData, damageData, targetToken);
         }
     }
+
+    // change font color to indicate this button has already been pressed
+    $(button).css("color", "#A9A9A9");
 }
 
 export async function _onApplyDamageToSpecificToken(toHitData, damageData, targetToken) {
@@ -3142,16 +3142,16 @@ async function _calcDamage(heroRoller, item, options) {
     if (options.vulnStunMultiplier) {
         const preStun = stun;
         stun = Math.floor(stun * options.vulnStunMultiplier);
-        effects += `Vunlerability x${options.vulnStunMultiplier} STUN (${preStun}x${options.vulnStunMultiplier}=${stun});`;
+        effects += `${options.VulnDesc.join("/")} x${options.vulnStunMultiplier} STUN (${preStun}x${options.vulnStunMultiplier}=${stun});`;
     }
     if (options.vulnBodyMultiplier) {
         const preBody = body;
         body = Math.floor(body * options.vulnBodyMultiplier);
-        effects += `Vunlerability x${options.vulnBodyMultiplier} BODY (${preBody}x${options.vulnBodyMultiplier}=${body});`;
+        effects += `${options.VulnDesc.join("/")} x${options.vulnBodyMultiplier} BODY (${preBody}x${options.vulnBodyMultiplier}=${body});`;
     }
-    for (const desc of options.VulnDesc || []) {
-        effects += ` ${desc};`;
-    }
+    // for (const desc of options.VulnDesc || []) {
+    //     effects += ` ${desc};`;
+    // }
 
     let bodyDamage = body;
     let stunDamage = stun;

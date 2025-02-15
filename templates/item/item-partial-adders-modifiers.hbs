@@ -51,7 +51,7 @@
     </tr>
     {{#each item.modifiers as |mod id|}}
         <tr class="{{#if mod.parentId}} from-parent{{/if}}" data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
-            <td class="left" title="{{mod.XMLID}}">{{mod.ALIAS}}{{#if mod.PRIVATE}} p{{/if}}</td>
+            <td class="left" title="{{mod.XMLID}}">{{mod.ALIAS}} {{mod.OPTION_ALIAS}} {{#if mod.PRIVATE}}p{{/if}}</td>
             <td>{{mod.cost}}</td>
             <td class="right">
                 {{#unless mod.parentId}}
@@ -66,7 +66,7 @@
 
         {{#each mod.adders as |adder id|}}
         <tr class="hero modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}"data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
-            <td class="left" title="{{adder.XMLID}}">{{adder.ALIAS}}{{mod.ALIAS}}{{#if adder.PRIVATE}} p{{/if}}</td>
+            <td class="left" title="{{adder.XMLID}}">{{adder.ALIAS}} {{adder.OPTION_ALIAS}} {{#if adder.PRIVATE}}p{{/if}}</td>
             <td>{{adder.cost}}</td>
             <td class="right">
                 {{!-- <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
