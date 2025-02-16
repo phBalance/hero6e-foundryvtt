@@ -543,10 +543,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (expandedData.rec) {
             const ENDURANCERESERVEREC = this.item.findModsByXmlid("ENDURANCERESERVEREC");
             if (ENDURANCERESERVEREC) {
-                this.item.system.value = parseInt(expandedData.rec) || 1;
-                await this.item.update({
-                    "system.value": this.item.system.value,
-                });
+                ENDURANCERESERVEREC.LEVELS = parseInt(expandedData.rec) || 1;
+                await this.item.update({ [`system.POWER`]: this.item.system.POWER });
             }
         }
 

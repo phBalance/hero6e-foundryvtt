@@ -5201,6 +5201,11 @@ export class HeroSystem6eItem extends Item {
 
     get _basePoints() {
         if (!this.system.XMLID) return 0;
+
+        if (this.baseInfo?.basePoints) {
+            return this.baseInfo.basePoints(this);
+        }
+
         if (this.system.XMLID.startsWith("__")) return 0;
         if (this.system.EVERYMAN) return 0;
         if (this.system.NATIVE_TONGUE) return 0;
@@ -5216,6 +5221,10 @@ export class HeroSystem6eItem extends Item {
         const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
         const levels = parseInt(this.system.LEVELS) || 0;
         _basePoints += levels * costPerLevel;
+
+        if (levels > 0) {
+            _basePoints = Math.max(1, _basePoints);
+        }
 
         return _basePoints;
     }

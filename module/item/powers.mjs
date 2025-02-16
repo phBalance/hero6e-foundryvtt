@@ -6,14 +6,24 @@ export class HeroSystem6ePower {
     #baseInfo = null;
     constructor(json, options) {
         // Item first so we can get baseInfo
-        this.item = options?.item;
+        this._item = options?.item;
+        this._id = json?.ID;
         this.#baseInfo = getModifierInfo({ xmlid: json.XMLID, actor: options.item?.actor, is5e: options.item?.is5e });
 
         for (const key of Object.keys(json)) {
-            if (foundry.utils.hasProperty(this, key)) {
-                this[`_${key}`] = json[key];
-            } else {
-                this[key] = json[key];
+            /// Create getters (if we don't already have one)
+            if (!Object.getOwnPropertyDescriptor(HeroSystem6ePower.prototype, key)?.["get"]) {
+                {
+                    Object.defineProperty(this, key, {
+                        get() {
+                            return this._original[key];
+                        },
+                        set(value) {
+                            this._original.LEVELS = value;
+                        },
+                    });
+                }
+                // Should probably create setters too, but not yet as we only support LEVELS at the moment
             }
         }
 
@@ -25,6 +35,14 @@ export class HeroSystem6ePower {
                 `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} baseInfo not found`,
             );
         }
+    }
+
+    get item() {
+        return this._item;
+    }
+
+    get _original() {
+        return this.item?.system.POWER.find((p) => p.ID === this._id);
     }
 
     get baseInfo() {
@@ -78,4 +96,24 @@ export class HeroSystem6ePower {
             );
         }
     }
+
+    // get LEVELS() {
+    //     return this._original.LEVELS;
+    // }
+
+    // set LEVELS(value) {
+    //     this._original.LEVELS = value;
+    // }
+
+    // toData() {
+    //     const _data = Object.getOwnPropertyDescriptors(this);
+    //     for (const key of Object.keys(_data).filter((o) => o.startsWith("_"))) {
+    //         delete _data[key];
+    //     }
+    //     return _data;
+    // }
+
+    // toJSON() {
+    //     return JSON.stringify(this.toData());
+    // }
 }
