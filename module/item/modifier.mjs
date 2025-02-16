@@ -5,6 +5,9 @@ import { HeroSystem6eAdder } from "./adder.mjs";
 export class HeroSystem6eModifier {
     #baseInfo = null;
     constructor(json, options) {
+        if (json?.constructor !== Object) {
+            debugger;
+        }
         // Item first so we can get baseInfo
         this._item = options?.item;
         this._id = json?.ID;
@@ -16,7 +19,7 @@ export class HeroSystem6eModifier {
             item: options?.item,
         });
 
-        for (const key of Object.keys(json).filter((k) => !k.startsWith("_"))) {
+        for (const key of Object.keys(json).filter((k) => !k.startsWith("_") && k !== "BASECOST_total")) {
             /// Create getters (if we don't already have one)
             if (!Object.getOwnPropertyDescriptor(HeroSystem6eModifier.prototype, key)?.["get"]) {
                 {
@@ -30,6 +33,8 @@ export class HeroSystem6eModifier {
                         // },
                     });
                 }
+            } else {
+                console.warn(`Unexpected modifier property (${key})`);
             }
         }
 
@@ -58,7 +63,19 @@ export class HeroSystem6eModifier {
     }
 
     get _original() {
-        return this.item?.system.MODIFIER.find((p) => p.ID === this._id);
+        try {
+            const __original =
+                this.item?.system.MODIFIER?.find((p) => p.ID === this._id) ||
+                this.item?.parentItem?.system.MODIFIER?.find((p) => p.ID === this._id);
+            if (!__original) {
+                debugger;
+            }
+            return __original;
+        } catch (e) {
+            console.error(e);
+            debugger;
+        }
+        return null;
     }
 
     get baseInfo() {

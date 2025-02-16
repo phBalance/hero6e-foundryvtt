@@ -2593,11 +2593,11 @@ export class HeroSystem6eItem extends Item {
                 // Add parent mod if we don't already have it
                 if (!_modifiers.find((mod) => mod.ID === pMod.ID)) {
                     // We may want the parent reference at some point (like for ingame editing of items)
-                    pMod.parentId ??= this.parentItem.system.ID;
+                    //pMod.parentId ??= this.parentItem.system.ID;
 
                     // Sometimes the same modifiers is applied to item and items parent, we only keep the parent one
                     _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
-                    _modifiers.push(new HeroSystem6eModifier(pMod, { item: this }));
+                    _modifiers.push(new HeroSystem6eModifier(pMod._original || pMod, { item: this }));
                 }
             }
         }
