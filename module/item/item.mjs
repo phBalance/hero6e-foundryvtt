@@ -12,12 +12,7 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
-import {
-    getPowerInfo,
-    getModifierInfo,
-    hdcTimeOptionIdToSeconds,
-    whisperUserTargetsForActor,
-} from "../utility/util.mjs";
+import { getPowerInfo, hdcTimeOptionIdToSeconds, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
@@ -223,7 +218,7 @@ export class HeroSystem6eItem extends Item {
     //     super.prepareData();
     // }
 
-    calcItemPointsNew() {
+    calcItemPoints() {
         const performanceStart = new Date().getTime();
         let changed = false;
         //super.prepareDerivedData();
@@ -241,7 +236,6 @@ export class HeroSystem6eItem extends Item {
         this.system.basePointsPlusAdders = _basePointsPlusAdders;
         this.system.basePointsPlusAddersForActivePoints = _basePointsPlusAdders - this._negativeCustomAddersCost;
 
-        //calcActivePoints
         // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
         const _activePoints = this._activePoints;
         if (_activePoints !== this.system.activePoints) {
@@ -253,7 +247,7 @@ export class HeroSystem6eItem extends Item {
         this.system._advantages = this._advantageCost;
         this.system._advantagesDc = this._advantagesAffectingDc;
 
-        //calcRealCost
+        // Real Cost = Active Points / (1 + total value of all limitations)
         const _realCost = this._realCost;
         if (_realCost !== this.system.realCost) {
             changed = true;
@@ -1261,12 +1255,7 @@ export class HeroSystem6eItem extends Item {
                     effectiveItemData.calcItemPoints();
                 }
 
-                // not counting the Area Of Effect Advantage.
-                // TODO: This is not quite correct as item.system.activePoints are already rounded so this can
-                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
-                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
                 const activePointsWithoutAoeAdvantage = effectiveItemData._activePointsWithoutAoe;
-
                 if (aoeModifier.XMLID === "AOE") {
                     switch (aoeModifier.OPTIONID) {
                         case "CONE":
@@ -2649,582 +2638,6 @@ export class HeroSystem6eItem extends Item {
             console.error(e);
             return [];
         }
-    }
-
-    calcItemPoints() {
-        // console.warn(`Cost calculations moved to prepareDerivedData. Should no longer call this function`);
-        // return false;
-
-        return this.calcItemPointsNew();
-
-        //     let changed = false;
-        //     changed = this.calcBasePointsPlusAdders() || changed;
-        //     changed = this.calcActivePoints() || changed;
-        //     changed = this.calcRealCost() || changed;
-        //     // if (this.system.basePointsPlusAdders != this._basePoints + this._addersCost) {
-        //     //     console.warn(
-        //     //         `${this.actor?.name}/${this.name}/${this.system.XMLID}: cost mismatch between legacy (${this.system.basePointsPlusAdders}) ` +
-        //     //             `and new calculations (${this._basePoints} + ${this._addersCost} = ${this._basePoints + this._addersCost})`,
-        //     //         this,
-        //     //     );
-        //     // }
-        //     return changed;
-    }
-
-    calcBasePointsPlusAdders() {
-        // const oldValue = this.system.basePointsPlusAdders;
-        // this.system.basePointsPlusAdders = this._basePoints + this._addersCost;
-        // this.system.basePointsPlusAddersForActivePoints = this.system.basePointsPlusAdders;
-        // return oldValue != this.system.basePointsPlusAdders;
-
-        const system = this.system;
-        const actor = this.actor;
-
-        const old = system.basePointsPlusAdders;
-
-        if (!system.XMLID) return 0;
-
-        // Everyman skills are free
-        if (system.EVERYMAN) {
-            system.basePointsPlusAdders = 0;
-            return { changed: old != system.basePointsPlusAdders };
-        }
-
-        // Native Tongue
-        if (system.NATIVE_TONGUE) {
-            system.basePointsPlusAdders = 0;
-            return { changed: old != system.basePointsPlusAdders };
-        }
-
-        // Check if we have CONFIG info about this power
-        const configPowerInfo = getPowerInfo({
-            item: this,
-            actor: actor,
-            xmlTag: this.system.xmlTag,
-        });
-
-        // Base Cost is typically extracted directly from HDC
-        let baseCost = parseFloat(system.BASECOST) || 0;
-
-        // Cost per level is NOT included in the HDC file.
-        // We will try to get cost per level via config.mjs
-        // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
-
-        if (!configPowerInfo?.costPerLevel) {
-            console.error(
-                `Unable to calculate costs for ${this.system.XMLID}: ${configPowerInfo} && ${configPowerInfo?.costPerLevel}`,
-            );
-        }
-
-        const costPerLevel = configPowerInfo?.costPerLevel(this) || 0;
-        this.system.costPerLevel = costPerLevel;
-
-        // The number of levels for cost is based on the original power, not
-        // not any additional modifications or adjustments.
-        const levels = parseInt(system.LEVELS) || 0;
-
-        let subCost = costPerLevel * levels;
-
-        // 3 CP per 2 points
-        if (costPerLevel == 3 / 2 && subCost % 1) {
-            let _threePerTwo = Math.ceil(costPerLevel * levels) + 1;
-            subCost = _threePerTwo;
-            system.title = (system.title || "") + "3 CP per 2 points; \n+1 level may cost nothing. ";
-        }
-
-        if (system.XMLID === "FORCEWALL") {
-            // FORCEWALL/BARRIER
-            baseCost += parseInt(system.BODYLEVELS) || 0; // 6e only
-            baseCost += (parseInt(system.LENGTHLEVELS) || 0) * (system.is5e ? 2 : 1);
-            baseCost += (parseInt(system.HEIGHTLEVELS) || 0) * (system.is5e ? 2 : 1);
-            baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness (6e only)
-        } else if (system.XMLID === "DUPLICATION") {
-            const points = parseInt(system.POINTS || 0);
-            const cost = points * configPowerInfo?.costPerLevel(this) || 0;
-            baseCost += cost;
-        }
-
-        // Start adding up the costs
-        let cost = baseCost + subCost;
-
-        if (system.XMLID === "FOLLOWER") {
-            cost = Math.ceil((parseInt(system.BASEPOINTS) || 5) / 5);
-            let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER) || 0)) + 1;
-            cost *= multiplier;
-        }
-
-        // Cost override
-        if (typeof this.baseInfo?.cost === "function") {
-            cost = this.baseInfo.cost(this);
-            baseCost = 0;
-        }
-
-        // ADDERS
-        let adderCost = 0;
-        let negativeCustomAdderCosts = 0;
-        for (const adder of this.system.ADDER || []) {
-            // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
-            const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
-
-            if (adder.SELECTED !== false) {
-                //TRANSPORT_FAMILIARITY
-                const adderCostPerLevel = parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) || 1;
-                const adderLevels = parseInt(adder.LEVELS);
-
-                // WEAPONSMITH (selections over 1 cost only 1)
-                if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
-                    adder.BASECOST_total = 1;
-                } else {
-                    adder.BASECOST_total = adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
-                }
-            } else {
-                adder.BASECOST_total = 0;
-            }
-
-            // It is possible to have negative adders although they are perhaps only custom adders. Ignore negative custom adders for the active cost as
-            // we have no idea if they are actually important.
-            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? Math.min(0, adder.BASECOST_total) : 0;
-            adderCost += adder.BASECOST_total;
-
-            adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
-
-            let subAdderCost = 0;
-            for (const adder2 of adder.ADDER || []) {
-                const adder2BaseCost = adder2.BASECOST;
-
-                if (adder2.SELECTED != false) {
-                    let adderLevels = Math.max(1, parseInt(adder2.LEVELS));
-                    subAdderCost += Math.ceil(adder2BaseCost * adderLevels);
-                    adder2.BASECOST_total = Math.ceil(adder2BaseCost * adderLevels);
-                }
-            }
-
-            // TRANSPORT_FAMILIARITY checking more than 2 animals costs same as entire category
-            if (!adder.SELECTED && subAdderCost > (adderBaseCost || 99)) {
-                subAdderCost = adderBaseCost;
-            }
-
-            // Riding discount
-            if (this.system.XMLID === "TRANSPORT_FAMILIARITY" && this.actor && subAdderCost > 0) {
-                if (adder.XMLID === "RIDINGANIMALS" && this.actor.items.find((o) => o.system.XMLID === "RIDING")) {
-                    subAdderCost -= 1;
-                }
-            }
-
-            // It is possible to have negative adders although they are perhaps only custom adders. Ignore custom adders for the active cost as
-            // we have no idea if they are actually important.
-            negativeCustomAdderCosts += adder.XMLID === "ADDER" ? subAdderCost : 0;
-            adderCost += subAdderCost;
-        }
-
-        //HACK for ENTANGLE +1PD/ED in 6e
-        //Normallly we would use a function in CONFIG.mjs
-        // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
-        if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
-            const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
-            const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
-            if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
-                adderCost -= 1;
-            }
-        }
-
-        // POWERS (likely ENDURANCERESERVEREC)
-        if (system.POWER) {
-            for (const adderPower of system.POWER) {
-                const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
-                const adderPowerInfo = getPowerInfo({
-                    item: adderPower,
-                    actor: this.actor,
-                    is5e: this.is5e,
-                });
-
-                // TODO: Add all adders into the system so that we can simplify this
-                const adderCostPerLevel = adderPowerInfo?.costPerLevel(adderPower) || 0;
-                adderCost += Math.ceil(adderCostPerLevel * adderLevels);
-            }
-        }
-
-        cost += adderCost;
-
-        // INDEPENDENT ADVANTAGE (aka Naked Advantage)
-        // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
-        // if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
-        //     let advantages = 0;
-        //     for (const modifier of this.modifiers.filter((o) => !o.PRIVATE)) {
-        //         const modPowerInfo = getPowerInfo({
-        //             item: modifier,
-        //             actor: this.actor,
-        //         });
-
-        //         if (!modPowerInfo) {
-        //             console.warn("Missing modPowerInfo", modifier);
-        //         }
-
-        //         // Is there a cost function
-        //         let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
-
-        //         // If not use a the default cost formula
-        //         if (!modCost) {
-        //             const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
-        //             modCost += modifierBaseCost;
-
-        //             // TODO: Add all modifiers into the system so that we can simplify this
-        //             const modifierCostPerLevel =
-        //                 typeof modPowerInfo?.costPerLevel === "function"
-        //                     ? modPowerInfo.costPerLevel(modifier)
-        //                     : modPowerInfo?.costPerLevel || 0;
-        //             modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
-        //         }
-
-        //         modifier.BASECOST_total = modCost;
-        //         advantages += modCost;
-        //     }
-        //     cost = cost * advantages;
-        // }
-
-        // COMPOUNDPOWER itself costs 0, other ITEMS will handle COMPOUNDPOWER sub-powers
-        if (this.system.XMLID === "COMPOUNDPOWER") {
-            cost = 0;
-        }
-
-        system.basePointsPlusAdders = cost;
-        system.basePointsPlusAddersForActivePoints = cost - negativeCustomAdderCosts;
-
-        return old !== system.basePointsPlusAdders;
-    }
-
-    // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
-    calcActivePoints() {
-        let system = this.system;
-
-        let advantages = 0;
-        let advantagesAffectingDc = 0;
-        let minAdvantage = 0;
-        let endModifierCost = 0;
-
-        const configPowerInfo = this.baseInfo;
-
-        for (const modifier of this.modifiers) {
-            let _myAdvantage = 0;
-
-            const modPowerInfo = getPowerInfo({
-                item: modifier,
-                actor: this.actor,
-                is5e: this.system.is5e,
-                xmlTag: "MODIFIER",
-            });
-
-            // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)
-            if (modPowerInfo?.minimumLimitation) {
-                continue;
-            }
-
-            // Some non-PRIVATE modifiers are considered adders and included in basePointsPlusAdders
-            if (configPowerInfo?.privateAsAdder && !modifier.PRIVATE) {
-                continue;
-            }
-
-            // Is there a cost function
-            let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
-
-            const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
-
-            // If not use a the default cost formula
-            if (!modCost) {
-                modCost += modifierBaseCost;
-
-                // TODO: Add all powers and modifiers into the system so that we can simplify this.
-                const modifierCostPerLevel =
-                    typeof modPowerInfo?.costPerLevel === "function"
-                        ? modPowerInfo.costPerLevel(modifier)
-                        : modPowerInfo?.costPerLevel || 0;
-                modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
-            }
-
-            // if (modifier.cost !== undefined) {
-            //     if (modCost != modifier.cost) {
-            //         console.error(`HeroSystem6eModifier ${modifier.XMLID} as cost mismatch`, modCost, modifier);
-            //     } else {
-            //         modCost = modifier.cost;
-            //     }
-            // }
-
-            _myAdvantage += modCost;
-
-            // We are only intertested in Advantages
-            // PH: FIXME: This is probably wrong when we have something like charges that slide over into the advantage territory
-            // with things like boostable
-            if (_myAdvantage < 0) {
-                continue;
-            }
-
-            switch (modifier.XMLID) {
-                case "REDUCEDEND":
-                    {
-                        // Reduced endurance is double the cost if it's applying against a power with autofire
-                        // We track this because we back out the endModifierCost to calculate _activePointsWithoutEndMods.
-                        const autofire = (system.MODIFIER || []).find((mod) => mod.XMLID === "AUTOFIRE");
-                        if (autofire) {
-                            endModifierCost = 2 * modifierBaseCost;
-                        } else {
-                            endModifierCost = modifierBaseCost;
-                        }
-                        //_myAdvantage = _myAdvantage + endModifierCost;
-                    }
-                    break;
-            }
-
-            // Some modifiers may have ADDERS
-            for (const adder of modifier.ADDER || []) {
-                const adderPowerInfo = getPowerInfo({
-                    item: adder,
-                    actor: this.actor,
-                });
-
-                if (!adderPowerInfo && !modifier.BASECOST) {
-                    console.warn(
-                        `${this.actor?.name}: ${this.name}/${this.system.XMLID}/${modifier.XMLID} is missing powerInfo for adder ${adder.XMLID}`,
-                        adder,
-                    );
-                }
-
-                let adderCost = adderPowerInfo?.cost ? adderPowerInfo.cost(adder, this) : 0;
-
-                if (!adderCost) {
-                    adderCost += parseFloat(adder.BASECOST);
-
-                    // TODO: Add all adders into the system so that we can simplify this
-                    const adderCostPerLevel =
-                        typeof adderPowerInfo?.costPerLevel === "function"
-                            ? adderPowerInfo.costPerLevel(adder)
-                            : adderPowerInfo?.costPerLevel ||
-                              parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) ||
-                              0;
-                    adderCost += parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
-                }
-
-                adder.BASECOST_total = adderCost;
-                _myAdvantage += adderCost;
-                minAdvantage = 0.25;
-            }
-
-            // No negative advantages and minimum is 1/4
-            _myAdvantage = Math.max(minAdvantage, _myAdvantage);
-            advantages += _myAdvantage;
-            //modifier.BASECOST_total = _myAdvantage;
-
-            // For attacks with Advantages, determine the DCs by
-            // making a special Active Point calculation that only counts
-            // Advantages that directly affect how the victim takes damage.
-            const modifierInfo = getModifierInfo({
-                xmlid: modifier.XMLID,
-                item: this,
-                xmlTag: "MODIFIER",
-            });
-            if (modifierInfo && !modifierInfo?.dcAffecting) {
-                console.error(
-                    `${this.actor?.name}/${this.name}/${this.system.XMLID}/${modifier.XMLID}: Missing dcAffecting function in config.mjs`,
-                );
-            } else {
-                if (modifierInfo?.dcAffecting(modifier)) {
-                    advantagesAffectingDc += Math.max(0, _myAdvantage);
-                }
-            }
-
-            // Save _myAdvantage
-            modifier.advantage = _myAdvantage;
-
-            // Check old vs new cost code
-            if (modifier.cost !== _myAdvantage) {
-                console.warn(
-                    `${this.actor?.name}/${this.name}/${this.system.XMLID}/${modifier.ALIAS}: modifier.cost (${modifier.cost} !== _myAdvantage (${_myAdvantage})`,
-                    modifier,
-                );
-            }
-        }
-
-        const _activePoints = system.basePointsPlusAddersForActivePoints * (1 + advantages);
-        system.activePointsDc = system.basePointsPlusAddersForActivePoints * (1 + advantagesAffectingDc);
-
-        system._advantages = advantages;
-        system._advantagesDc = advantagesAffectingDc;
-
-        // HALFEND is based on active points without the HALFEND modifier
-        if (this.findModsByXmlid("REDUCEDEND")) {
-            system._activePointsWithoutEndMods =
-                system.basePointsPlusAddersForActivePoints * (1 + advantages - endModifierCost);
-        }
-
-        let old = system.activePoints;
-        system.activePoints = RoundFavorPlayerDown(_activePoints || 0);
-
-        const changed = old !== system.activePoints;
-        return changed;
-    }
-
-    calcRealCost() {
-        const system = this.system;
-
-        // Real Cost = Active Cost / (1 + total value of all Limitations)
-
-        // This may be a slot in a framework if so get parent
-
-        const modifiers = this.modifiers;
-
-        let limitations = 0;
-        for (const modifier of modifiers) {
-            let _myLimitation = 0;
-
-            const modPowerInfo = modifier.baseInfo;
-            if (!modPowerInfo && !modifier.BASECOST) {
-                console.warn(
-                    `${this.actor?.name}/${this.name}/${this.system.XMLID} is missing powerInfo for modifier ${modifier.XMLID}`,
-                    modifier,
-                );
-            }
-
-            // Is there a cost function
-            let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
-
-            const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
-
-            // If not use a the default cost formula
-            if (!modCost) {
-                modCost += modifierBaseCost;
-
-                // TODO: Add all powers and modifiers into the system so that we can simplify this.
-                const modifierCostPerLevel =
-                    typeof modPowerInfo?.costPerLevel === "function"
-                        ? modPowerInfo.costPerLevel(modifier)
-                        : modPowerInfo?.costPerLevel || 0;
-                modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
-            }
-
-            _myLimitation += modCost;
-
-            for (const adder of modifier.ADDER || []) {
-                const adderPowerInfo = getPowerInfo({
-                    item: adder,
-                    actor: this.actor,
-                });
-
-                if (!adderPowerInfo) {
-                    console.info(
-                        `${this.actor?.name}: ${this.name}/${this.system?.XMLID}/${modifier.XMLID} is missing powerInfo for adder ${adder.XMLID}`,
-                        adder,
-                    );
-                }
-
-                let adderCost = adderPowerInfo?.cost ? adderPowerInfo.cost(adder, this) : 0;
-
-                if (!adderCost) {
-                    adderCost += parseFloat(adder.BASECOST);
-
-                    // TODO: Add all adders into the system so that we can simplify this
-                    const adderCostPerLevel =
-                        typeof adderPowerInfo?.costPerLevel === "function"
-                            ? adderPowerInfo.costPerLevel(adder)
-                            : adderPowerInfo?.costPerLevel ||
-                              parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) ||
-                              0;
-                    adderCost += parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
-                }
-
-                adder.BASECOST_total = adderCost;
-                _myLimitation += adderCost;
-            }
-
-            // There are some special cases with the increased endurance modifier not found in the HDC's XML
-            // INCREASEDEND moved to config.mjs
-            // if (modifier.XMLID === "INCREASEDEND") {
-            //     // If cost is only for activation, then increased end is worth 1/2.
-            //     const activationOnlyEndCost = modifiers.find(
-            //         (otherModifier) =>
-            //             (otherModifier.XMLID === "COSTSEND" &&
-            //                 otherModifier.OPTION_ALIAS === "Only Costs END to Activate") ||
-            //             otherModifier.XMLID === "COSTSENDONLYTOACTIVATE",
-            //     );
-            //     if (activationOnlyEndCost) {
-            //         _myLimitation = _myLimitation / 2;
-            //     }
-            // }
-
-            // We are only intertested in limitations and some limitations can turn into advantages (or at least -0 limitations),
-            // like charges, once adders are applied.
-            if (_myLimitation >= 0 && !modPowerInfo?.minimumLimitation) {
-                continue;
-            }
-
-            // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
-            if (_myLimitation > -0.25) {
-                console.info(`${modifier.XMLID} Limitation clamped to -1/4`, modifier, this);
-                _myLimitation = -0.25;
-                system.title =
-                    (system.title || "") +
-                    "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
-            }
-
-            modifier.BASECOST_total = _myLimitation;
-
-            limitations += _myLimitation;
-        }
-
-        let _realCost = system.activePoints;
-
-        // Skill Enhancer discount (min cost of 1)
-        if (this.parentItem?.baseInfo?.type.includes("enhancer")) {
-            _realCost = Math.max(1, _realCost - 1);
-
-            // NATIVE_TONGUE is always free
-            if (this.system.NATIVE_TONGUE) {
-                _realCost = 0;
-            }
-        }
-
-        // Power cost in Power Framework is applied before limitations
-        let costSuffix = "";
-        if (this.parentItem) {
-            if (this.parentItem.system.XMLID === "MULTIPOWER") {
-                // Fixed
-                if (this.system.ULTRA_SLOT) {
-                    costSuffix = this.actor?.system.is5e ? "u" : "f";
-                    _realCost /= 10.0;
-                }
-
-                // Variable
-                else {
-                    costSuffix = this.actor?.system.is5e ? "m" : "v";
-                    _realCost /= 5.0;
-                }
-            } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
-                const baseCost = (this.parentItem.system.BASECOST = parseFloat(this.parentItem.system.BASECOST));
-                _realCost = Math.max(baseCost, _realCost - baseCost);
-            }
-        }
-
-        _realCost = _realCost / (1 + -limitations);
-
-        // ADD_MODIFIERS_TO_BASE
-        if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
-            const _base = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].core;
-            const _cost = getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor }).costPerLevel(this) || 1;
-            const _baseCost = _base * _cost;
-            const _discount = _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations));
-            _realCost -= _discount;
-        }
-
-        _realCost = RoundFavorPlayerDown(_realCost);
-
-        // Minimum cost
-        if (_realCost === 0 && system.activePoints > 0) {
-            _realCost = 1;
-        }
-
-        let old = system.realCost;
-        system.realCost = _realCost + costSuffix;
-
-        const changed = old != system.realCost;
-        return changed;
     }
 
     /**
@@ -5881,6 +5294,19 @@ export class HeroSystem6eItem extends Item {
         );
     }
 
+    get dc() {
+        return Math.floor(this.activePointsForDc / 5);
+    }
+
+    get dcRaw() {
+        return this.activePointsForDc / 5;
+    }
+
+    // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
+    get activePointsForDc() {
+        return this.system.activePointsDc;
+    }
+
     get _limitationCost() {
         let _cost = 0;
         for (const limitation of this.limitations) {
@@ -5937,19 +5363,6 @@ export class HeroSystem6eItem extends Item {
 
     get costPerLevel() {
         return this.baseInfo?.costPerLevel(this);
-    }
-
-    get dc() {
-        return Math.floor(this.activePointsForDc / 5);
-    }
-
-    get dcRaw() {
-        return this.activePointsForDc / 5;
-    }
-
-    // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
-    get activePointsForDc() {
-        return this.system.activePointsDc;
     }
 }
 
