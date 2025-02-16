@@ -5,7 +5,7 @@ import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import {
     characteristicValueToDiceParts,
-    dicePartsToEffectFormula,
+    dicePartsToFullyQualifiedEffectFormula,
     maneuverbaseEffectDicePartsBundle,
 } from "./utility/damage.mjs";
 
@@ -330,7 +330,7 @@ function fixedValueFunction(value) {
 }
 
 function defaultPowerDicePartsBundle(item, diceParts) {
-    const formula = dicePartsToEffectFormula(diceParts);
+    const formula = dicePartsToFullyQualifiedEffectFormula(item, diceParts);
 
     return {
         diceParts: diceParts,
