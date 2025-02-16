@@ -33,8 +33,14 @@
 
         <hr>
 
-        {{> (getModulePath 'item/item-common-partial.hbs') item=item }}
-        {{> (getModulePath 'item/item-effects-partial.hbs') item=item alphaTesting=alphaTesting}}
+        {{!-- Common --}}
+        {{> (getModulePath 'item/item-partial-common.hbs') }}
+
+        {{!-- Active Points --}}
+        {{> (getModulePath 'item/item-partial-active-points.hbs') }}
+
+        {{!-- Adders & Modifiers --}}
+        {{> (getModulePath 'item/item-partial-adders-modifiers.hbs') }}
 
     </section>
 
