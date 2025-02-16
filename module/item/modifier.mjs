@@ -6,7 +6,7 @@ export class HeroSystem6eModifier {
     #baseInfo = null;
     constructor(json, options) {
         if (json?.constructor !== Object) {
-            debugger;
+            console.error(`Expected JSON object`, this, json, options);
         }
         // Item first so we can get baseInfo
         this._item = options?.item;
@@ -68,12 +68,11 @@ export class HeroSystem6eModifier {
                 this.item?.system.MODIFIER?.find((p) => p.ID === this._id) ||
                 this.item?.parentItem?.system.MODIFIER?.find((p) => p.ID === this._id);
             if (!__original) {
-                debugger;
+                console.error(`Unable to locate modifier`, this);
             }
             return __original;
         } catch (e) {
             console.error(e);
-            debugger;
         }
         return null;
     }
