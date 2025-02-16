@@ -17,8 +17,6 @@ import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import SettingsHelpers from "./settings/settings-helpers.mjs";
-//import { HeroSystem6eTokenHud } from "./bar3/tokenHud.mjs";
-//import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";

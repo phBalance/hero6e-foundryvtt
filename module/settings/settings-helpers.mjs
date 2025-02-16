@@ -275,19 +275,6 @@ export default class SettingsHelpers {
             requiresReload: true,
         });
 
-        // Deprecating bar3
-        // TODO: Remove all bar3 references in future versions.
-        game.settings.register(module, "bar3", {
-            name: game.i18n.localize("Settings.Bar3.Name"),
-            hint: game.i18n.localize("Settings.Bar3.Hint"),
-            scope: "world",
-            config: game.settings.get(game.system.id, "alphaTesting"),
-            type: Boolean,
-            default: false,
-            onChange: (value) => HEROSYS.log(false, value),
-            requiresReload: true,
-        });
-
         // Keep track of last migration version
         game.settings.register(module, "lastMigration", {
             name: game.i18n.localize("Settings.AlphaTesting.LastMigration.Name"),

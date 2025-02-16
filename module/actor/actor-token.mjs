@@ -1,7 +1,3 @@
-// Possible reference: https://github.com/foundryvtt/foundryvtt/issues/9026
-// Possible reference: https://gitlab.com/woodentavern/foundryvtt-bar-brawl
-
-// import { getBarExtendedAttribute } from "../bar3/extendTokenConfig.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 // import { clamp } from "../utility/compatibility.mjs";
@@ -143,12 +139,6 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
 export class HeroSystem6eToken extends Token {
     constructor(document) {
         super(document);
-    }
-
-    getData() {
-        let data = super.getData();
-        data.bar3 = this.token.flags.bar3;
-        return data;
     }
 
     /**

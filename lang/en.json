@@ -204,10 +204,6 @@
                 "PcEndOnly": "PCs (END) and NPCs (END, STUN, BODY)"
             }
         },
-        "Bar3": {
-            "Name": "Add 3rd Bar and labels",
-            "Hint": "Add a 3rd resource bar to tokens. Each token will have a Body, Stun and Endurance resource bar with an appropriate label. It is recommended this be disabled and instead use the BarBrawl module for custom bars."
-        },
         "CombatMovementOnlyOnActorsPhase": {
             "Name": "Combat Movement Only On Actors Phase",
             "Hint": "This prevents players from moving their tokens when it isn't their turn."
