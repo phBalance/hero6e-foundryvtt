@@ -243,9 +243,7 @@ export class HeroSystem6eItem extends Item {
         }
         this.system.activePoints = _activePoints;
         this.system._activePointsWithoutEndMods = this._activePointsForEnd;
-        this.system.activePointsDc = this._activePointsDcAffecting;
         this.system._advantages = this._advantageCost;
-        this.system._advantagesDc = this._advantagesAffectingDc;
 
         // Real Cost = Active Points / (1 + total value of all limitations)
         const _realCost = this._realCost;
@@ -265,6 +263,7 @@ export class HeroSystem6eItem extends Item {
         if (performanceDuration > 1000) {
             console.warn(`Performance concern. Took ${performanceDuration} to prepareDerivedData`, this);
         }
+
         return changed;
     }
 
@@ -5308,23 +5307,23 @@ export class HeroSystem6eItem extends Item {
         return _cost;
     }
 
-    get _activePointsDcAffecting() {
-        return RoundFavorPlayerDown(
-            (this._basePoints + this._addersCost - this._negativeCustomAddersCost) * (1 + this._advantagesAffectingDc),
+    // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
+    get _activePointsAffectingDcRaw() {
+        return (
+            (this._basePoints + this._addersCost - this._negativeCustomAddersCost) * (1 + this._advantagesAffectingDc)
         );
     }
 
+    get _activePointsDcAffecting() {
+        return RoundFavorPlayerDown(this._activePointsAffectingDcRaw);
+    }
+
     get dc() {
-        return Math.floor(this.activePointsForDc / 5);
+        return Math.floor(this._activePointsAffectingDcRaw / 5);
     }
 
     get dcRaw() {
-        return this.activePointsForDc / 5;
-    }
-
-    // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
-    get activePointsForDc() {
-        return this.system.activePointsDc;
+        return this._activePointsAffectingDcRaw / 5;
     }
 
     get _limitationCost() {

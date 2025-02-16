@@ -254,7 +254,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         // Martial Maneuvers in 5e ignore advantages. Everything else care about them.
         const alteredManeuverDc =
             item.is5e && item.type === "martialart"
-                ? maneuverDC * (1 + baseDamageItem.system._advantagesDc)
+                ? maneuverDC * (1 + baseDamageItem._advantagesAffectingDc)
                 : maneuverDC;
         const maneuverDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, alteredManeuverDc);
         const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, maneuverDiceParts);
@@ -294,7 +294,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     for (const csl of combatSkillLevelsForAttack(item)) {
         if (csl.dc > 0) {
             // CSLs in 5e ignore advantages. In 6e they care about it.
-            const alteredCslDc = item.is5e ? csl.dc * (1 + item.system._advantagesDc) : csl.dc;
+            const alteredCslDc = item.is5e ? csl.dc * (1 + item._advantagesAffectingDc) : csl.dc;
             const cslDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, alteredCslDc);
             const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, cslDiceParts);
             addedDamageBundle.diceParts = addDiceParts(baseDamageItem, addedDamageBundle.diceParts, cslDiceParts);
@@ -365,7 +365,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
 
             // 5e does not consider advantages so we have to compensate and as a consequence we may have a fractional DC (yes, the rules are not self consistent).
             // 6e is sensible in this regard.
-            const alteredHaymakerDc = item.is5e ? haymakerDC * (1 + item.system._advantagesDc) : haymakerDC;
+            const alteredHaymakerDc = item.is5e ? haymakerDC * (1 + item._advantagesAffectingDc) : haymakerDC;
             const haymakerDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, alteredHaymakerDc);
             const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, haymakerDiceParts);
 
@@ -445,7 +445,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
                         const deadlyBlowDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, deadlyDc);
                         const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, deadlyBlowDiceParts);
 
-                        addedDamageBundle.diceParts = subtractDiceParts(
+                        addedDamageBundle.diceParts = addDiceParts(
                             baseDamageItem,
                             addedDamageBundle.diceParts,
                             deadlyBlowDiceParts,
@@ -467,6 +467,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     }
 
     // FIXME: Environmental Movement: Aquatic Environments should actually counteract this.
+    // FIXME: Not everything should be affected by this. For instance, should mental powers be affected? What about electricity based SFX?
     if (item.actor?.statuses?.has("underwater")) {
         const underwaterDc = 2; // NOTE: Working with 2 DC and then subtracting
         const underwaterDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, underwaterDc);
@@ -571,7 +572,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
     }
 
     let apPerDie;
-    if (!isMartialOrManeuver && item.system.activePointsDc !== 0) {
+    if (!isMartialOrManeuver && item._activePointsAffectingDcRaw !== 0) {
         // Some ugly stuff to deal with the case where we have adders to the base powers. We need to figure out
         // how much a die actually costs.
         // FIXME: would be nice to pull out the TK exception/special handling.
@@ -582,11 +583,11 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         diceValue += diceParts.constant * pipValue;
         apPerDie =
             item.system.XMLID === "TELEKINESIS"
-                ? 5 * (1 + item.system._advantagesDc)
-                : item.system.activePointsDc / diceValue;
+                ? 5 * (1 + item._advantagesAffectingDc)
+                : item._activePointsAffectingDcRaw / diceValue;
     } else {
         // NOTE: Maneuvers shouldn't be able to be advantaged but will keep this here because I'm not sure if there are exceptions
-        apPerDie = baseApPerDie * (1 + item.system._advantagesDc);
+        apPerDie = baseApPerDie * (1 + item._advantagesAffectingDc);
     }
 
     // NOTE: Work in positive values and positive 0 for obviousness to users
