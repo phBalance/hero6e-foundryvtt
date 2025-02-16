@@ -34,12 +34,12 @@ Hooks.on("quenchReady", (quench) => {
 // Helper function to run all tests from browser console.
 //
 // For browsers that support top level await (e.g. Chrome) you can just:
-// console.log(`Test suite result: ${await window.herosystem6eRunTests(100)}`);
+// console.log(`Test suite result: ${await window.herosystem6eRunTests(100, 60*1000)}`);
 //
 // For other browsers you can just:
-// window.herosystem6eRunTests(100).catch((err) => console.error(`Error with test runs: ${err.message}`)).then((result) => console.log(`Finished test runs`))
+// window.herosystem6eRunTests(100, 60*1000).catch((err) => console.error(`Error with test runs: ${err.message}`)).then((result) => console.log(`Finished test runs`))
 //
-window.herosystem6eRunTests = async (numLoops = 1) => {
+window.herosystem6eRunTests = async (numLoops = 1, timeoutInMs = 120 * 1000) => {
     if (!game.modules.get("quench")?.active) {
         ui.notifications.warn(game.i18n.localize("Warning.Quench.Active"));
         throw new Error("Quench not active. Cannot run tests.");
@@ -48,7 +48,7 @@ window.herosystem6eRunTests = async (numLoops = 1) => {
     for (let i = 0; i < numLoops; ++i) {
         try {
             console.log(`Start test run ${i + 1} of ${numLoops}`);
-            await runTestSuiteOnce();
+            await runTestSuiteOnce(timeoutInMs);
         } catch (err) {
             console.error(`Test run failed: ${err}`);
             return err;
@@ -60,7 +60,7 @@ window.herosystem6eRunTests = async (numLoops = 1) => {
     return true;
 };
 
-async function runTestSuiteOnce() {
+async function runTestSuiteOnce(timeoutInMs) {
     const mochaRunner = await quench.runBatches("hero6efoundryvttv2.**", {
         updateSnapshots: false,
         preSelectedOnly: false,
@@ -72,7 +72,7 @@ async function runTestSuiteOnce() {
             mochaRunner.abort();
             mochaRunner.dispose();
             reject("Test suite took too long - aborting runs");
-        }, 20 * 1000 /* 20 seconds */);
+        }, timeoutInMs);
 
         mochaRunner.on("end", () => {
             // Clean up from the run.
