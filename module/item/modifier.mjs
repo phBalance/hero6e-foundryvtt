@@ -5,8 +5,12 @@ import { HeroSystem6eAdder } from "./adder.mjs";
 export class HeroSystem6eModifier {
     #baseInfo = null;
     constructor(json, options) {
+        if (json?.constructor !== Object) {
+            console.error(`Expected JSON object`, this, json, options);
+        }
         // Item first so we can get baseInfo
-        this.item = options?.item;
+        this._item = options?.item;
+        this._id = json?.ID;
         this.#baseInfo = getModifierInfo({
             xmlid: json.XMLID,
             actor: options?.item?.actor,
@@ -15,11 +19,22 @@ export class HeroSystem6eModifier {
             item: options?.item,
         });
 
-        for (const key of Object.keys(json)) {
-            if (foundry.utils.hasProperty(this, key)) {
-                this[`_${key}`] = json[key];
+        for (const key of Object.keys(json).filter((k) => !k.startsWith("_") && k !== "BASECOST_total")) {
+            /// Create getters (if we don't already have one)
+            if (!Object.getOwnPropertyDescriptor(HeroSystem6eModifier.prototype, key)?.["get"]) {
+                {
+                    Object.defineProperty(this, key, {
+                        get() {
+                            return this._original[key];
+                        },
+
+                        // set() {
+                        //     return this._original[key];
+                        // },
+                    });
+                }
             } else {
-                this[key] = json[key];
+                console.warn(`Unexpected modifier property (${key})`);
             }
         }
 
@@ -43,14 +58,26 @@ export class HeroSystem6eModifier {
         }
     }
 
-    // get item() {
-    //     return fromUuidSync(this._itemUuid);
-    // }
+    get item() {
+        return this._item;
+    }
+
+    get _original() {
+        try {
+            const __original =
+                this.item?.system.MODIFIER?.find((p) => p.ID === this._id) ||
+                this.item?.parentItem?.system.MODIFIER?.find((p) => p.ID === this._id);
+            if (!__original) {
+                console.error(`Unable to locate modifier`, this);
+            }
+            return __original;
+        } catch (e) {
+            console.error(e);
+        }
+        return null;
+    }
 
     get baseInfo() {
-        // if (!this.#baseInfo) {
-        //     this.#baseInfo = getModifierInfo({ xmlid: this.XMLID, actor: this.item?.actor, is5e: this.item?.is5e });
-        // }
         return this.#baseInfo;
     }
 

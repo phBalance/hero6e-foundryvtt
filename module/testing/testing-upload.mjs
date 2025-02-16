@@ -7758,6 +7758,110 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 2);
                 });
             });
+
+            describe("NAKEDMODIFIER Armour Piercing Strike", function () {
+                const contents = `
+                    <POWER XMLID="NAKEDMODIFIER" ID="1734764400775" BASECOST="0.0" LEVELS="60" ALIAS="Naked Advantage" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Armour Piercing Strike" INPUT="Str" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    <MODIFIER XMLID="ARMORPIERCING" ID="1738386767749" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES />
+                    </MODIFIER>
+                    <MODIFIER XMLID="OIHID" ID="1738386767750" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Alternate Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No">
+                        <NOTES />
+                    </MODIFIER>
+                    <MODIFIER XMLID="INCREASEDEND" ID="1738386786203" BASECOST="-0.5" LEVELS="0" ALIAS="Increased Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2X" OPTIONID="2X" OPTION_ALIAS="x2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No">
+                        <NOTES />
+                    </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    // <i>Armour Piercing Strike:</i>  Armor Piercing (+1/4) for up to 60 Active Points of Str (15 Active Points); Increased Endurance Cost (x2 END; -1/2), Only In Alternate Identity (-1/4)
+                    assert.equal(
+                        item.system.description,
+                        "Naked Advantage for up to 60 Active points of Str (Str), Armor Piercing (+1/4) (15 Active Points); Increased Endurance Cost (x2 END; -1/2), Only In Alternate Identity (-1/4)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 8);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 15);
+                });
+            });
+
+            describe("NAKEDMODIFIER AOE Line Stomp", function () {
+                const contents = `
+                    <POWER XMLID="NAKEDMODIFIER" ID="1730072748238" BASECOST="0.0" LEVELS="60" ALIAS="Naked Advantage" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="AOE Line Stomp" INPUT="STR" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    <MODIFIER XMLID="AOE" ID="1738385916817" BASECOST="0.0" LEVELS="16" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LINE" OPTIONID="LINE" OPTION_ALIAS="Line" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES />
+                    </MODIFIER>
+                    <MODIFIER XMLID="NORANGE" ID="1738385916821" BASECOST="-0.5" LEVELS="0" ALIAS="No Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="Yes">
+                        <NOTES />
+                    </MODIFIER>
+                    <MODIFIER XMLID="OIHID" ID="1738385916822" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Alternate Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES />
+                    </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    // <i>AOE Line Stomp:</i>  Area Of Effect (16m Line; +1/4); Only In Alternate Identity (-1/4) for up to 60 Active Points of STR (15 Active Points); No Range (-1/2*)
+                    assert.equal(
+                        item.system.description,
+                        "Naked Advantage for up to 60 Active points of STR (STR), Area Of Effect (16m Long, 2m Tall, 2m Wide Line; +1/4) (15 Active Points); No Range (-1/2*), Only In Alternate Identity (-1/4)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 10);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 15);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

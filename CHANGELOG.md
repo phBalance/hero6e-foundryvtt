@@ -2,6 +2,7 @@
 
 ## Version 4.0.18 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Powers that cost no END and do not use charges now default to active during HDC upload.
 - Correct deadly blow contribution to damage. [#1901](https://github.com/dmdorman/hero6e-foundryvtt/issues/1901)
 
 ## Version 4.0.17 20250214

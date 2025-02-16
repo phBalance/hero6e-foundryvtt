@@ -5215,10 +5215,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 4),
+            basePoints: function (item) {
+                const levels = parseInt(item.system.LEVELS || 0);
+                return levels > 0 ? Math.max(1, Math.ceil(levels / 4)) : 0;
+            },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="ENDURANCERESERVE" ID="1712448783608" BASECOST="0.0" LEVELS="0" ALIAS="Endurance Reserve" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><POWER XMLID="ENDURANCERESERVEREC" ID="1712448793952" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER></POWER>`,
         },
-        {},
+        {
+            costPerLevel: fixedValueFunction(1 / 10),
+            basePoints: undefined,
+        },
     );
     addPower(
         {
@@ -5231,10 +5238,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(2 / 3),
+            cost: function (item) {
+                const levels = parseInt(item.LEVELS || 0);
+                return levels > 0 ? Math.max(1, Math.ceil(levels / 3) * 2) : 0;
+            },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="ENDURANCERESERVEREC" ID="1713377825229" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
-        {},
+        {
+            costPerLevel: fixedValueFunction(1),
+            cost: undefined,
+        },
     );
     addPower(
         {
@@ -6054,6 +6068,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const _levels = parseInt(item.system.LEVELS);
                 //return (item._basePoints + item._addersCost) * (1 + item._advantageCost);
                 return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
+            },
+            realCost: function (item) {
+                // Real Cost = Active Cost / (1 + total value of all Limitations)
+                let _cost = item._activePoints;
+
+                // Need to be careful about NAKEDMODIFIER PRIVATE (part of cost) vs !PRIVATE (part of naked limitation)
+                // Considering moving this into CONFIG.MJS, but need to see if this applies anywhere else.
+                // Would be nice to have something generic to handle all cases
+                let _limitationCost = item._limitationCost;
+                if (item.system.XMLID === "NAKEDMODIFIER") {
+                    _limitationCost = 0;
+                    for (const limitation of item.limitations.filter((o) => o.PRIVATE)) {
+                        _limitationCost -= limitation.cost;
+                    }
+                }
+
+                // Unclear why we use FLOOR here instead of RoundDownPlayerFavor.  But trying to match HD.
+                _cost = Math.floor(_cost / (1 + _limitationCost));
+                return _cost;
             },
             privateAsAdder: true,
             defenseTagVsAttack: function () {

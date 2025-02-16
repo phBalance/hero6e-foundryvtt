@@ -1822,6 +1822,17 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
+            // Generic defeault toggle to on (if it doesn't use charges or END)
+            if (
+                this.system.showToggle &&
+                this.system.active === undefined &&
+                this.system.charges === undefined &&
+                !this.system.end
+            ) {
+                changed = true;
+                this.system.active ??= true;
+            }
+
             // SKILLS
             if (this.baseInfo?.type.includes("skill")) {
                 const skill = "skill";
@@ -2581,11 +2592,11 @@ export class HeroSystem6eItem extends Item {
                 // Add parent mod if we don't already have it
                 if (!_modifiers.find((mod) => mod.ID === pMod.ID)) {
                     // We may want the parent reference at some point (like for ingame editing of items)
-                    pMod.parentId ??= this.parentItem.system.ID;
+                    //pMod.parentId ??= this.parentItem.system.ID;
 
                     // Sometimes the same modifiers is applied to item and items parent, we only keep the parent one
                     _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
-                    _modifiers.push(new HeroSystem6eModifier(pMod, { item: this }));
+                    _modifiers.push(new HeroSystem6eModifier(pMod._original || pMod, { item: this }));
                 }
             }
         }
@@ -5189,6 +5200,11 @@ export class HeroSystem6eItem extends Item {
 
     get _basePoints() {
         if (!this.system.XMLID) return 0;
+
+        if (this.baseInfo?.basePoints) {
+            return this.baseInfo.basePoints(this);
+        }
+
         if (this.system.XMLID.startsWith("__")) return 0;
         if (this.system.EVERYMAN) return 0;
         if (this.system.NATIVE_TONGUE) return 0;
@@ -5204,6 +5220,10 @@ export class HeroSystem6eItem extends Item {
         const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
         const levels = parseInt(this.system.LEVELS) || 0;
         _basePoints += levels * costPerLevel;
+
+        if (levels > 0) {
+            _basePoints = Math.max(1, _basePoints);
+        }
 
         return _basePoints;
     }
@@ -5315,6 +5335,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _realCost() {
+        if (this.baseInfo?.realCost) {
+            return this.baseInfo.realCost(this);
+        }
+
         // Real Cost = Active Cost / (1 + total value of all Limitations)
         let _cost = this._activePoints;
 
@@ -5335,6 +5359,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         _cost = RoundFavorPlayerDown(_cost / (1 + _limitationCost));
+
         return _cost;
     }
 
