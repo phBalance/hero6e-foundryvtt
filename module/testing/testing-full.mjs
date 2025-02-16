@@ -3467,7 +3467,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("should recognize all energy blast advantages as DC affecting", async function () {
-                    assert.equal(energyBlastItem.system._advantagesDc, 10.25);
+                    assert.equal(energyBlastItem._advantagesAffectingDc, 10.25);
                 });
 
                 it("should recognize the cost of the entangle", async function () {
@@ -3479,7 +3479,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("should recognize all entangle advantages as DC affecting", async function () {
-                    assert.equal(entangleItem.system._advantagesDc, 2 + 3 / 4);
+                    assert.equal(entangleItem._advantagesAffectingDc, 2 + 3 / 4);
                 });
 
                 it("should recognize the cost of the flight", async function () {
@@ -3491,7 +3491,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("should recognize all flight advantages as DC affecting", async function () {
-                    assert.equal(flightItem.system._advantagesDc, 2);
+                    assert.equal(flightItem._advantagesAffectingDc, 2);
                 });
             });
 

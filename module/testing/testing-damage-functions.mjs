@@ -353,8 +353,12 @@ export function registerDamageFunctionTests(quench) {
 
                     describe("-1 DC", function () {
                         it("-1 DC Killing Attack", function () {
-                            killingItem.system._advantagesDc = 0;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, -1)),
@@ -365,8 +369,12 @@ export function registerDamageFunctionTests(quench) {
 
                     describe("0 DC", function () {
                         it("0 DC Killing Attack", function () {
-                            killingItem.system._advantagesDc = 0;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 0)),
@@ -377,8 +385,12 @@ export function registerDamageFunctionTests(quench) {
 
                     describe("1 DC", function () {
                         it("1 DC Killing Attack", function () {
-                            killingItem.system._advantagesDc = 0;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 1)),
@@ -387,8 +399,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Killing Attack & +1/4 advantage", function () {
-                            killingItem.system._advantagesDc = 1 / 4;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 1)),
@@ -397,8 +413,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Killing Attack & +1/2 advantage", function () {
-                            killingItem.system._advantagesDc = 1 / 2;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 2;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 1)),
@@ -407,8 +427,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Ego Attack", function () {
-                            egoAttackItem.system._advantagesDc = 0;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 1)),
@@ -417,8 +441,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Ego Attack & +1/4 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 1 / 4;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "0" but calculations say otherwise:
                             // 5 AP with 10AP/die and a 1/4 advantage is 12.5 AP per die or 1.25 DC per die
@@ -430,8 +458,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Ego Attack & +1/2 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 2 / 4;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 2 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "0" but calculations say otherwise:
                             // 5 AP with 10AP/die and a 2/4 advantage is 15 AP per die or 1.5 DC per die
@@ -443,8 +475,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Ego Attack & +3/4 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 3 / 4;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 3 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 1)),
@@ -453,8 +489,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Ego Attack & +1 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 1;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 1)),
@@ -463,8 +503,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack", function () {
-                            normalItem.system._advantagesDc = 0;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 1)),
@@ -473,8 +517,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack & +1/4 advantage", function () {
-                            normalItem.system._advantagesDc = 1 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 1)),
@@ -483,8 +531,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack & +1/2 advantage", function () {
-                            normalItem.system._advantagesDc = 2 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 2 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 1)),
@@ -493,8 +545,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack & +3/4 advantage", function () {
-                            normalItem.system._advantagesDc = 3 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 3 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 1)),
@@ -503,8 +559,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack & +1 advantage", function () {
-                            normalItem.system._advantagesDc = 1;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 4 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "1/2d6" but calculations say otherwise:
                             // 5 AP with 5 AP/die and a 1 advantage is 10 AP per die or 2 DC per die
@@ -517,8 +577,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack & +1 1/4 advantage", function () {
-                            normalItem.system._advantagesDc = 5 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 5 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "0" but calculations say otherwise:
                             // 5 AP with 5 AP/die and a 1 advantage is 10 AP per die or 2 DC per die
@@ -531,8 +595,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack & +1 1/2 advantage", function () {
-                            normalItem.system._advantagesDc = 6 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 6 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "0" but calculations say otherwise:
                             // 5 AP with 5 AP/die and a 1 advantage is 10 AP per die or 2 DC per die
@@ -545,8 +613,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("1 DC Normal Attack & +2 advantage", function () {
-                            normalItem.system._advantagesDc = 2;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 8 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(filterDc(calculateDicePartsFromDcForItem(normalItem, 1)), zeroInDiceParts);
                         });
@@ -554,8 +626,12 @@ export function registerDamageFunctionTests(quench) {
 
                     describe("2 DC", function () {
                         it("2 DC Killing Attack", function () {
-                            killingItem.system._advantagesDc = 0;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 2)),
@@ -564,8 +640,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Killing Attack & +1/4 advantage", function () {
-                            killingItem.system._advantagesDc = 1 / 4;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 2)),
@@ -574,8 +654,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Killing Attack & +1/2 advantage", function () {
-                            killingItem.system._advantagesDc = 1 / 2;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 2;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 2)),
@@ -584,8 +668,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Killing Attack & +3/4 advantage", function () {
-                            killingItem.system._advantagesDc = 3 / 4;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 3 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 2)),
@@ -594,8 +682,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Killing Attack & +1 advantage", function () {
-                            killingItem.system._advantagesDc = 1;
-                            killingItem.system.activePointsDc = 15 * (1 + killingItem.system._advantagesDc);
+                            Object.defineProperty(killingItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(killingItem, 2)),
@@ -604,8 +696,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Ego Attack", function () {
-                            egoAttackItem.system._advantagesDc = 0;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 2)),
@@ -614,9 +710,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Ego Attack & +1/4 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 1 / 4;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
-
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 2)),
                                 halfDieInDiceParts,
@@ -624,8 +723,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Ego Attack & +1/2 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 2 / 4;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 2 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 2)),
@@ -634,8 +737,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Ego Attack & +3/4 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 3 / 4;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 3 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 2)),
@@ -644,8 +751,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Ego Attack & +1 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 1;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 2)),
@@ -654,8 +765,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Ego Attack & +1 1/4 advantage", function () {
-                            egoAttackItem.system._advantagesDc = 5 / 4;
-                            egoAttackItem.system.activePointsDc = 10 * (1 + egoAttackItem.system._advantagesDc);
+                            Object.defineProperty(egoAttackItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 5 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(egoAttackItem, 2)),
@@ -664,8 +779,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack", function () {
-                            normalItem.system._advantagesDc = 0;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 2)),
@@ -674,8 +793,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack & +1/4 advantage", function () {
-                            normalItem.system._advantagesDc = 1 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 2)),
@@ -684,8 +807,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack & +1/2 advantage", function () {
-                            normalItem.system._advantagesDc = 2 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 2 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 2)),
@@ -694,8 +821,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack & +3/4 advantage", function () {
-                            normalItem.system._advantagesDc = 3 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 3 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 2)),
@@ -704,8 +835,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack & +1 advantage", function () {
-                            normalItem.system._advantagesDc = 1;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 4 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "0" but calculations say otherwise:
                             // 5 AP with 5 AP/die and a 1 advantage is 10 AP per die or 2 DC per die
@@ -718,8 +853,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack & +1 1/4 advantage", function () {
-                            normalItem.system._advantagesDc = 5 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 5 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "0" but calculations say otherwise:
                             // 5 AP with 5 AP/die and a 1 advantage is 10 AP per die or 2 DC per die
@@ -732,8 +871,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack & +1 1/2 advantage", function () {
-                            normalItem.system._advantagesDc = 6 / 4;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 6 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             // PH: 6e vol. 2 pg. 97 says "0" but calculations say otherwise:
                             // 5 AP with 5 AP/die and a 1 advantage is 10 AP per die or 2 DC per die
@@ -746,8 +889,12 @@ export function registerDamageFunctionTests(quench) {
                         });
 
                         it("2 DC Normal Attack & +2 advantage", function () {
-                            normalItem.system._advantagesDc = 2;
-                            normalItem.system.activePointsDc = 5 * (1 + normalItem.system._advantagesDc);
+                            Object.defineProperty(normalItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 8 / 4;
+                                },
+                                configurable: true,
+                            });
 
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 2)),
@@ -878,7 +1025,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("5e EGOATTACK active points", function () {
-                    assert.equal(item.system.activePointsDc, 10);
+                    assert.equal(item._activePointsDcAffecting, 10);
                 });
             });
 
@@ -924,7 +1071,7 @@ export function registerDamageFunctionTests(quench) {
                     });
 
                     it("5e Cosmetic TRANSFORM active points", function () {
-                        assert.equal(item.system.activePointsDc, 10);
+                        assert.equal(item._activePointsDcAffecting, 10);
                     });
                 });
 
@@ -972,7 +1119,7 @@ export function registerDamageFunctionTests(quench) {
                     });
 
                     it("5e Minor TRANSFORM active points", function () {
-                        assert.equal(item.system.activePointsDc, 20);
+                        assert.equal(item._activePointsDcAffecting, 20);
                     });
                 });
 
@@ -1017,7 +1164,7 @@ export function registerDamageFunctionTests(quench) {
                     });
 
                     it("5e Major TRANSFORM active points", function () {
-                        assert.equal(item.system.activePointsDc, 30);
+                        assert.equal(item._activePointsDcAffecting, 30);
                     });
                 });
             });
