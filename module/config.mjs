@@ -6055,6 +6055,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 //return (item._basePoints + item._addersCost) * (1 + item._advantageCost);
                 return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
             },
+            realCost: function (item) {
+                // Real Cost = Active Cost / (1 + total value of all Limitations)
+                let _cost = item._activePoints;
+
+                // Need to be careful about NAKEDMODIFIER PRIVATE (part of cost) vs !PRIVATE (part of naked limitation)
+                // Considering moving this into CONFIG.MJS, but need to see if this applies anywhere else.
+                // Would be nice to have something generic to handle all cases
+                let _limitationCost = item._limitationCost;
+                if (item.system.XMLID === "NAKEDMODIFIER") {
+                    _limitationCost = 0;
+                    for (const limitation of item.limitations.filter((o) => o.PRIVATE)) {
+                        _limitationCost -= limitation.cost;
+                    }
+                }
+
+                // Unclear why we use FLOOR here instead of RoundDownPlayerFavor.  But trying to match HD.
+                _cost = Math.floor(_cost / (1 + _limitationCost));
+                return _cost;
+            },
             privateAsAdder: true,
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense

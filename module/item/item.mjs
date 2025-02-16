@@ -5327,6 +5327,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _realCost() {
+        if (this.baseInfo?.realCost) {
+            return this.baseInfo.realCost(this);
+        }
+
         // Real Cost = Active Cost / (1 + total value of all Limitations)
         let _cost = this._activePoints;
 
@@ -5347,6 +5351,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         _cost = RoundFavorPlayerDown(_cost / (1 + _limitationCost));
+
         return _cost;
     }
 
