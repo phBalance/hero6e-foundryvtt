@@ -1053,31 +1053,6 @@ export class HeroSystem6eItem extends Item {
         return this.system?.is5e;
     }
 
-    get dc() {
-        return Math.floor(this.activePointsForDc / 5);
-    }
-
-    get dcRaw() {
-        return this.activePointsForDc / 5;
-    }
-
-    // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
-    get activePointsForDc() {
-        return this.system.activePointsDc;
-    }
-
-    activePointsWithoutAoeAdvantage(aoeModifier) {
-        // FIXME: This is not quite correct as it item.system.activePoints are already rounded so this can
-        //        come up short. We need a raw active cost and build up the advantage multipliers from there.
-        //        Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
-        const activePointsWithoutAoeAdvantage = Math.max(
-            this.system.basePointsPlusAdders,
-            this.system.activePoints / (1 + aoeModifier.BASECOST_total),
-        );
-
-        return activePointsWithoutAoeAdvantage;
-    }
-
     /**
      * Calculate all the AOE related parameters.
      *
@@ -1103,7 +1078,7 @@ export class HeroSystem6eItem extends Item {
 
         // 5e has a calculated size
         if (is5e) {
-            const activePointsWithoutAoeAdvantage = this.activePointsWithoutAoeAdvantage(modifier);
+            const activePointsWithoutAoeAdvantage = this._activePointsWithoutAoe;
             if (modifier.XMLID === "AOE") {
                 switch (modifier.OPTIONID) {
                     case "CONE":
@@ -1290,10 +1265,7 @@ export class HeroSystem6eItem extends Item {
                 // TODO: This is not quite correct as item.system.activePoints are already rounded so this can
                 //       come up short. We need a raw active cost and build up the advantage multipliers from there.
                 //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
-                const activePointsWithoutAoeAdvantage = Math.max(
-                    effectiveItemData.system.basePointsPlusAdders,
-                    effectiveItemData.system.activePoints / (1 + aoeModifier.BASECOST_total),
-                );
+                const activePointsWithoutAoeAdvantage = effectiveItemData._activePointsWithoutAoe;
 
                 if (aoeModifier.XMLID === "AOE") {
                     switch (aoeModifier.OPTIONID) {
@@ -5866,8 +5838,15 @@ export class HeroSystem6eItem extends Item {
         return _cost;
     }
 
+    get _advantageCostWithoutAoe() {
+        let _cost = 0;
+        for (const advantage of this.advantages.filter((a) => !(a.XMLID === "AOE" || a.XMLID === "EXPLOSION"))) {
+            _cost += advantage.cost;
+        }
+        return _cost;
+    }
+
     get _activePoints() {
-        // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
         if (this.baseInfo?.activePoints) {
             return this.baseInfo.activePoints(this);
         }
@@ -5875,10 +5854,16 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _activePointsForEnd() {
-        //return RoundFavorPlayerDown((this._basePoints + this._addersCost) * (1 + this._advantageCostWithoutEnd));
         return RoundFavorPlayerDown(
             (this._basePoints + this._addersCost - this._negativeCustomAddersCost) *
                 (1 + this._advantageCostWithoutEnd),
+        );
+    }
+
+    get _activePointsWithoutAoe() {
+        return RoundFavorPlayerDown(
+            (this._basePoints + this._addersCost - this._negativeCustomAddersCost) *
+                (1 + this._advantageCostWithoutAoe),
         );
     }
 
@@ -5925,7 +5910,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         _cost = RoundFavorPlayerDown(_cost / (1 + _limitationCost));
-        return _cost; // + costSuffix;
+        return _cost;
     }
 
     get _characterPointCost() {
@@ -5952,6 +5937,19 @@ export class HeroSystem6eItem extends Item {
 
     get costPerLevel() {
         return this.baseInfo?.costPerLevel(this);
+    }
+
+    get dc() {
+        return Math.floor(this.activePointsForDc / 5);
+    }
+
+    get dcRaw() {
+        return this.activePointsForDc / 5;
+    }
+
+    // PH: FIXME: Need to check that this works for maneuvers. They do have an ACTIVECOST field although ours might not.
+    get activePointsForDc() {
+        return this.system.activePointsDc;
     }
 }
 
