@@ -4,6 +4,7 @@
 
 - Powers that cost no END and do not use charges now default to active during HDC upload.
 - Correct deadly blow contribution to damage. [#1901](https://github.com/dmdorman/hero6e-foundryvtt/issues/1901)
+- Fixed a bug where new token images are unable to be uploaded.
 
 ## Version 4.0.17 20250214
 
