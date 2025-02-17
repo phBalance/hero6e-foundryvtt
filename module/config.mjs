@@ -5224,7 +5224,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             costPerLevel: fixedValueFunction(1 / 10),
-            basePoints: undefined,
+            basePoints: function (item) {
+                const levels = parseInt(item.system.LEVELS || 0);
+                return levels > 0 ? Math.max(1, Math.ceil(levels / 10)) : 0;
+            },
         },
     );
     addPower(

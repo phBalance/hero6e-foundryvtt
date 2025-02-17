@@ -1822,17 +1822,6 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // Generic defeault toggle to on (if it doesn't use charges or END)
-            if (
-                this.system.showToggle &&
-                this.system.active === undefined &&
-                this.system.charges === undefined &&
-                !this.system.end
-            ) {
-                changed = true;
-                this.system.active ??= true;
-            }
-
             // SKILLS
             if (this.baseInfo?.type.includes("skill")) {
                 const skill = "skill";
@@ -2406,6 +2395,17 @@ export class HeroSystem6eItem extends Item {
                         });
                     }
                 }
+            }
+
+            // Generic defeault toggle to on (if it doesn't use charges or END)
+            if (
+                this.system.showToggle &&
+                this.system.active === undefined &&
+                this.system.charges === undefined &&
+                !this.system.end
+            ) {
+                changed = true;
+                this.system.active ??= true;
             }
 
             this._postUploadDetails();
