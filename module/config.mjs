@@ -241,15 +241,46 @@ HERO.movementPowers5e = {
 function validatePowers() {
     let numViolations = 0;
 
-    // Has behaviors field
-    const powersWithoutBehaviors = this.filter((power) => !power.behaviors);
-    if (powersWithoutBehaviors.length > 0) {
-        console.log(`Powers without behaviors field: `, powersWithoutBehaviors);
+    // Has behaviors property
+    const powersWithoutBehaviorsProperty = this.filter((power) => !power.behaviors);
+    if (powersWithoutBehaviorsProperty.length > 0) {
+        console.log(`Powers without behaviors property: `, powersWithoutBehaviorsProperty);
     }
-    numViolations += powersWithoutBehaviors.length;
+    numViolations += powersWithoutBehaviorsProperty.length;
 
-    // Has range field and is not framework/compound/adder/modifier
-    const powersWithoutRange = this.filter(
+    // Has key property
+    const powersWithoutKeyProperty = this.filter((power) => !power.key);
+    if (powersWithoutKeyProperty.length > 0) {
+        console.log(`Powers without key property: `, powersWithoutKeyProperty);
+    }
+    numViolations += powersWithoutKeyProperty.length;
+
+    // Has xml property
+    const powersWithoutXmlProperty = this.filter((power) => !power.key);
+    if (powersWithoutXmlProperty.length > 0) {
+        console.log(`Powers without xml property: `, powersWithoutXmlProperty);
+    }
+    numViolations += powersWithoutXmlProperty.length;
+
+    // All powers with XML need to have matching key and XMLID
+    const powersWithoutMatchingKeyAndXmlid = this.filter((power) => {
+        if (!power.xml) {
+            return false;
+        }
+
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(power.xml.trim(), "text/xml");
+
+        // Make sure XMLID's match, if not then skip
+        return power.key !== xml.children[0].getAttribute("XMLID");
+    });
+    if (powersWithoutMatchingKeyAndXmlid.length > 0) {
+        console.log(`Powers without matching key and XMLID: `, powersWithoutMatchingKeyAndXmlid);
+    }
+    numViolations += powersWithoutMatchingKeyAndXmlid.length;
+
+    // Has range property and is not framework/compound/adder/modifier
+    const powersWithoutRangeProperty = this.filter(
         (power) =>
             !(
                 power.behaviors.includes("adder") ||
@@ -258,13 +289,13 @@ function validatePowers() {
                 power.type.includes("compound")
             ) && !power.range,
     );
-    if (powersWithoutRange.length > 0) {
-        console.log(`Powers without range field: `, powersWithoutRange);
+    if (powersWithoutRangeProperty.length > 0) {
+        console.log(`Powers without range property: `, powersWithoutRangeProperty);
     }
-    numViolations += powersWithoutRange.length;
+    numViolations += powersWithoutRangeProperty.length;
 
-    // A power (not modifier or adder) without duration field?
-    const powersWithoutDuration = this.filter(
+    // A power (not modifier or adder) without duration property?
+    const powersWithoutDurationProperty = this.filter(
         (power) =>
             !(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
             !power.duration &&
@@ -276,10 +307,10 @@ function validatePowers() {
                 power.type.includes("standard") ||
                 power.type.includes("skills")),
     );
-    if (powersWithoutDuration.length > 0) {
-        console.log(`Powers without duration field: `, powersWithoutDuration);
+    if (powersWithoutDurationProperty.length > 0) {
+        console.log(`Powers without duration property: `, powersWithoutDurationProperty);
     }
-    numViolations += powersWithoutDuration.length;
+    numViolations += powersWithoutDurationProperty.length;
 
     // All powers have a costPerLevel function
     const powersWithoutCostPerLevelFunction = this.filter(
@@ -7565,7 +7596,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         //     adder.BASECOST_total = baseCost + levels * 0.25;
         //     return adder.BASECOST_total;
         // },
-        xml: `<ADDER XMLID="DOUBLEHEIGHT" ID="1731170688389" BASECOST="0.0" LEVELS="4" ALIAS="x16 Height" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        xml: `<ADDER XMLID="DOUBLELENGTH" ID="1731170688389" BASECOST="0.0" LEVELS="4" ALIAS="x16 Height" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
     });
     addPower(
         {
@@ -8206,7 +8237,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
-            xml: `<MODIFIER XMLID="AVAD" ID="1737923097808" BASECOST="0.0" LEVELS="0" ALIAS="Attack Versus Alternate Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYVERY" OPTIONID="VERYVERY" OPTION_ALIAS="Very Common -&gt; Very Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
+            xml: `<MODIFIER XMLID="AVAD" ID="1737923097808" BASECOST="0.0" LEVELS="0" ALIAS="Attack Versus Alternate Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYVERY" OPTIONID="VERYVERY" OPTION_ALIAS="Very Common -&gt; Very Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -8682,7 +8713,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="LINKED" ID="1737924019237" BASECOST="-0.5" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMPOUNDPOWER" OPTIONID="COMPOUNDPOWER" OPTION_ALIAS="" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1737241269418">`,
+            xml: `<MODIFIER XMLID="LINKED" ID="1737924019237" BASECOST="-0.5" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMPOUNDPOWER" OPTIONID="COMPOUNDPOWER" OPTION_ALIAS="" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1737241269418"></MODIFIER>`,
         },
         {},
     );
