@@ -124,11 +124,11 @@ export class HeroSystem6eModifier {
     }
 
     get adders() {
-        const _addres = [];
+        const _adders = [];
         for (const _adderJson of this.ADDER || []) {
-            _addres.push(new HeroSystem6eAdder(_adderJson, { item: this.item, parent: this }));
+            _adders.push(new HeroSystem6eAdder(_adderJson, { item: this.item, parent: this }));
         }
-        return _addres;
+        return _adders;
     }
 
     get addersDescription() {
@@ -156,8 +156,7 @@ export class HeroSystem6eModifier {
     }
 
     set BASECOST_total(value) {
-        if (this.cost != value) {
-            //debugger;
+        if (this.cost !== value) {
             console.error(
                 `${this.item?.actor.name}/${this.item?.name}/${this.item?.system.XMLID}/${this.XMLID} BASECOST_total (${value}) did not match cost ${this.BASECOST_total}`,
             );
