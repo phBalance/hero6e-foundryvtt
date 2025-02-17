@@ -170,11 +170,8 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             if (aoe) {
-                data.aoeText = aoe.OPTION_ALIAS;
-                // if (!item.system.areaOfEffect) {
-                //     ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
-                // }
-                const levels = aoe.value; //item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
+                data.aoeText = aoe.type;
+                const levels = aoe.value;
                 if (levels) {
                     data.aoeText += ` (${levels}${getSystemDisplayUnits(item.actor.is5e)})`;
                 }

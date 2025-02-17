@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.18 20250216 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.19 20250216 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- AoE placement button shows shape again. [#1909](https://github.com/dmdorman/hero6e-foundryvtt/issues/1909)
+
+## Version 4.0.18 20250216
 
 - The "Add 3rd bar and labels" configuration option is no longer available. Please use [Bar Brawl](https://foundryvtt.com/packages/barbrawl) if you want to show STUN, BODY, and/or END bars.
 - Powers that cost no END and do not use charges now default to active during HDC upload.
