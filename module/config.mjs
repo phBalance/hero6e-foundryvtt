@@ -3368,6 +3368,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
+            cost: function (item) {
+                // BASECOST is 3 but for some reason HDC shows 0
+                const baseCost = parseFloat(item.system.BASECOST) || (item.adders.length === 0 ? 3 : 0);
+                const levels = parseInt(item.system.LEVELS);
+                return baseCost + levels * this.costPerLevel();
+            },
             categorized: true,
             duration: "constant",
             target: "self only",
