@@ -25,7 +25,7 @@ export class HeroSystem6eModifier {
                 {
                     Object.defineProperty(this, key, {
                         get() {
-                            return this._original[key];
+                            return this._original?.[key];
                         },
 
                         // set() {
@@ -73,7 +73,7 @@ export class HeroSystem6eModifier {
                 this.item?.system.MODIFIER?.find((p) => p.ID === this._id) ||
                 this.item?.parentItem?.system.MODIFIER?.find((p) => p.ID === this._id);
             if (!__original) {
-                console.error(`Unable to locate modifier`, this);
+                console.error(`Unable to locate modifier with ID=${this._id}`, this);
             }
             return __original;
         } catch (e) {
