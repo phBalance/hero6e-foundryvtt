@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.19 20250216 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.20 20250217 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed loading failures and other issues related to compound powers within a multipower. [#1915](https://github.com/dmdorman/hero6e-foundryvtt/issues/1915)
+
+## Version 4.0.19 20250216
 
 - AoE placement button shows shape again. [#1909](https://github.com/dmdorman/hero6e-foundryvtt/issues/1909)
 
