@@ -5101,9 +5101,12 @@ export class HeroSystem6eItem extends Item {
 
     get characterPointCostPlusSuffix() {
         const cost = this.system.characterPointCost || parseInt(this.system.realCost);
-        if (this.parentItem?.system.XMLID === "MULTIPOWER") {
+        if (
+            this.parentItem?.system.XMLID === "MULTIPOWER" ||
+            this.parentItem?.parentItem?.system.XMLID === "MULTIPOWER"
+        ) {
             // Fixed
-            if (this.system.ULTRA_SLOT) {
+            if (this.system.ULTRA_SLOT || this.parentItem?.system.ULTRA_SLOT) {
                 return cost + (this.actor?.system.is5e ? "u" : "f");
             }
 
@@ -5364,12 +5367,15 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _characterPointCost() {
-        let _cost = this.system.realCost;
+        let _cost = this._realCost; //this.system.realCost;
         // Power cost in Power Framework is applied before limitations
         if (this.parentItem) {
-            if (this.parentItem.system.XMLID === "MULTIPOWER") {
+            if (
+                this.parentItem.system.XMLID === "MULTIPOWER" ||
+                this.parentItem.parentItem?.system.XMLID === "MULTIPOWER"
+            ) {
                 // Fixed
-                if (this.system.ULTRA_SLOT) {
+                if (this.system.ULTRA_SLOT || this.parentItem?.system.ULTRA_SLOT) {
                     _cost = _cost / 10.0;
                 }
 
@@ -5382,6 +5388,7 @@ export class HeroSystem6eItem extends Item {
                 _cost = Math.max(baseCost, _cost - baseCost);
             }
         }
+
         return RoundFavorPlayerDown(_cost);
     }
 

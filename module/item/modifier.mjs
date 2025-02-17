@@ -11,6 +11,7 @@ export class HeroSystem6eModifier {
         // Item first so we can get baseInfo
         this._item = options?.item;
         this._id = json?.ID;
+        this._original = json; //this.#original;
         this.#baseInfo = getModifierInfo({
             xmlid: json.XMLID,
             actor: options?.item?.actor,
@@ -25,7 +26,8 @@ export class HeroSystem6eModifier {
                 {
                     Object.defineProperty(this, key, {
                         get() {
-                            return this._original[key];
+                            const original = this._original;
+                            return original[key];
                         },
 
                         // set() {
@@ -67,20 +69,27 @@ export class HeroSystem6eModifier {
         return this._item;
     }
 
-    get _original() {
-        try {
-            const __original =
-                this.item?.system.MODIFIER?.find((p) => p.ID === this._id) ||
-                this.item?.parentItem?.system.MODIFIER?.find((p) => p.ID === this._id);
-            if (!__original) {
-                console.error(`Unable to locate modifier`, this);
-            }
-            return __original;
-        } catch (e) {
-            console.error(e);
-        }
-        return null;
-    }
+    // get #original() {
+    //     try {
+    //         let item = this._item;
+    //         let original;
+    //         for (let i = 0; i < 10; i++) {
+    //             original = item.system.MODIFIER?.find((p) => p.ID === this._id);
+    //             if (original) break;
+    //             item = item.parentItem;
+    //         }
+    //         if (!original) {
+    //             console.error(
+    //                 `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}: Unable to locate modifier with ID=${this._id}`,
+    //                 this,
+    //             );
+    //         }
+    //         return original;
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    //     return null;
+    // }
 
     get baseInfo() {
         return this.#baseInfo;
