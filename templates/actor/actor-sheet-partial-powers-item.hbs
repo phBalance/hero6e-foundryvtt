@@ -28,7 +28,7 @@
         </td>
         <td>
             {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
-                {{this.system.characterPointCost}}
+                {{this.compoundCost}}
             {{else if this.isSeperator}}
                 {{!-- Show no cost--}}
             {{else if (eq this.system.XMLID "LIST")}}

@@ -4743,7 +4743,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("activePoints", async function () {
-                    assert.equal(actor.system.activePoints, 677);
+                    assert.equal(actor.system.activePoints, 680);
                 });
             });
         },

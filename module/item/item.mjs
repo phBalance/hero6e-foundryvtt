@@ -5367,7 +5367,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get _characterPointCost() {
-        let _cost = this.system.realCost;
+        let _cost = this._realCost; //this.system.realCost;
         // Power cost in Power Framework is applied before limitations
         if (this.parentItem) {
             if (
@@ -5375,7 +5375,7 @@ export class HeroSystem6eItem extends Item {
                 this.parentItem.parentItem?.system.XMLID === "MULTIPOWER"
             ) {
                 // Fixed
-                if (this.system.ULTRA_SLOT) {
+                if (this.system.ULTRA_SLOT || this.parentItem?.system.ULTRA_SLOT) {
                     _cost = _cost / 10.0;
                 }
 
@@ -5388,6 +5388,7 @@ export class HeroSystem6eItem extends Item {
                 _cost = Math.max(baseCost, _cost - baseCost);
             }
         }
+
         return RoundFavorPlayerDown(_cost);
     }
 
