@@ -8742,14 +8742,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    // DUPLICATE?
-    // addPower(undefined, {
-    //     key: "MODIFIER",
-    //     behaviors: ["modifier"],
-    //     costPerLevel: fixedValueFunction(0),
-    //     dcAffecting: fixedValueFunction(true),
-    //     xml: `<MODIFIER XMLID="MODIFIER" ID="1729971743152" BASECOST="0.0" LEVELS="0" ALIAS="Last For One Hour or Until Destroyed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-    // });
+    addPower(
+        {
+            key: "MOBILE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(true),
+            xml: `<MODIFIER XMLID="MOBILE" ID="1737907241760" BASECOST="0.25" LEVELS="0" ALIAS="Mobile" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
+        },
+        {},
+    );
 
     addPower(undefined, {
         key: "NND",

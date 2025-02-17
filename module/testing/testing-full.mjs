@@ -4444,6 +4444,308 @@ export function registerFullTests(quench) {
                     });
                 });
             });
+
+            describe("Amadeus - compound powers", function () {
+                const contents = `
+                    <?xml version="1.0" encoding="UTF-16"?>
+                    <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
+                    <BASIC_CONFIGURATION BASE_POINTS="334" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                    <CHARACTER_INFO CHARACTER_NAME="Amadeus" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                        <BACKGROUND />
+                        <PERSONALITY />
+                        <QUOTE />
+                        <TACTICS />
+                        <CAMPAIGN_USE />
+                        <APPEARANCE />
+                        <NOTES1 />
+                        <NOTES2 />
+                        <NOTES3 />
+                        <NOTES4 />
+                        <NOTES5 />
+                    </CHARACTER_INFO>
+                    <CHARACTERISTICS>
+                        <STR XMLID="STR" ID="1734202504950" BASECOST="0.0" LEVELS="10" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STR>
+                        <DEX XMLID="DEX" ID="1734202504876" BASECOST="0.0" LEVELS="2" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DEX>
+                        <CON XMLID="CON" ID="1734202504726" BASECOST="0.0" LEVELS="9" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </CON>
+                        <INT XMLID="INT" ID="1734202505479" BASECOST="0.0" LEVELS="5" ALIAS="INT" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </INT>
+                        <EGO XMLID="EGO" ID="1734202505189" BASECOST="0.0" LEVELS="2" ALIAS="EGO" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </EGO>
+                        <PRE XMLID="PRE" ID="1734202504582" BASECOST="0.0" LEVELS="2" ALIAS="PRE" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PRE>
+                        <OCV XMLID="OCV" ID="1734202504691" BASECOST="0.0" LEVELS="6" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </OCV>
+                        <DCV XMLID="DCV" ID="1734202505280" BASECOST="0.0" LEVELS="4" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DCV>
+                        <OMCV XMLID="OMCV" ID="1734202504666" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </OMCV>
+                        <DMCV XMLID="DMCV" ID="1734202504650" BASECOST="0.0" LEVELS="3" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </DMCV>
+                        <SPD XMLID="SPD" ID="1734202504837" BASECOST="0.0" LEVELS="1" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SPD>
+                        <PD XMLID="PD" ID="1734202504542" BASECOST="0.0" LEVELS="5" ALIAS="PD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </PD>
+                        <ED XMLID="ED" ID="1734202505114" BASECOST="0.0" LEVELS="2" ALIAS="ED" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </ED>
+                        <REC XMLID="REC" ID="1734202504948" BASECOST="0.0" LEVELS="8" ALIAS="REC" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </REC>
+                        <END XMLID="END" ID="1734202504724" BASECOST="0.0" LEVELS="30" ALIAS="END" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </END>
+                        <BODY XMLID="BODY" ID="1734202505453" BASECOST="0.0" LEVELS="15" ALIAS="BODY" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </BODY>
+                        <STUN XMLID="STUN" ID="1734202504584" BASECOST="0.0" LEVELS="20" ALIAS="STUN" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </STUN>
+                        <RUNNING XMLID="RUNNING" ID="1734202505503" BASECOST="0.0" LEVELS="8" ALIAS="Running" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </RUNNING>
+                        <SWIMMING XMLID="SWIMMING" ID="1734202504830" BASECOST="0.0" LEVELS="4" ALIAS="Swimming" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </SWIMMING>
+                        <LEAPING XMLID="LEAPING" ID="1734202505303" BASECOST="0.0" LEVELS="6" ALIAS="Leaping" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </LEAPING>
+                    </CHARACTERISTICS>
+                    <SKILLS>
+                        <SKILL XMLID="COMBAT_LEVELS" ID="1734202557516" BASECOST="0.0" LEVELS="3" ALIAS="Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with a large group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="PARAMEDICS" ID="1734202801917" BASECOST="3.0" LEVELS="0" ALIAS="Paramedics" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                        <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="NAVIGATION" ID="1734202803660" BASECOST="0.0" LEVELS="0" ALIAS="Navigation" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                        <NOTES />
+                        <ADDER XMLID="LAND" ID="1734202849627" BASECOST="2.0" LEVELS="0" ALIAS="Land" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </SKILL>
+                        <SKILL XMLID="ANALYZE" ID="1734202808732" BASECOST="3.0" LEVELS="0" ALIAS="Analyze" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Combat" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                        <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="DEFENSE_MANEUVER" ID="1734202815835" BASECOST="5.0" LEVELS="0" ALIAS="Defense Maneuver" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="I-II" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="TACTICS" ID="1734202834579" BASECOST="3.0" LEVELS="0" ALIAS="Tactics" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                        <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="TEAMWORK" ID="1734202837412" BASECOST="3.0" LEVELS="0" ALIAS="Teamwork" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                        <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="BREAKFALL" ID="1734202853499" BASECOST="3.0" LEVELS="0" ALIAS="Breakfall" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                        <NOTES />
+                        </SKILL>
+                        <SKILL XMLID="SURVIVAL" ID="1734203052348" BASECOST="0.0" LEVELS="0" ALIAS="Survival" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                        <NOTES />
+                        </SKILL>
+                    </SKILLS>
+                    <PERKS />
+                    <TALENTS>
+                        <TALENT XMLID="LIGHTNING_REFLEXES_ALL" ID="1734243552933" BASECOST="0.0" LEVELS="6" ALIAS="Lightning Reflexes" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="All Actions" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                        </TALENT>
+                    </TALENTS>
+                    <MARTIALARTS />
+                    <POWERS>
+                        <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1734202618927" BASECOST="61.0" LEVELS="0" ALIAS="Multipower" POSITION="0" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="255 180 0" SFX="Earth/Stone" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Amadeus Axe" QUANTITY="1">
+                        <NOTES />
+                        <MODIFIER XMLID="FOCUS" ID="1737903954206" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        </MULTIPOWER>
+                        <POWER XMLID="HKA" ID="1734202599915" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="255 180 0" SFX="Earth/Stone" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734202618927" ULTRA_SLOT="Yes" NAME="Axe Swing " INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </POWER>
+                        <POWER XMLID="HANDTOHANDATTACK" ID="1734202626755" BASECOST="0.0" LEVELS="6" ALIAS="Hand-To-Hand Attack" POSITION="2" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="255 180 0" SFX="Earth/Stone" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734202618927" ULTRA_SLOT="Yes" NAME="Concrete Hammer" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <MODIFIER XMLID="HANDTOHANDATTACK" ID="1737903906890" BASECOST="-0.25" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="HKA" ID="1737903300538" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Hand-To-Hand" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734202618927" ULTRA_SLOT="Yes" NAME="Wide Axe Swing" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="PLUSONEPIP" ID="1739696908604" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="AOE" ID="1739696908626" BASECOST="0.0" LEVELS="2" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="6.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LINE" OPTIONID="LINE" OPTION_ALIAS="Line" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                            <ADDER XMLID="DOUBLEWIDTH" ID="1739696908605" BASECOST="-1.0" LEVELS="6" ALIAS="Width (m)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                            </ADDER>
+                        </MODIFIER>
+                        <MODIFIER XMLID="CANNOTUSETARGETING" ID="1739696908630" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Use Targeting" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        </POWER>
+                        <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1734202692653" BASECOST="64.0" LEVELS="0" ALIAS="Multipower" POSITION="4" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="255 180 0" SFX="Earth/Stone" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Concrete Powers" QUANTITY="1">
+                        <NOTES />
+                        <MODIFIER XMLID="GESTURES" ID="1738519089346" BASECOST="-0.25" LEVELS="0" ALIAS="Gestures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        </MULTIPOWER>
+                        <POWER XMLID="COMPOUNDPOWER" ID="1737905440191" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734202692653" ULTRA_SLOT="Yes" NAME="Concrete Trap" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <POWER XMLID="ENTANGLE" ID="1737905472743" BASECOST="0.0" LEVELS="4" ALIAS="Entangle" POSITION="0" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="255 180 0" SFX="Earth/Stone" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Concrete Wrap" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1737906231711" BASECOST="0.0" LEVELS="8" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                            <ADDER XMLID="NONSELECTIVETARGET" ID="1737906231692" BASECOST="-0.25" LEVELS="0" ALIAS="Nonselective" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            </MODIFIER>
+                            <MODIFIER XMLID="VULNERABLE" ID="1737906231719" BASECOST="-0.5" LEVELS="0" ALIAS="Vulnerable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Gravity" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="MODIFIER" ID="1737906231721" BASECOST="-0.5" LEVELS="0" ALIAS="loses a third of its effectiveness" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="only effects feet, stopping movement" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="CHANGEENVIRONMENT" ID="1737905477418" BASECOST="0.0" LEVELS="0" ALIAS="Change Environment" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Rocky Terrain" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="MOVEMENT6E" ID="1737906367328" BASECOST="0.0" LEVELS="7" ALIAS="-7m of any mode of Movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="AOE" ID="1737906367347" BASECOST="0.0" LEVELS="8" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="COSTSENDTOMAINTAIN" ID="1737906367354" BASECOST="-0.5" LEVELS="0" ALIAS="Costs END To Maintain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="Full END Cost" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        </POWER>
+                        <POWER XMLID="ENERGYBLAST" ID="1734202671995" BASECOST="0.0" LEVELS="8" ALIAS="Blast" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734202692653" ULTRA_SLOT="Yes" NAME="Concrete Toss" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        </POWER>
+                        <POWER XMLID="FORCEWALL" ID="1734202690564" BASECOST="3.0" LEVELS="8" ALIAS="Barrier" POSITION="7" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="255 180 0" SFX="Earth/Stone" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734202692653" ULTRA_SLOT="Yes" NAME="Concrete Armor" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="4" EDLEVELS="4" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="1" HEIGHTLEVELS="1" BODYLEVELS="20" WIDTHLEVELS="0.0">
+                        <NOTES />
+                        <ADDER XMLID="DISMISSABLE" ID="1737907241758" BASECOST="5.0" LEVELS="0" ALIAS="Dismissable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="MOBILE" ID="1737907241760" BASECOST="0.25" LEVELS="0" ALIAS="Mobile" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="MODIFIER" ID="1737907319055" BASECOST="-0.5" LEVELS="0" ALIAS="Vulnerability" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="2x gravity effect" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="FORCEFIELD" ID="1734202736908" BASECOST="0.0" LEVELS="16" ALIAS="Resistant Protection" POSITION="8" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="255 180 0" SFX="Earth/Stone" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Concrete Body" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="8" EDLEVELS="8" MDLEVELS="0" POWDLEVELS="0">
+                        <NOTES />
+                        </POWER>
+                        <POWER XMLID="HEALING" ID="1737204126862" BASECOST="0.0" LEVELS="2" ALIAS="Healing" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Stimpack" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="PLUSONEPIP" ID="1737210056832" BASECOST="3.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="DECREASEDREUSE" ID="1737210056841" BASECOST="1.25" LEVELS="0" ALIAS="Decreased Re-use Duration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1MINUTE" OPTIONID="1MINUTE" OPTION_ALIAS="1 Minute" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="FOCUS" ID="1737210056869" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="CHARGES" ID="1737210056934" BASECOST="-1.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FOUR" OPTIONID="FOUR" OPTION_ALIAS="4" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="DOESNOTWORKONSOMEDAMAGE" ID="1737210056942" BASECOST="-0.75" LEVELS="0" ALIAS="Does Not Work On Some Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="[Common attack]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="CONCENTRATION" ID="1737210056950" BASECOST="-0.25" LEVELS="0" ALIAS="Concentration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALF" OPTIONID="HALF" OPTION_ALIAS="1/2 DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1737210056987" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Paramedics" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                            <ADDER XMLID="EVERYPHASE" ID="1737210056952" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                            </ADDER>
+                        </MODIFIER>
+                        </POWER>
+                    </POWERS>
+                    <DISADVANTAGES>
+                        <DISAD XMLID="VULNERABILITY" ID="1737205635803" BASECOST="0.0" LEVELS="0" ALIAS="Vulnerability" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Gravity">
+                        <NOTES />
+                        <ADDER XMLID="ATTACK" ID="1737205651059" BASECOST="10.0" LEVELS="0" ALIAS="The Attack Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="(Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="MULTIPLIER" ID="1737205651079" BASECOST="1.0" LEVELS="0" ALIAS="Vulnerability Multiplier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWICEEFFECT" OPTIONID="TWICEEFFECT" OPTION_ALIAS="2 x Effect" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        </DISAD>
+                        <DISAD XMLID="RIVALRY" ID="1737205666646" BASECOST="0.0" LEVELS="0" ALIAS="Rivalry" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                        <ADDER XMLID="SITUATION" ID="1737205709472" BASECOST="5.0" LEVELS="0" ALIAS="Rivalry Situation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PROFESSIONAL" OPTIONID="PROFESSIONAL" OPTION_ALIAS="Professional" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="DESCRIPTION" ID="1737205709476" BASECOST="0.0" LEVELS="0" ALIAS="Rivalry Desc." POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DEFAULT" OPTIONID="DEFAULT" OPTION_ALIAS="(" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="POWER" ID="1737205709483" BASECOST="10.0" LEVELS="0" ALIAS="Rival's Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LOTS" OPTIONID="LOTS" OPTION_ALIAS="Rival is Significantly More Powerful" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="FIERCENESS" ID="1737205709488" BASECOST="5.0" LEVELS="0" ALIAS="Fierceness of Rivalry" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="KILL" OPTIONID="KILL" OPTION_ALIAS="Seek to Harm or Kill Rival" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="KNOWLEDGE" ID="1737205709493" BASECOST="0.0" LEVELS="0" ALIAS="Knowledge of Rivalry" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="AWARE" OPTIONID="AWARE" OPTION_ALIAS="Rival Aware of Rivalry" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </DISAD>
+                        <DISAD XMLID="DEPENDENTNPC" ID="1737205684963" BASECOST="0.0" LEVELS="0" ALIAS="Dependent NPC" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                        <ADDER XMLID="APPEARANCE" ID="1737205700883" BASECOST="10.0" LEVELS="0" ALIAS="Appearance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11ORLESS" OPTIONID="11ORLESS" OPTION_ALIAS="Frequently" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="USEFULNESS" ID="1737205700890" BASECOST="10.0" LEVELS="0" ALIAS="Usefulness" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INCOMPENTENT" OPTIONID="INCOMPENTENT" OPTION_ALIAS="(Incompetent" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </DISAD>
+                    </DISADVANTAGES>
+                    <EQUIPMENT />
+                    </CHARACTER>
+                `;
+
+                let actor;
+
+                before(async () => {
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+
+                    await actor.uploadFromXml(contents);
+                });
+
+                it("name", async function () {
+                    console.log("name");
+                    assert.equal(actor.name, "Amadeus");
+                });
+
+                it("realCost", async function () {
+                    assert.equal(actor.system.realCost, 334);
+                });
+
+                it("activePoints", async function () {
+                    assert.equal(actor.system.activePoints, 677);
+                });
+            });
         },
 
         { displayName: "HERO: Full Character Tests" },
