@@ -2397,12 +2397,13 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // Generic defeault toggle to on (if it doesn't use charges or END)
+            // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
             if (
                 this.system.showToggle &&
                 this.system.active === undefined &&
                 this.system.charges === undefined &&
-                !this.system.end
+                !this.system.end &&
+                this.parentItem?.system.XMLID === "MULTIPOWER"
             ) {
                 changed = true;
                 this.system.active ??= true;
