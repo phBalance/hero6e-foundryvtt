@@ -2,6 +2,7 @@
 
 ## Version 4.0.18 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- The "Add 3rd bar and labels" configuration option is no longer available. Please use [Bar Brawl](https://foundryvtt.com/packages/barbrawl) if you want to show STUN, BODY, and/or END bars.
 - Powers that cost no END and do not use charges now default to active during HDC upload.
 - Correct deadly blow contribution to damage. [#1901](https://github.com/dmdorman/hero6e-foundryvtt/issues/1901)
 - Fixed a bug where new token images were unable to be uploaded. Token image uploads from HDC file to FORGE also should work now.
