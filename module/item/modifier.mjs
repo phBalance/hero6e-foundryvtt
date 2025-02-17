@@ -69,27 +69,27 @@ export class HeroSystem6eModifier {
         return this._item;
     }
 
-    get #original() {
-        try {
-            let item = this._item;
-            let original;
-            for (let i = 0; i < 10; i++) {
-                original = item.system.MODIFIER?.find((p) => p.ID === this._id);
-                if (original) break;
-                item = item.parentItem;
-            }
-            if (!original) {
-                console.error(
-                    `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}: Unable to locate modifier with ID=${this._id}`,
-                    this,
-                );
-            }
-            return original;
-        } catch (e) {
-            console.error(e);
-        }
-        return null;
-    }
+    // get #original() {
+    //     try {
+    //         let item = this._item;
+    //         let original;
+    //         for (let i = 0; i < 10; i++) {
+    //             original = item.system.MODIFIER?.find((p) => p.ID === this._id);
+    //             if (original) break;
+    //             item = item.parentItem;
+    //         }
+    //         if (!original) {
+    //             console.error(
+    //                 `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}: Unable to locate modifier with ID=${this._id}`,
+    //                 this,
+    //             );
+    //         }
+    //         return original;
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    //     return null;
+    // }
 
     get baseInfo() {
         return this.#baseInfo;
