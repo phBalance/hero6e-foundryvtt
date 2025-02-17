@@ -38,6 +38,10 @@ import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
 Hooks.once("init", async function () {
+    // Compatibility warnings for initial release of v13
+    // In chrome use -/Deprecated since Version 13/ as a console log filter
+    // Some v13 warning still slip in during initial load, re-applying filter is a temp fix.
+
     // Custom HeroSystem VisionMode
     setPerceptionModes();
 
