@@ -1336,7 +1336,7 @@ export class HeroSystem6eItem extends Item {
      */
     isActivatableManeuver() {
         // Hero designer has a few ways of marking things as doing damage. For the prebuilt ones you can't look at DAMAGETYPE as it's always "0" even
-        // for things like a Flying Dodge. So, we make our decision based on the EFFECT/WEAPONEFFECT. This means that customer maneuvers need to have the
+        // for things like a Flying Dodge. So, we make our decision based on the EFFECT/WEAPONEFFECT. This means that custom maneuvers need to have the
         // correct EFFECT or WEAPONEFFECT specified for things to work.
         // NOTE: Doesn't appear that there is a [WEAPONNNDDC] or [WEAPONFLASHDC] but we're going to add it just in case
         const effect =
@@ -2567,7 +2567,7 @@ export class HeroSystem6eItem extends Item {
         const children = items
             .filter((item) => item.system.PARENTID === this.system.ID)
             .sort((a, b) => (a.sort || 0) - (b.sort || 0));
-        return children; //children.length ? children : null;
+        return children;
     }
 
     get childIdx() {
@@ -2582,9 +2582,9 @@ export class HeroSystem6eItem extends Item {
     get modifiers() {
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
-            //_modifiers.push(_mod);
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
         }
+
         if (this.parentItem) {
             // Include common modifiers from parent that are not private.
             // <i>Crossbow:</i>  Multipower, 50-point reserve,  (50 Active Points); all slots OAF (-1)
