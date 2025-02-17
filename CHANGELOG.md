@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.18 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.18 20250216 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - The "Add 3rd bar and labels" configuration option is no longer available. Please use [Bar Brawl](https://foundryvtt.com/packages/barbrawl) if you want to show STUN, BODY, and/or END bars.
 - Powers that cost no END and do not use charges now default to active during HDC upload.
