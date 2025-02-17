@@ -1943,9 +1943,13 @@ export class HeroSystem6eActor extends Actor {
                     await ImageHelper.uploadBase64(base64, filename, path);
 
                     // FORGE stuff
-                    if (ForgeAPI) {
-                        const forgeUser = (await ForgeAPI.status()).user;
-                        relativePathName = `https://assets.forge-vtt.com/${forgeUser}/${relativePathName}`;
+                    try {
+                        if (ForgeAPI) {
+                            const forgeUser = (await ForgeAPI.status()).user;
+                            relativePathName = `https://assets.forge-vtt.com/${forgeUser}/${relativePathName}`;
+                        }
+                    } catch (e) {
+                        console.log(e);
                     }
 
                     // Update any tokens images that might exist

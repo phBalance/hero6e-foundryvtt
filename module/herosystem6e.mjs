@@ -17,8 +17,6 @@ import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import SettingsHelpers from "./settings/settings-helpers.mjs";
-//import { HeroSystem6eTokenHud } from "./bar3/tokenHud.mjs";
-//import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
@@ -40,6 +38,10 @@ import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
 Hooks.once("init", async function () {
+    // Compatibility warnings for initial release of v13
+    // In chrome use -/Deprecated since Version 13/ as a console log filter
+    // Some v13 warning still slip in during initial load, re-applying filter is a temp fix.
+
     // Custom HeroSystem VisionMode
     setPerceptionModes();
 

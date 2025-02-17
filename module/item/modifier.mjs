@@ -34,7 +34,12 @@ export class HeroSystem6eModifier {
                     });
                 }
             } else {
-                console.warn(`Unexpected modifier property (${key})`);
+                console.warn(
+                    `${this.item?.actor?.name}/${this.item?.name}/${this.item?.system.XMLID}/${json.XMLID}: Unexpected modifier property (${key}). Shouldn't be a problem, re-uploading from HDC should resolve.`,
+                    this,
+                    json,
+                    options,
+                );
             }
         }
 
