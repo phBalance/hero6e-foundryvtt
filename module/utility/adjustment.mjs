@@ -681,7 +681,7 @@ export async function performAdjustment(
 
         if (activeEffect.flags.adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
             isEffectFinished = true;
-            await existingEffect.update({ name: "pending delete", changes: existingEffect.changes });
+            await existingEffect.update({ changes: existingEffect.changes });
             await updateCharacteristicValue(activeEffect, { targetSystem, previousChanges });
             await existingEffect.delete();
             const chatCard = _generateAdjustmentChatCard({

@@ -138,7 +138,34 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             )) {
                 value -= parseInt(change.value) || 0;
 
-                // Add back in temporary effects (such as AID) as a seperate tag
+                // Remove RESISTANT ADVANTAGE (yes a second time, which might go negative; which is technically invalid)
+                if (ae.parent?.findModsByXmlid("RESISTANT")) {
+                    value -= parseInt(change.value) || 0;
+                }
+
+                if (value < 0) {
+                    console.warn(
+                        `${targetActor.name}: The ${ae.name} effect has reduced ${attackDefenseVs.toUpperCase()} below 0.`,
+                        targetActor,
+                        attackItem,
+                        options,
+                        ae,
+                    );
+                }
+
+                // Remove RESISTANT ADVANTAGE value
+                if (options.resistantAdvantage) {
+                    actorDefenses.defenseTags = [
+                        ...actorDefenses.defenseTags,
+                        ...createDefenseProfile(ae, attackItem, parseInt(-change.value), {
+                            ...newOptions,
+                            title: ae.flags?.XMLID,
+                            shortDesc: `${ae.flags?.XMLID}: ${ae.name}`,
+                        }),
+                    ];
+                }
+
+                // Add back in temporary effects (such as AID) as a separate tag
                 if (ae.isTemporary) {
                     actorDefenses.defenseTags = [
                         ...actorDefenses.defenseTags,
@@ -174,6 +201,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         );
         if (resistantBase) {
             newOptions.resistant = true;
+            newOptions.resistantAdvantage = true;
         }
 
         // Bases & Vehicles have resistant PD & ED
@@ -195,7 +223,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     // Items that provide defense and are active
     const activeDefenses = targetActor.items.filter(
         (o) =>
-            (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
+            (o.baseInfo?.type?.includes("defense") || o.baseInfo?.behaviors?.includes("defense")) &&
             o.isActive &&
             o.system.XMLID &&
             !(options?.ignoreDefenseIds || []).includes(o.id),
@@ -209,9 +237,10 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     }
 
     // Sort tags by value, shortDesc.  Get rid of 0 values.
-    actorDefenses.defenseTags = actorDefenses.defenseTags
-        .sort((a, b) => b.value - a.value || a.shortDesc.localeCompare(b.shortDesc))
-        .filter((o) => o.value > 0);
+    actorDefenses.defenseTags = actorDefenses.defenseTags.sort(
+        (a, b) => b.value - a.value || a.shortDesc.localeCompare(b.shortDesc),
+    );
+    //.filter((o) => o.value !== 0);
 
     // Totals
     for (const tag of actorDefenses.defenseTags) {
@@ -328,6 +357,9 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
                     if (condition.ALIAS.match(new RegExp(sfx, "i"))) {
                         return true;
                     }
+                    if (condition.OPTION_ALIAS.match(new RegExp(sfx, "i"))) {
+                        return true;
+                    }
                 }
                 break;
             case "CONDITIONALPOWER":
@@ -357,9 +389,11 @@ export async function getConditionalDefenses(token, item, avad) {
     let ignoreDefenseIds = [];
     let conditionalDefenses = token.actor.items.filter(
         (o) =>
-            (o.system.subType || o.system.type) === "defense" &&
+            (o.baseInfo?.type?.includes("defense") || o.baseInfo?.type?.includes("defense")) &&
             (o.isActive || o.effects.find(() => true)?.disabled === false) &&
-            ((o.system.MODIFIER || []).find((p) => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID)) ||
+            (o.modifiers.find((p) =>
+                ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER", "ONLYAGAINSTLIMITEDTYPE"].includes(p.XMLID),
+            ) ||
                 avad),
     );
 
