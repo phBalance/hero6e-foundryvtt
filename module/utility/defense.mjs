@@ -138,11 +138,6 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             )) {
                 value -= parseInt(change.value) || 0;
 
-                // Remove RESISTANT ADVANTAGE (yes a second time, which might go negative; which is technically invalid)
-                if (ae.parent?.findModsByXmlid("RESISTANT")) {
-                    value -= parseInt(change.value) || 0;
-                }
-
                 if (value < 0) {
                     console.warn(
                         `${targetActor.name}: The ${ae.name} effect has reduced ${attackDefenseVs.toUpperCase()} below 0.`,
