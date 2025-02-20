@@ -1412,6 +1412,11 @@ export class HeroSystem6eItem extends Item {
             return true;
         }
 
+        // Custom Light
+        // if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
+        //     return true;
+        // }
+
         return false;
     }
 
@@ -1769,8 +1774,15 @@ export class HeroSystem6eItem extends Item {
             }
 
             // CUSTOMPOWER LIGHT
-            // if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
-            //     await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
+            // if (
+            //     this.id &&
+            //     this.system.XMLID === "CUSTOMPOWER" &&
+            //     this.system.description.match(/light/i) &&
+            //     this.system.showToggle !== true
+            // ) {
+            //     this.system.showToggle = true;
+            //     changed = true;
+            //     debugger;
             // }
 
             // Carried Equipment
@@ -2366,14 +2378,14 @@ export class HeroSystem6eItem extends Item {
             }
 
             // CUSTOMPOWER LIGHT
-            if (changed && this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
-                if (!game.modules.get("ATL")?.active) {
+            if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
+                if (changed && !game.modules.get("ATL")?.active) {
                     ui.notifications.warn(
                         `You must install the <b>Active Token Effects</b> module for carried lights to work`,
                     );
                 }
                 let activeEffect = Array.from(this.effects)?.[0] || {};
-                if (this.system.active) {
+                if (this.system.active || !activeEffect.update) {
                     activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
                     activeEffect.img = "icons/svg/light.svg";
                     activeEffect.changes = [
@@ -2383,6 +2395,9 @@ export class HeroSystem6eItem extends Item {
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         },
                     ];
+                    if (!activeEffect.update) {
+                        activeEffect.disabled = true;
+                    }
 
                     if (activeEffect.update) {
                         await activeEffect.update({
@@ -2395,7 +2410,7 @@ export class HeroSystem6eItem extends Item {
                     }
                 } else {
                     // Light was turned off?
-                    if (activeEffect.update) {
+                    if (activeEffect?.update) {
                         await activeEffect.update({
                             name: activeEffect.name,
                             disabled: true,
