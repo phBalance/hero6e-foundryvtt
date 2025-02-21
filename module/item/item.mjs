@@ -347,6 +347,13 @@ export class HeroSystem6eItem extends Item {
         if (this.type === "maneuver" && this.system.active) {
             await this.update({ ["system.active"]: false });
         }
+
+        if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
+            // Invisibility status effect for SIGHTGROUP?
+            if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
+            }
+        }
     }
 
     // Largely used to determine if we can drag to hotbar
@@ -1811,20 +1818,13 @@ export class HeroSystem6eItem extends Item {
                 if (
                     this.system.charges?.value > 0 ||
                     this.system.AFFECTS_TOTAL === false ||
-                    configPowerInfo?.duration === "instant" ||
-                    this.parentItem?.system.XMLID === "MULTIPOWER"
+                    this.baseInfo?.duration === "instant" ||
+                    this.parentItem?.system.XMLID === "MULTIPOWER" ||
+                    this.baseInfo?.behaviors.includes("defaultoff")
                 ) {
                     this.system.active ??= false;
                 } else {
                     if (this.system.active === undefined) {
-                        // Special Visions (causes issues when actor is first created & uploaded)
-                        // TODO: Impelment custom HeroSystem vision mode(s)
-                        // if (this.baseInfo?.sight) {
-                        //     await activateSpecialVision(
-                        //         this,
-                        //         this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken,
-                        //     );
-                        // }
                         changed = true;
                         this.system.active ??= true;
                     }
@@ -2429,6 +2429,13 @@ export class HeroSystem6eItem extends Item {
             ) {
                 changed = true;
                 this.system.active ??= true;
+            }
+
+            if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
+                // Invisibility status effect for SIGHTGROUP?
+                if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
+                    this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
+                }
             }
 
             this._postUploadDetails();
