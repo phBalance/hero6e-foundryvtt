@@ -12,7 +12,6 @@ import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
-import { Attack } from "../utility/attack.mjs";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
@@ -979,9 +978,6 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         await characteristicRoller.roll();
         const damageRenderedResult = await characteristicRoller.render();
-        // const options = {};
-        // const action = Attack.getActionInfo(item, [], options);
-        // delete action.system; // Causes JSON.stringify error: Converting circular structure to JSON
 
         // NOTE: This is not the full information required to do damage to an actor. Call it a kludge
         //       as raw strength is not an attack item.
@@ -1001,7 +997,6 @@ export class HeroSystemActorSheet extends ActorSheet {
             stunDamage: characteristicRoller.getStunTotal(),
 
             rollerJSON: characteristicRoller.toJSON(),
-            //actionDataJSON: JSON.stringify(action),
 
             user: game.user,
         };
