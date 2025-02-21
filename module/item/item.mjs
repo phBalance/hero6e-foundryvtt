@@ -1780,21 +1780,11 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // CUSTOMPOWER LIGHT
-            // if (
-            //     this.id &&
-            //     this.system.XMLID === "CUSTOMPOWER" &&
-            //     this.system.description.match(/light/i) &&
-            //     this.system.showToggle !== true
-            // ) {
-            //     this.system.showToggle = true;
-            //     changed = true;
-            //     debugger;
-            // }
+            this.calcEndurance();
 
             // Carried Equipment
-            if (this.system.CARRIED && this.system.active === undefined) {
-                this.system.active = true;
+            if (this.system.CARRIED && this.system.active === undefined && this.system.end === 0) {
+                this.system.active ??= true;
                 changed = true;
             }
 
@@ -3768,38 +3758,40 @@ export class HeroSystem6eItem extends Item {
             .trim();
 
         // Endurance
-        system.end = this.getBaseEndCost();
-        const increasedEnd = this.findModsByXmlid("INCREASEDEND");
-        if (increasedEnd) {
-            system.end *= parseInt(increasedEnd.OPTION.replace("x", ""));
-        }
+        this.calcEndurance();
+        // system.end = this.getBaseEndCost();
+        // const increasedEnd = this.findModsByXmlid("INCREASEDEND");
+        // if (increasedEnd) {
+        //     system.end *= parseInt(increasedEnd.OPTION.replace("x", ""));
+        // }
 
-        const reducedEnd =
-            this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
-        if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
-            system.end = RoundFavorPlayerDown((system._activePointsWithoutEndMods || system.activePoints) / 10);
-            system.end = Math.max(1, RoundFavorPlayerDown(system.end / 2));
-        } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
-            system.end = 0;
-        }
+        // const reducedEnd =
+        //     this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
+        // if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
+        //     system.end = RoundFavorPlayerDown((system._activePointsWithoutEndMods || system.activePoints) / 10);
+        //     system.end = Math.max(1, RoundFavorPlayerDown(system.end / 2));
+        // } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
+        //     system.end = 0;
+        // }
 
         // Some powers do not use Endurance
-        const costsEnd = this.findModsByXmlid("COSTSEND");
-        if (!costsEnd) {
-            if (!configPowerInfo?.costEnd) {
-                system.end = 0;
-            }
 
-            // Charges typically do not cost END
-            if (this.findModsByXmlid("CHARGES")) {
-                system.end = 0;
-            }
-        } else {
-            // Full endurance cost unless it's purchased with half endurance
-            if (costsEnd.OPTIONID === "HALFEND") {
-                system.end = RoundFavorPlayerDown(system.end / 2);
-            }
-        }
+        // const costsEnd = this.findModsByXmlid("COSTSEND");
+        // if (!costsEnd) {
+        //     if (!configPowerInfo?.costEnd) {
+        //         system.end = 0;
+        //     }
+
+        //     // Charges typically do not cost END
+        //     if (this.findModsByXmlid("CHARGES")) {
+        //         system.end = 0;
+        //     }
+        // } else {
+        //     // Full endurance cost unless it's purchased with half endurance
+        //     if (costsEnd.OPTIONID === "HALFEND") {
+        //         system.end = RoundFavorPlayerDown(system.end / 2);
+        //     }
+        // }
 
         // STR only costs endurance when used.
         // Can get a bit messy, like when resisting an entangle, but will deal with that later.
@@ -5432,6 +5424,41 @@ export class HeroSystem6eItem extends Item {
 
     get costPerLevel() {
         return this.baseInfo?.costPerLevel(this);
+    }
+
+    calcEndurance() {
+        this.system.end = this.getBaseEndCost();
+        const increasedEnd = this.findModsByXmlid("INCREASEDEND");
+        if (increasedEnd) {
+            this.system.end *= parseInt(increasedEnd.OPTION.replace("x", ""));
+        }
+
+        const reducedEnd =
+            this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
+        if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
+            this.system.end = RoundFavorPlayerDown(
+                (this.system._activePointsWithoutEndMods || this.system.activePoints) / 10,
+            );
+            this.system.end = Math.max(1, RoundFavorPlayerDown(this.system.end / 2));
+        } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
+            this.system.end = 0;
+        }
+        const costsEnd = this.findModsByXmlid("COSTSEND");
+        if (!costsEnd) {
+            if (!this.baseInfo?.costEnd) {
+                this.system.end = 0;
+            }
+
+            // Charges typically do not cost END
+            if (this.findModsByXmlid("CHARGES")) {
+                this.system.end = 0;
+            }
+        } else {
+            // Full endurance cost unless it's purchased with half endurance
+            if (costsEnd.OPTIONID === "HALFEND") {
+                this.system.end = RoundFavorPlayerDown(this.system.end / 2);
+            }
+        }
     }
 }
 
