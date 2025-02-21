@@ -4,6 +4,7 @@
 
 - Full/Casual STR can now apply damage. [#1724](https://github.com/dmdorman/hero6e-foundryvtt/issues/1724)
 - Improved ability to target Entangles.
+- INVISIBILITY defaults to off.
 
 ## Version 4.0.20 20250217
 
