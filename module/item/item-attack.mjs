@@ -2064,8 +2064,8 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         let targetEntangle = targetToken.targetEntangle;
 
         // If they clicked "Apply Damage" then prompt
-        if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
-            console.log("do something");
+        // WHAT? if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
+        if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle !== true) {
             targetEntangle = await Dialog.wait({
                 title: `Confirm Target`,
                 content: `Target ${token.name} or the ENTANGLE effecting ${token.name}?`,
