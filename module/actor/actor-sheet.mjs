@@ -292,7 +292,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                 defenseTags: defenseTagsPD,
             } = getActorDefensesVsAttack(this.actor, pdAttack);
             defense.PD = defenseValuePD;
-            for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
+            for (const tag of defenseTagsPD.filter(
+                (o) => o.operation === "add" && (!o.options?.resistant || o.options?.resistantAdvantage),
+            )) {
                 defense.PDtags = `${defense.PDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.rPD = resistantValuePD;
@@ -994,7 +996,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             bodyDamage: characteristicRoller.getBodyTotal(),
             stunDamage: characteristicRoller.getStunTotal(),
 
-            roller: characteristicRoller.toJSON(),
+            rollerJSON: characteristicRoller.toJSON(),
 
             user: game.user,
         };

@@ -2221,8 +2221,8 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
 
     // AVAD All or Nothing
     if (avad) {
-        const nnd = avad.ADDER?.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
-        if (nnd && damageData.defenseAvad === 0) {
+        const nnd = avad.adders.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
+        if (nnd && damageData.defenseAvad > 0) {
             // render card
             let speaker = ChatMessage.getSpeaker({ actor: item.actor });
 

@@ -327,7 +327,16 @@ export class HeroSystem6eItem extends Item {
             if (effect.origin) {
                 await effect.delete();
             } else {
-                await effect.update({ disabled: true });
+                // Some effects like purchasing characteristics, should remain
+                // unless they are part of a multipower
+                if (effect.parent?.parentItem?.system?.XMLID === "MULIPOWER") {
+                    await effect.update({ disabled: true });
+                } else {
+                    // Otherwise turn it on if it has no charges and uses no endurance
+                    if (!effect.parent?.system.end && effect.parent?.system.charges === undefined) {
+                        await effect.update({ disabled: false });
+                    }
+                }
             }
         });
 
@@ -577,7 +586,7 @@ export class HeroSystem6eItem extends Item {
     async toggle(event) {
         let item = this;
 
-        if (!item.system.active) {
+        if (!item.isActive) {
             if (!this.actor.canAct(true, event)) {
                 return;
             }
@@ -694,22 +703,20 @@ export class HeroSystem6eItem extends Item {
             case "equipment":
                 {
                     // Is this a defense power?  If so toggle active state
-                    const configPowerInfo = item.baseInfo;
-                    if (
-                        (configPowerInfo && configPowerInfo.type.includes("defense")) ||
-                        configPowerInfo.behaviors.includes("defense") ||
-                        item.type === "equipment"
-                    ) {
-                        await item.update({ [attr]: newValue });
-                    }
+                    // const configPowerInfo = item.baseInfo;
+                    // if (
+                    //     (configPowerInfo && configPowerInfo.type.includes("defense")) ||
+                    //     configPowerInfo.behaviors.includes("defense") ||
+                    //     item.type === "equipment"
+                    // ) {
+                    //     await item.update({ [attr]: newValue });
+                    // }
 
                     // Check if there is an ActiveEffect associated with this item
                     if (firstAE) {
-                        //const newState = !newValue;
                         const newActiveState = firstAE.disabled;
-                        // await item.update({ [attr]: newState });
                         const effects = item.effects
-                            .filter(() => true)
+                            .filter((ae) => ae.disabled === newValue)
                             .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
                         for (const activeEffect of effects) {
                             await onActiveEffectToggle(activeEffect, newActiveState);
@@ -1405,6 +1412,11 @@ export class HeroSystem6eItem extends Item {
             return true;
         }
 
+        // Custom Light
+        // if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
+        //     return true;
+        // }
+
         return false;
     }
 
@@ -1762,8 +1774,15 @@ export class HeroSystem6eItem extends Item {
             }
 
             // CUSTOMPOWER LIGHT
-            // if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
-            //     await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
+            // if (
+            //     this.id &&
+            //     this.system.XMLID === "CUSTOMPOWER" &&
+            //     this.system.description.match(/light/i) &&
+            //     this.system.showToggle !== true
+            // ) {
+            //     this.system.showToggle = true;
+            //     changed = true;
+            //     debugger;
             // }
 
             // Carried Equipment
@@ -2359,14 +2378,14 @@ export class HeroSystem6eItem extends Item {
             }
 
             // CUSTOMPOWER LIGHT
-            if (changed && this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
-                if (!game.modules.get("ATL")?.active) {
+            if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
+                if (changed && !game.modules.get("ATL")?.active) {
                     ui.notifications.warn(
                         `You must install the <b>Active Token Effects</b> module for carried lights to work`,
                     );
                 }
                 let activeEffect = Array.from(this.effects)?.[0] || {};
-                if (this.system.active) {
+                if (this.system.active || !activeEffect.update) {
                     activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
                     activeEffect.img = "icons/svg/light.svg";
                     activeEffect.changes = [
@@ -2376,6 +2395,9 @@ export class HeroSystem6eItem extends Item {
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         },
                     ];
+                    if (!activeEffect.update) {
+                        activeEffect.disabled = true;
+                    }
 
                     if (activeEffect.update) {
                         await activeEffect.update({
@@ -2388,7 +2410,7 @@ export class HeroSystem6eItem extends Item {
                     }
                 } else {
                     // Light was turned off?
-                    if (activeEffect.update) {
+                    if (activeEffect?.update) {
                         await activeEffect.update({
                             name: activeEffect.name,
                             disabled: true,
@@ -2397,12 +2419,13 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // Generic defeault toggle to on (if it doesn't use charges or END)
+            // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
             if (
                 this.system.showToggle &&
                 this.system.active === undefined &&
                 this.system.charges === undefined &&
-                !this.system.end
+                !this.system.end &&
+                this.parentItem?.system.XMLID === "MULTIPOWER"
             ) {
                 changed = true;
                 this.system.active ??= true;
@@ -5065,6 +5088,14 @@ export class HeroSystem6eItem extends Item {
             if (this.disabledOIHID) return false;
         } catch (e) {
             console.error(e);
+        }
+
+        if (this.effect?.disabled === true && this.system.active === true) {
+            console.error(`active mismatch`, this);
+        }
+
+        if (this.effect?.disabled === false && this.system.active === false) {
+            console.error(`active mismatch`, this);
         }
 
         return this.system.active;

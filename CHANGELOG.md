@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.20 20250217 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.21 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Full/Casual STR can now apply damage. [#1724](https://github.com/dmdorman/hero6e-foundryvtt/issues/1724)
+
+## Version 4.0.20 20250217
 
 - Fixed loading failures and other issues related to compound powers within a multipower. [#1915](https://github.com/dmdorman/hero6e-foundryvtt/issues/1915)
 
