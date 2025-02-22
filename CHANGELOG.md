@@ -3,6 +3,9 @@
 ## Version 4.0.21 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Full/Casual STR can now apply damage. [#1724](https://github.com/dmdorman/hero6e-foundryvtt/issues/1724)
+- Improved ability to target Entangles.
+- INVISIBILITY defaults to off when it costs END or has CHARGES.
+- Equipment that uses END or CHARGES now defaults to off (not active).
 
 ## Version 4.0.20 20250217
 
