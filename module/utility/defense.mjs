@@ -1,5 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+import { HeroSystem6eItem } from "../item/item.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
+import { getPowerInfo } from "./util.mjs";
 
 //export function createDefenseProfile
 export function createDefenseProfile(actorItemDefense, attackItem, value, options = {}) {
@@ -411,29 +413,26 @@ export async function getConditionalDefenses(token, item, avad) {
     if (avad) {
         const pd = parseInt(token.actor.system.characteristics.pd.value);
         if (pd > 0 && item.system.INPUT === "PD") {
-            conditionalDefenses.push({
-                name: "PD",
-                id: "PD",
-                system: {
-                    XMLID: "PD",
-                    INPUT: "Physical",
-                    LEVELS: pd,
-                    description: `${pd} PD from characteristics`,
-                },
+            const pdXml = getPowerInfo({ xmlid: "PD", actor: token.actor });
+            const pdItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdXml.xml, token.actor), {
+                parent: token.actor,
             });
+            pdItem.system.LEVELS = pd;
+            pdItem._postUpload();
+            pdItem.system.description = `${pd} PD from characteristics`;
+            conditionalDefenses.push(pdItem);
         }
+
         const ed = parseInt(token.actor.system.characteristics.pd.value);
         if (ed > 0 && item.system.INPUT === "ED") {
-            conditionalDefenses.push({
-                name: "ED",
-                id: "ED",
-                system: {
-                    XMLID: "ED",
-                    INPUT: "Energy",
-                    LEVELS: ed,
-                    description: `${ed} ED from characteristics`,
-                },
+            const edXml = getPowerInfo({ xmlid: "ED", actor: token.actor });
+            const edItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edXml.xml, token.actor), {
+                parent: token.actor,
             });
+            edItem.system.LEVELS = ed;
+            edItem._postUpload();
+            edItem.system.description = `${ed} ED from characteristics`;
+            conditionalDefenses.push(edItem);
         }
     }
 
@@ -513,6 +512,10 @@ export async function getConditionalDefenses(token, item, avad) {
                 )
                     option.checked = true;
                 if (avad?.INPUT?.match(/power/i) && parseInt(defense.system.POWDLEVELS || 0) > 0) option.checked = true;
+            } else {
+                console.error(
+                    `defense (${defense.name}) against ${item.actor.name}/${item.system.XMLID} is not an instance of HeroSystem6eItem`,
+                );
             }
 
             // CONDITIONALPOWER
@@ -586,7 +589,7 @@ export async function getConditionalDefenses(token, item, avad) {
                 /"/g,
                 "",
             )}: ${item.system.description.replace(/"/g, "")}">${item.name}</span>:<ul>`;
-            for (let def of defenses) {
+            for (const def of defenses) {
                 content += `<li title="${def.system.description.replace(/"/g, "")}">${def.conditionalDefenseShortDescription}</li>`;
             }
             content += "</ul>";
