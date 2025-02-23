@@ -47,7 +47,7 @@ export function getPowerInfo(options) {
     }
 
     // Determine is5e
-    let is5e = actor?.is5e; //?.system?.is5e;
+    let is5e = actor?.is5e;
     if (is5e === undefined) {
         is5e = options.item?.system?.is5e;
     }

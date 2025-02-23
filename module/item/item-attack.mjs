@@ -1296,7 +1296,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     await pdAttack._postUpload();
     pdAttack.name ??= "KNOCKBACK";
 
-    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, pdAttack);
+    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, pdAttack, null);
 
     let defense = "";
 
@@ -2100,9 +2100,14 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
 
     // Martial Arts also have NND's which are special AVAD and always/usually PD
     if (!avad && item.system.EFFECT?.includes("NND")) {
-        avad = {
-            INPUT: "PD",
-        };
+        const pdXml = getPowerInfo({ xmlid: "PD", actor: token.actor });
+        avad = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdXml.xml, token.actor), {
+            parent: token.actor,
+        });
+        avad.system.LEVELS = 1;
+        avad._postUpload();
+
+        // Massive Kludge: MANEUVERS don't have INPUT but some of the rest of the code includes check for that
         item.system.INPUT = "PD";
     }
 
