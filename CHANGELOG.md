@@ -6,6 +6,7 @@
 - Improved ability to target Entangles.
 - INVISIBILITY defaults to off when it costs END or has CHARGES.
 - Equipment that uses END or CHARGES now defaults to off (not active).
+- Fix crashes related to NND powers and maneuvers. [#1955](https://github.com/dmdorman/hero6e-foundryvtt/issues/1955)
 
 ## Version 4.0.20 20250217
 
