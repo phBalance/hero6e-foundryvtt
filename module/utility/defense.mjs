@@ -437,9 +437,7 @@ export async function getConditionalDefenses(token, item, avad) {
     }
 
     if (conditionalDefenses.length > 0) {
-        const template2 = `systems/${HEROSYS.module}/templates/attack/item-conditional-defense-card.hbs`;
-
-        let options = [];
+        const options = [];
         for (const defense of conditionalDefenses) {
             const option = {
                 id: defense.id,
@@ -535,13 +533,14 @@ export async function getConditionalDefenses(token, item, avad) {
             options.push(option);
         }
 
-        let data = {
+        const data = {
             token,
             item,
             conditionalDefenses: options,
         };
 
-        const html = await renderTemplate(template2, data);
+        const conditionalDefenseCardTemplate = `systems/${HEROSYS.module}/templates/attack/item-conditional-defense-card.hbs`;
+        const html = await renderTemplate(conditionalDefenseCardTemplate, data);
 
         async function getDialogOutput() {
             return new Promise((resolve) => {
@@ -576,9 +575,10 @@ export async function getConditionalDefenses(token, item, avad) {
             return { ignoreDefenseIds: null, conditionalDefenses: null };
         }
 
-        let defenses = [];
-        for (let input of inputs) {
-            if (!input.checked) {
+        const defenses = [];
+        for (const input of inputs) {
+            // FIXME: PD & ED from characteristics do not have an id as they're not in the database. Ignore for simplicity but it's not fully correct.
+            if (!input.checked && input.id) {
                 ignoreDefenseIds.push(input.id);
                 defenses.push(token.actor.items.get(input.id) || conditionalDefenses.find((o) => o.id === input.id));
             }
