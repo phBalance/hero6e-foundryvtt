@@ -50,13 +50,6 @@ ol#combat-tracker {
     object-fit: cover;
     object-position: 50% 0;
     border: none;
-
-    flex: 0 0 var(--sidebar-item-height);
-    height: var(--sidebar-item-height);
-    width: var(--sidebar-item-height);
-    object-fit: cover;
-    object-position: 50% 0;
-    border: none;
 }
 
 // V12 used .directory-item .flexrow, which appears deprecated in the v13 CombatTracker examples
