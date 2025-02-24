@@ -2,6 +2,8 @@ import { HEROSYS } from "./herosystem6e.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
 
 export class HeroSystem6eCombatTracker extends CombatTracker {
+    // V12 static get defaultOptions is replaced by V13 static DEFAULT_OPTIONS = {}
+    // However I'm currently using static PARTS = {} in V13
     static get defaultOptions() {
         // v13 uses PARTS, defaultOptions isn't even called
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -13,6 +15,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
     }
 
     static initializeTemplate() {
+        // v13 uses PARTS, defaultOptions isn't even called
         if (HeroSystem6eCombatTracker.PARTS) {
             HeroSystem6eCombatTracker.PARTS.tracker.template = `systems/${HEROSYS.module}/templates/combat/tracker.hbs`;
         }

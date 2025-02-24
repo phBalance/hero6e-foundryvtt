@@ -156,10 +156,7 @@ Hooks.once("init", async function () {
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;
     CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
-
-    // Custom combat tracker doesn't work in v13 (yet)
-    // if (!foundry.utils.isNewerVersion(game.version, "13.000")) {
-    HeroSystem6eCombatTracker.initialize();
+    HeroSystem6eCombatTracker.initializeTemplate();
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
     // }
 
