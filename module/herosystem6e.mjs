@@ -158,7 +158,6 @@ Hooks.once("init", async function () {
     CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
     HeroSystem6eCombatTracker.initializeTemplate();
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
-    // }
 
     // Insert EffectsPanel template into DOM tree so it can render
     if (document.querySelector("#ui-top") !== null) {

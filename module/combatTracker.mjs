@@ -116,8 +116,14 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 segment: combatant.flags.segment,
                 holding: combatant.actor?.statuses.has("holding"),
             };
-            //if (turn.initiative !== null && !Number.isInteger(turn.initiative)) hasDecimals = true;
-            turn.css = [turn.active ? "active" : "", turn.hidden ? "hidden" : "", turn.defeated ? "defeated" : ""]
+
+            // V13 hidden is now hide
+            let constHidden = "hidden";
+            if (foundry.utils.isNewerVersion(game.version, "13.000")) {
+                constHidden = "hide";
+            }
+
+            turn.css = [turn.active ? "active" : "", turn.hidden ? constHidden : "", turn.defeated ? "defeated" : ""]
                 .join(" ")
                 .trim();
 
