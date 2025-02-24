@@ -57,8 +57,7 @@ ol#combat-tracker {
     position: relative;
     border-top: 1px solid var(--color-border-dark-1);
     display: flex;
-    flex-direction: row;
-    flex-flow: wrap;
+    flex-flow: row wrap;
     justify-content: flex-start;
     padding: 0;
 }
@@ -66,8 +65,7 @@ ol#combat-tracker {
 // V13 doesn't include flexcol
 .combat-sidebar .combat-tracker .combatant .token-name {
     display: flex;
-    flex-direction: column;
-    flex-flow: nowrap;
+    flex-flow: column nowrap;
     justify-content: flex-start;
 }
 
