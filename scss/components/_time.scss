@@ -52,6 +52,10 @@ ol#combat-tracker {
     border: none;
 }
 
+.combat-sidebar .combatant .token-name div.combatant-controls {
+    display: flex;
+}
+
 // V12 used .directory-item .flexrow, which appears deprecated in the v13 CombatTracker examples
 .combat-sidebar .combat-tracker .combatant {
     position: relative;
