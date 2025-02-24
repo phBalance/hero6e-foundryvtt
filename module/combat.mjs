@@ -3,6 +3,8 @@ import { clamp } from "./utility/compatibility.mjs";
 import { whisperUserTargetsForActor, expireEffects } from "./utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-attack.mjs";
 
+// export class HeroSystem6eCombat extends Combat {}
+
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
         super(data, context);

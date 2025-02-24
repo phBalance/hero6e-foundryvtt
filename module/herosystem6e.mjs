@@ -146,6 +146,9 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
         `systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`,
         `systems/${HEROSYS.module}/templates/chat/defense-tags-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/combat/header.hbs`,
+        `systems/${HEROSYS.module}/templates/combat/tracker.hbs`,
+        `systems/${HEROSYS.module}/templates/combat/footer.hbs`,
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
@@ -153,11 +156,8 @@ Hooks.once("init", async function () {
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;
     CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
-
-    // Custom combat tracker doesn't work in v13 (yet)
-    if (!foundry.utils.isNewerVersion(game.version, "13.000")) {
-        CONFIG.ui.combat = HeroSystem6eCombatTracker;
-    }
+    HeroSystem6eCombatTracker.initializeTemplate();
+    CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     // Insert EffectsPanel template into DOM tree so it can render
     if (document.querySelector("#ui-top") !== null) {
@@ -260,7 +260,7 @@ Hooks.on("closeTokenConfig", async (tokenConfig) => {
 
 Hooks.on("changeSidebarTab", async (app) => {
     // Make sure active token is centered in combat tracker when changing Sidebar
-    if (app.tabName === "combat" && game.combat?.active) {
+    if (app.tabName === "combat" && game.combat?.active && app.scrollToTurn) {
         app.scrollToTurn();
     }
 });

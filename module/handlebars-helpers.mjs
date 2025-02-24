@@ -16,6 +16,10 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("toLowerCase", toLowerCase);
     Handlebars.registerHelper("toUpperCase", toUpperCase);
     Handlebars.registerHelper("appliesTo", appliesTo);
+    Handlebars.registerHelper("checkInit", function (value) {
+        let myValue = Number(value) || 0;
+        return myValue > 0;
+    });
 }
 
 function indexOf(str, searchTerm) {

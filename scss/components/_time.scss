@@ -1,9 +1,15 @@
-.segment-container {
+ol#combat-tracker {
+    list-style: none;
+    margin: 0;
+    padding: 1px;
+}
+
+.combat-sidebar .combat-tracker .segment-container {
     margin: 4px 0;
     border: 1px solid #888;
 }
 
-.segment-inactive {
+.combat-sidebar .combat-tracker .segment-inactive {
     flex: 1;
     margin: 0;
     font-size: 16px;
@@ -13,7 +19,11 @@
     border-bottom: hidden;
 }
 
-.segment-has-items {
+.combat-sidebar .combat-tracker h3 {
+    font-weight: normal;
+}
+
+.combat-sidebar .combat-tracker .segment-has-items {
     flex: 1;
     margin: 0;
     font-size: 16px;
@@ -23,33 +33,47 @@
     border-bottom: 2px groove #bbb;
 }
 
-.segment-active {
+.combat-sidebar .combat-tracker .segment-active {
     background-color: var(--color-border-highlight);
-}
-
-.segment-header {
-    img {
-        flex: 0 0 36px;
-        margin-right: 5px;
-    }
-
-    h3 {
-        flex: 1;
-        margin: 0;
-        line-height: 36px;
-        font-size: 20px;
-        font-weight: 700;
-        color: #4b4a44;
-        display: inline-block;
-
-        &:hover {
-            color: #111;
-            text-shadow: 0 0 10px red;
-        }
-    }
 }
 
 .hero-combat-tracker-resource {
     font-weight: bold;
     font-size: 20px;
+}
+
+// Changed V12 tracker.hbs to be more like V13, ended up needing this for legacy V12
+.combat-sidebar .combat-tracker .token-image {
+    flex: 0 0 var(--sidebar-item-height);
+    height: var(--sidebar-item-height);
+    width: var(--sidebar-item-height);
+    object-fit: cover;
+    object-position: 50% 0;
+    border: none;
+}
+
+// V12 used .directory-item .flexrow, which appears deprecated in the v13 CombatTracker examples
+.combat-sidebar .combat-tracker .combatant {
+    position: relative;
+    border-top: 1px solid var(--color-border-dark-1);
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    padding: 0;
+}
+
+// V13 doesn't include flexcol
+.combat-sidebar .combat-tracker .combatant .token-name {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+}
+
+.combat-sidebar .combat-tracker .combatant .token-name strong {
+    flex: 0 0 24px;
+    line-height: 28px;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    font-weight: normal;
 }

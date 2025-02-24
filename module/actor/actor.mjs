@@ -12,6 +12,22 @@ import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
  * @extends {Actor}
  */
 export class HeroSystem6eActor extends Actor {
+    static Speed2Segments = [
+        [0],
+        [7],
+        [6, 12],
+        [4, 8, 12],
+        [3, 6, 9, 12],
+        [3, 5, 8, 10, 12],
+        [2, 4, 6, 8, 10, 12],
+        [2, 4, 6, 7, 9, 11, 12],
+        [2, 3, 5, 6, 8, 9, 11, 12],
+        [2, 3, 4, 6, 7, 8, 10, 11, 12],
+        [2, 3, 4, 5, 6, 8, 9, 10, 11, 12],
+        [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    ];
+
     /** @inheritdoc */
     async _preCreate(data, options, user) {
         await super._preCreate(data, options, user);
@@ -2755,4 +2771,22 @@ export class HeroSystem6eActor extends Actor {
     //     const cls = getDocumentClass("Token");
     //     return new cls(tokenData, options);
     // }
+
+    hasPhase(segmentNumber) {
+        let index = Math.min(Math.max(this.system.characteristics.spd.value, 1), 12); // Security bounds
+        let phases = HeroSystem6eActor.Speed2Segments[index];
+        //console.log("index", segmentNumber, index, phases, phases.includes(segmentNumber), HeroSystem6eActor.__speed2Segments);
+        return phases.includes(segmentNumber);
+    }
+
+    getBaseInit(segmentNumber) {
+        if (segmentNumber != this.segmentNumber) {
+            const characteristic = this.system?.initiativeCharacteristic || "dex";
+            const initValue = this.system.characteristics[characteristic]?.value || 0;
+            const r = Math.floor(Math.random(6)) + 1;
+            this.currentInit = parseInt(initValue) + Number((r / 10).toFixed(2));
+            this.segmentNumber = segmentNumber;
+        }
+        return this.currentInit;
+    }
 }
