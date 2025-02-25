@@ -1937,7 +1937,7 @@ export async function _onApplyDamage(event) {
                 const ae = token.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
                 if (ae) {
                     const entangle = fromUuidSync(ae.origin);
-                    if (entangle.findModsByXmlid("TAKESNODAMAGE") || entangle.findModsByXmlid("BOTHDAMAGE") {
+                    if (entangle.findModsByXmlid("TAKESNODAMAGE") || entangle.findModsByXmlid("BOTHDAMAGE")) {
                         await _onApplyDamageToSpecificToken(toHitData, damageData, {
                             ...targetToken,
                             targetEntangle: false,
