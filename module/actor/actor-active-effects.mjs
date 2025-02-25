@@ -317,6 +317,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/person-running.svg`,
                 changes: [
                     {
+                        key: "system.characteristics.ocv.value",
+                        value: 0,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                    {
                         key: "system.characteristics.dcv.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
