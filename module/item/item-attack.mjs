@@ -2583,6 +2583,15 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
         return ui.notifications.error(`Damaging ${entangleAE.flags.XMLID} is not currently supported.`);
     }
 
+    // We don't support adjustment powers on entangles
+    // TODO: Add drian body support for entangles
+    if (attackItem.baseInfo?.type.includes("adjustment")) {
+        ui.notifications.error(
+            `An entangle (${fromUuidSync(entangleAE.origin).name || entangleAE.name}) is not a supported target for an adjustment power (${attackItem.name}).`,
+        );
+        return;
+    }
+
     let defense;
     let defenseType;
     switch (attackItem?.system.class) {
