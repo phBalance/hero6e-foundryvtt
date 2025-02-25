@@ -1923,13 +1923,27 @@ export async function _onApplyDamage(event) {
                 tokenId: token.id,
                 name: token.name,
                 subTarget: null,
-                targetEntangle: false,
+                targetEntangle: undefined,
             });
         }
     } else {
         // Apply to all provided targets
         for (const targetToken of targetTokens) {
             await _onApplyDamageToSpecificToken(toHitData, damageData, targetToken);
+
+            // If entangle is transparent to damage, damage actor too
+            if (targetToken.targetEntangle) {
+                const ae = targetToken.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+                if (ae) {
+                    const entangle = fromUuidSync(ae.origin);
+                    if (entangle.findModsByXmlid("TAKESNODAMAGE")) {
+                        await _onApplyDamageToSpecificToken(toHitData, damageData, {
+                            ...targetToken,
+                            targetEntangle: false,
+                        });
+                    }
+                }
+            }
         }
     }
 
@@ -2071,7 +2085,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
 
         // If they clicked "Apply Damage" then prompt
         // WHAT? if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
-        if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle !== true) {
+        if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle === undefined) {
             targetEntangle = await Dialog.wait({
                 title: `Confirm Target`,
                 content: `Target ${token.name} or the ENTANGLE effecting ${token.name}?`,
