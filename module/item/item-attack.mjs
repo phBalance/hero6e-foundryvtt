@@ -1990,6 +1990,12 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
+    // Remove haymaker status
+    const haymakerAe = item.actor?.effects.find((effect) => effect.statuses.has("haymaker"));
+    if (haymakerAe) {
+        item.actor.removeActiveEffect(haymakerAe);
+    }
+
     const damageRoller = HeroRoller.fromJSON(damageData.roller);
 
     const aoeTemplate =
