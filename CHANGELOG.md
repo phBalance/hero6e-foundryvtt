@@ -7,8 +7,9 @@
 - INVISIBILITY defaults to off when it costs END or has CHARGES.
 - Equipment that uses END or CHARGES now defaults to off (not active).
 - Fix crashes related to NND powers and maneuvers. [#1955](https://github.com/dmdorman/hero6e-foundryvtt/issues/1955)
-- Haymaker status removed when applying damage [#1948](https://github.com/dmdorman/hero6e-foundryvtt/issues/1948)
+- Haymaker status removed when applying damage. [#1948](https://github.com/dmdorman/hero6e-foundryvtt/issues/1948)
 - NONCOMBAT status applies OCV=0 [#1946](https://github.com/dmdorman/hero6e-foundryvtt/issues/1946)
+- Improved effects panel to show power description. [#1943](https://github.com/dmdorman/hero6e-foundryvtt/issues/1943)
 
 ## Version 4.0.20 20250217
 
