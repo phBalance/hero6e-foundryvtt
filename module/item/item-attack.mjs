@@ -1933,10 +1933,11 @@ export async function _onApplyDamage(event) {
 
             // If entangle is transparent to damage, damage actor too
             if (targetToken.targetEntangle) {
-                const ae = targetToken.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+                const token = canvas.scene.tokens.get(targetToken.tokenId);
+                const ae = token.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
                 if (ae) {
                     const entangle = fromUuidSync(ae.origin);
-                    if (entangle.findModsByXmlid("TAKESNODAMAGE")) {
+                    if (entangle.findModsByXmlid("TAKESNODAMAGE") || entangle.findModsByXmlid("BOTHDAMAGE") {
                         await _onApplyDamageToSpecificToken(toHitData, damageData, {
                             ...targetToken,
                             targetEntangle: false,
