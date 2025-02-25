@@ -402,6 +402,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 .sort((a, b) => a.name.localeCompare(b.name));
             data.allConstantEffects = this.actor.getConstantEffects();
             data.allPersistentEffects = this.actor.getPersistentEffects();
+            data.allInherentEffects = this.actor.getInherentEffects();
 
             // Add defenses (without active effects) to actorEffects.
             // This provides a nice way to see ALL powers that are effecting
@@ -411,7 +412,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             for (const d of defensePowers) {
                 d.disabled = !d.isActive;
-                switch (d.baseInfo?.duration) {
+                switch (d.duration) {
                     case "instant":
                         // Might Vary
                         switch (d.system.XMLID) {
