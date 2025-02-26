@@ -1923,13 +1923,28 @@ export async function _onApplyDamage(event) {
                 tokenId: token.id,
                 name: token.name,
                 subTarget: null,
-                targetEntangle: false,
+                targetEntangle: undefined,
             });
         }
     } else {
         // Apply to all provided targets
         for (const targetToken of targetTokens) {
             await _onApplyDamageToSpecificToken(toHitData, damageData, targetToken);
+
+            // If entangle is transparent to damage, damage actor too
+            if (targetToken.targetEntangle) {
+                const token = canvas.scene.tokens.get(targetToken.tokenId);
+                const ae = token.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+                if (ae) {
+                    const entangle = fromUuidSync(ae.origin);
+                    if (entangle.findModsByXmlid("TAKESNODAMAGE") || entangle.findModsByXmlid("BOTHDAMAGE")) {
+                        await _onApplyDamageToSpecificToken(toHitData, damageData, {
+                            ...targetToken,
+                            targetEntangle: false,
+                        });
+                    }
+                }
+            }
         }
     }
 
@@ -1988,6 +2003,12 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
         // For example if the attack item was deleted or the HDC was uploaded again.
         console.warn(damageData.itemId);
         return ui.notifications.error(`Attack details are no longer available.`);
+    }
+
+    // Remove haymaker status
+    const haymakerAe = item.actor?.effects.find((effect) => effect.statuses.has("haymaker"));
+    if (haymakerAe) {
+        item.actor.removeActiveEffect(haymakerAe);
     }
 
     const damageRoller = HeroRoller.fromJSON(damageData.roller);
@@ -2065,7 +2086,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
 
         // If they clicked "Apply Damage" then prompt
         // WHAT? if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
-        if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle !== true) {
+        if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle === undefined) {
             targetEntangle = await Dialog.wait({
                 title: `Confirm Target`,
                 content: `Target ${token.name} or the ENTANGLE effecting ${token.name}?`,
@@ -2575,6 +2596,15 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     // Make sure this is an ENTANGLE
     if (entangleAE.flags.XMLID !== "ENTANGLE") {
         return ui.notifications.error(`Damaging ${entangleAE.flags.XMLID} is not currently supported.`);
+    }
+
+    // We don't support adjustment powers on entangles
+    // TODO: Add drian body support for entangles
+    if (attackItem.baseInfo?.type.includes("adjustment")) {
+        ui.notifications.error(
+            `An entangle (${fromUuidSync(entangleAE.origin).name || entangleAE.name}) is not a supported target for an adjustment power (${attackItem.name}).`,
+        );
+        return;
     }
 
     let defense;

@@ -68,6 +68,12 @@ export class EffectsPanel extends Application {
                         continue;
                     }
                 }
+                if (!ae.description) {
+                    // Active effects may have empty description, which we may enhance
+                    ae.description = undefined;
+                }
+                ae.description ??= fromUuidSync(ae.origin)?.system.description;
+                ae.description ??= ae.parent?.system.description;
                 context.effects.push(ae);
             }
 

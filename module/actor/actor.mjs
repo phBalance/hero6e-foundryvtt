@@ -290,6 +290,7 @@ export class HeroSystem6eActor extends Actor {
 
             if (data.system.characteristics.stun.value > 0) {
                 this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
+                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleeding);
             }
         }
 
@@ -1358,28 +1359,19 @@ export class HeroSystem6eActor extends Actor {
 
     getConstantEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter(
-                (ae) =>
-                    !ae.duration.duration &&
-                    ae.statuses.size === 0 &&
-                    (!ae.flags?.XMLID ||
-                        getPowerInfo({
-                            xmlid: ae.flags?.XMLID,
-                            actor: this,
-                        })?.duration !== "persistent"),
-            )
+            .filter((ae) => !ae.isTemporary && ae.parent.duration === "constant")
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
     getPersistentEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter(
-                (ae) =>
-                    !ae.duration.duration &&
-                    ae.statuses.size === 0 &&
-                    ae.flags?.XMLID &&
-                    getPowerInfo({ xmlid: ae.flags?.XMLID, actor: this })?.duration === "persistent",
-            )
+            .filter((ae) => !ae.isTemporary && ae.parent.duration === "persistent")
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    getInherentEffects() {
+        return Array.from(this.allApplicableEffects())
+            .filter((ae) => !ae.isTemporary && ae.parent.duration === "inherent")
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 

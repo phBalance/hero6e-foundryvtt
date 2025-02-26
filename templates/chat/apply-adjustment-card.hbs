@@ -45,6 +45,7 @@
             {{else}}
                 {{#if (eq adj.adjustmentDamageThisApplication 0)}}
                     No effect on {{adj.adjustmentTarget}}.
+                {{else if (eq adj.adjustmentDamageThisApplication NaN)}}
                 {{else}}
                     {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained.
                 {{/if}}

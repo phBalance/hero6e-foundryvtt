@@ -5460,6 +5460,25 @@ export class HeroSystem6eItem extends Item {
             }
         }
     }
+
+    get duration() {
+        let _duration = this.baseInfo?.duration;
+        if (this.baseInfo?.behaviors.includes("success")) {
+            _duration ??= "instant";
+        }
+
+        if (this.modifiers.find((o) => o.XMLID === "INHERENT")) {
+            return "inherent";
+        }
+        if (this.modifiers.find((o) => o.XMLID === "NONPERSISTENT")) {
+            return "constant";
+        }
+        if (this.modifiers.find((o) => o.XMLID === "PERSISTENT")) {
+            return "persistent";
+        }
+
+        return _duration;
+    }
 }
 
 export function getItem(id) {

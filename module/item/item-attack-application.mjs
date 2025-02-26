@@ -135,6 +135,12 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.targetEntangle = false;
             }
 
+            // Adjustment attacks do not target an ENTANGLE
+            if (data.item.baseInfo?.type.includes("adjustment")) {
+                data.entangleExists = false;
+                data.targetEntangle = false;
+            }
+
             const aoe = item.aoeAttackParameters({ levels: data.effectiveLevels });
             data.hitLocationsEnabled = game.settings.get(HEROSYS.module, "hit locations");
             data.hitLocationSideEnabled =
