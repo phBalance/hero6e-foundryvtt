@@ -15,7 +15,8 @@
 - Improved/fixed display of temporary, constant, persistent, and inherent effects/powers in the OTHERS tab of the actor sheet. [#1940](https://github.com/dmdorman/hero6e-foundryvtt/issues/1940)
 - Improved Social and physiological complication rolls. [#1729](https://github.com/dmdorman/hero6e-foundryvtt/issues/1729)
 - Improved Stunned, KnockedOut, and Dead statuses. NPC's now show as dead/defeated at -11 STUN. Automaton's show as dead at 0 BODY. [#1891](https://github.com/dmdorman/hero6e-foundryvtt/issues/1891) [#605](https://github.com/dmdorman/hero6e-foundryvtt/issues/605) [#171](https://github.com/dmdorman/hero6e-foundryvtt/issues/171)
-- Simplified velocity calculations to ensure there are no negative velocity values with combat maneuvers. Velocity support is still minimalistic and largely untracked. [#1925](https://github.com/dmdorman/hero6e-foundryvtt/issues/171)
+- Simplified velocity calculations to ensure there are no negative velocity values with combat maneuvers. Velocity support is still minimalistic and largely untracked. [#1925](https://github.com/dmdorman/hero6e-foundryvtt/issues/1925)
+- AUTOMATON's no longer take STUN from KnockBack damage. [#1926](https://github.com/dmdorman/hero6e-foundryvtt/issues/1926)
 
 ## Version 4.0.20 20250217
 

@@ -1390,6 +1390,18 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const damageDetail = await _calcDamage(damageRoller, pdAttack, damageData);
     damageDetail.effects = `${damageDetail.effects || ""} Prone`.replace("; ", "").trim();
 
+    const CANNOTBESTUNNED = token.actor.items.find((o) => o.system.XMLID === "AUTOMATON");
+    if (CANNOTBESTUNNED) {
+        defenseTags.push({
+            name: "TAKES NO STUN",
+            value: "immune",
+            resistant: false,
+            title: "Ignore the STUN damage from any attack",
+        });
+        damageDetail.effects = damageDetail.effects + "; Takes No STUN";
+        damageDetail.stun = 0;
+    }
+
     const cardData = {
         item: pdAttack,
 

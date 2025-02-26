@@ -319,11 +319,16 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Mark as defeated in combat tracker (automaton)
-        if (this.type === "automaton" && data.system.characteristics.body.value <= 0) {
-            this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                overlay: true,
-                active: true,
-            });
+        if (data.system?.characteristics?.body?.value <= 0) {
+            const CANNOTBESTUNNED = this.items.find(
+                (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
+            );
+            if (CANNOTBESTUNNED) {
+                this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                    overlay: true,
+                    active: true,
+                });
+            }
         }
 
         // Mark as defeated in combat tracker (pc/npc)
