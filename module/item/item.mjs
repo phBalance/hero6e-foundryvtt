@@ -3803,6 +3803,11 @@ export class HeroSystem6eItem extends Item {
         if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
             system.end = 0;
         }
+
+        // Some names should include modifiers
+        if (this.type.includes("disadvantage")) {
+            this.name = system.description;
+        }
     }
 
     createPowerDescriptionModifier(modifier) {
@@ -4563,12 +4568,34 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 14;
             }
 
+            const intensity = skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTIONID;
+            let intensityValue = 0;
+
+            switch (intensity) {
+                case "MINOR":
+                    intensityValue = 0;
+                    break;
+                case "MAJOR:":
+                    intensityValue = 5;
+                    break;
+                case "SEVERE":
+                    intensityValue = 10;
+                    break;
+                default:
+                    console.error(`unknown intensity ${intensity} for SOCIALLIMITATION`);
+            }
+
             tags.push({
                 value: rollValue,
-                name: "Occurrence Chance",
+                name: `${occurChance} occurence`,
             });
 
-            roll = `${rollValue}-`;
+            tags.push({
+                value: intensityValue,
+                name: `${intensity} intensity`,
+            });
+
+            roll = `${rollValue + intensityValue}-`;
         } else if (skillData.XMLID === "CONTACT") {
             const levels = parseInt(skillData.LEVELS || 1);
             let rollValue;
