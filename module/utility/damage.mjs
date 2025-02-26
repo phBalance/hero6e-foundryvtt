@@ -145,6 +145,8 @@ export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengt
         }
     }
 
+    // PH: FIXME: None of the minima modifiers (two hands, brace, etc) are considered here.
+
     return strMinimumValue;
 }
 
@@ -823,9 +825,10 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
 
     const baseEffectiveStrength = effectiveStrength(item, options);
     let str = baseEffectiveStrength;
+    const baseEffectiveStrDc = baseEffectiveStrength / 5;
 
     // NOTE: intentionally using fractional DC here.
-    const strDiceParts = calculateDicePartsFromDcForItem(item, str / 5);
+    const strDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc);
     const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
 
     dicePartsBundle.baseAttackItem = actorStrengthItem;
@@ -841,15 +844,16 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     const strMinimumModifier = item.findModsByXmlid("STRMINIMUM");
     if (strMinimumModifier) {
         const strMinimum = calculateStrengthMinimumForItem(item, strMinimumModifier);
-        const strMinDc = Math.ceil(strMinimum / 5);
+        str = baseEffectiveStrength - strMinimum;
+        const actualStrDc = Math.floor(str / 5);
 
-        const strMinDiceParts = calculateDicePartsFromDcForItem(item, strMinDc / 5);
+        const strMinDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc - actualStrDc);
         const formula = dicePartsToFullyQualifiedEffectFormula(item, strMinDiceParts);
 
-        dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, strMinDiceParts);
+        dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strMinDiceParts);
         dicePartsBundle.tags.push({
             value: `-(${formula})`,
-            name: "STR Minimum",
+            name: `STR Minimum ${strMinimum}`,
             title: `${strMinimumModifier.ALIAS} ${strMinimumModifier.OPTION_ALIAS} -> -(${formula})`,
         });
     }
@@ -857,7 +861,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     // Any STRDC modifiers such as MOVEBY?
     const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
     if (strMatch) {
-        // It doesn't make sense to halve negative strength
+        // It doesn't make sense to halve negative strength but haven't seen a rule for it.
         if (str >= 0) {
             const strBeforeManeuver = str;
             const divisor = parseInt(strMatch[1]);

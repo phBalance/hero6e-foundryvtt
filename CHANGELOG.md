@@ -7,12 +7,12 @@
 - INVISIBILITY defaults to off when it costs END or has CHARGES.
 - Equipment that uses END or CHARGES now defaults to off (not active).
 - Fix crashes related to NND powers and maneuvers. [#1955](https://github.com/dmdorman/hero6e-foundryvtt/issues/1955)
+- Correct STRMINIMUM calculations when velocity is not involved. [#1959](https://github.com/dmdorman/hero6e-foundryvtt/issues/1959)
 - Haymaker status removed when applying damage. [#1948](https://github.com/dmdorman/hero6e-foundryvtt/issues/1948)
 - NONCOMBAT status applies OCV=0 [#1946](https://github.com/dmdorman/hero6e-foundryvtt/issues/1946)
 - Improved effects panel to show power description. [#1943](https://github.com/dmdorman/hero6e-foundryvtt/issues/1943)
 - AOE Attacks that include an ENTANGLE that "Takes No Damage From Attacks" or "Entangle And Character Both Take Damage" will damage both the ENTANGLE and the actor.
-- Improved/fixed display of temporary, constant, persistent, and inherent effects/powers in the OTHERS tab of the actor sheet. [#1940
-  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/1940)
+- Improved/fixed display of temporary, constant, persistent, and inherent effects/powers in the OTHERS tab of the actor sheet. [#1940](https://github.com/dmdorman/hero6e-foundryvtt/issues/1940)
 
 ## Version 4.0.20 20250217
 
