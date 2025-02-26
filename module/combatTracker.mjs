@@ -104,7 +104,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 img: await this._getCombatantThumbnail(combatant),
                 active: i === combat.turn,
                 owner: combatant.isOwner,
-                defeated: combatant.isDefeated,
+                defeated: combatant.isDefeated || combatant.actor?.statuses.has("dead"),
                 hidden: combatant.hidden,
                 initiative: combatant.initiative,
                 initiativeTooltip: combatant.flags.initiativeTooltip,

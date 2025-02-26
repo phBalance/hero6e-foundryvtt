@@ -2343,7 +2343,11 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
             // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
             // all: "PCs and NPCs (end, stun, body)"
             if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
-                token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
+                //token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
+                token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                    overlay: true,
+                    active: true,
+                });
             }
         }
     }
