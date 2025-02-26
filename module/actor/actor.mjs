@@ -2761,6 +2761,25 @@ export class HeroSystem6eActor extends Actor {
         return price.toFixed(2);
     }
 
+    get activeMovement() {
+        const movementPowers = this.system.is5e ? CONFIG.HERO.movementPowers5e : CONFIG.HERO.movementPowers;
+
+        let movementItems = [];
+        for (const key of Object.keys(this.system.characteristics).filter((o) => movementPowers[o])) {
+            const char = this.system.characteristics[key];
+            if ((parseInt(char.value) || 0) > 0) {
+                char._id = key;
+                char.name = movementPowers[key];
+                movementItems.push(char);
+            }
+        }
+        const _activeMovement =
+            movementItems.length === 0
+                ? "none"
+                : movementItems.find((o) => o._id === this.flags.activeMovement)?._id || movementItems[0]._id;
+        return _activeMovement;
+    }
+
     /**
      * Apply any transformations to the Actor data which are caused by ActiveEffects.
      */

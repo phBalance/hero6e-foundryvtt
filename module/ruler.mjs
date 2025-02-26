@@ -426,15 +426,15 @@ export class HeroRuler extends Ruler {
  * @param {Object} token
  * @returns
  */
-export function calculateVelocityInSystemUnits(actor, token) {
+export function calculateVelocityInSystemUnits(actor, token, targetToken) {
     let velocity = 0;
 
     const combatants = game?.combat?.combatants;
 
     // In combat we can calculate the velocity using the distance moved and acceleration rules (5 units/phase per unit moved).
     // TODO: This does not consider the movement power being purchased with improved acceleration.
-    if (combatants && typeof dragRuler != "undefined" && token) {
-        const distance = dragRuler.getMovedDistanceFromToken(token);
+    if (combatants && typeof dragRuler != "undefined" && targetToken) {
+        const distance = dragRuler.getMovedDistanceFromToken(targetToken);
         const ranges = dragRuler.getRangesFromSpeedProvider(token);
         const speed = ranges.length > 1 ? ranges[1].range : 0;
         let delta = distance;
@@ -459,11 +459,16 @@ export function calculateVelocityInSystemUnits(actor, token) {
         }
     }
 
-    // Simplistic velocity calc using running & flight
-    // TODO: Should we not at least get the presently enabled movement type(s) to make a guess?
+    // Simplistic velocity calc using current movement
+    // TODO: This is likely wrong for Teleport and other movements with quirky velocity rules.
     else {
-        velocity = parseInt(actor.system.characteristics.running.value || 0);
-        velocity = Math.max(velocity, parseInt(actor.system.characteristics.flight.value || 0));
+        velocity = parseInt(actor.system.characteristics[actor.activeMovement]?.value || 0);
+    }
+
+    // Sanity check
+    if (velocity <= 0) {
+        console.warn(`Calculated velocity of ${velocity} is invalid, using simplistic calculation`);
+        velocity = Math.max(0, parseInt(actor.system.characteristics[actor.activeMovement]?.value || 0));
     }
 
     return velocity;

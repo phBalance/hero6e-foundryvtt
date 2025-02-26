@@ -102,8 +102,10 @@ export async function collectActionDataBeforeToHitOptions(item) {
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
     if ((item.system.EFFECT || "").match(/v\/\d+/)) {
-        const tokens = item.actor.getActiveTokens();
-        const token = tokens[0];
+        // Educated guess for token
+        const token =
+            actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+            actor.getActiveTokens()[0];
 
         data.showVelocity = true;
         data.velocity = calculateVelocityInSystemUnits(item.actor, token);
