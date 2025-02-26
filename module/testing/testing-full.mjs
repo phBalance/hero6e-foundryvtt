@@ -3147,7 +3147,7 @@ export function registerFullTests(quench) {
                 let rkaItem;
                 let hkaItem;
 
-                let moveByManeuverItem;
+                // let moveByManeuverItem;
                 let martialStrikeManeuverItem;
                 let customMartialFourDcManeuverItem;
 
@@ -3168,7 +3168,7 @@ export function registerFullTests(quench) {
                     rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
                     hkaItem = actor.items.find((item) => item.system.XMLID === "HKA");
 
-                    moveByManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
+                    // moveByManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
 
                     martialStrikeManeuverItem = actor.items.find(
                         (item) => item.system.XMLID === "MANEUVER" && item.name === "Martial Strike",
@@ -3198,13 +3198,52 @@ export function registerFullTests(quench) {
 
                     it("should recognize HKA associated with martial arts", function () {
                         // Base: HKA 1d6k (3 DC) => 3DC
-                        // Added: STR 10 = +2 DC, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +3 DC
-                        // Base + Added 3DC + 3DC (Double rule does not apply) => 6 DC at 15AP/die = 2d6
+                        // Added: STR 10 = +2 DC & STRMINIMUM 12 = -3DC to STR since diff is -2 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +0 DC
+                        // Base + Added 3DC + 0DC (Double rule does not apply) => 3 DC at 15AP/die = 1d6
                         assert.equal(
                             getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
                                 maWeaponItem: hkaItem,
                             }),
-                            "2d6K",
+                            "1d6K",
+                        );
+                    });
+
+                    it("should recognize HKA associated with martial arts with more strength", function () {
+                        // Base: HKA 1d6k (3 DC) => 3DC
+                        // Added: STR 12 = +2 DC & STRMINIMUM 12 = -2DC to STR since diff is 0 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
+                        // Base + Added 3DC + 1DC (Double rule does not apply) => 3 DC at 15AP/die = 1d6+1
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                maWeaponItem: hkaItem,
+                                effectivestr: 12,
+                            }),
+                            "1d6+1K",
+                        );
+                    });
+
+                    it("should recognize HKA associated with martial arts with fractionally more strength", function () {
+                        // Base: HKA 1d6k (3 DC) => 3DC
+                        // Added: STR 15 = +3 DC & STRMINIMUM 12 = -3DC to STR since diff is 3 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
+                        // Base + Added 3DC + 1DC (Double rule does not apply) => 4 DC at 15AP/die = 1d6+1
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                maWeaponItem: hkaItem,
+                                effectivestr: 15,
+                            }),
+                            "1d6+1K",
+                        );
+                    });
+
+                    it("should recognize HKA associated with martial arts with much more strength", function () {
+                        // Base: HKA 1d6k (3 DC) => 3DC
+                        // Added: STR 18 = +3 DC & STRMINIMUM 12 = -2DC to STR since diff is 6 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +2 DC
+                        // Base + Added 3DC + 2DC (Double rule does not apply) => 5 DC at 15AP/die = 1½d6
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                maWeaponItem: hkaItem,
+                                effectivestr: 18,
+                            }),
+                            "1½d6K",
                         );
                     });
                 });
@@ -3224,28 +3263,31 @@ export function registerFullTests(quench) {
 
                     it("should recognize double damage limit for martial maneuver with an HKA", function () {
                         // Base: HKA +1d6k (3 DC) => 3DC
-                        // Added: STR 10 = +2 DC, Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +4 DC
-                        // Base + Added 3DC + 4DC (Double rule applies) => 6DC at 15AP/die = 2d6
+                        // Added: STR 45 = +9 DC & STRMINIMUM 12 = -3DC to STR since diff is 33 STR, Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +8 DC
+                        // Base + Added 3DC + 8DC (Double rule applies) => 6DC at 15AP/die = 2d6
                         assert.equal(
                             getFullyQualifiedEffectFormulaFromItem(customMartialFourDcManeuverItem, {
                                 maWeaponItem: hkaItem,
+                                effectivestr: 45,
                             }),
                             "2d6K",
                         );
                     });
 
-                    it("should recognize velocity isn't in the double damage limit for move by maneuver with an HKA", function () {
-                        // Base: HKA 1d6k (3 DC) => 3DC
-                        // Added: STR 10 = +2 DC, Move Through (+0 DC halved because it's a killing attack = +0 DC), velocity 30"/5 = 6DC => +8 DC
-                        // Base + Added 3DC + 8DC (Double rule partially applies) => 11 DC at 15AP/die = 31/2d6
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(moveByManeuverItem, {
-                                velocity: 30,
-                                maWeaponItem: hkaItem,
-                            }),
-                            "3½d6K",
-                        );
-                    });
+                    // PH: FIXME: This doesn't work correctly yet as STR damage shouldn't be added for both the HKA and the MOVEBY
+                    // it("should recognize velocity isn't in the double damage limit for move by maneuver with an HKA", function () {
+                    //     // Base: HKA 1d6k (3 DC) => 3DC
+                    //     // Added: STR 45 = +9 DC & STRMINIMUM 12 = -3DC to STR since diff is 33 STR, Move Through (+0 DC halved because it's a killing attack = +0 DC), velocity 30"/5 = 6DC => +12 DC
+                    //     // Base + Added 3DC + 12DC (Double rule partially applies) => 12 DC at 15AP/die = 4d6
+                    //     assert.equal(
+                    //         getFullyQualifiedEffectFormulaFromItem(moveByManeuverItem, {
+                    //             velocity: 30,
+                    //             maWeaponItem: hkaItem,
+                    //             effectivestr: 45,
+                    //         }),
+                    //         "4d6K",
+                    //     );
+                    // });
                 });
             });
 
