@@ -62,8 +62,11 @@ export class HeroSystem6eActor extends Actor {
     /// Override and should probably be used instead of add/remove ActiveEffect
     async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
         if (
-            statusId === HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id ||
-            statusId === HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id
+            [
+                HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id,
+                HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
+                HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
+            ].includes(statusId)
         ) {
             overlay = true;
         }
