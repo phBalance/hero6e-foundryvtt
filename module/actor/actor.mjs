@@ -59,7 +59,25 @@ export class HeroSystem6eActor extends Actor {
         });
     }
 
+    /// Override and should probably be used instead of add/remove ActiveEffect
+    async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
+        if (
+            [
+                HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id,
+                HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
+                HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
+            ].includes(statusId)
+        ) {
+            overlay = true;
+        }
+        return super.toggleStatusEffect(statusId, { active, overlay });
+    }
+
     async removeActiveEffect(activeEffect) {
+        console.warn("Consider using 'toggleStatusEffect'", this);
+        if (!activeEffect) {
+            console.warn("removeActiveEffect is missing a parameter", this);
+        }
         const existingEffect = Array.from(this.allApplicableEffects()).find(
             (o) => o.id === activeEffect.id || o.statuses.has(activeEffect.id),
         );
@@ -85,6 +103,7 @@ export class HeroSystem6eActor extends Actor {
     // Assumes ActiveEffect is a statusEffects.
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
     async addActiveEffect(activeEffect) {
+        console.warn("Consider using 'toggleStatusEffect'", this);
         const newEffect = foundry.utils.deepClone(activeEffect);
 
         // Check for standard StatusEffects
@@ -269,29 +288,74 @@ export class HeroSystem6eActor extends Actor {
         // If stun was changed and running under triggering users context
         if (data?.system?.characteristics?.stun && userId === game.user.id) {
             if (data.system.characteristics.stun.value <= 0) {
-                this.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
+                this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
+                    overlay: true,
+                    active: true,
+                });
             }
 
+            const stunThreshold = this.type === "pc" ? 30 : 10;
+
             // Mark as defeated in combat tracker
-            if (data.type != "pc" && data.system.characteristics.stun.value < -10) {
-                const combatant = game.combat?.combatants.find((o) => o.actorId === data._id);
-                if (combatant && !combatant.defeated) {
-                    combatant.update({ defeated: true });
-                }
+            // Once an NPC is Knocked Out below the -10 STUN level,
+            // he should normally remain unconscious until the fight ends.
+            if (data.system.characteristics.stun.value < -stunThreshold) {
+                this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                    overlay: true,
+                    active: true,
+                });
             }
 
             // Mark as undefeated in combat tracker
-            if (data.type != "pc" && data.system.characteristics.stun.value > -10) {
-                let combatant = game.combat?.combatants?.find((o) => o.actorId === data._id);
-                if (combatant && combatant.defeated) {
-                    combatant.update({ defeated: false });
-                }
+            if (data.system.characteristics.stun.value >= -stunThreshold) {
+                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
             }
 
             if (data.system.characteristics.stun.value > 0) {
                 this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
-                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleeding);
+                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
+                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
             }
+        }
+
+        // Mark as defeated in combat tracker (automaton)
+        if (data.system?.characteristics?.body?.value <= 0) {
+            const CANNOTBESTUNNED = this.items.find(
+                (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
+            );
+            if (CANNOTBESTUNNED) {
+                this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                    overlay: true,
+                    active: true,
+                });
+            }
+        }
+
+        // Mark as defeated in combat tracker (pc/npc)
+        if (
+            ["pc", "npc"].includes(this.type) &&
+            data.system?.characteristics?.body?.value <= -this.system.characteristics.body.max
+        ) {
+            this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                overlay: true,
+                active: true,
+            });
+        }
+
+        // Mark as undefeated in combat tracker (automaton)
+        if (this.type === "automaton" && data.system.characteristics.body.value > 0) {
+            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
+            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
+            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+        }
+
+        // Mark as undefeated in combat tracker (pc/npc)
+        if (
+            ["pc", "npc"].includes(this.type) &&
+            data.system?.characteristics?.body?.value > 0 &&
+            this.system.characteristics.stun.value >= -30
+        ) {
+            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
         }
 
         // If STR was change check encumbrance
@@ -2700,6 +2764,25 @@ export class HeroSystem6eActor extends Actor {
         const equipment = this.items.filter((o) => o.type === "equipment" && o.isActive);
         const price = equipment.reduce((a, b) => a + parseFloat(b.system.PRICE), 0);
         return price.toFixed(2);
+    }
+
+    get activeMovement() {
+        const movementPowers = this.system.is5e ? CONFIG.HERO.movementPowers5e : CONFIG.HERO.movementPowers;
+
+        let movementItems = [];
+        for (const key of Object.keys(this.system.characteristics).filter((o) => movementPowers[o])) {
+            const char = this.system.characteristics[key];
+            if ((parseInt(char.value) || 0) > 0) {
+                char._id = key;
+                char.name = movementPowers[key];
+                movementItems.push(char);
+            }
+        }
+        const _activeMovement =
+            movementItems.length === 0
+                ? "none"
+                : movementItems.find((o) => o._id === this.flags.activeMovement)?._id || movementItems[0]._id;
+        return _activeMovement;
     }
 
     /**

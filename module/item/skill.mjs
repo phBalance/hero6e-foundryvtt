@@ -237,9 +237,21 @@ async function skillRoll(item, actor, target) {
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
 
+    let disadFlavor = "";
+    switch (item.system.XMLID) {
+        case "PSYCHOLOGICALLIMITATION":
+            disadFlavor =
+                "Character is typically required to react to the psychological limitation dictates for at least one phase, followed by an EGO roll to overcome the psychological limitation.";
+            break;
+        case "SOCIALLIMITATION":
+            disadFlavor =
+                "Success of social limitation roll typically means the character is required to react to (or is effected by) the social limitation dictates.";
+            break;
+    }
+
     const flavor = `${item.name.toUpperCase()} (${successValue}-) roll ${succeeded ? "succeeded" : "failed"} by ${
-        autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
-    }`;
+        autoSuccess === undefined ? `${Math.abs(margin)}. ` : `rolling ${total}. `
+    } ${disadFlavor}`;
     const rollHtml = await skillRoller.render(flavor);
 
     // render card

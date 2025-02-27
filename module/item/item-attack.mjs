@@ -102,8 +102,10 @@ export async function collectActionDataBeforeToHitOptions(item) {
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
     if ((item.system.EFFECT || "").match(/v\/\d+/)) {
-        const tokens = item.actor.getActiveTokens();
-        const token = tokens[0];
+        // Educated guess for token
+        const token =
+            actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+            actor.getActiveTokens()[0];
 
         data.showVelocity = true;
         data.velocity = calculateVelocityInSystemUnits(item.actor, token);
@@ -1388,6 +1390,18 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const damageDetail = await _calcDamage(damageRoller, pdAttack, damageData);
     damageDetail.effects = `${damageDetail.effects || ""} Prone`.replace("; ", "").trim();
 
+    const CANNOTBESTUNNED = token.actor.items.find((o) => o.system.XMLID === "AUTOMATON");
+    if (CANNOTBESTUNNED) {
+        defenseTags.push({
+            name: "TAKES NO STUN",
+            value: "immune",
+            resistant: false,
+            title: "Ignore the STUN damage from any attack",
+        });
+        damageDetail.effects = damageDetail.effects + "; Takes No STUN";
+        damageDetail.stun = 0;
+    }
+
     const cardData = {
         item: pdAttack,
 
@@ -2343,7 +2357,11 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
             // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
             // all: "PCs and NPCs (end, stun, body)"
             if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
-                token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
+                //token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
+                token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                    overlay: true,
+                    active: true,
+                });
             }
         }
     }
