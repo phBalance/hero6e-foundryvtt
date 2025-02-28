@@ -14,6 +14,7 @@ export class Attack {
             }
         });
     }
+
     // discontinue any effects for the action
     // action effects have a flag for actions only
     // they also get pulled in the start of turn (nextPhase flag)
