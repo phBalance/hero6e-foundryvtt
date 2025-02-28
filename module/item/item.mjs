@@ -5601,6 +5601,33 @@ export class HeroSystem6eItem extends Item {
 
         return _duration;
     }
+
+// Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
+// Using a simplied version of HeroSystemItem6e.itemDataFromXml for now.
+// PH: FIXME: Probably want to move from here and consolidate
+export function createModifierOrAdderFromXml(xml) {
+    const modifierOrAdderData = {};
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    for (const attribute of xmlDoc.children[0].attributes) {
+        switch (attribute.value) {
+            case "Yes":
+            case "YES":
+                modifierOrAdderData[attribute.name] = true;
+                break;
+            case "No":
+            case "NO":
+                modifierOrAdderData[attribute.name] = false;
+                break;
+            default:
+                modifierOrAdderData[attribute.name] = attribute.value.trim();
+        }
+    }
+
+    // Create a unique ID
+    modifierOrAdderData.ID = new Date().getTime().toString();
+
+    return modifierOrAdderData;
 }
 
 export function getItem(id) {

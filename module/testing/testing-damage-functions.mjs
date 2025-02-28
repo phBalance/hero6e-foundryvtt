@@ -1,7 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { calculateDicePartsFromDcForItem, addDiceParts } from "../utility/damage.mjs";
+import { addDiceParts, calculateDicePartsFromDcForItem } from "../utility/damage.mjs";
 
 export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
