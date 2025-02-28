@@ -3,6 +3,7 @@ import { HeroSystem6eItem } from "./item.mjs";
 
 export class HeroSystem6eAdder {
     #baseInfo;
+
     constructor(json, options) {
         // These are needed first
         this.item = options.item;
