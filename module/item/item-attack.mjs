@@ -19,7 +19,7 @@ import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { activateManeuver } from "./maneuver.mjs";
+import { activateManeuver, doManeuverEffects } from "./maneuver.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 export async function chatListeners(_html) {
@@ -70,6 +70,40 @@ function isStunBasedEffectRoll(item) {
     );
 }
 
+// PH: FIXME: Should we be looking to override the existing Item JSON functions for this functionality?
+/**
+ * Turn an item into JSON
+ * @param {*} item
+ */
+function dehydrateAttackItem(item) {
+    if (item.system._active.effectiveStrItem) {
+        item.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
+    }
+
+    const stringifiedItem = JSON.stringify(item.toObject(false));
+    return stringifiedItem;
+}
+
+/**
+ *
+ * @param {Object} rollInfo
+ */
+function rehydrateAttackItemAndActor(rollInfo) {
+    const actor = fromUuidSync(rollInfo.actorUuid);
+    const item = HeroSystem6eItem.fromSource(JSON.parse(rollInfo.itemJsonStr), {
+        parent: actor,
+    });
+
+    // If there is a strength item, then we need to rehydrate it as well.
+    if (item.system._active.effectiveStrItem) {
+        item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(item.system._active.effectiveStrItem, {
+            parent: actor,
+        });
+    }
+
+    return { actor, item };
+}
+
 /**
  * Dialog box for collectActionDataBeforeToHitOptions. The action doesn't have to be an attack (such as
  * the Block maneuver).
@@ -79,7 +113,6 @@ export async function collectActionDataBeforeToHitOptions(item) {
     const token = actor.getActiveTokens()[0];
     const data = {
         originalItem: item,
-        effectiveItem: item,
         actor: actor,
         token: token,
         state: null,
@@ -87,7 +120,7 @@ export async function collectActionDataBeforeToHitOptions(item) {
     };
 
     // Uses Tk
-    let tkItems = item.actor.items.filter((o) => o.system.XMLID == "TELEKINESIS");
+    const tkItems = item.actor.items.filter((o) => o.system.XMLID == "TELEKINESIS");
     let tkStr = 0;
     for (const item of tkItems) {
         tkStr += parseInt(item.system.LEVELS) || 0;
@@ -116,7 +149,12 @@ export async function collectActionDataBeforeToHitOptions(item) {
     await new ItemAttackFormApplication(data).render(true);
 }
 
+// PH: FIXME: formData is insufficient ... why are we doing it this way?
 export async function processActionToHit(item, formData) {
+    if (!item) {
+        return ui.notifications.error(`Attack details are no longer available.`);
+    }
+
     const haymakerManeuverActive = item.actor?.items.find(
         (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
     );
@@ -129,6 +167,54 @@ export async function processActionToHit(item, formData) {
         }
     }
 
+    let _targetArray = Array.from(game.user.targets);
+    // Make sure player who rolled attack is still the same
+    if (formData.userId && formData.userId !== game.user.id && game.users.get(formData.userId)) {
+        // GM or someone else intervened.  Likely an AOE template placement confirmation.
+        // Need to check if they are the same targets
+        const _userTargetArray = Array.from(game.users.get(formData.userId).targets);
+        if (
+            JSON.stringify(_targetArray.map((o) => o.document.id)) !==
+            JSON.stringify(_userTargetArray.map((o) => o.document.id))
+        ) {
+            let html = `<table><tr><th width="50%">${game.user.name}</th><th width="50%">${game.users.get(formData.userId).name}</th></tr><tr><td><ol>`;
+            for (const target of _targetArray) {
+                html += `<li style="text-align:left">${target.name}</li>`;
+            }
+            html += "</ol></td><td><ol>";
+            for (const target of _userTargetArray) {
+                html += `<li style="text-align:left">${target.name}</li>`;
+            }
+            html += "</ol></td></tr></table>";
+            _targetArray = await Dialog.wait({
+                title: `Pick target list`,
+                content: html,
+                buttons: {
+                    gm: {
+                        label: game.user.name,
+                        callback: async function () {
+                            return _targetArray;
+                        },
+                    },
+                    user: {
+                        label: game.users.get(formData.userId).name,
+                        callback: async function () {
+                            return _userTargetArray;
+                        },
+                    },
+                },
+            });
+        }
+    }
+
+    const action = Attack.getActionInfo(item, _targetArray, formData);
+    item = action.system.item[action.current.itemId];
+    const targets = action.system.currentTargets;
+    const hthAttackItemMergeObj = {
+        hthAttackItems: action.hthAttackItems.map((hthAttack) => fromUuidSync(hthAttack.uuid)),
+    };
+
+    // PH: FIXME: Need to not pass in formData presumably or at least pass in action
     if (item.getAoeModifier()) {
         await doAoeActionToHit(item, formData);
     } else {
@@ -226,7 +312,6 @@ export async function doAoeActionToHit(item, options) {
         }
     }
 
-    // FIXME: Why do we have this? We don't do anything with it.
     let dcv = parseInt(item.system.dcv || 0);
 
     const cvModifiers = action.current.cvModifiers;
@@ -344,7 +429,10 @@ export async function doAoeActionToHit(item, options) {
 
         // data for damage card
         actor,
+
         item,
+        itemJsonStr: dehydrateAttackItem(item),
+
         ...options,
 
         // misc
@@ -427,6 +515,9 @@ async function doSingleTargetActionToHit(item, options) {
     const action = Attack.getActionInfo(item, _targetArray, options);
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
+    const hthAttackItemMergeObj = {
+        hthAttackItems: action.hthAttackItems.map((hthAttack) => fromUuidSync(hthAttack.uuid)),
+    };
 
     const actor = item.actor;
 
@@ -435,18 +526,12 @@ async function doSingleTargetActionToHit(item, options) {
         actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
         actor.getActiveTokens()[0];
 
-    let effectiveItem = item;
-
     // STR 0 character must succeed with
     // a STR Roll in order to perform any Action that uses STR, such
     // as aiming an attack, pulling a trigger, or using a Power with the
     // Gestures Limitation.
     // Not all token types (base) will have STR
-    if (
-        actor &&
-        actor.system.characteristics.str &&
-        (effectiveItem.system.usesStrength || effectiveItem.findModsByXmlid("GESTURES"))
-    ) {
+    if (actor && actor.system.characteristics.str && (item.system.usesStrength || item.findModsByXmlid("GESTURES"))) {
         if (parseInt(actor.system.characteristics.str.value) <= 0) {
             if (
                 !(await RequiresACharacteristicRollCheck(
@@ -479,18 +564,6 @@ async function doSingleTargetActionToHit(item, options) {
         }
     }
 
-    // Create a temporary item based on effectiveLevels
-    if (options?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
-        options.effectiveLevels = parseInt(options.effectiveLevels) || 0;
-        if (options.effectiveLevels > 0 && options.effectiveLevels !== parseInt(item.system.LEVELS)) {
-            const effectiveItemData = item.toObject();
-            effectiveItemData._id = null;
-            effectiveItemData.system.LEVELS = options.effectiveLevels;
-            effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: item.actor });
-            await effectiveItem._postUpload();
-        }
-    }
-
     // Make sure there are enough resources and consume them
     const {
         error: resourceError,
@@ -498,10 +571,10 @@ async function doSingleTargetActionToHit(item, options) {
         resourcesRequired,
         resourcesUsedDescription,
         resourcesUsedDescriptionRenderedRoll,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveItem, {
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
         ...options,
         ...{ noResourceUse: overrideCanAct },
-        ...{ hthAttackItems: action.hthAttackItems.map((hthAttack) => fromUuidSync(hthAttack.uuid)) },
+        ...hthAttackItemMergeObj,
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -944,9 +1017,14 @@ async function doSingleTargetActionToHit(item, options) {
         }
     }
 
+    // The act of making the attack can cause effects for maneuvers related to OCV and DCV
+    // PH: FIXME: They are figured into the to-hit modal's ocv and dcv already
     if (["maneuver", "martialart"].includes(item.type)) {
         activateManeuver(item);
     }
+
+    // this doesn't work because we create data-item-id="{{item.uuid}}" for the button. However, item is now something that has no uuid.
+    // move all these fields to action?
 
     const cardData = {
         // dice rolls
@@ -956,7 +1034,10 @@ async function doSingleTargetActionToHit(item, options) {
         // data for damage card
         actor,
         token,
+
         item,
+        itemJsonStr: dehydrateAttackItem(item),
+
         adjustment,
         senseAffecting,
         ...options,
@@ -1166,7 +1247,7 @@ function getAttackTags(item) {
     }
 
     // MartialArts NND
-    if (item.system.EFFECT?.includes("NND")) {
+    if (item.system.EFFECT?.includes("NNDDC")) {
         attackTags.push({
             name: `NND`,
             title: `No Normal Defense`,
@@ -1191,9 +1272,9 @@ function getAttackTags(item) {
 export async function _onRollAoeDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
-    const options = { ...button.dataset };
-    const item = fromUuidSync(options.itemId);
-    return doSingleTargetActionToHit(item, JSON.parse(options.formData));
+    const toHitData = { ...button.dataset };
+    const { item } = rehydrateAttackItemAndActor(toHitData);
+    return doSingleTargetActionToHit(item, JSON.parse(toHitData.formData));
 }
 
 export async function _onRollKnockback(event) {
@@ -1507,10 +1588,10 @@ export async function _onRollDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
-    const item = fromUuidSync(toHitData.itemId);
-    const actor = item?.actor;
 
-    if (!actor) {
+    const { actor, item } = rehydrateAttackItemAndActor(toHitData);
+
+    if (!item || !actor) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
@@ -1518,23 +1599,9 @@ export async function _onRollDamage(event) {
     const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
-    let effectiveItem = item;
-
     const haymakerManeuverActiveItem = item.actor?.items.find(
         (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
     );
-
-    // Create a temporary item based on effectiveLevels
-    if (toHitData?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
-        toHitData.effectiveLevels = parseInt(toHitData.effectiveLevels) || 0;
-        if (toHitData.effectiveLevels > 0 && toHitData.effectiveLevels !== parseInt(item.system.LEVELS)) {
-            const effectiveItemData = item.toObject();
-            effectiveItemData._id = null;
-            effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
-            effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: item.actor });
-            await effectiveItem._postUpload();
-        }
-    }
 
     // Coerce type to boolean
     toHitData.targetEntangle =
@@ -1641,6 +1708,9 @@ export async function _onRollDamage(event) {
         user: game.user,
 
         item: item,
+        itemJsonStr: toHitData.itemJsonStr, // PH: FIXME: Would be nice to just have this in action data that is always passed through
+        actor: item.actor,
+
         nonDmgEffect:
             isAdjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item) || item.baseInfo?.nonDmgEffect,
         isSenseAffecting,
@@ -1684,9 +1754,9 @@ export async function _onRollMindScan(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
-    const item = fromUuidSync(event.currentTarget.dataset.itemId);
-
-    const template2 = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
+    const item = HeroSystem6eItem.fromSource(JSON.parse(toHitData.itemJsonStr), {
+        parent: fromUuidSync(toHitData.actorUuid),
+    });
 
     // We may need to use selected token
     if (toHitData.target === "Selected") {
@@ -1716,13 +1786,16 @@ export async function _onRollMindScan(event) {
         return;
     }
 
-    let data = {
+    const data = {
         targetTokenId: toHitData.target,
         targetName: token?.name,
-        effectiveLevels: toHitData.effectiveLevels,
+
         item,
+        itemJsonStr: toHitData.itemJsonStr, // PH: FIXME: Would be nice to just have this in action data that is always passed through
+        actor: item.actor,
     };
 
+    const template2 = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
     const content = await renderTemplate(template2, data);
     const chatData = {
         author: game.user._id,
@@ -1738,25 +1811,13 @@ export async function _onRollMindScanEffectRoll(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
-    const item = fromUuidSync(event.currentTarget.dataset.itemId);
+    const item = HeroSystem6eItem.fromSource(JSON.parse(toHitData.itemJsonStr), {
+        parent: fromUuidSync(toHitData.actorUuid),
+    });
     const actor = item?.actor;
 
     if (!actor) {
         return ui.notifications.error(`Attack details are no longer available.`);
-    }
-
-    let effectiveItem = item;
-
-    // Create a temporary item based on effectiveLevels
-    if (toHitData?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
-        toHitData.effectiveLevels = parseInt(toHitData.effectiveLevels) || 0;
-        if (toHitData.effectiveLevels > 0 && toHitData.effectiveLevels !== parseInt(item.system.LEVELS)) {
-            const effectiveItemData = item.toObject();
-            effectiveItemData._id = null;
-            effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
-            effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: item.actor });
-            await effectiveItem._postUpload();
-        }
     }
 
     // Look through all the scenes to find this token
@@ -1893,10 +1954,13 @@ export async function _onApplyDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
 
-    // PH: FIXME: Is toHitData actually needed?
     const damageData = { ...button.dataset };
-    const toHitData = damageData.toHitData;
     const targetTokens = JSON.parse(damageData.targetTokens);
+    const action = JSON.parse(damageData.actionData);
+
+    const item = HeroSystem6eItem.fromSource(JSON.parse(damageData.itemJsonStr), {
+        parent: fromUuidSync(damageData.actorUuid),
+    });
 
     if (targetTokens.length === 0) {
         // Check to make sure we have a selected token
@@ -1904,7 +1968,6 @@ export async function _onApplyDamage(event) {
             return ui.notifications.warn(`You must select at least one token before applying damage.`);
         }
 
-        const item = fromUuidSync(damageData.itemId);
         const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
 
         if (!item && action?.damageType) {
@@ -1939,7 +2002,7 @@ export async function _onApplyDamage(event) {
         }
 
         for (const token of canvas.tokens.controlled) {
-            await _onApplyDamageToSpecificToken(toHitData, damageData, {
+            await _onApplyDamageToSpecificToken(item, damageData, action, {
                 tokenId: token.id,
                 name: token.name,
                 subTarget: null,
@@ -1949,7 +2012,7 @@ export async function _onApplyDamage(event) {
     } else {
         // Apply to all provided targets
         for (const targetToken of targetTokens) {
-            await _onApplyDamageToSpecificToken(toHitData, damageData, targetToken);
+            await _onApplyDamageToSpecificToken(item, damageData, action, targetToken);
 
             // If entangle is transparent to damage, damage actor too
             if (targetToken.targetEntangle) {
@@ -1958,7 +2021,8 @@ export async function _onApplyDamage(event) {
                 if (ae) {
                     const entangle = fromUuidSync(ae.origin);
                     if (entangle.findModsByXmlid("TAKESNODAMAGE") || entangle.findModsByXmlid("BOTHDAMAGE")) {
-                        await _onApplyDamageToSpecificToken(toHitData, damageData, {
+                        // PH: FIXME: Is action correct here?
+                        await _onApplyDamageToSpecificToken(item, damageData, action, {
                             ...targetToken,
                             targetEntangle: false,
                         });
@@ -1972,7 +2036,7 @@ export async function _onApplyDamage(event) {
     $(button).css("color", "#A9A9A9");
 }
 
-export async function _onApplyDamageToSpecificToken(toHitData, _damageData, targetToken) {
+export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetToken) {
     const damageData = foundry.utils.deepClone(_damageData);
     const token = canvas.scene.tokens.get(targetToken.tokenId);
     if (!token) {
@@ -1985,9 +2049,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, _damageData, targ
         );
     }
 
-    const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
-    let item = fromUuidSync(damageData.itemId);
-
+    // PH: FIXME: Do we want to have this created here. Seems wrong given the structure. Feels like a kludge.
     // Generic Damage Roll - create a fake item
     if (!item && action.damageType) {
         let xml;
@@ -2094,6 +2156,11 @@ export async function _onApplyDamageToSpecificToken(toHitData, _damageData, targ
     const baseDamageRoller = damageRoller.clone();
 
     const automation = game.settings.get(HEROSYS.module, "automation");
+
+    // Maneuvers can include effects beyond damage
+    if (["maneuver", "martialart"].includes(item.type)) {
+        await doManeuverEffects(item, action);
+    }
 
     if (item.system.XMLID === "ENTANGLE") {
         return _onApplyEntangleToSpecificToken(item, token, damageRoller, action);
