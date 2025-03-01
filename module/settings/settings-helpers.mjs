@@ -13,8 +13,9 @@ export default class SettingsHelpers {
             hint: game.i18n.localize("Settings.UseStunned.Hint"),
             scope: "world",
             config: true,
-            type: Boolean,
+            type: String,
             default: true,
+
             onChange: (value) => HEROSYS.log(false, value),
         });
 
@@ -263,6 +264,21 @@ export default class SettingsHelpers {
             default: false,
             //onChange: () => ui.chat.render(), // doesn't seem to work
             requiresReload: true,
+        });
+
+        game.settings.register(module, "ShowCombatCharacteristicChanges", {
+            name: game.i18n.localize("Settings.ShowCombatCharacteristicChanges.Name"),
+            hint: game.i18n.localize("Settings.ShowCombatCharacteristicChanges.Hint"),
+            scope: "client",
+            config: true,
+            type: String,
+            default: "all",
+            choices: {
+                all: "All",
+                pc: "PC only",
+                none: "None",
+            },
+            requiresReload: false,
         });
 
         game.settings.register(module, "alphaTesting", {
