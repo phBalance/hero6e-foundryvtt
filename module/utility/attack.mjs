@@ -484,6 +484,7 @@ export class Attack {
             console.error("There is no attack item!");
             return null;
         }
+
         const attackerToken = Attack.getAttackerToken(item);
         const system = {
             actor: item.actor,
@@ -494,7 +495,7 @@ export class Attack {
             item: {},
             token: {},
         };
-        system.item[item.id] = item;
+        system.item[item.id] = item; // PH: FIXME: This is problematic for items which are not in the database
         system.token[attackerToken.id] = attackerToken;
         for (let i = 0; i < targetedTokens.length; i++) {
             system.token[targetedTokens[i].id] = targetedTokens[i];

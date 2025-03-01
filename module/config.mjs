@@ -5350,7 +5350,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(10),
             unusualDicePerDc: true,
             baseEffectDicePartsBundle: (item) => {
-                const baseBodyDice = parseInt(item.adjustedLevels || 0);
+                const baseBodyDice = parseInt(item.system.LEVELS || 0);
                 let baseHalfDice = 0;
                 let additionalBodyDice = 0;
 
@@ -6452,8 +6452,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // The damage for TELEKINESIS is based on STR.
                 // Each LEVEL of TELEKINESIS is equal to 1 point of STR.
                 const str =
-                    options.effectivestr != undefined
-                        ? parseInt(options.effectivestr)
+                    options.effectiveStr != undefined
+                        ? parseInt(options.effectiveStr)
                         : parseInt(item.adjustedLevels || 0);
 
                 return defaultPowerDicePartsBundle(item, characteristicValueToDiceParts(str));
@@ -6538,10 +6538,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(5),
-            cost: () => {
-                // We want this power to be free
-                return 0;
-            },
             costEnd: true,
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             xml: `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
