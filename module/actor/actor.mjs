@@ -202,7 +202,15 @@ export class HeroSystem6eActor extends Actor {
 
         let content = "";
 
-        if (changed?.system?.characteristics?.stun?.value) {
+        const ShowCombatCharacteristicChanges = game.settings.get(game.system.id, "ShowCombatCharacteristicChanges");
+        const ShowCombatCharacteristicChangesBool =
+            ShowCombatCharacteristicChanges === "all"
+                ? true
+                : ShowCombatCharacteristicChanges === "pc" && this.type === "pc"
+                  ? true
+                  : false;
+
+        if (changed?.system?.characteristics?.stun?.value && ShowCombatCharacteristicChangesBool) {
             const valueT = parseInt(this.system.characteristics.stun.value);
             const valueC = parseInt(changed.system.characteristics.stun.value);
             const valueM = parseInt(this.system.characteristics.stun.max);
@@ -221,7 +229,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        if (changed?.system?.characteristics?.body?.value) {
+        if (changed?.system?.characteristics?.body?.value && ShowCombatCharacteristicChangesBool) {
             const valueT = parseInt(this.system.characteristics.body.value);
             const valueC = parseInt(changed.system.characteristics.body.value);
             const valueM = parseInt(this.system.characteristics.body.max);
