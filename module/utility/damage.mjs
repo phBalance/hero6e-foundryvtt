@@ -96,11 +96,14 @@ export function characteristicValueToDiceParts(value) {
     };
 }
 
-function effectiveStrength(item, options) {
-    // PH: FIXME: Should fix the effectivestr bit. Likely didn't realize how to do sensitivity in HTML.
-    return parseInt(
-        options?.effectivestr != undefined ? options?.effectivestr : item.actor?.system.characteristics.str.value || 0,
-    );
+export function effectiveStrength(item, options) {
+    if (item.system._active.effectiveStr != undefined) {
+        return item.system._active.effectiveStr;
+    } else if (options.effectiveStr != undefined) {
+        return options.effectiveStr;
+    }
+
+    return parseInt(item.actor?.system.characteristics.str.value || 0);
 }
 
 export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengthMinimumModifier) {
@@ -352,7 +355,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     // Is there a haymaker active and thus part of this attack? Haymaker is added in without consideration of advantages in 5e but not in 6e.
     // Also in 5e killing haymakers get the DC halved.
     if (options.haymakerManeuverActiveItem) {
-        // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
+        // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike maneuver is the 1 exception.
         // PH: FIXME: Implement the exceptions: See 6e v2 pg. 99. 5e has none?
         if (
             !["maneuver", "martialart"].includes(item.type) ||
@@ -547,7 +550,8 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         }
     }
 
-    // Some powers have "fixed" damage that doesn't get modified by advantages and DC modifiers.
+    // PH: FIXME: Some powers have "fixed" damage that doesn't get modified by advantages and DC modifiers (or at least not
+    // in ways that I have taken the time to think through).
     // Examples are 6e's Absorption, Possession, and change environment.
     if (item.baseInfo.unusualDicePerDc) {
         const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
@@ -606,7 +610,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
     const diceOfDamage = Math.abs(dc * (5 / apPerDie));
     const diceSign = Math.sign(dc) || 0;
 
-    // Since the smallest interval is between 1 pip and 1/2 die (0.3 to 0.5) so 0.099 is probably the smallest possible epsilon.
+    // Since the smallest interval is between 1 pip and 1/2 die (0.3 to 0.5), 0.099 is probably the smallest possible epsilon.
     // However, the results don't match tables we see in 6e vol 2 p.97 if we use that epsilon.
     // It's possible a better algorithm would produce something better but with this one:
     // 0.066666 appears to be too large. (1DC KA @ +1/4)
@@ -629,10 +633,10 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         dc,
         d6Count,
         halfDieCount: halfDieCount,
+        constant,
 
         // PH: FIXME: Not implemented yet
         d6Less1DieCount: 0,
-        constant,
     };
 }
 
@@ -724,9 +728,9 @@ export function calculateDicePartsForItem(item, options) {
     if (doubleDamageLimit()) {
         // PH: FIXME: Need to implement these:
         // Exceptions to the rule (because it wouldn't be the hero system without exceptions) from FRed pg. 405:
-        // 1) Weapons that do normal damage (this really means not killing attacks) in superheroic campaigns
+        // 1) Weapons that do normal damage in superheroic campaigns
         // 2) extra damage classes for unarmed martial maneuvers
-        // 3) movement bonuses to normal damage (this really means not killing attacks)
+        // 3) movement bonuses to normal damage
 
         const baseDc = baseDiceParts.dc;
         const addDc = addedDiceParts.dc;
@@ -827,22 +831,27 @@ export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
 }
 
 function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage) {
-    // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage
+    // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage.
 
-    const actorStrengthItem = item.actor?.items.find(
-        (item) => item.system.XMLID === "__STRENGTHDAMAGE" && item.name === "__InternalStrengthPlaceholder",
-    );
+    // PH: FIXME: Should probably figure out a way to get rid of the actor strength placeholder. Might mean
+    //            rewriting all the tests?
+    const actorStrengthItem =
+        item.system._active.effectiveStrItem ||
+        item.actor?.items.find(
+            (item) => item.system.XMLID === "__STRENGTHDAMAGE" && item.name === "__InternalStrengthPlaceholder",
+        );
 
     const baseEffectiveStrength = effectiveStrength(item, options);
     let str = baseEffectiveStrength;
-    const baseEffectiveStrDc = baseEffectiveStrength / 5;
+    const baseEffectiveStrDc =
+        (baseEffectiveStrength / 5) * (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc);
 
     // NOTE: intentionally using fractional DC here.
     const strDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc);
     const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
 
     dicePartsBundle.baseAttackItem = actorStrengthItem;
-    dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
+    dicePartsBundle.diceParts = addDiceParts(actorStrengthItem, dicePartsBundle.diceParts, strDiceParts);
     dicePartsBundle.tags.push({
         value: `${strengthAddsToDamage ? "+" : ""}${formula}`,
         name: "STR",
@@ -855,12 +864,12 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     if (strMinimumModifier) {
         const strMinimum = calculateStrengthMinimumForItem(item, strMinimumModifier);
         str = baseEffectiveStrength - strMinimum;
-        const actualStrDc = Math.floor(str / 5);
+        const actualStrDc = Math.floor((str / 5) * (strengthAddsToDamage ? 1 : 1 + item._advantagesAffectingDc));
 
-        const strMinDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc - actualStrDc);
-        const formula = dicePartsToFullyQualifiedEffectFormula(item, strMinDiceParts);
+        const strMinDiceParts = calculateDicePartsFromDcForItem(actorStrengthItem, baseEffectiveStrDc - actualStrDc);
+        const formula = dicePartsToFullyQualifiedEffectFormula(actorStrengthItem, strMinDiceParts);
 
-        dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strMinDiceParts);
+        dicePartsBundle.diceParts = subtractDiceParts(actorStrengthItem, dicePartsBundle.diceParts, strMinDiceParts);
         dicePartsBundle.tags.push({
             value: `-(${formula})`,
             name: `STR Minimum ${strMinimum}`,
@@ -878,10 +887,10 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
             str = RoundFavorPlayerUp(str / divisor);
 
             // NOTE: intentionally using fractional DC here.
-            const strDiceParts = calculateDicePartsFromDcForItem(item, (strBeforeManeuver - str) / 5);
-            const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
+            const strDiceParts = calculateDicePartsFromDcForItem(actorStrengthItem, (strBeforeManeuver - str) / 5);
+            const formula = dicePartsToFullyQualifiedEffectFormula(actorStrengthItem, strDiceParts);
 
-            dicePartsBundle.diceParts = subtractDiceParts(item, dicePartsBundle.diceParts, strDiceParts);
+            dicePartsBundle.diceParts = subtractDiceParts(actorStrengthItem, dicePartsBundle.diceParts, strDiceParts);
             dicePartsBundle.tags.push({
                 value: `-(${formula})`,
                 name: `${item.name} STR`,
@@ -890,7 +899,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         }
     }
 
-    return str;
+    return { actorStrengthItem, baseEffectiveStrength, str };
 }
 
 export function maneuverbaseEffectDicePartsBundle(item, options) {
@@ -904,19 +913,27 @@ export function maneuverbaseEffectDicePartsBundle(item, options) {
     if (isManeuverWithEmptyHand(item, options)) {
         // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
         if (isNonKillingStrengthBasedManeuver(item)) {
-            // PH: FIXME: Ugly that we're adding the baseAttackItem to the dicePartsBundle. Does it make sense there?
-            const str = addStrengthToBundle(item, options, baseDicePartsBundle, false);
+            const { actorStrengthItem, str } = addStrengthToBundle(item, options, baseDicePartsBundle, false);
 
             // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
             // strength for damage purposes.
             // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
             if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
                 const hthAttackItems = options.hthAttackItems || [];
+
                 hthAttackItems.forEach((hthAttack) => {
                     const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDicePartsBundle(
                         hthAttack,
                         options,
                     );
+
+                    // PH: FIXME: This only works for situations where we can "absorb" all of the HTH attack into
+                    //            the base attack
+                    // Since this HTH Attack is effectively absorbed into the strength, we use the STR's DC.
+                    hthAttackDiceParts.dc =
+                        (hthAttackDiceParts.dc / (1 + hthAttack._advantageCost)) *
+                        (1 + actorStrengthItem._advantageCost);
+
                     baseDicePartsBundle.diceParts = addDiceParts(
                         item,
                         baseDicePartsBundle.diceParts,
@@ -1006,4 +1023,26 @@ export function maneuverbaseEffectDicePartsBundle(item, options) {
             baseAttackItem: null,
         };
     }
+}
+
+/**
+ * Calculate the number of character points this item should use. If no option to override full power is the default.
+ *
+ * @param {*} item
+ * @param {Object} options
+ * @param {number} option.effectiveCharacterPoints - the number of character points this item should use
+ * @returns {number} - Number of DC
+ */
+export function computeReducedOrPushedDc(item, options) {
+    const baseCharacterPoints = item.system.effectiveCharacterPoints;
+    const effectiveCharacterPoints = options.effectiveRealCost ?? baseCharacterPoints;
+
+    // When reducing character points, we just scale. However, when pushing we don't consider
+    // advantages (which was clearly an "it's too complicated to calculate" simplification that we'll keep)
+    const effectiveBaseRawDc =
+        effectiveCharacterPoints <= baseCharacterPoints
+            ? item.dcRaw * (effectiveCharacterPoints / baseCharacterPoints)
+            : item.dcRaw + ((effectiveCharacterPoints - baseCharacterPoints) * (1 + item.system._advantagesDc)) / 5;
+
+    return effectiveBaseRawDc;
 }

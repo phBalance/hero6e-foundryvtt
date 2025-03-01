@@ -5,17 +5,23 @@ import {
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
-import { activateManeuver, deactivateManeuver, enforceManeuverLimits } from "./maneuver.mjs";
+import { activateManeuver, maneuverCanBeAbortedTo, deactivateManeuver, enforceManeuverLimits } from "./maneuver.mjs";
 import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
-import { getPowerInfo, hdcTimeOptionIdToSeconds, whisperUserTargetsForActor } from "../utility/util.mjs";
+import {
+    getModifierInfo,
+    getPowerInfo,
+    hdcTimeOptionIdToSeconds,
+    whisperUserTargetsForActor,
+} from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
+    calculateDicePartsFromDcForItem,
     calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
     dicePartsToEffectFormula,
@@ -389,8 +395,24 @@ export class HeroSystem6eItem extends Item {
         );
     }
 
+    canBeAbortedTo() {
+        // Maneuvers have their own rules for what can be used for an abort.
+        if (["maneuver", "martialart"].includes(this.type)) {
+            return maneuverCanBeAbortedTo(this);
+        }
+
+        // Can abort to a defensive power
+        else if (this.baseInfo.type.includes("defense")) {
+            return true;
+        }
+
+        return false;
+    }
+
     async roll(event) {
         if (!this.actor.canAct(true, event)) return;
+
+        if (this.actor.needsToAbortToAct() && !this.canBeAbortedTo()) return;
 
         if (this.baseInfo.behaviors.includes("dice") || this.baseInfo.behaviors.includes("to-hit")) {
             // FIXME: Martial maneuvers all share the MANEUVER XMLID. Need to extract out things from that (and fix the broken things).
@@ -1284,7 +1306,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     // FIXME: Take this function out back and kill it. It's too similar to buildAoeAttackParameters
-    aoeAttackParameters(options) {
+    aoeAttackParameters() {
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
             const is5e = !!this.actor?.system?.is5e;
@@ -1303,17 +1325,7 @@ export class HeroSystem6eItem extends Item {
 
             // 5e has a calculated size
             if (is5e) {
-                // A bit hacky: create effectiveItem based on options.levels
-                let effectiveItemData = new HeroSystem6eItem(
-                    foundry.utils.mergeObject(this.toObject(), { system: { is5e: true } }),
-                );
-                if ((parseInt(options?.levels) || 0) > 0) {
-                    effectiveItemData.name = "Effective";
-                    effectiveItemData.system.LEVELS = parseInt(options?.levels) || 0;
-                    effectiveItemData.calcItemPoints();
-                }
-
-                const activePointsWithoutAoeAdvantage = effectiveItemData._activePointsWithoutAoe;
+                const activePointsWithoutAoeAdvantage = this._activePointsWithoutAoe;
                 if (aoeModifier.XMLID === "AOE") {
                     switch (aoeModifier.OPTIONID) {
                         case "CONE":
@@ -1357,15 +1369,13 @@ export class HeroSystem6eItem extends Item {
                     } else {
                         dcFalloff = 1;
                     }
-                    dcFalloff = parseInt(options?.LEVELS || aoeModifier.LEVELS || 0)
-                        ? parseInt(options?.LEVELS || aoeModifier.LEVELS)
-                        : dcFalloff;
+                    dcFalloff = parseInt(aoeModifier.LEVELS || 0) ? parseInt(aoeModifier.LEVELS) : dcFalloff;
 
                     const effectiveDc = Math.floor(activePointsWithoutAoeAdvantage / 5);
                     levels = effectiveDc * dcFalloff;
                 }
             } else {
-                levels = parseInt(options?.LEVELS || aoeModifier.LEVELS);
+                levels = parseInt(aoeModifier.LEVELS);
             }
 
             // 5e has a slightly different alias for an Explosive Radius in HD.
@@ -1512,7 +1522,7 @@ export class HeroSystem6eItem extends Item {
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
         // Effect
-        this.configureAttackParameters(item);
+        this.configureAttackParameters();
 
         // Defense
         if (item.type === "defense") {
@@ -1780,6 +1790,9 @@ export class HeroSystem6eItem extends Item {
 
     async _postUpload(options) {
         try {
+            // PH: FIXME: Not sure if I like this.
+            this.system._active ??= {};
+
             const configPowerInfo = this.baseInfo;
             if (!configPowerInfo) {
                 if (this.system.XMLID) {
@@ -1929,7 +1942,7 @@ export class HeroSystem6eItem extends Item {
 
                 if (changed) {
                     // text description of damage
-                    this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, {});
                 }
             }
 
@@ -2498,7 +2511,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            this._postUploadDetails();
+            this._postUploadDetails(options);
 
             return changed;
         } catch (e) {
@@ -5350,7 +5363,7 @@ export class HeroSystem6eItem extends Item {
     isSenseAffecting() {
         return (
             !!this.baseInfo?.type?.includes("sense-affecting") ||
-            (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
+            (!!this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
         );
     }
 
@@ -5361,7 +5374,7 @@ export class HeroSystem6eItem extends Item {
             return this.baseInfo.basePoints(this);
         }
 
-        if (this.system.XMLID.startsWith("__")) return 0;
+        // if (this.system.XMLID.startsWith("__")) return 0;
         if (this.system.EVERYMAN) return 0;
         if (this.system.NATIVE_TONGUE) return 0;
 
@@ -5434,6 +5447,16 @@ export class HeroSystem6eItem extends Item {
         return _cost;
     }
 
+    get _limitationCost() {
+        let _cost = 0;
+        for (const limitation of this.limitations) {
+            _cost += limitation.cost;
+        }
+
+        // Return +0 rather than -0 for obviousness
+        return _cost ? -_cost : 0;
+    }
+
     get _activePoints() {
         if (this.baseInfo?.activePoints) {
             return this.baseInfo.activePoints(this);
@@ -5481,14 +5504,6 @@ export class HeroSystem6eItem extends Item {
 
     get dcRaw() {
         return this._activePointsAffectingDcRaw / 5;
-    }
-
-    get _limitationCost() {
-        let _cost = 0;
-        for (const limitation of this.limitations) {
-            _cost += limitation.cost;
-        }
-        return -_cost;
     }
 
     get _realCost() {
@@ -5604,6 +5619,101 @@ export class HeroSystem6eItem extends Item {
         return _duration;
     }
 
+    /**
+     * Add advantages from itemFrom to this item but postUpload is not run
+     * FIXME: this does not handle the merging of any advantages (e.g. AP being added when already have AP)
+     *
+     * @param {HeroSystem6eItem} itemTo
+     */
+    copyItemAdvantages(itemFrom) {
+        const advantagesToCopy = itemFrom.advantages.map((advantage) => advantage._original);
+        this.system.MODIFIER = (this.system.MODIFIER || []).concat(advantagesToCopy);
+
+        // Stash a copy of what we've added in after the fact
+        this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(advantagesToCopy);
+    }
+
+    // Change the actual levels
+    changePowerLevel(effectiveRealCost) {
+        const baseRealCost = this._realCost;
+
+        // When reducing character points, we just scale. However, when pushing we don't consider
+        // advantages (which was clearly an "it's too complicated to calculate" simplification in the rules that we'll keep)
+        const effectiveBaseRawDc =
+            effectiveRealCost <= baseRealCost
+                ? this.dcRaw * (effectiveRealCost / baseRealCost)
+                : this.dcRaw + ((effectiveRealCost - baseRealCost) * (1 + this._advantagesAffectingDc)) / 5;
+
+        const diceParts = calculateDicePartsFromDcForItem(this, effectiveBaseRawDc);
+
+        this.damageLevelTweaking(diceParts);
+    }
+
+    /**
+     * Most damage powers have a standard way of describing, in XML, how they do damage. This works for those.
+     */
+    damageLevelTweaking(diceParts) {
+        const plusOnePipAdderData = getModifierInfo({
+            xmlid: "PLUSONEPIP",
+            actor: this.actor,
+            is5e: this.is5e,
+            item: this,
+            xmlTag: "ADDER",
+        });
+        const plusHalfDieAdderData = getModifierInfo({
+            xmlid: "PLUSONEHALFDIE",
+            actor: this.actor,
+            is5e: this.is5e,
+            item: this,
+            xmlTag: "ADDER",
+        });
+        const minusOnePipAdderData = getModifierInfo({
+            xmlid: "MINUSONEPIP",
+            actor: this.actor,
+            is5e: this.is5e,
+            item: this,
+            xmlTag: "ADDER",
+        });
+
+        // Set the level for the number of dice.
+        this.system.LEVELS = diceParts.d6Count.toString();
+
+        // Set/clear a d6-1 adder
+        const minusOnePipAdder = this.adders.find((adder) => adder.XMLID === "MINUSONEPIP");
+        if (!diceParts.d6Less1DieCount && minusOnePipAdder) {
+            // Remove the adder
+            this.system.ADDER = this.system.ADDER.filter((adder) => adder.XMLID !== "MINUSONEPIP");
+        } else if (diceParts.d6Less1DieCount && !minusOnePipAdder) {
+            // Add the adder
+            const newAdder = createModifierOrAdderFromXml(minusOnePipAdderData.xml);
+            this.system.ADDER ??= [];
+            this.system.ADDER.push(newAdder);
+        }
+
+        // Set/clear a 1/2d6 adder
+        const halfDieAdder = this.adders.find((adder) => adder.XMLID === "PLUSONEHALFDIE");
+        if (!diceParts.halfDieCount && halfDieAdder) {
+            // Remove the adder
+            this.system.ADDER = this.system.ADDER.filter((adder) => adder.XMLID !== "PLUSONEHALFDIE");
+        } else if (diceParts.halfDieCount && !halfDieAdder) {
+            // Add the adder
+            const newAdder = createModifierOrAdderFromXml(plusHalfDieAdderData.xml);
+            this.system.ADDER ??= [];
+            this.system.ADDER.push(newAdder);
+        }
+
+        // Set/clear a +1 pip adder
+        const onePipAdder = this.adders.find((adder) => adder.XMLID === "PLUSONEPIP");
+        if (!diceParts.constant && onePipAdder) {
+            // Remove the adder
+            this.system.ADDER = this.system.ADDER.filter((adder) => adder.XMLID !== "PLUSONEPIP");
+        } else if (diceParts.constant && !onePipAdder) {
+            // Add the adder
+            const newAdder = createModifierOrAdderFromXml(plusOnePipAdderData.xml);
+            this.system.ADDER ??= [];
+            this.system.ADDER.push(newAdder);
+        }
+    }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER

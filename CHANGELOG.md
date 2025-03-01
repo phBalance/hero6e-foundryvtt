@@ -4,6 +4,8 @@
 
 - Initial support for SURFACE templates [#2055](https://github.com/dmdorman/hero6e-foundryvtt/issues/2055)
 - Improved MIND CONTROL support. Chat cards show EGO+X success messages. Still no support for modifiers.
+- Support Naked Advantages for attack powers.
+- Support advantages for Hand-to-Hand Attacks.
 
 ## Version 4.0.24 20250323
 
