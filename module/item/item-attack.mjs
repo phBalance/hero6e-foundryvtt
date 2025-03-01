@@ -2694,7 +2694,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
             entangleAE.update({ changes: entangleAE.changes });
             effectsFinal = `Entangle has ${newBody} BODY remaining.`;
         } else {
-            entangleAE.parent.removeActiveEffect(entangleAE);
+            await entangleAE.parent.removeActiveEffect(entangleAE);
             effectsFinal = `Entangle was destroyed.`;
         }
     }
