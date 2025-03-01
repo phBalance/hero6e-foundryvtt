@@ -354,9 +354,6 @@ export class HeroSystem6eActor extends Actor {
             }
 
             if (data.system.characteristics.stun.value > 0) {
-                // this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
-                // this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
-                // this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
                 await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
                     active: false,
                 });
@@ -393,9 +390,9 @@ export class HeroSystem6eActor extends Actor {
 
         // Mark as undefeated in combat tracker (automaton)
         if (this.type === "automaton" && data.system?.characteristics?.body?.value > 0) {
-            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
-            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
-            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
         }
 
         // Mark as undefeated in combat tracker (pc/npc)
@@ -404,7 +401,6 @@ export class HeroSystem6eActor extends Actor {
             data.system?.characteristics?.body?.value > 0 &&
             this.system.characteristics.stun.value >= -30
         ) {
-            //this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
             await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
                 active: false,
             });
@@ -722,16 +718,19 @@ export class HeroSystem6eActor extends Actor {
         let result = true;
         let badStatus = [];
 
+        // Is knocked out?
         if (this.statuses.has("knockedOut")) {
             if (uiNotice) badStatus.push("KNOCKED OUT");
             result = false;
         }
 
+        // Is stunned?
         if (this.statuses.has("stunned")) {
             badStatus.push("STUNNED");
             result = false;
         }
 
+        // Is already aborted?
         if (this.statuses.has("aborted")) {
             badStatus.push("ABORTED");
             result = false;
