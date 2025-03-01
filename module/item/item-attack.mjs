@@ -58,11 +58,11 @@ export async function onMessageRendered(html) {
 }
 
 function isBodyBasedEffectRoll(item) {
-    return !!(item.system.XMLID === "TRANSFORM");
+    return item.system.XMLID === "TRANSFORM";
 }
 
 function isStunBasedEffectRoll(item) {
-    return !!(
+    return (
         item.system.XMLID === "MENTALILLUSIONS" ||
         item.system.XMLID === "MINDCONTROL" ||
         item.system.XMLID === "MINDSCAN" ||
@@ -1540,15 +1540,15 @@ export async function _onRollDamage(event) {
     toHitData.targetEntangle =
         toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
 
-    const adjustment = getPowerInfo({
+    const isAdjustment = !!getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
     // Sense affecting power or maneuver with FLASHDC
-    const senseAffecting = item.isSenseAffecting();
+    const isSenseAffecting = item.isSenseAffecting();
     const isKilling = item.doesKillingDamage;
     const isEntangle = item.system.XMLID === "ENTANGLE";
-    const isNormalAttack = !isEntangle && !senseAffecting && !adjustment && !isKilling;
-    const isKillingAttack = !isEntangle && !senseAffecting && !adjustment && isKilling;
+    const isNormalAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isKilling;
+    const isKillingAttack = !isEntangle && !isSenseAffecting && !isAdjustment && isKilling;
     const isEffectBasedAttack = isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item);
 
     const increasedMultiplierLevels = parseInt(item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0);
@@ -1556,7 +1556,7 @@ export async function _onRollDamage(event) {
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
-    const { diceParts, tags } = calculateDicePartsForItem(effectiveItem, {
+    const { diceParts, tags } = calculateDicePartsForItem(item, {
         isAction: true,
         ...toHitData,
         ...{ haymakerManeuverActiveItem },
@@ -1581,9 +1581,9 @@ export async function _onRollDamage(event) {
                 ? customStunMultiplierSetting
                 : undefined,
         )
-        .makeAdjustmentRoll(!!adjustment)
-        .makeFlashRoll(!!senseAffecting)
-        .makeEntangleRoll(!!isEntangle)
+        .makeAdjustmentRoll(isAdjustment)
+        .makeFlashRoll(isSenseAffecting)
+        .makeEntangleRoll(isEntangle)
         .makeEffectRoll(isEffectBasedAttack)
         .addStunMultiplier(increasedMultiplierLevels - decreasedMultiplierLevels)
         .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
@@ -1642,8 +1642,8 @@ export async function _onRollDamage(event) {
 
         item: item,
         nonDmgEffect:
-            adjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item) || item.baseInfo?.nonDmgEffect,
-        senseAffecting,
+            isAdjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item) || item.baseInfo?.nonDmgEffect,
+        isSenseAffecting,
 
         // dice rolls
         renderedDamageRoll: damageRenderedResult,
@@ -2043,7 +2043,7 @@ export async function _onApplyDamageToSpecificToken(toHitData, _damageData, targ
     // Remove haymaker status
     const haymakerAe = item.actor?.effects.find((effect) => effect.statuses.has("haymaker"));
     if (haymakerAe) {
-        item.actor.removeActiveEffect(haymakerAe);
+        await item.actor.removeActiveEffect(haymakerAe);
     }
 
     const damageRoller = HeroRoller.fromJSON(damageData.roller);
@@ -2303,25 +2303,29 @@ export async function _onApplyDamageToSpecificToken(toHitData, _damageData, targ
     // We need to recalculate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(damageRoller, item, damageData);
 
-    // TRANSFORMATION
-    const transformation =
+    const isTransform =
         getPowerInfo({
             item: item,
         })?.XMLID === "TRANSFORM";
-    if (transformation) {
-        return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
-    }
-
-    // AID, DRAIN or any adjustment powers
-    const adjustment = getPowerInfo({
+    const isAdjustment = !!getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
-    if (adjustment) {
+    const isSenseAffecting = item.isSenseAffecting();
+
+    if (isTransform) {
+        return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
+    } else if (isAdjustment) {
         return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
-    }
-    const senseAffecting = item.isSenseAffecting();
-    if (senseAffecting) {
-        return _onApplySenseAffectingToSpecificToken(item, token, damageDetail, defense);
+    } else if (isSenseAffecting) {
+        return _onApplySenseAffectingToSpecificToken(
+            item,
+            token,
+            damageDetail,
+            defense,
+            defenseTags,
+            action,
+            damageRoller,
+        );
     }
 
     // AUTOMATION immune to mental powers
@@ -3014,7 +3018,15 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
     }
 }
 
-async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData) {
+async function _onApplySenseAffectingToSpecificToken(
+    senseAffectingItem,
+    token,
+    damageData,
+    defense,
+    _defenseTags,
+    _action,
+    flashRoller,
+) {
     const defenseTags = [];
 
     // We currently only support sense groups, not individual senses
@@ -3123,63 +3135,68 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
 
 /**
  *
- * @param {HeroRoller} heroRoller
+ * @param {HeroRoller} damageRoller
  * @param {*} item
  * @param {*} options
  * @returns
  */
-async function _calcDamage(heroRoller, item, options) {
+async function _calcDamage(damageRoller, item, options) {
     let damageDetail = {};
     const itemData = item.system;
 
-    const adjustmentPower = getPowerInfo({
+    const isAdjustment = !!getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
-    const senseAffectingPower = item.isSenseAffecting();
-    const entangle = item.system.XMLID === "ENTANGLE";
-    const bodyBasedEffectRollItem = isBodyBasedEffectRoll(item);
-    const stunBasedEffectRollItem = isStunBasedEffectRoll(item);
+    const isSenseAffectingPower = item.isSenseAffecting();
+    const isEntangle = item.system.XMLID === "ENTANGLE";
+    const isBodyBasedEffectRollItem = isBodyBasedEffectRoll(item);
+    const isStunBasedEffectRollItem = isStunBasedEffectRoll(item);
 
     let body;
     let stun;
+    let effect = 0;
     let bodyForPenetrating = 0;
     let effects = "";
 
-    if (adjustmentPower) {
+    if (isAdjustment) {
         // kludge for SIMPLIFIED HEALING
         if (item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
             // PH: FIXME: Didn't we already do this in the damage roll?
-            const shr = await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
+            const shr = await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
             body = shr.getBodyTotal();
             stun = shr.getStunTotal();
         } else {
             body = 0;
-            stun = heroRoller.getAdjustmentTotal();
-            bodyForPenetrating = (await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).getBodyTotal();
+            stun = damageRoller.getAdjustmentTotal();
+            bodyForPenetrating = (
+                await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)
+            ).getBodyTotal();
         }
-    } else if (senseAffectingPower) {
-        body = heroRoller.getFlashTotal();
+    } else if (isSenseAffectingPower) {
+        body = damageRoller.getFlashTotal();
         stun = 0;
         bodyForPenetrating = 0;
-    } else if (entangle) {
-        body = heroRoller.getEntangleTotal();
+    } else if (isEntangle) {
+        body = damageRoller.getEntangleTotal();
         stun = 0;
         bodyForPenetrating = 0;
-    } else if (bodyBasedEffectRollItem) {
-        body = heroRoller.getEffectTotal();
+    } else if (isBodyBasedEffectRollItem) {
+        body = damageRoller.getEffectTotal();
         stun = 0;
         bodyForPenetrating = 0;
-    } else if (stunBasedEffectRollItem) {
+    } else if (isStunBasedEffectRollItem) {
         body = 0;
-        stun = heroRoller.getEffectTotal();
+        stun = damageRoller.getEffectTotal();
         bodyForPenetrating = 0;
     } else {
-        body = heroRoller.getBodyTotal();
-        stun = heroRoller.getStunTotal();
+        body = damageRoller.getBodyTotal();
+        stun = damageRoller.getStunTotal();
 
         // TODO: Doesn't handle a 1 point killing attack which is explicitly called out as doing 1 penetrating BODY.
         if (item.doesKillingDamage) {
-            bodyForPenetrating = (await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).getBodyTotal();
+            bodyForPenetrating = (
+                await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)
+            ).getBodyTotal();
         } else {
             bodyForPenetrating = body;
         }
@@ -3197,7 +3214,7 @@ async function _calcDamage(heroRoller, item, options) {
     const useHitLocations = game.settings.get(HEROSYS.module, "hit locations") && !noHitLocationsPower;
     const hasStunMultiplierRoll = item.doesKillingDamage && !useHitLocations;
 
-    const stunMultiplier = hasStunMultiplierRoll ? heroRoller.getStunMultiplier() : 1;
+    const stunMultiplier = hasStunMultiplierRoll ? damageRoller.getStunMultiplier() : 1;
 
     // TODO: FIXME: This calculation is buggy as it doesn't consider:
     //       multiple levels of penetrating vs hardened/impenetrable
@@ -3215,9 +3232,9 @@ async function _calcDamage(heroRoller, item, options) {
         useHitLoc = true;
 
         if (game.settings.get(HEROSYS.module, "hitLocTracking") === "all") {
-            hitLocation = heroRoller.getHitLocation().fullName;
+            hitLocation = damageRoller.getHitLocation().fullName;
         } else {
-            hitLocation = heroRoller.getHitLocation().name;
+            hitLocation = damageRoller.getHitLocation().name;
         }
     }
 
@@ -3284,8 +3301,8 @@ async function _calcDamage(heroRoller, item, options) {
 
     let hitLocText = "";
     if (useHitLocations) {
-        const hitLocationBodyMultiplier = heroRoller.getHitLocation().bodyMultiplier;
-        const hitLocationStunMultiplier = heroRoller.getHitLocation().stunMultiplier;
+        const hitLocationBodyMultiplier = damageRoller.getHitLocation().bodyMultiplier;
+        const hitLocationStunMultiplier = damageRoller.getHitLocation().stunMultiplier;
 
         if (item.doesKillingDamage) {
             // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
@@ -3296,7 +3313,7 @@ async function _calcDamage(heroRoller, item, options) {
             stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
-        if (heroRoller.getHitLocation().item || heroRoller.getHitLocation().activeEffect) {
+        if (damageRoller.getHitLocation().item || damageRoller.getHitLocation().activeEffect) {
             hitLocText = `Hit ${hitLocation}`;
         } else {
             hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
@@ -3319,7 +3336,7 @@ async function _calcDamage(heroRoller, item, options) {
     }
 
     // minimum damage rule (needs to be last)
-    if (stun < body && !senseAffectingPower) {
+    if (stun < body && !isSenseAffectingPower) {
         stun = body;
         effects +=
             `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
@@ -3335,8 +3352,15 @@ async function _calcDamage(heroRoller, item, options) {
     } else if (item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.bodyonly) {
         stun = 0;
     } else if (item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly) {
-        stun = 0;
-        body = 0;
+        if (isBodyBasedEffectRollItem) {
+            effect = body;
+            stun = 0;
+            body = 0;
+        } else if (isStunBasedEffectRollItem) {
+            effect = stun;
+            stun = 0;
+            body = 0;
+        }
     }
 
     stun = RoundFavorPlayerDown(stun);
@@ -3352,6 +3376,8 @@ async function _calcDamage(heroRoller, item, options) {
     damageDetail.useHitLoc = useHitLoc;
     damageDetail.hitLocText = hitLocText;
     damageDetail.hitLocation = hitLocation;
+
+    damageDetail.effect = effect;
 
     damageDetail.knockbackMessage = knockbackMessage;
     damageDetail.useKnockBack = useKnockback;
@@ -3387,7 +3413,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             </POWER>
         `;
         const kbAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {});
-        //await pdAttack._postUpload();
         const { defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
         knockbackTags = [...knockbackTags, ...defenseTags];
         for (const tag of defenseTags) {
