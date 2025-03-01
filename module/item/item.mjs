@@ -5604,6 +5604,8 @@ export class HeroSystem6eItem extends Item {
         return _duration;
     }
 
+}
+
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
 // Using a simplied version of HeroSystemItem6e.itemDataFromXml for now.
 // PH: FIXME: Probably want to move from here and consolidate
