@@ -207,7 +207,8 @@ export class HeroSystem6eItem extends Item {
                 name: `New ${String(data.type).titleCase()} (${count})`,
             });
         }
-        super._onCreate(data, options, userId);
+
+        return super._onCreate(data, options, userId);
     }
 
     /**
@@ -5346,6 +5347,7 @@ export class HeroSystem6eItem extends Item {
         if (this.baseInfo?.activePoints) {
             return this.baseInfo.activePoints(this);
         }
+
         return RoundFavorPlayerDown((this._basePoints + this._addersCost) * (1 + this._advantageCost));
     }
 
