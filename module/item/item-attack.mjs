@@ -1839,7 +1839,7 @@ export async function _onRollMindScanEffectRoll(event) {
         targetsEgo,
         egoAdder,
         targetEgo,
-        success: damageDetail.stun >= targetEgo,
+        success: damageDetail.effect >= targetEgo,
         buttonText: button.innerHTML.trim(),
         buttonTitle: button.title.replace(/\n/g, " ").trim(),
         defense,
@@ -1848,24 +1848,10 @@ export async function _onRollMindScanEffectRoll(event) {
         // dice rolls
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
-
-        // hit locations
-        useHitLoc: damageDetail.useHitLoc,
-        hitLocText: damageDetail.hitLocText,
-        hitLocation: damageDetail.hitLocation,
-
-        // body
-        bodyDamage: damageDetail.bodyDamage,
-        bodyDamageEffective: damageDetail.body,
-
-        // stun
-        stunDamage: damageDetail.stunDamage,
-        stunDamageEffective: damageDetail.stun,
-        hasRenderedDamageRoll: true,
-        stunMultiplier: damageDetail.stunMultiplier,
-        hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-
         roller: mindScanRoller.toJSON(),
+
+        // effect
+        effectDamage: damageDetail.effect,
 
         // misc
         targetIds: toHitData.targetIds,
