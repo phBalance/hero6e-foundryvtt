@@ -2480,7 +2480,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.str.value = 10;
-                    await actor.addAttackPlaceholders();
+                    await actor.addAttackPlaceholder();
                     await actor._postUpload();
 
                     item = new HeroSystem6eItem(
@@ -6229,7 +6229,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.dex.value = 15;
-                        await actor.addAttackPlaceholders();
+                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = new HeroSystem6eItem(
@@ -6289,7 +6289,7 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor.addAttackPlaceholders();
+                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = new HeroSystem6eItem(
@@ -6353,7 +6353,7 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor.addAttackPlaceholders();
+                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = new HeroSystem6eItem(
@@ -6418,7 +6418,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.dex.value = 15;
-                        await actor.addAttackPlaceholders();
+                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = await new HeroSystem6eItem(
