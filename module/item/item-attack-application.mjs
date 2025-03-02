@@ -1,4 +1,5 @@
 import {
+    buildStrengthItem,
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     penaltySkillLevelsForAttack,
@@ -372,20 +373,7 @@ export class ItemAttackFormApplication extends FormApplication {
     // PH: FIXME: Effective item is not STR for maneuvers with empty fist or the weapon for weapon maneuvers
     async #buildEffectiveObjectFromOriginalAndData({ effectiveStr }) {
         // PH: FIXME: Should only be creating the strength item for situations where we're using strength.
-        const strengthItem = new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(
-                `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
-                this.data.originalItem.actor,
-            ),
-            {
-                parent: this.data.originalItem.actor,
-            },
-        );
-
-        // PH: FIXME: Shouldn't have to kludge this in here.
-        strengthItem.system._active = {};
-
-        strengthItem.changePowerLevel(effectiveStr);
+        const strengthItem = buildStrengthItem(effectiveStr, this.data.originalItem.actor);
 
         const effectiveItemData = this.data.originalItem.toObject(false);
         effectiveItemData._id = null;

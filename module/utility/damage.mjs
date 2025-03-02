@@ -96,7 +96,33 @@ export function characteristicValueToDiceParts(value) {
     };
 }
 
+/**
+ * Build an item that is based on STR. _postUpload() is not called on it and is the
+ * responsibility of the caller.
+ *
+ * @param {number} effectiveStr
+ */
+export function buildStrengthItem(effectiveStr, actor) {
+    const strengthItem = new HeroSystem6eItem(
+        HeroSystem6eItem.itemDataFromXml(
+            `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+            actor,
+        ),
+        {
+            parent: actor,
+        },
+    );
+
+    // PH: FIXME: Shouldn't have to kludge this in here.
+    strengthItem.system._active = {};
+
+    strengthItem.changePowerLevel(effectiveStr);
+
+    return strengthItem;
+}
+
 export function effectiveStrength(item, options) {
+    // PH: FIXME: Should get rid of this _active.effectiveStr
     if (item.system._active.effectiveStr != undefined) {
         return item.system._active.effectiveStr;
     } else if (options.effectiveStr != undefined) {
@@ -831,17 +857,16 @@ export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
 }
 
 function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage) {
+    const baseEffectiveStrength = effectiveStrength(item, options);
+
     // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage.
 
-    // PH: FIXME: Should probably figure out a way to get rid of the actor strength placeholder. Might mean
+    // PH: FIXME: Should probably figure out a way to get rid of the actor strength placeholder here. Might mean
     //            rewriting all the tests?
     const actorStrengthItem =
         item.system._active.effectiveStrItem ||
-        item.actor?.items.find(
-            (item) => item.system.XMLID === "__STRENGTHDAMAGE" && item.name === "__InternalStrengthPlaceholder",
-        );
+        (item.system._active.effectiveStrItem = buildStrengthItem(baseEffectiveStrength, item.actor));
 
-    const baseEffectiveStrength = effectiveStrength(item, options);
     let str = baseEffectiveStrength;
     const baseEffectiveStrDc =
         (baseEffectiveStrength / 5) * (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc);
