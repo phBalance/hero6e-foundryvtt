@@ -2803,24 +2803,16 @@ export class HeroSystem6eActor extends Actor {
 
         // Add in costs for items
         for (const item of this.items.filter(
-            (o) => o.type != "attack" && o.type != "defense" && o.type != "movement",
+            (o) =>
+                o.type !== "attack" &&
+                o.type !== "defense" &&
+                o.type !== "movement" &&
+                !o.system.XMLID.startsWith("__"), // Exclude placeholder powers
         )) {
             let _characterPointCost = parseInt(item.system?.characterPointCost || item.system?.realCost) || 0;
             const _activePoints = parseInt(item.system?.activePoints) || 0;
 
-            // if ((item.parentItem?.type || item.type) != "equipment") {
-            //     if (item.system.XMLID === "COMPOUNDPOWER") {
-            //         // This compound power may be within a framework, so use that cost
-            //         _characterPointCost = parseInt(item.compoundCost);
-            //     }
-
-            //     // Don't include costs from COMPOUNDPOWER children as we added them above
-            //     if (item.parentItem?.system.XMLID === "COMPOUNDPOWER") {
-            //         _characterPointCost = 0;
-            //     }
-            // }
-
-            if (_characterPointCost != 0) {
+            if (_characterPointCost !== 0) {
                 // Equipment is typically purchased with money, not character points
                 if ((item.parentItem?.type || item.type) !== "equipment") {
                     characterPointCost += _characterPointCost;
@@ -2837,7 +2829,7 @@ export class HeroSystem6eActor extends Actor {
         // DISAD_POINTS: realCost
         const DISAD_POINTS = parseInt(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
         const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
-        if (_disadPoints != 0) {
+        if (_disadPoints !== 0) {
             this.system.pointsDetail.MatchingDisads = -_disadPoints;
             this.system.activePointsDetail.MatchingDisads = -_disadPoints;
             characterPointCost -= _disadPoints;
