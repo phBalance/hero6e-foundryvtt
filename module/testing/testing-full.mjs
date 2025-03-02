@@ -4790,6 +4790,7 @@ export function registerFullTests(quench) {
                 });
             });
 
+            // PH: FIXME: Flesh this out
             describe("single power naked advantage to strength", function () {
                 const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
@@ -4883,7 +4884,7 @@ export function registerFullTests(quench) {
 
                 let strikeManeuver;
                 let nakedStrAoE;
-                let nakedStrAp;
+                // let nakedStrAp;
 
                 before(async () => {
                     actor = new HeroSystem6eActor(
@@ -4901,9 +4902,9 @@ export function registerFullTests(quench) {
                     nakedStrAoE = actor.items.find(
                         (item) => item.system.XMLID === "NAKEDMODIFIER" && item.name === "AoE STR",
                     );
-                    nakedStrAp = actor.items.find(
-                        (item) => item.system.XMLID === "NAKEDMODIFIER" && item.name === "AP STR",
-                    );
+                    // nakedStrAp = actor.items.find(
+                    //     (item) => item.system.XMLID === "NAKEDMODIFIER" && item.name === "AP STR",
+                    // );
                 });
 
                 // PH: FIXME: TODO:
