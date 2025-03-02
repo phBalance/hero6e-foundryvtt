@@ -130,7 +130,7 @@ export async function migrateWorld() {
         "removing STR placeholder",
         async (actor) => await removeStrengthPlaceholder(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.16`, "background: #1111FF; color: #FFFFFF");
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.21`, "background: #1111FF; color: #FFFFFF");
 
     // Always rebuild the database for all actors by recreating actors and all their items (description, cost, etc)
     _start = Date.now();
@@ -151,7 +151,7 @@ async function removeStrengthPlaceholder(actor) {
         if (!actor) return false;
 
         // Delete strength placeholder as we need many of them so will be creating them on the fly.
-        await actor.items.find((item) => item.system.XMLID === "__STRENGTHDAMAGE")?.delete();
+        await actor.items.find((item) => item.system.ALIAS === "__InternalStrengthPlaceholder")?.delete();
 
         const modifiedItems = actor.items
             .map((item) => {
@@ -192,9 +192,9 @@ async function replaceActorsBuiltInManeuvers(actor) {
         }
 
         // Add in the new placeholder items and all built in maneuvers
-        timer.placeholdersStart = Date.now();
-        await actor.addAttackPlaceholders();
-        timer.placeholdersEnd = Date.now();
+        timer.placeholderStart = Date.now();
+        await actor.addAttackPlaceholder();
+        timer.placeholderEnd = Date.now();
 
         timer.maneuversStart = Date.now();
         await actor.addHeroSystemManeuvers();

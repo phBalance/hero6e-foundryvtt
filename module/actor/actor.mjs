@@ -1778,7 +1778,7 @@ export class HeroSystem6eActor extends Actor {
                     power.type.includes("maneuver"),
             ).length +
             1 + // Perception
-            2; // STR and Weapon placeholder
+            1; // Weapon placeholder
 
         const xmlItemsToProcess =
             1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
@@ -2318,7 +2318,7 @@ export class HeroSystem6eActor extends Actor {
         await this.addPerception();
 
         // MANEUVERS
-        await this.addAttackPlaceholders();
+        await this.addAttackPlaceholder();
         await this.addHeroSystemManeuvers();
     }
 
@@ -2350,7 +2350,7 @@ export class HeroSystem6eActor extends Actor {
         return perceptionItem._postUpload({ applyEncumbrance: false });
     }
 
-    async addAttackPlaceholders() {
+    async addAttackPlaceholder() {
         // Maneuver Weapon Placeholder
         // PH: FIXME: Figure out how to hide this (has name "__InternalManeuverPlaceholderWeapon") in the UI
         const maneuverWeaponPlaceholderItemContent = `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792633" BASECOST="0.0" LEVELS="1" ALIAS="__InternalManeuverPlaceholderWeapon" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="__InternalManeuverPlaceholderWeapon" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`;
