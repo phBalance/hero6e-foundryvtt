@@ -8538,7 +8538,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     // activated. If the power has a lengthy activation time, but can be
                     // used every Phase thereafter (usually for Constant or Persistent
                     // Powers), halve the Limitation value (to a minimum of -¼).
-                    return Math.min(-0.25, baseCost / 2);
+                    // ALso need to round to nearest quarter
+                    return Math.min(-0.25, Math.floor((baseCost / 2) * 4) / 4);
                 }
                 return baseCost;
             },

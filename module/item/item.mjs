@@ -83,7 +83,11 @@ function filterItem(item, filterString) {
 
     const regex = new RegExp(filterString.trim(), "i");
 
-    const match = item.name?.match(regex) || item.system.description?.match(regex) || item.system.XMLID?.match(regex);
+    const match =
+        item.name?.match(regex) ||
+        item.system.NAME?.match(regex) ||
+        item.system.description?.match(regex) ||
+        item.system.XMLID?.match(regex);
     if (match) {
         return true;
     }
@@ -91,7 +95,10 @@ function filterItem(item, filterString) {
     // Could be a child of a parent
     for (const child of item.childItems) {
         const match2 =
-            child.name?.match(regex) || child.system.description?.match(regex) || child.system.XMLID?.match(regex);
+            child.name?.match(regex) ||
+            child.system.NAME?.match(regex) ||
+            child.system.description?.match(regex) ||
+            child.system.XMLID?.match(regex);
         if (match2) {
             return true;
         }
@@ -2130,6 +2137,10 @@ export class HeroSystem6eItem extends Item {
                 if (oldName !== this.name) {
                     changeObject.name = this.name;
                 }
+                if (!changeObject.name && !this.name) {
+                    console.warn("Name is empty");
+                    changeObject.name = this.system.XMLID || "undefined";
+                }
                 await this.update(changeObject, options);
             }
 
@@ -3996,32 +4007,10 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // for (const adder of modifier.adders) {
-        //     switch (adder.XMLID) {
-        //         case "DOUBLELENGTH":
-        //         case "DOUBLEWIDTH":
-        //         case "DOUBLEHEIGHT":
-        //         case "DOUBLEAREA":
-        //             // These adders relate to AOE and so are displayed as a part of that
-        //             break;
-
-        //         case "BREAKABILITY":
-        //             result += `${adder.OPTION_ALIAS} `;
-        //             break;
-
-        //         // case "ACTIVATION":
-        //         // case "RESET":
-        //         //     result += `${adder.OPTION_ALIAS}, `;
-        //         //     break;
-
-        //         case "EXPLOSION":
-        //             result += adder.ALIAS + "; ";
-
-        //             break;
-        //         default:
-        //             result += adder.ALIAS + ", ";
-        //     }
-        // }
+        // EXTRATIME has a MODIFIER
+        for (const mod2 of modifier.modifiers) {
+            result += `${mod2.ALIAS}, `;
+        }
 
         if (modifier.XMLID === "FOCUS") {
             // Sometimes the focus description is in the ALIAS, sometimes it is in the COMMENTS
@@ -4069,7 +4058,10 @@ export class HeroSystem6eItem extends Item {
                 fraction += "3/4";
                 break;
             default:
-                fraction += BASECOST_total % 1;
+                // -.375 for example
+                console.warn(`Unexpected fraction`, Math.abs(BASECOST_total % 1), this);
+                fraction += Math.abs(BASECOST_total % 1);
+                break;
         }
 
         result += fraction.trim();
