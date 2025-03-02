@@ -7863,7 +7863,7 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe.only("EXTRATIME & Extra Phase", function () {
+            describe("EXTRATIME & Extra Phase", function () {
                 const contents = `
                     <POWER XMLID="INVISIBILITY" ID="1734810806131" BASECOST="10.0" LEVELS="0" ALIAS="Invisibility" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734458180367" NAME="Personal Sound Dampening" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                     <NOTES />
