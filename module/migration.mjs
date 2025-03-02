@@ -152,6 +152,18 @@ async function removeStrengthPlaceholder(actor) {
 
         // Delete strength placeholder as we need many of them so will be creating them on the fly.
         await actor.items.find((item) => item.system.XMLID === "__STRENGTHDAMAGE")?.delete();
+
+        const modifiedItems = actor.items
+            .map((item) => {
+                if (!item.system._active) {
+                    return item.update({ "system._active": {} });
+                }
+
+                return undefined;
+            })
+            .filter(Boolean);
+
+        await Promise.all(modifiedItems);
     } catch (e) {
         const msg = `Migration of maneuvers to 4.0.14 failed for ${actor?.name}. Please report.`;
         console.error(msg, e);
