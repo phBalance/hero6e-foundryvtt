@@ -2514,27 +2514,27 @@ export class HeroSystem6eItem extends Item {
             this._postUploadDetails(options);
 
             return changed;
-        } catch (e) {
+        } catch (error) {
             try {
                 if (foundry.utils.isNewerVersion(this.actor.system.versionHeroSystem6eCreated, "3.0.63")) {
                     ui.notifications.error(
-                        `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly. Please report.`,
+                        `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly. Please report.  Error: ${error.message}`,
                         { console: true, permanent: true },
                     );
-                    console.error(e);
+                    console.error(error);
                 } else {
                     ui.notifications.error(
                         `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
                         { console: true, permanent: false },
                     );
                 }
-            } catch (e2) {
+            } catch (error2) {
                 ui.notifications.error(
                     `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly. Please report.`,
                     { console: true, permanent: true },
                 );
-                console.error(e);
-                console.error(e2);
+                console.error(error);
+                console.error(error2);
             }
         }
         return false;
