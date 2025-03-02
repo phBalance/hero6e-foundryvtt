@@ -83,7 +83,11 @@ function filterItem(item, filterString) {
 
     const regex = new RegExp(filterString.trim(), "i");
 
-    const match = item.name?.match(regex) || item.system.description?.match(regex) || item.system.XMLID?.match(regex);
+    const match =
+        item.name?.match(regex) ||
+        item.system.NAME?.match(regex) ||
+        item.system.description?.match(regex) ||
+        item.system.XMLID?.match(regex);
     if (match) {
         return true;
     }
@@ -91,7 +95,10 @@ function filterItem(item, filterString) {
     // Could be a child of a parent
     for (const child of item.childItems) {
         const match2 =
-            child.name?.match(regex) || child.system.description?.match(regex) || child.system.XMLID?.match(regex);
+            child.name?.match(regex) ||
+            child.system.NAME?.match(regex) ||
+            child.system.description?.match(regex) ||
+            child.system.XMLID?.match(regex);
         if (match2) {
             return true;
         }
