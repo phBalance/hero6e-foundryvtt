@@ -209,10 +209,6 @@ export async function processActionToHit(item, formData) {
 
     const action = Attack.getActionInfo(item, _targetArray, formData);
     item = action.system.item[action.current.itemId];
-    const targets = action.system.currentTargets;
-    const hthAttackItemMergeObj = {
-        hthAttackItems: action.hthAttackItems.map((hthAttack) => fromUuidSync(hthAttack.uuid)),
-    };
 
     // PH: FIXME: Need to not pass in formData presumably or at least pass in action
     if (item.getAoeModifier()) {
