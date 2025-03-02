@@ -2449,12 +2449,12 @@ export class HeroSystem6eItem extends Item {
             this._postUploadDetails(options);
 
             return changed;
-        } catch (e) {
+        } catch (error) {
             ui.notifications.error(
-                `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to upload properly. Please report.`,
+                `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to upload properly. Please report. Error: ${error.message}`,
                 { console: true, permanent: true },
             );
-            console.error(e);
+            console.error(error);
         }
         return false;
     }
