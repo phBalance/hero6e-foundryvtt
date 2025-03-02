@@ -7862,6 +7862,57 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 15);
                 });
             });
+
+            describe.only("EXTENDED TIME & Extra Phase", function () {
+                const contents = `
+                    <POWER XMLID="INVISIBILITY" ID="1734810806131" BASECOST="10.0" LEVELS="0" ALIAS="Invisibility" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1734458180367" NAME="Personal Sound Dampening" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    <ADDER XMLID="MENTALGROUP" ID="1736103283700" BASECOST="5.0" LEVELS="0" ALIAS="Mental Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                        <NOTES />
+                    </ADDER>
+                    <MODIFIER XMLID="EXTRATIME" ID="1736103283742" BASECOST="-0.75" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRA" OPTIONID="EXTRA" OPTION_ALIAS="Extra Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES />
+                        <MODIFIER XMLID="ACTIVATEONLY" ID="1736103283701" BASECOST="-1.0" LEVELS="0" ALIAS="Only to Activate" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES />
+                        </MODIFIER>
+                    </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Invisibility to Hearing and Mental Groups  (15 Active Points); Extra Time (Extra Phase, Only to Activate, -1/2), Cybernetics (-1/4)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 8);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 15);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
