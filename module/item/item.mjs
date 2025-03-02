@@ -2137,6 +2137,10 @@ export class HeroSystem6eItem extends Item {
                 if (oldName !== this.name) {
                     changeObject.name = this.name;
                 }
+                if (!changeObject.name && !this.name) {
+                    console.warn("Name is empty");
+                    changeObject.name = this.system.XMLID || "undefined";
+                }
                 await this.update(changeObject, options);
             }
 
@@ -4003,32 +4007,10 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // for (const adder of modifier.adders) {
-        //     switch (adder.XMLID) {
-        //         case "DOUBLELENGTH":
-        //         case "DOUBLEWIDTH":
-        //         case "DOUBLEHEIGHT":
-        //         case "DOUBLEAREA":
-        //             // These adders relate to AOE and so are displayed as a part of that
-        //             break;
-
-        //         case "BREAKABILITY":
-        //             result += `${adder.OPTION_ALIAS} `;
-        //             break;
-
-        //         // case "ACTIVATION":
-        //         // case "RESET":
-        //         //     result += `${adder.OPTION_ALIAS}, `;
-        //         //     break;
-
-        //         case "EXPLOSION":
-        //             result += adder.ALIAS + "; ";
-
-        //             break;
-        //         default:
-        //             result += adder.ALIAS + ", ";
-        //     }
-        // }
+        // EXTRATIME has a MODIFIER
+        for (const mod2 of modifier.modifiers) {
+            result += `${mod2.ALIAS}, `;
+        }
 
         if (modifier.XMLID === "FOCUS") {
             // Sometimes the focus description is in the ALIAS, sometimes it is in the COMMENTS
@@ -4076,7 +4058,10 @@ export class HeroSystem6eItem extends Item {
                 fraction += "3/4";
                 break;
             default:
-                fraction += BASECOST_total % 1;
+                // -.375 for example
+                console.warn(`Unexpected fraction`, Math.abs(BASECOST_total % 1), this);
+                fraction += Math.abs(BASECOST_total % 1);
+                break;
         }
 
         result += fraction.trim();

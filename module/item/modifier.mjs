@@ -140,6 +140,14 @@ export class HeroSystem6eModifier {
         return _adders;
     }
 
+    get modifiers() {
+        const _modifiers = [];
+        for (const _modifierJson of this.MODIFIER || []) {
+            _modifiers.push(new HeroSystem6eModifier(_modifierJson, { item: this.item, parent: this }));
+        }
+        return _modifiers;
+    }
+
     get addersDescription() {
         const textArray = [];
         for (const _adder of this.adders) {
