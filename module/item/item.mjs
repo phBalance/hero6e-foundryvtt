@@ -3634,7 +3634,7 @@ export class HeroSystem6eItem extends Item {
 
                     // Otherwise add it to the list of ADDERS as normal.
                     if (adder.ALIAS.trim()) {
-                        _adderArray.push(adder.ALIAS);
+                        _adderArray.push(`${adder.ALIAS} ${parseInt(adder.BASECOST)?.signedString()}`);
                     }
                     break;
 
