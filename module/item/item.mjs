@@ -2447,11 +2447,27 @@ export class HeroSystem6eItem extends Item {
 
             return changed;
         } catch (e) {
-            ui.notifications.error(
-                `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to upload properly. Please report.`,
-                { console: true, permanent: true },
-            );
-            console.error(e);
+            try {
+                if (foundry.utils.isNewerVersion(this.actor.system.versionHeroSystem6eCreated, "3.0.63")) {
+                    ui.notifications.error(
+                        `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly. Please report.`,
+                        { console: true, permanent: true },
+                    );
+                    console.error(e);
+                } else {
+                    ui.notifications.error(
+                        `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
+                        { console: true, permanent: false },
+                    );
+                }
+            } catch (e2) {
+                ui.notifications.error(
+                    `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly. Please report.`,
+                    { console: true, permanent: true },
+                );
+                console.error(e);
+                console.error(e2);
+            }
         }
         return false;
     }
@@ -3433,7 +3449,7 @@ export class HeroSystem6eItem extends Item {
                     system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
 
                     // Provide dice if this is an attack
-                    if (this.baseInfo.behaviors.includes("dice")) {
+                    if (this.baseInfo?.behaviors.includes("dice")) {
                         const damageFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                         if (damageFormula !== "0") {
                             if (system.description.indexOf(damageFormula) === -1) {
@@ -5044,37 +5060,39 @@ export class HeroSystem6eItem extends Item {
     }
 
     get doesKillingDamage() {
-        // Preferred Methods to determine KILLING
-        if (this.system.XMLID.startsWith("__")) {
-            return false;
-        } else if (this.baseInfo.doesKillingDamage != undefined) {
-            return this.baseInfo.doesKillingDamage;
-        } else if (this.baseInfo.nonDmgEffect) {
-            return false;
-        } else if (this.isSenseAffecting()) {
-            return false;
-        } else if (this.baseInfo.type.includes("adjustment")) {
-            return false;
-        } else if (this.baseInfo.type.includes("mental")) {
-            return false;
-        } else if (this.system.WEAPONEFFECT) {
-            return this.system.WEAPONEFFECT.includes("KILLING");
-        } else if (this.system.EFFECT) {
-            return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
-        } else if (this.type === "disadvantage") {
-            return false;
-        } else if (this.baseInfo.type.includes("disadvantage")) {
-            return false;
+        if (this.system.XMLID && this.baseInfo) {
+            // Preferred Methods to determine KILLING
+            if (this.system.XMLID.startsWith("__")) {
+                return false;
+            } else if (this.baseInfo.doesKillingDamage != undefined) {
+                return this.baseInfo.doesKillingDamage;
+            } else if (this.baseInfo.nonDmgEffect) {
+                return false;
+            } else if (this.isSenseAffecting()) {
+                return false;
+            } else if (this.baseInfo.type.includes("adjustment")) {
+                return false;
+            } else if (this.baseInfo.type.includes("mental")) {
+                return false;
+            } else if (this.system.WEAPONEFFECT) {
+                return this.system.WEAPONEFFECT.includes("KILLING");
+            } else if (this.system.EFFECT) {
+                return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
+            } else if (this.type === "disadvantage") {
+                return false;
+            } else if (this.baseInfo.type.includes("disadvantage")) {
+                return false;
+            }
         }
 
         // Legacy KILLING support
         console.warn(
             `${this.actor.name}: Unable to determine KILLING property for ${this.system.XMLID}/${this.name}, using legacy values.`,
         );
-        if (this.system.killing === true) {
+        if (this.system?.killing === true) {
             return true;
         }
-        if (this.system.killing === false) {
+        if (this.system?.killing === false) {
             return false;
         }
 
