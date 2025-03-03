@@ -316,13 +316,25 @@ export class HeroSystem6eActor extends Actor {
 
             // Mark as undefeated in combat tracker
             if (data.system.characteristics.stun.value >= -stunThreshold) {
-                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+                //this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                    active: false,
+                });
             }
 
             if (data.system.characteristics.stun.value > 0) {
-                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
-                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
-                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+                // this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
+                // this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
+                // this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
+                    active: false,
+                });
+                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect.id, {
+                    active: false,
+                });
+                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                    active: false,
+                });
             }
         }
 
@@ -363,7 +375,10 @@ export class HeroSystem6eActor extends Actor {
             data.system?.characteristics?.body?.value > 0 &&
             this.system.characteristics.stun.value >= -30
         ) {
-            this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+            //this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                active: false,
+            });
         }
 
         // If STR was change check encumbrance
