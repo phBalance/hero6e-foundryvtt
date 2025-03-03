@@ -1760,7 +1760,6 @@ export class HeroSystem6eItem extends Item {
             const CHARGES = this.findModsByXmlid("CHARGES");
             if (CHARGES) {
                 this.system.charges = {
-                    ...this.system.charges,
                     max: parseInt(CHARGES.OPTION_ALIAS),
                     value: parseInt(CHARGES.OPTION_ALIAS),
                     clipsMax: Math.pow(
@@ -1772,6 +1771,7 @@ export class HeroSystem6eItem extends Item {
                     continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
                     boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
                     fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
+                    ...this.system.charges,
                 };
 
                 // The first time through, on creation, there will be no value (number of charges) defined.
