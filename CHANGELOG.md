@@ -21,6 +21,7 @@
 - Fixed EXTRATIME cost and display [#1920](https://github.com/dmdorman/hero6e-foundryvtt/issues/1920)
 - Improved error handling for older/unsupported tokens. Uploading the HDC file again fixes these errors.
 - Custom Adders now includes cost on description.
+- MULTIPOWER, COMPOUNDPOWER, and LIST don't really have a range property. [#1837](https://github.com/dmdorman/hero6e-foundryvtt/issues/1837)
 
 ## Version 4.0.20 20250217
 

@@ -559,6 +559,10 @@ export class HeroSystem6eItem extends Item {
                     break;
 
                 default:
+                    // Some items don't really have a range
+                    if (["MULTIPOWER", "COMPOUNDPOWER", "LIST"].includes(this.system.XMLID)) {
+                        break;
+                    }
                     console.error("Unhandled range", configPowerInfo);
                     if (configPowerInfo?.range?.toLowerCase()) {
                         content += ` ${configPowerInfo?.range?.toLowerCase()}`;
