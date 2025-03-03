@@ -1037,7 +1037,7 @@ export class HeroSystem6eItem extends Item {
             this.system.range = power.range;
         } else {
             // This should never happen, missing something from CONFIG.mjs?  Perhaps with super old actors?
-            this.system.range = HERO.RANGE_TYPES.SELF;
+            this.system.range = CONFIG.HERO.RANGE_TYPES.SELF;
         }
         return true;
     }
