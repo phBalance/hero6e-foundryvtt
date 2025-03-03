@@ -3209,8 +3209,8 @@ export class HeroSystem6eItem extends Item {
                     //Sight and Hearing Groups Flash 5 1/2d6
                     //Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6
                     // Groups
-                    let _groups = [system.OPTION_ALIAS];
-                    for (let addr of (system.ADDER || []).filter((o) => o.XMLID.indexOf("GROUP") > -1)) {
+                    const _groups = [system.OPTION_ALIAS];
+                    for (const addr of (system.ADDER || []).filter((o) => o.XMLID.indexOf("GROUP") > -1)) {
                         _groups.push(addr.ALIAS);
                     }
                     if (_groups.length === 1) {
@@ -3225,7 +3225,7 @@ export class HeroSystem6eItem extends Item {
 
                     // singles
                     const _singles = [];
-                    for (let addr of (system.ADDER || []).filter(
+                    for (const addr of (system.ADDER || []).filter(
                         (o) =>
                             o.XMLID.indexOf("GROUP") === -1 &&
                             o.XMLID.match(/(NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/),
@@ -3234,7 +3234,7 @@ export class HeroSystem6eItem extends Item {
                     }
                     if (_singles.length === 1) {
                         system.description += ", " + _singles[0];
-                    } else {
+                    } else if (_singles.length > 1) {
                         system.description += ", " + _singles.slice(0, -1).join(", ");
                         system.description += " and " + _singles.slice(-1);
                     }
