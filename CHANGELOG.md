@@ -19,6 +19,7 @@
 - AUTOMATON's no longer take STUN from KnockBack damage. [#1926](https://github.com/dmdorman/hero6e-foundryvtt/issues/1926)
 - Added setting that enables you to "Show BODY & STUN changes to token owners as a private chat" for all, PC's only, or none. [#1965](https://github.com/dmdorman/hero6e-foundryvtt/issues/1926)
 - Fixed EXTRATIME cost and display [#1920](https://github.com/dmdorman/hero6e-foundryvtt/issues/1920)
+- Improved error handling for older/unsupported tokens. Uploading the HDC file again fixes these errors.
 
 ## Version 4.0.20 20250217
 
