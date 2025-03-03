@@ -430,6 +430,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                     case "persistent":
                         data.allPersistentEffects.push(d);
                         break;
+                    case "inherent":
+                        data.allInherentEffects.push(d);
+                        break;
+
                     default:
                         data.allConstantEffects.push(d);
 
