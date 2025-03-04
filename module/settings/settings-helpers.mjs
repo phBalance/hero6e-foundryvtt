@@ -509,4 +509,3 @@ class StunMultiplierMenu extends FormApplication {
         await this.render();
     }
 }
-
