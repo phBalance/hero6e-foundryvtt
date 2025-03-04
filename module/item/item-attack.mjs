@@ -1557,10 +1557,23 @@ export async function _onRollDamage(event) {
 
     const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations;
 
+    const customStunMultiplierSetting = game.settings.get(
+        game.system.id,
+        "NonStandardStunMultiplierForKillingAttackBackingSetting",
+    );
+
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
         .makeNormalRoll(isNormalAttack)
-        .makeKillingRoll(isKillingAttack)
+        .makeKillingRoll(
+            isKillingAttack,
+            customStunMultiplierSetting.d6Count ||
+                customStunMultiplierSetting.d6Less1DieCount ||
+                customStunMultiplierSetting.halfDieCount ||
+                customStunMultiplierSetting.constant
+                ? customStunMultiplierSetting
+                : undefined,
+        )
         .makeAdjustmentRoll(!!adjustment)
         .makeFlashRoll(!!senseAffecting)
         .makeEntangleRoll(!!isEntangle)
