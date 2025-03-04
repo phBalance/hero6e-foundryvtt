@@ -494,7 +494,7 @@ class StunMultiplierMenu extends FormApplication {
         return options;
     }
 
-    async getData(_options) {
+    async getData() {
         const customStunMultiplier = game.settings.get(
             game.system.id,
             "NonStandardStunMultiplierForKillingAttackBackingSetting",
