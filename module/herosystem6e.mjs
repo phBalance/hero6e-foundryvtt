@@ -950,6 +950,11 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     break;
                 }
 
+                const customStunMultiplierSetting = game.settings.get(
+                    game.system.id,
+                    "NonStandardStunMultiplierForKillingAttackBackingSetting",
+                );
+
                 //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
                     .addDice(userSelection.dice, "DICE")
@@ -958,7 +963,15 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     .addNumber(userSelection.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
 
                     .makeNormalRoll(userSelection.damageType === "NORMAL")
-                    .makeKillingRoll(userSelection.damageType === "KILLING")
+                    .makeKillingRoll(
+                        userSelection.damageType === "KILLING",
+                        customStunMultiplierSetting.d6Count ||
+                            customStunMultiplierSetting.d6Less1DieCount ||
+                            customStunMultiplierSetting.halfDieCount ||
+                            customStunMultiplierSetting.constant
+                            ? customStunMultiplierSetting
+                            : undefined,
+                    )
                     .makeAdjustmentRoll(userSelection.damageType === "ADJUSTMENT")
                     .makeEntangleRoll(userSelection.damageType === "ENTANGLE")
                     .makeFlashRoll(userSelection.damageType === "FLASH")

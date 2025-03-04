@@ -54,8 +54,23 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
     let flavour;
     switch (chatMessageCmd.groups.flavour?.toLowerCase()) {
         case "k":
-            flavour = HeroRoller.ROLL_TYPE.KILLING;
-            roller.makeKillingRoll();
+            {
+                const customStunMultiplierSetting = game.settings.get(
+                    game.system.id,
+                    "NonStandardStunMultiplierForKillingAttackBackingSetting",
+                );
+
+                flavour = HeroRoller.ROLL_TYPE.KILLING;
+                roller.makeKillingRoll(
+                    true,
+                    customStunMultiplierSetting.d6Count ||
+                        customStunMultiplierSetting.d6Less1DieCount ||
+                        customStunMultiplierSetting.halfDieCount ||
+                        customStunMultiplierSetting.constant
+                        ? customStunMultiplierSetting
+                        : undefined,
+                );
+            }
             break;
 
         case "n":

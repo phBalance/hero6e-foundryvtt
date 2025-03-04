@@ -229,7 +229,6 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            //onChange: () => ui.combat.render(),
             requiresReload: false,
         });
 
@@ -240,7 +239,6 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: true,
-            //onChange: () => ui.chat.render(), // doesn't seem to work
             requiresReload: true,
         });
 
@@ -251,8 +249,25 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            //onChange: () => ui.combat.render(),
             requiresReload: false,
+        });
+
+        game.settings.register(module, "NonStandardStunMultiplierForKillingAttackBackingSetting", {
+            name: game.i18n.localize("Settings.NonStandardStunMultiplierForKillingAttack.Name"),
+            label: game.i18n.localize("Settings.NonStandardStunMultiplierForKillingAttack.Label"),
+            scope: "world",
+            config: false,
+            type: Object,
+            default: { d6Count: 0, d6Less1DieCount: 0, halfDieCount: 0, constant: 0 },
+            requiresReload: false,
+        });
+
+        game.settings.registerMenu(module, "NonStandardStunMultiplierForKillingAttack", {
+            name: game.i18n.localize("Settings.NonStandardStunMultiplierForKillingAttack.Name"),
+            label: game.i18n.localize("Settings.NonStandardStunMultiplierForKillingAttack.Label"),
+            icon: "fas fa-bars", // A Font Awesome icon used in the submenu button
+            type: StunMultiplierMenu,
+            restricted: true, // Restrict this submenu to game master only
         });
 
         game.settings.register(module, "ShowGenericRoller", {
@@ -262,7 +277,6 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            //onChange: () => ui.chat.render(), // doesn't seem to work
             requiresReload: true,
         });
 
@@ -342,7 +356,7 @@ class AutomationMenu extends FormApplication {
         options = foundry.utils.mergeObject(options, {
             classes: ["form"],
             popOut: true,
-            template: `systems/${HEROSYS.module}/templates/automationMenu.hbs`,
+            template: `systems/${HEROSYS.module}/templates/configuration/automationMenu.hbs`,
             id: "automation-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
@@ -457,9 +471,42 @@ class AutomationMenu extends FormApplication {
         };
     }
 
-    async _updateObject(event, formData) {
+    async _updateObject(_event, formData) {
         const data = foundry.utils.expandObject(formData);
         await game.settings.set(game.system.id, "automation", data.automation);
         await this.render();
     }
 }
+
+class StunMultiplierMenu extends FormApplication {
+    static get defaultOptions() {
+        const defaultOptions = super.defaultOptions;
+        const options = foundry.utils.mergeObject(defaultOptions, {
+            classes: ["form"],
+            popOut: true,
+            template: `systems/${HEROSYS.module}/templates/configuration/customStunMultiplier.hbs`,
+            id: "stun-multiplier-form-application",
+            closeOnSubmit: false, // do not close when submitted
+            submitOnChange: true, // submit when any input changes
+            title: "Custom STUN Multiplier Settings",
+        });
+
+        return options;
+    }
+
+    async getData(_options) {
+        const customStunMultiplier = game.settings.get(
+            game.system.id,
+            "NonStandardStunMultiplierForKillingAttackBackingSetting",
+        );
+
+        return customStunMultiplier;
+    }
+
+    async _updateObject(_event, formData) {
+        const data = foundry.utils.expandObject(formData);
+        await game.settings.set(game.system.id, "NonStandardStunMultiplierForKillingAttackBackingSetting", data);
+        await this.render();
+    }
+}
+

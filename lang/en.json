@@ -209,25 +209,9 @@
             "Name": "Combat Movement Only On Actors Phase",
             "Hint": "This prevents players from moving their tokens when it isn't their turn."
         },
-        "effectsPanel": {
-            "Name": "Effects Panel",
-            "Hint": "Show the effects panel when a token is controlled."
-        },
-        "ShowAllConditionalDefenses": {
-            "Name": "Show all Conditional Defenses",
-            "Hint": "Conditional Defenses that provide no obvious defense are hidden by default. There may be some edge cases where these defenses should be applied. Enabling this setting will give the GM an opportunity to apply a conditional defense, even when the automation thinks it does not apply."
-        },
-        "ShowOnlyVisibleCombatants": {
-            "Name": "Show only visible combatants",
-            "Hint": "Show only the combatants that you can currently see. When a combatant goes around a corner or turns invisible, they will not show up on the combat tracker. Currently experimental."
-        },
-        "ShowGenericRoller": {
-            "Name": "Show Generic Dice Roller",
-            "Hint": "Show generic dice rolling buttons at the bottom of the Chat Messages sidebar."
-        },
-        "ShowCombatCharacteristicChanges": {
-            "Name": "Show combat characteristic changes",
-            "Hint": "Show BODY & STUN changes to token owners as a private chat."
+        "combatTrackerDispositionHighlighting": {
+            "Name": "Combat Tracker Disposition Highlighting",
+            "Hint": "The background color of combatants in the combat tracker will match the color associated with the token disposition. Players with a friendly disposition will be green."
         },
         "DefaultEdition": {
             "Name": "Default System Rules",
@@ -237,17 +221,17 @@
                 "five": "5th edition"
             }
         },
-        "combatTrackerDispositionHighlighting": {
-            "Name": "Combat Tracker Disposition Highlighting",
-            "Hint": "The background color of combatants in the combat tracker will match the color associated with the token disposition. Players with a friendly disposition will be green."
+        "DiceSkinning": {
+            "Name": "Dice Skinning (Dice So Nice)",
+            "Hint": "Requires Dice So Nice module. Dice associated with hit locations, stun multipliers, and knockback have a different dice skin."
         },
-        "StrEnd": {
-            "Name": "Heroic Strength & Endurance",
-            "Hint": "Using STR typically costs 1 END per 10 points of STR used. In heroic campaigns the GM has the option of charging 1 END per 5 STR used. This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
-            "Choices": {
-                "five": "1 END per 5 STR",
-                "ten": "1 END per 10 STR"
-            }
+        "DoubleDamageLimit": {
+            "Name": "Double Damage Limit",
+            "Hint": "A character cannot more than double the Damage Classes of their base attack. This should be enabled for 5E games. It is an optional rule for 6E games."
+        },
+        "effectsPanel": {
+            "Name": "Effects Panel",
+            "Hint": "Show the effects panel when a token is controlled."
         },
         "Equipment": {
             "WeightPercentage": {
@@ -274,6 +258,20 @@
                 }
             }
         },
+        "LongTermEndurance": {
+            "Name": "Long-term Endurance",
+            "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation. When an actor's average END use per turn exceeds double their REC, max END is lowered."
+        },
+        "NonStandardStunMultiplierForKillingAttack": {
+            "Name": "Custom Killing Attack STUN Multiplier",
+            "Label": "STUN Multipler Override",
+            "Template": {
+                "D6": "Number of d6",
+                "D6minus1": "Number of d6-1",
+                "HalfDice": "Number of ½d6",
+                "Constant": "Constant"
+            }
+        },
         "OptionalManeuvers": {
             "Name": "Optional Maneuvers",
             "Hint": "Add the optional maneuvers to the maneuvers tab."
@@ -282,21 +280,33 @@
             "Name": "Secret Mind Scan",
             "Hint": "Mind Scan has several components that the Game Master may wish to keep secret. When enabled players are unable to make Mind Scan rolls. Instead the GM is required to make Mind Scan rolls for the players. When disabled, players can select number of minds and familarity."
         },
+        "ShowAllConditionalDefenses": {
+            "Name": "Show all Conditional Defenses",
+            "Hint": "Conditional Defenses that provide no obvious defense are hidden by default. There may be some edge cases where these defenses should be applied. Enabling this setting will give the GM an opportunity to apply a conditional defense, even when the automation thinks it does not apply."
+        },
+        "ShowCombatCharacteristicChanges": {
+            "Name": "Show combat characteristic changes",
+            "Hint": "Show BODY & STUN changes to token owners as a private chat."
+        },
+        "ShowGenericRoller": {
+            "Name": "Show Generic Dice Roller",
+            "Hint": "Show generic dice rolling buttons at the bottom of the Chat Messages sidebar."
+        },
+        "ShowOnlyVisibleCombatants": {
+            "Name": "Show only visible combatants",
+            "Hint": "Show only the combatants that you can currently see. When a combatant goes around a corner or turns invisible, they will not show up on the combat tracker. Currently experimental."
+        },
+        "StrEnd": {
+            "Name": "Heroic Strength & Endurance",
+            "Hint": "Using STR typically costs 1 END per 10 points of STR used. In heroic campaigns the GM has the option of charging 1 END per 5 STR used. This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
+            "Choices": {
+                "five": "1 END per 5 STR",
+                "ten": "1 END per 10 STR"
+            }
+        },
         "UseEndurance": {
             "Name": "Use Endurance",
             "Hint": "Automate tracking of endurance. For example END will used for attacks and constant powers when in combat."
-        },
-        "LongTermEndurance": {
-            "Name": "Long-term Endurance",
-            "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation. When an actor's average END use per turn exceeds double their REC, max END is lowered."
-        },
-        "DoubleDamageLimit": {
-            "Name": "Double Damage Limit",
-            "Hint": "A character cannot more than double the Damage Classes of their base attack. This should be enabled for 5E games. It is an optional rule for 6E games."
-        },
-        "DiceSkinning": {
-            "Name": "Dice Skinning (Dice So Nice)",
-            "Hint": "Requires Dice So Nice module. Dice associated with hit locations, stun multipliers, and knockback have a different dice skin."
         },
         "UseKnockback": {
             "Name": "Use Knockback",
