@@ -405,7 +405,7 @@ export function registerDiceTests(quench) {
                 });
 
                 describe("serialize/deserialize", async function () {
-                    it("should generate the same object when serialized and deserialized", async function () {
+                    it("should generate the same object when serialized and deserialized - success roll", async function () {
                         const roller = new HeroRoller()
                             .makeSuccessRoll()
                             .addDice(7)
@@ -419,6 +419,27 @@ export function registerDiceTests(quench) {
                         const postRoller = roller.clone();
 
                         expect(roller.getSuccessTerms()).to.deep.equal(postRoller.getSuccessTerms());
+                        expect(roller.getFormula()).to.equal(postRoller.getFormula());
+                    });
+
+                    it("should generate the same object when serialized and deserialized - killing roll", async function () {
+                        const roller = new HeroRoller()
+                            .makeKillingRoll(true, { d6Count: 6, d6Less1DieCount: 1, halfDieCount: 12, constant: 2 })
+                            .addDice(7)
+                            .addNumber(7)
+                            .addDiceMinus1(3)
+                            .addHalfDice(2)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        const postRoller = roller.clone();
+
+                        expect(roller.getBaseTerms()).to.deep.equal(postRoller.getBaseTerms());
+                        expect(roller.getStunMultiplier()).to.deep.equal(postRoller.getStunMultiplier());
+                        expect(roller.getStunMultiplierDiceParts()).to.deep.equal(
+                            postRoller.getStunMultiplierDiceParts(),
+                        );
                         expect(roller.getFormula()).to.equal(postRoller.getFormula());
                     });
 
@@ -531,7 +552,12 @@ export function registerDiceTests(quench) {
                         expect(() => {
                             return roller.getStunMultiplier();
                         }).to.throw();
-
+                        expect(() => {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplierDiceParts();
+                        }).to.throw();
                         expect(() => {
                             return roller.getBodyTerms();
                         }).to.throw();
@@ -733,6 +759,12 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             return roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplierDiceParts();
                         }).to.throw();
                         expect(() => {
                             roller.getAdjustmentTerms();
@@ -1382,7 +1414,7 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                     });
 
-                    it("should calculate stun multiplier correctly for 5e", async function () {
+                    it("should calculate the default stun multiplier correctly for 5e", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -1395,12 +1427,128 @@ export function registerDiceTests(quench) {
                         expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
                     });
 
-                    it("should calculate stun multiplier correctly for 5e in reverse order", async function () {
+                    it("should not calculate the default stun multiplier correctly for 5e in reverse order", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true) // This locks in the multipler as a 6e
+                            .modifyTo5e(true)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.not.equal(TestRollMock.fixedRollResult - 1);
+                    });
+
+                    it("should calculate default stun multiplier correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                    });
+
+                    it("should calculate default stun multiplier correctly for 6e in reverse order", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeKillingRoll(true)
-                            .modifyTo5e(true)
+                            .modifyTo5e(false)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                    });
+
+                    it("should calculate a stun multiplier with no parts correctly for 5e as a minimum 1", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(1);
+                    });
+
+                    it("should calculate a stun multiplier with a const (1) correctly for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 1,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(1);
+                    });
+
+                    it("should calculate a stun multiplier with a fixed const correctly for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 66,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(66);
+                    });
+
+                    it("should calculate a stun multiplier with a half die correctly for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 1,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult / 2);
+                    });
+
+                    it("should calculate a stun multiplier with a die minus a pip correctly for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 1,
+                                constant: 0,
+                            })
                             .addNumber(1);
 
                         await roller.roll();
@@ -1408,30 +1556,246 @@ export function registerDiceTests(quench) {
                         expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
                     });
 
-                    it("should calculate stun multiplier correctly for 6e", async function () {
+                    it("should calculate a stun multiplier with a die correctly for 5e", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .modifyTo5e(false)
-                            .makeKillingRoll(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
                             .addNumber(1);
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult);
                     });
 
-                    it("should calculate stun multiplier correctly for 6e in reverse order", async function () {
+                    it("should calculate a multipart stun multiplier with a die and constant correctly for 5e", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true)
                             .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 1,
+                            })
                             .addNumber(1);
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult + 1);
+                    });
+
+                    it("should calculate a multipart stun multiplier with a die and half die correctly for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 1,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult + TestRollMock.fixedRollResult / 2,
+                        );
+                    });
+
+                    it("should calculate a multipart stun multiplier with a die and die minus 1 correctly for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 1,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult + (TestRollMock.fixedRollResult - 1),
+                        );
+                    });
+
+                    it("should calculate a stun multiplier with no parts correctly for 6e as a minimum 1", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(1);
+                    });
+
+                    it("should calculate a stun multiplier with a const (1) correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 1,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(1);
+                    });
+
+                    it("should calculate a stun multiplier with a fixed const correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 66,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(66);
+                    });
+
+                    it("should calculate a stun multiplier with a half die correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 1,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult / 2);
+                    });
+
+                    it("should calculate a stun multiplier with a die minus a pip correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 0,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 1,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
+                    });
+
+                    it("should calculate a stun multiplier with a die correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult);
+                    });
+
+                    it("should calculate a multipart stun multiplier with a die and constant correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 0,
+                                constant: 1,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult + 1);
+                    });
+
+                    it("should calculate a multipart stun multiplier with a die and half die correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 1,
+                                d6Less1DieCount: 0,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult + TestRollMock.fixedRollResult / 2,
+                        );
+                    });
+
+                    it("should calculate a multipart stun multiplier with a die and die minus 1 correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true, {
+                                d6Count: 1,
+                                halfDieCount: 0,
+                                d6Less1DieCount: 1,
+                                constant: 0,
+                            })
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult + (TestRollMock.fixedRollResult - 1),
+                        );
                     });
 
                     it("should handle a pip", async function () {
@@ -1685,8 +2049,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true)
                             .modifyTo5e(true)
+                            .makeKillingRoll(true)
                             .addStunMultiplier(-1)
                             .addDice(3);
 
@@ -1715,8 +2079,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true)
                             .modifyTo5e(true)
+                            .makeKillingRoll(true)
                             .addStunMultiplier(-5)
                             .addDice(3);
 
@@ -2264,6 +2628,12 @@ export function registerDiceTests(quench) {
                             roller.getStunTotal();
                         }).to.throw();
                         expect(() => {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplierDiceParts();
+                        }).to.throw();
+                        expect(() => {
                             roller.getFlashTerms();
                         }).to.throw();
                         expect(() => {
@@ -2395,6 +2765,12 @@ export function registerDiceTests(quench) {
                             roller.getStunTotal();
                         }).to.throw();
                         expect(() => {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplierDiceParts();
+                        }).to.throw();
+                        expect(() => {
                             roller.getAdjustmentTerms();
                         }).to.throw();
                         expect(() => {
@@ -2514,8 +2890,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll5Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeFlashRoll()
                             .modifyTo5e(false)
+                            .makeFlashRoll()
                             .addHalfDice(1);
 
                         await roller.roll();
@@ -2554,6 +2930,12 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             roller.getStunTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplierDiceParts();
                         }).to.throw();
                         expect(() => {
                             roller.getAdjustmentTerms();
@@ -2665,6 +3047,12 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             roller.getStunTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunMultiplierDiceParts();
                         }).to.throw();
                         expect(() => {
                             roller.getAdjustmentTerms();

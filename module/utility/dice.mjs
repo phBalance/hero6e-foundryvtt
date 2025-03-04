@@ -56,12 +56,11 @@ export const DICE_SO_NICE_CUSTOM_SETS = Object.freeze({
     },
 });
 
+// v12 classes and namespace
 const Die = foundry.dice.terms.Die;
 const NumericTerm = foundry.dice.terms.NumericTerm;
 const OperatorTerm = foundry.dice.terms.OperatorTerm;
-
-// foundry.dice.terms.RollTerm is the v12 way of finding the class
-const RollTermClass = foundry.dice?.terms.RollTerm ? foundry.dice.terms.RollTerm : RollTerm;
+const RollTermClass = foundry.dice.terms.RollTerm;
 
 /**
  * Add our custom colour sets into Dice So Nice! This allows users to see what the colour set is for each function.
@@ -189,6 +188,12 @@ export class HeroRoller {
         this._killingStunMultiplierHeroRoller = undefined;
         this._killingBaseStunMultiplier = 0;
         this._killingAdditionalStunMultiplier = 0;
+        this._killingBaseStunMultiplierDiceParts = {
+            d6Count: 0,
+            halfDieCount: 0,
+            d6Less1DieCount: 0,
+            constant: 0,
+        };
 
         this._standardEffect = false;
 
@@ -199,9 +204,12 @@ export class HeroRoller {
             stunMultiplier: 1,
             bodyMultiplier: 1,
         };
+
+        this._hitLocationRoller = undefined;
         this._useHitLocation = false;
         this._alreadyHitLocation = "none";
 
+        this._hitSideRoller = undefined;
         this._useHitLocationSide = false;
         this._alreadyHitLocationSide = "none";
 
@@ -238,10 +246,16 @@ export class HeroRoller {
         return this;
     }
 
-    makeKillingRoll(apply = true) {
+    makeKillingRoll(apply = true, stunMultiplierDiceParts) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.KILLING;
-            this._killingStunMultiplier = this._is5eRoll ? "1d6-1" : "1d3";
+            if (!stunMultiplierDiceParts) {
+                this._killingBaseStunMultiplierDiceParts = this._is5eRoll
+                    ? { d6Count: 0, d6Less1DieCount: 1, halfDieCount: 0, constant: 0 }
+                    : { d6Count: 0, d6Less1DieCount: 0, halfDieCount: 1, constant: 0 };
+            } else {
+                this._killingBaseStunMultiplierDiceParts = stunMultiplierDiceParts;
+            }
         }
         return this;
     }
@@ -284,7 +298,7 @@ export class HeroRoller {
     modifyTo5e(apply = false) {
         if (apply) {
             this._is5eRoll = true;
-            this.makeKillingRoll(this._type === HeroRoller.ROLL_TYPE.KILLING);
+            this.makeKillingRoll(this._type === HeroRoller.ROLL_TYPE.KILLING, this._killingBaseStunMultiplierDiceParts);
         }
         return this;
     }
@@ -671,6 +685,15 @@ export class HeroRoller {
             `asking for stun multiplier from type ${this._type}/${this._useHitLocation} doesn't make sense`,
         );
     }
+    getStunMultiplierDiceParts() {
+        if (this._type === HeroRoller.ROLL_TYPE.KILLING && !this._useHitLocation) {
+            return this._killingBaseStunMultiplierDiceParts;
+        }
+
+        throw new Error(
+            `asking for stun multiplier from type ${this._type}/${this._useHitLocation} doesn't make sense`,
+        );
+    }
 
     getBodyTerms() {
         if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
@@ -891,24 +914,33 @@ export class HeroRoller {
             // _buildRollClass: this._buildRollClass.name, // TODO: This is just wrong.
             _options: this._options,
             _rollObj: this._rollObj ? this._rollObj.toJSON() : undefined,
+
             _formulaTerms: this._formulaTerms.map((term) => term.toJSON()),
+
             _type: this._type,
+            _is5eRoll: this._is5eRoll,
 
             _termsCluster: this._termsCluster,
 
             _killingStunMultiplierHeroRoller: this._killingStunMultiplierHeroRoller?.toData(),
             _killingBaseStunMultiplier: this._killingBaseStunMultiplier,
             _killingAdditionalStunMultiplier: this._killingAdditionalStunMultiplier,
+            _killingBaseStunMultiplierDiceParts: this._killingBaseStunMultiplierDiceParts,
 
             _standardEffect: this._standardEffect,
 
             _hitLocation: this._hitLocation,
+
+            _hitLocationRoller: this._hitLocationRoller?.toData(),
             _useHitLocation: this._useHitLocation,
             _alreadyHitLocation: this._alreadyHitLocation,
+
+            _hitSideRoller: this._hitSideRoller?.toData(),
             _useHitLocationSide: this._useHitLocationSide,
             _alreadyHitLocationSide: this._alreadyHitLocationSide,
-            _hitLocationRoller: this._hitLocationRoller?.toData(),
-            _hitSideRoller: this._hitSideRoller?.toData(),
+
+            _successValue: this._successValue,
+            _successRolledValue: this._successRolledValue,
 
             _noBody: this._noBody,
         };
@@ -926,13 +958,14 @@ export class HeroRoller {
         // TODO: Finish this.
         // TODO: I suspect that will only be able to support Roll class.
         const heroRoller = new HeroRoller(dataObj.options, Roll);
-
         heroRoller._rollObj = dataObj._rollObj ? Roll.fromData(dataObj._rollObj) : undefined;
+
         heroRoller._formulaTerms = dataObj._formulaTerms.map((_term, index) =>
             RollTermClass.fromData(dataObj._formulaTerms[index]),
         );
 
         heroRoller._type = dataObj._type;
+        heroRoller._is5eRoll = dataObj._is5eRoll;
 
         heroRoller._termsCluster = dataObj._termsCluster;
 
@@ -942,17 +975,37 @@ export class HeroRoller {
         heroRoller._killingBaseStunMultiplier = dataObj._killingBaseStunMultiplier;
         heroRoller._killingAdditionalStunMultiplier = dataObj._killingAdditionalStunMultiplier;
 
+        // Since this structure only exists in version 2 of the object we may need to reconstruct if the field
+        // doesn't exist (i.e. our dataObj is version 1)
+        if (typeof dataObj._killingBaseStunMultiplierDiceParts === "object") {
+            heroRoller._killingBaseStunMultiplierDiceParts = dataObj._killingBaseStunMultiplierDiceParts;
+        } else if (typeof dataObj._killingAdditionalStunMultiplier === "string") {
+            heroRoller._killingBaseStunMultiplierDiceParts =
+                dataObj._killingAdditionalStunMultiplier === "1d6-1"
+                    ? { d6Count: 0, d6Less1DieCount: 1, halfDieCount: 0, constant: 0 }
+                    : { d6Count: 0, d6Less1DieCount: 0, halfDieCount: 1, constant: 0 };
+        } else {
+            heroRoller._killingBaseStunMultiplierDiceParts = dataObj._is5eRoll
+                ? { d6Count: 0, d6Less1DieCount: 1, halfDieCount: 0, constant: 0 }
+                : { d6Count: 0, d6Less1DieCount: 0, halfDieCount: 1, constant: 0 };
+        }
+
         heroRoller._standardEffect = dataObj._standardEffect;
 
         heroRoller._hitLocation = dataObj._hitLocation;
-        heroRoller._useHitLocation = dataObj._useHitLocation;
-        heroRoller._alreadyHitLocation = dataObj._alreadyHitLocation;
-        heroRoller._useHitLocationSide = dataObj._useHitLocationSide;
-        heroRoller._alreadyHitLocationSide = dataObj._alreadyHitLocationSide;
+
         heroRoller._hitLocationRoller = dataObj._hitLocationRoller
             ? HeroRoller.fromData(dataObj._hitLocationRoller)
             : undefined;
+        heroRoller._useHitLocation = dataObj._useHitLocation;
+        heroRoller._alreadyHitLocation = dataObj._alreadyHitLocation;
+
         heroRoller._hitSideRoller = dataObj._hitSideRoller ? HeroRoller.fromData(dataObj._hitSideRoller) : undefined;
+        heroRoller._useHitLocationSide = dataObj._useHitLocationSide;
+        heroRoller._alreadyHitLocationSide = dataObj._alreadyHitLocationSide;
+
+        heroRoller._successValue = dataObj._successValue;
+        heroRoller._successRolledValue = dataObj._successRolledValue;
 
         heroRoller._noBody = dataObj._noBody;
 
@@ -979,11 +1032,16 @@ export class HeroRoller {
         if (this._type === HeroRoller.ROLL_TYPE.KILLING && !this._useHitLocation) {
             // NOTE: It appears there is no standard effect for the STUNx per APG p 53
             //       although there don't appear to be any mention of this in other books.
+            // NOTE: There are 2 standard STUNx formula 1d6-1 (5e) and 1/2d6 (6e) but the 6e
+            //       rules have a bunch of suggestions on vol 2 pg. 98. We just open it up to whatever
+            //       people want.
             this._killingStunMultiplierHeroRoller = new HeroRoller({}, this._buildRollClass)
                 .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUNx)
                 .makeBasicRoll()
-                .addDieMinus1Min1(this._killingStunMultiplier === "1d6-1" ? 1 : 0)
-                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
+                .addDice(this._killingBaseStunMultiplierDiceParts.d6Count)
+                .addDieMinus1Min1(this._killingBaseStunMultiplierDiceParts.d6Less1DieCount)
+                .addHalfDice(this._killingBaseStunMultiplierDiceParts.halfDieCount)
+                .addNumber(this._killingBaseStunMultiplierDiceParts.constant);
 
             await this._killingStunMultiplierHeroRoller.roll({});
 
