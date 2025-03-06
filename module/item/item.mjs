@@ -2779,8 +2779,16 @@ export class HeroSystem6eItem extends Item {
             return 0;
         }
 
-        // Combat maneuvers cost 1 END and everything else is based on active points
-        const endCost = this.type === "maneuver" ? 1 : RoundFavorPlayerDown((this.system.activePoints || 0) / 10);
+        // Combat maneuvers cost 1 END
+        if (this.type === "maneuver") {
+            return 1;
+        }
+
+        // Everything else is based on 1 END per 10 active points.
+        // NOTE: When we push we are altering the actual active points, via LEVELS and modifiers, so we have to back it out.
+        const unpushedActivePoints =
+            this._activePoints - (this.system._active.pushedRealPoints || 0) * (1 + this._limitationCost);
+        const endCost = RoundFavorPlayerDown(unpushedActivePoints / 10);
 
         return Math.max(1, endCost);
     }
@@ -3861,39 +3869,6 @@ export class HeroSystem6eItem extends Item {
 
         // Endurance
         this.calcEndurance();
-        // system.end = this.getBaseEndCost();
-        // const increasedEnd = this.findModsByXmlid("INCREASEDEND");
-        // if (increasedEnd) {
-        //     system.end *= parseInt(increasedEnd.OPTION.replace("x", ""));
-        // }
-
-        // const reducedEnd =
-        //     this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
-        // if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
-        //     system.end = RoundFavorPlayerDown((system._activePointsWithoutEndMods || system.activePoints) / 10);
-        //     system.end = Math.max(1, RoundFavorPlayerDown(system.end / 2));
-        // } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
-        //     system.end = 0;
-        // }
-
-        // Some powers do not use Endurance
-
-        // const costsEnd = this.findModsByXmlid("COSTSEND");
-        // if (!costsEnd) {
-        //     if (!configPowerInfo?.costEnd) {
-        //         system.end = 0;
-        //     }
-
-        //     // Charges typically do not cost END
-        //     if (this.findModsByXmlid("CHARGES")) {
-        //         system.end = 0;
-        //     }
-        // } else {
-        //     // Full endurance cost unless it's purchased with half endurance
-        //     if (costsEnd.OPTIONID === "HALFEND") {
-        //         system.end = RoundFavorPlayerDown(system.end / 2);
-        //     }
-        // }
 
         // STR only costs endurance when used.
         // Can get a bit messy, like when resisting an entangle, but will deal with that later.
@@ -4166,11 +4141,7 @@ export class HeroSystem6eItem extends Item {
             result = result.replace(`Focus (${modifier.OPTION}; `, `${modifier.OPTION} (`);
         }
 
-        const configPowerInfo = this.baseInfo; //getPowerInfo({
-        //     xmlid: system.XMLID,
-        //     actor: item?.actor,
-        //     is5e: this.is5e,
-        // });
+        const configPowerInfo = this.baseInfo;
 
         // All Slots? This may be a slot in a framework if so get parent
         if (configPowerInfo && configPowerInfo.type?.includes("framework")) {
@@ -5400,6 +5371,7 @@ export class HeroSystem6eItem extends Item {
     get _addersCost() {
         if (this.system.EVERYMAN) return 0;
         if (this.system.NATIVE_TONGUE) return 0;
+
         let _cost = 0;
 
         for (const adder of this.adders) {
@@ -5567,6 +5539,7 @@ export class HeroSystem6eItem extends Item {
 
     calcEndurance() {
         this.system.end = this.getBaseEndCost();
+
         const increasedEnd = this.findModsByXmlid("INCREASEDEND");
         if (increasedEnd) {
             this.system.end *= parseInt(increasedEnd.OPTION.replace("x", ""));
@@ -5582,6 +5555,7 @@ export class HeroSystem6eItem extends Item {
         } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             this.system.end = 0;
         }
+
         const costsEnd = this.findModsByXmlid("COSTSEND");
         if (!costsEnd) {
             if (!this.baseInfo?.costEnd) {
@@ -5697,7 +5671,41 @@ export class HeroSystem6eItem extends Item {
             this.system.ADDER = this.system.ADDER.filter((adder) => adder.XMLID !== "PLUSONEHALFDIE");
         } else if (diceParts.halfDieCount && !halfDieAdder) {
             // Add the adder
-            const newAdder = createModifierOrAdderFromXml(plusHalfDieAdderData.xml);
+            let xml = plusHalfDieAdderData.xml;
+
+            // BASECOST is either 1.5, 3, 5, or 10 depending on the base LEVELS cost
+            const baseApPerDie =
+                (this.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
+                this.baseInfo.costPerLevel(this);
+
+            let baseCost = 0;
+            switch (baseApPerDie) {
+                case 3:
+                    baseCost = 1.5;
+                    break;
+
+                case 5:
+                    baseCost = 3;
+                    break;
+
+                case 10:
+                    baseCost = 5;
+                    break;
+
+                case 15:
+                    baseCost = 10;
+                    break;
+
+                default:
+                    console.error(
+                        `${this.name}/${this.system.XMLID} for ${this.actor} has unknown base active points per die`,
+                    );
+                    break;
+            }
+
+            xml = xml.replace(/BASECOST=".+"/, `BASECOST="${baseCost}"`);
+
+            const newAdder = createModifierOrAdderFromXml(xml);
             this.system.ADDER ??= [];
             this.system.ADDER.push(newAdder);
         }
@@ -5709,7 +5717,41 @@ export class HeroSystem6eItem extends Item {
             this.system.ADDER = this.system.ADDER.filter((adder) => adder.XMLID !== "PLUSONEPIP");
         } else if (diceParts.constant && !onePipAdder) {
             // Add the adder
-            const newAdder = createModifierOrAdderFromXml(plusOnePipAdderData.xml);
+            let xml = plusOnePipAdderData.xml;
+
+            // BASECOST is either 1,2,3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
+            const baseApPerDie =
+                (this.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
+                this.baseInfo.costPerLevel(this);
+
+            let baseCost = 0;
+            switch (baseApPerDie) {
+                case 3:
+                    baseCost = 1;
+                    break;
+
+                case 5:
+                    baseCost = 2;
+                    break;
+
+                case 10:
+                    baseCost = 3;
+                    break;
+
+                case 15:
+                    baseCost = 5;
+                    break;
+
+                default:
+                    console.error(
+                        `${this.name}/${this.system.XMLID} for ${this.actor} has unknown base active points per die`,
+                    );
+                    break;
+            }
+
+            xml = xml.replace(/BASECOST=".+"/, `BASECOST="${baseCost}"`);
+
+            const newAdder = createModifierOrAdderFromXml(xml);
             this.system.ADDER ??= [];
             this.system.ADDER.push(newAdder);
         }
