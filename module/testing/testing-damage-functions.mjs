@@ -1,6 +1,10 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+
 import { HeroSystem6eItem } from "../item/item.mjs";
+import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
+
 import { addDiceParts, calculateDicePartsFromDcForItem } from "../utility/damage.mjs";
 
 export function registerDamageFunctionTests(quench) {
@@ -297,6 +301,18 @@ export function registerDamageFunctionTests(quench) {
                     halfDieCount: 0,
                     constant: 0,
                 });
+                const twoDiceAndAHalfInDiceParts = Object.freeze({
+                    d6Count: 2,
+                    d6Less1DieCount: 0,
+                    halfDieCount: 1,
+                    constant: 0,
+                });
+                const threeDiceInDiceParts = Object.freeze({
+                    d6Count: 3,
+                    d6Less1DieCount: 0,
+                    halfDieCount: 0,
+                    constant: 0,
+                });
 
                 describe("DCs for varied attacks", function () {
                     const rkaContent = `
@@ -314,9 +330,15 @@ export function registerDamageFunctionTests(quench) {
                             <NOTES />
                         </POWER>
                     `;
+                    const nonTargettingFlashContent = `
+                        <POWER XMLID="FLASH" ID="1740973760304" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    `;
                     let killingItem;
                     let egoAttackItem;
                     let normalItem;
+                    let threePointFlashItem;
 
                     before(async () => {
                         const actor = new HeroSystem6eActor(
@@ -349,6 +371,15 @@ export function registerDamageFunctionTests(quench) {
                         });
                         await normalItem._postUpload();
                         actor.items.set(normalItem.system.XMLID, normalItem);
+
+                        threePointFlashItem = new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(nonTargettingFlashContent, actor),
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await threePointFlashItem._postUpload();
+                        actor.items.set(threePointFlashItem.system.XMLID, threePointFlashItem);
                     });
 
                     describe("-1 DC", function () {
@@ -621,6 +652,118 @@ export function registerDamageFunctionTests(quench) {
                             });
 
                             assert.deepEqual(filterDc(calculateDicePartsFromDcForItem(normalItem, 1)), zeroInDiceParts);
+                        });
+
+                        it("1 DC Flash Attack", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                oneAndAHalfDiceInDiceParts,
+                            );
+                        });
+
+                        it("1 DC Flash Attack & +1/4 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                oneDieInDiceParts,
+                            );
+                        });
+
+                        it("1 DC Flash Attack & +1/2 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 2 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                oneDieInDiceParts,
+                            );
+                        });
+
+                        it("1 DC Flash Attack & +3/4 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 3 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                halfDieInDiceParts,
+                            );
+                        });
+
+                        it("1 DC Flash Attack & +1 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 4 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                halfDieInDiceParts,
+                            );
+                        });
+
+                        it("1 DC Flash Attack & +1 1/4 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 5 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                halfDieInDiceParts,
+                            );
+                        });
+
+                        it("1 DC Flash Attack & +1 1/2 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 6 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                halfDieInDiceParts,
+                            );
+                        });
+
+                        it("1 DC Flash Attack & +2 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 8 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 1)),
+                                halfDieInDiceParts,
+                            );
                         });
                     });
 
@@ -899,6 +1042,118 @@ export function registerDamageFunctionTests(quench) {
                             assert.deepEqual(
                                 filterDc(calculateDicePartsFromDcForItem(normalItem, 2)),
                                 halfDieInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 0 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                threeDiceInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack & +1/4 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 1 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                twoDiceAndAHalfInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack & +1/2 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 2 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                twoDiceInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack & +3/4 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 3 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                oneAndAHalfDiceInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack & +1 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 4 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                oneAndAHalfDiceInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack & +1 1/4 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 5 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                oneAndAHalfDiceInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack & +1 1/2 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 6 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                oneDieInDiceParts,
+                            );
+                        });
+
+                        it("2 DC Flash Attack & +2 advantage", function () {
+                            Object.defineProperty(threePointFlashItem, "_advantagesAffectingDc", {
+                                get() {
+                                    return 8 / 4;
+                                },
+                                configurable: true,
+                            });
+
+                            assert.deepEqual(
+                                filterDc(calculateDicePartsFromDcForItem(threePointFlashItem, 2)),
+                                oneDieInDiceParts,
                             );
                         });
                     });
