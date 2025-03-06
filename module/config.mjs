@@ -7929,18 +7929,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
-    // DUPLICATE?
-    // addPower(
-    //     {
-    //         key: "PLUSONEHALFDIE",
-    //         behaviors: ["adder"],
-    //         costPerLevel: fixedValueFunction(0),
-    //         xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></<ADDER XMLID="OFFENSIVE" ID="1735589940604" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-    //     },
-    //     {},
-    // );
-
     addPower(
         {
             // AUTOFIRE related
