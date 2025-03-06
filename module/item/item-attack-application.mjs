@@ -98,7 +98,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
             this.data.effectiveRealCost ??= this.data.originalItem._realCost;
-            this.data.pushedCharacterPoints ??= 0;
+            this.data.pushedRealPoints ??= 0;
 
             // Penalty Skill Levels
             // Currently only supports range PSL
@@ -254,9 +254,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 return naObj;
             }, this.data.nakedAdvantagesItems ?? {});
 
-            this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData({
-                effectiveStr: this.data.effectiveStr,
-            });
+            this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData();
 
             this.#setAoeAndHitLocationDataForEffectiveItem();
 
@@ -371,7 +369,9 @@ export class ItemAttackFormApplication extends FormApplication {
 
     // Create a new effectiveItem
     // PH: FIXME: Effective item is not STR for maneuvers with empty fist or the weapon for weapon maneuvers
-    async #buildEffectiveObjectFromOriginalAndData({ effectiveStr }) {
+    async #buildEffectiveObjectFromOriginalAndData() {
+        const effectiveStr = this.data.effectiveStr;
+
         // PH: FIXME: Should only be creating the strength item for situations where we're using strength.
         const strengthItem = buildStrengthItem(effectiveStr, this.data.originalItem.actor);
 
@@ -380,11 +380,13 @@ export class ItemAttackFormApplication extends FormApplication {
         const effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: this.data.originalItem.actor });
 
         // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR placeholder
+        effectiveItem.system._active = {};
         effectiveItem.system._active.effectiveStr = effectiveStr;
         effectiveItem.system._active.effectiveStrItem = strengthItem;
 
         // Reduce or Push the item
         effectiveItem.changePowerLevel(this.data.effectiveRealCost);
+        effectiveItem.system._active.pushedRealPoints = this.data.pushedRealPoints;
 
         // Add any Hand-to-Hand Attack advantages into the base item
         // PH: FIXME: Can add advantages from HA to STR if HA's active points don't exceed the STR used. Need to consider STRMINIMUM
@@ -394,6 +396,11 @@ export class ItemAttackFormApplication extends FormApplication {
             .map(([uuid]) => fromUuidSync(uuid))
             .forEach((hthAttack) => {
                 effectiveItem.copyItemAdvantages(hthAttack);
+                effectiveItem.system._active.linkedEnd ??= [];
+                effectiveItem.system._active.linkedEnd.push({
+                    uuid: hthAttack.uuid,
+                });
+
                 strengthItem.copyItemAdvantages(hthAttack);
             });
 
@@ -405,6 +412,11 @@ export class ItemAttackFormApplication extends FormApplication {
             .map(([uuid]) => fromUuidSync(uuid))
             .forEach((naAttack) => {
                 effectiveItem.copyItemAdvantages(naAttack);
+                effectiveItem.system._active.linkedEnd ??= [];
+                effectiveItem.system._active.linkedEnd.push({
+                    uuid: naAttack.uuid,
+                });
+
                 strengthItem.copyItemAdvantages(naAttack);
             });
 
@@ -424,7 +436,7 @@ export class ItemAttackFormApplication extends FormApplication {
      *  PH: FIXME: How should pushing play with HTH Attack and Naked Advantages? I assume that they don't interact.
      * @param {Object} formData
      */
-    #reduceOrPush(formData) {
+    #processReduceOrPush(formData) {
         const desiredEffectiveRealCost = formData.effectiveRealCost || 0;
 
         // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
@@ -448,36 +460,7 @@ export class ItemAttackFormApplication extends FormApplication {
         }
     }
 
-    async _updateObject(event, formData) {
-        const extendedFormData = foundry.utils.expandObject(formData);
-
-        // PH: FIXME: There has to be a better way than this?
-        delete extendedFormData.effectiveRealCost;
-
-        // HTH Attacks and Naked Advantages format includes the UUID which has periods in it so we can't use extendedFormData. Do a custom merge.
-        delete extendedFormData.hthAttackItems;
-        delete extendedFormData.nakedAdvantagesItems;
-
-        // CSL & PSL format is non-standard, need to deal with those
-        const updates = [];
-        for (const key of Object.keys(extendedFormData)) {
-            if (key.length === 16) {
-                const extendedItem = this.data.actor.items.find((o) => o.id === key);
-                if (extendedItem) {
-                    updates.push({ _id: key, ...extendedFormData[key] });
-                    delete extendedFormData[key];
-                }
-            }
-        }
-        if (updates) {
-            await this.data.actor.updateEmbeddedDocuments("Item", updates);
-        }
-
-        // Take all the data we updated in the form and apply it.
-        this.data = foundry.utils.mergeObject(this.data, extendedFormData);
-
-        this.#reduceOrPush(formData);
-
+    #processHthAndNa(formData) {
         // PH: FIXME: Need to consider real weapons w/ STRMINIMUM
         const limitedByStrength = this.data.effectiveStr < 3;
         let hthAttackDisabledDueToStrength = false;
@@ -512,10 +495,41 @@ export class ItemAttackFormApplication extends FormApplication {
                 `Naked Advantages must be able to apply at least as many active points as the base attack`,
             );
         }
+    }
 
-        this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData({
-            effectiveStr: this.data.effectiveStr,
-        });
+    async _updateObject(event, formData) {
+        const extendedFormData = foundry.utils.expandObject(formData);
+
+        // PH: FIXME: There has to be a better way than this?
+        delete extendedFormData.effectiveRealCost;
+
+        // HTH Attacks and Naked Advantages format includes the UUID which has periods in it so we can't use extendedFormData. Do a custom merge.
+        delete extendedFormData.hthAttackItems;
+        delete extendedFormData.nakedAdvantagesItems;
+
+        // CSL & PSL format is non-standard, need to deal with those
+        const updates = [];
+        for (const key of Object.keys(extendedFormData)) {
+            if (key.length === 16) {
+                const extendedItem = this.data.actor.items.find((o) => o.id === key);
+                if (extendedItem) {
+                    updates.push({ _id: key, ...extendedFormData[key] });
+                    delete extendedFormData[key];
+                }
+            }
+        }
+        if (updates) {
+            await this.data.actor.updateEmbeddedDocuments("Item", updates);
+        }
+
+        // Take all the data we updated in the form and apply it.
+        this.data = foundry.utils.mergeObject(this.data, extendedFormData);
+
+        this.#processReduceOrPush(formData);
+
+        this.#processHthAndNa(formData);
+
+        this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData();
 
         this.#setAoeAndHitLocationDataForEffectiveItem();
 

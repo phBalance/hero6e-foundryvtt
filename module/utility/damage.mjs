@@ -871,11 +871,13 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
 
     // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage.
 
-    // PH: FIXME: Should probably figure out a way to get rid of the actor strength placeholder here. Might mean
-    //            rewriting all the tests?
-    const actorStrengthItem =
-        item.system._active.effectiveStrItem ||
-        (item.system._active.effectiveStrItem = buildStrengthItem(baseEffectiveStrength, item.actor));
+    let actorStrengthItem = item.system._active.effectiveStrItem;
+    if (!actorStrengthItem) {
+        actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor);
+
+        // PH: FIXME: This is a problem but we shouldn't be saving to the database.
+        actorStrengthItem._postUpload();
+    }
 
     let str = baseEffectiveStrength;
     const baseEffectiveStrDc =

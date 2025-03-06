@@ -3807,6 +3807,9 @@ function calculateRequiredEnd(item, effectiveStr) {
 
         endToUse = itemEndurance;
 
+        // Pushing uses 1 END per pushed CP
+        endToUse += item.system._active.pushedRealPoints || 0;
+
         // TODO: May want to get rid of this so we can support HKA with 0 STR (weird but possible?) or
         // attacks such as TK or EB which have no STR component.
         if (item.system.usesStrength || item.system.usesTk) {
