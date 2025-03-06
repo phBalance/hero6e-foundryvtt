@@ -546,7 +546,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
  *
  * A 15 AP/die killing attack: +1 pip is 5 points, +1/2d6 or +1d6-1 is 10 points, and +1d6 is 15 points.
  * This makes 3 possible breakpoints x.0, x.3333, x.6666 for any whole number x >=0 when we divide by the AP/15 to get the num of dice.
- * NOTE: These are the same breaks that 3AP/die and 6AP/die
+ * NOTE: These are the same breaks that 3AP/die (except for FLASH which just has to be different) and 6AP/die
  *
  * @param {HeroSystem6eItem} item
  * @param {number} dc
@@ -599,9 +599,19 @@ export function calculateDicePartsFromDcForItem(item, dc) {
     } else if (baseApPerDie === 10) {
         halfDieValue = 5 / 10;
         pipValue = 3 / 10;
-    } else if (baseApPerDie === 15 || baseApPerDie === 6 || baseApPerDie === 3) {
+    } else if (baseApPerDie === 15 || baseApPerDie === 6) {
         halfDieValue = 10 / 15;
         pipValue = 5 / 15;
+    } else if (baseApPerDie === 3) {
+        // FLASH has an exception, because why not. It only has a 1/2d6 adder and doesn't have +1 pip. To work around this
+        // set the pipValue to the same as the halfDieValue so that we prefer the half die over a pip.
+        if (item.system.XMLID === "FLASH") {
+            pipValue = 1.5 / 3;
+        } else {
+            pipValue = 1 / 3;
+        }
+
+        halfDieValue = 1.5 / 3;
     } else {
         console.error(
             `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.name}/${item.system.XMLID}`,
