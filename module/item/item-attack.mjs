@@ -3753,7 +3753,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
  *
  * @returns HeroSystemItemResourcesToUse
  */
-function calculateRequiredResourcesToUse(item, options) {
+export function calculateRequiredResourcesToUse(item, options) {
     const chargesRequired = calculateRequiredCharges(item, options.boostableChargesToUse || 0);
     const endRequired = calculateRequiredEnd(item, parseInt(options.effectiveStr) || 0);
 
