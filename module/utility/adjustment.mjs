@@ -492,7 +492,9 @@ export async function performAdjustment(
     // const targetStartingMax = targetCharacteristic != null ? targetCharacteristic.max : targetPower.system.max;
     //const targetStartingCore = targetCharacteristic != null ? targetCharacteristic.core : targetPower.system.core;
 
-    existingEffect = existingEffect || _findExistingMatchingEffect(attackItem, potentialCharacteristic, targetSystem);
+    existingEffect =
+        existingEffect ||
+        _findExistingMatchingEffect(attackItem, potentialCharacteristic, targetSystem, thisAttackActivePointsEffect);
 
     const activeEffect =
         existingEffect ||
