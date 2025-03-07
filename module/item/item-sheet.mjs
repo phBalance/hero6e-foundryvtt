@@ -497,7 +497,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Remove NaN properties, which should revert back to original value
         const keys = Object.keys(formData);
         for (const key of keys) {
-            if (isNaN(formData[key])) {
+            if (isNaN(formData[key]) && typeof formData[key] !== "string") {
                 delete formData[key];
             }
         }
