@@ -1139,7 +1139,7 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
             .filter(
                 (ae) =>
                     !ae.disabled &&
-                    ae.changes?.[0].key === activeEffect.changes[0].key &&
+                    ae.changes?.[0]?.key === activeEffect.changes[0].key &&
                     ae.flags.type === "adjustment",
             )
             .sort((a, b) => (a.flags.createTime || 0) - (b.flags.createTime || 0))) {

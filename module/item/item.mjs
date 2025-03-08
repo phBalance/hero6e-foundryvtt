@@ -573,7 +573,7 @@ export class HeroSystem6eItem extends Item {
 
         // Perceivability
         if (this.baseInfo.perceivability) {
-            content += ` ${this.baseInfo.perceivability}.`;
+            content += ` Perceivability: ${this.baseInfo.perceivability}.`;
         }
 
         if (this.system.end) {

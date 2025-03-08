@@ -224,6 +224,7 @@
                     </tr>
                     {{#each items as |item id|}}
                         {{#if (or (eq item.type "attack") (and (or (eq item.system.XMLID "STRIKE") (ne item.type "maneuver")) (eq item.system.subType "attack") (ne item.system.XMLID "__STRENGTHDAMAGE")))}}
+                            {{#unless (and (eq item.type "equipment") (eq item.system.active false))}}
                             <tr class="item {{#if (gt item.system.value item.system.max)}}over-max{{/if}}{{#if (lt item.system.value item.system.max)}} under-max{{/if}}"
                                 data-item-id="{{item._id}}" >
                                 <td>
@@ -282,6 +283,7 @@
                                 </td>
                                 </td>
                             </tr>
+                            {{/unless}}
                         {{/if}}
                     {{/each}}
                 </table>
@@ -954,6 +956,31 @@
                 <div class="form-group">
                     <label for="system.CHARACTER.BASIC_CONFIGURATION.EXPERIENCE"><b>EXPERIENCE</b></label>
                     <input name="system.CHARACTER.BASIC_CONFIGURATION.EXPERIENCE" value="{{actor.system.CHARACTER.BASIC_CONFIGURATION.EXPERIENCE}}" type="number">
+                </div>
+
+                <div class="form-group">
+                    <label for="system.CHARACTER.CHARACTER_INFO.ALTERNATE_IDENTITIES"><b>ALTERNATE IDENTITIES</b></label>
+                    <input name="system.CHARACTER.CHARACTER_INFO.ALTERNATE_IDENTITIES" value="{{actor.system.CHARACTER.CHARACTER_INFO.ALTERNATE_IDENTITIES}}" type="text">
+                </div>
+
+                <div class="form-group">
+                    <label for="system.CHARACTER.CHARACTER_INFO.CAMPAIGN_NAME"><b>CAMPAIGN NAME</b></label>
+                    <input name="system.CHARACTER.CHARACTER_INFO.CAMPAIGN_NAME" value="{{actor.system.CHARACTER.CHARACTER_INFO.CAMPAIGN_NAME}}" type="text">
+                </div>
+
+                <div class="form-group">
+                    <label for="system.CHARACTER.CHARACTER_INFO.GENRE"><b>GENRE</b></label>
+                    <input name="system.CHARACTER.CHARACTER_INFO.GENRE" value="{{actor.system.CHARACTER.CHARACTER_INFO.GENRE}}" type="text">
+                </div>
+                
+                <div class="form-group">
+                    <label for="system.CHARACTER.CHARACTER_INFO.PLAYER_NAME"><b>PLAYER NAME</b></label>
+                    <input name="system.CHARACTER.CHARACTER_INFO.PLAYER_NAME" value="{{actor.system.CHARACTER.CHARACTER_INFO.PLAYER_NAME}}" type="text">
+                </div>
+
+                <div class="form-group">
+                    <label for="system.CHARACTER.CHARACTER_INFO.GM"><b>GM</b></label>
+                    <input name="system.CHARACTER.CHARACTER_INFO.GM" value="{{actor.system.CHARACTER.CHARACTER_INFO.GM}}" type="text">
                 </div>
 
                 <table>

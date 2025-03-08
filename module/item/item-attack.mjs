@@ -1486,7 +1486,10 @@ async function _rollApplyKnockback(token, knockbackDice) {
     }
 
     // Token falls prone
-    token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
+    //token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
+    await token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+        active: true,
+    });
 }
 
 /**
@@ -3472,13 +3475,19 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             knockbackMessage = "No Knockback";
         } else if (knockbackResultTotal + shrinkingKB == 0) {
             knockbackMessage = "Inflicts Knockdown";
-            actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
+            //actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
+            await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+                active: true,
+            });
         } else {
             // If the result is positive, the target is Knocked Back 1" or 2m times the result
             knockbackMessage = `Knocked Back ${
                 (knockbackResultTotal + shrinkingKB) * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
             }${getSystemDisplayUnits(item.actor?.is5e || item.system.is5e)}`;
-            actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
+            //actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
+            await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+                active: true,
+            });
         }
     }
 

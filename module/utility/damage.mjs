@@ -470,7 +470,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
 
     // FIXME: Environmental Movement: Aquatic Environments should actually counteract this.
     // FIXME: Not everything should be affected by this. For instance, should mental powers be affected? What about electricity based SFX?
-    if (item.actor?.statuses?.has("underwater")) {
+    if (item.actor?.statuses?.has("underwater") && baseDamageItem.system.usesStrength) {
         const underwaterDc = 2; // NOTE: Working with 2 DC and then subtracting
         const underwaterDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, underwaterDc);
         const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, underwaterDiceParts);
