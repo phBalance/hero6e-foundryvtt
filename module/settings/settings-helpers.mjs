@@ -283,7 +283,7 @@ export default class SettingsHelpers {
         game.settings.register(module, "ShowCombatCharacteristicChanges", {
             name: game.i18n.localize("Settings.ShowCombatCharacteristicChanges.Name"),
             hint: game.i18n.localize("Settings.ShowCombatCharacteristicChanges.Hint"),
-            scope: "client",
+            scope: "world",
             config: true,
             type: String,
             default: "all",
