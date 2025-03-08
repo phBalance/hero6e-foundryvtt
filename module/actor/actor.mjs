@@ -340,10 +340,8 @@ export class HeroSystem6eActor extends Actor {
 
         // Mark as defeated in combat tracker (automaton)
         if (data.system?.characteristics?.body?.value <= 0) {
-            const CANNOTBESTUNNED = this.items.find(
-                (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
-            );
-            if (CANNOTBESTUNNED) {
+            const AUTOMATON = this.items.find((o) => o.system.XMLID === "AUTOMATON");
+            if (AUTOMATON) {
                 await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
                     overlay: true,
                     active: true,
@@ -363,7 +361,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Mark as undefeated in combat tracker (automaton)
-        if (this.type === "automaton" && data.system.characteristics.body.value > 0) {
+        if (this.type === "automaton" && data.system?.characteristics?.body?.value > 0) {
             this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
             this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
             this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
