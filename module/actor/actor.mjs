@@ -70,7 +70,19 @@ export class HeroSystem6eActor extends Actor {
         ) {
             overlay = true;
         }
-        return super.toggleStatusEffect(statusId, { active, overlay });
+        await super.toggleStatusEffect(statusId, { active, overlay });
+
+        // Several status effects also imply prone
+        if (
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id) ||
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.unconsciousEffect.id) ||
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.asleepEffect.id)
+        ) {
+            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+                active: true,
+            });
+        }
     }
 
     async removeActiveEffect(activeEffect) {

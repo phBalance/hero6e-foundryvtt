@@ -23,6 +23,8 @@
 - Custom Adders now includes cost on description.
 - MULTIPOWER, COMPOUNDPOWER, and LIST don't really have a range property. [#1837](https://github.com/dmdorman/hero6e-foundryvtt/issues/1837)
 - Equipment that is not carried no longer shows on "Attack" tab of character sheet. [#1996](https://github.com/dmdorman/hero6e-foundryvtt/issues/1996)
+- PRONE status is now applied when ASLEEP, DEAD, KNOCKEDOUT, or UNCONSCIOUS is applied. [#1991
+  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/1991)
 
 ## Version 4.0.20 20250217
 
