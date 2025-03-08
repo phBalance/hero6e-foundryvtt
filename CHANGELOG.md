@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.21 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.21 20250308 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Full/Casual STR can now apply damage. Useful for breaking out of an ENTANGLE. [#1724](https://github.com/dmdorman/hero6e-foundryvtt/issues/1724)
 - Improved ability to target Entangles.
