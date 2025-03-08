@@ -25,6 +25,7 @@
 - Equipment that is not carried no longer shows on "Attack" tab of character sheet. [#1996](https://github.com/dmdorman/hero6e-foundryvtt/issues/1996)
 - PRONE status is now applied when ASLEEP, DEAD, KNOCKEDOUT, or UNCONSCIOUS is applied. [#1991
   ](https://github.com/dmdorman/hero6e-foundryvtt/issues/1991)
+- UNDERWATER penalties when attacking now only apply when the attack uses strength. [#1984](https://github.com/dmdorman/hero6e-foundryvtt/issues/1984)
 
 ## Version 4.0.20 20250217
 
