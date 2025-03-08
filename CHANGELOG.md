@@ -29,6 +29,8 @@
 - When recovering from being KNOCKED OUT, END will now equal STUN. [#1989](https://github.com/dmdorman/hero6e-foundryvtt/issues/1989)
 - Added alternate identities, campaign name, genre, player name, and gm to the actor OTHER tab. [#1986](https://github.com/dmdorman/hero6e-foundryvtt/issues/1986)
 - The world's killing attacks' STUN multiplier can be customized using the "Custom Killing Attack Multiplier" configuration menu. Leaving all fields at 0 will use the default for your system. [#1972](https://github.com/dmdorman/hero6e-foundryvtt/issues/1972)
+- Psychological Complications and Social Complications roll results now have a description of the consequences. [#1729](https://github.com/dmdorman/hero6e-foundryvtt/issues/1729)
+- Damage with deadly blow now calculated correctly. [#1901](https://github.com/dmdorman/hero6e-foundryvtt/issues/1901)
 
 ## Version 4.0.20 20250217
 
