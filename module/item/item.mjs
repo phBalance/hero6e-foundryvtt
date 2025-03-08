@@ -3765,7 +3765,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Active Points
-        if (parseInt(system.realCost) != parseInt(system.activePoints) || this.parentItem) {
+        if (system.realCost !== system.characterPointCost) {
             if (system.activePoints) {
                 system.description += " (" + system.activePoints + " Active Points);";
             }
