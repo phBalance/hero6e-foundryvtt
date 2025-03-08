@@ -27,6 +27,7 @@
   ](https://github.com/dmdorman/hero6e-foundryvtt/issues/1991)
 - UNDERWATER penalties when attacking now only apply when the attack uses strength. [#1984](https://github.com/dmdorman/hero6e-foundryvtt/issues/1984)
 - When recovering from being KNOCKED OUT, END will now equal STUN. [#1989](https://github.com/dmdorman/hero6e-foundryvtt/issues/1989)
+- Added alternate identities, campaign name, genre, player name, and gm to the actor OTHER tab. [#1986](https://github.com/dmdorman/hero6e-foundryvtt/issues/1986)
 
 ## Version 4.0.20 20250217
 
