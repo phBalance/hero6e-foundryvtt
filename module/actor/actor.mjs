@@ -296,7 +296,7 @@ export class HeroSystem6eActor extends Actor {
         // If stun was changed and running under triggering users context
         if (data?.system?.characteristics?.stun && userId === game.user.id) {
             if (data.system.characteristics.stun.value <= 0) {
-                this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
+                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
                     overlay: true,
                     active: true,
                 });
@@ -308,7 +308,7 @@ export class HeroSystem6eActor extends Actor {
             // Once an NPC is Knocked Out below the -10 STUN level,
             // he should normally remain unconscious until the fight ends.
             if (data.system.characteristics.stun.value < -stunThreshold) {
-                this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
                     overlay: true,
                     active: true,
                 });
@@ -344,7 +344,7 @@ export class HeroSystem6eActor extends Actor {
                 (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
             );
             if (CANNOTBESTUNNED) {
-                this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
                     overlay: true,
                     active: true,
                 });
@@ -356,7 +356,7 @@ export class HeroSystem6eActor extends Actor {
             ["pc", "npc"].includes(this.type) &&
             data.system?.characteristics?.body?.value <= -this.system.characteristics.body.max
         ) {
-            this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
                 overlay: true,
                 active: true,
             });

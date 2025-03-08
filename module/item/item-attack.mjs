@@ -2371,8 +2371,8 @@ export async function _onApplyDamageToSpecificToken(toHitData, damageData, targe
             // all: "PCs and NPCs (end, stun, body)"
             if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
                 //token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
-                token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    overlay: true,
+                await token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
+                    overlay: false, // Would like to know if they are prone, and the contrast isn't great.
                     active: true,
                 });
             }
