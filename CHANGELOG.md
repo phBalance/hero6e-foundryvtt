@@ -1,5 +1,9 @@
 # Releases
 
+## Version 4.0.22 20250308 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Some campaigns were experiencing lag related to vision, so we moved all custom vision code to a new "Hero Vision" mode. Existing and new tokens will now have standard FoundryVTT vision. You can manually set each token to use "Hero Vision" for improved support of enhanced visions. [#2012](https://github.com/dmdorman/hero6e-foundryvtt/issues/2012)
+
 ## Version 4.0.21 20250308 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Full/Casual STR can now apply damage. Useful for breaking out of an ENTANGLE. [#1724](https://github.com/dmdorman/hero6e-foundryvtt/issues/1724)
