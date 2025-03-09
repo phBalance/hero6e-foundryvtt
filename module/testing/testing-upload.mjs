@@ -7750,7 +7750,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Blast 11d6 (PD; Custom Adder), Area Of Effect (16m Long, 2m Tall, 2m Wide Line; +1/4)",
+                        "Blast 11d6 (PD; Custom Adder -55 Points), Area Of Effect (16m Long, 2m Tall, 2m Wide Line; +1/4)",
                     );
                 });
 
