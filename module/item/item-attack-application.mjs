@@ -692,8 +692,8 @@ export class ItemAttackFormApplication extends FormApplication {
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {
-                // PH: FIXME: effectiveItem is temporary and has no id. Do we need this still? How to work around it? originalItem's id?
-                itemId: item.id,
+                purpose: "AoE",
+                itemId: this.data.originalItem.id,
                 item,
                 actor,
                 aoeType,
@@ -766,10 +766,13 @@ export class ItemAttackFormApplication extends FormApplication {
         });
     }
 
-    // PH: FIXME: effectiveItem is temporary and has no id. Do we need this still? How to work around it? originalItem's id? See above
     getAoeTemplate() {
+        // PH: FIXME: Is there a good reason to allow a user to have more than 1 template? This allows 1 per power.
         return Array.from(canvas.templates.getDocuments()).find(
-            (o) => o.author.id === game.user.id && o.flags.itemId === this.data.effectiveItem.id,
+            (template) =>
+                template.author.id === game.user.id &&
+                template.flags.purpose === "AoE" &&
+                template.flags.itemId === this.data.originalItem.id,
         );
     }
 }
