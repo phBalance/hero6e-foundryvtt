@@ -62,9 +62,67 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             return;
         }
 
+        // Augment default turns
+        try {
+            const turnsAugmented = context.turns.map((turn) => {
+                const combatant = this.viewed.combatants.find((combatant) => combatant.id === turn.id);
+                return {
+                    ...turn,
+                    //css: turn.css.replace("active", ""), // HBS will add this back in for the appropriate segment
+                    flags: combatant.flags,
+                    holding: combatant.actor?.statuses.has("holding"),
+                    effects: (combatant.actor?.temporaryEffects || []).filter(
+                        (e) => !e.statuses.has(CONFIG.specialStatusEffects.DEFEATED) && e.statuses.size > 0,
+                    ),
+                    segment: combatant.flags.segment,
+                };
+            });
+            context.turns = turnsAugmented;
+        } catch (e) {
+            console.error(e);
+        }
+
+        try {
+            if (game.settings.get(HEROSYS.module, "combatTrackerDispositionHighlighting")) {
+                const turnsDisposition = context.turns.map((turn) => {
+                    const combatant = this.viewed.combatants.find((combatant) => combatant.id === turn.id);
+                    const token = combatant?.token;
+                    switch (token?.disposition) {
+                        case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
+                            if (token.hasPlayerOwner) {
+                                turn.css += " combat-tracker-hero-disposition-player";
+                            } else {
+                                turn.css += " combat-tracker-hero-disposition-friendly";
+                            }
+                            break;
+                        case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
+                            turn.css += " combat-tracker-hero-disposition-neutral";
+                            break;
+                        case CONST.TOKEN_DISPOSITIONS.HOSTILE:
+                            turn.css += " combat-tracker-hero-disposition-hostile";
+                            break;
+                        case CONST.TOKEN_DISPOSITIONS.SECRET:
+                            turn.css += " combat-tracker-hero-disposition-secret";
+                            break;
+                        default:
+                            console.warn(`Unknown token disposition`, this);
+                    }
+                    return turn;
+                });
+                context.turns = turnsDisposition;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
         context.segments = [];
         for (let s = 1; s <= 12; s++) {
             context.segments[s] = [];
+            for (let turn of context.turns) {
+                if (turn.flags.segment === s) {
+                    context.segments[s].push(turn);
+                }
+            }
         }
 
         // testing/simple: Assign combatants to a segment
@@ -78,54 +136,22 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         // }
 
         // Turns
-        const turns = [];
-        const combat = this.viewed;
-        for (let [i, combatant] of combat.turns.entries()) {
-            if (!combatant.visible) continue;
+        // const turns = [];
+        // const combat = this.viewed;
 
-            // Is this token visible by the player?  Always show PC's
-            if (game.settings.get(HEROSYS.module, "ShowOnlyVisibleCombatants")) {
-                if (
-                    !game.user.isGM &&
-                    canvas.visibility?.testVisibility(combatant.token) === false &&
-                    combatant.actor.type !== "pc"
-                ) {
-                    continue;
-                }
-            }
+        // for (let [i, combatant] of combat.turns.entries()) {
+        //     if (!combatant.visible) continue;
 
-            // Prepare turn data
-            const resource =
-                combatant.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER ? combatant.resource : null;
-            const token = combatant.token;
-            const turn = {
-                id: combatant.id,
-                name: combatant.name,
-                img: await this._getCombatantThumbnail(combatant),
-                active: i === combat.turn,
-                owner: combatant.isOwner,
-                defeated: combatant.isDefeated || combatant.actor?.statuses.has("dead"),
-                hidden: combatant.hidden,
-                initiative: combatant.initiative,
-                initiativeTooltip: combatant.flags.initiativeTooltip,
-                lightningReflexes: combatant.flags.lightningReflexes,
-                hasRolled: combatant.initiative !== null,
-                hasResource: resource !== null,
-                resource: resource,
-                canPing: combatant.sceneId === canvas.scene?.id && game.user.hasPermission("PING_CANVAS"),
-                segment: combatant.flags.segment,
-                holding: combatant.actor?.statuses.has("holding"),
-            };
-
-            // V13 hidden is now hide
-            let constHidden = "hidden";
-            if (foundry.utils.isNewerVersion(game.version, "13.000")) {
-                constHidden = "hide";
-            }
-
-            turn.css = [turn.active ? "active" : "", turn.hidden ? constHidden : "", turn.defeated ? "defeated" : ""]
-                .join(" ")
-                .trim();
+        //     // Is this token visible by the player?  Always show PC's
+        //     if (game.settings.get(HEROSYS.module, "ShowOnlyVisibleCombatants")) {
+        //         if (
+        //             !game.user.isGM &&
+        //             canvas.visibility?.testVisibility(combatant.token) === false &&
+        //             combatant.actor.type !== "pc"
+        //         ) {
+        //             continue;
+        //         }
+        //     }
 
             if (game.settings.get(HEROSYS.module, "combatTrackerDispositionHighlighting")) {
                 switch (token?.disposition) {
@@ -148,19 +174,51 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 }
             }
 
-            // Actor and Token status effects
-            turn.effects = new Set();
-            for (const effect of combatant.actor?.temporaryEffects || []) {
-                if (effect.statuses.has(CONFIG.specialStatusEffects.DEFEATED)) turn.defeated = true;
-                else if (effect.img) turn.effects.add(effect.img);
-            }
-            turns.push(turn);
 
-            if (turn.segment) {
-                context.segments[turn.segment].push(turn);
-            }
-        }
-        context.turns = turns;
+        //     // V13 hidden is now hide
+        //     let constHidden = "hidden";
+        //     if (foundry.utils.isNewerVersion(game.version, "13.000")) {
+        //         constHidden = "hide";
+        //     }
+
+        //     turn.css = [turn.active ? "active" : "", turn.hidden ? constHidden : "", turn.defeated ? "defeated" : ""]
+        //         .join(" ")
+        //         .trim();
+
+        //     if (game.settings.get(HEROSYS.module, "combatTrackerDispositionHighlighting")) {
+        //         switch (token.disposition) {
+        //             case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
+        //                 if (token.hasPlayerOwner) {
+        //                     turn.css += " combat-tracker-hero-disposition-player";
+        //                 } else {
+        //                     turn.css += " combat-tracker-hero-disposition-friendly";
+        //                 }
+        //                 break;
+        //             case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
+        //                 turn.css += " combat-tracker-hero-disposition-neutral";
+        //                 break;
+        //             case CONST.TOKEN_DISPOSITIONS.HOSTILE:
+        //                 turn.css += " combat-tracker-hero-disposition-hostile";
+        //                 break;
+        //             case CONST.TOKEN_DISPOSITIONS.SECRET:
+        //                 turn.css += " combat-tracker-hero-disposition-secret";
+        //                 break;
+        //         }
+        //     }
+
+        //     // Actor and Token status effects
+        //     turn.effects = new Set();
+        //     for (const effect of combatant.actor?.temporaryEffects || []) {
+        //         if (effect.statuses.has(CONFIG.specialStatusEffects.DEFEATED)) turn.defeated = true;
+        //         else if (effect.img) turn.effects.add(effect.img);
+        //     }
+        //     turns.push(turn);
+
+        //     if (turn.segment) {
+        //         context.segments[turn.segment].push(turn);
+        //     }
+        // }
+        // context.turns = turns;
     }
 
     scrollToTurn() {
@@ -188,10 +246,9 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         event.stopPropagation();
         target ??= event.target; //v12
         const { combatantId } = target.closest("[data-combatant-id]")?.dataset ?? {};
-        const { control } = target.closest("[data-control]")?.dataset ?? {};
+        const { control, effectId } = target.closest("[data-control]")?.dataset ?? {};
         const combat = this.viewed;
         const c = combat.combatants.get(combatantId);
-        console.log(c.name);
 
         if (!c) {
             console.warn(combatantId, control);
@@ -207,6 +264,16 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             await combat.updateEmbeddedDocuments("Combatant", updates);
             return;
         }
+
+        if (control === "effect" && effectId) {
+            const effect = c.actor.temporaryEffects.find((e) => e.id == effectId);
+            if (effect) {
+                for (const status of effect.statuses) {
+                    await c.token.actor.toggleStatusEffect(status);
+                }
+            }
+        }
+
         return super._onCombatantControl(event, target);
     }
 
