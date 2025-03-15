@@ -153,28 +153,27 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         //         }
         //     }
 
-        //     // Prepare turn data
-        //     const resource =
-        //         combatant.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER ? combatant.resource : null;
-        //     const token = combatant.token;
-        //     const turn = {
-        //         id: combatant.id,
-        //         name: combatant.name,
-        //         img: await this._getCombatantThumbnail(combatant),
-        //         active: i === combat.turn,
-        //         owner: combatant.isOwner,
-        //         defeated: combatant.isDefeated || combatant.actor?.statuses.has("dead"),
-        //         hidden: combatant.hidden,
-        //         initiative: combatant.initiative,
-        //         initiativeTooltip: combatant.flags.initiativeTooltip,
-        //         lightningReflexes: combatant.flags.lightningReflexes,
-        //         hasRolled: combatant.initiative !== null,
-        //         hasResource: resource !== null,
-        //         resource: resource,
-        //         canPing: combatant.sceneId === canvas.scene?.id && game.user.hasPermission("PING_CANVAS"),
-        //         segment: combatant.flags.segment,
-        //         holding: combatant.actor?.statuses.has("holding"),
-        //     };
+            if (game.settings.get(HEROSYS.module, "combatTrackerDispositionHighlighting")) {
+                switch (token?.disposition) {
+                    case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
+                        if (token.hasPlayerOwner) {
+                            turn.css += " combat-tracker-hero-disposition-player";
+                        } else {
+                            turn.css += " combat-tracker-hero-disposition-friendly";
+                        }
+                        break;
+                    case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
+                        turn.css += " combat-tracker-hero-disposition-neutral";
+                        break;
+                    case CONST.TOKEN_DISPOSITIONS.HOSTILE:
+                        turn.css += " combat-tracker-hero-disposition-hostile";
+                        break;
+                    case CONST.TOKEN_DISPOSITIONS.SECRET:
+                        turn.css += " combat-tracker-hero-disposition-secret";
+                        break;
+                }
+            }
+
 
         //     // V13 hidden is now hide
         //     let constHidden = "hidden";
