@@ -143,7 +143,7 @@ export class HeroSystem6eCombat extends Combat {
         );
 
         // Add or remove extra combatants based on SPD or Lightning Reflexes
-        await this.extraCombatants();
+        //await this.extraCombatants();
     }
 
     async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
@@ -466,7 +466,11 @@ export class HeroSystem6eCombat extends Combat {
         // Reset movement history
         if (window.dragRuler) {
             if (masterCombatant) {
-                await dragRuler.resetMovementHistory(this, masterCombatant.id);
+                // If we are missing flags for dragRuler or the trackedRound !== null, resetMovementHistory
+                // Without this we sometimes get in a continuous loop (unclear as to why; related to #onModifyCombatants?)
+                if (!masterCombatant.flags.dragRuler || masterCombatant.flags.dragRuler.trackedRound !== null) {
+                    await dragRuler.resetMovementHistory(this, masterCombatant.id);
+                }
             } else {
                 console.error("Unable to find masterCombatant for DragRuler");
             }

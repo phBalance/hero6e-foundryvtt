@@ -143,6 +143,15 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             await combat.extraCombatants();
         }
     }
+
+    static async deleteCombatants(tokens, { combat } = {}) {
+        await super.deleteCombatants(tokens, combat);
+
+        combat ??= game.combats.viewed;
+        if (combat) {
+            await combat.extraCombatants();
+        }
+    }
 }
 
 export class HeroSystem6eToken extends Token {
