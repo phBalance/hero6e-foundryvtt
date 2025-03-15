@@ -2784,11 +2784,18 @@ export class HeroSystem6eItem extends Item {
             return 1;
         }
 
-        // Everything else is based on 1 END per 10 active points.
+        // Everything else is based on 1 END per 10 active points except for strength which is 1 per 5 when using heroic rules.
+        const endUnitSize =
+            this.system.XMLID === "__STRENGTHDAMAGE" &&
+            this.actor.system.isHeroic &&
+            game.settings.get(HEROSYS.module, "StrEnd") === "five"
+                ? 5
+                : 10;
+
         // NOTE: When we push we are altering the actual active points, via LEVELS and modifiers, so we have to back it out.
         const unpushedActivePoints =
             this._activePoints - (this.system._active.pushedRealPoints || 0) * (1 + this._limitationCost);
-        const endCost = RoundFavorPlayerDown(unpushedActivePoints / 10);
+        const endCost = RoundFavorPlayerDown(unpushedActivePoints / endUnitSize);
 
         return Math.max(1, endCost);
     }
@@ -5471,7 +5478,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get dc() {
-        return Math.floor(this._activePointsAffectingDcRaw / 5);
+        return Math.floor(this.dcRaw);
     }
 
     get dcRaw() {
