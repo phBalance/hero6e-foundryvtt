@@ -1983,7 +1983,7 @@ export async function _onApplyDamage(event) {
 }
 
 export async function _onApplyDamageToSpecificToken(toHitData, _damageData, targetToken) {
-    const damageData = foundry.deepClone(_damageData);
+    const damageData = foundry.utils.deepClone(_damageData);
     const token = canvas.scene.tokens.get(targetToken.tokenId);
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
