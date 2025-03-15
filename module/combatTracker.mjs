@@ -207,6 +207,16 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             await combat.updateEmbeddedDocuments("Combatant", updates);
             return;
         }
+
+        if (control === "effect" && effectId) {
+            const effect = c.actor.temporaryEffects.find((e) => e.id == effectId);
+            if (effect) {
+                for (const status of effect.statuses) {
+                    await c.token.actor.toggleStatusEffect(status);
+                }
+            }
+        }
+
         return super._onCombatantControl(event, target);
     }
 
