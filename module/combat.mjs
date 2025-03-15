@@ -303,7 +303,7 @@ export class HeroSystem6eCombat extends Combat {
             if (toDelete.length > 0) {
                 await this.deleteEmbeddedDocuments(
                     "Combatant",
-                    toDelete.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
+                    toDelete.map((o) => o.id),
                 );
             }
         } catch (e) {
