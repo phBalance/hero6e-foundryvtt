@@ -5,7 +5,8 @@ $combat-tracker-hero-disposition-opacity-hover: 0.6;
     background-color: rgba(67, 223, 223, $combat-tracker-hero-disposition-opacity-default);
 }
 
-.combat-sidebar li.combatant.combat-tracker-hero-disposition-friendly:hover {
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-friendly:hover,
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-friendly.active {
     background-color: rgba(67, 223, 223, $combat-tracker-hero-disposition-opacity-hover);
 }
 
@@ -13,7 +14,8 @@ $combat-tracker-hero-disposition-opacity-hover: 0.6;
     background-color: rgba(241, 216, 5, $combat-tracker-hero-disposition-opacity-default);
 }
 
-.combat-sidebar li.combatant.combat-tracker-hero-disposition-neutral:hover {
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-neutral:hover,
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-neutral.active {
     background-color: rgba(241, 216, 5, $combat-tracker-hero-disposition-opacity-hover);
 }
 
@@ -21,7 +23,8 @@ $combat-tracker-hero-disposition-opacity-hover: 0.6;
     background-color: rgba(231, 33, 36, $combat-tracker-hero-disposition-opacity-default);
 }
 
-.combat-sidebar li.combatant.combat-tracker-hero-disposition-hostile:hover {
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-hostile:hover,
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-hostile.active {
     background-color: rgba(231, 33, 36, $combat-tracker-hero-disposition-opacity-hover);
 }
 
@@ -29,7 +32,8 @@ $combat-tracker-hero-disposition-opacity-hover: 0.6;
     background-color: rgba(166, 18, 212, $combat-tracker-hero-disposition-opacity-default);
 }
 
-.combat-sidebar li.combatant.combat-tracker-hero-disposition-secret:hover {
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-secret:hover,
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-secret.active {
     background-color: rgba(166, 18, 212, $combat-tracker-hero-disposition-opacity-hover);
 }
 
