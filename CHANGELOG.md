@@ -3,6 +3,7 @@
 ## Version 4.0.23 So Far... (https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed VULNERABILITY's incorrectly applying (or applying several times) to some AOE attacks. [#1813](https://github.com/dmdorman/hero6e-foundryvtt/issues/1813) [#1857](https://github.com/dmdorman/hero6e-foundryvtt/issues/1857)
+- Fix negative OCV and OMCV modifiers on AoE to-hit dialog. [#2020](https://github.com/dmdorman/hero6e-foundryvtt/issues/2020)
 
 ## Version 4.0.22 20250308
 
