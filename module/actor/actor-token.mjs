@@ -134,6 +134,15 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             console.error(e);
         }
     }
+
+    static async createCombatants(tokens, { combat } = {}) {
+        await super.createCombatants(tokens, combat);
+
+        combat ??= game.combats.viewed;
+        if (combat) {
+            await combat.extraCombatants();
+        }
+    }
 }
 
 export class HeroSystem6eToken extends Token {
