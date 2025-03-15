@@ -140,6 +140,10 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
 
         combat ??= game.combats.viewed;
         if (combat) {
+            // const turn = combat.turns.findIndex((c) => c.id === combat.current.combatantId);
+            // if (turn !== combat.turn) {
+            //     debugger;
+            // }
             await combat.extraCombatants();
         }
     }

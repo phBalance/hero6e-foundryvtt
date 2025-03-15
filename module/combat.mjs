@@ -44,10 +44,9 @@ export class HeroSystem6eCombat extends Combat {
                 }
             }
         }
-        if (!updates.length) return this;
 
         // Update multiple combatants
-        if (updates) {
+        if (updates && updates.length > 0) {
             await this.updateEmbeddedDocuments("Combatant", updates);
         }
 
@@ -127,13 +126,15 @@ export class HeroSystem6eCombat extends Combat {
         await this.rollInitiative(documents.map((o) => o.id));
 
         // Get current combatant and try to maintain turn order to the best of our ability
-        const priorState = foundry.utils.deepClone(this.current);
+        //const priorState = foundry.utils.deepClone(this.current);
+        for (const tokenId of [...new Set(documents.map((o) => o.tokenId))]) {
+            await this.assignSegments(tokenId);
+        }
         this.setupTurns();
-        await this.assignSegments(priorState.tokenId);
-        const combatTurn = this.getCombatTurnHero(priorState);
+        const combatTurn = this.getCombatTurnHero(this.current);
 
         // Call Super
-        await super._onCreateDescendantDocuments(
+        const created = await super._onCreateDescendantDocuments(
             parent,
             collection,
             documents,
@@ -174,60 +175,66 @@ export class HeroSystem6eCombat extends Combat {
     async assignSegments(tokenId) {
         if (!tokenId) return;
 
-        const tokenCombatants = this.combatants.filter((o) => o.tokenId === tokenId);
-        const tokenCombatantCount = tokenCombatants.length;
-        if (tokenCombatantCount === 0) return;
-        if (!tokenCombatants[0]?.isOwner) return;
-        const actor = tokenCombatants[0].actor;
-        if (!actor) return;
-        const lightningReflexes = actor?.items.find(
-            (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
-        );
-        const updates = [];
-        for (let c = 0; c < tokenCombatantCount; c++) {
-            const _combatant = tokenCombatants[c];
-            const spd = clamp(parseInt(_combatant.actor?.system.characteristics.spd?.value || 0), 1, 12);
-            if (spd) {
-                const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
-                let update = {
-                    _id: _combatant.id,
-                    initiative: _combatant.flags.initiative,
-                    "flags.segment": segment,
-                    "flags.spd": spd,
-                    "flags.initiativeTooltip": `${
-                        _combatant.flags.initiative
-                    }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD`,
-                };
-                if (lightningReflexes && c % 2 === 0) {
-                    update = {
-                        ...update,
+        try {
+            const tokenCombatants = this.combatants.filter((o) => o.tokenId === tokenId);
+            const tokenCombatantCount = tokenCombatants.length;
+            if (tokenCombatantCount === 0) return;
+            if (!tokenCombatants[0]?.isOwner) return;
+            const actor = tokenCombatants[0].actor;
+            if (!actor) return;
+            const lightningReflexes = actor?.items.find(
+                (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+            );
+            const updates = [];
+            for (let c = 0; c < tokenCombatantCount; c++) {
+                const _combatant = tokenCombatants[c];
+                const spd = clamp(parseInt(_combatant.actor?.system.characteristics.spd?.value || 0), 1, 12);
+                if (spd) {
+                    const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
+                    let update = {
+                        _id: _combatant.id,
+                        initiative: _combatant.flags.initiative,
+                        "flags.segment": segment,
+                        "flags.spd": spd,
                         "flags.initiativeTooltip": `${
                             _combatant.flags.initiative
-                        }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD ${
-                            lightningReflexes.system.LEVELS
-                        }LR`,
-                        initiative: _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
-                        "flags.lightningReflexes.levels": parseInt(lightningReflexes.system.LEVELS),
-                        "flags.lightningReflexes.name":
-                            lightningReflexes.system.OPTION_ALIAS || lightningReflexes.system.INPUT || "All Actions",
+                        }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD`,
                     };
-                } else {
-                    update = {
-                        ...update,
-                        "flags.lightningReflexes": null,
-                    };
-                }
-                if (
-                    update.initiative != _combatant.initiative ||
-                    update["flags.lightningReflexes.name"] != _combatant.flags?.lightningReflexes?.name ||
-                    update["flags.segment"] != _combatant.flags?.segment
-                ) {
-                    updates.push(update);
+                    if (lightningReflexes && c % 2 === 0) {
+                        update = {
+                            ...update,
+                            "flags.initiativeTooltip": `${
+                                _combatant.flags.initiative
+                            }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD ${
+                                lightningReflexes.system.LEVELS
+                            }LR`,
+                            initiative: _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
+                            "flags.lightningReflexes.levels": parseInt(lightningReflexes.system.LEVELS),
+                            "flags.lightningReflexes.name":
+                                lightningReflexes.system.OPTION_ALIAS ||
+                                lightningReflexes.system.INPUT ||
+                                "All Actions",
+                        };
+                    } else {
+                        update = {
+                            ...update,
+                            "flags.lightningReflexes": null,
+                        };
+                    }
+                    if (
+                        update.initiative != _combatant.initiative ||
+                        update["flags.lightningReflexes.name"] != _combatant.flags?.lightningReflexes?.name ||
+                        update["flags.segment"] != _combatant.flags?.segment
+                    ) {
+                        updates.push(update);
+                    }
                 }
             }
-        }
-        if (updates.length > 0) {
-            await this.updateEmbeddedDocuments("Combatant", updates);
+            if (updates.length > 0) {
+                await this.updateEmbeddedDocuments("Combatant", updates);
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -236,49 +243,68 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`Hero | extraCombatants`);
         }
 
-        // Only 1 GM should do this
-        if (!game.users.activeGM?.isSelf) return;
+        try {
+            // Only 1 GM should do this
+            if (!game.users.activeGM?.isSelf) return;
 
-        const uniqueTokens = Array.from(new Set(this.combatants.map((o) => o.tokenId)));
-        for (const _tokenId of uniqueTokens) {
-            const _combatant = this.combatants.find((o) => o.tokenId === _tokenId && o.actor);
-            if (!_combatant?.isOwner) continue;
-            const actor = _combatant?.actor;
-            if (actor) {
-                const lightningReflexes = actor?.items.find(
-                    (o) =>
-                        o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
-                );
-                const targetCombatantCount =
-                    clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) * (lightningReflexes ? 2 : 1);
-                const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
-                const tokenCombatantCount = tokenCombatants.length;
+            const toCreate = [];
+            const toDelete = [];
 
-                if (tokenCombatantCount < targetCombatantCount) {
-                    const toCreate = [];
-                    for (let i = 0; i < targetCombatantCount - tokenCombatantCount; i++) {
-                        toCreate.push(_combatant);
-                    }
-                    await this.createEmbeddedDocuments("Combatant", toCreate);
-                    await this.assignSegments(_tokenId);
-                    return;
-                }
-
-                if (tokenCombatantCount > targetCombatantCount) {
-                    const _combatants = this.combatants.filter((o) => o.tokenId === _tokenId && o.actor);
-                    await this.deleteEmbeddedDocuments(
-                        "Combatant",
-                        _combatants.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
+            const uniqueTokens = Array.from(new Set(this.combatants.map((o) => o.tokenId)));
+            for (const _tokenId of uniqueTokens) {
+                const _combatant = this.combatants.find((o) => o.tokenId === _tokenId && o.actor);
+                if (!_combatant?.isOwner) continue;
+                const actor = _combatant?.actor;
+                if (actor) {
+                    const lightningReflexes = actor?.items.find(
+                        (o) =>
+                            o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
+                            o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
                     );
-                    await this.assignSegments(_tokenId);
-                    return;
-                }
+                    const targetCombatantCount =
+                        clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) *
+                        (lightningReflexes ? 2 : 1);
+                    const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
+                    const tokenCombatantCount = tokenCombatants.length;
 
-                // Add custom hero flags for segments and such
-                if (tokenCombatantCount === targetCombatantCount) {
-                    await this.assignSegments(_tokenId);
+                    if (tokenCombatantCount < targetCombatantCount) {
+                        for (let i = 0; i < targetCombatantCount - tokenCombatantCount; i++) {
+                            toCreate.push(_combatant);
+                        }
+                        //await this.createEmbeddedDocuments("Combatant", toCreate);
+                        //await this.assignSegments(_tokenId);
+                        continue;
+                    }
+
+                    if (tokenCombatantCount > targetCombatantCount) {
+                        toDelete.push(...this.combatants.filter((o) => o.tokenId === _tokenId && o.actor));
+                        // await this.deleteEmbeddedDocuments(
+                        //     "Combatant",
+                        //     toDelete.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
+                        // );
+                        //await this.assignSegments(_tokenId);
+                        continue;
+                    }
+
+                    // Add custom hero flags for segments and such
+                    // if (tokenCombatantCount === targetCombatantCount) {
+                    //     await this.assignSegments(_tokenId);
+                    // }
                 }
             }
+
+            if (toCreate.length > 0) {
+                await this.createEmbeddedDocuments("Combatant", toCreate);
+            }
+
+            if (toDelete.length > 0) {
+                await this.deleteEmbeddedDocuments(
+                    "Combatant",
+                    toDelete.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
+                );
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -951,9 +977,9 @@ export class HeroSystem6eCombat extends Combat {
         return _previousRound;
     }
 
-    getCombatTurnHero(priorState) {
+    getCombatTurnHero(combatState) {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | getCombatTurnHero`, priorState);
+            console.debug(`Hero | getCombatTurnHero`, combatState);
         }
 
         // Don't bother when combat tracker is empty
@@ -965,21 +991,21 @@ export class HeroSystem6eCombat extends Combat {
         // Find Exact match
         let combatTurn = this.turns.findIndex(
             (o) =>
-                o.tokenId === priorState.tokenId &&
-                o.flags.segment === priorState.segment &&
-                o.initiative === priorState.initiative,
+                o.tokenId === combatState.tokenId &&
+                o.flags.segment === combatState.segment &&
+                o.initiative === combatState.initiative,
         );
 
         // find closest match
         if (combatTurn === -1) {
             combatTurn = this.turns.findIndex(
                 (o) =>
-                    (o.flags.segment === priorState.segment && o.initiative <= priorState.initiative) ||
-                    o.flags.segment > priorState.segment,
+                    (o.flags.segment === combatState.segment && o.initiative <= combatState.initiative) ||
+                    o.flags.segment > combatState.segment,
             );
             console.log(
                 `Combat Tracker was unable to find exact match.  Should only occur when current combatant changes SPD/Initiative.`,
-                priorState,
+                combatState,
                 this,
             );
         }
