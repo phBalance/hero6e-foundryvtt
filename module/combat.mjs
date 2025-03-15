@@ -168,7 +168,7 @@ export class HeroSystem6eCombat extends Combat {
         );
 
         // Add or remove extra combatants based on SPD or Lightning Reflexes (shouldn't be needed as we have overrides for combatant deletes via UI)
-        await this.extraCombatants();
+        //await this.extraCombatants();
     }
 
     async assignSegments(tokenId) {
@@ -260,6 +260,7 @@ export class HeroSystem6eCombat extends Combat {
                         toCreate.push(_combatant);
                     }
                     await this.createEmbeddedDocuments("Combatant", toCreate);
+                    await this.assignSegments(_tokenId);
                     return;
                 }
 
@@ -269,6 +270,7 @@ export class HeroSystem6eCombat extends Combat {
                         "Combatant",
                         _combatants.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
                     );
+                    await this.assignSegments(_tokenId);
                     return;
                 }
 
