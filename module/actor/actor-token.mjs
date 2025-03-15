@@ -135,18 +135,12 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         }
     }
 
-    static async createCombatants(tokens, { combat } = {}) {
-        await super.createCombatants(tokens, combat);
-
-        combat ??= game.combats.viewed;
-        if (combat) {
-            const turn = combat.turns.findIndex((c) => c.id === combat.current.combatantId);
-            if (turn !== combat.turn) {
-                console.warn(`Combat order is confused`, this, combat);
-            }
-            await combat.extraCombatants();
-        }
-    }
+    // static async createCombatants(tokens, { combat } = {}) {
+    //     //const combatantId = game.combats.viewed?.combatant.id;
+    //     await super.createCombatants(tokens, combat);
+    //     //combat ??= game.combats.viewed;
+    //     //await combat.extraCombatants();
+    // }
 
     static async deleteCombatants(tokens, { combat } = {}) {
         await super.deleteCombatants(tokens, combat);

@@ -57,27 +57,27 @@ export class HeroSystem6eCombat extends Combat {
      * Return the Array of combatants sorted into initiative order, breaking ties alphabetically by name.
      * @returns {Combatant[]}
      */
-    setupTurns() {
-        // if (CONFIG.debug.combat) {
-        //     console.debug(`Hero | setupTurns`);
-        // }
+    // setupTurns() {
+    //     // if (CONFIG.debug.combat) {
+    //     //     console.debug(`Hero | setupTurns`);
+    //     // }
 
-        this.turns ||= [];
+    //     this.turns ||= [];
 
-        // Determine the turn order and the current turn
-        const turns = this.combatants.contents.sort(this._sortCombatants);
-        if (this.turn !== null) this.turn = clamp(this.turn, 0, turns.length - 1);
+    //     // Determine the turn order and the current turn
+    //     const turns = this.combatants.contents.sort(this._sortCombatants);
+    //     if (this.turn !== null) this.turn = clamp(this.turn, 0, turns.length - 1);
 
-        // Update state tracking
-        let c = turns[this.turn];
-        this.current = this._getCurrentState(c);
+    //     // Update state tracking
+    //     const c = turns[this.turn];
+    //     this.current = this._getCurrentState(c);
 
-        // One-time initialization of the previous state
-        if (!this.previous) this.previous = this.current;
+    //     // One-time initialization of the previous state
+    //     if (!this.previous) this.previous = this.current;
 
-        // Return the array of prepared turns
-        return (this.turns = turns);
-    }
+    //     // Return the array of prepared turns
+    //     return (this.turns = turns);
+    // }
 
     /**
      * Define how the array of Combatants is sorted in the displayed list of the tracker.
@@ -116,6 +116,16 @@ export class HeroSystem6eCombat extends Combat {
         );
     }
 
+    /**
+     * Actions taken after descendant documents have been created and changes have been applied to client data.
+     * @param {Document} parent         The direct parent of the created Documents, may be this Document or a child
+     * @param {string} collection       The collection within which documents were created
+     * @param {Document[]} documents    The array of created Documents
+     * @param {object[]} data           The source data for new documents that were created
+     * @param {object} options          Options which modified the creation operation
+     * @param {string} userId           The ID of the User who triggered the operation
+     * @override
+     */
     async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onCreateDescendantDocuments`);
@@ -127,11 +137,19 @@ export class HeroSystem6eCombat extends Combat {
 
         // Get current combatant and try to maintain turn order to the best of our ability
         //const priorState = foundry.utils.deepClone(this.current);
-        for (const tokenId of [...new Set(documents.map((o) => o.tokenId))]) {
-            await this.assignSegments(tokenId);
-        }
+
         this.setupTurns();
-        const combatTurn = this.getCombatTurnHero(this.current);
+
+        // Variable options.combatTurn is the current combat turn,
+        // which normally should remain the same after we add a new combatant.
+        const combatTurn = Math.max(
+            this.turns.findIndex((t) => t.id === this.combatant?.id),
+            0,
+        ); //options.combatTurn; //this.getCombatTurnHero(this.current);
+        if (options.combatTurn && combatTurn !== options.combatTurn) {
+            console.log(combatTurn, options.combatTurn);
+            options.combatTurn = combatTurn;
+        }
 
         // Call Super
         await super._onCreateDescendantDocuments(
@@ -139,12 +157,16 @@ export class HeroSystem6eCombat extends Combat {
             collection,
             documents,
             data,
-            { ...options, combatTurn: combatTurn },
+            options, //{ ...options, combatTurn: combatTurn },
             userId,
         );
 
         // Add or remove extra combatants based on SPD or Lightning Reflexes
-        //await this.extraCombatants();
+        await this.extraCombatants();
+
+        for (const tokenId of [...new Set(documents.map((o) => o.tokenId))]) {
+            await this.assignSegments(tokenId);
+        }
     }
 
     async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
@@ -903,7 +925,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async _onUpdate(...args) {
-        //console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
+        console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
         super._onUpdate(...args);
     }
 
