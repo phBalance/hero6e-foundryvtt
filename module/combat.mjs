@@ -558,9 +558,8 @@ export class HeroSystem6eCombat extends Combat {
              */
             const spentResources = {
                 totalEnd: 0,
-                end: 0,
-                reserveEnd: 0,
-                charges: 0,
+                totalReserveEnd: 0,
+                totalCharges: 0,
             };
 
             for (const powerUsingResourcesToContinue of combatant.actor.items.filter(
@@ -588,9 +587,8 @@ export class HeroSystem6eCombat extends Combat {
                         : "";
 
                     spentResources.totalEnd += resourcesRequired.totalEnd;
-                    spentResources.end += resourcesRequired.end;
-                    spentResources.reserveEnd += resourcesRequired.reserveEnd;
-                    spentResources.charges += resourcesRequired.charges;
+                    spentResources.totalReserveEnd += resourcesRequired.totalReserveEnd;
+                    spentResources.totalCharges += resourcesRequired.totalCharges;
                 }
             }
 

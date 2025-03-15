@@ -841,25 +841,12 @@ export class HeroSystemActorSheet extends ActorSheet {
             this.options.itemFilters.skill = expandedData.itemFilters?.skill;
             this.options.itemFilters.equipment = expandedData.itemFilters?.equipment;
             this.options.itemFilters.martial = expandedData.itemFilters?.martial;
-
-            // If core characteristics changed the re-calculate costs
-            // let recalculateCosts = false;
-            // for (const char of Object.keys(expandedData?.system?.characteristics)) {
-            //     if (this.actor.system.characteristics[char].core !== expandedData.system.characteristics[char].core) {
-            //         recalculateCosts = true;
-            //     }
-            // }
         } catch (e) {
             console.error(e);
         }
 
         // Do all the standard things like updating item properties that match the name of input boxes
         await super._updateObject(event, expandedData); //formData);
-
-        // if (recalculateCosts) {
-        //     await this.actor.calcCharacteristicsCost();
-        //     await this.actor.CalcActorRealAndActivePoints();
-        // }
 
         await this.render();
     }

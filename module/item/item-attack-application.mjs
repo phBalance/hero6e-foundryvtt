@@ -4,7 +4,7 @@ import {
     isManeuverThatDoesNormalDamage,
     penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
-import { processActionToHit } from "../item/item-attack.mjs";
+import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -93,6 +93,8 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.dcvMod ??= parseInt(this.data.originalItem.system.dcv);
             this.data.omcvMod ??= parseInt(this.data.originalItem.system.ocv); //TODO: May need to make a distinction between OCV/OMCV
             this.data.dmcvMod ??= parseInt(this.data.originalItem.system.dcv);
+
+            // PH: FIXME: Need to separate STR usage from TK usage. See collectActionDataBeforeToHitOptions.
             this.data.effectiveStr ??= parseInt(this.data.str);
             this.data.effectiveStr = Math.max(0, this.data.effectiveStr);
 
@@ -255,6 +257,15 @@ export class ItemAttackFormApplication extends FormApplication {
             }, this.data.nakedAdvantagesItems ?? {});
 
             this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData();
+            this.data.effectiveItemResourceUsage = calculateRequiredResourcesToUse(
+                [
+                    this.data.effectiveItem,
+                    ...(this.data.effectiveItem.system._active.linkedEnd || []).map(
+                        (linkedEndInfo) => linkedEndInfo.item,
+                    ),
+                ],
+                this.data.formData || this.data,
+            );
 
             this.#setAoeAndHitLocationDataForEffectiveItem();
 
@@ -372,17 +383,27 @@ export class ItemAttackFormApplication extends FormApplication {
     async #buildEffectiveObjectFromOriginalAndData() {
         const effectiveStr = this.data.effectiveStr;
 
-        // PH: FIXME: Should only be creating the strength item for situations where we're using strength.
-        const strengthItem = buildStrengthItem(effectiveStr, this.data.originalItem.actor);
-
         const effectiveItemData = this.data.originalItem.toObject(false);
         effectiveItemData._id = null;
         const effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: this.data.originalItem.actor });
-
-        // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR placeholder
         effectiveItem.system._active = {};
-        effectiveItem.system._active.effectiveStr = effectiveStr;
-        effectiveItem.system._active.effectiveStrItem = strengthItem;
+
+        // Does this item allow strength to be added and has the character decided to use strength to augment the damage?
+        let strengthItem = null;
+        if (effectiveStr > 0 && this.data.originalItem.system.usesStrength) {
+            strengthItem = buildStrengthItem(effectiveStr, this.data.originalItem.actor);
+
+            // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR placeholder
+            effectiveItem.system._active.effectiveStr = effectiveStr;
+            effectiveItem.system._active.effectiveStrItem = strengthItem;
+
+            effectiveItem.system._active.linkedEnd ??= [];
+            effectiveItem.system._active.linkedEnd.push({
+                item: strengthItem,
+            });
+        }
+
+        // PH: FIXME: Need to link in TK as appropriate
 
         // Reduce or Push the item
         effectiveItem.changePowerLevel(this.data.effectiveRealCost);
@@ -398,10 +419,11 @@ export class ItemAttackFormApplication extends FormApplication {
                 effectiveItem.copyItemAdvantages(hthAttack);
                 effectiveItem.system._active.linkedEnd ??= [];
                 effectiveItem.system._active.linkedEnd.push({
-                    uuid: hthAttack.uuid,
+                    item: hthAttack,
+                    uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
                 });
 
-                strengthItem.copyItemAdvantages(hthAttack);
+                strengthItem?.copyItemAdvantages(hthAttack);
             });
 
         // Add any Naked Advantages into the base item
@@ -414,14 +436,15 @@ export class ItemAttackFormApplication extends FormApplication {
                 effectiveItem.copyItemAdvantages(naAttack);
                 effectiveItem.system._active.linkedEnd ??= [];
                 effectiveItem.system._active.linkedEnd.push({
-                    uuid: naAttack.uuid,
+                    item: naAttack,
+                    uuid: naAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
                 });
 
-                strengthItem.copyItemAdvantages(naAttack);
+                strengthItem?.copyItemAdvantages(naAttack);
             });
 
         // PH: FIXME: Do we need to do this?
-        await strengthItem._postUpload();
+        await strengthItem?._postUpload();
 
         await effectiveItem._postUpload();
 
@@ -530,6 +553,13 @@ export class ItemAttackFormApplication extends FormApplication {
         this.#processHthAndNa(formData);
 
         this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData();
+        this.data.effectiveItemResourceUsage = calculateRequiredResourcesToUse(
+            [
+                this.data.effectiveItem,
+                ...(this.data.effectiveItem.system._active.linkedEnd || []).map((linkedEndInfo) => linkedEndInfo.item),
+            ],
+            formData,
+        );
 
         this.#setAoeAndHitLocationDataForEffectiveItem();
 
@@ -767,7 +797,6 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     getAoeTemplate() {
-        // PH: FIXME: Is there a good reason to allow a user to have more than 1 template? This allows 1 per power.
         return Array.from(canvas.templates.getDocuments()).find(
             (template) =>
                 template.author.id === game.user.id &&
