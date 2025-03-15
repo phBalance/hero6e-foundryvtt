@@ -134,7 +134,7 @@ export class HeroSystem6eCombat extends Combat {
         const combatTurn = this.getCombatTurnHero(this.current);
 
         // Call Super
-        const created = await super._onCreateDescendantDocuments(
+        await super._onCreateDescendantDocuments(
             parent,
             collection,
             documents,
@@ -277,7 +277,10 @@ export class HeroSystem6eCombat extends Combat {
                     }
 
                     if (tokenCombatantCount > targetCombatantCount) {
-                        toDelete.push(...this.combatants.filter((o) => o.tokenId === _tokenId && o.actor));
+                        const _combatants = this.combatants.filter((o) => o.tokenId === _tokenId && o.actor);
+                        toDelete.push(
+                            ..._combatants.filter((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
+                        );
                         // await this.deleteEmbeddedDocuments(
                         //     "Combatant",
                         //     toDelete.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
