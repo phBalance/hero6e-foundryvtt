@@ -354,7 +354,7 @@ export class HeroSystem6eCombat extends Combat {
      */
     async startCombat() {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | extraCombatants`);
+            console.debug(`Hero | startCombat`);
         }
         // Hero combats start with round 1 and segment 12.
         const firstSegment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || 0;
