@@ -128,7 +128,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 .trim();
 
             if (game.settings.get(HEROSYS.module, "combatTrackerDispositionHighlighting")) {
-                switch (token.disposition) {
+                switch (token?.disposition) {
                     case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
                         if (token.hasPlayerOwner) {
                             turn.css += " combat-tracker-hero-disposition-player";

@@ -134,6 +134,28 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             console.error(e);
         }
     }
+
+    static async createCombatants(tokens, { combat } = {}) {
+        await super.createCombatants(tokens, combat);
+
+        combat ??= game.combats.viewed;
+        if (combat) {
+            // const turn = combat.turns.findIndex((c) => c.id === combat.current.combatantId);
+            // if (turn !== combat.turn) {
+            //     debugger;
+            // }
+            await combat.extraCombatants();
+        }
+    }
+
+    static async deleteCombatants(tokens, { combat } = {}) {
+        await super.deleteCombatants(tokens, combat);
+
+        combat ??= game.combats.viewed;
+        if (combat) {
+            await combat.extraCombatants();
+        }
+    }
 }
 
 export class HeroSystem6eToken extends Token {
