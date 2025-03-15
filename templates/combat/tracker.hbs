@@ -1,4 +1,4 @@
-{{!-- {{log 'tracker.hbs' this}} --}}
+{{log 'tracker.hbs' this}}
 <ol id="combat-tracker" class="combat-tracker directory-list">
     {{#each segments}}
 
@@ -33,15 +33,15 @@
                                     <i class="fa-solid fa-bullseye-arrow"></i>
                                 </a>
                                 {{/if}}
-                                {{#unless ../user.isGM}}
+                                {{!-- {{#unless ../user.isGM}}
                                 <a class="combatant-control" data-action="activateCombatant" aria-label="{{localize 'COMBAT.PanToCombatant'}}" role="button" data-tooltip="COMBAT.PanToCombatant" data-control="panToCombatant">
                                     <i class="fa-solid fa-arrows-to-eye"></i>
                                 </a>
-                                {{/unless}}
+                                {{/unless}} --}}
                                 <div class="token-effects">
                                     {{#each this.effects}}
-                                    <a class="combatant-control" data-action="activateCombatant" aria-label="{{localize 'COMBAT.PanToCombatant'}}" role="button" data-tooltip="COMBAT.PanToCombatant" data-control="effect">
-                                        <img class="token-effect" src="{{this}}"/>
+                                    <a class="combatant-control" data-tooltip="{{this.name}}" data-control="effect" data-effect-id="{{this.id}}">
+                                        <img class="token-effect" src="{{this.img}}" />
                                     </a>
                                     {{/each}}
                                 </div>

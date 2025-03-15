@@ -3,6 +3,8 @@
 ## Version 4.0.24 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix issues where Combat Tracker would occasionally infinitely add/delete combatants, requiring a browser reload. [#2022](https://github.com/dmdorman/hero6e-foundryvtt/issues/2022) [#2018](https://github.com/dmdorman/hero6e-foundryvtt/issues/2018)
+- Fixed missing Combat Tracker context menu.
+- Statuses can now be toggled off from combat tracker.
 
 ## Version 4.0.23 20250315
 
