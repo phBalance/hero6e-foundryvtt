@@ -14,7 +14,9 @@
                         <img class="token-image" src="{{this.img}}" alt="{{this.name}}" loading="lazy"/>
                     {{/unless}}
                     <div class="token-name">
-                        <strong>{{this.name}}</strong>
+                        <strong>{{this.name}} 
+                            {{!-- [{{this.flags.turnNumber}}] --}}
+                        </strong>
                         {{#if this.lightningReflexes.levels}}
                             <strong title="Lightning Reflexes">LR {{this.lightningReflexes.name}}</strong>
                         {{else}}

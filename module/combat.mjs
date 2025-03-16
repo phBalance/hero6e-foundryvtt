@@ -142,13 +142,9 @@ export class HeroSystem6eCombat extends Combat {
 
         // Variable options.combatTurn is the current combat turn,
         // which normally should remain the same after we add a new combatant.
-        const combatTurn = Math.max(
-            this.turns.findIndex((t) => t.id === this.combatant?.id),
-            0,
-        ); //options.combatTurn; //this.getCombatTurnHero(this.current);
-        if (options.combatTurn && combatTurn !== options.combatTurn) {
-            console.log(combatTurn, options.combatTurn);
-            options.combatTurn = combatTurn;
+        // Need some help when called from extraCombatants to keep proper turn.
+        if (options.combatTurn && options.combatant) {
+            options.combatTurn = this.turns.findIndex((o) => o.id === options.combatant._id) || options.combatTurn;
         }
 
         // Call Super
@@ -319,7 +315,9 @@ export class HeroSystem6eCombat extends Combat {
             }
 
             if (toCreate.length > 0) {
-                await this.createEmbeddedDocuments("Combatant", toCreate);
+                await this.createEmbeddedDocuments("Combatant", toCreate, {
+                    combatant: foundry.utils.deepClone(this.combatant),
+                });
             }
 
             if (toDelete.length > 0) {
