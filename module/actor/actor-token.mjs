@@ -171,7 +171,7 @@ export class HeroSystem6eToken extends Token {
         const overlayEffect = activeEffects.findLast((e) => e.img && e.getFlag("core", "overlay"));
 
         // If dead only show overlayEffect
-        if (this.actor.statuses.has("dead")) {
+        if (this.actor?.statuses.has("dead")) {
             activeEffects = [overlayEffect];
         }
 
