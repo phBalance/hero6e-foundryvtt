@@ -1341,14 +1341,13 @@ export class HeroSystem6eActor extends Actor {
         //        not invoked way too many times and way too early.
         const charBase = (characteristicUpperCase) => {
             return (
-                parseInt(this.system[characteristicUpperCase]?.LEVELS) +
-                (parseInt(
+                parseInt(
                     getPowerInfo({
                         xmlid: characteristicUpperCase,
                         actor: this,
                         xmlTag: characteristicUpperCase,
                     })?.base,
-                ) || 0)
+                ) || 0
             );
         };
 
