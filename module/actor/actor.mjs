@@ -2081,7 +2081,7 @@ export class HeroSystem6eActor extends Actor {
                 );
             } else if (!power.behaviors) {
                 await ui.notifications.error(
-                    `${this.name}/${item.name}/${item.system.XMLID} does not have behaviors defined. Please report.`,
+                    `${this.name}/${item.detailedName()} does not have behaviors defined. Please report.`,
                     { console: true, permanent: true },
                 );
             }

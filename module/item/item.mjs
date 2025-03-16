@@ -1173,9 +1173,7 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     default:
-                        console.error(
-                            `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
-                        );
+                        console.error(`Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${item.detailedName()}`);
                         break;
                 }
 
@@ -1347,7 +1345,7 @@ export class HeroSystem6eItem extends Item {
 
                         default:
                             console.error(
-                                `Unhandled 5e AOE OPTIONID ${aoeModifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                                `Unhandled 5e AOE OPTIONID ${aoeModifier.OPTIONID} for ${item.detailedName()}`,
                             );
                             break;
                     }
@@ -2518,19 +2516,19 @@ export class HeroSystem6eItem extends Item {
             try {
                 if (foundry.utils.isNewerVersion(this.actor.system.versionHeroSystem6eCreated, "3.0.63")) {
                     ui.notifications.error(
-                        `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly. Please report.  Error: ${error.message}`,
+                        `${item.detailedName()} for ${this.actor.name} failed to parse properly. Please report.  Error: ${error.message}`,
                         { console: true, permanent: true },
                     );
                     console.error(error);
                 } else {
                     ui.notifications.error(
-                        `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
+                        `${item.detailedName()} for ${this.actor.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
                         { console: true, permanent: false },
                     );
                 }
             } catch (error2) {
                 ui.notifications.error(
-                    `${this.name}/${this.system.XMLID} for ${this.actor.name} failed to parse properly. Please report.`,
+                    `${item.detailedName()} for ${this.actor.name} failed to parse properly. Please report.`,
                     { console: true, permanent: true },
                 );
                 console.error(error);
@@ -2642,7 +2640,7 @@ export class HeroSystem6eItem extends Item {
         const performanceDuration = new Date().getTime() - performanceStart;
         if (performanceDuration > 1000) {
             console.warn(
-                `${this.actor?.name}/${this.name}/${this.system.XMLID}: Performance concernt. Took ${performanceDuration} seconds to upload.`,
+                `${this.actor?.name}/${item.detailedName()}: Performance concernt. Took ${performanceDuration} seconds to upload.`,
             );
         }
 
@@ -3546,7 +3544,7 @@ export class HeroSystem6eItem extends Item {
                         // PH: FIXME: Why is this not based purely on behavior?
                         if (!["skill", "talent", "perk"].includes(this.type)) {
                             console.error(
-                                `${this.actor?.name}: ${this.name}/${this.system.XMLID} has a success behavior but isn't a skill, talent, or perk`,
+                                `${this.actor?.name}: ${item.detailedName()} has a success behavior but isn't a skill, talent, or perk`,
                             );
                         }
                         system.description += ` ${system.roll}`;
@@ -5632,6 +5630,9 @@ export class HeroSystem6eItem extends Item {
 
     /**
      * Most damage powers have a standard way of describing, in XML, how they do damage. This works for those.
+     *
+     * PH: FIXME: This doesn't work for at least the following powers:
+     * TK
      */
     damageLevelTweaking(diceParts) {
         const plusOnePipAdderData = getModifierInfo({
@@ -5704,9 +5705,7 @@ export class HeroSystem6eItem extends Item {
                     break;
 
                 default:
-                    console.error(
-                        `${this.name}/${this.system.XMLID} for ${this.actor} has unknown base active points per die`,
-                    );
+                    console.error(`${item.detailedName()} for ${this.actor} has unknown base active points per die`);
                     break;
             }
 
@@ -5750,9 +5749,7 @@ export class HeroSystem6eItem extends Item {
                     break;
 
                 default:
-                    console.error(
-                        `${this.name}/${this.system.XMLID} for ${this.actor} has unknown base active points per die`,
-                    );
+                    console.error(`${item.detailedName()} for ${this.actor} has unknown base active points per die`);
                     break;
             }
 
@@ -5762,6 +5759,20 @@ export class HeroSystem6eItem extends Item {
             this.system.ADDER ??= [];
             this.system.ADDER.push(newAdder);
         }
+    }
+
+    // TODO: Start using this everywhere we are using this combination in strings.
+    detailedName() {
+        // Fake the
+        if (this.system.XMLID === "__STRENGTHDAMAGE") {
+            if (this.system.ALIAS === "__InternalStrengthPlaceholder") {
+                return "Your STRENGTH";
+            } else if (this.system.ALIAS === "__InternalManeuverPlaceholderWeapon") {
+                return "Weapon Placeholder";
+            }
+        }
+
+        return `${this.name}/${this.system.XMLID}`;
     }
 }
 
@@ -6017,9 +6028,7 @@ async function _startIfIsAContinuingCharge(item) {
         if (ae) {
             let seconds = hdcTimeOptionIdToSeconds(continuing.OPTIONID);
             if (seconds < 0) {
-                console.error(
-                    `optionID for ${item.name}/${item.system.XMLID} has unhandled option ID ${continuing.OPTIONID}`,
-                );
+                console.error(`optionID for ${item.detailedName()} has unhandled option ID ${continuing.OPTIONID}`);
                 seconds = 1;
             }
 
