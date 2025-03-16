@@ -83,6 +83,30 @@ export class HeroSystem6eActor extends Actor {
                 active: true,
             });
         }
+
+        // Make dead tokens more obvious
+        if (statusId === HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) {
+            for (const token of this.getActiveTokens()) {
+                if (this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id)) {
+                    await token.document.update({ alpha: 0.3, [`texture.tint`]: `ff0000` });
+                    await token.layer._sendToBackOrBringToFront(false); // send to back
+                } else {
+                    await token.document.update({ alpha: 1, [`texture.tint`]: null });
+                }
+            }
+        }
+
+        // TODO: Stunned
+        // Careful about Stunned + Dead.
+        // if (statusId === HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id) {
+        //     for (const token of this.getActiveTokens()) {
+        //         if (this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id)) {
+        //             await token.document.update({ [`texture.tint`]: `ffff00` });
+        //         } else {
+        //             await token.document.update({ [`texture.tint`]: null });
+        //         }
+        //     }
+        // }
     }
 
     async removeActiveEffect(activeEffect) {

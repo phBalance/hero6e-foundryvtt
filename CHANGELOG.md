@@ -5,6 +5,8 @@
 - Fix issues where Combat Tracker would occasionally infinitely add/delete combatants, requiring a browser reload. [#2022](https://github.com/dmdorman/hero6e-foundryvtt/issues/2022) [#2018](https://github.com/dmdorman/hero6e-foundryvtt/issues/2018)
 - Fixed missing Combat Tracker context menu.
 - Statuses can now be toggled off from combat tracker.
+- Fixed issue where adding several combatants sometimes messes up current phase/segment.
+- Defeated tokens now have a red tint on their image, are slightly transparent, do not show any effects (except for skull overlay) and are sent to the back of the token order.
 
 ## Version 4.0.23 20250315
 

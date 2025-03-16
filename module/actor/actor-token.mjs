@@ -135,18 +135,12 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         }
     }
 
-    static async createCombatants(tokens, { combat } = {}) {
-        await super.createCombatants(tokens, combat);
-
-        combat ??= game.combats.viewed;
-        if (combat) {
-            // const turn = combat.turns.findIndex((c) => c.id === combat.current.combatantId);
-            // if (turn !== combat.turn) {
-            //     debugger;
-            // }
-            await combat.extraCombatants();
-        }
-    }
+    // static async createCombatants(tokens, { combat } = {}) {
+    //     //const combatantId = game.combats.viewed?.combatant.id;
+    //     await super.createCombatants(tokens, combat);
+    //     //combat ??= game.combats.viewed;
+    //     //await combat.extraCombatants();
+    // }
 
     static async deleteCombatants(tokens, { combat } = {}) {
         await super.deleteCombatants(tokens, combat);
@@ -161,6 +155,45 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
 export class HeroSystem6eToken extends Token {
     constructor(document) {
         super(document);
+    }
+
+    async _drawEffects() {
+        this.effects.renderable = false;
+
+        // Clear Effects Container
+        this.effects.removeChildren().forEach((c) => c.destroy());
+        this.effects.bg = this.effects.addChild(new PIXI.Graphics());
+        this.effects.bg.zIndex = -1;
+        this.effects.overlay = null;
+
+        // Categorize effects
+        let activeEffects = this.actor?.temporaryEffects || [];
+        const overlayEffect = activeEffects.findLast((e) => e.img && e.getFlag("core", "overlay"));
+
+        // If dead only show overlayEffect
+        if (this.actor?.statuses.has("dead")) {
+            activeEffects = [overlayEffect];
+        }
+
+        // Draw effects
+        const promises = [];
+        for (const [i, effect] of activeEffects.entries()) {
+            if (!effect.img) continue;
+            const promise =
+                effect === overlayEffect
+                    ? this._drawOverlay(effect.img, effect.tint)
+                    : this._drawEffect(effect.img, effect.tint);
+            promises.push(
+                promise.then((e) => {
+                    if (e) e.zIndex = i;
+                }),
+            );
+        }
+        await Promise.allSettled(promises);
+
+        this.effects.sortChildren();
+        this.effects.renderable = true;
+        this.renderFlags.set({ refreshEffects: true });
     }
 
     /**
