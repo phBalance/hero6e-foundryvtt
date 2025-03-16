@@ -1875,6 +1875,16 @@ export class HeroSystem6eItem extends Item {
                 if (this.system.subType !== movement) {
                     this.system.subType = movement;
                     this.system.showToggle = true;
+
+                    // Movement power typically default to active
+                    if (
+                        !this.system.charges?.value &&
+                        this.parentItem?.system.XMLID !== "MULTIPOWER" &&
+                        !this.baseInfo?.behaviors.includes("defaultoff")
+                    ) {
+                        this.system.active ??= true;
+                    }
+
                     changed = true;
                 }
             }
