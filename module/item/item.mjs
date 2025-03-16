@@ -224,6 +224,23 @@ export class HeroSystem6eItem extends Item {
         return super._onCreate(data, options, userId);
     }
 
+    async update(...args) {
+        if (!this.id) {
+            // This is either an effective item or just an item that's not in the database.
+            // If it's an effective item, redirect to the original item for persistance otherwise ignore.
+            if (this.system._active?.__originalUuid) {
+                const originalItem = fromUuidSync(this.system._active.__originalUuid);
+                return originalItem.update(...args);
+            }
+
+            // Hmm. Just a temporary item. Ignore the update.
+            console.warn(`Ignoring update to ${item.actor.name}'s temporary item ${item.detailedName()}`);
+            return this;
+        }
+
+        return super.update(...args);
+    }
+
     /**
      * Augment the basic Item data model with additional dynamic data.
      */

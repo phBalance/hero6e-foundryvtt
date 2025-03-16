@@ -147,11 +147,11 @@ export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengt
         const limitationBaseCost = strengthMinimumModifier.BASECOST;
         if (itemWithStrengthMinimum.id) {
             console.warn(
-                `${itemWithStrengthMinimum.actor?.name}/${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
+                `${itemWithStrengthMinimum.actor?.name}/${itemWithStrengthMinimum.detailedName()} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
             );
         } else {
             console.info(
-                `${itemWithStrengthMinimum.actor?.name}/${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
+                `${itemWithStrengthMinimum.actor?.name}/${itemWithStrengthMinimum.detailedName()} really making a guess with STRMINIMUM limitations. Update HDC to newer HD version and set the modifier's OPTION field to just the minimum STR.`,
             );
         }
 
@@ -169,7 +169,7 @@ export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengt
             strMinimumValue = 20;
         } else {
             console.error(
-                `${itemWithStrengthMinimum.name}/${itemWithStrengthMinimum.system.XMLID} has ${strengthMinimumModifier.system.XMLID} with unrecognized limitation of ${limitationBaseCost} levels`,
+                `${itemWithStrengthMinimum.detailedName()} has ${strengthMinimumModifier.system.XMLID} with unrecognized limitation of ${limitationBaseCost} levels`,
             );
         }
     }
