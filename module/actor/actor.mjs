@@ -61,15 +61,18 @@ export class HeroSystem6eActor extends Actor {
 
     /// Override and should probably be used instead of add/remove ActiveEffect
     async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
-        if (
-            [
-                HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id,
-                HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
-                HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
-            ].includes(statusId)
-        ) {
+        const overlayEffects = [
+            HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id,
+            HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
+            HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
+        ];
+
+        // Overley Effects
+        if (overlayEffects.includes(statusId)) {
             overlay = true;
         }
+
+        // Toggle effect
         await super.toggleStatusEffect(statusId, { active, overlay });
 
         // Several status effects also imply prone
@@ -84,29 +87,21 @@ export class HeroSystem6eActor extends Actor {
             });
         }
 
-        // Make dead tokens more obvious
-        if (statusId === HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) {
+        // Make overlay effects more obvious by changing the tint on the token img
+        if (overlayEffects.includes(statusId)) {
             for (const token of this.getActiveTokens()) {
-                if (this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id)) {
+                if (this.statuses.has("dead")) {
                     await token.document.update({ alpha: 0.3, [`texture.tint`]: `ff0000` });
                     await token.layer._sendToBackOrBringToFront(false); // send to back
+                } else if (this.statuses.has("knockedOut")) {
+                    await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
+                } else if (this.statuses.has("stunned")) {
+                    await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
                 } else {
                     await token.document.update({ alpha: 1, [`texture.tint`]: null });
                 }
             }
         }
-
-        // TODO: Stunned
-        // Careful about Stunned + Dead.
-        // if (statusId === HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id) {
-        //     for (const token of this.getActiveTokens()) {
-        //         if (this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id)) {
-        //             await token.document.update({ [`texture.tint`]: `ffff00` });
-        //         } else {
-        //             await token.document.update({ [`texture.tint`]: null });
-        //         }
-        //     }
-        // }
     }
 
     async removeActiveEffect(activeEffect) {

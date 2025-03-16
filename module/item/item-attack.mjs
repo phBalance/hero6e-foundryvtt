@@ -1066,9 +1066,11 @@ function getAttackTags(item) {
     }
 
     // FLASH
-    // TODO: Additional SENSE GROUPS
     if (item.system.XMLID === "FLASH") {
-        attackTags.push({ name: item.system.OPTION_ALIAS });
+        attackTags.push({ name: item.system.OPTION_ALIAS, title: item.system.XMLID });
+        for (const adder of item.adders) {
+            attackTags.push({ name: adder.ALIAS, title: adder.XMLID });
+        }
     }
 
     // ADJUSTMENT should include what we are adjusting
@@ -2993,9 +2995,37 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
     }
 }
 
-async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData, defense) {
+async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData) {
     const defenseTags = [];
-    let totalDefense = 0;
+
+    // We currently only support sense groups, not individual senses
+    const senseGroups = [
+        { XMLID: "SIGHTGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect },
+        { XMLID: "TOUCHGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect },
+        {
+            XMLID: "HEARINGGROUP",
+            statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.hearingSenseDisabledEffect,
+        },
+        { XMLID: "RADIOGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.radioSenseDisabledEffect },
+        {
+            XMLID: "SMELLGROUP",
+            statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.smellTasteSenseDisabledEffect,
+        },
+        {
+            XMLID: "MENTALGROUP",
+            statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.mentalSenseDisabledEffect,
+        },
+    ];
+
+    // Target groups are we attacking
+    const targetGroups = [senseAffectingItem.system.OPTIONID || senseAffectingItem.system.INPUT];
+    targetGroups.push(...senseAffectingItem.adders.map((a) => a.XMLID));
+    for (const adder of targetGroups) {
+        const senseGroup = senseGroups.find((sg) => sg.XMLID === adder);
+        if (senseGroup) {
+            senseGroup.bodyDamage = damageData.bodyDamage;
+        }
+    }
 
     // FLASHDEFENSE
     for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.isActive)) {
@@ -3004,85 +3034,61 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
             flashDefense.system.OPTIONID.includes(senseAffectingItem.system.INPUT?.toUpperCase())
         ) {
             const value = parseInt(flashDefense.system.LEVELS || 0);
-            totalDefense += value;
-            damageData.bodyDamage = Math.max(0, damageData.bodyDamage - totalDefense);
-            defense = `${totalDefense} Flash Defense`;
+            //totalDefense += value;
+            //damageData.bodyDamage = Math.max(0, damageData.bodyDamage - totalDefense);
 
-            defenseTags.push({
-                value: value,
-                name: flashDefense.system.XMLID,
-                title: flashDefense.name,
+            //defense = `${value} ${flashDefense.system.OPTIONID} Defense`;
+
+            const senseGroup = senseGroups.find((sg) => sg.XMLID === flashDefense.system.OPTIONID);
+            if (senseGroup) {
+                senseGroup.defenseItems ??= [];
+                senseGroup.defenseItems.push(flashDefense);
+                senseGroup.bodyDamage = Math.max(0, (senseGroup.bodyDamage || 0) - value);
+                senseGroup.defenseValue = (senseGroup.defenseValue || 0) + value;
+
+                defenseTags.push({
+                    value: value,
+                    name: flashDefense.system.OPTIONID,
+                    title: flashDefense.name,
+                });
+            } else {
+                ui.notifications.error(`Unsupported flash defense [${flashDefense.system.OPTIONID}]`);
+                continue;
+            }
+        }
+    }
+
+    // Create new ActiveEffects
+    for (const senseGroup of senseGroups) {
+        if (senseGroup.bodyDamage > 0) {
+            token.actor.addActiveEffect({
+                ...senseGroup.statusEffect,
+                name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseGroup.XMLID} ${
+                    senseGroup.bodyDamage
+                } segments remaining [${senseAffectingItem.actor.name}]`,
+                duration: {
+                    seconds: senseGroup.bodyDamage,
+                },
+                flags: {
+                    bodyDamage: senseGroup.bodyDamage,
+                    XMLID: senseGroup.XMLID,
+                    source: senseAffectingItem.actor.name,
+                },
+                origin: senseAffectingItem.uuid,
             });
         }
     }
 
-    // Determine sense group
-    // TODO: Not all flashes are an entire group, such as vision only.
-    // TODO: Need loop for multiple sense groups.
-    // TODO: Flash defense should target approprate sense group
-    let senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect;
-
-    // OPTIONID comes from FLASH POWER, INPUT comes from Martial Flash
-    const targetGroup = senseAffectingItem.system.OPTIONID || senseAffectingItem.system.INPUT;
-    switch (targetGroup) {
-        case "SIGHTGROUP":
-        case "Sight":
-            break; // This is already the default
-        case "HEARINGGROUP":
-        case "Hearing":
-            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.hearingSenseDisabledEffect;
-            break;
-        case "MENTALGROUP":
-        case "Mental":
-            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.mentalSenseDisabledEffect;
-            break;
-        case "RADIOGROUP":
-        case "Radio":
-            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.radioSenseDisabledEffect;
-            break;
-        case "SMELLGROUP":
-        case "Smell/Taste":
-            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.smellTasteSenseDisabledEffect;
-            break;
-        case "TOUCHGROUP":
-        case "Touch":
-            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect;
-            break;
-        case "Unusual":
-            ui.notifications.warn(`FLASHing ${targetGroup} is unsupported`);
-            break;
-        default:
-            ui.notifications.warn(`Unable to determine FLASH effect for ${targetGroup}`);
-    }
-
-    // Create new ActiveEffect
-    if (damageData.bodyDamage > 0) {
-        token.actor.addActiveEffect({
-            ...senseDisabledEffect,
-            name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseAffectingItem.system.OPTIONID} ${
-                damageData.bodyDamage
-            } segments remaining [${senseAffectingItem.actor.name}]`,
-            duration: {
-                seconds: damageData.bodyDamage,
-            },
-            flags: {
-                bodyDamage: damageData.bodyDamage,
-                XMLID: senseAffectingItem.system.XMLID,
-                source: senseAffectingItem.actor.name,
-            },
-            origin: senseAffectingItem.uuid,
-        });
-    }
-
     const cardData = {
         item: senseAffectingItem,
+        senseGroups: senseGroups.filter((sg) => sg.bodyDamage > 0),
         // dice rolls
 
         // body
         damageData,
 
         // defense
-        defense: defense,
+        //defense: defense,
 
         // misc
         targetToken: token,

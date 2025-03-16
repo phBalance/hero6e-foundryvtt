@@ -664,12 +664,27 @@ export class HeroSystem6eItem extends Item {
             if (this.system.XMLID === "INVISIBILITY") {
                 // Invisibility status effect for SIGHTGROUP?
                 if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-                    this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
+                    await this.actor.toggleStatusEffect(
+                        HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
+                        {
+                            active: true,
+                        },
+                    );
+                    //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
-                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
+                await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
+                    active: true,
+                });
+                //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
             } else if (this.system.XMLID === "DESOLIDIFICATION") {
-                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect);
+                await this.actor.toggleStatusEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
+                    {
+                        active: true,
+                    },
+                );
+                //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect);
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await activateManeuver(this);
             }
@@ -691,18 +706,36 @@ export class HeroSystem6eItem extends Item {
             if (this.system.XMLID === "INVISIBILITY") {
                 // Remove Invisibility status effect
                 if (this.actor.statuses.has("invisible")) {
-                    await this.actor.removeActiveEffect(
-                        HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
+                    await this.actor.toggleStatusEffect(
+                        HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
+                        {
+                            active: false,
+                        },
                     );
+                    // await this.actor.removeActiveEffect(
+                    //     HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
+                    // );
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 if (this.actor.statuses.has("fly")) {
-                    await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
+                    await this.actor.toggleStatusEffect(
+                        HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id,
+                        {
+                            active: false,
+                        },
+                    );
+                    //await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
             } else if (this.system.XMLID === "DESOLIDIFICATION") {
-                await this.actor.removeActiveEffect(
-                    HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
+                await this.actor.toggleStatusEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
+                    {
+                        active: false,
+                    },
                 );
+                // await this.actor.removeActiveEffect(
+                //     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
+                // );
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await deactivateManeuver(this);
             }
@@ -1842,6 +1875,16 @@ export class HeroSystem6eItem extends Item {
                 if (this.system.subType !== movement) {
                     this.system.subType = movement;
                     this.system.showToggle = true;
+
+                    // Movement power typically default to active
+                    if (
+                        !this.system.charges?.value &&
+                        this.parentItem?.system.XMLID !== "MULTIPOWER" &&
+                        !this.baseInfo?.behaviors.includes("defaultoff")
+                    ) {
+                        this.system.active ??= true;
+                    }
+
                     changed = true;
                 }
             }

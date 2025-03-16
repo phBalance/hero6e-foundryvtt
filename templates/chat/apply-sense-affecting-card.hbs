@@ -26,10 +26,20 @@
       {{/each}}
   </div>
 
-  <div class="card-section">
-    <div class="description-tiny">Defense: {{ defense }}</div>
-  </div>
+    <div class="card-section">
+        <div class="description-tiny">Defense: </div>
+        {{#each senseGroups}}
+            {{#each this.defenseItems}}
+                <div class="description-tiny" title="{{{this.system.description}}}">
+                    {{this.name}} {{this.defenseValue}} {{../XMLID}}
+                </div>
+            {{/each}}
+        {{/each}}
+    </div>
 
-  {{{itemName item}}}: {{targetToken.actor.name}} for {{ damageData.bodyDamage }} segments.
+    {{{itemName item}}}: {{targetToken.actor.name}} for {{ damageData.bodyDamage }} segments.
+    {{#each senseGroups}}
+        {{this.XMLID}} for {{ this.bodyDamage }} segments.
+    {{/each}}
 
 </div>
