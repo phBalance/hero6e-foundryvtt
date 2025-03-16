@@ -80,6 +80,13 @@ function dehydrateAttackItem(item) {
         item.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
     }
 
+    // If there are linked endurance items, then we need to rehydrate them as well.
+    if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
+        item.system._active.linkedEnd = item.system._active.linkedEnd.forEach((linkedItem) => {
+            linkedItem.item = linkedItem.item.toObject(false);
+        });
+    }
+
     const stringifiedItem = JSON.stringify(item.toObject(false));
     return stringifiedItem;
 }
@@ -98,6 +105,15 @@ function rehydrateAttackItemAndActor(rollInfo) {
     if (item.system._active.effectiveStrItem) {
         item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(item.system._active.effectiveStrItem, {
             parent: actor,
+        });
+    }
+
+    // If there are linked endurance items, then we need to rehydrate them as well.
+    if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
+        item.system._active.linkedEnd.forEach((linkedItemData) => {
+            linkedItemData.item = HeroSystem6eItem.fromSource(linkedItemData, {
+                parent: actor,
+            });
         });
     }
 
