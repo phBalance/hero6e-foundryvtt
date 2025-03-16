@@ -8,7 +8,7 @@
 - Fixed issue where adding several combatants sometimes messes up current phase/segment.
 - Defeated tokens now have a red tint on their image, are slightly transparent, do not show any effects (except for skull overlay) and are sent to the back of the token order. STUNNED and KNOCKEDOUT tokens have yellow tint to make them more obvious. [#2033](https://github.com/dmdorman/hero6e-foundryvtt/issues/2033)
 - Fix for 5e actors uploading as PRONE [#2050](https://github.com/dmdorman/hero6e-foundryvtt/issues/2050)
-- Movement powers now upload as active, unless they have charges or are in a multipower. [#2026](https://github.com/dmdorman/hero6e-foundryvtt/issues/2026)
+- Movement powers now upload as active, unless they have CHARGES or are in a MULTIPOWER. [#2026](https://github.com/dmdorman/hero6e-foundryvtt/issues/2026)
 
 ## Version 4.0.23 20250315
 
