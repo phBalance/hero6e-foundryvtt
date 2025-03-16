@@ -5,13 +5,13 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
 
-import { addDiceParts, calculateDicePartsFromDcForItem } from "../utility/damage.mjs";
+import { addDiceParts, calculateDicePartsFromDcForItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
 
 export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.damageFunctions",
         (context) => {
-            const { after, assert, before, describe, it } = context;
+            const { after, assert, before, describe, expect, it } = context;
 
             describe("dice parts", function () {
                 const rkaContent = `
@@ -243,6 +243,92 @@ export function registerDamageFunctionTests(quench) {
                         };
                         const sum = addDiceParts(rkaItem, first, second, false);
                         assert.deepEqual(sum, result);
+                    });
+                });
+            });
+
+            describe("characteristicValueToDiceParts", function () {
+                describe("handle multiples of 5", function () {
+                    it("should handle 5", function () {
+                        expect(characteristicValueToDiceParts(5)).to.deep.equal({
+                            dc: 1,
+                            d6Count: 1,
+                            d6Less1DieCount: 0,
+                            halfDieCount: 0,
+                            constant: 0,
+                        });
+                    });
+
+                    it("should handle 45", function () {
+                        expect(characteristicValueToDiceParts(45)).to.deep.equal({
+                            dc: 9,
+                            d6Count: 9,
+                            d6Less1DieCount: 0,
+                            halfDieCount: 0,
+                            constant: 0,
+                        });
+                    });
+                });
+
+                describe("handle non multiples of 5", function () {
+                    it("should handle -8", function () {
+                        expect(characteristicValueToDiceParts(-8)).to.deep.equal({
+                            dc: -1.6,
+                            d6Count: -1,
+                            d6Less1DieCount: 0,
+                            halfDieCount: -1,
+                            constant: 0,
+                        });
+                    });
+
+                    it("should handle -7", function () {
+                        expect(characteristicValueToDiceParts(-7)).to.deep.equal({
+                            dc: -1.4,
+                            d6Count: -1,
+                            d6Less1DieCount: 0,
+                            halfDieCount: 0,
+                            constant: 0,
+                        });
+                    });
+
+                    it("should handle 7", function () {
+                        expect(characteristicValueToDiceParts(7)).to.deep.equal({
+                            dc: 1.4,
+                            d6Count: 1,
+                            d6Less1DieCount: 0,
+                            halfDieCount: 0,
+                            constant: 0,
+                        });
+                    });
+
+                    it("should handle 8", function () {
+                        expect(characteristicValueToDiceParts(8)).to.deep.equal({
+                            dc: 1.6,
+                            d6Count: 1,
+                            d6Less1DieCount: 0,
+                            halfDieCount: 1,
+                            constant: 0,
+                        });
+                    });
+
+                    it("should handle 42", function () {
+                        expect(characteristicValueToDiceParts(42)).to.deep.equal({
+                            dc: 8.4,
+                            d6Count: 8,
+                            d6Less1DieCount: 0,
+                            halfDieCount: 0,
+                            constant: 0,
+                        });
+                    });
+
+                    it("should handle 43", function () {
+                        expect(characteristicValueToDiceParts(43)).to.deep.equal({
+                            dc: 8.6,
+                            d6Count: 8,
+                            d6Less1DieCount: 0,
+                            halfDieCount: 1,
+                            constant: 0,
+                        });
                     });
                 });
             });

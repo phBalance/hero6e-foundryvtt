@@ -91,7 +91,7 @@ export function characteristicValueToDiceParts(value) {
         dc: value / 5,
         d6Count: Math.trunc(value / 5) || 0,
         d6Less1DieCount: 0,
-        halfDieCount: Math.floor((value % 5) / 5) || 0,
+        halfDieCount: Math.round((value % 5) / 5) || 0,
         constant: 0,
     };
 }
