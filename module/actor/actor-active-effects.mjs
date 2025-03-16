@@ -47,7 +47,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             stunEffect: {
                 name: game.i18n.localize("EFFECT.StatusStunned"),
                 id: "stunned",
-                img: "icons/svg/daze.svg",
+                //img: "icons/svg/daze.svg",
+                img: `systems/${module}/icons/foundry/daze.svg`,
                 changes: [
                     {
                         key: "system.characteristics.dcv.value",
@@ -86,7 +87,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             knockedOutEffect: {
                 name: game.i18n.localize("EFFECT.StatusKnockedOut"),
                 id: "knockedOut",
-                img: "icons/svg/stoned.svg",
+                //img: "icons/svg/stoned.svg",
+                img: `systems/${module}/icons/foundry/stoned.svg`,
                 changes: [
                     {
                         key: "system.characteristics.ocv.value",
@@ -113,7 +115,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             deadEffect: {
                 name: game.i18n.localize("EFFECT.StatusDead"),
                 id: "dead",
-                img: "icons/svg/skull.svg",
+                //img: "icons/svg/skull.svg",
+                img: `systems/${module}/icons/foundry/skull.svg`,
                 changes: [
                     {
                         key: "system.characteristics.ocv.value",
