@@ -17,8 +17,8 @@
                         <strong>{{this.name}} 
                             {{!-- [{{this.flags.turnNumber}}] --}}
                         </strong>
-                        {{#if this.lightningReflexes.levels}}
-                            <strong title="Lightning Reflexes">LR {{this.lightningReflexes.name}}</strong>
+                        {{#if this.flags.lightningReflexes.levels}}
+                            <strong title="Lightning Reflexes">LR {{this.flags.lightningReflexes.name}}</strong>
                         {{else}}
                             <div class="combatant-controls">
                                 {{#if @root/user.isGM}}
