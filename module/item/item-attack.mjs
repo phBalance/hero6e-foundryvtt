@@ -3654,7 +3654,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         const hasSTUN = getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN");
         if (!hasSTUN) {
             return {
-                error: `${item.name}/${item.system.XMLID} needs ${resourcesRequired.totalEnd} END but ${actor.name} only has ${actorEndurance} END. This actor cannot use STUN for END`,
+                error: `${item.detailedName()} needs ${resourcesRequired.totalEnd} END but ${actor.name} only has ${actorEndurance} END. This actor cannot use STUN for END`,
             };
         }
 
@@ -3669,7 +3669,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             });
             if (!confirmed) {
                 return {
-                    warning: `${item.name}/${item.system.XMLID} needs ${resourcesRequired.totalEnd} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference`,
+                    warning: `${item.detailedName()} needs ${resourcesRequired.totalEnd} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference`,
                 };
             }
         }
@@ -3690,7 +3690,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         const errorItemList = chargeUsingItemsWithInsufficientCharges.reduce(
             (error, current) =>
                 error +
-                `${error ? " " : ""}${current.item.name}/${current.item.system.XMLID} does not have ${current.charges} charge${
+                `${error ? " " : ""}${current.item.detailedName()} does not have ${current.charges} charge${
                     current.charges > 1 ? "s" : ""
                 } remaining`,
             "",
@@ -3711,12 +3711,12 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         if (enduranceReserve) {
             if (resourcesRequired.totalReserveEnd > reserveEnd) {
                 return {
-                    error: `${current.item.name}/${item.system.XMLID} needs ${resourcesRequired.totalReserveEnd} END but ${enduranceReserve.name} only has ${reserveEnd} END`,
+                    error: `${item.detailedName()} needs ${resourcesRequired.totalReserveEnd} END but ${enduranceReserve.name} only has ${reserveEnd} END`,
                 };
             }
         } else {
             return {
-                error: `${current.item.name}/${item.system.XMLID} needs an endurance reserve to spend END but none found`,
+                error: `${item.detailedName()} needs an endurance reserve to spend END but none found`,
             };
         }
     }
@@ -3725,12 +3725,10 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     // The actor is now committed to spending the resources to activate the power
     const { resourcesUsedDescription, resourcesUsedDescriptionRenderedRoll } = await spendResourcesToUse(
         item,
-        resourcesRequired.totalEnd,
+        resourcesRequired,
         actualStunDamage,
         actualStunRoller,
-        resourcesRequired.totalReserveEnd,
         enduranceReserve,
-        resourcesRequired.charges,
         !useResources,
     );
 
@@ -3766,6 +3764,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
 
 /**
  * @typedef {Object} HeroSystemIndividualItemResourcesToUse
+ * @property {HeroSystem6eItem} item - Item the other properties relate to.
  * @property {number} end - Endurance consumed from actor's END characteristic.
  * @property {number} reserveEnd - Endurance consumed from the item's associated endurance reserve.
  * @property {number} charges - Charges consumed from the item.
@@ -3814,7 +3813,7 @@ function sum(arrayOfNumbers) {
  * @param {HeroSystem6eItem} item
  * @param {Object} options
  *
- * @returns number
+ * @returns HeroSystemIndividualItemResourcesToUse
  */
 function calculateRequiredResourcesToUseForSingleItem(item, options) {
     const chargesRequired = calculateRequiredCharges(item, options.boostableChargesToUse || 0);
@@ -3822,7 +3821,7 @@ function calculateRequiredResourcesToUseForSingleItem(item, options) {
     const endRequired = calculateRequiredEnd(item, parseInt(options.effectiveStr) || 0);
 
     return {
-        item: item, // kludge copying the item
+        item: item,
         end: endRequired,
         reserveEnd: reserveEndRequired,
         charges: chargesRequired,
@@ -3849,74 +3848,12 @@ function calculateRequiredCharges(item, boostableChargesToUse) {
         chargesToUse = 1 + boostableChargesUsed;
     }
 
+    // How many applications?
     const autofire = item.findModsByXmlid("AUTOFIRE");
-    const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
-    chargesToUse *= autoFireShots;
+    const multipleApplications = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 1;
+    chargesToUse *= multipleApplications || 1;
 
     return chargesToUse;
-}
-
-/**
- * Calculate the total expendable endurance to use this item
- *
- * @param {HeroSystem6eItem} item
- * @param {number} effectiveStr
- *
- * @returns number
- */
-function calculateRequiredEndOld(item, effectiveStr) {
-    let endToUse = 0;
-
-    if (game.settings.get(HEROSYS.module, "use endurance")) {
-        const autofire = item.findModsByXmlid("AUTOFIRE");
-        const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
-        const itemEndurance = (item.system.end || 0) * (autoFireShots || 1);
-
-        endToUse = itemEndurance;
-
-        // Pushing uses 1 END per pushed CP
-        endToUse += item.system._active.pushedRealPoints || 0;
-
-        // PH: FIXME: get rid of effectiveStr as it is a separate item with END calculated normally
-        // TODO: May want to get rid of this so we can support HKA with 0 STR (weird but possible) or
-        // attacks such as TK or EB which have no STR component.
-        if (item.system.usesStrength || item.system.usesTk) {
-            const strPerEnd =
-                item.actor.system.isHeroic && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
-            let strEnd = Math.max(1, RoundFavorPlayerDown(effectiveStr / strPerEnd));
-
-            // But wait, may have purchased STR with reduced endurance
-            const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
-            if (strPower) {
-                const strPowerLevels = parseInt(strPower.system.LEVELS);
-                const strREDUCEDEND = strPower.findModsByXmlid("REDUCEDEND");
-                if (strREDUCEDEND) {
-                    if (strREDUCEDEND.OPTIONID === "ZERO") {
-                        strEnd = 0;
-                    } else {
-                        strEnd = Math.max(
-                            1,
-                            RoundFavorPlayerDown(Math.min(effectiveStr, strPowerLevels) / (strPerEnd * 2)),
-                        );
-                    }
-                    // Add back in STR that isn't part of strPower
-                    if (effectiveStr > strPowerLevels) {
-                        strEnd += Math.max(1, RoundFavorPlayerDown((effectiveStr - strPowerLevels) / strPerEnd));
-                    }
-                }
-            }
-
-            // TELEKINESIS is more expensive than normal STR
-            if (item.system.usesTk) {
-                endToUse = Math.ceil((endToUse * effectiveStr) / parseInt(item.system.LEVELS || 1));
-            } else {
-                // TODO: Endurance use from STR can only happen once per phase
-                endToUse = endToUse + strEnd;
-            }
-        }
-    }
-
-    return endToUse;
 }
 
 /**
@@ -3930,26 +3867,53 @@ function calculateRequiredEnd(item) {
     let endToUse = 0;
 
     if (game.settings.get(HEROSYS.module, "use endurance")) {
-        // PH: FIXME: Look at ENDRESERVE modifiers
+        // If this item uses an endurance reserve, can it optionally draw from actor's endurance?
+        if (item.system.USE_END_RESERVE && item.findModsByXmlid("ENDRESERVEOREND")) {
+            ui.notifications.error(
+                `Selecting to draw from END or END RESERVE not supported for ${item.detailedName()}. Please report.`,
+            );
+        }
+
+        // If this item uses an endurance reserve, does it also draw from actor's endurance?
+        if (item.system.USE_END_RESERVE && !item.findModsByXmlid("DOUBLEENDCOST")) {
+            return 0;
+        }
 
         // Pushing uses 1 END per pushed CP
         const endPerShot = (item.system.end || 0) + (item.system._active.pushedRealPoints || 0);
 
-        // How many shots?
+        // How many applications?
         const autofire = item.findModsByXmlid("AUTOFIRE");
-        const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
-        endToUse = endPerShot * (autoFireShots || 1);
+        const multipleApplications = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+        endToUse = endPerShot * (multipleApplications || 1);
     }
 
     return endToUse;
 }
 
-/// PH: FIXME: This needs to be implmented and end calcs need to have end reserve taken out
+/**
+ * Calculate the total expendable endurance from a reserve to use this item
+ *
+ * @param {HeroSystem6eItem} item
+ *
+ * @returns number
+ */
 function calculateRequiredReserveEndurance(item, options) {
-    if (item.system.USE_END_RESERVE) {
+    let reserveEndToUse = 0;
+
+    if (item.system.USE_END_RESERVE && game.settings.get(HEROSYS.module, "use endurance")) {
+        // TODO: Lack of support for ENDRESERVEOREND is coded in calculateRequiredEnd
+
+        // Pushing uses 1 END per pushed CP
+        const endPerShot = (item.system.end || 0) + (item.system._active.pushedRealPoints || 0);
+
+        // How many applications?
+        const autofire = item.findModsByXmlid("AUTOFIRE");
+        const multipleApplications = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+        reserveEndToUse = endPerShot * (multipleApplications || 1);
     }
 
-    return 0;
+    return reserveEndToUse;
 }
 
 /**
@@ -4033,24 +3997,25 @@ export function actorAutomation(actor) {
  * Spend all resources (END, STUN, charges) provided. Assumes numbers are possible.
  *
  * @param {HeroSystem6eItem} item
- * @param {HeroSystem6eItem} enduranceReserve
- * @param {number} endToSpend
+ * @param {HeroSystemItemResourcesToUse} resourcesRequired
  * @param {number} stunToSpend
  * @param {HeroRoller} stunToSpendRoller
- * @param {number} chargesToSpend
+ * @param {HeroSystem6eItem} enduranceReserve
  * @param {boolean} noResourceUse - true if you would like to simulate the resources being used without using them (aka dry run)
  * @returns {Object}
  */
 async function spendResourcesToUse(
     item,
-    endToSpend,
+    resourcesRequired,
     stunToSpend,
     stunToSpendRoller,
-    reserveEndToSpend,
     enduranceReserve,
-    chargesToSpend,
     noResourceUse,
 ) {
+    const endToSpend = resourcesRequired.totalEnd;
+    const reserveEndToSpend = resourcesRequired.totalReserveEnd;
+    const chargesToSpend = resourcesRequired.totalCharges;
+
     const actor = item.actor;
     const expectedAutomation = actorAutomation(actor);
     const canSpendResources = !noResourceUse;
@@ -4060,16 +4025,16 @@ async function spendResourcesToUse(
         expectedAutomation.endurance;
     const canSpendStun = canSpendResources && expectedAutomation.stun;
     const canSpendCharges = canSpendResources;
-    let resourcesUsedDescription = "";
+    let resourcesUsedDescriptions = [];
     let resourcesUsedDescriptionRenderedRoll = "";
 
     // Deduct reserve END
     if (reserveEndToSpend) {
         if (enduranceReserve) {
             const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
-            const actorNewEndurance = reserveEnd - endToSpend;
+            const actorNewEndurance = reserveEnd - reserveEndToSpend;
 
-            resourcesUsedDescription = `${endToSpend} END from Endurance Reserve`;
+            resourcesUsedDescriptions.push(`${reserveEndToSpend} END from Endurance Reserve`);
 
             if (canSpendEndurance) {
                 await enduranceReserve.update({
@@ -4088,7 +4053,7 @@ async function spendResourcesToUse(
         const actorChanges = {};
 
         if (stunToSpend > 0) {
-            resourcesUsedDescription = `
+            resourcesUsedDescriptions.push(`
                 <span>
                     ${endToSpend} END and ${stunToSpend} STUN
                     <i class="fal fa-circle-info" data-tooltip="<b>USING STUN FOR ENDURANCE</b><br>
@@ -4098,7 +4063,7 @@ async function spendResourcesToUse(
                     expended. Yes, characters can Knock themselves out this way.
                     "></i>
                 </span>
-                `;
+                `);
 
             resourcesUsedDescriptionRenderedRoll = await stunToSpendRoller.render();
 
@@ -4110,7 +4075,7 @@ async function spendResourcesToUse(
                 actorChanges["system.characteristics.stun.value"] = actorStun - stunToSpend;
             }
         } else {
-            resourcesUsedDescription = `${endToSpend} END`;
+            resourcesUsedDescriptions.push(`${endToSpend} END`);
         }
 
         if (canSpendEndurance) {
@@ -4122,14 +4087,36 @@ async function spendResourcesToUse(
 
     // Spend charges
     if (chargesToSpend > 0) {
-        resourcesUsedDescription = `${resourcesUsedDescription}${
-            resourcesUsedDescription ? " and " : ""
-        }${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`;
+        resourcesUsedDescriptions.push(`${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`);
 
         if (canSpendCharges) {
             const startingCharges = parseInt(item.system.charges?.value || 0);
+
             await item.update({ "system.charges.value": startingCharges - chargesToSpend });
         }
+    }
+
+    let resourcesUsedDescription = "";
+    if (resourcesUsedDescriptions.length > 0) {
+        // Turn array of descriptions into a single string
+        if (resourcesUsedDescriptions.length === 1) {
+            resourcesUsedDescription = resourcesUsedDescriptions[0];
+        } else if (resourcesUsedDescriptions.length === 2) {
+            resourcesUsedDescription = `${resourcesUsedDescriptions[0]} and ${resourcesUsedDescriptions[1]}`;
+        } else {
+            resourcesUsedDescription = `${resourcesUsedDescriptions[0]}, ${resourcesUsedDescriptions[1]}, and ${resourcesUsedDescriptions[2]}`;
+        }
+
+        // Make a tooltip for the resource usage including all individual item usage
+        const resourceBreakdownByItem = resourcesRequired.individualResourceUsage
+            .map((itemResources) =>
+                itemResources.end || itemResources.reserveEnd || itemResources.charges
+                    ? `${itemResources.item.detailedName()} required ${itemResources.end} END, ${itemResources.reserveEnd} END from endurance reserve, and ${itemResources.charges} charge${itemResources.charges !== 1 ? "s" : ""}`
+                    : "",
+            )
+            .filter(Boolean)
+            .join("\n");
+        resourcesUsedDescription = `<span title="${resourceBreakdownByItem}">${resourcesUsedDescription}</span>`;
     }
 
     return {
