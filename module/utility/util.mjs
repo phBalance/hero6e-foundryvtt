@@ -252,7 +252,7 @@ export async function expireEffects(actor) {
             );
             if (ae.parent instanceof HeroSystem6eItem) {
                 console.error(
-                    `${actor.name}/${ae.parent.name}/${ae.parent.system.XMLID}/${ae.name} is a temporary effect associated with an item. This is super unusual. Try uploading the HDC file again.  If that doesn't resolve the issue then this could be a coding error and should be reported.`,
+                    `${actor.name}/${ae.parent.detailedName()}/${ae.name} is a temporary effect associated with an item. This is super unusual. Try uploading the HDC file again.  If that doesn't resolve the issue then this could be a coding error and should be reported.`,
                     ae,
                 );
             }

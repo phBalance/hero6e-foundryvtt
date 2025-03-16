@@ -2076,7 +2076,7 @@ export class HeroSystem6eActor extends Actor {
             // Power needs to exist
             if (!power) {
                 await ui.notifications.error(
-                    `${this.name}/${item.name} has unknown power XMLID: ${item.system.XMLID}. Please report.`,
+                    `${this.name}/${item.detailedName()} has unknown power XMLID}. Please report.`,
                     { console: true, permanent: true },
                 );
             } else if (!power.behaviors) {

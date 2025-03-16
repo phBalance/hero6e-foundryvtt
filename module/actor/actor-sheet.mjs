@@ -445,12 +445,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                         if (game.settings.get(game.system.id, "alphaTesting")) {
                             if (!d.baseInfo) {
                                 ui.notifications.warn(
-                                    `${this.actor.name}: ${d.name}/${d.system.XMLID} has no powerInfo/config.`,
+                                    `${this.actor.name}: ${d.detailedName()} has no powerInfo/config.`,
                                     d,
                                 );
                             } else {
                                 ui.notifications.warn(
-                                    `${this.actor.name}: ${d.name}/${d.system.XMLID} has no duration specified.`,
+                                    `${this.actor.name}: ${d.detailedName()} has no duration specified.`,
                                     d,
                                 );
                             }
