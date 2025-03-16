@@ -392,7 +392,7 @@ function standardBaseEffectDiceParts(item /* , options */) {
  * Shouldn't ever be called. Only here to make sure we don't have to check if baseEffectDicePartsBundle exists
  */
 function noDamageBaseEffectDicePartsBundle(item /* , _options */) {
-    console.error(`${item.name}/${item.system.XMLID} is defined as having no effect but effect is called`);
+    console.error(`${item.detailedName()} is defined as having no effect but effect is called`);
 
     return {
         diceParts: {
@@ -2390,7 +2390,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 switch (item.system.OPTIONID) {
                     case "SINGLESINGLE":
                         console.debug(
-                            `${item.actor?.name}/${item.name}/${item.system.XMLID}: SINGLESINGLE doesn't appear to be a currently supported OPTIONID`,
+                            `${item.actor?.name}/${item.detailedName()}: SINGLESINGLE doesn't appear to be a currently supported OPTIONID`,
                         );
                         return 1;
                     case "SINGLE":

@@ -614,7 +614,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         halfDieValue = 1.5 / 3;
     } else {
         console.error(
-            `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.name}/${item.system.XMLID}`,
+            `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.detailedName()}`,
             item,
         );
 
@@ -742,7 +742,7 @@ export function calculateDicePartsForItem(item, options) {
     // PH: FIXME: This can be removed when we don't create damage for things that aren't attacks.
     if (!baseAttackItem) {
         console.error(
-            `Actor=${item.actor?.name}. Actor.type=${item.actor?.type}. ${item.name}/${item.system.XMLID} links to a base attack item of ${baseAttackItem}.`,
+            `Actor=${item.actor?.name}. Actor.type=${item.actor?.type}. ${item.detailedName()} links to a base attack item of ${baseAttackItem}.`,
         );
         return {
             diceParts: zeroDiceParts,
@@ -1035,7 +1035,7 @@ export function maneuverbaseEffectDicePartsBundle(item, options) {
         // PH: FIXME: May wish to make maWeaponItem a UUID rather than the item itself.
         let weaponItem = options.maWeaponItem;
         if (!weaponItem) {
-            console.warn(`Kludge: No weapon specified for ${item.name}/${item.system.XMLID}. Using placeholder.`);
+            console.warn(`Kludge: No weapon specified for ${item.detailedName()}. Using placeholder.`);
             weaponItem = item.actor?.items.find((item) => item.name === "__InternalManeuverPlaceholderWeapon");
         }
 
@@ -1052,7 +1052,7 @@ export function maneuverbaseEffectDicePartsBundle(item, options) {
             baseAttackItem: weaponItem,
         };
     } else {
-        console.error(`${item.name}/${item.system.XMLID} should not be calling MANEUVER base damage`);
+        console.error(`${item.detailedName()} should not be calling MANEUVER base damage`);
 
         return {
             diceParts: zeroDiceParts,

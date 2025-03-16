@@ -124,7 +124,7 @@ export async function activateManeuver(item) {
         item.system.XMLID === "SETANDBRACE" ||
         item.system.XMLID === "PULLINGAPUNCH"
     ) {
-        console.error(`Unsupported maneuver ${item.name}/${item.system.XMLID}`);
+        console.error(`Unsupported maneuver ${item.detailedName()}`);
     } else {
         // PH: FIXME: Assume this is a martial maneuver and give it a default effect
         const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
