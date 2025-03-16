@@ -250,35 +250,6 @@ export async function expireEffects(actor) {
 
     let adjustmentChatMessages = [];
     for (const ae of temporaryEffects) {
-        // Determine XMLID, ITEM, ACTOR
-        // let origin = await fromUuid(ae.origin);
-        // let item =
-        //     origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
-        // let aeActor =
-        //     (origin instanceof HeroSystem6eActor ? origin : item?.actor) ||
-        //     actor ||
-        //     ae.parent instanceof HeroSystem6eActor
-        //         ? ae.parent
-        //         : null;
-        // let XMLID = ae.flags.XMLID || item?.system?.XMLID;
-
-        // let powerInfo = getPowerInfo({
-        //     actor: aeActor,
-        //     xmlid: XMLID,
-        //     item: item,
-        // });
-
-        // if (
-        //     !powerInfo &&
-        //     ae.statuses.size === 0 &&
-        //     game.settings.get(game.system.id, "alphaTesting") &&
-        //     ae.duration?.seconds < 3.154e7 * 100
-        // ) {
-        //     //return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
-        //     // TakeRecovery has no XMLID, not sure why we HAVE to have one, just expire the effect.
-        //     console.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
-        // }
-
         // Sanity Check
         if (ae._prepareDuration().remaining > 0 && !ae.duration.startTime) {
             console.warn(
