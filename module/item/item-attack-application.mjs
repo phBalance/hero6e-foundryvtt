@@ -472,6 +472,8 @@ export class ItemAttackFormApplication extends FormApplication {
 
         if (this.data.effectiveRealCost > this.data.originalItem._realCost) {
             this.data.pushedRealPoints = this.data.effectiveRealCost - this.data.originalItem._realCost;
+        } else {
+            this.data.pushedRealPoints = 0;
         }
 
         if (this.data.effectiveRealCost < desiredEffectiveRealCost) {
