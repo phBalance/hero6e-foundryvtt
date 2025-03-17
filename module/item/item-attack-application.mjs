@@ -227,6 +227,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     // Default to useable for any attack.
                     attacksObj[hthAttack.uuid] = {
                         _canUseForAttack: hthAttack.system._canUseForAttack ?? true,
+                        _disabled: !(hthAttack.system._canUseForAttack ?? true),
                         description: hthAttack.system.description,
                         name: hthAttack.name,
                     };
@@ -249,6 +250,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 naObj[naItem.uuid] = {
                     _canUseForAttack: false,
+                    _disabled: false,
                     description: naItem.system.description,
                     name: naItem.name,
                     item: naItem,
@@ -389,6 +391,7 @@ export class ItemAttackFormApplication extends FormApplication {
         effectiveItem.system._active = { __originalUuid: this.data.originalItem.uuid };
 
         // PH: FIXME: Doesn't include TK
+        // PH: FIXME: Doesn't include items with STR minima
         // Does this item allow strength to be added and has the character decided to use strength to augment the damage?
         let strengthItem = null;
         if (effectiveStr > 0 && this.data.originalItem.system.usesStrength) {
@@ -404,17 +407,33 @@ export class ItemAttackFormApplication extends FormApplication {
             });
         }
 
-        // PH: FIXME: Need to link in TK as appropriate
+        // PH: FIXME: Need to link in TK as appropriate into STR?
 
         // Reduce or Push the item
         effectiveItem.changePowerLevel(this.data.effectiveRealCost);
         effectiveItem.system._active.pushedRealPoints = this.data.pushedRealPoints;
 
-        // Add any Hand-to-Hand Attack advantages into the base item
-        // PH: FIXME: Can add advantages from HA to STR if HA's active points don't exceed the STR used. Need to consider STRMINIMUM
-        // PH: FIXME: Should we generate a warning if excluded?
+        // Add any checked & appropriate Hand-to-Hand Attack advantages into the base item
+        let hthAttackDisabledDueToStrength = false;
         Object.entries(this.data.hthAttackItems)
-            .filter(([, { _canUseForAttack }]) => _canUseForAttack)
+            .filter(([, { _canUseForAttack, _disabled }]) => _canUseForAttack && !_disabled)
+            .filter((_, index, array) => {
+                // If there is no strength item or effective strength is less than 3 then we don't have enough
+                // strength applied to allow HTH Attacks
+                // PH: FIXME: Should look at strengthItem's actual strength
+                // PH: FIXME: Need to consider real weapons w/ STRMINIMUM
+                if (!strengthItem || this.data.effectiveStr < 3) {
+                    hthAttackDisabledDueToStrength = true;
+                    array[index][1]._disabled = true;
+                    return false;
+                }
+
+                // PH: FIXME: Can add advantages from HA to STR if HA's active points don't exceed the STR used. Need to consider STRMINIMUM
+
+                array[index][1]._disabled = false;
+
+                return true;
+            })
             .map(([uuid]) => fromUuidSync(uuid))
             .forEach((hthAttack) => {
                 effectiveItem.copyItemAdvantages(hthAttack);
@@ -426,13 +445,32 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 strengthItem?.copyItemAdvantages(hthAttack);
             });
+        if (hthAttackDisabledDueToStrength) {
+            ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
+        }
 
         // Add any Naked Advantages into the base item
         // PH: FIXME: Typically the NA should reduce the duration of the power to instant although it can be bought up. Should consider modification of duration
         // PH: FIXME: Need to implement endurance usage. A REDUCE END NA will reduce the base attack's END use but otherwise the NA endurance usage is paid separately.
+        let nakedAdvantagesDisabledDueToActivePoints = false;
         Object.entries(this.data.nakedAdvantagesItems)
-            .filter(([, { _canUseForAttack }]) => _canUseForAttack)
-            .map(([uuid]) => fromUuidSync(uuid))
+            .filter(([, { _canUseForAttack, _disabled }]) => _canUseForAttack && !_disabled)
+            .map(([uuid], index, array) => {
+                const naItem = fromUuidSync(uuid);
+
+                // Item the NA is being applied to must not exceed the AP of the NA was designed against.
+                // TODO: This implies that one cannot push with a NA. Is this correct?
+                if (parseInt(naItem.system.LEVELS || 0) < effectiveItem._activePoints) {
+                    nakedAdvantagesDisabledDueToActivePoints = true;
+                    array[index][1]._disabled = true;
+                    return undefined;
+                }
+
+                array[index][1]._disabled = false;
+
+                return naItem;
+            })
+            .filter(Boolean)
             .forEach((naAttack) => {
                 effectiveItem.copyItemAdvantages(naAttack);
                 effectiveItem.system._active.linkedEnd ??= [];
@@ -443,6 +481,11 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 strengthItem?.copyItemAdvantages(naAttack);
             });
+        if (nakedAdvantagesDisabledDueToActivePoints) {
+            ui.notifications.warn(
+                `Naked Advantages must be able to apply at least as many active points as the base attack`,
+            );
+        }
 
         await strengthItem?._postUpload();
 
@@ -454,7 +497,7 @@ export class ItemAttackFormApplication extends FormApplication {
     /**
      * Can only push and reduce so much. Make sure we're not exceeding.
      *  PH: FIXME: Should not be able to push if the power is bought to 0 END, don't cost END, or use charges.
-     *  PH: FIXME: Pushing for heroic has different rules than superheroic (which is what this is)
+     *  PH: FIXME: Pushing for heroic has different rules than superheroic (which is what is implemented here)
      *  PH: FIXME: Allow pushing beyond 10 CP with override?
      *  PH: FIXME: How should pushing play with HTH Attack and Naked Advantages? I assume that they don't interact.
      * @param {Object} formData
@@ -485,41 +528,31 @@ export class ItemAttackFormApplication extends FormApplication {
         }
     }
 
-    #processHthAndNa(formData) {
-        // PH: FIXME: Need to consider real weapons w/ STRMINIMUM
-        const limitedByStrength = this.data.effectiveStr < 3;
-        let hthAttackDisabledDueToStrength = false;
+    /**
+     * Determine what Hand-to-Hand and Naked Advantages should be enabled.
+     *
+     * @param {Object} formData
+     */
+    #processFormDataForHthAndNa(formData) {
+        // Restructure HTH Attacks
         Object.entries(formData).forEach(([key, value]) => {
             const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
             if (!match) {
                 return;
             }
 
-            // HTH attacks should not be enabled if there is not enough STR
-            hthAttackDisabledDueToStrength = hthAttackDisabledDueToStrength || value;
-            this.data.hthAttackItems[match[1]]._canUseForAttack = limitedByStrength ? false : value;
+            this.data.hthAttackItems[match[1]]._canUseForAttack = value;
         });
-        if (limitedByStrength && hthAttackDisabledDueToStrength) {
-            ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
-        }
 
-        // Add any Naked Advantages into the base item
-        let nakedAdvantagesDisabledDueToActivePoints = false;
+        // Restructure HTH Attacks
         Object.entries(formData).forEach(([key, value]) => {
             const match = key.match(/^nakedAdvantagesItems.(.*)._canUseForAttack$/);
             if (!match) {
                 return;
             }
 
-            // PH: FIXME: Group NA - must not exceed the AP of the base power if going to be applied.
-
             this.data.nakedAdvantagesItems[match[1]]._canUseForAttack = value;
         });
-        if (nakedAdvantagesDisabledDueToActivePoints) {
-            ui.notifications.warn(
-                `Naked Advantages must be able to apply at least as many active points as the base attack`,
-            );
-        }
     }
 
     async _updateObject(event, formData) {
@@ -552,8 +585,9 @@ export class ItemAttackFormApplication extends FormApplication {
 
         this.#processReduceOrPush(formData);
 
-        this.#processHthAndNa(formData);
+        this.#processFormDataForHthAndNa(formData);
 
+        // PH: FIXME: Build the item to use. Is there a way to only have this code once in getData?
         this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData();
         this.data.effectiveItemResourceUsage = calculateRequiredResourcesToUse(
             [
@@ -569,7 +603,6 @@ export class ItemAttackFormApplication extends FormApplication {
             canvas.tokens.activate();
             await this.close();
 
-            // PH: FIXME: Need to pass through just the item that has not been stored in a database
             return processActionToHit(this.data.effectiveItem, formData);
         }
 
