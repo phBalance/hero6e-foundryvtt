@@ -234,7 +234,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Hmm. Just a temporary item. Ignore the update.
-            console.warn(`Ignoring update to ${item.actor.name}'s temporary item ${item.detailedName()}`);
+            console.warn(`Ignoring update to ${this.actor.name}'s temporary item ${this.detailedName()}`);
             return this;
         }
 
@@ -1190,7 +1190,7 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     default:
-                        console.error(`Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${item.detailedName()}`);
+                        console.error(`Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.detailedName()}`);
                         break;
                 }
 
@@ -1362,7 +1362,7 @@ export class HeroSystem6eItem extends Item {
 
                         default:
                             console.error(
-                                `Unhandled 5e AOE OPTIONID ${aoeModifier.OPTIONID} for ${item.detailedName()}`,
+                                `Unhandled 5e AOE OPTIONID ${aoeModifier.OPTIONID} for ${this.detailedName()}`,
                             );
                             break;
                     }
@@ -2533,19 +2533,19 @@ export class HeroSystem6eItem extends Item {
             try {
                 if (foundry.utils.isNewerVersion(this.actor.system.versionHeroSystem6eCreated, "3.0.63")) {
                     ui.notifications.error(
-                        `${item.detailedName()} for ${this.actor.name} failed to parse properly. Please report.  Error: ${error.message}`,
+                        `${this.detailedName()} for ${this.actor.name} failed to parse properly. Please report.  Error: ${error.message}`,
                         { console: true, permanent: true },
                     );
                     console.error(error);
                 } else {
                     ui.notifications.error(
-                        `${item.detailedName()} for ${this.actor.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
+                        `${this.detailedName()} for ${this.actor.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
                         { console: true, permanent: false },
                     );
                 }
             } catch (error2) {
                 ui.notifications.error(
-                    `${item.detailedName()} for ${this.actor.name} failed to parse properly. Please report.`,
+                    `${this.detailedName()} for ${this.actor.name} failed to parse properly. Please report.`,
                     { console: true, permanent: true },
                 );
                 console.error(error);
@@ -2657,7 +2657,7 @@ export class HeroSystem6eItem extends Item {
         const performanceDuration = new Date().getTime() - performanceStart;
         if (performanceDuration > 1000) {
             console.warn(
-                `${this.actor?.name}/${item.detailedName()}: Performance concernt. Took ${performanceDuration} seconds to upload.`,
+                `${this.actor?.name}/${this.detailedName()}: Performance concernt. Took ${performanceDuration} seconds to upload.`,
             );
         }
 
@@ -3561,7 +3561,7 @@ export class HeroSystem6eItem extends Item {
                         // PH: FIXME: Why is this not based purely on behavior?
                         if (!["skill", "talent", "perk"].includes(this.type)) {
                             console.error(
-                                `${this.actor?.name}: ${item.detailedName()} has a success behavior but isn't a skill, talent, or perk`,
+                                `${this.actor?.name}: ${this.detailedName()} has a success behavior but isn't a skill, talent, or perk`,
                             );
                         }
                         system.description += ` ${system.roll}`;
@@ -5722,7 +5722,9 @@ export class HeroSystem6eItem extends Item {
                     break;
 
                 default:
-                    console.error(`${item.detailedName()} for ${this.actor} has unknown base active points per die`);
+                    console.error(
+                        `${this.detailedName()} for ${this.actor.name} has unknown base active points per die`,
+                    );
                     break;
             }
 
@@ -5766,7 +5768,9 @@ export class HeroSystem6eItem extends Item {
                     break;
 
                 default:
-                    console.error(`${item.detailedName()} for ${this.actor} has unknown base active points per die`);
+                    console.error(
+                        `${this.detailedName()} for ${this.actor.name} has unknown base active points per die`,
+                    );
                     break;
             }
 

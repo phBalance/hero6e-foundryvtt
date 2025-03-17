@@ -3817,7 +3817,7 @@ function sum(arrayOfNumbers) {
  */
 function calculateRequiredResourcesToUseForSingleItem(item, options) {
     const chargesRequired = calculateRequiredCharges(item, options.boostableChargesToUse || 0);
-    const reserveEndRequired = calculateRequiredReserveEndurance(item, options);
+    const reserveEndRequired = calculateRequiredReserveEndurance(item);
     const endRequired = calculateRequiredEnd(item, parseInt(options.effectiveStr) || 0);
 
     return {
@@ -3898,7 +3898,7 @@ function calculateRequiredEnd(item) {
  *
  * @returns number
  */
-function calculateRequiredReserveEndurance(item, options) {
+function calculateRequiredReserveEndurance(item) {
     let reserveEndToUse = 0;
 
     if (item.system.USE_END_RESERVE && game.settings.get(HEROSYS.module, "use endurance")) {

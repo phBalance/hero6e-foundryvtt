@@ -386,8 +386,9 @@ export class ItemAttackFormApplication extends FormApplication {
         const effectiveItemData = this.data.originalItem.toObject(false);
         effectiveItemData._id = null;
         const effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: this.data.originalItem.actor });
-        effectiveItem.system._active = {};
+        effectiveItem.system._active = { __originalUuid: this.data.originalItem.uuid };
 
+        // PH: FIXME: Doesn't include TK
         // Does this item allow strength to be added and has the character decided to use strength to augment the damage?
         let strengthItem = null;
         if (effectiveStr > 0 && this.data.originalItem.system.usesStrength) {
@@ -443,7 +444,6 @@ export class ItemAttackFormApplication extends FormApplication {
                 strengthItem?.copyItemAdvantages(naAttack);
             });
 
-        // PH: FIXME: Do we need to do this?
         await strengthItem?._postUpload();
 
         await effectiveItem._postUpload();
