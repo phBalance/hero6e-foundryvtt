@@ -1,5 +1,6 @@
 import {
     buildStrengthItem,
+    calculateReduceOrPushRealCost,
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     penaltySkillLevelsForAttack,
@@ -397,6 +398,9 @@ export class ItemAttackFormApplication extends FormApplication {
         if (effectiveStr > 0 && this.data.originalItem.system.usesStrength) {
             strengthItem = buildStrengthItem(effectiveStr, this.data.originalItem.actor);
 
+            // Pushing?
+            strengthItem.system._active.pushedRealPoints = this.data.effectiveStrPushedRealPoints;
+
             // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR placeholder
             effectiveItem.system._active.effectiveStr = effectiveStr;
             effectiveItem.system._active.effectiveStrItem = strengthItem;
@@ -412,6 +416,7 @@ export class ItemAttackFormApplication extends FormApplication {
         // Reduce or Push the item
         effectiveItem.changePowerLevel(this.data.effectiveRealCost);
         effectiveItem.system._active.pushedRealPoints = this.data.pushedRealPoints;
+        const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem._activePoints;
 
         // Add any checked & appropriate Hand-to-Hand Attack advantages into the base item
         let hthAttackDisabledDueToStrength = false;
@@ -460,7 +465,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 // Item the NA is being applied to must not exceed the AP of the NA was designed against.
                 // TODO: This implies that one cannot push with a NA. Is this correct?
-                if (parseInt(naItem.system.LEVELS || 0) < effectiveItem._activePoints) {
+                if (parseInt(naItem.system.LEVELS || 0) < effectiveItemActivePointsBeforeHthAndNaAdvantages) {
                     nakedAdvantagesDisabledDueToActivePoints = true;
                     array[index][1]._disabled = true;
                     return undefined;
@@ -495,7 +500,7 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     /**
-     * Can only push and reduce so much. Make sure we're not exceeding.
+     * Can only push and reduce so much. Make sure we're not exceeding basic boundaries for strength or the item.
      *  PH: FIXME: Should not be able to push if the power is bought to 0 END, don't cost END, or use charges.
      *  PH: FIXME: Pushing for heroic has different rules than superheroic (which is what is implemented here)
      *  PH: FIXME: Allow pushing beyond 10 CP with override?
@@ -503,28 +508,34 @@ export class ItemAttackFormApplication extends FormApplication {
      * @param {Object} formData
      */
     #processReduceOrPush(formData) {
-        const desiredEffectiveRealCost = formData.effectiveRealCost || 0;
+        // Limit the item's reduce or push
+        const desiredEffectiveItemRealCost = formData.effectiveRealCost || 0;
 
-        // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
-        // Can't set to less than 1 CP
-        // Follow superheroic rules and don't allow more than 10 points of pushing
-        this.data.effectiveRealCost = Math.min(
-            Math.max(1, desiredEffectiveRealCost),
-            this.data.originalItem._realCost + Math.min(10, this.data.originalItem._realCost),
-        );
+        ({ effectiveRealCost: this.data.effectiveRealCost, pushedRealPoints: this.data.pushedRealPoints } =
+            calculateReduceOrPushRealCost(this.data.originalItem._realCost, desiredEffectiveItemRealCost));
 
-        if (this.data.effectiveRealCost > this.data.originalItem._realCost) {
-            this.data.pushedRealPoints = this.data.effectiveRealCost - this.data.originalItem._realCost;
-        } else {
-            this.data.pushedRealPoints = 0;
+        if (this.data.effectiveRealCost < desiredEffectiveItemRealCost) {
+            ui.notifications.warn(
+                "Pushing a power is limited to the lesser of 10 character points or the original total character points",
+            );
+        } else if (this.data.effectiveRealCost > desiredEffectiveItemRealCost) {
+            ui.notifications.warn("The minimum power cost is 1 character point");
         }
 
-        if (this.data.effectiveRealCost < desiredEffectiveRealCost) {
-            ui.notifications.warn(
-                "Pushing is limited to the lesser of 10 character points or the original total character points",
-            );
-        } else if (this.data.effectiveRealCost > desiredEffectiveRealCost) {
-            ui.notifications.warn("This minimum power cost is 1 character point");
+        // Limit strength's push
+        // PH: FIXME: Should be working with limited strength and not desired strength
+        const desiredStrengthRealCost = formData.effectiveStr || 0;
+        if (this.data.effectiveStr > 0) {
+            ({ effectiveRealCost: this.data.effectiveStr, pushedRealPoints: this.data.effectiveStrPushedRealPoints } =
+                calculateReduceOrPushRealCost(this.data.str, desiredStrengthRealCost));
+
+            if (this.data.effectiveStr < desiredStrengthRealCost) {
+                ui.notifications.warn(
+                    "Pushing strength is limited to the lesser of 10 character points or the original total character points",
+                );
+            }
+        } else {
+            this.data.effectiveStrPushedRealPoints = 0;
         }
     }
 
