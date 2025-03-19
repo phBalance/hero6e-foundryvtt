@@ -97,6 +97,32 @@ export function characteristicValueToDiceParts(value) {
 }
 
 /**
+ * Can only push and reduce so much. Make sure we're not exceeding basic boundaries.
+ *
+ * @param {number} startingRealCost
+ * @param {number} desiredEffectiveRealCost
+ */
+export function calculateReduceOrPushRealCost(startingRealCost, desiredEffectiveRealCost) {
+    let pushedRealPoints = 0;
+
+    // Can't set to less than 1 CP
+    // Follow superheroic rules and don't allow more than 10 points of pushing
+    const effectiveRealCost = Math.min(
+        Math.max(1, desiredEffectiveRealCost),
+        startingRealCost + Math.min(10, startingRealCost),
+    );
+
+    if (effectiveRealCost > startingRealCost) {
+        pushedRealPoints = effectiveRealCost - startingRealCost;
+    }
+
+    return {
+        effectiveRealCost,
+        pushedRealPoints,
+    };
+}
+
+/**
  * Build an item that is based on STR. _postUpload() is not called on it and is the
  * responsibility of the caller.
  *
