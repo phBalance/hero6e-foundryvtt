@@ -396,7 +396,11 @@ export class ItemAttackFormApplication extends FormApplication {
         // Does this item allow strength to be added and has the character decided to use strength to augment the damage?
         let strengthItem = null;
         if (effectiveStr > 0 && this.data.originalItem.system.usesStrength) {
-            strengthItem = buildStrengthItem(effectiveStr, this.data.originalItem.actor);
+            strengthItem = buildStrengthItem(
+                effectiveStr,
+                this.data.originalItem.actor,
+                `STR used with ${this.data.originalItem.name}`,
+            );
 
             // Pushing?
             strengthItem.system._active.pushedRealPoints = this.data.effectiveStrPushedRealPoints;

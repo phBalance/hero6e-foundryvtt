@@ -128,7 +128,7 @@ export function calculateReduceOrPushRealCost(startingRealCost, desiredEffective
  *
  * @param {number} effectiveStr
  */
-export function buildStrengthItem(effectiveStr, actor) {
+export function buildStrengthItem(effectiveStr, actor, name) {
     const strengthItem = new HeroSystem6eItem(
         HeroSystem6eItem.itemDataFromXml(
             `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -138,6 +138,8 @@ export function buildStrengthItem(effectiveStr, actor) {
             parent: actor,
         },
     );
+
+    strengthItem.name = name;
 
     // PH: FIXME: Shouldn't have to kludge this in here.
     strengthItem.system._active = {};
@@ -899,7 +901,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
 
     let actorStrengthItem = item.system._active.effectiveStrItem;
     if (!actorStrengthItem) {
-        actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor);
+        actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor, `STR used with ${item.name}`);
 
         // PH: FIXME: This is a problem but we shouldn't be saving to the database.
         actorStrengthItem._postUpload();
