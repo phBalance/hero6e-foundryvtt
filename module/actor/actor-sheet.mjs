@@ -225,8 +225,11 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                 // Active Effects may be blocking updates
                 let ary = [];
-                let activeEffects = Array.from(this.actor.allApplicableEffects()).filter((ae) =>
-                    ae.changes.find((p) => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.value`),
+                let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(
+                    (ae) =>
+                        ae.changes.find(
+                            (p) => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.value`,
+                        ) && !ae.disabled,
                 );
                 for (const ae of activeEffects) {
                     ary.push(`<li>${ae.name}</li>`);
@@ -240,9 +243,9 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                 ary = [];
                 activeEffects = Array.from(this.actor.allApplicableEffects()).filter(
-                    (o) =>
-                        o.changes.find((p) => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.max`) &&
-                        !o.disabled,
+                    (ae) =>
+                        ae.changes.find((p) => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.max`) &&
+                        !ae.disabled,
                 );
 
                 for (const ae of activeEffects) {
@@ -1343,7 +1346,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const activeEffects = Array.from(this.actor.allApplicableEffects()).filter((o) =>
             o.changes.find((p) => p.key === input.name),
         );
-        for (const ae of activeEffects) {
+        for (const ae of activeEffects.filter((ae) => !ae.disabled)) {
             // Delete status
             if (ae.statuses) {
                 const confirmed = await Dialog.confirm({
@@ -1383,9 +1386,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                         }
                     }
                     // Clicking to remove PD AE, removes checkbox to re-active it. #1469
-                    // We will disable the AE instead of deleting it
-                    //actionsToAwait.push(ae.delete());
-                    actionsToAwait.push(ae.update({ disabled: true }));
+                    // We will disable the AE on items, or delete AE on actors
+                    if (ae.parent instanceof HeroSystem6eActor) {
+                        actionsToAwait.push(ae.delete());
+                    } else {
+                        actionsToAwait.push(ae.update({ disabled: true }));
+                    }
                     await Promise.all(actionsToAwait);
                 }
                 continue;

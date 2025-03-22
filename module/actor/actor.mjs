@@ -1240,6 +1240,13 @@ export class HeroSystem6eActor extends Actor {
             await ae.delete();
         }
 
+        // Remove all active effects with ACTOR as the parent
+        for (const ae of this.effects) {
+            if (ae.parent instanceof HeroSystem6eActor) {
+                await ae.delete();
+            }
+        }
+
         // Set Characteristics MAX to CORE
         const characteristicChangesMax = {};
         for (const char of Object.keys(this.system.characteristics)) {
