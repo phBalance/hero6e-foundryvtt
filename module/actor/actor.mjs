@@ -72,6 +72,18 @@ export class HeroSystem6eActor extends Actor {
             overlay = true;
         }
 
+        // If dead don't knockOut or Stun
+        if (this.statuses.has("dead") && active) {
+            if (
+                [
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
+                ].includes(statusId)
+            ) {
+                return;
+            }
+        }
+
         // Toggle effect
         await super.toggleStatusEffect(statusId, { active, overlay });
 
@@ -524,6 +536,14 @@ export class HeroSystem6eActor extends Actor {
         // they may take Zero Phase Actions at the beginning of their Phase
         // to turn off Powers, and Persistent Powers that don’t cost END
         // remain in effect.
+
+        // If not a PC and DEAD then don't recover
+        if (this.type !== "pc" && this.statuses.has("dead")) {
+            if (asAction) {
+                ui.notifications.error(`${this.name} is Defeated/Dead and cannot take a recovery.`);
+            }
+            return;
+        }
 
         token = token || this.getActiveTokens()[0];
         const speaker = ChatMessage.getSpeaker({ actor: this, token });
