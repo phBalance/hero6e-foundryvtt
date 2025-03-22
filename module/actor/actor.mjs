@@ -1539,6 +1539,12 @@ export class HeroSystem6eActor extends Actor {
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
+    getMiscEffects() {
+        return Array.from(this.allApplicableEffects())
+            .filter((ae) => !ae.isTemporary && !ae.parent.duration)
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
     async uploadFromXml(xml) {
         // Convert xml string to xml document (if necessary)
         if (typeof xml === "string") {
