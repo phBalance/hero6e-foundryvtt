@@ -770,13 +770,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         )} ${senseAffectingItem.system.OPTIONID} ${d.remaining} segments remaining [${senseAffectingItem.actor.name}]`;
                         flashAe.update({ name: newName });
                     } else {
-                        const cardHtml = `${flashAe.name} has expired.`;
+                        const cardHtml = `${flashAe.name.replace(/\d+ segments remaining/, "")} has expired.`;
                         const chatData = {
                             //author: game.user._id,
                             content: cardHtml,
-                            //speaker: speaker,
+                            speaker: ChatMessage.getSpeaker({ actor }),
                         };
-                        ChatMessage.create(chatData);
+                        await ChatMessage.create(chatData);
 
                         await flashAe.delete();
                     }

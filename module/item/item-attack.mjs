@@ -3071,7 +3071,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
                 },
                 flags: {
                     bodyDamage: senseGroup.bodyDamage,
-                    XMLID: senseGroup.XMLID,
+                    XMLID: senseAffectingItem.system.XMLID,
                     source: senseAffectingItem.actor.name,
                 },
                 origin: senseAffectingItem.uuid,

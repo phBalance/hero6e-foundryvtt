@@ -328,7 +328,7 @@ export async function expireEffects(actor) {
                 // Catch all to delete the expired AE.
                 // May need to revisit and make exception for statuses (like prone)
                 if (ae.parent instanceof HeroSystem6eActor) {
-                    const cardHtml = `${ae.name} has expired.`;
+                    const cardHtml = `${ae.name.replace(/\d+ segments remaining/, "")} has expired.`;
                     const chatData = {
                         //author: game.user._id,
                         content: cardHtml,
