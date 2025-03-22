@@ -625,7 +625,7 @@ async function doSingleTargetActionToHit(item, options) {
         cvMod.dcv += csl.dcv;
     }
 
-    let dmcv = parseInt(item.system.dmcv || 0);
+    const dmcv = parseInt(item.system.dmcv || 0);
     if (dmcv != 0) {
         // Make sure we don't already have this activeEffect
         let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
