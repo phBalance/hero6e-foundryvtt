@@ -221,7 +221,7 @@ HERO.mindScanChoices = [
 ];
 
 // TODO: This could be created from powers.
-HERO.movementPowers = {
+HERO.movementPowers = Object.freeze({
     extradimensionalmovement: "Extra Dimensional Movement",
     flight: "Flight",
     ftl: "Faster Than Light",
@@ -231,12 +231,12 @@ HERO.movementPowers = {
     swinging: "Swinging",
     teleportation: "Teleportation",
     tunneling: "Tunneling",
-};
+});
 
-HERO.movementPowers5e = {
+HERO.movementPowers5e = Object.freeze({
     ...HERO.movementPowers,
     gliding: "Gliding",
-};
+});
 
 function validatePowers() {
     let numViolations = 0;
