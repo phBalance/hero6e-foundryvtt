@@ -127,6 +127,19 @@ export class HeroSystem6eActor extends Actor {
 
             await existingEffect.delete();
         }
+
+        for (const token of this.getActiveTokens()) {
+            if (this.statuses.has("dead")) {
+                await token.document.update({ alpha: 0.3, [`texture.tint`]: `ff0000` });
+                await token.layer._sendToBackOrBringToFront(false); // send to back
+            } else if (this.statuses.has("knockedOut")) {
+                await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
+            } else if (this.statuses.has("stunned")) {
+                await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
+            } else {
+                await token.document.update({ alpha: 1, [`texture.tint`]: null });
+            }
+        }
     }
 
     // Adding ActiveEffects seems complicated.
