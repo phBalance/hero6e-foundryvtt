@@ -1,3 +1,4 @@
+import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 //import { HeroSystem6eActor } from "../actor/actor.mjs";
@@ -239,46 +240,10 @@ export async function expireEffects(actor) {
     //     console.log(`%c ExpireEffects ${actor.name} ${game.time.worldTime}`, "background: #229; color: #bada55");
     // }
 
-    let temporaryEffects = [];
-
-    // Were looking for active effects that we own.
-    // if (actor.inCombat) {
-    //     temporaryEffects = await getTemporaryEffectsOwnedByActorInCombat(actor);
-    // } else {
-    temporaryEffects = actor.temporaryEffects;
-    //}
+    const temporaryEffects = actor.temporaryEffects;
 
     let adjustmentChatMessages = [];
     for (const ae of temporaryEffects) {
-        // Determine XMLID, ITEM, ACTOR
-        // let origin = await fromUuid(ae.origin);
-        // let item =
-        //     origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
-        // let aeActor =
-        //     (origin instanceof HeroSystem6eActor ? origin : item?.actor) ||
-        //     actor ||
-        //     ae.parent instanceof HeroSystem6eActor
-        //         ? ae.parent
-        //         : null;
-        // let XMLID = ae.flags.XMLID || item?.system?.XMLID;
-
-        // let powerInfo = getPowerInfo({
-        //     actor: aeActor,
-        //     xmlid: XMLID,
-        //     item: item,
-        // });
-
-        // if (
-        //     !powerInfo &&
-        //     ae.statuses.size === 0 &&
-        //     game.settings.get(game.system.id, "alphaTesting") &&
-        //     ae.duration?.seconds < 3.154e7 * 100
-        // ) {
-        //     //return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
-        //     // TakeRecovery has no XMLID, not sure why we HAVE to have one, just expire the effect.
-        //     console.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
-        // }
-
         // Sanity Check
         if (ae._prepareDuration().remaining > 0 && !ae.duration.startTime) {
             console.warn(
@@ -291,13 +256,12 @@ export async function expireEffects(actor) {
                     ae,
                 );
             }
-            //await ae.update({ [`duration.startTime`]: game.time.worldTime });
         }
 
         // With Simple Calendar you can move time ahead in large steps.
         // Need to loop as multiple fades may be required.
-        //let d = ae._prepareDuration();
-        while (ae._prepareDuration().remaining <= 0) {
+        // The null check is for AE that have no duration.
+        while (ae._prepareDuration().remaining <= 0 && ae._prepareDuration().remaining !== null) {
             // What is this effect related to?
             if (ae.flags.type === "adjustment") {
                 // Fade by up to 5 Active Points
@@ -361,9 +325,19 @@ export async function expireEffects(actor) {
                     break;
                 }
             } else {
-                // Default is to delete the expired AE (like prone?, I think NOT)
-                //if (powerInfo) {  // Why do we care about powerInfo?
-                //await ae.delete();
+                // Catch all to delete the expired AE.
+                // May need to revisit and make exception for statuses (like prone)
+                if (ae.parent instanceof HeroSystem6eActor) {
+                    const cardHtml = `${ae.name} has expired.`;
+                    const chatData = {
+                        //author: game.user._id,
+                        content: cardHtml,
+                        //speaker: speaker,
+                    };
+                    const chatMessage = ChatMessage.create(chatData);
+                    adjustmentChatMessages.push(chatMessage);
+                    await ae.delete();
+                }
                 break;
                 //}
             }

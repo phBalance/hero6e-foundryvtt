@@ -898,21 +898,21 @@ export class HeroSystem6eCombat extends Combat {
         //console.log("nextTurn before game.time.advance", game.time.worldTime, advanceTime);
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
 
-        const _gt = game.time.worldTime;
+        //const _gt = game.time.worldTime;
         await this.update(updateData, updateOptions);
 
         // Hack to let worldTime update, which we need to expire effects on the correct phase within each segment.
-        if (advanceTime) {
-            for (let x = 0; x < 200; x++) {
-                const _gt2 = game.time.worldTime;
-                if (_gt2 != _gt) break;
-                console.warn("Waiting for game.time.advance", _gt, _gt2);
-                await new Promise((resolve) => setTimeout(resolve, 10));
-            }
-            if (game.time.worldTime === _gt) {
-                console.warn(`Worldtime did not advance when expected`, _gt, game.time.worldTime);
-            }
-        }
+        // if (advanceTime) {
+        //     for (let x = 0; x < 200; x++) {
+        //         const _gt2 = game.time.worldTime;
+        //         if (_gt2 != _gt) break;
+        //         console.warn("Waiting for game.time.advance", _gt, _gt2);
+        //         await new Promise((resolve) => setTimeout(resolve, 10));
+        //     }
+        //     if (game.time.worldTime === _gt) {
+        //         console.warn(`Worldtime did not advance when expected`, _gt, game.time.worldTime);
+        //     }
+        // }
         // console.log("nextTurn after game.time.advance", game.time.worldTime);
 
         // && originalRound === newRound) {
@@ -927,7 +927,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async _onUpdate(...args) {
-        console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
+        //console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
         super._onUpdate(...args);
     }
 
