@@ -199,6 +199,9 @@ export function determineCostPerActivePointWithDefenseMultipler(targetCharacteri
 }
 
 export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) {
+    if (!targetCharacteristic && !targetPower) {
+        console.error(`Missing targetCharacteristic & targetPower`, targetActor);
+    }
     // TODO: Not sure we need to use the characteristic here...
     const powerInfo =
         targetPower?.baseInfo ||
@@ -331,7 +334,7 @@ function _createNewAdjustmentEffect(
             itemTokenName,
             attackerTokenId: action?.current?.attackerTokenId,
             createTime: game.time.worldTime,
-            initialCostPerActivePoint: determineCostPerActivePoint(potentialCharacteristic, null, targetSystem),
+            initialCostPerActivePoint: determineCostPerActivePoint(potentialCharacteristic, targetPower, targetSystem),
 
             // changes: [
             //     {
@@ -444,6 +447,7 @@ export async function performAdjustment(
         targetPower = targetActor.items
             .filter((item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower)
             .sort((a, b) => b.adjustedLevels - a.adjustedLevels)?.[0];
+        targetPower = targetPower || fromUuidSync(nameOfCharOrPower);
         // if (targetPower) {
         //     // Sometimes we pass an item.id, make sure we output item.name
         //     nameOfCharOrPower = item.name;
@@ -520,7 +524,7 @@ export async function performAdjustment(
     let totalEffectActivePointsForXmlid = 0;
     const costPerActivePoint = simplifiedHealing
         ? 1
-        : determineCostPerActivePoint(potentialCharacteristic, null, targetActor);
+        : determineCostPerActivePoint(potentialCharacteristic, targetPower, targetActor);
 
     // Healing is special
     if (isHealing) {
@@ -673,7 +677,7 @@ export async function performAdjustment(
         let i = 0;
         for (const change of activeEffect.changes) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
-            const costPerActivePoint2 = determineCostPerActivePoint(char, null, targetActor);
+            const costPerActivePoint2 = determineCostPerActivePoint(char, targetPower, targetActor);
             change.value = Math.trunc(activeEffect.flags.adjustmentActivePoints / costPerActivePoint2);
             adjustmentDamageThisApplicationArray[i] =
                 existingEffect.changes[i].value - adjustmentDamageThisApplicationArray[i];
@@ -1069,7 +1073,7 @@ export async function performAdjustment(
             ).toUpperCase();
             const _costPerActivePoint = simplifiedHealing
                 ? 1
-                : determineCostPerActivePoint(_targetUpperCaseName, null, targetActor);
+                : determineCostPerActivePoint(_targetUpperCaseName, targetPower, targetActor);
 
             const card = _generateAdjustmentChatCard({
                 attackItem,
@@ -1231,7 +1235,7 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
                     }
                 }
             } else {
-                console.error(`Unhandled characteristis `);
+                console.error(`Unhandled characteristic `, char, activeEffect);
                 //debugger;
             }
         }

@@ -2,6 +2,7 @@ import { HEROSYS } from "./herosystem6e.mjs";
 import { clamp } from "./utility/compatibility.mjs";
 import { whisperUserTargetsForActor, expireEffects } from "./utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-attack.mjs";
+import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 
 // export class HeroSystem6eCombat extends Combat {}
 
@@ -682,9 +683,12 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         if (combatant.actor.statuses.has("stunned")) {
-            const effect = combatant.actor.effects.contents.find((o) => o.statuses.has("stunned"));
+            // const effect = combatant.actor.effects.contents.find((o) => o.statuses.has("stunned"));
+            // await effect.delete();
 
-            await effect.delete();
+            await combatant.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
+                active: false,
+            });
 
             const content = `${combatant.actor.name} recovers from being stunned.`;
 
