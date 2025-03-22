@@ -8061,6 +8061,54 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 15);
                 });
             });
+
+            describe("Leaping with usable as", function () {
+                const contents = `
+                    <LEAPING XMLID="LEAPING" ID="1718648443509" BASECOST="0.0" LEVELS="16" ALIAS="Leaping" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                        <NOTES />
+                        <ADDER XMLID="IMPROVEDNONCOMBAT" ID="1742091727368" BASECOST="0.0" LEVELS="1" ALIAS="x4 Noncombat" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="USABLEAS" ID="1742091727369" BASECOST="0.25" LEVELS="0" ALIAS="Usable [As Second Mode Of Movement]" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="RuN" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                    </LEAPING>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = true;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        `Leaping +16" (x4 Noncombat), Usable [As Second Mode Of Movement] (RuN; +1/4)`,
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 26);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 26);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
