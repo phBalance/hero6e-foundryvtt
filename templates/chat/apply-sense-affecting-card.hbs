@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS apply-sense-affecting-card' this }} --}}
+{{ log 'HEROSYS apply-sense-affecting-card' this }}
 <div class="hero chat-card item-card apply-sense-affecting-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
   tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
@@ -27,7 +27,7 @@
   </div>
 
     <div class="card-section">
-        <div class="description-tiny">Defense: </div>
+        <div class="description-tiny">Defense: {{#unless tags.length}}None{{/unless}}</div>
         {{#each senseGroups}}
             {{#each this.defenseItems}}
                 <div class="description-tiny" title="{{{this.system.description}}}">
