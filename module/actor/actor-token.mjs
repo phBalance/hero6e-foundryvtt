@@ -264,4 +264,35 @@ export class HeroSystem6eToken extends Token {
     //     }
     //     return super._canHover(user, event);
     // }
+
+    // _canViewMode(mode) {
+    //     try {
+    //         if (this.isVisable) {
+    //             const point = this.center;
+    //             const { width, height } = this.getSize();
+    //             const tolerance = Math.min(width, height) / 4;
+    //             //const visibility = canvas.visibility.testVisibility(this.center, { tolerance, object: this });
+
+    //             const sr = canvas.dimensions.sceneRect;
+    //             const inBuffer = !sr.contains(point.x, point.y);
+    //             const activeVisionSources = canvas.effects.visionSources.filter(
+    //                 (s) => s.active && inBuffer !== sr.contains(s.x, s.y),
+    //             );
+    //             const modes = CONFIG.Canvas.detectionModes;
+    //             const config = canvas.visibility._createVisibilityTestConfig(point, { tolerance, object: this });
+    //             for (const visionSource of activeVisionSources) {
+    //                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+    //                 if (basicMode) {
+    //                     const visibility = modes.basicSight.testVisibility(visionSource, basicMode, config);
+    //                     if (!visibility) {
+    //                         return false;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    //     return super._canViewMode(mode);
+    // }
 }
