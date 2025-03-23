@@ -3034,11 +3034,6 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
             flashDefense.system.OPTIONID.includes(senseAffectingItem.system.INPUT?.toUpperCase())
         ) {
             const value = parseInt(flashDefense.system.LEVELS || 0);
-            //totalDefense += value;
-            //damageData.bodyDamage = Math.max(0, damageData.bodyDamage - totalDefense);
-
-            //defense = `${value} ${flashDefense.system.OPTIONID} Defense`;
-
             const senseGroup = senseGroups.find((sg) => sg.XMLID === flashDefense.system.OPTIONID);
             if (senseGroup) {
                 senseGroup.defenseItems ??= [];
@@ -3081,14 +3076,10 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
 
     const cardData = {
         item: senseAffectingItem,
-        senseGroups: senseGroups.filter((sg) => sg.bodyDamage > 0),
-        // dice rolls
+        senseGroups: senseGroups.filter((sg) => sg.defenseItems || sg.bodyDamage > 0),
 
         // body
         damageData,
-
-        // defense
-        //defense: defense,
 
         // misc
         targetToken: token,
