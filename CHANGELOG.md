@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.24 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.24 20250323 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix issues where Combat Tracker would occasionally infinitely add/delete combatants, requiring a browser reload. [#2022](https://github.com/dmdorman/hero6e-foundryvtt/issues/2022) [#2018](https://github.com/dmdorman/hero6e-foundryvtt/issues/2018)
 - Fixed missing Combat Tracker context menu.
@@ -10,6 +10,7 @@
 - Movement powers now upload as active unless they have CHARGES or are in a MULTIPOWER. [#2026](https://github.com/dmdorman/hero6e-foundryvtt/issues/2026)
 - Added Support for FLASH with multiple target group adders and associated defenses. [#2025](https://github.com/dmdorman/hero6e-foundryvtt/issues/2025)
 - Resolved issue where an actor had purchased POWERDEFENSE twice and the DRAIN reduced both powers. Now a DRAIN only affects the largest AP power. [#2075](https://github.com/dmdorman/hero6e-foundryvtt/issues/2075) [#2074](https://github.com/dmdorman/hero6e-foundryvtt/issues/2074)
+- Cannot have the same maneuver status affecting OCV/DCV multiple times.
 
 ## Version 4.0.23 20250315
 
