@@ -9,6 +9,7 @@
 - Fix for 5e actors uploading as PRONE [#2050](https://github.com/dmdorman/hero6e-foundryvtt/issues/2050)
 - Movement powers now upload as active, unless they have CHARGES or are in a MULTIPOWER. [#2026](https://github.com/dmdorman/hero6e-foundryvtt/issues/2026)
 - Added Support for FLASH with multiple target group adders and associated defenses. [#2025](https://github.com/dmdorman/hero6e-foundryvtt/issues/2025)
+- Resolved issue where an actor had purchased POWERDEFENSE twice and the DRAIN reduced both powers. Now a DRAIN only affects the largest AP power. [#2075](https://github.com/dmdorman/hero6e-foundryvtt/issues/2075) [#2074](https://github.com/dmdorman/hero6e-foundryvtt/issues/2074)
 
 ## Version 4.0.23 20250315
 

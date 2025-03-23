@@ -5287,7 +5287,8 @@ export class HeroSystem6eItem extends Item {
         // TODO: Custom adjustedLevels in config.mjs for things that are all or nothing?
         let _adjustedLevels = parseInt(this.system.LEVELS || 0);
 
-        // Notice that we are only looking for DRAINS on "this" item.  If there are more than one item with the same XMLID then we don't know which item is getting the drain.
+        // Notice that we are only looking for DRAINS on "this" item.
+        // If there are more than one item with the same XMLID then we don't know which item is getting the drain.
         for (const ae of this.effects) {
             //console.log(ae);
             for (const change of ae.changes) {
@@ -5297,12 +5298,21 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Ideally the AE is on the item, but if DRAINing multiple items at once it may include
+        // characteristics + powers, so need to support AE on ITEM and AE on ACTOR.
         if (this.actor) {
             for (const ae of this.actor.temporaryEffects) {
                 //console.log(ae);
                 for (const change of ae.changes) {
                     if (change.key.match(new RegExp(this.system.XMLID, "i"))) {
-                        _adjustedLevels += parseInt(change.value || 0);
+                        const item = fromUuidSync(ae.flags?.target?.[0]);
+                        if (!item) {
+                            console.warn(`${ae.name} has no associated item`, this, ae);
+                        }
+                        if (item.id === this.id || !item) {
+                            //console.warn(`${ae.name} should be on item not on actor`, this, ae);
+                            _adjustedLevels += parseInt(change.value || 0);
+                        }
                     }
                 }
             }
