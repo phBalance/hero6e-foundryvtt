@@ -4396,7 +4396,21 @@ export class HeroSystem6eItem extends Item {
         // Double Knockback
         const doubleKb = this.findModsByXmlid("DOUBLEKB");
         if (doubleKb) {
-            this.system.knockbackMultiplier = 2;
+            const cost = doubleKb.cost;
+
+            if (this.actor.system.is5e) {
+                // There are 2 types of knockback multipliers with the same XMLID for 5e.
+                if (cost === 0.5) {
+                    this.system.knockbackMultiplier = 1.5;
+                } else {
+                    this.system.knockbackMultiplier = 2;
+                }
+            } else {
+                // 6e allows it to be purchased in several multiples although HD doesn't support it in a single
+                // modifier. The code is here just in case things change.
+                const multiplier = 4 * cost;
+                this.system.knockbackMultiplier = multiplier;
+            }
         }
 
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
