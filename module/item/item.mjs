@@ -5417,28 +5417,24 @@ export class HeroSystem6eItem extends Item {
         return _cost;
     }
 
-    get _advantageCost() {
+    _advantageCostExcludingList(exclusionList) {
         let _cost = 0;
-        for (const advantage of this.advantages) {
+        for (const advantage of this.advantages.filter((advantage) => !exclusionList.includes(advantage.XMLID))) {
             _cost += advantage.cost;
         }
         return _cost;
+    }
+
+    get _advantageCost() {
+        return this._advantageCostExcludingList([]);
     }
 
     get _advantageCostWithoutEnd() {
-        let _cost = 0;
-        for (const advantage of this.advantages.filter((a) => a.XMLID !== "REDUCEDEND")) {
-            _cost += advantage.cost;
-        }
-        return _cost;
+        return this._advantageCostExcludingList(["REDUCEDEND"]);
     }
 
     get _advantageCostWithoutAoe() {
-        let _cost = 0;
-        for (const advantage of this.advantages.filter((a) => !(a.XMLID === "AOE" || a.XMLID === "EXPLOSION"))) {
-            _cost += advantage.cost;
-        }
-        return _cost;
+        return this._advantageCostExcludingList(["AOE", "EXPLOSION"]);
     }
 
     get _limitationCost() {
@@ -5470,6 +5466,13 @@ export class HeroSystem6eItem extends Item {
         return RoundFavorPlayerDown(
             (this._basePoints + this._addersCost - this._negativeCustomAddersCost) *
                 (1 + this._advantageCostWithoutAoe),
+        );
+    }
+
+    _activePointsWithoutExclusionList(exclusionList) {
+        return RoundFavorPlayerDown(
+            (this._basePoints + this._addersCost - this._negativeCustomAddersCost) *
+                (1 + this._advantageCostExcludingList(exclusionList)),
         );
     }
 
