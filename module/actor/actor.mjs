@@ -85,7 +85,11 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Toggle effect
-        await super.toggleStatusEffect(statusId, { active, overlay });
+        try {
+            await super.toggleStatusEffect(statusId, { active, overlay });
+        } catch (e) {
+            console.error(e, statusId);
+        }
 
         // Several status effects also imply prone
         if (
