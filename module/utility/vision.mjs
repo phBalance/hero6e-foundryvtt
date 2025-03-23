@@ -13,6 +13,7 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
             // if (this.token?.name === "Onyx") {
             //     debugger;
             // }
+
             const defaultBlind =
                 (this.data.radius === 0 && (this.data.lightRadius === 0 || !this.visionMode?.perceivesLight)) ||
                 Object.values(this.blinded).includes(true);
@@ -34,7 +35,8 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
                     i.isSense &&
                     i.isRangedSense &&
                     (i.isTargeting || ["TOUCHGROUP", "SMELLGROUP"].includes(i.system.GROUP)) &&
-                    (!this.token?.actor?.statuses.has("blind") || i.system.GROUP !== "SIGHTGROUP"),
+                    (!this.token?.actor?.statuses.has("blind") || i.system.GROUP !== "SIGHTGROUP") &&
+                    !this.token.actor.statuses.has(i.system.GROUP.replace("GROUP", "").toLowerCase() + "SenseDisabled"),
             );
 
             if (blindVisionItem) {

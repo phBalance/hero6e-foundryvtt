@@ -46,6 +46,7 @@
         "ActiveEffectConstant": "Constant Effects",
         "ActiveEffectPersistent": "Persistent Effects",
         "ActiveEffectInherent": "Inherent Effects",
+        "ActiveEffectMisc": "Miscellaneous Effects",
         "Aoe": "AOE",
         "APPEARANCE": "APPEARANCE",
         "BACKGROUND": "BACKGROUND",

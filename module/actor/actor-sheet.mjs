@@ -406,6 +406,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             data.allConstantEffects = this.actor.getConstantEffects();
             data.allPersistentEffects = this.actor.getPersistentEffects();
             data.allInherentEffects = this.actor.getInherentEffects();
+            data.allMiscEffects = this.actor.getMiscEffects();
 
             // Add defenses (without active effects) to actorEffects.
             // This provides a nice way to see ALL powers that are effecting

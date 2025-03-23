@@ -119,7 +119,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         for (let s = 1; s <= 12; s++) {
             context.segments[s] = [];
             for (let [t, turn] of context.turns.entries()) {
-                if (turn.flags.segment === s) {
+                if (turn.flags?.segment === s) {
                     context.segments[s].push(turn);
                     turn.flags.turnNumber = t;
                 }

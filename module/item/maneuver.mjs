@@ -125,7 +125,13 @@ export async function activateManeuver(item) {
             addOcvTraitToChanges(maneuverOcvTrait),
         ].filter(Boolean);
 
-        newActiveEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
+        if (item.actor.effects.find((ae) => ae.name === maneuverEffect.name)) {
+            // Unclear why we are creating this effect a second time.
+            // TODO: Check for duplicate effect sooner.
+            console.warn(`${maneuverEffect.name} already exists`);
+        } else {
+            newActiveEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
+        }
     }
 
     return Promise.all(newActiveEffects);

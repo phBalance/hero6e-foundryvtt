@@ -135,12 +135,25 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         }
     }
 
-    // static async createCombatants(tokens, { combat } = {}) {
-    //     //const combatantId = game.combats.viewed?.combatant.id;
-    //     await super.createCombatants(tokens, combat);
-    //     //combat ??= game.combats.viewed;
-    //     //await combat.extraCombatants();
-    // }
+    static async createCombatants(tokens, { combat } = {}) {
+        if (combat === undefined && game.combats.viewed) {
+            combat ??= game.combats.viewed;
+        }
+        if (combat) {
+            console.log(
+                `createCombatants/before: ${combat.current.name} segment=${combat.current.segment} init=${combat.current.initiative}`,
+                combat,
+            );
+        }
+
+        await super.createCombatants(tokens, combat);
+
+        combat ??= game.combats.viewed;
+        console.log(
+            `createCombatants/after: ${combat.current.name} segment=${combat.current.segment} init=${combat.current.initiative}`,
+            combat,
+        );
+    }
 
     static async deleteCombatants(tokens, { combat } = {}) {
         await super.deleteCombatants(tokens, combat);
@@ -250,5 +263,36 @@ export class HeroSystem6eToken extends Token {
     //         return false;
     //     }
     //     return super._canHover(user, event);
+    // }
+
+    // _canViewMode(mode) {
+    //     try {
+    //         if (this.isVisable) {
+    //             const point = this.center;
+    //             const { width, height } = this.getSize();
+    //             const tolerance = Math.min(width, height) / 4;
+    //             //const visibility = canvas.visibility.testVisibility(this.center, { tolerance, object: this });
+
+    //             const sr = canvas.dimensions.sceneRect;
+    //             const inBuffer = !sr.contains(point.x, point.y);
+    //             const activeVisionSources = canvas.effects.visionSources.filter(
+    //                 (s) => s.active && inBuffer !== sr.contains(s.x, s.y),
+    //             );
+    //             const modes = CONFIG.Canvas.detectionModes;
+    //             const config = canvas.visibility._createVisibilityTestConfig(point, { tolerance, object: this });
+    //             for (const visionSource of activeVisionSources) {
+    //                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
+    //                 if (basicMode) {
+    //                     const visibility = modes.basicSight.testVisibility(visionSource, basicMode, config);
+    //                     if (!visibility) {
+    //                         return false;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    //     return super._canViewMode(mode);
     // }
 }
