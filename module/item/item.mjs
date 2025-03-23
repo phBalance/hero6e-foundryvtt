@@ -2807,9 +2807,11 @@ export class HeroSystem6eItem extends Item {
                 ? 5
                 : 10;
 
+        const activePoints = this.system._active.originalActivePoints ?? this._activePoints;
+
         // NOTE: When we push we are altering the actual active points, via LEVELS and modifiers, so we have to back it out.
         const unpushedActivePoints =
-            this._activePoints - (this.system._active.pushedRealPoints || 0) * (1 + this._limitationCost);
+            activePoints - (this.system._active.pushedRealPoints || 0) * (1 + this._limitationCost);
         const endCost = RoundFavorPlayerDown(unpushedActivePoints / endUnitSize);
 
         return Math.max(1, endCost);
@@ -5621,10 +5623,14 @@ export class HeroSystem6eItem extends Item {
     /**
      * Add advantages from itemFrom to this item but postUpload is not run
      * FIXME: this does not handle the merging of any advantages (e.g. AP being added when already have AP)
+     * NOTE: This assumes that all changes have been made and that copying item advantage is the last thing that's
+     *       done for an effective item.
      *
      * @param {HeroSystem6eItem} itemTo
      */
     copyItemAdvantages(itemFrom, advantagesToIgnore) {
+        this.system._active.originalActivePoints = this.system._active.originalActivePoints ?? this._activePoints;
+
         const advantagesToCopy = itemFrom.advantages
             .map((advantage) => advantage._original)
             .filter((advantage) => !advantagesToIgnore.includes(advantage.XMLID));
