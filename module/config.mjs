@@ -9519,12 +9519,6 @@ HERO.stunBodyDamages = Object.freeze({
     effectonly: "Effect only",
 });
 
-HERO.knockbackMultiplier = {
-    0: "No Knockback",
-    1: "Knockback",
-    2: "Double Knockback",
-};
-
 HERO.SFX = [
     "Default",
     "Acid",

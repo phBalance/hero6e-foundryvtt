@@ -3256,7 +3256,7 @@ async function _calcDamage(heroRoller, item, options) {
         knockbackRoller,
         knockbackResultTotal,
         shrinkingKB,
-    } = await _calcKnockback(body, item, options, parseInt(itemData.knockbackMultiplier));
+    } = await _calcKnockback(body, item, options, itemData.knockbackMultiplier);
 
     // -------------------------------------------------
     // determine effective damage
@@ -3462,7 +3462,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
             .addNumber(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), "Max potential knockback")
-            //.addNumber(-parseInt(options.knockbackResistanceValue || 0), "Knockback resistance")
             .addNumber(-parseInt(knockbackResistanceValue), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
