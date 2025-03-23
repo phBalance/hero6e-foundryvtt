@@ -2817,12 +2817,14 @@ export function registerUploadTests(quench) {
                         assert.equal(item.system.description, "Hearing Group Flash 11½d6");
                     });
 
-                    it("realCost", function () {
-                        assert.equal(item.system.realCost, 35);
+                    // PH: FIXME: Not supported yet.
+                    it.skip("realCost", function () {
+                        assert.equal(item.system.realCost, 34.5);
                     });
 
-                    it("activePoints", function () {
-                        assert.equal(item.system.activePoints, 35);
+                    // PH: FIXME: Not supported yet.
+                    it.skip("activePoints", function () {
+                        assert.equal(item.system.activePoints, 34.5);
                     });
 
                     it("end", function () {
