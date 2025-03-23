@@ -440,19 +440,13 @@ export async function performAdjustment(
     //       us into the thorny question of what powers have been discovered.
     let targetPower;
     if (!targetCharacteristic) {
-        // targetPower = targetActor.items.find(
-        //     (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
-        // );
-        // Get the power with the highest adjustedLevels
+        // Get the power with the highest adjustedLevels.
+        // Not sure what the rules are, but it is easier to DRAIN from a large AP to
+        // reduce issues with the DRAIN rolling over to a secondary power, which we don't support.
         targetPower = targetActor.items
             .filter((item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower)
             .sort((a, b) => b.adjustedLevels - a.adjustedLevels)?.[0];
         targetPower = targetPower || fromUuidSync(nameOfCharOrPower);
-        // if (targetPower) {
-        //     // Sometimes we pass an item.id, make sure we output item.name
-        //     nameOfCharOrPower = item.name;
-        //     targetUpperCaseName = nameOfCharOrPower.toUpperCase();
-        // }
     }
 
     // Do we have a target?
