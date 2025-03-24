@@ -447,8 +447,6 @@ export class ItemAttackFormApplication extends FormApplication {
                     return false;
                 }
 
-                // PH: FIXME: Can add advantages from HA to STR if HA's active points don't exceed the STR used. Need to consider STRMINIMUM
-
                 array[index][1].reasonForCantUse = "";
 
                 if (!array[index][1]._canUseForAttack) {
@@ -459,22 +457,25 @@ export class ItemAttackFormApplication extends FormApplication {
             })
             .map(([uuid]) => fromUuidSync(uuid))
             .forEach((hthAttack) => {
-                // Endurance advantages and limitations don't apply to strength
-                // Invisible Power Effects does not transfer to STR if on the HTH Attack
-                const ignoreEnduranceAdvantages = ["INCREASEDEND", "REDUCEDEND"];
-                const ignoreInvisiblePowerEffects = ["INVISIBLE"];
-                const ignoreAdvantagesForHthAttack = [...ignoreInvisiblePowerEffects, ...ignoreEnduranceAdvantages];
+                // Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
+                // PH: FIXME: Need to consider STRMINIMUM
+                const haBaseCost = hthAttack._basePoints;
+                if (haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+                    // Endurance advantages and limitations don't apply to strength
+                    // Invisible Power Effects does not transfer to STR if on the HTH Attack
+                    const ignoreAdvantagesForHthAttack = ["INCREASEDEND", "REDUCEDEND", "INVISIBLE"];
 
-                // PH: FIXME: AoE gets an increased radius based on STR used (so effectively double the radius)
-                // PH: FIXME: AoE gets the radius built from the HA not based on the effective item
-                effectiveItem.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+                    // PH: FIXME: AoE gets an increased radius based on STR used (so effectively double the radius)
+                    // PH: FIXME: AoE gets the radius built from the HA not based on the effective item
+                    effectiveItem.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+                    strengthItem?.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+                }
+
                 effectiveItem.system._active.linkedEnd ??= [];
                 effectiveItem.system._active.linkedEnd.push({
                     item: hthAttack,
                     uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
                 });
-
-                strengthItem?.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
             });
         if (hthAttackDisabledDueToStrength) {
             ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
