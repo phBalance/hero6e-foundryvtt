@@ -459,6 +459,7 @@ export class ItemAttackFormApplication extends FormApplication {
             .forEach((hthAttack) => {
                 // Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
                 // PH: FIXME: Need to consider STRMINIMUM
+                // PH: FIXME: Might be nice to have a warning displayed
                 const haBaseCost = hthAttack._basePoints;
                 if (haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
                     // Endurance advantages and limitations don't apply to strength
