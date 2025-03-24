@@ -437,7 +437,9 @@ export class ItemAttackFormApplication extends FormApplication {
                 // PH: FIXME: Should look at strengthItem's actual strength
                 // PH: FIXME: Need to consider real weapons w/ STRMINIMUM
                 if (!strengthItem || this.data.effectiveStr < 3) {
-                    hthAttackDisabledDueToStrength = true;
+                    if (array[index][1]._canUseForAttack) {
+                        hthAttackDisabledDueToStrength = true;
+                    }
 
                     array[index][1]._canUseForAttack = false;
                     array[index][1].reasonForCantUse = "Must use at least 3 (½d6) STR to add a hand-to-hand attack";
@@ -488,12 +490,15 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 // Item the NA is being applied to must not exceed the AP of the NA was designed against.
                 // TODO: This implies that one cannot push with a NA. Is this correct?
-                if (parseInt(naItem.system.LEVELS || 0) < effectiveItemActivePointsBeforeHthAndNaAdvantages) {
-                    nakedAdvantagesDisabledDueToActivePoints = true;
+                const naEffectiveAgainstAp = parseInt(naItem.system.LEVELS || 0);
+                if (naEffectiveAgainstAp < effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+                    if (array[index][1]._canUseForAttack) {
+                        nakedAdvantagesDisabledDueToActivePoints = true;
+                    }
 
                     array[index][1]._canUseForAttack = false;
                     array[index][1].reasonForCantUse =
-                        "Naked Advantages must be able to apply at least as many active points as the base attack";
+                        `${naItem.detailedName()} is effective against ${naEffectiveAgainstAp} AP but the base attack is ${effectiveItemActivePointsBeforeHthAndNaAdvantages} AP`;
 
                     return undefined;
                 }
