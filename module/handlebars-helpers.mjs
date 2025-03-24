@@ -16,10 +16,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("toLowerCase", toLowerCase);
     Handlebars.registerHelper("toUpperCase", toUpperCase);
     Handlebars.registerHelper("appliesTo", appliesTo);
-    Handlebars.registerHelper("checkInit", function (value) {
-        let myValue = Number(value) || 0;
-        return myValue > 0;
-    });
+    Handlebars.registerHelper("checkInit", checkInit);
 }
 
 function indexOf(str, searchTerm) {
@@ -97,4 +94,9 @@ function isDefined(value) {
 function appliesTo(power, attack) {
     if (typeof power?.baseInfo?.appliesTo !== "function") return false;
     return power.baseInfo.appliesTo(attack);
+}
+
+function checkInit(value) {
+    let myValue = Number(value) || 0;
+    return myValue > 0;
 }

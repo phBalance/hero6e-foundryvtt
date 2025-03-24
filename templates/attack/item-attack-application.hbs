@@ -7,10 +7,26 @@
     </header>
 
     <div class="description">
-        <b>{{{itemName action.system.currentItem}}}
-            {{#if action.system.currentItem.system.SFX}} ({{action.system.currentItem.system.SFX}}){{/if}}
-        </b>: {{action.system.currentItem.system.description}} {{action.current.step}}
+      <b>{{{itemName action.system.currentItem}}}
+          {{#if action.system.currentItem.system.SFX}} ({{action.system.currentItem.system.SFX}}){{/if}}
+      </b>: {{action.system.currentItem.system.description}} {{action.current.step}}
+
+      {{#if (gameConfigValue "alphaTesting")}}
+        <div>
+          <b><label>END from Character</label></b> {{effectiveItemResourceUsage.totalEnd}}
+        </div>
+        <div>
+          <b><label>END from Reserve</label></b> {{effectiveItemResourceUsage.totalReserveEnd}}
+        </div>
+        <div>
+          <b><label>Charges</label></b> {{effectiveItemResourceUsage.totalCharges}}
+        </div>
+        <div>
+          <b><label>Active Points</label></b> {{effectiveItem._activePoints}}
+        </div>
+      {{/if}}
     </div>
+
     {{!-- BEGIN multiple-attack-section --}}
     <div class="multiple-attack-section" {{#unless action.current.isMultipleAttack}} style="display: none;"{{/unless}}>  
       {{!-- multiple attack selection --}}
