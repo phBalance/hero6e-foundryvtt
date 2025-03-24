@@ -2382,15 +2382,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     } else if (isAdjustment) {
         return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
     } else if (isSenseAffecting) {
-        return _onApplySenseAffectingToSpecificToken(
-            item,
-            token,
-            damageDetail,
-            defense,
-            defenseTags,
-            action,
-            damageRoller,
-        );
+        return _onApplySenseAffectingToSpecificToken(item, token, damageDetail);
     }
 
     // AUTOMATION immune to mental powers
@@ -3083,15 +3075,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
     }
 }
 
-async function _onApplySenseAffectingToSpecificToken(
-    senseAffectingItem,
-    token,
-    damageData,
-    defense,
-    _defenseTags,
-    _action,
-    flashRoller,
-) {
+async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData) {
     const defenseTags = [];
 
     // We currently only support sense groups, not individual senses
