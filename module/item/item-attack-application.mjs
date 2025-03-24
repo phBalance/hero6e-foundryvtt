@@ -219,21 +219,22 @@ export class ItemAttackFormApplication extends FormApplication {
                 const hthAttacks = this.data.originalItem.actor.items.filter(
                     (item) => item.system.XMLID === "HANDTOHANDATTACK" && !(item.system.CARRIED && !item.system.active),
                 );
-                this.data.hthAttackItems = hthAttacks.reduce((attacksObj, hthAttack) => {
+                this.data.hthAttackItems ??= hthAttacks.reduce((attacksObj, hthAttack) => {
                     // If already exists we're updating so no need to recreate.
                     if (attacksObj[hthAttack.uuid]) {
                         return attacksObj;
                     }
 
                     // Default to useable for any attack.
+                    const use = hthAttack.system._canUseForAttack ?? true;
                     attacksObj[hthAttack.uuid] = {
-                        _canUseForAttack: hthAttack.system._canUseForAttack ?? true,
-                        _disabled: !(hthAttack.system._canUseForAttack ?? true),
+                        _canUseForAttack: use,
+                        reasonForCantUse: "",
                         description: hthAttack.system.description,
                         name: hthAttack.name,
                     };
                     return attacksObj;
-                }, this.data.hthAttackItems ?? {});
+                }, {});
             } else {
                 this.data.hthAttackItems = {};
             }
@@ -243,7 +244,7 @@ export class ItemAttackFormApplication extends FormApplication {
             const nakedAdvantagesItems = this.data.originalItem.actor.items.filter(
                 (item) => item.system.XMLID === "NAKEDMODIFIER",
             );
-            this.data.nakedAdvantagesItems = nakedAdvantagesItems.reduce((naObj, naItem) => {
+            this.data.nakedAdvantagesItems ??= nakedAdvantagesItems.reduce((naObj, naItem) => {
                 // If already exists we're updating so no need to recreate.
                 if (naObj[naItem.uuid]) {
                     return naObj;
@@ -251,13 +252,13 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 naObj[naItem.uuid] = {
                     _canUseForAttack: false,
-                    _disabled: false,
+                    easonForCantUse: "",
                     description: naItem.system.description,
                     name: naItem.name,
                     item: naItem,
                 };
                 return naObj;
-            }, this.data.nakedAdvantagesItems ?? {});
+            }, {});
 
             this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData();
             this.data.effectiveItemResourceUsage = calculateRequiredResourcesToUse(
@@ -420,12 +421,16 @@ export class ItemAttackFormApplication extends FormApplication {
         // Reduce or Push the item
         effectiveItem.changePowerLevel(this.data.effectiveRealCost);
         effectiveItem.system._active.pushedRealPoints = this.data.pushedRealPoints;
-        const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem._activePoints;
+
+        // Active points for the base item. For maneuvers this could be STR or a weapon.
+        const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem.baseInfo.baseEffectDicePartsBundle(
+            effectiveItem,
+            {},
+        ).baseAttackItem._activePoints;
 
         // Add any checked & appropriate Hand-to-Hand Attack advantages into the base item
         let hthAttackDisabledDueToStrength = false;
         Object.entries(this.data.hthAttackItems)
-            .filter(([, { _canUseForAttack, _disabled }]) => _canUseForAttack && !_disabled)
             .filter((_, index, array) => {
                 // If there is no strength item or effective strength is less than 3 then we don't have enough
                 // strength applied to allow HTH Attacks
@@ -433,13 +438,20 @@ export class ItemAttackFormApplication extends FormApplication {
                 // PH: FIXME: Need to consider real weapons w/ STRMINIMUM
                 if (!strengthItem || this.data.effectiveStr < 3) {
                     hthAttackDisabledDueToStrength = true;
-                    array[index][1]._disabled = true;
+
+                    array[index][1]._canUseForAttack = false;
+                    array[index][1].reasonForCantUse = "Must use at least 3 (½d6) STR to add a hand-to-hand attack";
+
                     return false;
                 }
 
                 // PH: FIXME: Can add advantages from HA to STR if HA's active points don't exceed the STR used. Need to consider STRMINIMUM
 
-                array[index][1]._disabled = false;
+                array[index][1].reasonForCantUse = "";
+
+                if (!array[index][1]._canUseForAttack) {
+                    return false;
+                }
 
                 return true;
             })
@@ -471,7 +483,6 @@ export class ItemAttackFormApplication extends FormApplication {
         // PH: FIXME: Need to implement endurance usage. A REDUCE END NA will reduce the base attack's END use but otherwise the NA endurance usage is paid separately.
         let nakedAdvantagesDisabledDueToActivePoints = false;
         Object.entries(this.data.nakedAdvantagesItems)
-            .filter(([, { _canUseForAttack, _disabled }]) => _canUseForAttack && !_disabled)
             .map(([uuid], index, array) => {
                 const naItem = fromUuidSync(uuid);
 
@@ -479,11 +490,19 @@ export class ItemAttackFormApplication extends FormApplication {
                 // TODO: This implies that one cannot push with a NA. Is this correct?
                 if (parseInt(naItem.system.LEVELS || 0) < effectiveItemActivePointsBeforeHthAndNaAdvantages) {
                     nakedAdvantagesDisabledDueToActivePoints = true;
-                    array[index][1]._disabled = true;
+
+                    array[index][1]._canUseForAttack = false;
+                    array[index][1].reasonForCantUse =
+                        "Naked Advantages must be able to apply at least as many active points as the base attack";
+
                     return undefined;
                 }
 
-                array[index][1]._disabled = false;
+                array[index][1].reasonForCantUse = "";
+
+                if (!array[index][1]._canUseForAttack) {
+                    return undefined;
+                }
 
                 return naItem;
             })
@@ -567,7 +586,7 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.hthAttackItems[match[1]]._canUseForAttack = value;
         });
 
-        // Restructure HTH Attacks
+        // Restructure Naked Advantages
         Object.entries(formData).forEach(([key, value]) => {
             const match = key.match(/^nakedAdvantagesItems.(.*)._canUseForAttack$/);
             if (!match) {
