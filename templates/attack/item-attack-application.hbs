@@ -208,9 +208,9 @@
               <ol>
               {{#each hthAttackItems}}
                 <li>
-                    <label title="{{{this.description}}}">
-                      <input class="item-toggle" {{#if this._disabled}}disabled title="Must use at least 3 (½d6) STR to add a hand-to-hand attack"{{/if}} id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
-                      {{this.name}}
+                    <label>
+                      <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
+                      <span title="{{{this.description}}}">{{this.name}}</span>
                     </label>
                   </li>
               {{/each}}
@@ -229,9 +229,9 @@
             <ol>
             {{#each nakedAdvantagesItems}}
               <li>
-                  <label title="{{{this.description}}}">
-                    <input class="item-toggle" {{#if this._disabled}}disabled title="Naked Advantages must be able to apply at least as many active points as the base attack"{{/if}} id="{{this.uuid}}" type="checkbox" name="nakedAdvantagesItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
-                    {{this.name}}
+                  <label>
+                    <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="nakedAdvantagesItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
+                    <span  title="{{{this.description}}}">{{this.name}}</span>
                   </label>
                 </li>
             {{/each}}
