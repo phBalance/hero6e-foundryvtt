@@ -2400,6 +2400,24 @@ export async function _onApplyDamageToSpecificToken(toHitData, _damageData, targ
     }
     effectsFinal = effectsFinal.replace(/; $/, "");
 
+    // Mind Control
+    if (item.system.XMLID === "MINDCONTROL") {
+        const targetActorEgo = token.actor?.system.characteristics?.ego?.value;
+        if (targetActorEgo !== undefined) {
+            if (damageDetail.stunDamage >= targetActorEgo + 30) {
+                effectsFinal += `EGO+30: Target will perform actions they are violently opposed to doing. Target will believe statements that contradict strongly held personal beliefs or principles (such as Psychological Complications) or that contradict reality under direct observation.`;
+            } else if (damageDetail.stunDamage >= targetActorEgo + 20) {
+                effectsFinal += `EGO+20: Target will perform actions they are normally against doing. Target will believe any statement that doesn't contradict strongly held personal beliefs or principles (such as Psychological Complications).`;
+            } else if (damageDetail.stunDamage >= targetActorEgo + 10) {
+                effectsFinal += `EGO+10: Target will perform actions they wouldn't mind doing. Target will believe any statement that doesn't contradict reality under direct observation.`;
+            } else if (damageDetail.stunDamage >= targetActorEgo) {
+                effectsFinal += `EGO+0: Target will perform actions they are inclined to perform anyway. Target believes any statement which doesn't contradict prior knowledge.`;
+            } else {
+                effectsFinal += `No effect.`;
+            }
+        }
+    }
+
     const cardData = {
         item: item,
 
