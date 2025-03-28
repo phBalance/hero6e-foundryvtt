@@ -547,11 +547,14 @@ export class ItemAttackFormApplication extends FormApplication {
                 break;
 
             case "rect": {
-                const warningMessage = game.i18n.localize("Warning.AreaOfEffectUnsupported");
+                // if (areaOfEffect.type === "surface" && item.findModsByXmlid("CONTINUOUS")) {
+                //     // This is likely a damage shield
+                // }
 
-                ui.notifications.warn(warningMessage);
-
-                return;
+                // rectangle templates are defined as a distance/hypotenuse and an angle
+                templateData.direction = areaOfEffect.direction;
+                templateData.distance = sizeConversionToMeters * areaOfEffect.distance;
+                break;
             }
 
             default:
