@@ -3203,7 +3203,7 @@ async function _calcDamage(heroRoller, item, options) {
     }
 
     if (item.system.EFFECT) {
-        effects = `${item.system._effect || item.system.EFFECT}; `;
+        effects += `${item.system._effect || item.system.EFFECT}; `;
     }
 
     // VULNERABILITY
