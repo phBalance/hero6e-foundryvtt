@@ -1380,6 +1380,13 @@ export class HeroSystem6eItem extends Item {
                 dcFalloff: dcFalloff,
             };
 
+            // KLUGE for SURFACE
+            // Rectangles are defined as a distance/hypotenuse
+            if (aoeModifier.OPTIONID === "SURFACE") {
+                newAoe.direction = 45;
+                newAoe.distance = Math.sqrt(levels * levels * 2);
+            }
+
             return {
                 ...aoeModifier,
                 ...newAoe,
