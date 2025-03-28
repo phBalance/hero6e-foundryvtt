@@ -3,6 +3,7 @@
 ## Version 4.0.25 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Initial support for SURFACE templates [#2055](https://github.com/dmdorman/hero6e-foundryvtt/issues/2055)
+- Improved MIND CONTROL support. Chat cards show EGO+X success messages. Still no support for modifiers.
 
 ## Version 4.0.24 20250323
 
