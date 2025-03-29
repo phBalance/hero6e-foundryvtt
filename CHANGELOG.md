@@ -4,7 +4,7 @@
 
 - Fixed maps failing to load when older maps used older "dead" status [#2099](https://github.com/dmdorman/hero6e-foundryvtt/issues/2099)
 - Initial support for SURFACE templates [#2055](https://github.com/dmdorman/hero6e-foundryvtt/issues/2055)
-- Improved MIND CONTROL support. Chat cards show EGO+X success messages. Still no support for modifiers.
+- Improved MIND CONTROL support. Chat cards show EGO+X success messages. Still no support for modifiers. [#1726](https://github.com/dmdorman/hero6e-foundryvtt/issues/1726)
 
 ## Version 4.0.24 20250323
 
