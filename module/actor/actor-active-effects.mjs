@@ -208,7 +208,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusTargeted"),
                 img: "icons/svg/target.svg",
             },
-            holdingAndActionEffect: {
+            holdingAnActionEffect: {
                 id: "holding",
                 name: game.i18n.localize("EFFECT.HoldingAnAction"),
                 img: `icons/svg/clockwork.svg`,
