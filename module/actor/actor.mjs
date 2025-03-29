@@ -2792,8 +2792,8 @@ export class HeroSystem6eActor extends Actor {
 
         const powers = getCharacteristicInfoArrayForActor(this);
         for (const powerInfo of powers) {
-            characterPointCost += parseInt(this.system.characteristics[powerInfo.key.toLowerCase()]?.realCost || 0);
-            activePoints += parseInt(this.system.characteristics[powerInfo.key.toLowerCase()]?.activePoints || 0);
+            characterPointCost += parseFloat(this.system.characteristics[powerInfo.key.toLowerCase()]?.realCost || 0);
+            activePoints += parseFloat(this.system.characteristics[powerInfo.key.toLowerCase()]?.activePoints || 0);
         }
         this.system.pointsDetail.characteristics = characterPointCost;
         this.system.activePointsDetail.characteristics = characterPointCost;
@@ -2809,8 +2809,8 @@ export class HeroSystem6eActor extends Actor {
                 o.type !== "movement" &&
                 !o.system.XMLID.startsWith("__"), // Exclude placeholder powers
         )) {
-            let _characterPointCost = parseInt(item.system?.characterPointCost || item.system?.realCost) || 0;
-            const _activePoints = parseInt(item.system?.activePoints) || 0;
+            let _characterPointCost = parseFloat(item.system?.characterPointCost || item.system?.realCost) || 0;
+            const _activePoints = parseFloat(item.system?.activePoints) || 0;
 
             if (_characterPointCost !== 0) {
                 // Equipment is typically purchased with money, not character points
@@ -2827,7 +2827,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // DISAD_POINTS: realCost
-        const DISAD_POINTS = parseInt(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
         const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
         if (_disadPoints !== 0) {
             this.system.pointsDetail.MatchingDisads = -_disadPoints;
