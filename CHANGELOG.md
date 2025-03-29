@@ -4,7 +4,7 @@
 
 - Powers and strength can now be pushed, using superheroic rules, or reduced in to-hit dialog
 - Support Naked Advantages for attack powers.
-- Support advantages for Hand-to-Hand Attacks.
+- Support advantage transfer to strength for Hand-to-Hand Attacks.
 - Fix charge usage for items using autofire.
 
 ## Version 4.0.25 20250329

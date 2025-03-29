@@ -523,6 +523,9 @@ export class ItemAttackFormApplication extends FormApplication {
                 });
 
                 strengthItem?.copyItemAdvantages(naAttack, []);
+
+                // PH: FIXME: active points from NA should be automatically adjusted to reflect the AP in the effective item (i.e. 30 AP effective item
+                //            shouldn't have to pay full END for NA that can affect up to 90 AP - it should just be dipped down to 30 AP)
             });
         if (nakedAdvantagesDisabledDueToActivePoints) {
             ui.notifications.warn(
