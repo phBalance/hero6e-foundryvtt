@@ -1,16 +1,32 @@
 {{ log 'HEROSYS ITEM ATTACK APPLICATION CARD item-attack-application' this }}
-<form data-actor-id="{{actor.id}}" data-item-id="{{item.id}}" data-token-id="{{token.id}}">
+<form>
   <div class="hero chat-card item-card attack-card">
     <header class="card-header flexrow">
-      <img src="{{item.img}}" title="{{action.system.currentItem.name}}" width="36" height="36" />
+      <img src="{{originalItem.img}}" title="{{action.system.currentItem.name}}" width="36" height="36" />
       <h3 class="item-name">{{{itemName action.system.currentItem}}}</h3>
     </header>
 
     <div class="description">
-        <b>{{{itemName action.system.currentItem}}}
-            {{#if action.system.currentItem.system.SFX}} ({{action.system.currentItem.system.SFX}}){{/if}}
-        </b>: {{action.system.currentItem.system.description}} {{action.current.step}}
+      <b>{{{itemName action.system.currentItem}}}
+          {{#if action.system.currentItem.system.SFX}} ({{action.system.currentItem.system.SFX}}){{/if}}
+      </b>: {{action.system.currentItem.system.description}} {{action.current.step}}
+
+      {{#if (gameConfigValue "alphaTesting")}}
+        <div>
+          <b><label>END from Character</label></b> {{effectiveItemResourceUsage.totalEnd}}
+        </div>
+        <div>
+          <b><label>END from Reserve</label></b> {{effectiveItemResourceUsage.totalReserveEnd}}
+        </div>
+        <div>
+          <b><label>Charges</label></b> {{effectiveItemResourceUsage.totalCharges}}
+        </div>
+        <div>
+          <b><label>Active Points</label></b> {{effectiveItem._activePoints}}
+        </div>
+      {{/if}}
     </div>
+
     {{!-- BEGIN multiple-attack-section --}}
     <div class="multiple-attack-section" {{#unless action.current.isMultipleAttack}} style="display: none;"{{/unless}}>  
       {{!-- multiple attack selection --}}
@@ -151,8 +167,6 @@
         </div>
       {{/if}}
 
-
-
       {{#if mindScanChoices}}
         <div class="form-group">
           <label>{{localize "Items.Attack.OmcvMod"}}</label>
@@ -182,18 +196,17 @@
         </div>
       {{/if}}
 
-      {{#if (gt item.system.LEVELS 1)}}
+      {{#if (gt originalItem._realCost 0)}}
         <div class="form-group">
-          <label>Effective Levels</label>
+          <label>Reducing &amp; Pushing</label>
           <div class="noflexwrap">
-            {{numberInput effectiveLevels name="effectiveLevels" step=1 min=1 max=999}}
-            <label>/ {{item.system.LEVELS}}</label>
+            {{numberInput effectiveRealCost name="effectiveRealCost" step=1 min=1 max=999}}
+            <label>/ {{originalItem._realCost}} Character Points</label>
           </div>
         </div>
       {{/if}}
 
-
-      {{#if (or item.system.usesStrength item.system.usesTk)}}
+      {{#if (or effectiveItem.system.usesStrength effectiveItem.system.usesTk)}}
         <div class="form-group">
           <label>Effective Strength</label>
           <div class="noflexwrap">
@@ -211,9 +224,9 @@
               <ol>
               {{#each hthAttackItems}}
                 <li>
-                    <label title="{{{this.description}}}">
-                      <input class="item-toggle" {{#if (lt @root.effectiveStr 3)}}disabled title="Must use at least 3 (½d6) STR to add a hand-to-hand attack"{{/if}} id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
-                      {{this.name}}
+                    <label>
+                      <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
+                      <span title="{{{this.description}}}">{{this.name}}</span>
                     </label>
                   </li>
               {{/each}}
@@ -221,6 +234,26 @@
             </div>
           </div>
         {{/if}}
+      {{/if}}
+
+      {{#if nakedAdvantagesItems}}
+        <div class="form-group">
+          <label>
+            Naked Advantages
+          </label>
+          <div class="form-fields naked-advantage-attacks">
+            <ol>
+            {{#each nakedAdvantagesItems}}
+              <li>
+                  <label>
+                    <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="nakedAdvantagesItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
+                    <span  title="{{{this.description}}}">{{this.name}}</span>
+                  </label>
+                </li>
+            {{/each}}
+            </ol>
+          </div>
+        </div>
       {{/if}}
 
       {{#if boostableChargesAvailable}}
@@ -296,16 +329,17 @@
 
   {{!-- Conditional attack selection. DEADLY BLOW --}}
   <div class="form-fields  csl-attack-list">
-    <table>        
-      {{#each item.system.conditionalAttacks}}
+    <table>      
+      {{!-- PH: FIXME: Not sure if this should be originalItem or effectiveItem   --}}
+      {{#each originalItem.system.conditionalAttacks}}
       {{! Don't show DEADLYBLOW/conditional attacks for adjustment or sense-affecting powers --}}
-        {{#if (appliesTo this @root/item)}}
+        {{#if (appliesTo this @root/originalItem)}}
           <tr>
               <td>
                   <input name="system.conditionalAttacks.{{this.id}}.system.checked" type="checkbox" _id="{{this.id}}" {{checked this.system.checked}} data-dtype="Boolean" />
               </td>
               <td class="left">
-                  <b>{{this.name}}{{#if @root/item.system.SFX}} ({{@root/item.system.SFX}}){{/if}}</b>: {{this.system.description}}
+                  <b>{{this.name}}{{#if @root/originalItem.system.SFX}} ({{@root/originalItem.system.SFX}}){{/if}}</b>: {{this.system.description}}
               </td>
           </tr>
         {{/if}}
@@ -344,7 +378,7 @@
       <div>
         <p class="hero-warning">
           <i class="fas fa-exclamation-triangle"></i>
-            You have no target.  The GM may have to initiate this attack for you. Make sure the GM knows your target area.  The GM may have to add the desired target into the scene so it can be targeted.  The GM can also select target token(s) with the mouse.
+            You have no target. The GM may have to initiate this attack for you. Make sure the GM knows your target area. The GM may have to add the desired target into the scene so it can be targeted. The GM can also select target token(s) with the mouse.
         </p>
         <i>{{localize "Items.Attack.TargetingExplanation"}}</i>
       </div>
