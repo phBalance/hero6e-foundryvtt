@@ -5236,7 +5236,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Duplication (creates 962-point form) (192 Active Points); Original Is Incapacitated And Helpless While Duplicate Exists (-1)",
+                        "Duplication (creates 962-point form) (193 Active Points); Original Is Incapacitated And Helpless While Duplicate Exists (-1)",
                     );
                 });
 
@@ -5245,7 +5245,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 192);
+                    assert.equal(item.system.activePoints, 193);
                 });
 
                 it("levels", function () {
