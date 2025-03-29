@@ -477,20 +477,26 @@ export class HeroSystem6eCombat extends Combat {
 
         // Stop holding
         if (combatant.actor.statuses.has("holding")) {
-            const ae = combatant.actor.effects.find((effect) => effect.statuses.has("holding"));
+            //const ae = combatant.actor.effects.find((effect) => effect.statuses.has("holding"));
             //combatant.actor.removeActiveEffect(ae);
-            await combatant.actor.toggleStatusEffect(ae.id, {
-                active: false,
-            });
+            await combatant.actor.toggleStatusEffect(
+                HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.id,
+                {
+                    active: false,
+                },
+            );
         }
 
         // Stop nonCombatMovement
         if (combatant.actor.statuses.has("nonCombatMovement")) {
-            const ae = combatant.actor.effects.find((effect) => effect.statuses.has("nonCombatMovement"));
+            //const ae = combatant.actor.effects.find((effect) => effect.statuses.has("nonCombatMovement"));
             //combatant.actor.removeActiveEffect(ae);
-            await combatant.actor.toggleStatusEffect(ae.id, {
-                active: false,
-            });
+            await combatant.actor.toggleStatusEffect(
+                HeroSystem6eActorActiveEffects.statusEffectsObj.nonCombatMovementEffect.id,
+                {
+                    active: false,
+                },
+            );
         }
 
         // Stop BRACE
