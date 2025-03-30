@@ -5540,6 +5540,9 @@ export class HeroSystem6eItem extends Item {
             for (const limitation of this.limitations.filter((o) => o.PRIVATE)) {
                 _limitationCost -= limitation.cost;
             }
+        } else if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
+            // The real cost of an EC slot includes the limitations on the pool.
+            _limitationCost = this.parentItem._limitationCost;
         }
 
         // We must round only if we divide (FRed pg 7, 6e vol 1 pg 12)
@@ -5571,6 +5574,14 @@ export class HeroSystem6eItem extends Item {
             } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
                 const baseCost = (this.parentItem.system.BASECOST = parseFloat(this.parentItem.system.BASECOST));
                 _cost = Math.max(baseCost, _cost - baseCost);
+
+                // The final cost of an EC slot includes the limitations on the slot.
+                const _limitationCost = this._limitationCost;
+
+                // We must round only if we divide (FRed pg 7, 6e vol 1 pg 12)
+                if (_limitationCost !== 0) {
+                    _cost = RoundFavorPlayerDown(_cost / (1 + _limitationCost));
+                }
             }
         }
 
