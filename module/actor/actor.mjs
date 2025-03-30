@@ -753,20 +753,20 @@ export class HeroSystem6eActor extends Actor {
      *
      * @returns {boolean}
      */
-    needsToAbortToAct() {
-        const currentCombatActorId = game.combat?.combatants.find(
-            (combatant) => combatant.tokenId === game.combat.current?.tokenId,
-        )?.actorId;
-        const thisActorsCombatTurn =
-            game.combat?.active && currentCombatActorId != undefined && currentCombatActorId === this.id;
-        const thisActorHoldingAnAction = this.statuses.has("holding");
+    // needsToAbortToAct() {
+    //     const currentCombatActorId = game.combat?.combatants.find(
+    //         (combatant) => combatant.tokenId === game.combat.current?.tokenId,
+    //     )?.actorId;
+    //     const thisActorsCombatTurn =
+    //         game.combat?.active && currentCombatActorId != undefined && currentCombatActorId === this.id;
+    //     const thisActorHoldingAnAction = this.statuses.has("holding");
 
-        if (game.combat?.active && !thisActorsCombatTurn && !thisActorHoldingAnAction) {
-            return true;
-        }
+    //     if (game.combat?.active && !thisActorsCombatTurn && !thisActorHoldingAnAction) {
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     // When stunned, knockedout, etc you cannot act
     canAct(uiNotice, event) {
@@ -795,10 +795,12 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Is not actor's turn to act
-        if (this.needsToAbortToAct()) {
-            badStatus.push("NOT THE ACTIVE COMBATANT");
-            result = false;
-        }
+        // AaronWasHere 3/30/2025: Was unable to full heal Spctral Daemon LordB
+        //  which tries to toggle on FLIGHT.  It was not part of the combat tracker.
+        // if (this.needsToAbortToAct()) {
+        //     badStatus.push("NOT THE ACTIVE COMBATANT");
+        //     result = false;
+        // }
 
         // No speed?
         if (parseInt(this.system.characteristics.spd?.value || 0) < 1) {
