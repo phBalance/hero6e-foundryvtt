@@ -5701,10 +5701,7 @@ export class HeroSystem6eItem extends Item {
 
         // When reducing character points, we just scale. However, when pushing we don't consider
         // advantages (which was clearly an "it's too complicated to calculate" simplification in the rules that we'll keep)
-        const effectiveBaseRawDc =
-            effectiveRealCost <= baseRealCost
-                ? this.dcRaw * (effectiveRealCost / baseRealCost)
-                : this.dcRaw + ((effectiveRealCost - baseRealCost) * (1 + this._advantagesAffectingDc)) / 5;
+        const effectiveBaseRawDc = this.dcRaw * (effectiveRealCost / baseRealCost);
 
         const diceParts = calculateDicePartsFromDcForItem(this, effectiveBaseRawDc);
 
