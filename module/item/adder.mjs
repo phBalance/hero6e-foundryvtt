@@ -1,5 +1,4 @@
 import { getModifierInfo } from "../utility/util.mjs";
-import { HeroSystem6eItem } from "./item.mjs";
 
 export class HeroSystem6eAdder {
     #baseInfo;
