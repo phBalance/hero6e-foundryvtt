@@ -975,43 +975,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         return recursiveFindByXmlid.call(this, xmlid);
-
-        // for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-        //     if (this.system?.[key]) {
-        //         const value = this.system[key]?.find((o) => o.XMLID === xmlid);
-        //         if (value) {
-        //             return value;
-        //         }
-        //     }
-        // }
-
-        // // TODO: "Delete" support for old format
-        // for (const key of ["ADDER", "MODIFIER", "POWER"]) {
-        //     if (this.system?.[key]) {
-        //         const value = this.system[key].find((o) => o.XMLID === xmlid);
-        //         if (value) {
-        //             return value;
-        //         }
-
-        //         for (const subMod of this.system[key]) {
-        //             for (const key2 of ["ADDER", "MODIFIER", "POWER"]) {
-        //                 if (subMod[key2]) {
-        //                     const value = subMod[key2].find((o) => o.XMLID === xmlid);
-        //                     if (value) {
-        //                         return value;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
-        // Power framework may include this modifier
-        // if (this.parentItem && !this.parentItem.XMLID === "COMPOUNDPOWER" && this.actor?.items) {
-        //     if (this.parentItem) {
-        //         return this.parentItem.findModsByXmlid(xmlid);
-        //     }
-        // }
     }
 
     findModById(id, xmlid) {
@@ -5092,7 +5055,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isContainer() {
-        if (this.isSeperator) return false;
+        if (this.isSeparator) return false;
         if (this.childItems.length) return true;
 
         // A backpack from MiscEquipment.hdp is a CUSTOMPOWER
@@ -5101,7 +5064,7 @@ export class HeroSystem6eItem extends Item {
         return this.baseInfo?.isContainer;
     }
 
-    get isSeperator() {
+    get isSeparator() {
         // It appears that some seperators can have childItems.  Not sure why this is the case.
         return this.system.XMLID === "LIST" && this.system.ALIAS.trim() === "";
     }
