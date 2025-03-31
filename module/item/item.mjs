@@ -5521,21 +5521,22 @@ export class HeroSystem6eItem extends Item {
             _cost = Math.max(1, _cost - 1);
         }
 
-        // Need to be careful about NAKEDMODIFIER PRIVATE (part of cost) vs !PRIVATE (part of naked limitation)
-        // Considering moving this into CONFIG.MJS, but need to see if this applies anywhere else.
-        // Would be nice to have something generic to handle all cases
         let _limitationCost = this._limitationCost;
         if (this.system.XMLID === "NAKEDMODIFIER") {
+            // Need to be careful about NAKEDMODIFIER PRIVATE (part of cost) vs !PRIVATE (part of naked limitation)
+            // Considering moving this into CONFIG.MJS, but need to see if this applies anywhere else.
+            // Would be nice to have something generic to handle all cases
             _limitationCost = 0;
+
             for (const limitation of this.limitations.filter((o) => o.PRIVATE)) {
                 _limitationCost -= limitation.cost;
             }
         } else if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
+            // Elemental controls reduce the slot cost by the base cost. Slot cost must be at least 2x base cost.
             const baseCost = (this.parentItem.system.BASECOST = parseFloat(this.parentItem.system.BASECOST));
             _cost = Math.max(baseCost, _cost - baseCost);
 
-            // The real cost of an EC slot includes the limitations on the pool and the slot.
-            _limitationCost = this._limitationCost;
+            // The real cost of an EC slot is the sum of the limitations on the pool and the slot (which is this._limitationCost) above
         }
 
         // We must round only if we divide (FRed pg 7, 6e vol 1 pg 12)
