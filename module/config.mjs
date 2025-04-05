@@ -298,7 +298,7 @@ HERO.hitLocations = Object.freeze({
 });
 
 HERO.isSpecialHitLocation = function (location) {
-    return HERO.hitLocations[location].isSpecialHl;
+    return HERO.hitLocations[location]?.isSpecialHl ?? false;
 };
 
 HERO.sidedLocations = new Set(["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]);
