@@ -2600,57 +2600,52 @@ export class HeroSystem6eActor extends Actor {
             //     newValue = Math.floor(newValue);
             // }
 
-            let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
-            newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
+            // Only update characteristics if there are no active effects modifying the characteristic
+            if (!this.appliedEffects.find((e) => e.changes.find((c) => c.key.includes(key)))) {
+                let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
+                newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
 
-            if (this.system.characteristics[key].max !== newValue) {
-                if (this.id) {
-                    //changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
-                    await this.update({
-                        [`system.characteristics.${key.toLowerCase()}.max`]: Math.floor(newValue),
-                    });
-                } else {
+                newValue = Math.floor(newValue); // For 5e SPD
+
+                if (this.system.characteristics[key].max !== newValue) {
                     this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue);
+                    if (this.id) {
+                        changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue);
+                    }
+                    changed = true;
                 }
-
-                changed = true;
-            }
-            if (
-                this.system.characteristics[key].value !== this.system.characteristics[key.toLowerCase()].max &&
-                this.system.characteristics[key.toLowerCase()].max !== null &&
-                overrideValues
-            ) {
-                if (this.id) {
-                    await this.update(
-                        {
-                            [`system.characteristics.${key.toLowerCase()}.value`]:
-                                this.system.characteristics[key.toLowerCase()].max,
-                        },
-                        { hideChatMessage: true },
-                    );
-                } else {
+                if (
+                    this.system.characteristics[key].value !== this.system.characteristics[key.toLowerCase()].max &&
+                    this.system.characteristics[key.toLowerCase()].max !== null &&
+                    overrideValues
+                ) {
                     this.system.characteristics[key.toLowerCase()].value =
                         this.system.characteristics[key.toLowerCase()].max;
+                    if (this.id) {
+                        changes[`system.characteristics.${key.toLowerCase()}.value`] =
+                            this.system.characteristics[key.toLowerCase()].max;
+                    }
+                    changed = true;
                 }
-                changed = true;
-            }
-            if (this.system.characteristics[key].core !== newValue && overrideValues) {
-                changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue;
-                this.system.characteristics[key.toLowerCase()].core = newValue;
-                changed = true;
-            }
+                if (this.system.characteristics[key].core !== newValue && overrideValues) {
+                    changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue;
+                    this.system.characteristics[key.toLowerCase()].core = newValue;
+                    changed = true;
+                }
 
-            // Rollable Characteristics
-            const rollableChanges = this.updateRollable(key.toLowerCase());
-            if (rollableChanges) {
-                changed = true;
+                // Rollable Characteristics
+                const rollableChanges = this.updateRollable(key.toLowerCase());
+                if (rollableChanges) {
+                    changed = true;
 
-                foundry.utils.mergeObject(changes, rollableChanges);
+                    foundry.utils.mergeObject(changes, rollableChanges);
+                }
             }
         }
 
         // Save changes
         if (changed && this.id) {
+            console.log(`update ${Object.keys(changes).length} for ${this.name}`, changes);
             await this.update(changes);
         }
 
@@ -2779,9 +2774,11 @@ export class HeroSystem6eActor extends Actor {
             if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;
             }
-            return {
-                [`system.characteristics.${key}.roll`]: characteristic.roll,
-            };
+            if (this.system.characteristics[key].roll !== characteristic.roll) {
+                return {
+                    [`system.characteristics.${key}.roll`]: characteristic.roll,
+                };
+            }
         }
 
         return undefined;
