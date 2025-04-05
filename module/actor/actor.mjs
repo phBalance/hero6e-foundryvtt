@@ -2601,45 +2601,47 @@ export class HeroSystem6eActor extends Actor {
             // }
 
             // Only update characteristics if there are no active effects modifying the characteristic
-            if (!this.appliedEffects.find((e) => e.changes.find((c) => c.key.includes(key)))) {
-                let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
-                newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
+            //const charHasEffect = this.appliedEffects.find((e) => e.changes.find((c) => c.key.includes(key)));
+            let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
+            newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
 
-                newValue = Math.floor(newValue); // For 5e SPD
+            newValue = Math.floor(newValue); // For 5e SPD
 
-                if (this.system.characteristics[key].max !== newValue) {
-                    this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue);
-                    if (this.id) {
-                        changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue);
-                    }
-                    changed = true;
+            if (this.system.characteristics[key].max !== newValue) {
+                //if (charHasEffect) debugger;
+                this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue);
+                if (this.id) {
+                    changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue);
                 }
-                if (
-                    this.system.characteristics[key].value !== this.system.characteristics[key.toLowerCase()].max &&
-                    this.system.characteristics[key.toLowerCase()].max !== null &&
-                    overrideValues
-                ) {
-                    this.system.characteristics[key.toLowerCase()].value =
+                changed = true;
+            }
+            if (
+                this.system.characteristics[key].value !== this.system.characteristics[key.toLowerCase()].max &&
+                this.system.characteristics[key.toLowerCase()].max !== null &&
+                overrideValues
+            ) {
+                //if (charHasEffect) debugger;
+                this.system.characteristics[key.toLowerCase()].value =
+                    this.system.characteristics[key.toLowerCase()].max;
+                if (this.id) {
+                    changes[`system.characteristics.${key.toLowerCase()}.value`] =
                         this.system.characteristics[key.toLowerCase()].max;
-                    if (this.id) {
-                        changes[`system.characteristics.${key.toLowerCase()}.value`] =
-                            this.system.characteristics[key.toLowerCase()].max;
-                    }
-                    changed = true;
                 }
-                if (this.system.characteristics[key].core !== newValue && overrideValues) {
-                    changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue;
-                    this.system.characteristics[key.toLowerCase()].core = newValue;
-                    changed = true;
-                }
+                changed = true;
+            }
+            if (this.system.characteristics[key].core !== newValue && overrideValues) {
+                //if (charHasEffect) debugger;
+                changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue;
+                this.system.characteristics[key.toLowerCase()].core = newValue;
+                changed = true;
+            }
 
-                // Rollable Characteristics
-                const rollableChanges = this.updateRollable(key.toLowerCase());
-                if (rollableChanges) {
-                    changed = true;
-
-                    foundry.utils.mergeObject(changes, rollableChanges);
-                }
+            // Rollable Characteristics
+            const rollableChanges = this.updateRollable(key.toLowerCase());
+            if (rollableChanges) {
+                //if (charHasEffect) debugger;
+                changed = true;
+                foundry.utils.mergeObject(changes, rollableChanges);
             }
         }
 
