@@ -2647,7 +2647,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Save changes
         if (changed && this.id) {
-            console.log(`update ${Object.keys(changes).length} for ${this.name}`, changes);
+            //console.log(`update ${Object.keys(changes).length} for ${this.name}`, changes);
             await this.update(changes);
         }
 
