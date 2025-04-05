@@ -661,7 +661,17 @@ async function doSingleTargetActionToHit(item, options) {
             ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
         }
 
-        const target = targets[0];
+        const isAoE = item.getAoeModifier();
+        const aoeTemplate =
+            game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
+            game.scenes.current.templates.find((o) => o.author.id === game.user.id);
+        if (isAoE && !aoeTemplate) {
+            return ui.notifications.error(`Attack AOE template was not found.`);
+        }
+
+        // Pick the appropriate target based on the attack type. For AoE it's the base of the AoE template for
+        // a single target attack it's the actual target.
+        const target = isAoE ? aoeTemplate : targets[0];
         const distance = token ? calculateDistanceBetween(token, target).distance : 0;
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
 
