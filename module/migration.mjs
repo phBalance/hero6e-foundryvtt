@@ -161,7 +161,6 @@ async function removeStrengthPlaceholderAndCreateActiveProperty(actor) {
         const updates = actor.items
             .map((item) => {
                 if (!item.system._active) {
-                    //return item.update({ "system._active": {} });
                     return { _id: item._id, "system._active": {} };
                 }
 
