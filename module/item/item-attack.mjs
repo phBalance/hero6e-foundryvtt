@@ -73,7 +73,8 @@ function isStunBasedEffectRoll(item) {
 
 // PH: FIXME: Should we be looking to override the existing Item JSON functions for this functionality?
 /**
- * Turn an item into JSON
+ * Turn an item into JSON.
+ * Reverse the process with rehydrateAttackItem
  * @param {*} item
  */
 export function dehydrateAttackItem(item) {
@@ -93,11 +94,21 @@ export function dehydrateAttackItem(item) {
 }
 
 /**
- *
+ * Rehydrates a JSON object created by dehydrateAttackItem
  * @param {Object} rollInfo
  */
-function rehydrateAttackItemAndActor(rollInfo) {
+function rehydrateActorAndAttackItem(rollInfo) {
     const actor = fromUuidSync(rollInfo.actorUuid);
+
+    return redydrateAttackItem(rollInfo, actor);
+}
+
+/**
+ * Rehydrates a JSON object created by dehydrateAttackItem
+ * @param {Object} rollInfo
+ * @param {*} actor
+ */
+function redydrateAttackItem(rollInfo, actor) {
     const item = HeroSystem6eItem.fromSource(JSON.parse(rollInfo.itemJsonStr), {
         parent: actor,
     });
@@ -1297,7 +1308,7 @@ export async function _onRollAoeDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
-    const { item } = rehydrateAttackItemAndActor(toHitData);
+    const { item } = rehydrateActorAndAttackItem(toHitData);
     return doSingleTargetActionToHit(item, JSON.parse(toHitData.formData));
 }
 
@@ -1305,7 +1316,6 @@ export async function _onRollKnockback(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const options = { ...button.dataset };
-    //const ignoreDefenseIds = JSON.parse(options.ignoreDefenseIdsJson) || [];
     const item = fromUuidSync(options.itemId);
     const token = game.scenes.current.tokens.get(options.targetTokenId);
     const knockbackResultTotal = options.knockbackResultTotal;
@@ -1613,7 +1623,7 @@ export async function _onRollDamage(event) {
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
 
-    const { actor, item } = rehydrateAttackItemAndActor(toHitData);
+    const { actor, item } = rehydrateActorAndAttackItem(toHitData);
 
     if (!item || !actor) {
         return ui.notifications.error(`Attack details are no longer available.`);
@@ -2013,11 +2023,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
 
     const actor = actorParam || fromUuidSync(damageData.actorUuid);
 
-    const item =
-        itemParam ||
-        HeroSystem6eItem.fromSource(JSON.parse(damageData.itemJsonStr), {
-            parent: actor,
-        });
+    const item = itemParam || redydrateAttackItem(damageData, actorParam || actor).item;
 
     if (targetTokens.length === 0) {
         // Check to make sure we have a selected token
@@ -2808,8 +2814,6 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     };
 
     ChatMessage.create(chatData);
-
-    // TODO: Chat Card
 }
 
 async function _performAbsorptionForToken(token, absorptionItems, damageDetail, damageItem) {
