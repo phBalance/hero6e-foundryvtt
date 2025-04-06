@@ -1,5 +1,5 @@
 {{!-- {{ log 'HEROSYS apply-damage-card' this }} --}}
-<div class="hero chat-card apply-damage-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+<div class="hero chat-card apply-damage-card" {{#if
   tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
   <header class="card-header flexrow">
@@ -75,13 +75,13 @@
 
       {{#if (gte knockbackResultTotalWithShrinking 0)}}
         <div data-visibility="gm">
-          <button class="roll-knockback" data-item-Id="{{item.uuid}}" data-target-Token-Id="{{targetToken.id}}"
+          <button class="roll-knockback" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-target-token-id="{{targetToken.id}}"
             data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}">
             {{ knockbackMessage }}
           </button>
         </div>
         <div data-visibility="!gm">
-          <button class="roll-knockback" data-item-Id="{{item.uuid}}" data-target-Token-Id="{{targetToken.id}}"
+          <button class="roll-knockback" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-target-token-id="{{targetToken.id}}"
             data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}" disabled title="Only a GM can perform KB">
             {{ knockbackMessage }}
           </button>

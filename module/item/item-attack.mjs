@@ -1315,10 +1315,11 @@ export async function _onRollAoeDamage(event) {
 export async function _onRollKnockback(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
-    const options = { ...button.dataset };
-    const item = fromUuidSync(options.itemId);
-    const token = game.scenes.current.tokens.get(options.targetTokenId);
-    const knockbackResultTotal = options.knockbackResultTotal;
+
+    const kbOptions = { ...button.dataset };
+    const { item } = rehydrateActorAndAttackItem(kbOptions);
+    const token = game.scenes.current.tokens.get(kbOptions.targetTokenId);
+    const knockbackResultTotal = kbOptions.knockbackResultTotal;
     if (!item || !token || !knockbackResultTotal) {
         return ui.notifications.error(`Knockback details are not available.`);
     }
@@ -1523,6 +1524,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
 
     const cardData = {
         item: pdAttack,
+        actor: actor,
+        itemJsonStr: dehydrateAttackItem(pdAttack),
 
         // Incoming Damage Information
         incomingDamageSummary: damageRoller.getTotalSummary(),
@@ -2468,6 +2471,8 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     const cardData = {
         item: item,
+        actor: item.actor,
+        itemJsonStr: dehydrateAttackItem(item),
 
         // Incoming Damage Information
         incomingDamageSummary: baseDamageRoller.getTotalSummary(),
@@ -2773,6 +2778,8 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
     const cardData = {
         item: attackItem,
+        actor: attackItem.actor,
+        itemJsonStr: dehydrateAttackItem(attackItem),
 
         // Incoming Damage Information
         incomingDamageSummary: originalRoll.getTotalSummary(),
