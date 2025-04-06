@@ -1,40 +1,43 @@
 // Import Modules
 import { HERO } from "./config.mjs";
-import { HeroSystem6eActor } from "./actor/actor.mjs";
-import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
-import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
-
-import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-token.mjs";
-import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
-import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 import * as chat from "./chat.mjs";
-import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
-import {
-    HeroSystem6eActorActiveEffects,
-    HeroSystem6eActorActiveEffectsSystemData,
-} from "./actor/actor-active-effects.mjs";
 import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
-import SettingsHelpers from "./settings/settings-helpers.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
-import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 import { migrateWorld } from "./migration.mjs";
-import "./utility/adjustment.mjs";
-
 import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 import { setPerceptionModes } from "./utility/vision.mjs";
 import { HeroPointVisionSource } from "./utility/vision.mjs";
+import { EffectsPanel } from "./effects-panel.mjs";
 
+import { HeroSystem6eActor } from "./actor/actor.mjs";
+import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
+import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
+import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-token.mjs";
+import {
+    HeroSystem6eActorActiveEffects,
+    HeroSystem6eActorActiveEffectsSystemData,
+} from "./actor/actor-active-effects.mjs";
+import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
+
+import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
+import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
+import { dehydrateAttackItem } from "./item/item-attack.mjs";
+
+import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
+
+import SettingsHelpers from "./settings/settings-helpers.mjs";
+
+import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
+import "./utility/adjustment.mjs";
 import "./utility/chat-dice.mjs";
 
 import "./testing/testing-main.mjs";
-import { EffectsPanel } from "./effects-panel.mjs";
-import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
 Hooks.once("init", async function () {
@@ -893,7 +896,7 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     break;
                 }
 
-                //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
+                // Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
                     .addNumber(userSelection.ocv, "OCV")
                     .addNumber(11, "Base to hit")
@@ -914,6 +917,7 @@ Hooks.on("renderSidebarTab", async (app, html) => {
 
                 return ChatMessage.create(chatData);
             }
+
             case "damage": {
                 const options = {
                     dice: 1,
@@ -925,14 +929,17 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     damageType: {
                         groupName: "damageType",
                         choices: {
-                            NORMAL: "Normal",
-                            KILLING: "Killing",
+                            NORMAL_PD: "Normal PD",
+                            NORMAL_ED: "Normal ED",
+                            NORMAL_MD: "Normal MD",
+                            KILLING_PD: "Killing PD",
+                            KILLING_ED: "Killing ED",
                             ADJUSTMENT: "Adjustment",
                             ENTANGLE: "Entangle",
                             FLASH: "Flash",
                             EFFECT: "Effect",
                         },
-                        chosen: "NORMAL",
+                        chosen: "NORMAL_PD",
                     },
                 };
 
@@ -958,21 +965,42 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                     break;
                 }
 
+                const damageTypeString = userSelection.damageType.replace("_", " ");
+                const damageType = userSelection.damageType.replace(/_[EMP]D/, "");
+
                 const customStunMultiplierSetting = game.settings.get(
                     game.system.id,
                     "NonStandardStunMultiplierForKillingAttackBackingSetting",
                 );
 
-                //Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
+                // Canvas selected token? If so, use that as the actor
+                const actor = canvas.tokens.controlled.at(0)?.actor;
+                // Roll as if 5e or 6e?
+                const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
+                const is5eAttack =
+                    actor !== undefined ? canvas.tokens.controlled.at(0).actor.is5e : DefaultEdition === "five";
+                const tempActor = new HeroSystem6eActor({
+                    name: `Generic Actor`,
+                    type: "npc",
+                });
+                tempActor.system.is5e = is5eAttack;
+                await tempActor._postUpload();
+
+                // NOTE: Missing PD vs ED for normal & killing attacks
+                // NOTE: No application of damage for anything other than normal and killing attacks
+
+                // Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
                 const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
                     .addDice(userSelection.dice, "DICE")
                     .addHalfDice(userSelection.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
                     .addDiceMinus1(userSelection.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
                     .addNumber(userSelection.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
 
-                    .makeNormalRoll(userSelection.damageType === "NORMAL")
+                    .modifyTo5e(is5eAttack)
+
+                    .makeNormalRoll(damageType === "NORMAL")
                     .makeKillingRoll(
-                        userSelection.damageType === "KILLING",
+                        damageType === "KILLING",
                         customStunMultiplierSetting.d6Count ||
                             customStunMultiplierSetting.d6Less1DieCount ||
                             customStunMultiplierSetting.halfDieCount ||
@@ -980,29 +1008,66 @@ Hooks.on("renderSidebarTab", async (app, html) => {
                             ? customStunMultiplierSetting
                             : undefined,
                     )
-                    .makeAdjustmentRoll(userSelection.damageType === "ADJUSTMENT")
-                    .makeEntangleRoll(userSelection.damageType === "ENTANGLE")
-                    .makeFlashRoll(userSelection.damageType === "FLASH")
-                    .makeEffectRoll(userSelection.damageType === "EFFECT");
+                    .makeAdjustmentRoll(damageType === "ADJUSTMENT")
+                    .makeEntangleRoll(damageType === "ENTANGLE")
+                    .makeFlashRoll(damageType === "FLASH")
+                    .makeEffectRoll(damageType === "EFFECT");
 
                 await heroRoller.roll();
 
-                let cardHtml = await heroRoller.render(`Roll Generic ${userSelection.damageType} Damage`);
+                const powers = is5eAttack ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
 
-                if (["NORMAL", "KILLING"].includes(userSelection.damageType)) {
-                    const action = { damageType: userSelection.damageType };
+                let xml = "";
+                if (userSelection.damageType === "NORMAL_PD") {
+                    xml = powers
+                        .find((power) => power.key === "ENERGYBLAST")
+                        .xml.replace(/ INPUT="[PE]D"/, ` INPUT="PD"`);
+                } else if (userSelection.damageType === "NORMAL_ED") {
+                    xml = powers
+                        .find((power) => power.key === "ENERGYBLAST")
+                        .xml.replace(/ INPUT="[EP]D"/, ` INPUT="ED"`);
+                } else if (userSelection.damageType === "NORMAL_MD") {
+                    xml = foundry.utils.deepClone(powers.find((power) => power.key === "EGOATTACK").xml);
+                } else if (userSelection.damageType === "KILLING_PD") {
+                    xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="PD"`);
+                } else if (userSelection.damageType === "KILLING_ED") {
+                    xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="ED"`);
+                }
+
+                let item = null;
+
+                if (xml) {
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor || tempActor), {
+                        parent: actor || tempActor,
+                    });
+                    await item._postUpload();
+
+                    if (!actor) {
+                        tempActor.items.set(item.system.XMLID, item);
+                    }
+                }
+
+                // PH: FIXME: Should put this into handlebars
+                let cardHtml = await heroRoller.render(`Roll Generic ${damageTypeString} Damage`);
+
+                // PH: FIXME: Is this an actual field of action or just a kludge?
+                const action = { damageType: damageType };
+
+                if (["NORMAL", "KILLING"].includes(damageType)) {
                     cardHtml += `
-                    <div data-visibility="gm">
-                        <button class="apply-damage"
-                            title="Apply damage to selected tokens."
-                            data-action-data='${JSON.stringify(action)}'
-                            data-roller='${heroRoller.toJSON()}'
-                            data-target-tokens='${JSON.stringify([])}'
-                        >
-                            Apply ${userSelection.damageType} Damage
-                        </button>
-                    </div>
-                `;
+                        <div data-visibility="gm">
+                            <button class="generic-roller-apply-damage"
+                                title="Apply damage to selected tokens."
+                                ${actor ? `data-actor-uuid='${actor.uuid}'` : ""}
+                                ${item ? `data-item-json-str='${dehydrateAttackItem(item)}'` : ""}
+                                data-action-data='${JSON.stringify(action)}'
+                                data-roller='${heroRoller.toJSON()}'
+                                data-target-tokens='${JSON.stringify([])}'
+                            >
+                                Apply ${damageTypeString} Damage
+                            </button>
+                        </div>
+                    `;
                 }
 
                 const chatData = {
@@ -1014,6 +1079,7 @@ Hooks.on("renderSidebarTab", async (app, html) => {
 
                 return ChatMessage.create(chatData);
             }
+
             default:
                 console.log(`Unhandled action`, dataset.action);
         }

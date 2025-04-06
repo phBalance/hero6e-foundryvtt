@@ -26,6 +26,7 @@ export async function chatListeners(_html) {
     const html = $(_html); // v13 compatibility
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
     html.on("click", "button.apply-damage", this._onApplyDamage.bind(this));
+    html.on("click", "button.generic-roller-apply-damage", this._onGenericRollerApplyDamage.bind(this));
     html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
     html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
     html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
@@ -1971,9 +1972,38 @@ export async function _onRollMindScanEffectRoll(event) {
 }
 
 /**
+ * Event handler for apply damage for the generic roller
+ */
+export async function _onGenericRollerApplyDamage(event) {
+    const button = event.currentTarget;
+    const damageData = { ...button.dataset };
+
+    // Since this is coming through the generic damage roll user flow there may or may not be a real actor attached.
+    const actor = damageData.actorUuid
+        ? fromUuidSync(damageData.actorUuid)
+        : new HeroSystem6eActor({
+              name: `Generic Actor`,
+              type: "npc",
+          });
+
+    const item = HeroSystem6eItem.fromSource(JSON.parse(damageData.itemJsonStr), {
+        parent: actor,
+    });
+
+    actor.system.is5e = item.system.is5e;
+    await actor._postUpload();
+
+    if (!damageData.actorUuid) {
+        actor.items.set(item.system.XMLID, item);
+    }
+
+    return _onApplyDamage(event, actor, item);
+}
+
+/**
  * Event handler for when the Apply Damage button is clicked on item-damage-card.hbsNotice the chatListeners function in this file.
  */
-export async function _onApplyDamage(event) {
+export async function _onApplyDamage(event, actorParam, itemParam) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
 
@@ -1981,47 +2011,18 @@ export async function _onApplyDamage(event) {
     const targetTokens = JSON.parse(damageData.targetTokens);
     const action = JSON.parse(damageData.actionData);
 
-    const item = HeroSystem6eItem.fromSource(JSON.parse(damageData.itemJsonStr), {
-        parent: fromUuidSync(damageData.actorUuid),
-    });
+    const actor = actorParam || fromUuidSync(damageData.actorUuid);
+
+    const item =
+        itemParam ||
+        HeroSystem6eItem.fromSource(JSON.parse(damageData.itemJsonStr), {
+            parent: actor,
+        });
 
     if (targetTokens.length === 0) {
         // Check to make sure we have a selected token
         if (canvas.tokens.controlled.length == 0) {
             return ui.notifications.warn(`You must select at least one token before applying damage.`);
-        }
-
-        const action = damageData.actionData ? JSON.parse(damageData.actionData) : null;
-
-        if (!item && action?.damageType) {
-            action.defense = await Dialog.wait({
-                title: "Generic Damage",
-                content: `You used the generic "Roll Damage" button. Select the defense you want applied.`,
-                buttons: {
-                    PD: {
-                        label: "PD",
-                        callback: () => {
-                            return "PD";
-                        },
-                    },
-                    ED: {
-                        label: "ED",
-                        callback: () => {
-                            return "ED";
-                        },
-                    },
-                    // MD: {
-                    //     label: "MD",
-                    //     callback: () => {
-                    //         return "MD";
-                    //     },
-                    // },
-                },
-                close: () => {
-                    return null;
-                },
-            });
-            damageData.actionData = JSON.stringify(action);
         }
 
         for (const token of canvas.tokens.controlled) {
@@ -2070,38 +2071,6 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         return ui.notifications.error(
             `Actor for ${token.name} is missing.  Unable to apply damage.  You will have to create a new actor & token.`,
         );
-    }
-
-    // PH: FIXME: Do we want to have this created here. Seems wrong given the structure. Feels like a kludge.
-    // Generic Damage Roll - create a fake item
-    if (!item && action.damageType) {
-        let xml;
-        switch (action.defense) {
-            case "PD":
-            case "ED": {
-                const _xmlid = action.damageType === "KILLING" ? "RKA" : "ENERGYBLAST";
-                xml = `<POWER XMLID="${_xmlid}" ID="1735535975123" BASECOST="0.0" LEVELS="0" ALIAS="Generic Damage" INPUT="${action.defense}">
-                    </POWER>`;
-                break;
-            }
-            case null:
-                return;
-            default:
-                ui.notifications.error(`Generic ${action.defense} damage is not supported.`);
-                return;
-        }
-
-        const actor = new HeroSystem6eActor({
-            name: `Generic Actor`,
-            type: "npc",
-        });
-        actor.system.is5e = token?.actor?.is5e;
-        await actor._postUpload();
-        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor), {
-            parent: actor,
-        });
-        await item._postUpload();
-        actor.items.set(item.system.XMLID, item);
     }
 
     if (!item) {
