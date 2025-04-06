@@ -465,7 +465,13 @@ export class ItemAttackFormApplication extends FormApplication {
                 // Item the NA is being applied to must not exceed the AP of the NA was designed against.
                 // TODO: This implies that one cannot push with a NA. Is this correct?
                 const naEffectiveAgainstAp = parseInt(naItem.system.LEVELS || 0);
-                if (naEffectiveAgainstAp < effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+
+                // 5e and 6e have different rules as far as applying multiple naked advantages. 6e states that the effect of the first NA counts
+                // as a part of the power's AP for the purposes of adding a 2nd NA. 5e (FRed) does not have this rule.
+                const effectiveItemApForNaComparison = naItem.is5e
+                    ? effectiveItemActivePointsBeforeHthAndNaAdvantages
+                    : effectiveItem._activePoints;
+                if (naEffectiveAgainstAp < effectiveItemApForNaComparison) {
                     if (array[index][1]._canUseForAttack) {
                         nakedAdvantagesDisabledDueToActivePoints = true;
                     }
@@ -483,25 +489,24 @@ export class ItemAttackFormApplication extends FormApplication {
                     return undefined;
                 }
 
-                return naItem;
-            })
-            .filter(Boolean)
-            .forEach((naAttack) => {
-                effectiveItem.copyItemAdvantages(naAttack, []);
+                effectiveItem.copyItemAdvantages(naItem, []);
                 effectiveItem.system._active.linkedEnd ??= [];
                 effectiveItem.system._active.linkedEnd.push({
-                    item: naAttack,
-                    uuid: naAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+                    item: naItem,
+                    uuid: uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
                 });
 
-                strengthItem?.copyItemAdvantages(naAttack, []);
+                strengthItem?.copyItemAdvantages(naItem, []);
 
                 // PH: FIXME: active points from NA should be automatically adjusted to reflect the AP in the effective item (i.e. 30 AP effective item
                 //            shouldn't have to pay full END for NA that can affect up to 90 AP - it should just be dipped down to 30 AP)
-            });
+
+                return naItem;
+            })
+            .filter(Boolean);
         if (nakedAdvantagesDisabledDueToActivePoints) {
             ui.notifications.warn(
-                `Naked Advantages must be able to apply at least as many active points as the base attack`,
+                `Naked Advantages must be able to apply at least as many active points as the base attack${effectiveItem.is5e ? "" : " and other naked advantages"}`,
             );
         }
 

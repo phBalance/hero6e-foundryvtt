@@ -1108,7 +1108,7 @@ export class HeroSystem6eItem extends Item {
         if (this.actor?.is5e !== undefined) {
             return this.actor.is5e;
         }
-        return this.system?.is5e;
+        return this.system.is5e;
     }
 
     /**
