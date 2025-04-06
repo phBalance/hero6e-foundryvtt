@@ -1,8 +1,8 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "./actor.mjs";
 
-import { HeroSystem6eItem } from "../item/item.mjs";
-import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
+import { cloneToEffectiveAttackItem, HeroSystem6eItem } from "../item/item.mjs";
+import { dehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
 
 import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
@@ -942,28 +942,33 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     async _onStrengthCharacteristicRoll(characteristicValue, flavor) {
         // STR should have an item for potential damage, just like a strike and should consume resources
-        let item;
-
-        // Strength use consumes resources. No other characteristic roll does.
-        item = this.actor.items.find((o) => o.system.XMLID === "STRIKE");
-
-        if (!item) {
+        const originalStrikeItem = this.actor.items.find((o) => o.system.XMLID === "STRIKE");
+        if (!originalStrikeItem) {
             return ui.notifications.error(`Unable to find STRIKE item for ${this.actor.name}. Cannot perform attack`);
         }
 
-        const strengthUsed = { effectiveStr: characteristicValue };
+        // Create a temporary strike attack linked to a strength item.
+        const { effectiveItem: effectiveAttackItem, strengthItem: effectiveStrengthItem } = cloneToEffectiveAttackItem({
+            originalItem: originalStrikeItem,
+            effectiveRealCost: originalStrikeItem._realCost,
+            pushedRealPoints: originalStrikeItem._realCost,
+            effectiveStr: characteristicValue,
+            effectiveStrPushedRealPoints: 0,
+        });
+        effectiveAttackItem._postUpload();
+        effectiveStrengthItem._postUpload();
 
-        // Consume resources
+        // Strength use consumes resources. No other characteristic roll does.
         const {
             error: resourceError,
             warning: resourceWarning,
             resourcesUsedDescription,
             resourcesUsedDescriptionRenderedRoll,
-        } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, strengthUsed);
+        } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveAttackItem, {});
         if (resourceError) {
-            return ui.notifications.error(`${item.name} ${resourceError}`);
+            return ui.notifications.error(`${effectiveAttackItem.name} ${resourceError}`);
         } else if (resourceWarning) {
-            return ui.notifications.warn(`${item.name} ${resourceWarning}`);
+            return ui.notifications.warn(`${effectiveAttackItem.name} ${resourceWarning}`);
         }
 
         // NOTE: Characteristic rolls can't have +1 to their roll.
@@ -976,24 +981,26 @@ export class HeroSystemActorSheet extends ActorSheet {
         await characteristicRoller.roll();
         const damageRenderedResult = await characteristicRoller.render();
 
-        // NOTE: This is not the full information required to do damage to an actor. Call it a kludge
-        //       as raw strength is not an attack item.
         const cardData = {
             flavor,
-            item,
+            item: effectiveAttackItem,
             targetEntangle: "true",
 
             resourcesUsedDescription: resourcesUsedDescription
                 ? `Spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`
                 : "",
 
-            // dice rolls
+            actor: this.actor,
+
             renderedDamageRoll: damageRenderedResult,
 
             bodyDamage: characteristicRoller.getBodyTotal(),
             stunDamage: characteristicRoller.getStunTotal(),
 
             rollerJSON: characteristicRoller.toJSON(),
+
+            itemJsonStr: dehydrateAttackItem(effectiveAttackItem),
+            actionDataJSON: JSON.stringify({}), // Kludge
 
             user: game.user,
         };
