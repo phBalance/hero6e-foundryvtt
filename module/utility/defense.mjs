@@ -521,7 +521,7 @@ export async function getConditionalDefenses(token, item, avad) {
                 const conditionalPower = defense.findModsByXmlid("CONDITIONALPOWER");
                 if (conditionalPower?.OPTION_ALIAS?.match(/not work/i)) {
                     const re = new RegExp(item.system.sfx, "i");
-                    for (const sfx of item.system.SFX.split("/")) {
+                    for (const sfx of item.system.SFX?.split("/") || []) {
                         if (sfx?.match(re)) {
                             option.checked = false;
                         }

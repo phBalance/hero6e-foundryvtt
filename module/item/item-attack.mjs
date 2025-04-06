@@ -75,7 +75,7 @@ function isStunBasedEffectRoll(item) {
  * Turn an item into JSON
  * @param {*} item
  */
-function dehydrateAttackItem(item) {
+export function dehydrateAttackItem(item) {
     if (item.system._active.effectiveStrItem) {
         item.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
     }

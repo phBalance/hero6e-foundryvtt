@@ -1,11 +1,11 @@
 import {
-    buildStrengthItem,
     calculateReduceOrPushRealCost,
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
+import { cloneToEffectiveAttackItem } from "../item/item.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -386,42 +386,13 @@ export class ItemAttackFormApplication extends FormApplication {
     // Create a new effectiveItem
     // PH: FIXME: Effective item is not STR for maneuvers with empty fist or the weapon for weapon maneuvers
     async #buildEffectiveObjectFromOriginalAndData() {
-        const effectiveStr = this.data.effectiveStr;
-
-        const effectiveItemData = this.data.originalItem.toObject(false);
-        effectiveItemData._id = null;
-        const effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: this.data.originalItem.actor });
-        effectiveItem.system._active = { __originalUuid: this.data.originalItem.uuid };
-
-        // PH: FIXME: Doesn't include TK
-        // PH: FIXME: Doesn't include items with STR minima
-        // Does this item allow strength to be added and has the character decided to use strength to augment the damage?
-        let strengthItem = null;
-        if (effectiveStr > 0 && this.data.originalItem.system.usesStrength) {
-            strengthItem = buildStrengthItem(
-                effectiveStr,
-                this.data.originalItem.actor,
-                `STR used with ${this.data.originalItem.name}`,
-            );
-
-            // Pushing?
-            strengthItem.system._active.pushedRealPoints = this.data.effectiveStrPushedRealPoints;
-
-            // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR placeholder
-            effectiveItem.system._active.effectiveStr = effectiveStr;
-            effectiveItem.system._active.effectiveStrItem = strengthItem;
-
-            effectiveItem.system._active.linkedEnd ??= [];
-            effectiveItem.system._active.linkedEnd.push({
-                item: strengthItem,
-            });
-        }
-
-        // PH: FIXME: Need to link in TK as appropriate into STR?
-
-        // Reduce or Push the item
-        effectiveItem.changePowerLevel(this.data.effectiveRealCost);
-        effectiveItem.system._active.pushedRealPoints = this.data.pushedRealPoints;
+        const { effectiveItem, strengthItem } = cloneToEffectiveAttackItem({
+            originalItem: this.data.originalItem,
+            effectiveRealCost: this.data.effectiveRealCost,
+            pushedRealPoints: this.data.pushedRealPoints,
+            effectiveStr: this.data.effectiveStr,
+            effectiveStrPushedRealPoints: this.data.effectiveStrPushedRealPoints,
+        });
 
         // Active points for the base item. For maneuvers this could be STR or a weapon.
         const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem.baseInfo.baseEffectDicePartsBundle(

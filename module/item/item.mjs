@@ -20,6 +20,7 @@ import {
 } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
+    buildStrengthItem,
     calculateDicePartsForItem,
     calculateDicePartsFromDcForItem,
     calculateStrengthMinimumForItem,
@@ -6087,6 +6088,58 @@ async function _startIfIsAContinuingCharge(item) {
             console.log("No associated Active Effect", item);
         }
     }
+}
+
+/**
+ * Create an uninitialized in-memory item.
+ *
+ * Caller can do further changes, such as linking items, and will need to call _postUpload
+ *
+ * @param {Object} param0
+ * @returns
+ */
+export function cloneToEffectiveAttackItem({
+    originalItem,
+    effectiveRealCost,
+    pushedRealPoints,
+    effectiveStr,
+    effectiveStrPushedRealPoints,
+}) {
+    const effectiveItemData = originalItem.toObject(false);
+    effectiveItemData._id = null;
+    const effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
+    effectiveItem.system._active = { __originalUuid: originalItem.uuid };
+
+    // PH: FIXME: Doesn't include TK
+    // PH: FIXME: Doesn't include items with STR minima
+    // Does this item allow strength to be added and has the character decided to use strength to augment the damage?
+    let strengthItem = null;
+    if (effectiveStr > 0 && originalItem.system.usesStrength) {
+        strengthItem = buildStrengthItem(effectiveStr, originalItem.actor, `STR used with ${originalItem.name}`);
+
+        // Pushing?
+        strengthItem.system._active.pushedRealPoints = effectiveStrPushedRealPoints;
+
+        // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR placeholder
+        effectiveItem.system._active.effectiveStr = effectiveStr;
+        effectiveItem.system._active.effectiveStrItem = strengthItem;
+
+        effectiveItem.system._active.linkedEnd ??= [];
+        effectiveItem.system._active.linkedEnd.push({
+            item: strengthItem,
+        });
+    }
+
+    // PH: FIXME: Need to link in TK as appropriate into STR?
+
+    // Reduce or Push the item
+    effectiveItem.changePowerLevel(effectiveRealCost);
+    effectiveItem.system._active.pushedRealPoints = pushedRealPoints;
+
+    return {
+        effectiveItem,
+        strengthItem,
+    };
 }
 
 // for testing and pack-load-from-config macro
