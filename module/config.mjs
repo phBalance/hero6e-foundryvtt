@@ -6251,7 +6251,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             activePoints: function (item) {
                 const _levels = parseInt(item.system.LEVELS);
-                //return (item._basePoints + item._addersCost) * (1 + item._advantageCost);
                 return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
             },
             realCost: function (item) {
