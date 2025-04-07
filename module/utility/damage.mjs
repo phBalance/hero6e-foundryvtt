@@ -969,7 +969,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     return { actorStrengthItem, baseEffectiveStrength, str };
 }
 
-export function maneuverbaseEffectDicePartsBundle(item, options) {
+export function maneuverBaseEffectDicePartsBundle(item, options) {
     const baseDicePartsBundle = {
         diceParts: zeroDiceParts,
         tags: [],
