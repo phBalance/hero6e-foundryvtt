@@ -4082,12 +4082,10 @@ async function spendResourcesToUse(
 
         // Make a tooltip for the resource usage including all individual item usage
         const resourceBreakdownByItem = resourcesRequired.individualResourceUsage
-            .map((itemResources) =>
-                itemResources.end || itemResources.reserveEnd || itemResources.charges
-                    ? `${itemResources.item.detailedName()} required ${itemResources.end} END, ${itemResources.reserveEnd} END from endurance reserve, and ${itemResources.charges} charge${itemResources.charges !== 1 ? "s" : ""}`
-                    : "",
+            .map(
+                (itemResources) =>
+                    `${itemResources.item.detailedName()} required ${itemResources.end} END, ${itemResources.reserveEnd} END from endurance reserve, and ${itemResources.charges} charge${itemResources.charges !== 1 ? "s" : ""}`,
             )
-            .filter(Boolean)
             .join("\n");
         resourcesUsedDescription = `<span title="${resourceBreakdownByItem}">${resourcesUsedDescription}</span>`;
     }
