@@ -998,8 +998,8 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
                     //            the base attack
                     // Since this HTH Attack is effectively absorbed into the strength, we use the STR's DC.
                     hthAttackDiceParts.dc =
-                        (hthAttackDiceParts.dc / (1 + hthAttack._advantageCost)) *
-                        (1 + actorStrengthItem._advantageCost);
+                        (hthAttackDiceParts.dc / (1 + hthAttack._advantagesAffectingDc)) *
+                        (1 + actorStrengthItem._advantagesAffectingDc);
 
                     baseDicePartsBundle.diceParts = addDiceParts(
                         item,
