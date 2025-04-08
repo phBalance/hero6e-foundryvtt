@@ -6,7 +6,7 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 import {
     characteristicValueToDiceParts,
     dicePartsToFullyQualifiedEffectFormula,
-    maneuverbaseEffectDicePartsBundle,
+    maneuverBaseEffectDicePartsBundle,
 } from "./utility/damage.mjs";
 
 export const HERO = { heroDice };
@@ -1242,7 +1242,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             addStr: false,
             useWeapon: false,
         },
-        baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+        baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
     });
     addPower(
         {
@@ -1267,7 +1267,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1294,7 +1294,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1322,7 +1322,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         undefined,
     );
@@ -1350,7 +1350,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: true,
                 weaponEffect: "[NORMALDC]",
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1377,7 +1377,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1405,7 +1405,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1432,7 +1432,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1459,7 +1459,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1487,7 +1487,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {
             maneuverDesc: {
@@ -1525,7 +1525,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {
             maneuverDesc: {
@@ -1562,7 +1562,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1589,7 +1589,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1615,7 +1615,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             addStr: false,
             useWeapon: false,
         },
-        baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+        baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
     });
 
     addPower(
@@ -1641,7 +1641,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {
             maneuverDesc: {
@@ -1679,7 +1679,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {
             maneuverDesc: {
@@ -1717,7 +1717,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         undefined,
     );
@@ -1745,7 +1745,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1773,7 +1773,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1800,7 +1800,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             addStr: false,
             useWeapon: false,
         },
-        baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+        baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
     });
     addPower(
         {
@@ -1909,7 +1909,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         undefined,
     );
@@ -1936,7 +1936,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1963,7 +1963,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         undefined,
     );
@@ -1990,7 +1990,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -2017,7 +2017,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {
             maneuverDesc: {
@@ -2054,7 +2054,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             addStr: false,
             useWeapon: false,
         },
-        baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+        baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
     });
 
     addPower(
@@ -2080,7 +2080,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: true,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         undefined,
     );
@@ -2107,7 +2107,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 addStr: false,
                 useWeapon: false,
             },
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         undefined,
     );
@@ -6251,7 +6251,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             activePoints: function (item) {
                 const _levels = parseInt(item.system.LEVELS);
-                //return (item._basePoints + item._addersCost) * (1 + item._advantageCost);
                 return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
             },
             realCost: function (item) {
@@ -6713,7 +6712,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            baseEffectDicePartsBundle: maneuverbaseEffectDicePartsBundle,
+            baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
         {},
     );

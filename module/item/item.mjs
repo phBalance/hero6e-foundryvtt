@@ -6120,7 +6120,7 @@ export function cloneToEffectiveAttackItem({
         // Pushing?
         strengthItem.system._active.pushedRealPoints = effectiveStrPushedRealPoints;
 
-        // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR placeholder
+        // PH: FIXME: We can get rid of the effectiveStr field in the active because we'll just have the actual STR item
         effectiveItem.system._active.effectiveStr = effectiveStr;
         effectiveItem.system._active.effectiveStrItem = strengthItem;
 

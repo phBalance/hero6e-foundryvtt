@@ -267,6 +267,13 @@ export class ItemAttackFormApplication extends FormApplication {
                     ...(this.data.effectiveItem.system._active.linkedEnd || []).map(
                         (linkedEndInfo) => linkedEndInfo.item,
                     ),
+                    ...(this.data.effectiveItem.system._active.linkedAssociated || []).map(
+                        (linkedInfo) => linkedInfo.item,
+                    ),
+
+                    // PH: FIXME: This should probably be recursive as these linked items could have linked endurance
+                    // only items or linked items of their own (presumably).
+                    ...(this.data.effectiveItem.system._active.linked || []).map((linkedInfo) => linkedInfo.item),
                 ],
                 this.data.formData || this.data,
             );
@@ -444,8 +451,8 @@ export class ItemAttackFormApplication extends FormApplication {
                     strengthItem?.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
                 }
 
-                effectiveItem.system._active.linkedEnd ??= [];
-                effectiveItem.system._active.linkedEnd.push({
+                effectiveItem.system._active.linkedAssociated ??= [];
+                effectiveItem.system._active.linkedAssociated.push({
                     item: hthAttack,
                     uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
                 });
@@ -622,6 +629,10 @@ export class ItemAttackFormApplication extends FormApplication {
             [
                 this.data.effectiveItem,
                 ...(this.data.effectiveItem.system._active.linkedEnd || []).map((linkedEndInfo) => linkedEndInfo.item),
+
+                // PH: FIXME: This should probably be recursive as these linked items could have linked endurance
+                // only items or linked items of their own (presumably).
+                ...(this.data.effectiveItem.system._active.linked || []).map((linkedInfo) => linkedInfo.item),
             ],
             formData,
         );

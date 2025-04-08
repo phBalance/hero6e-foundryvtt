@@ -75,21 +75,38 @@ function isStunBasedEffectRoll(item) {
 /**
  * Turn an item into JSON.
  * Reverse the process with rehydrateAttackItem
- * @param {*} item
+ * @param {*} item - what should be dehydrated
  */
 export function dehydrateAttackItem(item) {
-    if (item.system._active.effectiveStrItem) {
-        item.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
+    const dehydratedItem = foundry.utils.deepClone(item);
+
+    // If there is a strength item, dehydrate it
+    if (dehydratedItem.system._active.effectiveStrItem) {
+        dehydratedItem.system._active.effectiveStrItem = dehydratedItem.system._active.effectiveStrItem.toObject(false);
     }
 
-    // If there are linked endurance items, then we need to rehydrate them as well.
-    if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
-        item.system._active.linkedEnd = item.system._active.linkedEnd.forEach((linkedItem) => {
+    // If there are linked endurance items, then we need to dehydrate them as well.
+    if (dehydratedItem.system._active.linkedEnd && dehydratedItem.system._active.linkedEnd.length > 0) {
+        dehydratedItem.system._active.linkedEnd.forEach((linkedEndItem) => {
+            linkedEndItem.item = linkedEndItem.item.toObject(false);
+        });
+    }
+
+    // If there are linked associated items, then we need to dehydrate them as well.
+    if (dehydratedItem.system._active.linkedAssociated && dehydratedItem.system._active.linkedAssociated.length > 0) {
+        dehydratedItem.system._active.linkedAssociated.forEach((linkedItem) => {
             linkedItem.item = linkedItem.item.toObject(false);
         });
     }
 
-    const stringifiedItem = JSON.stringify(item.toObject(false));
+    // If there are linked items, then we need to dehydrate them as well.
+    if (dehydratedItem.system._active.linked && dehydratedItem.system._active.linked.length > 0) {
+        dehydratedItem.system._active.linked.forEach((linkedItem) => {
+            linkedItem.item = linkedItem.item.toObject(false);
+        });
+    }
+
+    const stringifiedItem = JSON.stringify(dehydratedItem.toObject(false));
     return stringifiedItem;
 }
 
@@ -113,7 +130,7 @@ function redydrateAttackItem(rollInfo, actor) {
         parent: actor,
     });
 
-    // If there is a strength item, then we need to rehydrate it as well.
+    // If there is a strength item, then we need to rehydrate it.
     if (item.system._active.effectiveStrItem) {
         item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(item.system._active.effectiveStrItem, {
             parent: actor,
@@ -122,8 +139,26 @@ function redydrateAttackItem(rollInfo, actor) {
 
     // If there are linked endurance items, then we need to rehydrate them as well.
     if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
-        item.system._active.linkedEnd.forEach((linkedItemData) => {
-            linkedItemData.item = HeroSystem6eItem.fromSource(linkedItemData, {
+        item.system._active.linkedEnd.forEach((linkedEndItemData) => {
+            linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
+                parent: actor,
+            });
+        });
+    }
+
+    // If there are linked associated items, then we need to rehydrate them as well.
+    if (item.system._active.linkedAssociated && item.system._active.linkedAssociated.length > 0) {
+        item.system._active.linkedAssociated.forEach((linkedEndItemData) => {
+            linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
+                parent: actor,
+            });
+        });
+    }
+
+    // If there are linked items, then we need to rehydrate them as well.
+    if (item.system._active.linked && item.system._active.linked.length > 0) {
+        item.system._active.linked.forEach((linkedItemData) => {
+            linkedItemData.item = HeroSystem6eItem.fromSource(linkedItemData.item, {
                 parent: actor,
             });
         });
@@ -540,10 +575,6 @@ async function doSingleTargetActionToHit(item, options) {
     const action = Attack.getActionInfo(item, _targetArray, options);
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
-    const hthAttackItemMergeObj = {
-        hthAttackItems: action.hthAttackItems.map((hthAttack) => fromUuidSync(hthAttack.uuid)),
-    };
-
     const actor = item.actor;
 
     // Educated guess for token
@@ -599,7 +630,6 @@ async function doSingleTargetActionToHit(item, options) {
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
         ...options,
         ...{ noResourceUse: overrideCanAct },
-        ...hthAttackItemMergeObj,
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -3608,6 +3638,11 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     const resourceUsingItems = [
         item,
         ...(item.system._active.linkedEnd || []).map((linkedEndInfo) => linkedEndInfo.item),
+        ...(item.system._active.linkedAssociated || []).map((linkedEndInfo) => linkedEndInfo.item),
+
+        // PH: FIXME: This should probably be recursive as these linked items could have linked endurance
+        // only items or linked items of their own (presumably).
+        ...(item.system._active.linked || []).map((linkedInfo) => linkedInfo.item),
     ];
 
     // What resources are required to activate this power?
@@ -4082,12 +4117,10 @@ async function spendResourcesToUse(
 
         // Make a tooltip for the resource usage including all individual item usage
         const resourceBreakdownByItem = resourcesRequired.individualResourceUsage
-            .map((itemResources) =>
-                itemResources.end || itemResources.reserveEnd || itemResources.charges
-                    ? `${itemResources.item.detailedName()} required ${itemResources.end} END, ${itemResources.reserveEnd} END from endurance reserve, and ${itemResources.charges} charge${itemResources.charges !== 1 ? "s" : ""}`
-                    : "",
+            .map(
+                (itemResources) =>
+                    `${itemResources.item.detailedName()} required ${itemResources.end} END, ${itemResources.reserveEnd} END from endurance reserve, and ${itemResources.charges} charge${itemResources.charges !== 1 ? "s" : ""}`,
             )
-            .filter(Boolean)
             .join("\n");
         resourcesUsedDescription = `<span title="${resourceBreakdownByItem}">${resourcesUsedDescription}</span>`;
     }

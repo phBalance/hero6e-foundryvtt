@@ -17,6 +17,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("toUpperCase", toUpperCase);
     Handlebars.registerHelper("appliesTo", appliesTo);
     Handlebars.registerHelper("checkInit", checkInit);
+    Handlebars.registerHelper("objectNumKeys", objectNumKeys);
 }
 
 function indexOf(str, searchTerm) {
@@ -99,4 +100,8 @@ function appliesTo(power, attack) {
 function checkInit(value) {
     let myValue = Number(value) || 0;
     return myValue > 0;
+}
+
+function objectNumKeys(obj) {
+    return Object.keys(obj).length;
 }

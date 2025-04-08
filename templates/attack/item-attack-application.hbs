@@ -215,7 +215,7 @@
           </div>
         </div>
 
-        {{#if hthAttackItems}}
+        {{#if (gt (objectNumKeys hthAttackItems) 0)}}
           <div class="form-group">
             <label>
               Hand-To-Hand Attacks
@@ -236,7 +236,7 @@
         {{/if}}
       {{/if}}
 
-      {{#if nakedAdvantagesItems}}
+      {{#if (gt (objectNumKeys nakedAdvantagesItems) 0)}}
         <div class="form-group">
           <label>
             Naked Advantages
