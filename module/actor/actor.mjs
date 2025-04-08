@@ -2863,6 +2863,22 @@ export class HeroSystem6eActor extends Actor {
         return this.system.is5e;
     }
 
+    get _characterPoints() {
+        return this.system.points;
+    }
+
+    get _characterPointsForDisplay() {
+        return RoundFavorPlayerDown(this._characterPoints);
+    }
+
+    get _activePoints() {
+        return this.system.activePoints;
+    }
+
+    get _activePointsForDisplay() {
+        return RoundFavorPlayerDown(this._activePoints);
+    }
+
     get encumbrance() {
         // encumbrancePercentage
         const equipmentWeightPercentage =
