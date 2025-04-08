@@ -2284,6 +2284,15 @@ export function registerFullTests(quench) {
                 let actor;
                 let previousSetting;
                 let hthAttack;
+                let strikeItem;
+                let moveByItem;
+                let moveThroughItem;
+                let haymakerManeuver;
+                let nerveStrikeItem;
+                let killingStrikeItem;
+                let martialStrikeItem;
+                let martialFlashItem;
+                let sacrificeStrikeItem;
 
                 beforeEach(async () => {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
@@ -2300,6 +2309,18 @@ export function registerFullTests(quench) {
                     await actor.uploadFromXml(contents);
 
                     hthAttack = actor.items.find((item) => item.system.XMLID === "HANDTOHANDATTACK");
+
+                    strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                    moveByItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
+                    moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
+                    haymakerManeuver = actor.items.find(
+                        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
+                    );
+                    nerveStrikeItem = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
+                    killingStrikeItem = actor.items.find((item) => item.system.ALIAS === "Killing Strike");
+                    martialStrikeItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
+                    (martialFlashItem = actor.items.find((item) => item.system.ALIAS === "Martial Flash")),
+                        (sacrificeStrikeItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"));
                 });
 
                 afterEach(async () => {
@@ -2348,63 +2369,62 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe("basic maneuvers", function () {
+                describe("basic maneuver with HTH attack", function () {
+                    beforeEach(function () {
+                        // Add the HTH attack
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                    });
+
+                    afterEach(function () {
+                        // Remove the HTH attack
+                        delete strikeItem.system._active.linkedAssociated;
+                    });
+
                     it("should have the correct damage for a strike", function () {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
                         // Added DCs: Strike 0DC =>  +0 DC
                         // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 16d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "STRIKE"),
-                                { hthAttackItems: [hthAttack] },
-                            ),
-                            "16d6",
-                        );
+                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "16d6");
                     });
+                });
 
+                describe("basic maneuver without HTH attack", function () {
                     it("should have the correct damage for a strike without HTH Attack", function () {
                         // Base DCs: STR +2 DC (STR 10) => +2 DC
                         // Added DCs: Strike 0DC =>  +0 DC
                         // Base + Added = 2DC + 0DC (doubling rule does not apply) = 2 DC. Martial Strike is 5AP/die => 2d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "STRIKE"),
-                                {},
-                            ),
-                            "2d6",
-                        );
+                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "2d6");
                     });
                 });
 
-                describe("Haymaker", function () {
-                    let haymakerManeuver;
-
+                describe("Haymaker with HTH", function () {
                     beforeEach(function () {
-                        // Turn on the haymaker
-                        haymakerManeuver = actor.items.find(
-                            (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
-                        );
+                        // Add the HTH attack
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                    });
+
+                    afterEach(function () {
+                        delete strikeItem.system._active.linkedAssociated;
                     });
 
                     it("should increase the damage of a Strike", function () {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
                         // Added DCs: Strike 0DC, Haymaker +4DC =>  +4 DC
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
-                        const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
                         assert.equal(
                             getEffectFormulaFromItem(strikeItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
-                                hthAttackItems: [hthAttack],
                             }),
                             "20d6",
                         );
                     });
+                });
 
+                describe("Haymaker without HTH", function () {
                     it("should not increase the damage of a move through", function () {
                         // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
                         // Added DCs: Haymaker does not apply since we are executing a maneuver and this is not a Strike, velocity 20"/3 -> 6d6/6DC,
                         // Base + Added = 2DC + 6DC (doubling rule does not apply) = 8 DC. Move Through is 5AP/die => 8d6
-                        const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
                         assert.equal(
                             getEffectFormulaFromItem(moveThroughItem, {
                                 haymakerManeuverActiveItem: haymakerManeuver,
@@ -2415,16 +2435,13 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe("MANEUVER with Velocity", function () {
+                describe("MANEUVER with Velocity without HTH", function () {
                     it("should add velocity damage for Move Through", function () {
                         // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
                         // Added DCs: velocity 30"/3 -> 10DC => +10DC
                         // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
                         assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
-                                { effectiveStr: 20, velocity: 30 },
-                            ),
+                            getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 30 }),
                             "14d6",
                         );
                     });
@@ -2434,12 +2451,20 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 90"/3 -> 30DC => +30DC
                         // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
                         assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
-                                { effectiveStr: 20, velocity: 90 },
-                            ),
+                            getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 90 }),
                             "34d6",
                         );
+                    });
+                });
+
+                describe("MANEUVER with Velocity with HTH", function () {
+                    beforeEach(function () {
+                        // Add the HTH attack
+                        moveByItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                    });
+
+                    afterEach(function () {
+                        delete moveByItem.system._active.linkedAssociated;
                     });
 
                     it("should add velocity damage for Move By", function () {
@@ -2447,25 +2472,19 @@ export function registerFullTests(quench) {
                         // Added DCs: velocity 10"/5 -> 2DC => +2DC
                         // Base + Added = 9DC + 2DC (doubling rule does not apply) = 11 DC. Move By is 5AP/die => 11d6
                         assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { hthAttackItems: [hthAttack], effectiveStr: 20, velocity: 10 },
-                            ),
+                            getEffectFormulaFromItem(moveByItem, {
+                                effectiveStr: 20,
+                                velocity: 10,
+                            }),
                             "11d6",
                         );
                     });
 
                     it("should add velocity damage for Move By (not subject to doubling rule)", function () {
-                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC) => 2DC
+                        // Base DCs: Move By (STR 20 -> 4 DC/2 -> 2DC), +14 DC HTH/2 -> +7DC => 9DC
                         // Added DCs: velocity 90"/5 -> 18DC => +18DC
-                        // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { effectiveStr: 20, velocity: 90 },
-                            ),
-                            "20d6",
-                        );
+                        // Base + Added = 9DC + 18DC (doubling rule does not apply) = 27 DC. Move By is 5AP/die => 27d6
+                        assert.equal(getEffectFormulaFromItem(moveByItem, { effectiveStr: 20, velocity: 90 }), "27d6");
                     });
 
                     // TODO: move through with weapon
@@ -2473,15 +2492,31 @@ export function registerFullTests(quench) {
                 });
 
                 describe("Martial Arts", function () {
+                    beforeEach(function () {
+                        // Add the HTH attack
+                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                    });
+
+                    afterEach(function () {
+                        // Remove the HTH attack
+                        delete nerveStrikeItem.system._active.linkedAssociated;
+                        delete killingStrikeItem.system._active.linkedAssociated;
+                        delete martialStrikeItem.system._active.linkedAssociated;
+                        delete martialFlashItem.system._active.linkedAssociated;
+                        delete sacrificeStrikeItem.system._active.linkedAssociated;
+                    });
+
                     it("should have the correct damage for Nerve Strike", function () {
                         // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
                         // Added DCs: Does not use STR, HTH doesn't activate as STR < 0 => +0 DC
                         // Base + Added = 4DC. Nerve Strike is an NND (10AP/die) => 2d6
-                        const moveBy = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
                         assert.equal(
-                            getEffectFormulaFromItem(moveBy, {
-                                hthAttackItems: [hthAttack],
-                                effectiveStr: 20,
+                            getEffectFormulaFromItem(nerveStrikeItem, {
+                                effectiveStr: 0,
                                 velocity: 90,
                             }),
                             "2d6",
@@ -2492,11 +2527,8 @@ export function registerFullTests(quench) {
                         // Base: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
                         // Added DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
                         // Base + Added = 2C + 16DC (doubling rule clamps the strength added DC) = 4DC. Killing strike is 15AP/die => 1d6+1
-                        const moveBy = actor.items.find((item) => item.system.ALIAS === "Killing Strike");
-
                         assert.equal(
-                            getEffectFormulaFromItem(moveBy, {
-                                hthAttackItems: [hthAttack],
+                            getEffectFormulaFromItem(killingStrikeItem, {
                                 effectiveStr: 20,
                                 velocity: 90,
                             }),
@@ -2508,9 +2540,7 @@ export function registerFullTests(quench) {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
                         // Added DCs: Martial Strike 2DC =>  +2 DC
                         // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
-                        const msItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
-
-                        assert.equal(getEffectFormulaFromItem(msItem, { hthAttackItems: [hthAttack] }), "18d6");
+                        assert.equal(getEffectFormulaFromItem(martialStrikeItem, {}), "18d6");
                     });
 
                     it("should have the correct damage for Martial Flash", function () {
@@ -2518,10 +2548,7 @@ export function registerFullTests(quench) {
                         // Added DCs: Does not use STR and no HTH Attack  => +0 DC
                         // Base + Added = 4DC. Martial Flash is a 5AP/die => 4d6
                         assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.ALIAS === "Martial Flash"),
-                                { hthAttackItems: [hthAttack], effectiveStr: 20, velocity: 90 },
-                            ),
+                            getEffectFormulaFromItem(martialFlashItem, { effectiveStr: 20, velocity: 90 }),
                             "4d6",
                         );
                     });
@@ -2530,8 +2557,7 @@ export function registerFullTests(quench) {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
                         // Added: Sacrifice Strike 4DC =>  4DC
                         // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20DC. Sacrifice Strike is 5AP/die => 20d6
-                        const ssItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
-                        assert.equal(getEffectFormulaFromItem(ssItem, { hthAttackItems: [hthAttack] }), "20d6");
+                        assert.equal(getEffectFormulaFromItem(sacrificeStrikeItem, {}), "20d6");
                     });
                 });
 
@@ -2559,30 +2585,36 @@ export function registerFullTests(quench) {
                         cslItem.system.csl = cslPreviousAllocation;
                     });
 
+                    beforeEach(function () {
+                        // Add the HTH attack
+                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                    });
+
+                    afterEach(function () {
+                        // Remove the HTH attack
+                        delete nerveStrikeItem.system._active.linkedAssociated;
+                        delete killingStrikeItem.system._active.linkedAssociated;
+                        delete martialStrikeItem.system._active.linkedAssociated;
+                        delete martialFlashItem.system._active.linkedAssociated;
+                        delete sacrificeStrikeItem.system._active.linkedAssociated;
+                    });
+
                     it("should have the correct damage for Nerve Strike", function () {
                         // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
                         // Added DCs: (11 CSL) 2:1 +5DC
                         // Base + Added = 4 DC + 5DC (Doubling rule kicks in) => 8DC. Nerve Strike is an NND (10AP/die) => 4d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Nerve Strike"),
-                                {},
-                            ),
-                            "4d6",
-                        );
+                        assert.equal(getEffectFormulaFromItem(nerveStrikeItem, { effectiveStr: 0 }), "4d6");
                     });
 
                     it("should have the correct damage for Killing Strike", function () {
                         // Base DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
                         // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
                         // Base + Added = 2DC + 5DC (doubling rule kicks in) = 4DC. Killing strike is 15AP/die => 1d6+1
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Killing Strike"),
-                                { effectiveStr: 0 },
-                            ),
-                            "1d6+1",
-                        );
+                        assert.equal(getEffectFormulaFromItem(killingStrikeItem, { effectiveStr: 0 }), "1d6+1");
                     });
 
                     it("should have the correct damage for Martial Strike", function () {
@@ -2590,10 +2622,7 @@ export function registerFullTests(quench) {
                             // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
                             // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
                             // Base + Added = 16DC + 7DC (doubling rule does not apply) = 23DC. Martial Strike is 5AP/die => 23d6
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
-                                { hthAttackItems: [hthAttack] },
-                            ),
+                            getEffectFormulaFromItem(martialStrikeItem, {}),
                             "23d6",
                         );
                     });
@@ -2602,26 +2631,14 @@ export function registerFullTests(quench) {
                         // Base DCs: Martial Flash 4DC (aka 2d6) => 4DC.
                         // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
                         // Base + Added = 4DC + 5DC (doubling rule kicks in) => 8DC. Martial Flash is a 5AP/die => 8d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
-                                { hthAttackItems: [hthAttack] },
-                            ),
-                            "8d6",
-                        );
+                        assert.equal(getEffectFormulaFromItem(martialFlashItem, {}), "8d6");
                     });
 
                     it("should have the correct damage for Sacrifice Strike", function () {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
                         // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
                         // Base + Added = 16DC + 9DC (doubling rule does not apply) = 25DC. Sacrifice Strike is 5AP/die => 25d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
-                                { hthAttackItems: [hthAttack] },
-                            ),
-                            "25d6",
-                        );
+                        assert.equal(getEffectFormulaFromItem(sacrificeStrikeItem, {}), "25d6");
                     });
                 });
 
@@ -2632,25 +2649,29 @@ export function registerFullTests(quench) {
                         // Pretend that we have the underwater status on
                         previousStatuses = actor.statuses;
                         actor.statuses = new Set(["underwater"]);
+
+                        // Add the HTH attack
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
                     });
 
                     afterEach(function () {
                         actor.statuses = previousStatuses;
+
+                        // Remove the HTH attack
+                        delete strikeItem.system._active.linkedAssociated;
                     });
 
                     it("should decrease the damage of a Strike", function () {
                         // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
                         // Added DCs: Strike 0DC, Underwater -2DC =>  -2 DC
                         // Base + Added = 16DC - 2DC (doubling rule does not apply) = 14 DC. Martial Strike is 5AP/die => 14d6
-                        const strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        assert.equal(getEffectFormulaFromItem(strikeItem, { hthAttackItems: [hthAttack] }), "14d6");
+                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "14d6");
                     });
 
                     it("should decrease the damage of a move through", function () {
                         // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
                         // Added DCs: Underwater -2DC, Velocity 20" -> 6DC =>  +4 DC
                         // Base + Added = 2DC + 4DC (doubling rule does not apply) = 6 DC. Move Through is 5AP/die => 6d6
-                        const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
                         assert.equal(getEffectFormulaFromItem(moveThroughItem, { velocity: 20 }), "6d6");
                     });
 
@@ -2658,7 +2679,6 @@ export function registerFullTests(quench) {
                         // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
                         // Added DCs: Underwater -2DC, velocity 2" -> 0d6 =>  -2 DC
                         // Base + Added = 1DC - 2DC (doubling rule does not apply) = 0 DC. Move Through is 5AP/die => 0d6
-                        const moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
                         assert.equal(getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 5, velocity: 2 }), "0");
                     });
                 });

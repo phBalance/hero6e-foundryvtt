@@ -762,7 +762,6 @@ export function subtractDiceParts(item, firstDiceParts, secondDiceParts, useDieM
  * @returns {HeroSystemFormulaDicePartsBundle}
  */
 export function calculateDicePartsForItem(item, options) {
-    const doubleDamageLimitTags = [];
     const {
         diceParts: baseDiceParts,
         tags: baseTags,
@@ -785,11 +784,14 @@ export function calculateDicePartsForItem(item, options) {
         addedDamageBundle: { diceParts: addedDiceParts, tags: extraTags },
         velocityDamageBundle: { diceParts: velocityDiceParts, tags: velocityTags },
     } = calculateAddedDicePartsFromItem(item, baseAttackItem, options);
+
+    // No idea if we should favour 1d6-1 or not. Try to make a guess.
     const useDieMinusOne = !!baseAttackItem.findModsByXmlid("MINUSONEPIP");
 
     // Max Doubling Rules
     // 5e rule and 6e optional rule: A character cannot more than double the Damage Classes of their base attack, no
     // matter how many different methods they use to add damage.
+    const doubleDamageLimitTags = [];
     let sumDiceParts = addDiceParts(baseAttackItem, baseDiceParts, addedDiceParts, useDieMinusOne);
     if (doubleDamageLimit()) {
         // PH: FIXME: Need to implement these:
@@ -925,24 +927,31 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         title: `${str} STR -> ${strengthAddsToDamage ? "+" : ""}${formula}`,
     });
 
-    // STRMINIMUM
-    // A character using a weapon only adds damage for every full 5 points of STR they has above the weapon’s STR Minimum
-    const strMinimumModifier = item.findModsByXmlid("STRMINIMUM");
-    if (strMinimumModifier) {
+    // STRMINIMUM - need to consider the item and any associated items such as Hand-to-Hand Attacks
+    const itemsWithStrMinimum = [
+        ...(item.findModsByXmlid("STRMINIMUM") ? [item] : []),
+        ...(item.system._active.linkedAssociated?.map((info) =>
+            info.item.findModsByXmlid("STRMINIMUM") ? info.item : undefined,
+        ) || []),
+    ].filter(Boolean);
+
+    // STRMINIMUM - A character using a weapon only adds damage for every full 5 points of STR they has above the weapon’s STR Minimum
+    itemsWithStrMinimum.forEach((itemWithStrMinimum) => {
+        const strMinimumModifier = itemWithStrMinimum.findModsByXmlid("STRMINIMUM");
         const strMinimum = calculateStrengthMinimumForItem(item, strMinimumModifier);
         str = baseEffectiveStrength - strMinimum;
-        const actualStrDc = Math.floor((str / 5) * (strengthAddsToDamage ? 1 : 1 + item._advantagesAffectingDc));
+        const newStrDc = Math.floor((str / 5) * (strengthAddsToDamage ? 1 : 1 + item._advantagesAffectingDc));
 
-        const strMinDiceParts = calculateDicePartsFromDcForItem(actorStrengthItem, baseEffectiveStrDc - actualStrDc);
+        const strMinDiceParts = calculateDicePartsFromDcForItem(actorStrengthItem, baseEffectiveStrDc - newStrDc);
         const formula = dicePartsToFullyQualifiedEffectFormula(actorStrengthItem, strMinDiceParts);
 
         dicePartsBundle.diceParts = subtractDiceParts(actorStrengthItem, dicePartsBundle.diceParts, strMinDiceParts);
         dicePartsBundle.tags.push({
             value: `-(${formula})`,
-            name: `STR Minimum ${strMinimum}`,
+            name: `${itemWithStrMinimum.name} STR Minimum ${strMinimum}`,
             title: `${strMinimumModifier.ALIAS} ${strMinimumModifier.OPTION_ALIAS} -> -(${formula})`,
         });
-    }
+    });
 
     // Any STRDC modifiers such as MOVEBY?
     const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
@@ -986,7 +995,13 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             // strength for damage purposes.
             // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
             if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
-                const hthAttackItems = options.hthAttackItems || [];
+                const hthAttackItems =
+                    item.system._active.linkedAssociated
+                        ?.map((info) => info.item)
+                        .filter((power) => power.system.XMLID === "HANDTOHANDATTACK") || [];
+
+                // PH: FIXME: Need to convert options.hthAttackItem over to using item.system._active.linked
+                // and change all the tests too
 
                 hthAttackItems.forEach((hthAttack) => {
                     const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDicePartsBundle(

@@ -92,6 +92,13 @@ export function dehydrateAttackItem(item) {
         });
     }
 
+    // If there are linked associated items, then we need to dehydrate them as well.
+    if (dehydratedItem.system._active.linkedAssociated && dehydratedItem.system._active.linkedAssociated.length > 0) {
+        dehydratedItem.system._active.linkedAssociated.forEach((linkedItem) => {
+            linkedItem.item = linkedItem.item.toObject(false);
+        });
+    }
+
     // If there are linked items, then we need to dehydrate them as well.
     if (dehydratedItem.system._active.linked && dehydratedItem.system._active.linked.length > 0) {
         dehydratedItem.system._active.linked.forEach((linkedItem) => {
@@ -133,6 +140,15 @@ function redydrateAttackItem(rollInfo, actor) {
     // If there are linked endurance items, then we need to rehydrate them as well.
     if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
         item.system._active.linkedEnd.forEach((linkedEndItemData) => {
+            linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
+                parent: actor,
+            });
+        });
+    }
+
+    // If there are linked associated items, then we need to rehydrate them as well.
+    if (item.system._active.linkedAssociated && item.system._active.linkedAssociated.length > 0) {
+        item.system._active.linkedAssociated.forEach((linkedEndItemData) => {
             linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
                 parent: actor,
             });
@@ -559,10 +575,6 @@ async function doSingleTargetActionToHit(item, options) {
     const action = Attack.getActionInfo(item, _targetArray, options);
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
-    const hthAttackItemMergeObj = {
-        hthAttackItems: action.hthAttackItems.map((hthAttack) => fromUuidSync(hthAttack.uuid)),
-    };
-
     const actor = item.actor;
 
     // Educated guess for token
@@ -618,7 +630,6 @@ async function doSingleTargetActionToHit(item, options) {
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
         ...options,
         ...{ noResourceUse: overrideCanAct },
-        ...hthAttackItemMergeObj,
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -3627,6 +3638,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     const resourceUsingItems = [
         item,
         ...(item.system._active.linkedEnd || []).map((linkedEndInfo) => linkedEndInfo.item),
+        ...(item.system._active.linkedAssociated || []).map((linkedEndInfo) => linkedEndInfo.item),
 
         // PH: FIXME: This should probably be recursive as these linked items could have linked endurance
         // only items or linked items of their own (presumably).

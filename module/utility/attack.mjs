@@ -464,20 +464,6 @@ export class Attack {
         return maneuver;
     }
 
-    static getHthAttackInfo(options) {
-        return Object.entries(options)
-            .map(([key, value]) => {
-                const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
-                if (!match || !value) {
-                    return null;
-                }
-                return {
-                    uuid: match[1],
-                };
-            })
-            .filter(Boolean);
-    }
-
     static getActionInfo(item, targetedTokens, options = {}) {
         // do I need to safety things here?
         if (!item) {
@@ -503,12 +489,10 @@ export class Attack {
 
         const maneuver = Attack.getManeuverInfo(item, targetedTokens, options, system);
         const current = Attack.getCurrentManeuverInfo(maneuver, options, system); // get current attack as a 'maneuver' with just the currently executing attack options
-        const hthAttackItems = Attack.getHthAttackInfo(options);
         const action = {
             maneuver,
             current,
             system,
-            hthAttackItems,
         };
 
         return action;
