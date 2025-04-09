@@ -15,12 +15,12 @@
                     <div class="sixth-ed flex0" title="6th edition {{#if actor.system.isHeroic}}Heroic{{else}}Superheroic{{/if}} {{actor.type}}">6{{#if actor.system.isHeroic}}h{{else}}s{{/if}}</div>
                 {{/if}}
 
-                {{#if actor.system.points}}
-                <div class="points flex0">CP</div>
+                {{#if actor._characterPointsForDisplay}}
+                    <div class="points flex0">CP</div>
                 {{/if}}
 
-                {{#if actor.system.activePoints}}
-                <div class="points flex0">AP</div>
+                {{#if actor._activePointsForDisplay}}
+                    <div class="points flex0">AP</div>
                 {{/if}}
 
                 <label class="upload-button flex0">
@@ -164,11 +164,11 @@
             {{/if}}
 
             {{#if actor.system.points}}
-            <div class="points flex0" title="{{pointsTitle}}">{{actor.system.points}}CP</div>
+                <div class="points flex0" title="{{pointsTitle}}">{{actor._characterPointsForDisplay}}CP</div>
             {{/if}}
 
             {{#if actor.system.activePoints}}
-            <div class="points flex0" title="{{activePointsTitle}}">{{actor.system.activePoints}}AP</div>
+                <div class="points flex0" title="{{activePointsTitle}}">{{actor._activePointsForDisplay}}AP</div>
             {{/if}}
 
             <label class="upload-button flex0">
