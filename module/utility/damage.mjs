@@ -915,7 +915,6 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     const baseEffectiveStrDc =
         (baseEffectiveStrength / 5) * (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc);
 
-    // NOTE: intentionally using fractional DC here.
     const strDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc);
     const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
 
@@ -927,7 +926,8 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         title: `${str} STR -> ${strengthAddsToDamage ? "+" : ""}${formula}`,
     });
 
-    // STRMINIMUM - need to consider the item and any associated items such as Hand-to-Hand Attacks
+    // STRMINIMUM - A character using a weapon only adds damage for every full 5 points of STR they has above the weapon’s STR Minimum
+    //            - need to consider the item and any associated items such as Hand-to-Hand Attacks
     const itemsWithStrMinimum = [
         ...(item.findModsByXmlid("STRMINIMUM") ? [item] : []),
         ...(item.system._active.linkedAssociated?.map((info) =>
@@ -935,15 +935,14 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         ) || []),
     ].filter(Boolean);
 
-    // STRMINIMUM - A character using a weapon only adds damage for every full 5 points of STR they has above the weapon’s STR Minimum
     itemsWithStrMinimum.forEach((itemWithStrMinimum) => {
         const strMinimumModifier = itemWithStrMinimum.findModsByXmlid("STRMINIMUM");
         const strMinimum = calculateStrengthMinimumForItem(item, strMinimumModifier);
         str = baseEffectiveStrength - strMinimum;
         const newStrDc = Math.floor((str / 5) * (strengthAddsToDamage ? 1 : 1 + item._advantagesAffectingDc));
 
-        const strMinDiceParts = calculateDicePartsFromDcForItem(actorStrengthItem, baseEffectiveStrDc - newStrDc);
-        const formula = dicePartsToFullyQualifiedEffectFormula(actorStrengthItem, strMinDiceParts);
+        const strMinDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc - newStrDc);
+        const formula = dicePartsToFullyQualifiedEffectFormula(item, strMinDiceParts);
 
         dicePartsBundle.diceParts = subtractDiceParts(actorStrengthItem, dicePartsBundle.diceParts, strMinDiceParts);
         dicePartsBundle.tags.push({
