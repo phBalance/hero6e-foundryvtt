@@ -2563,32 +2563,6 @@ export class HeroSystem6eActor extends Actor {
             changes[`system.heroicIdentity`] = true;
         }
 
-        // isHeroic
-        // Need to be a careful as there are custom templates ('Nekhbet Vulture Child Goddess')
-        // that we are unlikely able to decode heroic status.
-        // Stringify the TEMPLATE for our best chance.
-        let isHeroic = undefined;
-        try {
-            if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Heroic/i)) {
-                isHeroic = true;
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Superheroic/i)) {
-                isHeroic = false;
-            }
-            if (isHeroic !== this.system.isHeroic) {
-                changes["system.isHeroic"] = isHeroic;
-            }
-            if (typeof isHeroic === "undefined" && this.type != "base2") {
-                // Custom Templates
-                // Automations
-                // Barrier
-                if (this.id) {
-                    console.warn(`Unable to determine isHeroic for ${this.name}.`, this.system.CHARACTER?.TEMPLATE);
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        }
-
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
             //if (key.toLowerCase() === "spd") debugger;
@@ -2877,6 +2851,69 @@ export class HeroSystem6eActor extends Actor {
 
     get _activePointsForDisplay() {
         return RoundFavorPlayerDown(this._activePoints);
+    }
+
+    /**
+     * Try to determine the template type
+     */
+    get _templateType() {
+        let templateType = "";
+        // isHeroic
+        // Need to be a careful as there are custom templates ('Nekhbet Vulture Child Goddess')
+        // that we are unlikely able to decode heroic status.
+        // NOTE: Older HD used "Main" as the template type - not sure what it means
+        // Stringify the TEMPLATE for our best chance.
+        try {
+            if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Heroic/i)) {
+                // Have seen "Heroic" and "Heroic6E"
+                templateType = "Heroic";
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Superheroic/i)) {
+                // Have seen "Superheroic" and "Superheroic6E"
+                templateType = "Superheroic";
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Normal/i)) {
+                // Have seen "Normal" (no 6e template)
+                templateType = "Normal";
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Vehicle/i)) {
+                // Have seen "Vehicle" and "Vehicle6E"
+                templateType = "Vehicle";
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Base/i)) {
+                // Have seen "Base" and "Base6E"
+                templateType = "Base";
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Automaton/i)) {
+                // Have seen "Automaton" and "Automaton6E"
+                templateType = "Automaton";
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.AI/i)) {
+                // Have seen "AI" and "AI6E"
+                templateType = "AI";
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Computer/i)) {
+                // Have seen "Computer" and "Computer6E"
+                templateType = "Computer";
+            }
+
+            if (templateType === "" && this.type !== "base2") {
+                // Custom Templates
+                // Automations
+                // Barrier
+                if (this.id) {
+                    console.warn(`Unknown template type for ${this.name}.`, this.system.CHARACTER?.TEMPLATE);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        return templateType;
+    }
+
+    get _templateTypeAbreviation() {
+        const templateType = this._templateType;
+
+        // There are 2 types that start with A (AI, and Automaton) so distinguish between them
+        if (templateType === "AI") {
+            return "ai";
+        }
+
+        return this._templateType?.charAt(0).toLowerCase() || "?";
     }
 
     get encumbrance() {
