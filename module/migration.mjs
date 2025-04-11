@@ -132,7 +132,7 @@ export async function migrateWorld() {
         lastMigration,
         getAllActorsInGame(),
         "removing STR placeholder",
-        async (actor) => await removeStrengthPlaceholderAndCreateActiveProperty(actor),
+        async (actor) => await removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicProperty(actor),
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.26`, "background: #1111FF; color: #FFFFFF");
 
@@ -150,9 +150,12 @@ export async function migrateWorld() {
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 }
 
-async function removeStrengthPlaceholderAndCreateActiveProperty(actor) {
+async function removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicProperty(actor) {
     try {
         if (!actor) return false;
+
+        // Remove the isHeroic property as it is now calculated on the fly
+        await actor.update({ "system.-=isHeroic": null });
 
         // Delete strength placeholder as we need many of them so will be creating them on the fly.
         await actor.items.find((item) => item.system.ALIAS === "__InternalStrengthPlaceholder")?.delete();
