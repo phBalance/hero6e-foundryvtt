@@ -1093,11 +1093,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     // An attempt to cache getPowerInfo for performance reasons.
-    //_baseInfo ??= getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
-    getBaseInfo() {
-        console.warn("Use baseInfo instead of getBaseInfo");
-        return this.baseInfo;
-    }
     get baseInfo() {
         // cache getPowerInfo
         this._baseInfo ??= getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
