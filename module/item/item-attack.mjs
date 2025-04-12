@@ -1183,8 +1183,8 @@ function getAttackTags(item) {
     }
 
     // Item adders
-    if (item.system.adders) {
-        for (const adder of item.system.adders) {
+    if (item.adders) {
+        for (const adder of item.adders) {
             switch (adder.XMLID) {
                 case "MINUSONEPIP":
                 case "PLUSONEHALFDIE":
