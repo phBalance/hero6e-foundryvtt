@@ -710,6 +710,10 @@ export class HeroSystem6eCombat extends Combat {
             };
 
             await ChatMessage.create(chatData);
+        } else if (combatant.actor.statuses.has("knockedOut")) {
+            if (combatant.actor.system.characteristics.stun?.value >= -10) {
+                await combatant.actor.TakeRecovery(false, combatant.token);
+            }
         }
     }
 
