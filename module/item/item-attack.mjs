@@ -12,7 +12,7 @@ import {
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem, requiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
-import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
+import { ItemAttackFormApplication, getAoeTemplateForItem } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../ruler.mjs";
@@ -309,9 +309,7 @@ export async function doAoeActionToHit(item, options) {
 
     const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
 
-    const aoeTemplate =
-        game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.author.id === game.user.id);
+    const aoeTemplate = getAoeTemplateForItem(item);
     if (!aoeTemplate) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
@@ -715,9 +713,7 @@ async function doSingleTargetActionToHit(item, options) {
         }
 
         const isAoE = item.getAoeModifier();
-        const aoeTemplate =
-            game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-            game.scenes.current.templates.find((o) => o.author.id === game.user.id);
+        const aoeTemplate = isAoE ? getAoeTemplateForItem(item) : null;
         if (isAoE && !aoeTemplate) {
             return ui.notifications.error(`Attack AOE template was not found.`);
         }
@@ -879,9 +875,7 @@ async function doSingleTargetActionToHit(item, options) {
     heroRoller.addDice(-3);
 
     const aoeModifier = item.getAoeModifier();
-    const aoeTemplate =
-        game.scenes.current.templates.find((template) => template.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((template) => template.author.id === game.user.id);
+    const aoeTemplate = aoeModifier ? getAoeTemplateForItem(item) : null;
     const explosion = item.hasExplosionAdvantage();
     const SELECTIVETARGET = aoeModifier?.ADDER ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET") : null;
     const NONSELECTIVETARGET = aoeModifier?.ADDER
@@ -2144,13 +2138,12 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     const damageRoller = HeroRoller.fromJSON(damageData.roller);
 
-    const aoeTemplate =
-        game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.author.id === game.user.id);
     const explosion = item.hasExplosionAdvantage();
     if (explosion) {
-        // Distance from center
+        const aoeTemplate = getAoeTemplateForItem(item);
+
         if (aoeTemplate) {
+            // Distance from center
             if (
                 game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE &&
                 game.settings.get("core", "gridDiagonals") !== CONST.GRID_DIAGONALS.EXACT
