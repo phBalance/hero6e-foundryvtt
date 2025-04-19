@@ -2094,6 +2094,10 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
                 const ae = token.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
                 if (ae) {
                     const entangle = fromUuidSync(ae.origin);
+                    if (!entangle) {
+                        console.error(ae);
+                        return ui.notifications.error(`Entangle details are no longer available.`);
+                    }
                     if (entangle.findModsByXmlid("TAKESNODAMAGE") || entangle.findModsByXmlid("BOTHDAMAGE")) {
                         // PH: FIXME: Is action correct here?
                         await _onApplyDamageToSpecificToken(item, damageData, action, {
