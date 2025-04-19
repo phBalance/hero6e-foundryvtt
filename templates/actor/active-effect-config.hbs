@@ -126,7 +126,7 @@
     <!-- Duration Tab -->
     <section class="tab" data-tab="duration">
         <div class="form-group">
-            <label>Effect Fades every (seconds)</label>
+            <label>Effect fades every (seconds)</label>
             <div class="form-fields">
                 <input type="number" name="duration.seconds" value="{{ data.duration.seconds }}"/>
             </div>
@@ -139,8 +139,14 @@
         </div>
         <div class="form-group">
             <label>{{ localize "EFFECT.StartTime" }}</label>
-            <div class="form-fields">
+            {{!-- <div class="form-fields">
                 <input type="number" name="duration.startTime" value="{{ data.duration.startTime }}"/>
+            </div> --}}
+            <div class="form-fields">
+                <label>WorldTime</label>
+                <input type="number" name="duration.startTime" value="{{ data.duration.startTime }}"/>
+                <label>Date</label>
+                <input type="string" name="startTimeDisplay" value="{{ data.startTimeDisplay }}" disabled/>
             </div>
         </div>
         <hr/>

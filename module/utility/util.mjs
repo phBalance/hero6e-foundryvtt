@@ -457,6 +457,10 @@ export function toHHMMSS(secs) {
     var minutes = Math.floor(sec_num / 60) % 60;
     var seconds = sec_num % 60;
 
+    if (hours === 0 && minutes === 0) {
+        return `${seconds}s`;
+    }
+
     return [hours, minutes, seconds]
         .map((v) => (v < 10 ? "0" + v : v))
         .filter((v, i) => v !== "00" || i > 0)
