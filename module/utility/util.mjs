@@ -297,7 +297,7 @@ export async function expireEffects(actor) {
                     ui.notifications.warn(
                         `The originating item ${ae.origin} of adjustment ${ae.name} appears to have been deleted. Deleting adjustment's active effect.`,
                     );
-                    ae.delete();
+                    await ae.delete();
                     break;
                 }
 
@@ -318,7 +318,7 @@ export async function expireEffects(actor) {
                 });
 
                 if (bodyValue === bodyMax) {
-                    ae.delete();
+                    await ae.delete();
                     break;
                 }
             } else {
