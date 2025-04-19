@@ -559,7 +559,7 @@ export class HeroSystem6eCombat extends Combat {
                 startContent += `Has the following statuses: ${Array.from(combatant.actor.statuses).join(", ")}<br>`;
             }
 
-            for (const ae of combatant.actor.temporaryEffects.filter((ae) => ae.statuses.size === 0)) {
+            for (const ae of combatant.actor.temporaryEffects.filter((ae) => ae._prepareDuration().duration)) {
                 tempContent += `<li>${ae.name} fades in ${toHHMMSS(ae._prepareDuration().remaining)}</li>`;
             }
             if (tempContent) {
