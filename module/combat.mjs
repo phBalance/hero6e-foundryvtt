@@ -701,7 +701,7 @@ export class HeroSystem6eCombat extends Combat {
                 active: false,
             });
 
-            const content = `${combatant.actor.name} recovers from being stunned.`;
+            const content = `${combatant.token.name} recovers from being stunned.`;
 
             const chatData = {
                 author: game.user._id,
