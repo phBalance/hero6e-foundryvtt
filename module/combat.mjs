@@ -701,7 +701,7 @@ export class HeroSystem6eCombat extends Combat {
                 active: false,
             });
 
-            const content = `${combatant.actor.name} recovers from being stunned.`;
+            const content = `${combatant.token.name} recovers from being stunned.`;
 
             const chatData = {
                 author: game.user._id,
@@ -710,6 +710,10 @@ export class HeroSystem6eCombat extends Combat {
             };
 
             await ChatMessage.create(chatData);
+        } else if (combatant.actor.statuses.has("knockedOut")) {
+            if (combatant.actor.system.characteristics.stun?.value >= -10) {
+                await combatant.actor.TakeRecovery(false, combatant.token);
+            }
         }
     }
 

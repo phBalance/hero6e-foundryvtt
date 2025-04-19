@@ -243,7 +243,7 @@ export async function expireEffects(actor) {
 
     const temporaryEffects = actor.temporaryEffects;
 
-    let adjustmentChatMessages = [];
+    const adjustmentChatMessages = [];
     for (const ae of temporaryEffects) {
         // Sanity Check
         if (ae._prepareDuration().remaining > 0 && !ae.duration.startTime) {
@@ -263,6 +263,10 @@ export async function expireEffects(actor) {
         // Need to loop as multiple fades may be required.
         // The null check is for AE that have no duration.
         while (ae._prepareDuration().remaining <= 0 && ae._prepareDuration().remaining !== null) {
+            const origin = fromUuidSync(ae.origin);
+            const item =
+                origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
+
             // What is this effect related to?
             if (ae.flags.type === "adjustment") {
                 // Fade by up to 5 Active Points
@@ -272,14 +276,6 @@ export async function expireEffects(actor) {
                 } else {
                     _fade = -5; //Math.max(ae.flags.adjustmentActivePoints, -5);
                 }
-
-                const origin = fromUuidSync(ae.origin);
-                const item =
-                    origin instanceof HeroSystem6eItem
-                        ? origin
-                        : ae.parent instanceof HeroSystem6eItem
-                          ? ae.parent
-                          : null;
 
                 if (item) {
                     adjustmentChatMessages.push(
@@ -327,7 +323,7 @@ export async function expireEffects(actor) {
                 }
             } else {
                 // Catch all to delete the expired AE.
-                // May need to revisit and make exception for statuses (like prone)
+                // May need to revisit and make exception for statuses (like prone/recovery)
                 if (ae.parent instanceof HeroSystem6eActor) {
                     const cardHtml = `${ae.name.replace(/\d+ segments remaining/, "")} has expired.`;
                     const chatData = {
@@ -335,8 +331,8 @@ export async function expireEffects(actor) {
                         content: cardHtml,
                         //speaker: speaker,
                     };
-                    const chatMessage = ChatMessage.create(chatData);
-                    adjustmentChatMessages.push(chatMessage);
+                    await ChatMessage.create(chatData);
+                    //adjustmentChatMessages.push(chatMessage);  // Not a adjustment card (but could be if we filled in additional props)
                     await ae.delete();
                 }
                 break;
@@ -363,6 +359,7 @@ export async function expireEffects(actor) {
             }
         }
     }
+
     await renderAdjustmentChatCards(adjustmentChatMessages);
 }
 
