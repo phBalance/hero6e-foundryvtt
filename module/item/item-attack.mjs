@@ -128,7 +128,7 @@ export function dehydrateAttackItem(item) {
 function rehydrateActorAndAttackItem(rollInfo) {
     const actor = fromUuidSync(rollInfo.actorUuid);
 
-    return redydrateAttackItem(rollInfo.itemJsonStr, actor);
+    return rehydrateAttackItem(rollInfo.itemJsonStr, actor);
 }
 
 /**
@@ -136,7 +136,7 @@ function rehydrateActorAndAttackItem(rollInfo) {
  * @param {string} itemJsonStr
  * @param {*} actor
  */
-function redydrateAttackItem(itemJsonStr, actor) {
+function rehydrateAttackItem(itemJsonStr, actor) {
     const item = HeroSystem6eItem.fromSource(JSON.parse(itemJsonStr), {
         parent: actor,
     });
@@ -2067,7 +2067,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
 
     const actor = actorParam || fromUuidSync(damageData.actorUuid);
 
-    const item = itemParam || redydrateAttackItem(damageData.itemJsonStr, actorParam || actor).item;
+    const item = itemParam || rehydrateAttackItem(damageData.itemJsonStr, actorParam || actor).item;
 
     if (targetTokens.length === 0) {
         // Check to make sure we have a selected token
@@ -2093,13 +2093,15 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
                 const token = canvas.scene.tokens.get(targetToken.tokenId);
                 const ae = token.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
                 if (ae) {
-                    const entangle = fromUuidSync(ae.origin);
+                    const { item: entangle } = rehydrateAttackItem(
+                        ae.flags.dehydratedEntangleItem,
+                        fromUuidSync(ae.flags.dehydratedEntangleActorUuid),
+                    );
                     if (!entangle) {
                         console.error(ae);
                         return ui.notifications.error(`Entangle details are no longer available.`);
                     }
                     if (entangle.findModsByXmlid("TAKESNODAMAGE") || entangle.findModsByXmlid("BOTHDAMAGE")) {
-                        // PH: FIXME: Is action correct here?
                         await _onApplyDamageToSpecificToken(item, damageData, action, {
                             ...targetToken,
                             targetEntangle: false,
@@ -2681,6 +2683,8 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
             entangleDefense,
             XMLID: item.system.XMLID,
             source: item.actor.name,
+            dehydratedEntangleItem: dehydrateAttackItem(item),
+            dehydratedEntangleActorUuid: item.actor.uuid,
         },
         origin: item.uuid,
     };
