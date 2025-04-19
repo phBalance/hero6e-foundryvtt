@@ -281,7 +281,7 @@ export async function expireEffects(actor) {
                     adjustmentChatMessages.push(
                         await performAdjustment(
                             item,
-                            ae.flags.target[0], // nameOfCharOrPower
+                            ae.flags.target, // nameOfCharOrPower
                             -_fade, // thisAttackRawActivePointsDamage
                             "None - Effect Fade", // defenseDescription
                             "", // effectsDescription

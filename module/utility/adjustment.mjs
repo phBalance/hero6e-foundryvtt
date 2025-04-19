@@ -337,7 +337,8 @@ function _createNewAdjustmentEffect(options) {
             affectedPoints: 0,
             XMLID: attackItem.system.XMLID,
             source: targetActor.name,
-            target: [targetPower?.uuid || potentialCharacteristic],
+            target: targetPower?.uuid || potentialCharacteristic,
+            targetDisplay: fromUuidSync(targetPower?.uuid).XMLID || potentialCharacteristic,
             key: targetPower?.system?.XMLID || potentialCharacteristic,
             itemTokenName,
             attackerTokenId: _attackerToken?.id,
@@ -543,6 +544,7 @@ export async function performAdjustment(
                 defenseDescription,
                 effectsDescription,
                 targetUpperCaseName,
+                nameOfCharOrPower,
                 isFade: true,
                 isEffectFinished: true,
                 targetActor,
@@ -701,6 +703,7 @@ export async function performAdjustment(
                 defenseDescription,
                 effectsDescription,
                 targetUpperCaseName, //potentialCharacteristic,
+                nameOfCharOrPower,
                 isFade,
                 isEffectFinished,
                 targetActor,
@@ -1111,6 +1114,7 @@ export async function performAdjustment(
         defenseDescription,
         effectsDescription,
         targetUpperCaseName,
+        nameOfCharOrPower,
         isFade,
         isEffectFinished,
         targetActor,
@@ -1216,14 +1220,7 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
                     targetStartingValue + totalPointsDifference,
                     targetStartingMax, // + totalPointsDifference,
                 );
-                // if (previousChanges.length > 0) {
-                //     debugger;
-                // }
                 await targetSystem.update({ [`system.characteristics.${char}.value`]: newValue });
-                // console.log(
-                //     `characteristices ${char}.value = ${targetStartingValue} ${char}.max = ${targetStartingMax}`,
-                // );
-                // console.log(`Updated characteristices ${char}.value from ${targetStartingValue} to ${newValue}`);
 
                 if (CONFIG.debug.adjustmentFadeKeep) {
                     const delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
@@ -1236,8 +1233,11 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
                     }
                 }
             } else {
-                console.error(`Unhandled characteristic `, char, activeEffect);
-                //debugger;
+                if (getPowerInfo({ xmlid: change.key.toUpperCase() })?.xmlTag === "POWER") {
+                    console.debug(`Skipping POWER`, char, activeEffect);
+                } else {
+                    console.error(`Unhandled characteristic `, char, activeEffect);
+                }
             }
         }
         // const targetStartingValue = targetSystem.characteristics[targetValuePath];
@@ -1313,6 +1313,7 @@ function _generateAdjustmentChatCard(
         defenseDescription,
         effectsDescription,
         targetUpperCaseName,
+        nameOfCharOrPower,
         isFade,
         isEffectFinished,
         targetActor,
@@ -1343,7 +1344,7 @@ function _generateAdjustmentChatCard(
             adjustmentDamageRaw: Math.abs(thisAttackActivePointsEffectRaw),
             thisAttackActivePointsEffect: Math.abs(thisAttackActivePointsEffect),
             adjustmentDamageThisApplication,
-            adjustmentTarget: targetUpperCaseName,
+            adjustmentTarget: fromUuidSync(nameOfCharOrPower)?.system.XMLID || targetUpperCaseName,
             adjustmentTotalActivePointEffect: totalEffectActivePointsForXmlid,
             thisAttackActivePointAdjustmentNotAppliedDueToMax,
             thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,
