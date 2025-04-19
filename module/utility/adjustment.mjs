@@ -347,16 +347,11 @@ function _createNewAdjustmentEffect(options) {
             startSegment: game.combat?.current?.segment,
             startInitiative: game.combat?.current?.initiative,
             startCombatId: game.combat?.id,
-
-            // changes: [
-            //     {
-            //         source: item.uuid,
-            //         seconds: _determineEffectDurationInSeconds(item, rawActivePointsDamage),
-            //         adjustmentActivePoints: 0,
-            //     },
-            // ],
         },
-        origin: attackItem.uuid,
+        // We likely created an effective Item, so store the originalUuid
+        origin: fromUuidSync(attackItem.uuid)?.uuid || fromUuidSync(attackItem.system._active?.__originalUuid)?.uuid,
+        // We likely created an effective Item, so store the JSON
+        originJson: JSON.stringify(attackItem),
         description: attackItem.system.description, // Issues with core FoundryVTT where description doesn't show, nor is editable.
         transfer: true,
         disabled: false,
