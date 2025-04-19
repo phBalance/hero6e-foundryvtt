@@ -462,3 +462,38 @@ export function toHHMMSS(secs) {
         .filter((v, i) => v !== "00" || i > 0)
         .join(":");
 }
+
+export function tokenEducatedGuess(options = {}) {
+    // TokenId
+    const token = options.token || canvas.tokens.get(options.tokenId);
+    if (token) {
+        return token;
+    }
+
+    // Actor from Item
+    options.actorId ??= options.item.actor.id;
+
+    // Actor in combat should provide a token
+    const combatant = game.combat?.combatants?.contents.find((o) => o.actorId === options.item.actor.id);
+    if (combatant) {
+        return canvas.tokens.get(combatant.tokenId);
+    }
+
+    // Controled token of provided actor
+    const controledToken = options.actor
+        ?.getActiveTokens()
+        .find((t) => canvas.tokens.controlled.find((c) => c.id === t.id));
+    if (controledToken) {
+        return controledToken;
+    }
+
+    // Any token on this canvas for Actor
+    const anyToken = options.actor?.getActiveTokens()?.[0];
+    if (anyToken) {
+        return anyToken;
+    }
+
+    console.error(`Unable to determine token`, options);
+
+    return null;
+}
