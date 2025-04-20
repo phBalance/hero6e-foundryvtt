@@ -5340,7 +5340,7 @@ export class HeroSystem6eItem extends Item {
 
         // Custom basePoints
         if (this.baseInfo?.cost) {
-            return this.baseInfo?.cost(this);
+            return this.baseInfo.cost(this);
         }
 
         const baseCost = parseFloat(this.system.BASECOST) || 0;
@@ -5668,6 +5668,7 @@ export class HeroSystem6eItem extends Item {
      *
      * PH: FIXME: This doesn't work for at least the following powers:
      * TK
+     * Anything that doesn't have a damage effect (e.g. Darkness)
      */
     damageLevelTweaking(diceParts) {
         const plusOnePipAdderData = getModifierInfo({
