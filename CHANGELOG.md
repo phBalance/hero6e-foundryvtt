@@ -2,9 +2,15 @@
 
 ## Version 4.0.26 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+WARNING: Read the changelog for this version before deciding to update.
+
+- Finish any combat before upgrading. You will not be able to replay combat sequences from earlier chat cards.
 - Powers and strength can now be pushed, using superheroic rules, or reduced in the to-hit dialog.
 - Support Naked Advantages for attack powers in the to-hit dialog.
 - Support advantage transfer to strength for Hand-to-Hand Attacks.
+- These above 3 changes have introduced at least the following known problems (a no prize for those who find more):
+  - Entangles with additional BODY dice will incorrectly have the additional BODY dice doubled. [#2174](https://github.com/dmdorman/hero6e-foundryvtt/issues/2174)
+  - Darkness radius will be incorrect. It can be changed from the template once placed. [#2184](https://github.com/dmdorman/hero6e-foundryvtt/issues/2184)
 - Fix charge usage for items using autofire.
 - Add Special Hit Locations when hit locations are enabled.
 - Non heroic characters can how use 1 END per 5 STR per configuration option. Heroic is always 1 END per 5 STR.
