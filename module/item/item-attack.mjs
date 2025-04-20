@@ -1863,7 +1863,7 @@ export async function _onRollMindScan(event) {
         targetName: token?.name,
 
         item,
-        itemJsonStr: toHitData.itemJsonStr, // PH: FIXME: Would be nice to just have this in action data that is always passed through
+        itemJsonStr: toHitData.itemJsonStr,
         actor: item.actor,
     };
 
