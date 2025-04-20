@@ -548,7 +548,7 @@ function noDamageBaseEffectDicePartsBundle(item /* , _options */) {
             constant: 0,
         },
         tags: [{ value: "0", name: `BAD TAG`, title: "Should not have been called. Please report." }],
-        baseAttackItem: null,
+        baseAttackItem: item,
     };
 }
 
@@ -5218,19 +5218,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["to-hit"],
             perceivability: "obvious",
             costPerLevel: function (item) {
+                const is5e = item.is5e;
                 switch (item.system.OPTIONID) {
                     case "SIGHTGROUP":
-                        return 5; // Targeting sense gruop
+                        return is5e ? 10 : 5; // Targeting sense gruop
                     case "HEARINGGROUP":
                     case "MENTALGROUP":
                     case "RADIOGROUP":
                     case "SMELLGROUP":
                     case "TOUCHGROUP":
-                        return 3; // Non-targeting sense group
+                        return is5e ? 5 : 3; // Non-targeting sense group
                     default:
                         console.error(`DARKNESS OPTIONID ${item.system.OPTIONID} is not handled`);
                 }
-                return 5;
+                return is5e ? 10 : 5;
             },
             duration: "constant",
             range: HERO.RANGE_TYPES.STANDARD,
