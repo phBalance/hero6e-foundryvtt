@@ -5340,7 +5340,7 @@ export class HeroSystem6eItem extends Item {
 
         // Custom basePoints
         if (this.baseInfo?.cost) {
-            return this.baseInfo?.cost(this);
+            return this.baseInfo.cost(this);
         }
 
         const baseCost = parseFloat(this.system.BASECOST) || 0;
