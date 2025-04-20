@@ -5668,6 +5668,7 @@ export class HeroSystem6eItem extends Item {
      *
      * PH: FIXME: This doesn't work for at least the following powers:
      * TK
+     * Anything that doesn't have a damage effect (e.g. Darkness)
      */
     damageLevelTweaking(diceParts) {
         const plusOnePipAdderData = getModifierInfo({
