@@ -2672,6 +2672,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         img: HeroSystem6eActorActiveEffects.statusEffectsObj.entangledEffect.img,
         changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.entangledEffect.changes),
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
+        description: item.system.description,
         flags: {
             entangleDefense,
             XMLID: item.system.XMLID,
