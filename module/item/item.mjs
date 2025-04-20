@@ -4979,6 +4979,11 @@ export class HeroSystem6eItem extends Item {
             return this.baseInfo.attackDefenseVs;
         }
 
+        // Adjustment
+        if (this.baseInfo?.type.includes("adjustment")) {
+            return "POWERDEFENSE";
+        }
+
         // Generic defense specification
         if (["PD", "ED", "MD"].includes(this.system.INPUT)) {
             return this.system.INPUT;
@@ -4987,11 +4992,6 @@ export class HeroSystem6eItem extends Item {
         // Mental
         if (this.baseInfo?.type.includes("mental")) {
             return "MD";
-        }
-
-        // Adjustment
-        if (this.baseInfo?.type.includes("adjustment")) {
-            return "POWERDEFENSE";
         }
 
         // Flash
