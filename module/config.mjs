@@ -548,7 +548,7 @@ function noDamageBaseEffectDicePartsBundle(item /* , _options */) {
             constant: 0,
         },
         tags: [{ value: "0", name: `BAD TAG`, title: "Should not have been called. Please report." }],
-        baseAttackItem: null,
+        baseAttackItem: item,
     };
 }
 
