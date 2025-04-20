@@ -4,7 +4,7 @@
 
 WARNING: Read the changelog for this version before deciding to update.
 
-- Finish any combat before upgrading. You will not be able to replay combat sequences from earlier chat cards.
+- Finish any combat before upgrading. You will not be able to replay combat sequences from earlier chat cards. Active effects may not finish correctly - if you need to do so manually you can find them in the Other tab.
 - Powers and strength can now be pushed, using superheroic rules, or reduced in the to-hit dialog.
 - Support Naked Advantages for attack powers in the to-hit dialog.
 - Support advantage transfer to strength for Hand-to-Hand Attacks.

@@ -125,7 +125,7 @@ export function dehydrateAttackItem(item) {
  * Rehydrates a JSON object created by dehydrateAttackItem
  * @param {Object} rollInfo
  */
-function rehydrateActorAndAttackItem(rollInfo) {
+export function rehydrateActorAndAttackItem(rollInfo) {
     const actor = fromUuidSync(rollInfo.actorUuid);
 
     return rehydrateAttackItem(rollInfo.itemJsonStr, actor);
@@ -136,7 +136,7 @@ function rehydrateActorAndAttackItem(rollInfo) {
  * @param {string} itemJsonStr
  * @param {*} actor
  */
-function rehydrateAttackItem(itemJsonStr, actor) {
+export function rehydrateAttackItem(itemJsonStr, actor) {
     const item = HeroSystem6eItem.fromSource(JSON.parse(itemJsonStr), {
         parent: actor,
     });
