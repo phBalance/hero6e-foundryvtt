@@ -8,6 +8,7 @@
 - Fix charge usage for items using autofire.
 - Add Special Hit Locations when hit locations are enabled.
 - Non heroic characters can how use 1 END per 5 STR per configuration option. Heroic is always 1 END per 5 STR.
+- Several minor adjustment power fixes and enhancements. [#2177](https://github.com/dmdorman/hero6e-foundryvtt/issues/2177) [#2178](https://github.com/dmdorman/hero6e-foundryvtt/issues/2178) [#2164](https://github.com/dmdorman/hero6e-foundryvtt/issues/2164) [#2111](https://github.com/dmdorman/hero6e-foundryvtt/issues/2111) [#2110](https://github.com/dmdorman/hero6e-foundryvtt/issues/2110) [#2101](https://github.com/dmdorman/hero6e-foundryvtt/issues/2101)
 
 ## Version 4.0.25 20250329
 
