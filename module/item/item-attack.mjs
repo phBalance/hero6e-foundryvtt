@@ -1210,7 +1210,7 @@ function getAttackTags(item) {
     }
 
     // STUN/BODY/EFFECT Only
-    if (item.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody) {
+    if (item.system.stunBodyDamage && item.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody) {
         attackTags.push({
             name: item.system.stunBodyDamage,
             title: item.system.stunBodyDamage,
