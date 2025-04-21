@@ -529,19 +529,10 @@ export class HeroSystem6eCombat extends Combat {
             });
         const maneuverNextPhaseNonTogglePromises = maneuverNextPhaseAes
             .filter((ae) => !ae.flags.toggle)
-            .map((maneuverAes) => {
-                const maneuver =
-                    fromUuidSync(maneuverAes.flags.itemUuid) ||
-                    rehydrateAttackItem(
-                        maneuverAes.flags.dehydratedManeuverItem,
-                        fromUuidSync(maneuverAes.flags.dehydratedManeuverActorUuid),
-                    );
-                return maneuver.delete();
-            });
+            .map((maneuverAes) => maneuverAes.delete());
         const combinedManeuvers = [...maneuverNextPhaseTogglePromises, ...maneuverNextPhaseNonTogglePromises];
         if (combinedManeuvers.length > 0) {
-            const results = await Promise.all(combinedManeuvers);
-            console.warn(results);
+            await Promise.all(combinedManeuvers);
         }
 
         // PH: FIXME: stop abort under certain circumstances
