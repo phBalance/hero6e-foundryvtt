@@ -1,6 +1,8 @@
 # Releases
 
-## Version 4.0.26 20250420 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.27 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+## Version 4.0.26 20250420
 
 WARNING: Read the changelog for this version before deciding to update.
 
