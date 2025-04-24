@@ -13,7 +13,7 @@ export default class SettingsHelpers {
             hint: game.i18n.localize("Settings.UseStunned.Hint"),
             scope: "world",
             config: true,
-            type: String,
+            type: Boolean,
             default: true,
 
             onChange: (value) => HEROSYS.log(false, value),
