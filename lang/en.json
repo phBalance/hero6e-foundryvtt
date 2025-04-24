@@ -182,6 +182,11 @@
 
             "LastMigration": {
                 "Name": "Last Migration"
+            },
+
+            "singleCombatantTracker": {
+                "Name": "Single Combatant Tracker",
+                "Hint": "Default combat tracker has a combatant entity per phase, but has issues when combatants are added/removed, also some modules don't like multiple combatants per token. Single Combatant Tracker (a work in progress) has one combatant entity per token, and will eventually support holding/haymaker/etc. Changing this setting may require you to delete and re-create existing combat trackers."
             }
         },
         "Automation": {
