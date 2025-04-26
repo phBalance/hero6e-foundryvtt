@@ -602,7 +602,7 @@
                                 {{characteristic.base}}
                             {{/if}}
                         </td>
-                        <td class="{{#if (gt characteristic.core characteristic.characteristicMax)}}characteristicMax{{/if}}" 
+                        <td class="{{#if (gt characteristic.core characteristic.characteristicMax)}}characteristic-max{{/if}}" 
                             {{#if (gt characteristic.core characteristic.characteristicMax)}}title="{{characteristic.core}} exceeds Characteristic Maximum of {{characteristic.characteristicMax}}. Costs double for excess."{{/if}}
                             {{#if characteristic.costTitle}}title="{{characteristic.costTitle}}" {{/if}}>
                             {{#unless (eq characteristic.core null)}}
