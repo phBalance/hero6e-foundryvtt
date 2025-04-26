@@ -4,6 +4,7 @@
 
 - Fixed issue where movement radios may not show on initial load. [#2212](https://github.com/dmdorman/hero6e-foundryvtt/issues/2212)
 - Fixed issue where characteristic rolls may not show after initial actor upload. [#2224](https://github.com/dmdorman/hero6e-foundryvtt/issues/2224)
+- Improved Combat Skill Level support. [#2232](https://github.com/dmdorman/hero6e-foundryvtt/issues/2232)
 
 ## Version 4.0.26 20250420
 

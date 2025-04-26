@@ -2245,6 +2245,32 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // duplicate ID can be a problem
+        for (const item of this.items) {
+            if (item.system.ID) {
+                const dups = this.items.filter((i) => i.system.ID === item.system.ID);
+                if (dups.length > 1) {
+                    // Try to give duplicate items a new ID
+                    for (const dupItem of dups.splice(1)) {
+                        if (dupItem.childItems.length === 0) {
+                            await dupItem.update({
+                                [`system.idDuplicate`]: dupItem.system.ID,
+                                [`system.ID`]: new Date().getTime().toString(),
+                            });
+                            ui.notifications.warn(
+                                `Created new internal ID reference for <b>${item.name}</b>. Recommend deleting item from HDC file and re-creating it.`,
+                            );
+                        } else {
+                            ui.notifications.warn(
+                                `Duplicate ID reference for <b>${item.name}</b> may cause problems. Recommend deleting item from HDC file and re-creating it.`,
+                                { permanent: true },
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
         // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
         this.items
             .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
