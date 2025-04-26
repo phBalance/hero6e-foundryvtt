@@ -325,10 +325,10 @@ export async function doAoeActionToHit(item, options) {
         (item) => item.type == "maneuver" && item.name === "Set" && item.isActive,
     );
 
-    const attackHeroRoller = new HeroRoller()
-        .makeSuccessRoll()
-        .addNumber(11, "Base to hit")
-        .addNumber(hitCharacteristic, item.system.uses)
+    const attackHeroRoller = new HeroRoller().makeSuccessRoll().addNumber(11, "Base to hit");
+
+    attackHeroRoller.addNumber(hitCharacteristic, item.system.uses);
+    attackHeroRoller
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
@@ -670,10 +670,9 @@ async function doSingleTargetActionToHit(item, options) {
 
     let stunForEndHeroRoller = null;
 
-    const heroRoller = new HeroRoller()
-        .makeSuccessRoll()
-        .addNumber(11, "Base to hit")
-        .addNumber(hitCharacteristic, itemData.uses)
+    const attackHeroRoller = new HeroRoller().makeSuccessRoll().addNumber(11, "Base to hit");
+    attackHeroRoller.addNumber(hitCharacteristic, itemData.uses);
+    attackHeroRoller
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
@@ -690,10 +689,10 @@ async function doSingleTargetActionToHit(item, options) {
 
     // Mind Scan
     if (parseInt(options.mindScanMinds)) {
-        heroRoller.addNumber(parseInt(options.mindScanMinds), "Number Of Minds");
+        attackHeroRoller.addNumber(parseInt(options.mindScanMinds), "Number Of Minds");
     }
     if (parseInt(options.mindScanFamiliar)) {
-        heroRoller.addNumber(parseInt(options.mindScanFamiliar), "Mind Familiarity");
+        attackHeroRoller.addNumber(parseInt(options.mindScanFamiliar), "Mind Familiarity");
     }
 
     // There are no range penalties if this is a line of sight power or it has been bought with
@@ -730,11 +729,11 @@ async function doSingleTargetActionToHit(item, options) {
         );
         if (pslRange) {
             const pslValue = Math.min(parseInt(pslRange.system.LEVELS), -rangePenalty);
-            heroRoller.addNumber(pslValue, "Penalty Skill Levels");
+            attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels");
         }
 
         if (rangePenalty) {
-            heroRoller.addNumber(
+            attackHeroRoller.addNumber(
                 rangePenalty,
                 `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
             );
@@ -745,7 +744,7 @@ async function doSingleTargetActionToHit(item, options) {
         if (braceManeuver) {
             const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
             if (brace > 0) {
-                heroRoller.addNumber(brace, braceManeuver.name);
+                attackHeroRoller.addNumber(brace, braceManeuver.name);
             }
         }
     }
@@ -826,13 +825,13 @@ async function doSingleTargetActionToHit(item, options) {
         const strMinimumValue = calculateStrengthMinimumForItem(item, strMinimumModifier);
         const extraStr = Math.max(0, parseInt(actor.system.characteristics.str.value)) - strMinimumValue;
         if (extraStr < 0) {
-            heroRoller.addNumber(Math.floor(extraStr / 5), strMinimumModifier.ALIAS);
+            attackHeroRoller.addNumber(Math.floor(extraStr / 5), strMinimumModifier.ALIAS);
         }
     }
 
     cvModifiers.forEach((cvModifier) => {
         if (cvModifier.cvMod.ocv) {
-            heroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
+            attackHeroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
         }
     });
     Attack.makeActionActiveEffects(action);
@@ -853,7 +852,7 @@ async function doSingleTargetActionToHit(item, options) {
         // Figure out the OCV penalty for the hit location or special hit locations.
         const aimOcvPenalty = CONFIG.HERO.hitLocations[options.aim]?.ocvMod || 0;
         if (aimOcvPenalty) {
-            heroRoller.addNumber(aimOcvPenalty, aimTargetLocation);
+            attackHeroRoller.addNumber(aimOcvPenalty, aimTargetLocation);
         }
 
         // Penalty Skill Levels
@@ -863,7 +862,7 @@ async function doSingleTargetActionToHit(item, options) {
             );
             if (pslHit) {
                 let pslValue = Math.min(pslHit.system.LEVELS, Math.abs(aimOcvPenalty));
-                heroRoller.addNumber(pslValue, pslHit.name);
+                attackHeroRoller.addNumber(pslValue, pslHit.name);
             }
         }
     }
@@ -872,7 +871,7 @@ async function doSingleTargetActionToHit(item, options) {
     // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
     // and lastly we subtract the die roll. The value returned is the maximum DCV hit
     // (so we can be sneaky and not tell the target's DCV out loud).
-    heroRoller.addDice(-3);
+    attackHeroRoller.addDice(-3);
 
     const aoeModifier = item.getAoeModifier();
     const aoeTemplate = aoeModifier ? getAoeTemplateForItem(item) : null;
@@ -924,7 +923,7 @@ async function doSingleTargetActionToHit(item, options) {
         }
 
         // Mind scan typically has just 1 target, but could have more. Use same roll for all targets.
-        const targetHeroRoller = aoeAlwaysHit || options.mindScanMinds ? heroRoller : heroRoller.clone();
+        const targetHeroRoller = aoeAlwaysHit || options.mindScanMinds ? attackHeroRoller : attackHeroRoller.clone();
         let toHitRollTotal = 0;
         let by = 0;
         let autoSuccess = false;
@@ -1119,7 +1118,7 @@ async function doSingleTargetActionToHit(item, options) {
         resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
 
         // misc
-        tags: heroRoller.tags(),
+        tags: attackHeroRoller.tags(),
         attackTags: getAttackTags(item),
         maxMinds: CONFIG.HERO.mindScanChoices
             .find((o) => o.key === parseInt(options.mindScanMinds))

@@ -1763,12 +1763,14 @@ export class HeroSystem6eActor extends Actor {
             // Specifically compound power is a problem if we don't set is5e properly for a 5e actor.
             // Caution: Any this.system.* variables are lost if they are not updated here.
             await this.update({
+                ...changes,
                 "system.is5e": this.system.is5e,
                 "system.CHARACTER.BASIC_CONFIGURATION": this.system.CHARACTER.BASIC_CONFIGURATION,
                 "system.CHARACTER.CHARACTER_INFO": this.system.CHARACTER.CHARACTER_INFO,
                 "system.CHARACTER.TEMPLATE": this.system.CHARACTER.TEMPLATE,
                 "system.CHARACTER.version": this.system.CHARACTER.version,
             });
+            changes = {};
         }
 
         // Quench test may need CHARACTERISTICS, which are set in postUpload
@@ -2243,6 +2245,32 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // duplicate ID can be a problem
+        for (const item of this.items) {
+            if (item.system.ID) {
+                const dups = this.items.filter((i) => i.system.ID === item.system.ID);
+                if (dups.length > 1) {
+                    // Try to give duplicate items a new ID
+                    for (const dupItem of dups.splice(1)) {
+                        if (dupItem.childItems.length === 0) {
+                            await dupItem.update({
+                                [`system.idDuplicate`]: dupItem.system.ID,
+                                [`system.ID`]: new Date().getTime().toString(),
+                            });
+                            ui.notifications.warn(
+                                `Created new internal ID reference for <b>${item.name}</b>. Recommend deleting item from HDC file and re-creating it.`,
+                            );
+                        } else {
+                            ui.notifications.warn(
+                                `Duplicate ID reference for <b>${item.name}</b> may cause problems. Recommend deleting item from HDC file and re-creating it.`,
+                                { permanent: true },
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
         // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
         this.items
             .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
@@ -2656,9 +2684,7 @@ export class HeroSystem6eActor extends Actor {
             let attacks = {};
             let checkedCount = 0;
 
-            for (const attack of this.items.filter(
-                (o) => (o.type === "attack" || o.system.subType === "attack") && o.system.uses === _ocv,
-            )) {
+            for (const attack of this._cslItems.filter((o) => o.system.uses === _ocv)) {
                 let checked = false;
 
                 // Attempt to determine if attack should be checked
@@ -2718,11 +2744,6 @@ export class HeroSystem6eActor extends Actor {
                 if (checked) checkedCount++;
             }
 
-            // Make sure at least one attacked is checked
-            // if (checkedCount === 0 && Object.keys(attacks).length > 0) {
-            //     attacks[Object.keys(attacks)[0]] = true;
-            // }
-
             if (cslItem._id) {
                 await cslItem.update({ "system.attacks": attacks }, { hideChatMessage: true });
             }
@@ -2748,13 +2769,13 @@ export class HeroSystem6eActor extends Actor {
         });
 
         if (characteristic && charPowerEntry?.behaviors.includes("success")) {
-            characteristic.roll = Math.round(9 + characteristic.value * 0.2);
+            const newRoll = Math.round(9 + characteristic.value * 0.2);
             if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;
             }
-            if (this.system.characteristics[key].roll !== characteristic.roll) {
+            if (this.system.characteristics[key].roll !== newRoll) {
                 return {
-                    [`system.characteristics.${key}.roll`]: characteristic.roll,
+                    [`system.characteristics.${key}.roll`]: newRoll,
                 };
             }
         }
@@ -2853,6 +2874,39 @@ export class HeroSystem6eActor extends Actor {
 
     get _activePointsForDisplay() {
         return RoundFavorPlayerDown(this._activePoints);
+    }
+
+    get _cslItems() {
+        const priorityCsl = function (item) {
+            switch (item.type) {
+                case "power":
+                    return 1;
+                case "equipment":
+                    return 1;
+                case "martialart":
+                    return 2;
+                case "maneuver":
+                    return 9;
+                default:
+                    return 99;
+            }
+        };
+
+        const _sortCslItems = function (a, b) {
+            const priorityA = priorityCsl(a);
+            const priorityB = priorityCsl(b);
+            return priorityA - priorityB;
+        };
+        return this.items
+            .filter(
+                (o) =>
+                    o.rollsToHit() &&
+                    (!o.baseInfo.behaviors.includes("optional-maneuver") ||
+                        game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
+                    !o.system.XMLID.startsWith("__"),
+            )
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .sort(_sortCslItems);
     }
 
     /**
