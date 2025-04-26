@@ -1523,7 +1523,7 @@ export class HeroSystem6eActor extends Actor {
                 const characteristicMax = parseInt(this.system.CHARACTER.RULES[key.toUpperCase() + "_MAX"] || 0);
                 if (core > characteristicMax) {
                     // Pay double for characteristics over CHARACTERISTIC MAXIMA
-                    cost += core - characteristicMax;
+                    cost += (core - characteristicMax) * (powerInfo.costPerLevel(this) || 1);
                 }
 
                 if (this.system.characteristics[key].characteristicMax !== characteristicMax) {
