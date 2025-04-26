@@ -1518,6 +1518,19 @@ export class HeroSystem6eActor extends Actor {
             const levels = core - base;
             let cost = Math.round(levels * (powerInfo.costPerLevel(this) || 0));
 
+            // CHARACTERISTIC MAXIMA
+            if (this.system.CHARACTER.RULES) {
+                const characteristicMax = parseInt(this.system.CHARACTER.RULES[key.toUpperCase() + "_MAX"] || 0);
+                if (core > characteristicMax) {
+                    // Pay double for characteristics over CHARACTERISTIC MAXIMA
+                    cost += core - characteristicMax;
+                }
+
+                if (this.system.characteristics[key].characteristicMax !== characteristicMax) {
+                    changes[`system.characteristics.${key}.characteristicMax`] = characteristicMax;
+                }
+            }
+
             // 5e hack for fractional speed
             if (key === "spd" && cost < 0) {
                 cost = Math.ceil(cost / 10);
@@ -2595,15 +2608,6 @@ export class HeroSystem6eActor extends Actor {
 
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
-            //if (key.toLowerCase() === "spd") debugger;
-
-            // let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // This is the +- LEVELS of a characteristic that was purchased
-            // newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
-            // if (this.system.is5e && key === "spd") {
-            //     SPD is always an integer, but in 5e due to figured characteristics, the base can be fractional.
-            //     newValue = Math.floor(newValue);
-            // }
-
             // Only update characteristics if there are no active effects modifying the characteristic
             //const charHasEffect = this.appliedEffects.find((e) => e.changes.find((c) => c.key.includes(key)));
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0); // uppercase?  LEVELS?  This probably hasn't worked in a long time!
@@ -2813,7 +2817,7 @@ export class HeroSystem6eActor extends Actor {
             let _characterPointCost = parseFloat(item.system?.characterPointCost || item.system?.realCost) || 0;
             const _activePoints = parseFloat(item.system?.activePoints) || 0;
 
-            if (_characterPointCost !== 0) {
+            if (_characterPointCost !== 0 && item.type !== "disadvantage") {
                 // Equipment is typically purchased with money, not character points
                 if ((item.parentItem?.type || item.type) !== "equipment") {
                     characterPointCost += _characterPointCost;
@@ -2828,14 +2832,14 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // DISAD_POINTS: realCost
-        const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
-        const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
-        if (_disadPoints !== 0) {
-            this.system.pointsDetail.MatchingDisads = -_disadPoints;
-            this.system.activePointsDetail.MatchingDisads = -_disadPoints;
-            characterPointCost -= _disadPoints;
-            activePoints -= _disadPoints;
-        }
+        //const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        //const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
+        // if (_disadPoints !== 0) {
+        //     this.system.pointsDetail.MatchingDisads = -_disadPoints;
+        //     this.system.activePointsDetail.MatchingDisads = -_disadPoints;
+        //     characterPointCost -= _disadPoints;
+        //     activePoints -= _disadPoints;
+        // }
 
         this.system.realCost = characterPointCost;
         this.system.activePoints = activePoints;
