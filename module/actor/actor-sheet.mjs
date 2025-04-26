@@ -493,10 +493,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                         name += ` (${item.system.XMLID})`;
                     }
 
-                    data.activePointSummary.push({
-                        name: name,
-                        activePoints: activePoints,
-                    });
+                    if (!item.system.XMLID.startsWith("__")) {
+                        data.activePointSummary.push({
+                            name: name,
+                            activePoints: activePoints,
+                        });
+                    }
                 }
             }
 
