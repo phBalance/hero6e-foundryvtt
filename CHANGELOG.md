@@ -2,7 +2,8 @@
 
 ## Version 4.0.27 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Fixed issue where movement radios may not show on initial load [#2212](https://github.com/dmdorman/hero6e-foundryvtt/issues/2212)
+- Fixed issue where movement radios may not show on initial load. [#2212](https://github.com/dmdorman/hero6e-foundryvtt/issues/2212)
+- Fixed issue where characteristic rolls may not show after initial actor upload. [#2224](https://github.com/dmdorman/hero6e-foundryvtt/issues/2224)
 
 ## Version 4.0.26 20250420
 

@@ -1763,12 +1763,14 @@ export class HeroSystem6eActor extends Actor {
             // Specifically compound power is a problem if we don't set is5e properly for a 5e actor.
             // Caution: Any this.system.* variables are lost if they are not updated here.
             await this.update({
+                ...changes,
                 "system.is5e": this.system.is5e,
                 "system.CHARACTER.BASIC_CONFIGURATION": this.system.CHARACTER.BASIC_CONFIGURATION,
                 "system.CHARACTER.CHARACTER_INFO": this.system.CHARACTER.CHARACTER_INFO,
                 "system.CHARACTER.TEMPLATE": this.system.CHARACTER.TEMPLATE,
                 "system.CHARACTER.version": this.system.CHARACTER.version,
             });
+            changes = {};
         }
 
         // Quench test may need CHARACTERISTICS, which are set in postUpload
@@ -2748,13 +2750,13 @@ export class HeroSystem6eActor extends Actor {
         });
 
         if (characteristic && charPowerEntry?.behaviors.includes("success")) {
-            characteristic.roll = Math.round(9 + characteristic.value * 0.2);
+            const newRoll = Math.round(9 + characteristic.value * 0.2);
             if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;
             }
-            if (this.system.characteristics[key].roll !== characteristic.roll) {
+            if (this.system.characteristics[key].roll !== newRoll) {
                 return {
-                    [`system.characteristics.${key}.roll`]: characteristic.roll,
+                    [`system.characteristics.${key}.roll`]: newRoll,
                 };
             }
         }
