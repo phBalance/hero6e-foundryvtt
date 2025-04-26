@@ -988,7 +988,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
             // strength for damage purposes.
             // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
-            if (str >= 3 && isManeuverThatDoesNormalDamage(item)) {
+            if (isManeuverThatDoesNormalDamage(item)) {
                 const hthAttackItems =
                     item.system._active.linkedAssociated
                         ?.map((info) => info.item)
