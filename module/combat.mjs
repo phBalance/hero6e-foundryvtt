@@ -8,6 +8,10 @@ import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
+        data ??= {};
+        data.flags ??= {};
+        data.flags[game.system.id] ??= {};
+        data.flags[game.system.id].segment ??= 12;
         super(data, context);
 
         this.previous = this.previous || {
@@ -89,31 +93,44 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     _sortCombatants(a, b) {
-        // Lightning Reflexes
-        const lrA = Number.isNumeric(a.flags.lightningReflexes?.levels) ? a.flags.lightningReflexes.levels : 0;
-        const lrB = Number.isNumeric(b.flags.lightningReflexes?.levels) ? b.flags.lightningReflexes.levels : 0;
+        if (!HeroSystem6eCombat.singleCombatantTracker) {
+            // Lightning Reflexes
+            const lrA = Number.isNumeric(a.flags.lightningReflexes?.levels) ? a.flags.lightningReflexes.levels : 0;
+            const lrB = Number.isNumeric(b.flags.lightningReflexes?.levels) ? b.flags.lightningReflexes.levels : 0;
 
-        // Sort by segment first
-        const segA = Number.isNumeric(a.flags.segment) ? a.flags.segment : -Infinity;
-        const segB = Number.isNumeric(b.flags.segment) ? b.flags.segment : -Infinity;
+            // Sort by segment first
+            const segA = Number.isNumeric(a.flags.segment) ? a.flags.segment : -Infinity;
+            const segB = Number.isNumeric(b.flags.segment) ? b.flags.segment : -Infinity;
 
-        // Then by initiative (dex or ego)
-        const initA = Number.isNumeric(a.initiative) ? a.initiative + lrA : -Infinity;
-        const initB = Number.isNumeric(b.initiative) ? b.initiative + lrB : -Infinity;
+            // Then by initiative (dex or ego)
+            const initA = Number.isNumeric(a.initiative) ? a.initiative + lrA : -Infinity;
+            const initB = Number.isNumeric(b.initiative) ? b.initiative + lrB : -Infinity;
 
-        // Then by spd
-        const spdA = Number.isNumeric(a.flags.spd) ? a.flags.spd : -Infinity;
-        const spdB = Number.isNumeric(b.flags.spd) ? b.flags.spd : -Infinity;
+            // Then by spd
+            const spdA = Number.isNumeric(a.flags.spd) ? a.flags.spd : -Infinity;
+            const spdB = Number.isNumeric(b.flags.spd) ? b.flags.spd : -Infinity;
 
-        // Then by hasPlayerOwner
-        // Finally by tokenId
+            // Then by hasPlayerOwner
+            // Finally by tokenId
 
+            return (
+                segA - segB ||
+                initB - initA ||
+                spdB - spdA ||
+                a.hasPlayerOwner < b.hasPlayerOwner ||
+                (a.tokenId > b.tokenId ? 1 : -1)
+            );
+        } else {
+            const ia = a.flags.nextPhase?.initiative || (Number.isNumeric(a.initiative) ? a.initiative : -Infinity);
+            const ib = b.flags.nextPhase?.initiative || (Number.isNumeric(b.initiative) ? b.initiative : -Infinity);
+            return ib - ia || (a.id > b.id ? 1 : -1);
+        }
+    }
+
+    static get singleCombatantTracker() {
         return (
-            segA - segB ||
-            initB - initA ||
-            spdB - spdA ||
-            a.hasPlayerOwner < b.hasPlayerOwner ||
-            (a.tokenId > b.tokenId ? 1 : -1)
+            game.settings.get(game.system.id, "alphaTesting") &&
+            game.settings.get(game.system.id, "singleCombatantTracker")
         );
     }
 

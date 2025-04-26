@@ -4,6 +4,7 @@ import * as chat from "./chat.mjs";
 import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
+import { HeroSystem6eCombatant } from "./combatant.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { migrateWorld } from "./migration.mjs";
@@ -68,6 +69,7 @@ Hooks.once("init", async function () {
     CONFIG.HERO = HERO;
 
     CONFIG.Combat.documentClass = HeroSystem6eCombat;
+    CONFIG.Combatant.documentClass = HeroSystem6eCombatant;
     CONFIG.Combat.defeatedStatusId = "dead";
 
     // V11 now support ActiveEffects on items without
@@ -151,6 +153,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/chat/defense-tags-partial.hbs`,
         `systems/${HEROSYS.module}/templates/combat/header.hbs`,
         `systems/${HEROSYS.module}/templates/combat/tracker.hbs`,
+        `systems/${HEROSYS.module}/templates/combat/tracker-single.hbs`,
         `systems/${HEROSYS.module}/templates/combat/footer.hbs`,
     ];
     // Handlebars Templates and Partials

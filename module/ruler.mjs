@@ -97,6 +97,8 @@ export class HeroRuler extends Ruler {
 
         Hooks.once("ready", function () {
             Hooks.on("controlToken", that._controlToken.bind(that));
+            window.setTimeout(that._controlToken.bind(that), 1);
+            //that._controlToken(); //.bind(that);
         });
 
         if (!game.modules.get("drag-ruler")?.active) {

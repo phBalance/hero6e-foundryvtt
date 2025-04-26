@@ -13,7 +13,7 @@ export default class SettingsHelpers {
             hint: game.i18n.localize("Settings.UseStunned.Hint"),
             scope: "world",
             config: true,
-            type: String,
+            type: Boolean,
             default: true,
 
             onChange: (value) => HEROSYS.log(false, value),
@@ -331,6 +331,17 @@ export default class SettingsHelpers {
                 },
             ],
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL,
+        });
+
+        // Use new combat tracker
+        game.settings.register(module, "singleCombatantTracker", {
+            name: game.i18n.localize("Settings.AlphaTesting.singleCombatantTracker.Name"),
+            hint: game.i18n.localize("Settings.AlphaTesting.singleCombatantTracker.Hint"),
+            scope: "world",
+            config: game.settings.get(game.system.id, "alphaTesting"),
+            type: Boolean,
+            default: false,
+            requiresReload: true,
         });
     }
 }
