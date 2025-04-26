@@ -2866,30 +2866,33 @@ export class HeroSystem6eActor extends Actor {
         // NOTE: Older HD used "Main" as the template type - not sure what it means
         // Stringify the TEMPLATE for our best chance.
         try {
-            if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Heroic/i)) {
+            const template = this.system.CHARACTER?.TEMPLATE || this.system.CHARACTER?.BASIC_CONFIGURATION?.TEMPLATE;
+            const stringifiedTemplate = JSON.stringify(template);
+
+            if (stringifiedTemplate?.match(/\.Heroic/i)) {
                 // Have seen "Heroic" and "Heroic6E"
                 templateType = "Heroic";
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Superheroic/i)) {
+            } else if (stringifiedTemplate?.match(/\.Superheroic/i)) {
                 // Have seen "Superheroic" and "Superheroic6E"
                 templateType = "Superheroic";
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Normal/i)) {
-                // Have seen "Normal" (no 6e template)
-                templateType = "Normal";
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Vehicle/i)) {
+            } else if (stringifiedTemplate?.match(/\.Vehicle/i)) {
                 // Have seen "Vehicle" and "Vehicle6E"
                 templateType = "Vehicle";
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Base/i)) {
+            } else if (stringifiedTemplate?.match(/\.Base/i)) {
                 // Have seen "Base" and "Base6E"
                 templateType = "Base";
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Automaton/i)) {
+            } else if (stringifiedTemplate?.match(/\.Automaton/i)) {
                 // Have seen "Automaton" and "Automaton6E"
                 templateType = "Automaton";
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.AI/i)) {
+            } else if (stringifiedTemplate?.match(/\.AI/i)) {
                 // Have seen "AI" and "AI6E"
                 templateType = "AI";
-            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Computer/i)) {
+            } else if (stringifiedTemplate?.match(/\.Computer/i)) {
                 // Have seen "Computer" and "Computer6E"
                 templateType = "Computer";
+            } else if (stringifiedTemplate?.match(/Normal/i)) {
+                // Have seen "Normal" and "CompetentNormal" - no 6e template
+                templateType = "Normal";
             }
 
             if (templateType === "" && this.type !== "base2" && this.flags.uploading !== true) {
@@ -2897,7 +2900,11 @@ export class HeroSystem6eActor extends Actor {
                 // Automations
                 // Barrier
                 if (this.id) {
-                    console.warn(`Unknown template type for ${this.name}.`, this.system.CHARACTER?.TEMPLATE);
+                    console.warn(
+                        `Unknown template type for ${this.name}.`,
+                        this.system.CHARACTER?.TEMPLATE,
+                        this.system.BASIC_CONFIGURATION?.TEMPLATE,
+                    );
                 }
             }
         } catch (e) {
@@ -2915,7 +2922,7 @@ export class HeroSystem6eActor extends Actor {
             return "ai";
         }
 
-        return this._templateType?.charAt(0).toLowerCase() || "?";
+        return templateType?.charAt(0).toLowerCase() || "?";
     }
 
     get encumbrance() {
