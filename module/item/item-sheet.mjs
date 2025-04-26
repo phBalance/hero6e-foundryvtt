@@ -219,9 +219,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 if (item.actor) {
                     for (const attack of item.actor._cslItems) {
                         // Check if there is an adder (if so attack is checked)
-                        const adder = this.item.adders.find(
-                            (a) => a.ALIAS == attack.name && a.targetId === attack.system.ID,
-                        );
+                        const adder = this.item.adders.find((a) => a.ALIAS == attack.name && a.targetId === attack.id);
 
                         data.attacks.push({
                             id: attack.id,
@@ -553,7 +551,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             for (const [attackId, checked] of Object.entries(expandedData.attacks)) {
                 const attackItem = this.actor.items.find((o) => o.id === attackId);
                 const adder = (this.item.system.ADDER || []).find(
-                    (adder) => adder.XMLID === "ADDER" && adder.targetId === attackItem.system.ID,
+                    (adder) => adder.XMLID === "ADDER" && adder.targetId === attackItem.id,
                 );
 
                 // Create a custom adders that matches attack name
@@ -568,7 +566,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         PRIVATE: false,
                         SELECTED: true,
                         BASECOST_total: 0,
-                        targetId: attackItem.system.ID,
+                        targetId: attackItem.id,
                     };
                     this.item.system.ADDER ??= [];
                     this.item.system.ADDER.push(newAdder);
@@ -576,7 +574,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
                 // Delete custom adders that matches attack name
                 if (adder && !checked) {
-                    this.item.system.ADDER = this.item.system.ADDER.filter((o) => o.targetId != attackItem.system.ID);
+                    this.item.system.ADDER = this.item.system.ADDER.filter((o) => o.targetId != attackItem.id);
                 }
             }
         }

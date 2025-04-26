@@ -2138,11 +2138,29 @@ export class HeroSystem6eItem extends Item {
                                 PRIVATE: false,
                                 SELECTED: true,
                                 BASECOST_total: 0,
-                                targetId: attackItem.system.ID,
+                                targetId: attackItem.id,
                             };
                             this.system.ADDER ??= [];
                             this.system.ADDER.push(newAdder);
                             count++;
+                        }
+                    }
+                } else {
+                    // Try to associate CSL adders with specific attack
+                    if (this.baseInfo?.editOptions?.showAttacks) {
+                        let addersChanged = false;
+                        for (const adder of (this.system.ADDER || []).filter((a) => !a.targetId)) {
+                            const item = this.actor._cslItems.find(
+                                (o) => o.name === adder.ALIAS || o.system.ALIAS === adder.ALIAS,
+                            );
+                            if (item) {
+                                adder.targetId = item.id;
+                                addersChanged = true;
+                            }
+                        }
+                        if (addersChanged) {
+                            // AARON: The update causes error and it seems to work without it
+                            //await this.update({ [`system.ADDER`]: this.system.ADDER });
                         }
                     }
                 }

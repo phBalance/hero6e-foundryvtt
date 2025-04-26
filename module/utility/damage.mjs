@@ -10,7 +10,10 @@ export function combatSkillLevelsForAttack(item) {
     const cslSkills = item.actor.items.filter(
         (o) =>
             ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) &&
-            (o.system.ADDER || []).find((adder) => adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name) &&
+            (o.system.ADDER || []).find(
+                (adder) =>
+                    (adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name) && adder.targetId === item.id,
+            ) &&
             o.isActive != false,
     );
 
