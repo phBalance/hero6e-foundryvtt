@@ -15,7 +15,8 @@ export class HeroSystem6eCombatant extends Combatant {
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     ];
 
-    hasPhase(segmentNumber, options = {}) {
+    hasPhase(segmentNumber) {
+        //, options = {}) {
         const actor = this.actor;
         const index = Math.min(Math.max(actor.system.characteristics.spd?.value || 0, 1), 12);
         const phases = foundry.utils.deepClone(HeroSystem6eCombatant.Speed2Segments[index]);
