@@ -5385,7 +5385,11 @@ export class HeroSystem6eItem extends Item {
         let _cost = 0;
 
         for (const adder of this.adders) {
-            _cost += adder.cost;
+            if (this.baseInfo?.categorized && this.system.FAMILIARITY) {
+                _cost += Math.max(1, adder.cost - 1);
+            } else {
+                _cost += adder.cost;
+            }
         }
 
         // ENDURANCERESERVEREC is a power, we can treat it like an adder
