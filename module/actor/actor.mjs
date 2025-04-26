@@ -2658,9 +2658,7 @@ export class HeroSystem6eActor extends Actor {
             let attacks = {};
             let checkedCount = 0;
 
-            for (const attack of this.items.filter(
-                (o) => (o.type === "attack" || o.system.subType === "attack") && o.system.uses === _ocv,
-            )) {
+            for (const attack of this._cslItems.filter((o) => o.system.uses === _ocv)) {
                 let checked = false;
 
                 // Attempt to determine if attack should be checked
@@ -2719,11 +2717,6 @@ export class HeroSystem6eActor extends Actor {
 
                 if (checked) checkedCount++;
             }
-
-            // Make sure at least one attacked is checked
-            // if (checkedCount === 0 && Object.keys(attacks).length > 0) {
-            //     attacks[Object.keys(attacks)[0]] = true;
-            // }
 
             if (cslItem._id) {
                 await cslItem.update({ "system.attacks": attacks }, { hideChatMessage: true });
@@ -2855,6 +2848,39 @@ export class HeroSystem6eActor extends Actor {
 
     get _activePointsForDisplay() {
         return RoundFavorPlayerDown(this._activePoints);
+    }
+
+    get _cslItems() {
+        const priorityCsl = function (item) {
+            switch (item.type) {
+                case "power":
+                    return 1;
+                case "equipment":
+                    return 1;
+                case "martialart":
+                    return 2;
+                case "maneuver":
+                    return 9;
+                default:
+                    return 99;
+            }
+        };
+
+        const _sortCslItems = function (a, b) {
+            const priorityA = priorityCsl(a);
+            const priorityB = priorityCsl(b);
+            return priorityA - priorityB;
+        };
+        return this.items
+            .filter(
+                (o) =>
+                    o.rollsToHit() &&
+                    (!o.baseInfo.behaviors.includes("optional-maneuver") ||
+                        game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
+                    !o.system.XMLID.startsWith("__"),
+            )
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .sort(_sortCslItems);
     }
 
     /**

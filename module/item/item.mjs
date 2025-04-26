@@ -1951,13 +1951,7 @@ export class HeroSystem6eItem extends Item {
             if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
                 if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER") || this.system.OPTIONID === "ALL") {
                     let count = 0;
-                    for (const attackItem of this.actor.items.filter(
-                        (o) =>
-                            o.rollsToHit() &&
-                            (!o.baseInfo.behaviors.includes("optional-maneuver") ||
-                                game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
-                            !o.system.XMLID.startsWith("__"), // TODO: Should we allow __STRENGTHDAMAGE to have a "to-hit" behavior when it isn't player facing?
-                    )) {
+                    for (const attackItem of this.actor._cslItems) {
                         let addMe = false;
 
                         switch (this.system.XMLID) {
@@ -2144,6 +2138,7 @@ export class HeroSystem6eItem extends Item {
                                 PRIVATE: false,
                                 SELECTED: true,
                                 BASECOST_total: 0,
+                                targetId: attackItem.system.ID,
                             };
                             this.system.ADDER ??= [];
                             this.system.ADDER.push(newAdder);

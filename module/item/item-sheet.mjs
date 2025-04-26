@@ -56,195 +56,193 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     getData() {
         const data = super.getData();
 
-        // Grab the item's data.
-        //const itemData = data.data
+        try {
+            // Grab the item's data.
+            //const itemData = data.data
 
-        // Re-define the template data references.
-        // data.item = itemData
-        // data.data = itemData.data
-        // data.config = CONFIG.HERO
+            // Re-define the template data references.
+            // data.item = itemData
+            // data.data = itemData.data
+            // data.config = CONFIG.HERO
 
-        // Grab the item
-        const item = data.item;
+            // Grab the item
+            const item = data.item;
 
-        // Re-define the template data references.
-        //data.item = item
-        data.system = item.system;
-        data.config = CONFIG.HERO;
-        data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
+            // Re-define the template data references.
+            //data.item = item
+            data.system = item.system;
+            data.config = CONFIG.HERO;
+            data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
 
-        // Easy reference to ActiveEffects with an origin of this item
-        if (this.actor) {
-            data.effects = this.actor.effects.filter((o) => o.origin === item.uuid);
-        } else {
-            data.effects = this.document.effects;
-        }
+            // Easy reference to ActiveEffects with an origin of this item
+            if (this.actor) {
+                data.effects = this.actor.effects.filter((o) => o.origin === item.uuid);
+            } else {
+                data.effects = this.document.effects;
+            }
 
-        // Signed OCV and DCV
-        if (data.system.ocv != undefined) {
-            data.system.ocv = ("+" + parseInt(data.system.ocv)).replace("+-", "-");
-        }
-        if (data.system.dcv != undefined) {
-            data.system.dcv = ("+" + parseInt(data.system.dcv)).replace("+-", "-");
-        }
+            // Signed OCV and DCV
+            if (data.system.ocv != undefined) {
+                data.system.ocv = ("+" + parseInt(data.system.ocv)).replace("+-", "-");
+            }
+            if (data.system.dcv != undefined) {
+                data.system.dcv = ("+" + parseInt(data.system.dcv)).replace("+-", "-");
+            }
 
-        const configPowerInfo = item.baseInfo;
-        data.sheet = { ...(configPowerInfo?.sheet || {}) };
-        data.editOptions = configPowerInfo?.editOptions;
+            const configPowerInfo = item.baseInfo;
+            data.sheet = { ...(configPowerInfo?.sheet || {}) };
+            data.editOptions = configPowerInfo?.editOptions;
 
-        // SFX
-        const sfx = [
-            "Default",
-            "Acid",
-            "Alien",
-            "Air/Wind",
-            "Animal",
-            "Body Control",
-            "Chi",
-            "Cosmic Energy",
-            "Cyberkinesis",
-            "Darkness",
-            "Density Alteration",
-            "Dimensional Manipulation",
-            "Earth/Stone",
-            "Electricity",
-            "Emotion Control",
-            "Fire/Heat",
-            "Force",
-            "Gravity",
-            "Ice/Cold",
-            "Illusion",
-            "Kinetic Energy",
-            "Light",
-            "Luck",
-            "Magic/Mystic",
-            "Magnetism",
-            "Martial Arts",
-            "Matter Manipulation",
-            "Mental/Psionic",
-            "Metamorphic",
-            "Precognition",
-            "Radiation",
-            "Serum Based",
-            "Shape Alteration",
-            "Size Alteration",
-            "Sleep/Dream",
-            "Solar/Celestial",
-            "Sonic",
-            "Speedster",
-            "Strength/Toughness",
-            "Stretching",
-            "Telekinetic",
-            "Teleportation",
-            "Time",
-            "Vibration",
-            "Water",
-            "Weather",
-            "Wood/Plant",
-            "Miscellaneous",
-        ];
+            // SFX
+            const sfx = [
+                "Default",
+                "Acid",
+                "Alien",
+                "Air/Wind",
+                "Animal",
+                "Body Control",
+                "Chi",
+                "Cosmic Energy",
+                "Cyberkinesis",
+                "Darkness",
+                "Density Alteration",
+                "Dimensional Manipulation",
+                "Earth/Stone",
+                "Electricity",
+                "Emotion Control",
+                "Fire/Heat",
+                "Force",
+                "Gravity",
+                "Ice/Cold",
+                "Illusion",
+                "Kinetic Energy",
+                "Light",
+                "Luck",
+                "Magic/Mystic",
+                "Magnetism",
+                "Martial Arts",
+                "Matter Manipulation",
+                "Mental/Psionic",
+                "Metamorphic",
+                "Precognition",
+                "Radiation",
+                "Serum Based",
+                "Shape Alteration",
+                "Size Alteration",
+                "Sleep/Dream",
+                "Solar/Celestial",
+                "Sonic",
+                "Speedster",
+                "Strength/Toughness",
+                "Stretching",
+                "Telekinetic",
+                "Teleportation",
+                "Time",
+                "Vibration",
+                "Water",
+                "Weather",
+                "Wood/Plant",
+                "Miscellaneous",
+            ];
 
-        data.sheet.SFX = {
-            selectOptions: sfx.reduce((current, item) => {
-                current[item] = item;
-                return current;
-            }, {}),
-        };
+            data.sheet.SFX = {
+                selectOptions: sfx.reduce((current, item) => {
+                    current[item] = item;
+                    return current;
+                }, {}),
+            };
 
-        // A select list of possible adjustment targets on the character
-        if (
-            item.system.XMLID === "ABSORPTION" ||
-            item.system.XMLID === "AID" ||
-            item.system.XMLID === "HEALING" ||
-            item.system.XMLID === "DISPEL" ||
-            item.system.XMLID === "DRAIN" ||
-            item.system.XMLID === "SUCCOR" ||
-            item.system.XMLID === "SUPPRESS" ||
-            item.system.XMLID === "TRANSFER"
-        ) {
-            const { enhances, reduces } = item.splitAdjustmentSourceAndTarget();
-
-            const enhancesValidator =
-                item.system.XMLID === "AID" ||
+            // A select list of possible adjustment targets on the character
+            if (
                 item.system.XMLID === "ABSORPTION" ||
+                item.system.XMLID === "AID" ||
+                item.system.XMLID === "HEALING" ||
+                item.system.XMLID === "DISPEL" ||
+                item.system.XMLID === "DRAIN" ||
                 item.system.XMLID === "SUCCOR" ||
+                item.system.XMLID === "SUPPRESS" ||
                 item.system.XMLID === "TRANSFER"
-                    ? adjustmentSourcesStrict
-                    : adjustmentSourcesPermissive;
+            ) {
+                const { enhances, reduces } = item.splitAdjustmentSourceAndTarget();
 
-            data.possibleEnhances = enhancesValidator(this.actor, this.item.is5e);
-            data.possibleReduces = adjustmentSourcesPermissive(this.actor, this.item.is5e);
+                const enhancesValidator =
+                    item.system.XMLID === "AID" ||
+                    item.system.XMLID === "ABSORPTION" ||
+                    item.system.XMLID === "SUCCOR" ||
+                    item.system.XMLID === "TRANSFER"
+                        ? adjustmentSourcesStrict
+                        : adjustmentSourcesPermissive;
 
-            data.enhances = enhances ? enhances.split(",").map((target) => target.toUpperCase().trim()) : [];
-            data.reduces = reduces ? reduces.split(",").map((target) => target.toUpperCase().trim()) : [];
-        }
+                data.possibleEnhances = enhancesValidator(this.actor, this.item.is5e);
+                data.possibleReduces = adjustmentSourcesPermissive(this.actor, this.item.is5e);
 
-        // Combat Skill Levels & Mental Combat Levels
-        if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
-            let _ocv = "ocv";
-            let _dcv = "dcv";
-            if (this.item.system.XMLID === "MENTAL_COMBAT_LEVELS") {
-                _ocv = "omcv";
-                _dcv = "dmcv";
-            }
-            data.cslChoices = { [_ocv]: _ocv };
-            if (this.item.system.OPTION != "SINGLE") {
-                data.cslChoices[_dcv] = _dcv;
-                data.cslChoices.dc = "dc";
+                data.enhances = enhances ? enhances.split(",").map((target) => target.toUpperCase().trim()) : [];
+                data.reduces = reduces ? reduces.split(",").map((target) => target.toUpperCase().trim()) : [];
             }
 
-            // Make sure CSL's are defined
-            if (!item.system.csl) {
-                item.system.csl = {};
-                for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
-                    item.system.csl[c] = _ocv;
+            // Combat Skill Levels & Mental Combat Levels
+            if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
+                let _ocv = "ocv";
+                let _dcv = "dcv";
+                if (this.item.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                    _ocv = "omcv";
+                    _dcv = "dmcv";
                 }
-                item.update({ "system.csl": item.system.csl });
-            }
+                data.cslChoices = { [_ocv]: _ocv };
+                if (this.item.system.OPTION != "SINGLE") {
+                    data.cslChoices[_dcv] = _dcv;
+                    data.cslChoices.dc = "dc";
+                }
 
-            // CSL radioBoxes names
-            data.csl = [];
-            for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
-                data.csl.push({
-                    name: `system.csl.${c}`,
-                    value: item.system.csl[c],
-                });
-            }
-        }
+                // Make sure CSL's are defined
+                if (!item.system.csl) {
+                    item.system.csl = {};
+                    for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
+                        item.system.csl[c] = _ocv;
+                    }
+                    item.update({ "system.csl": item.system.csl });
+                }
 
-        if (configPowerInfo?.editOptions?.showAttacks) {
-            // Enumerate attacks
-            data.attacks = [];
-            if (item.actor) {
-                for (const attack of item.actor.items.filter(
-                    (o) =>
-                        o.rollsToHit() &&
-                        (!o.baseInfo.behaviors.includes("optional-maneuver") ||
-                            game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
-                        !o.system.XMLID.startsWith("__"),
-                )) {
-                    // Check if there is an adder (if so attack is checked)
-                    const adder = this.item.adders.find((o) => o.ALIAS == attack.name);
-
-                    data.attacks.push({
-                        id: attack.id,
-                        name: attack.name,
-                        checked: adder ? true : false,
-                        title: `${
-                            attack.system.XMLID + (attack.system.DISPLAY ? " (" + attack.system.DISPLAY + ")" : "")
-                        }: ${attack.system.description.replace(/"/g, "&quot;")}`,
+                // CSL radioBoxes names
+                data.csl = [];
+                for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
+                    data.csl.push({
+                        name: `system.csl.${c}`,
+                        value: item.system.csl[c],
                     });
                 }
             }
-        }
 
-        // PENALTY_SKILL_LEVELS
-        data.penaltyChoices = item.baseInfo?.editOptions?.penaltyChoices;
+            if (configPowerInfo?.editOptions?.showAttacks) {
+                // Enumerate attacks
+                data.attacks = [];
+                if (item.actor) {
+                    for (const attack of item.actor._cslItems) {
+                        // Check if there is an adder (if so attack is checked)
+                        const adder = this.item.adders.find((o) => o.ALIAS == attack.name);
 
-        // ENDURANCERESERVE has a REC rate
-        if (item.system.XMLID == "ENDURANCERESERVE") {
-            const power = item.system.POWER.find((o) => o.XMLID === "ENDURANCERESERVEREC");
-            data.rec = parseInt(power?.LEVELS) || 0;
+                        data.attacks.push({
+                            id: attack.id,
+                            name: attack.name,
+                            checked: adder ? true : false,
+                            title: `${
+                                attack.system.XMLID + (attack.system.DISPLAY ? " (" + attack.system.DISPLAY + ")" : "")
+                            }: ${attack.system.description.replace(/"/g, "&quot;")}`,
+                        });
+                    }
+                }
+            }
+
+            // PENALTY_SKILL_LEVELS
+            data.penaltyChoices = item.baseInfo?.editOptions?.penaltyChoices;
+
+            // ENDURANCERESERVE has a REC rate
+            if (item.system.XMLID == "ENDURANCERESERVE") {
+                const power = item.system.POWER.find((o) => o.XMLID === "ENDURANCERESERVEREC");
+                data.rec = parseInt(power?.LEVELS) || 0;
+            }
+        } catch (e) {
+            console.error(e);
         }
 
         return data;
