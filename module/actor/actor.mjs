@@ -2817,12 +2817,16 @@ export class HeroSystem6eActor extends Actor {
             let _characterPointCost = parseFloat(item.system?.characterPointCost || item.system?.realCost) || 0;
             const _activePoints = parseFloat(item.system?.activePoints) || 0;
 
-            if (_characterPointCost !== 0 && item.type !== "disadvantage") {
+            if (_characterPointCost !== 0) {
                 // Equipment is typically purchased with money, not character points
-                if ((item.parentItem?.type || item.type) !== "equipment") {
+                if ((item.parentItem?.type || item.type) !== "equipment" && item.type !== "disadvantage") {
                     characterPointCost += _characterPointCost;
                 }
-                activePoints += _activePoints;
+
+                if (item.type !== "disadvantage") {
+                    activePoints += _activePoints;
+                }
+
                 this.system.pointsDetail[item.parentItem?.type || item.type] ??= 0;
                 this.system.activePointsDetail[item.parentItem?.type || item.type] ??= 0;
 
@@ -2832,14 +2836,14 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // DISAD_POINTS: realCost
-        //const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
-        //const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
-        // if (_disadPoints !== 0) {
-        //     this.system.pointsDetail.MatchingDisads = -_disadPoints;
-        //     this.system.activePointsDetail.MatchingDisads = -_disadPoints;
-        //     characterPointCost -= _disadPoints;
-        //     activePoints -= _disadPoints;
-        // }
+        const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
+        if (_disadPoints !== 0) {
+            this.system.pointsDetail.MatchingDisads = _disadPoints;
+            this.system.activePointsDetail.MatchingDisads = _disadPoints;
+            // characterPointCost -= _disadPoints;
+            // activePoints -= _disadPoints;
+        }
 
         this.system.realCost = characterPointCost;
         this.system.activePoints = activePoints;
