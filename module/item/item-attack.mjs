@@ -1648,6 +1648,32 @@ async function _rollApplyKnockback(token, knockbackDice) {
     });
 }
 
+export async function rollEffect(item) {
+    const { diceParts } = calculateDicePartsForItem(item, {});
+
+    const effectRoller = new HeroRoller()
+        .modifyTo5e(item.actor.system.is5e)
+        .makeEffectRoll()
+        .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
+        .addHalfDice(diceParts.halfDieCount >= 1 ? diceParts.halfDieCount : 0)
+        .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
+        .addNumber(diceParts.constant);
+    await effectRoller.roll();
+
+    const cardHtml = await effectRoller.render(`${item.name} Effect Roll`);
+
+    const speaker = ChatMessage.getSpeaker();
+    const chatData = {
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        rolls: effectRoller.rawRolls(),
+        author: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
+}
+
 /**
  * Event handler for when the Roll Damage button is clicked. Should only roll damage. The effects of damage
  * are calculated later in the sequence when the apply buttons are pushed.

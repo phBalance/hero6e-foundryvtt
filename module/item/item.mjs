@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import {
     collectActionDataBeforeToHitOptions,
+    rollEffect,
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
@@ -435,7 +436,7 @@ export class HeroSystem6eItem extends Item {
             //return;
         }
 
-        if (this.baseInfo.behaviors.includes("dice") || this.baseInfo.behaviors.includes("to-hit")) {
+        if (this.baseInfo.behaviors.includes("to-hit")) {
             // FIXME: Martial maneuvers all share the MANEUVER XMLID. Need to extract out things from that (and fix the broken things).
             switch (this.system.XMLID) {
                 case "AID":
@@ -491,6 +492,18 @@ export class HeroSystem6eItem extends Item {
                 default:
                     ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`);
                     return collectActionDataBeforeToHitOptions(this, event);
+            }
+        } else if (this.baseInfo.behaviors.includes("dice")) {
+            switch (this.system.XMLID) {
+                case "LUCK":
+                case "UNLUCK":
+                    return rollEffect(this, event);
+
+                case "DEPENDENCE":
+                case "SUSCEPTIBILITY":
+                default:
+                    ui.notifications.warn(`${this.system.XMLID} effect roll is not fully supported`);
+                    return rollEffect(this, event);
             }
         } else if (this.baseInfo.behaviors.includes("defense")) {
             return this.toggle(event);
