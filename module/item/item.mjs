@@ -3066,6 +3066,13 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}: `;
                 break;
 
+            case "LUCK":
+                {
+                    const levels = parseInt(system.LEVELS || 1);
+                    system.description = `${system.ALIAS} ${levels}d6`;
+                }
+                break;
+
             case "UNLUCK":
                 system.description = `${system.ALIAS}`;
                 break;
@@ -4351,6 +4358,8 @@ export class HeroSystem6eItem extends Item {
         } else if (xmlid === "__STRENGTHDAMAGE") {
             // This is strength damage so it doesn't double up and add itself.
             this.system.usesStrength = false;
+        } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
+            this.system.usesStrength = false;
         }
 
         // AVAD
@@ -5355,7 +5364,6 @@ export class HeroSystem6eItem extends Item {
             return this.baseInfo.basePoints(this);
         }
 
-        // if (this.system.XMLID.startsWith("__")) return 0;
         if (this.system.EVERYMAN) return 0;
         if (this.system.NATIVE_TONGUE) return 0;
 
