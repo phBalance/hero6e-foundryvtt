@@ -5368,7 +5368,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe.only("can load older HDC format - GitHub issue #2229", function () {
+                describe("can load older HDC format - GitHub issue #2229", function () {
                     const contents = `
                         <?xml version="1.0" encoding="UTF-8"?>
                         <CHARACTER version="2.0">
