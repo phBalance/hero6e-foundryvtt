@@ -325,7 +325,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
 
         addedDamageBundle.diceParts = addDiceParts(baseDamageItem, addedDamageBundle.diceParts, maneuverDiceParts);
         addedDamageBundle.tags.push({
-            value: `${formula}`,
+            value: formula === "0" ? "" : `${formula}`, // Hide the formula if it's 0 as it looks ugly
             name: item.name,
             title: `${rawManeuverDc.signedString()}DC${maneuverDC !== rawManeuverDc ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
         });
