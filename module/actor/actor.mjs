@@ -1519,7 +1519,7 @@ export class HeroSystem6eActor extends Actor {
             let cost = Math.round(levels * (powerInfo.costPerLevel(this) || 0));
 
             // CHARACTERISTIC MAXIMA
-            if (this.system.CHARACTER.RULES) {
+            if (this.system.CHARACTER?.RULES) {
                 const characteristicMax = parseInt(this.system.CHARACTER.RULES[key.toUpperCase() + "_MAX"] || 0);
                 if (core > characteristicMax) {
                     // Pay double for characteristics over CHARACTERISTIC MAXIMA
