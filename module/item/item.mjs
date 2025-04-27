@@ -1991,7 +1991,7 @@ export class HeroSystem6eItem extends Item {
                                     continue;
                                 }
 
-                                switch (this.system.OPTIONID) {
+                                switch (this.system.OPTIONID || this.system.OPTION) {
                                     case "SINGLESINGLE": // Depricated ?
                                     case "SINGLE":
                                         if (count === 0) {
