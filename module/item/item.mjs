@@ -2615,10 +2615,6 @@ export class HeroSystem6eItem extends Item {
                         itemData.type = "perk";
                     }
 
-                    if (!itemData.system.XMLID) {
-                        debugger;
-                    }
-
                     return itemData;
                 }
             }
@@ -2640,9 +2636,6 @@ export class HeroSystem6eItem extends Item {
             );
         }
 
-        if (!itemData.system.XMLID) {
-            debugger;
-        }
         return itemData;
     }
 
