@@ -4803,7 +4803,7 @@ export function registerFullTests(quench) {
                         talent: 6,
                         power: 128,
                         disadvantage: 60,
-                        MatchingDisads: -60,
+                        MatchingDisads: 60,
                     });
                 });
 
@@ -5139,7 +5139,7 @@ export function registerFullTests(quench) {
             });
 
             describe("older HDC formats", function () {
-                describe.skip("can load older HDC format - GitHub issue #2228", function () {
+                describe("can load older HDC format - GitHub issue #2228", function () {
                     const contents = `
                         <?xml version="1.0" encoding="ISO-8859-1"?>
                         <CHARACTER>
@@ -5837,7 +5837,7 @@ export function registerFullTests(quench) {
                     });
 
                     // This is broken because of #2115
-                    it.skip("should be the correct number of points", function () {
+                    it("should be the correct number of points", function () {
                         assert.equal(actor.system.points, 401);
                     });
 
