@@ -1991,7 +1991,7 @@ export class HeroSystem6eItem extends Item {
                                     continue;
                                 }
 
-                                switch (this.system.OPTIONID) {
+                                switch (this.system.OPTIONID || this.system.OPTION) {
                                     case "SINGLESINGLE": // Depricated ?
                                     case "SINGLE":
                                         if (count === 0) {
@@ -4531,14 +4531,23 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${rollValue}-`;
         } else if (skillData.XMLID === "DEPENDENTNPC" || skillData.XMLID === "HUNTED") {
-            const appearanceChance = skillData.ADDER.find((adder) => adder.XMLID === "APPEARANCE")?.OPTIONID;
+            const appearance = skillData.ADDER.find((adder) => adder.XMLID === "APPEARANCE");
+            const appearanceChance = appearance?.OPTIONID || appearance.OPTION;
             let chance;
 
-            if (appearanceChance === "EIGHT" || appearanceChance === "8ORLESS") {
+            if (appearanceChance === "EIGHT" || appearanceChance === "8ORLESS" || appearanceChance.startsWith("8-")) {
                 chance = 8;
-            } else if (appearanceChance === "ELEVEN" || appearanceChance === "11ORLESS") {
+            } else if (
+                appearanceChance === "ELEVEN" ||
+                appearanceChance === "11ORLESS" ||
+                appearanceChance.startsWith("11-")
+            ) {
                 chance = 11;
-            } else if (appearanceChance === "FOURTEEN" || appearanceChance === "14ORLESS") {
+            } else if (
+                appearanceChance === "FOURTEEN" ||
+                appearanceChance === "14ORLESS" ||
+                appearanceChance.startsWith("14-")
+            ) {
                 chance = 14;
             } else {
                 // Shouldn't happen. Give it a default.
@@ -4576,7 +4585,9 @@ export class HeroSystem6eItem extends Item {
         } else if (skillData.XMLID === "PSYCHOLOGICALLIMITATION") {
             // Intensity is based on an EGO roll
             const egoRoll = this.actor.system.characteristics.ego.roll || 0;
-            const intensity = skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY")?.OPTIONID;
+            const intensity =
+                skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY")?.OPTIONID ||
+                skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY").OPTION?.toUpperCase();
             let intensityValue;
 
             if (intensity === "MODERATE") {
@@ -4602,21 +4613,25 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${egoRoll + intensityValue}-`;
         } else if (skillData.XMLID === "SOCIALLIMITATION") {
-            const occurChance = skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTIONID;
+            const occurChance =
+                skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTIONID ||
+                skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTION;
             let rollValue;
 
-            if (occurChance === "OCCASIONALLY") {
+            if (occurChance === "OCCASIONALLY" || occurChance.includes("8-")) {
                 rollValue = 8;
-            } else if (occurChance === "FREQUENTLY") {
+            } else if (occurChance === "FREQUENTLY" || occurChance.includes("11-")) {
                 rollValue = 11;
-            } else if (occurChance === "VERYFREQUENTLY") {
+            } else if (occurChance === "VERYFREQUENTLY" || occurChance.includes("14-")) {
                 rollValue = 14;
             } else {
                 console.error(`unknown occurChance ${occurChance} for SOCIALLIMITATION`);
                 rollValue = 14;
             }
 
-            const intensity = skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTIONID;
+            const intensity =
+                skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTIONID ||
+                skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTION.toUpperCase();
             let intensityValue = 0;
 
             switch (intensity) {

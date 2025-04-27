@@ -1519,11 +1519,11 @@ export class HeroSystem6eActor extends Actor {
             let cost = Math.round(levels * (powerInfo.costPerLevel(this) || 0));
 
             // CHARACTERISTIC MAXIMA
-            if (this.system.CHARACTER.RULES) {
+            if (this.system.CHARACTER?.RULES) {
                 const characteristicMax = parseInt(this.system.CHARACTER.RULES[key.toUpperCase() + "_MAX"] || 0);
                 if (core > characteristicMax) {
                     // Pay double for characteristics over CHARACTERISTIC MAXIMA
-                    cost += core - characteristicMax;
+                    cost += (core - characteristicMax) * (powerInfo.costPerLevel(this) || 1);
                 }
 
                 if (this.system.characteristics[key].characteristicMax !== characteristicMax) {
@@ -2537,6 +2537,18 @@ export class HeroSystem6eActor extends Actor {
                 this._xmlToJsonNode(jsonChild, child.children);
             }
 
+            // Items should have an XMLID
+            // Some super old items are missing XMLID, which we will try to fix
+            if (!jsonChild.XMLID) {
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.xmlTag });
+                if (powerInfo) {
+                    if (powerInfo.key != jsonChild.xmlTag) {
+                        console.error(`powerInfo.key != xmlTag`, jsonChild);
+                    }
+                    jsonChild.XMLID = powerInfo.key;
+                }
+            }
+
             if (
                 HeroSystem6eItem.ItemXmlChildTagsUpload.includes(child.tagName) &&
                 !HeroSystem6eItem.ItemXmlTags.includes(child.parentElement?.tagName)
@@ -2812,17 +2824,21 @@ export class HeroSystem6eActor extends Actor {
                 o.type !== "attack" &&
                 o.type !== "defense" &&
                 o.type !== "movement" &&
-                !o.system.XMLID.startsWith("__"), // Exclude placeholder powers
+                !o.system.XMLID?.startsWith("__"), // Exclude placeholder powers
         )) {
             let _characterPointCost = parseFloat(item.system?.characterPointCost || item.system?.realCost) || 0;
             const _activePoints = parseFloat(item.system?.activePoints) || 0;
 
-            if (_characterPointCost !== 0 && item.type !== "disadvantage") {
+            if (_characterPointCost !== 0) {
                 // Equipment is typically purchased with money, not character points
-                if ((item.parentItem?.type || item.type) !== "equipment") {
+                if ((item.parentItem?.type || item.type) !== "equipment" && item.type !== "disadvantage") {
                     characterPointCost += _characterPointCost;
                 }
-                activePoints += _activePoints;
+
+                if (item.type !== "disadvantage") {
+                    activePoints += _activePoints;
+                }
+
                 this.system.pointsDetail[item.parentItem?.type || item.type] ??= 0;
                 this.system.activePointsDetail[item.parentItem?.type || item.type] ??= 0;
 
@@ -2832,14 +2848,14 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // DISAD_POINTS: realCost
-        //const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
-        //const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
-        // if (_disadPoints !== 0) {
-        //     this.system.pointsDetail.MatchingDisads = -_disadPoints;
-        //     this.system.activePointsDetail.MatchingDisads = -_disadPoints;
-        //     characterPointCost -= _disadPoints;
-        //     activePoints -= _disadPoints;
-        // }
+        const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
+        if (_disadPoints !== 0) {
+            this.system.pointsDetail.MatchingDisads = _disadPoints;
+            this.system.activePointsDetail.MatchingDisads = _disadPoints;
+            // characterPointCost -= _disadPoints;
+            // activePoints -= _disadPoints;
+        }
 
         this.system.realCost = characterPointCost;
         this.system.activePoints = activePoints;
