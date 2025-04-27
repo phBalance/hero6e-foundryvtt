@@ -776,10 +776,21 @@
                                     {{/if}}
                                 </td>
                                 <td>
-                                    {{#if item.system.roll}}
+                                    {{#if (itemHasBehaviours this "roll" "success")}}
                                         <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
                                             data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
                                             sign=false}}-</button>
+                                    {{/if}}
+
+                                    {{#if (itemHasBehaviours this "dice")}}
+                                        <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
+                                    {{/if}}
+
+                                    {{#if (itemHasActionBehavior this "activatable")}}
+                                        <input class="item-toggle" type="checkbox"
+                                            Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
+                                            data-action="toggle"
+                                        />
                                     {{/if}}
                                 </td>
                                 <td class="right">
