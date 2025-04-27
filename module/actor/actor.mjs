@@ -2537,6 +2537,18 @@ export class HeroSystem6eActor extends Actor {
                 this._xmlToJsonNode(jsonChild, child.children);
             }
 
+            // Items should have an XMLID
+            // Some super old items are missing XMLID, which we will try to fix
+            if (!jsonChild.XMLID) {
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.xmlTag });
+                if (powerInfo) {
+                    if (powerInfo.key != jsonChild.xmlTag) {
+                        console.error(`powerInfo.key != xmlTag`, jsonChild);
+                    }
+                    jsonChild.XMLID = powerInfo.key;
+                }
+            }
+
             if (
                 HeroSystem6eItem.ItemXmlChildTagsUpload.includes(child.tagName) &&
                 !HeroSystem6eItem.ItemXmlTags.includes(child.parentElement?.tagName)
@@ -2812,7 +2824,7 @@ export class HeroSystem6eActor extends Actor {
                 o.type !== "attack" &&
                 o.type !== "defense" &&
                 o.type !== "movement" &&
-                !o.system.XMLID.startsWith("__"), // Exclude placeholder powers
+                !o.system.XMLID?.startsWith("__"), // Exclude placeholder powers
         )) {
             let _characterPointCost = parseFloat(item.system?.characterPointCost || item.system?.realCost) || 0;
             const _activePoints = parseFloat(item.system?.activePoints) || 0;
