@@ -84,19 +84,28 @@ const zeroDiceParts = Object.freeze({
  * @property {array.<HeroSystemFormulaTag>} tags
  */
 
+function characteristicValueToDc(charDiceParts) {
+    return charDiceParts.d6Count + charDiceParts.halfDieCount * 0.6;
+}
+
 /**
  * Return the dice and half dice roll for this characteristic value. Doesn't support +1 intentionally.
  * @param {number} value
  * @returns {HeroSystemFormulaDiceParts}
  */
 export function characteristicValueToDiceParts(value) {
-    return {
-        dc: value / 5,
+    const charDiceParts = {
+        dc: 0,
         d6Count: Math.trunc(value / 5) || 0,
         d6Less1DieCount: 0,
         halfDieCount: Math.round((value % 5) / 5) || 0,
         constant: 0,
     };
+
+    // Calculate the effective DC from the dice parts so we don't turn 7 STR into 1.4 DC (which is 1d6+1).
+    charDiceParts.dc = characteristicValueToDc(charDiceParts);
+
+    return charDiceParts;
 }
 
 /**
@@ -988,9 +997,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
         if (isNonKillingStrengthBasedManeuver(item)) {
             const { actorStrengthItem, str } = addStrengthToBundle(item, options, baseDicePartsBundle, false);
 
-            // If a character is using at least a 1/2 d6 of STR they can add HA damage and it will figure into the base
-            // strength for damage purposes.
-            // It only affects maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
+            // Hand-to-Hand Attacks can only be added to maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
             if (isManeuverThatDoesNormalDamage(item)) {
                 const hthAttackItems =
                     item.system._active.linkedAssociated
