@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import {
     collectActionDataBeforeToHitOptions,
+    rollEffect,
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
@@ -435,7 +436,7 @@ export class HeroSystem6eItem extends Item {
             //return;
         }
 
-        if (this.baseInfo.behaviors.includes("dice") || this.baseInfo.behaviors.includes("to-hit")) {
+        if (this.baseInfo.behaviors.includes("to-hit")) {
             // FIXME: Martial maneuvers all share the MANEUVER XMLID. Need to extract out things from that (and fix the broken things).
             switch (this.system.XMLID) {
                 case "AID":
@@ -491,6 +492,18 @@ export class HeroSystem6eItem extends Item {
                 default:
                     ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`);
                     return collectActionDataBeforeToHitOptions(this, event);
+            }
+        } else if (this.baseInfo.behaviors.includes("dice")) {
+            switch (this.system.XMLID) {
+                case "LUCK":
+                case "UNLUCK":
+                    return rollEffect(this, event);
+
+                case "DEPENDENCE":
+                case "SUSCEPTIBILITY":
+                default:
+                    ui.notifications.warn(`${this.system.XMLID} effect roll is not fully supported`);
+                    return rollEffect(this, event);
             }
         } else if (this.baseInfo.behaviors.includes("defense")) {
             return this.toggle(event);
@@ -3066,6 +3079,13 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}: `;
                 break;
 
+            case "LUCK":
+                {
+                    const levels = parseInt(system.LEVELS || 1);
+                    system.description = `${system.ALIAS} ${levels}d6`;
+                }
+                break;
+
             case "UNLUCK":
                 system.description = `${system.ALIAS}`;
                 break;
@@ -4351,6 +4371,8 @@ export class HeroSystem6eItem extends Item {
         } else if (xmlid === "__STRENGTHDAMAGE") {
             // This is strength damage so it doesn't double up and add itself.
             this.system.usesStrength = false;
+        } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
+            this.system.usesStrength = false;
         }
 
         // AVAD
@@ -5370,7 +5392,6 @@ export class HeroSystem6eItem extends Item {
             return this.baseInfo.basePoints(this);
         }
 
-        // if (this.system.XMLID.startsWith("__")) return 0;
         if (this.system.EVERYMAN) return 0;
         if (this.system.NATIVE_TONGUE) return 0;
 

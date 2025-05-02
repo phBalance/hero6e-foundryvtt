@@ -7249,10 +7249,31 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DEPENDENCE",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["activatable", "dice"],
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            baseEffectDicePartsBundle: (item) => {
+                let numDice = 0;
+
+                const diceAdder = item.system.ADDER?.find((adder) => adder.XMLID === "EFFECT");
+                if (diceAdder) {
+                    // OPTIONID is something like "1d6"
+                    const matchArray = diceAdder.OPTIONID.match(/([0-9]+)d6/i);
+                    if (matchArray?.length === 2) {
+                        numDice = parseInt(matchArray[1]);
+                    }
+                }
+
+                const diceParts = {
+                    dc: item.dcRaw,
+                    d6Count: numDice,
+                    d6Less1DieCount: 0,
+                    halfDieCount: 0,
+                    constant: 0,
+                };
+                return defaultPowerDicePartsBundle(item, diceParts);
+            },
             xml: `<DISAD XMLID="DEPENDENCE" ID="1709445727918" BASECOST="0.0" LEVELS="0" ALIAS="Dependence" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
             <NOTES />
             <ADDER XMLID="EFFECT" ID="1709447139841" BASECOST="5.0" LEVELS="0" ALIAS="Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DAMAGE1D6" OPTIONID="DAMAGE1D6" OPTION_ALIAS="Takes 1d6 Damage" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -7503,8 +7524,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const diceAdder = item.system.ADDER?.find((adder) => adder.XMLID === "DICE");
                 if (diceAdder) {
                     // OPTIONID is something like "1d6"
-                    const matchArray = diceAdder.OPTIONID.match(/([0-9]+)d6/);
-                    if (matchArray === 2) {
+                    const matchArray = diceAdder.OPTIONID.match(/([0-9]+)d6/i);
+                    if (matchArray?.length === 2) {
                         numDice = parseInt(matchArray[1]);
                     }
                 }
