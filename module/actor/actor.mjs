@@ -120,7 +120,7 @@ export class HeroSystem6eActor extends Actor {
             this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) &&
             this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
         ) {
-            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.knockedOutEffect.stunEffect.id, {
+            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
                 active: false,
             });
         }
@@ -1347,6 +1347,12 @@ export class HeroSystem6eActor extends Actor {
 
         // We just cleared encumbrance, check if it applies again
         await this.applyEncumbrancePenalty();
+
+        // Mini-Migration
+        for (const item of this.items) {
+            await item._postUpload();
+        }
+        await this._postUpload();
     }
 
     // Raw base is insufficient for 5e characters
