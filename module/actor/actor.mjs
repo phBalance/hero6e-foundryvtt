@@ -1962,6 +1962,7 @@ export class HeroSystem6eActor extends Actor {
                                     PARENTID: system.ID,
                                     POSITION: parseInt(system2.POSITION),
                                     sort: itemData.sort + 100 + parseInt(system2.POSITION),
+                                    errors: [...(system2.errors || []), "Added PARENTID for COMPOUNDPOWER child"],
                                 },
                             };
 
@@ -2574,7 +2575,16 @@ export class HeroSystem6eActor extends Actor {
                         console.error(`powerInfo.key != xmlTag`, jsonChild);
                     }
                     jsonChild.XMLID = powerInfo.key;
+                    jsonChild.errors ??= [];
+                    jsonChild.errors.push("Missing XMLID, using xmlTag reference");
                 }
+            }
+
+            // Some super old items are missing OPTIONID, which we will try to fix
+            if (jsonChild.OPTION && !jsonChild.OPTIONID) {
+                jsonChild.OPTIONID = jsonChild.OPTION;
+                jsonChild.errors ??= [];
+                jsonChild.errors.push("Missing OPTIONID, using OPTION reference");
             }
 
             if (
@@ -2995,13 +3005,16 @@ export class HeroSystem6eActor extends Actor {
             } else if (stringifiedTemplate?.match(/Normal/i)) {
                 // Have seen "Normal" and "CompetentNormal" - no 6e template
                 templateType = "Normal";
+            } else if (stringifiedTemplate?.match(/Super/i)) {
+                // 'builtIn.StandardSuper.hdt'
+                templateType = "Superheroic";
             }
 
             if (templateType === "" && this.type !== "base2" && this.flags.uploading !== true) {
                 // Custom Templates
                 // Automations
                 // Barrier
-                if (this.id) {
+                if (this.id && this.system.CHARACTER) {
                     console.warn(
                         `Unknown template type for ${this.name}.`,
                         this.system.CHARACTER?.TEMPLATE,

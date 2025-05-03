@@ -2602,7 +2602,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             costPerLevel: function (item) {
-                switch (item.system.OPTIONID || item.system.OPTION) {
+                switch (item.system.OPTIONID) {
                     case "SINGLESINGLE":
                         return 1;
                     case "SINGLESTRIKE":
