@@ -84,7 +84,7 @@ const zeroDiceParts = Object.freeze({
  * @property {array.<HeroSystemFormulaTag>} tags
  */
 
-function characteristicValueToDc(charDiceParts) {
+function characteristicDicePartsToDc(charDiceParts) {
     return charDiceParts.d6Count + charDiceParts.halfDieCount * 0.6;
 }
 
@@ -103,7 +103,7 @@ export function characteristicValueToDiceParts(value) {
     };
 
     // Calculate the effective DC from the dice parts so we don't turn 7 STR into 1.4 DC (which is 1d6+1).
-    charDiceParts.dc = characteristicValueToDc(charDiceParts);
+    charDiceParts.dc = characteristicDicePartsToDc(charDiceParts);
 
     return charDiceParts;
 }
@@ -671,7 +671,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         diceValue += (diceParts.d6Less1DieCount + diceParts.halfDieCount) * halfDieValue;
         diceValue += diceParts.constant * pipValue;
         apPerDie =
-            item.system.XMLID === "TELEKINESIS"
+            item.system.XMLID === "TELEKINESIS" || item.system.XMLID === "__STRENGTHDAMAGE"
                 ? 5 * (1 + item._advantagesAffectingDc)
                 : item._activePointsAffectingDcRaw / diceValue;
     } else {
@@ -920,7 +920,8 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
 
     let str = baseEffectiveStrength;
     const baseEffectiveStrDc =
-        (baseEffectiveStrength / 5) * (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc);
+        characteristicValueToDiceParts(baseEffectiveStrength).dc *
+        (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc);
 
     const strDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc);
     const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
@@ -933,7 +934,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         title: `${str} STR -> ${strengthAddsToDamage ? "+" : ""}${formula}`,
     });
 
-    // STRMINIMUM - A character using a weapon only adds damage for every full 5 points of STR they has above the weapon’s STR Minimum
+    // STRMINIMUM -
     //            - need to consider the item and any associated items such as Hand-to-Hand Attacks
     const itemsWithStrMinimum = [
         ...(item.findModsByXmlid("STRMINIMUM") ? [item] : []),
@@ -946,7 +947,13 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         const strMinimumModifier = itemWithStrMinimum.findModsByXmlid("STRMINIMUM");
         const strMinimum = calculateStrengthMinimumForItem(item, strMinimumModifier);
         str = baseEffectiveStrength - strMinimum;
-        const newStrDc = Math.floor((str / 5) * (strengthAddsToDamage ? 1 : 1 + item._advantagesAffectingDc));
+
+        // A character using a weapon only adds STR damage for every full 5 points of STR they have above the weapon’s STR Minimum
+        const postMinimaDc = Math.floor(str / 5);
+        const postMinimaStr = postMinimaDc * 5;
+
+        // PH: FIXME: should both situations consider advantages?
+        const newStrDc = postMinimaDc * (strengthAddsToDamage ? 1 : 1 + item._advantagesAffectingDc);
 
         const strMinDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc - newStrDc);
         const formula = dicePartsToFullyQualifiedEffectFormula(item, strMinDiceParts);
@@ -955,7 +962,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         dicePartsBundle.tags.push({
             value: `-(${formula})`,
             name: `${itemWithStrMinimum.name} STR Minimum ${strMinimum}`,
-            title: `${strMinimumModifier.ALIAS} ${strMinimumModifier.OPTION_ALIAS} -> -(${formula})`,
+            title: `${strMinimumModifier.ALIAS} ${strMinimumModifier.OPTION_ALIAS} (effective STR above minimum ${postMinimaStr}) -> -(${formula})`,
         });
     });
 
