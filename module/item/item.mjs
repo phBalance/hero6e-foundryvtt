@@ -3525,7 +3525,7 @@ export class HeroSystem6eItem extends Item {
 
                     if (configPowerInfo?.type?.includes("skill")) {
                         const { roll } = this._getSkillRollComponents(system);
-                        system.description = system.ALIAS;
+                        system.description = system.ALIAS || system.XMLID;
                         this.name = system.NAME || system.ALIAS;
                         if (system?.INPUT) {
                             system.description += `: ${system.INPUT}`;
@@ -3872,7 +3872,7 @@ export class HeroSystem6eItem extends Item {
             system.description += this.createPowerDescriptionModifier(modifier);
         }
 
-        system.description = system.description
+        system.description = (system.description || "")
             .replace(";,", ";")
             .replace("; ,", ";")
             .replace("; ;", ";")
@@ -4592,7 +4592,7 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 11;
             } else if (enrageChance === "14-") {
                 rollValue = 14;
-            } else if (!enrageChance) {
+            } else {
                 // Shouldn't happen. Give it a default.
                 console.error(`ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`);
                 rollValue = 8;

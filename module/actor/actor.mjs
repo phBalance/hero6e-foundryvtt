@@ -1953,6 +1953,7 @@ export class HeroSystem6eActor extends Actor {
                             const power = getPowerInfo({
                                 xmlid: system2.XMLID,
                                 actor: this,
+                                xmlTag: system2.xmlTag,
                             });
                             let itemData2 = {
                                 name: system2.NAME || system2.ALIAS || system2.XMLID,
@@ -2569,7 +2570,10 @@ export class HeroSystem6eActor extends Actor {
             // Items should have an XMLID
             // Some super old items are missing XMLID, which we will try to fix
             if (!jsonChild.XMLID) {
-                const powerInfo = getPowerInfo({ xmlid: jsonChild.xmlTag });
+                const powerInfo = getPowerInfo({
+                    xmlid: jsonChild.xmlTag,
+                    xmlTag: child.parentNode.tagName === "CHARACTERISTICS" ? jsonChild.xmlTag : null,
+                });
                 if (powerInfo) {
                     if (powerInfo.key != jsonChild.xmlTag) {
                         console.error(`powerInfo.key != xmlTag`, jsonChild);
@@ -2582,10 +2586,43 @@ export class HeroSystem6eActor extends Actor {
 
             // Some super old items are missing OPTIONID, which we will try to fix
             if (jsonChild.OPTION && !jsonChild.OPTIONID) {
-                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID });
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag });
                 jsonChild.OPTIONID = powerInfo?.optionIDFix?.(jsonChild) || jsonChild.OPTION.toUpperCase();
                 jsonChild.errors ??= [];
                 jsonChild.errors.push("Missing OPTIONID, using OPTION reference");
+            }
+
+            // Some super old items are missing and ID (like SCIENTIST skill enhancer)
+            if (jsonChild.XMLID && !jsonChild.ID) {
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag });
+
+                const PARENTID = child.nextElementSibling?.attributes?.PARENTID?.value;
+                if (PARENTID) {
+                    jsonChild.ID = PARENTID;
+                    jsonChild.errors ??= [];
+                    jsonChild.errors.push("Missing ID, using PARENTID from nextElementSibling");
+                }
+
+                if (!jsonChild.BASECOST) {
+                    // We are going to rebase this item as we have no BASECOST or likely any other properties
+                    if (!powerInfo.xml) {
+                        console.warn(`Unable to rebase ${jsonChild.XMLID} because powerInfo.xml is not available.`);
+                    } else {
+                        try {
+                            jsonChild.errors ??= [];
+                            const parser = new DOMParser();
+                            const rebase = parser.parseFromString(powerInfo.xml.trim(), "text/xml");
+                            for (const attribute of rebase.children[0].attributes) {
+                                if (!jsonChild[attribute.name]) {
+                                    jsonChild[attribute.name] ??= attribute.value;
+                                    jsonChild.errors.push(`${attribute.name} from config.mjs:xml`);
+                                }
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                }
             }
 
             if (
