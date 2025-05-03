@@ -876,6 +876,13 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        // FOCUS
+        const FOCUS = this.findModsByXmlid("FOCUS"); //this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
+        if (FOCUS) {
+            if (FOCUS?.OPTIONID?.startsWith("O")) return true;
+            if (FOCUS?.OPTIONID?.startsWith("I")) return perceptionSuccess;
+        }
+
         // Combat Maneuvers and Martial Arts are only perceivable when used
         if (["maneuver", "martialarts"].includes(this.type)) {
             return false;
@@ -891,13 +898,6 @@ export class HeroSystem6eItem extends Item {
         if (this.findModsByXmlid("OIHID") && this.actor.system.heroicIdentity === false) return false;
 
         // TODO: Costs endurance (even if bought to 0 END) is perceivable when active unless it has invisible power effect bought for it.
-
-        // FOCUS
-        const FOCUS = this.findModsByXmlid("FOCUS"); //this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
-        if (FOCUS) {
-            if (FOCUS?.OPTIONID?.startsWith("O")) return true;
-            if (FOCUS?.OPTIONID?.startsWith("I")) return perceptionSuccess;
-        }
 
         const VISIBLE = this.modifiers.find((o) => o.XMLID === "VISIBLE");
         if (VISIBLE) {
@@ -929,8 +929,12 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        if (this.system.XMLID === "DISTINCTIVEFEATURES") {
+            return "maybe";
+        }
+
         if (
-            ["skill", "disadvantage", "perk"].includes(this.type) ||
+            ["skill", "disadvantage", "perk", "talent"].includes(this.type) ||
             this.baseInfo?.type.includes("characteristic") ||
             this.baseInfo?.type.includes("passive") // passive sense
         ) {
@@ -945,9 +949,13 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        // Most equipment that is not armor or a weapon is likely inobvious
+        if (this.type.includes("equipment")) {
+            return "maybe";
+        }
+
         if (game.settings.get(game.system.id, "alphaTesting")) {
-            ui.notifications.warn(`${this.name} has undetermined perceivability`);
-            console.log(this);
+            console.warn(`${this.actor.name}/${this.name}/${this.system.XMLID} has undetermined perceivability`, this);
         }
 
         return false;
@@ -3957,7 +3965,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FOCUS":
-                result += `, ${modifier.OPTION_ALIAS || modifier.OPTIONID}`;
+                result += `, ${modifier.OPTION === modifier.OPTION_ALIAS ? `${modifier.OPTION}` : `${modifier.OPTION}/${modifier.OPTION_ALIAS || modifier.OPTIONID}`}`;
                 break;
 
             case "ABLATIVE":
