@@ -92,6 +92,11 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
         return null;
     }
 
+    // 5e Missile Deflection functions similar to BLOCK and thus technically no defense
+    if (actorItemDefense.system.XMLID === "MISSILEDEFLECTION") {
+        return null;
+    }
+
     console.error(
         `Unable to determine defenseTagVsAttack for ${actorItemDefense.actor.name}::${actorItemDefense.system.XMLID}`,
     );

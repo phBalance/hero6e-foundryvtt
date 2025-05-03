@@ -4088,7 +4088,7 @@ export class HeroSystem6eItem extends Item {
 
         if (modifier.XMLID === "FOCUS") {
             // Sometimes the focus description is in the ALIAS, sometimes it is in the COMMENTS
-            result += `(${modifier.ALIAS.replace("Focus", "")} ${modifier.COMMENTS}; `
+            result += `(${modifier.ALIAS.replace("Focus", "")} ${modifier.COMMENTS || ""}; `
                 .replace(/ {2}/g, " ")
                 .replace("( ", "(")
                 .replace("(; ", "(");
