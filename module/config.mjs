@@ -533,6 +533,16 @@ function standardBaseEffectDiceParts(item /* , options */) {
     return defaultPowerDicePartsBundle(item, diceParts);
 }
 
+function characteristicBaseEffectDiceParts(item /* , options */) {
+    const d6Count = parseInt(item.system.LEVELS || 0);
+    const halfDieCount = item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0;
+    const value = d6Count * 5 + (halfDieCount ? 3 : 0);
+
+    const diceParts = characteristicValueToDiceParts(value);
+
+    return defaultPowerDicePartsBundle(item, diceParts);
+}
+
 /**
  * Shouldn't ever be called. Only here to make sure we don't have to check if baseEffectDicePartsBundle exists
  */
@@ -666,6 +676,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
+            baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<STR XMLID="STR" ID="1712377060992" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {},
@@ -683,6 +694,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["base2"],
+            baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<DEX XMLID="DEX" ID="1712447975671" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -702,6 +714,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<CON XMLID="CON" ID="1712377266422" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -721,6 +734,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["vehicle", "base2"],
+            baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<INT XMLID="INT" ID="1712377270415" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {},
@@ -738,6 +752,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["automaton", "vehicle", "base2", "computer"],
+            baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<EGO XMLID="EGO" ID="1712377272129" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -757,6 +772,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<PRE XMLID="PRE" ID="1712377273912" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {},
@@ -773,6 +789,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"], // TODO: Remove the 6e here.
         base: 10,
         costPerLevel: fixedValueFunction(1 / 2),
+        baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         xml: `<COM XMLID="COM" ID="1712377275507" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
     });
     addPower(
@@ -788,6 +805,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["base2"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -808,6 +826,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["base2"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -828,6 +847,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["automaton", "vehicle", "base2"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -848,6 +868,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["automaton", "vehicle", "base2"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -868,6 +889,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["base2"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<SPD XMLID="SPD" ID="1712377280539" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -899,6 +921,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<PD XMLID="PD" ID="1712377277205" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -930,6 +953,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<ED XMLID="ED" ID="1712377278856" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -949,6 +973,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<REC XMLID="REC" ID="1712377282168" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -969,6 +994,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<END XMLID="END" ID="1712377283848" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -989,6 +1015,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["computer", "ai"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<BODY XMLID="BODY" ID="1712377268646" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
             <NOTES />
             </BODY>`,
@@ -1010,6 +1037,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<STUN XMLID="STUN" ID="1712377285547" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -1031,6 +1059,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             onlyFor: ["base2"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1047,6 +1076,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
         onlyFor: ["base2", "vehicle"],
+        baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
     });
 
     addPower(
@@ -1062,6 +1092,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             onlyFor: ["vehicle"],
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1079,6 +1110,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1094,6 +1126,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1109,6 +1142,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1124,6 +1158,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1139,6 +1174,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1154,6 +1190,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1169,6 +1206,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1184,6 +1222,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1199,6 +1238,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1214,6 +1254,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         },
         {},
     );
@@ -1330,7 +1371,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLUBWEAPON",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver", "to-hit", "dice"],
+            behaviors: ["non-hd", "optional-maneuver", "activate"],
             name: "Club Weapon",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -6690,7 +6731,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
-            baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},

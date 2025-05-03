@@ -283,7 +283,7 @@ export function registerDamageFunctionTests(quench) {
 
                     it("should handle -7", function () {
                         expect(characteristicValueToDiceParts(-7)).to.deep.equal({
-                            dc: -1.4,
+                            dc: -1,
                             d6Count: -1,
                             d6Less1DieCount: 0,
                             halfDieCount: 0,
@@ -293,7 +293,7 @@ export function registerDamageFunctionTests(quench) {
 
                     it("should handle 7", function () {
                         expect(characteristicValueToDiceParts(7)).to.deep.equal({
-                            dc: 1.4,
+                            dc: 1,
                             d6Count: 1,
                             d6Less1DieCount: 0,
                             halfDieCount: 0,
@@ -313,7 +313,7 @@ export function registerDamageFunctionTests(quench) {
 
                     it("should handle 42", function () {
                         expect(characteristicValueToDiceParts(42)).to.deep.equal({
-                            dc: 8.4,
+                            dc: 8,
                             d6Count: 8,
                             d6Less1DieCount: 0,
                             halfDieCount: 0,
@@ -1543,10 +1543,12 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("6e Martial Strike damage", function () {
+                    // 10 STR +2 DC from Martial Strike
                     assert.equal(item.system.damage, "4d6");
                 });
 
                 it("6e Martial Strike description", function () {
+                    // 10 STR +2 DC from Martial Strike
                     assert.equal(item.system.description, "1/2 Phase, +0 OCV, +2 DCV, 4d6 Strike");
                 });
             });
