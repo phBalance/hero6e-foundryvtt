@@ -98,8 +98,30 @@ export class HeroSystem6eActor extends Actor {
             this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.unconsciousEffect.id) ||
             this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.asleepEffect.id)
         ) {
-            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
-                active: true,
+            if (!this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id)) {
+                await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+                    active: true,
+                });
+            }
+        }
+
+        // When knockedOut, remove stunned
+        if (
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id) &&
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id)
+        ) {
+            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
+                active: false,
+            });
+        }
+
+        // When dead, remove knockedOut
+        if (
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) &&
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
+        ) {
+            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.knockedOutEffect.stunEffect.id, {
+                active: false,
             });
         }
 
@@ -375,12 +397,12 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // Mark as undefeated in combat tracker
-            if (data.system.characteristics.stun.value >= -stunThreshold) {
-                //this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    active: false,
-                });
-            }
+            // if (data.system.characteristics.stun.value >0) {
+            //     //this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+            //     await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+            //         active: false,
+            //     });
+            // }
 
             if (data.system.characteristics.stun.value > 0) {
                 await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
