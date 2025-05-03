@@ -5284,6 +5284,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            optionIDFix: function (json) {
+                if (["SIGHT", "HEARING", "MENTAL", "RADIO", "SMELL", "TOUCH"].includes(json.OPTION)) {
+                    return json.OPTION + "GROUP";
+                }
+                return json.OPTION;
+            },
             xml: `<POWER XMLID="DARKNESS" ID="1709333868971" BASECOST="0.0" LEVELS="1" ALIAS="Darkness" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},

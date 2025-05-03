@@ -2582,7 +2582,8 @@ export class HeroSystem6eActor extends Actor {
 
             // Some super old items are missing OPTIONID, which we will try to fix
             if (jsonChild.OPTION && !jsonChild.OPTIONID) {
-                jsonChild.OPTIONID = jsonChild.OPTION;
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID });
+                jsonChild.OPTIONID = powerInfo?.optionIDFix?.(jsonChild) || jsonChild.OPTION.toUpperCase();
                 jsonChild.errors ??= [];
                 jsonChild.errors.push("Missing OPTIONID, using OPTION reference");
             }
