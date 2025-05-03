@@ -6868,7 +6868,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DETECT",
-            type: ["sense"],
+            type: ["sense", "passive"],
             behaviors: ["activatable", "adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
