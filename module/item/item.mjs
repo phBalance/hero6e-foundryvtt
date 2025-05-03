@@ -929,6 +929,10 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        if (this.system.XMLID === "DISTINCTIVEFEATURES") {
+            return "maybe";
+        }
+
         if (
             ["skill", "disadvantage", "perk", "talent"].includes(this.type) ||
             this.baseInfo?.type.includes("characteristic") ||
@@ -945,9 +949,13 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        // Most equipment that is not armor or a weapon is likely inobvious
+        if (this.type.includes("equipment")) {
+            return "maybe";
+        }
+
         if (game.settings.get(game.system.id, "alphaTesting")) {
-            ui.notifications.warn(`${this.name} has undetermined perceivability`);
-            console.log(this);
+            console.warn(`${this.actor.name}/${this.name}/${this.system.XMLID} has undetermined perceivability`, this);
         }
 
         return false;

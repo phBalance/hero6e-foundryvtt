@@ -1286,7 +1286,7 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     async _onActorDescription() {
-        let content = `${this.actor.system.APPEARANCE || ""}`;
+        let content = `${this.actor.system.CHARACTER?.CHARACTER_INFO?.APPEARANCE || ""}`;
         const perceivable = [];
         for (let item of this.actor.items) {
             const p = item.isPerceivable(false); // inobivous is not included
