@@ -2299,6 +2299,7 @@ export class HeroSystem6eActor extends Actor {
                             await dupItem.update({
                                 [`system.idDuplicate`]: dupItem.system.ID,
                                 [`system.ID`]: new Date().getTime().toString(),
+                                [`system.error`]: [...(dupItem.system.error || []), "Duplicate ID, created new one"],
                             });
                             ui.notifications.warn(
                                 `Created new internal ID reference for <b>${item.name}</b>. Recommend deleting item from HDC file and re-creating it.`,
@@ -2567,12 +2568,21 @@ export class HeroSystem6eActor extends Actor {
                 this._xmlToJsonNode(jsonChild, child.children);
             }
 
+            // Some super old items use RANGED, but is now called RANGE
+            if (jsonChild.XMLID === "RANGED" && jsonChild.xmlTag === "ADDER") {
+                jsonChild.XMLID = "RANGE";
+                jsonChild.errors ??= [];
+                jsonChild.errors.push("RANGE ranamed to RANGED");
+            }
+
             // Items should have an XMLID
             // Some super old items are missing XMLID, which we will try to fix
+            // A bit more generic
             if (!jsonChild.XMLID) {
                 const powerInfo = getPowerInfo({
                     xmlid: jsonChild.xmlTag,
                     xmlTag: child.parentNode.tagName === "CHARACTERISTICS" ? jsonChild.xmlTag : null,
+                    is5e: true,
                 });
                 if (powerInfo) {
                     if (powerInfo.key != jsonChild.xmlTag) {
@@ -2586,7 +2596,7 @@ export class HeroSystem6eActor extends Actor {
 
             // Some super old items are missing OPTIONID, which we will try to fix
             if (jsonChild.OPTION && !jsonChild.OPTIONID) {
-                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag });
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
                 jsonChild.OPTIONID = powerInfo?.optionIDFix?.(jsonChild) || jsonChild.OPTION.toUpperCase();
                 jsonChild.errors ??= [];
                 jsonChild.errors.push("Missing OPTIONID, using OPTION reference");
@@ -2594,7 +2604,7 @@ export class HeroSystem6eActor extends Actor {
 
             // Some super old items are missing and ID (like SCIENTIST skill enhancer)
             if (jsonChild.XMLID && !jsonChild.ID) {
-                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag });
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
 
                 const PARENTID = child.nextElementSibling?.attributes?.PARENTID?.value;
                 if (PARENTID) {

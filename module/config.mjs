@@ -7143,11 +7143,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RANGE",
             type: ["sense"],
-            behaviors: ["adder"],
+            behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.STANDARD,
+            xml: `<POWER XMLID="RANGE" ID="1746309807411" BASECOST="10.0" LEVELS="0" ALIAS="Range" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMELLGROUP" OPTIONID="SMELLGROUP" OPTION_ALIAS="Smell/Taste Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
@@ -8227,7 +8228,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
+    addPower(
+        {
+            // DETECT related
+            key: "RANGE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="RANGE" ID="1746309597386" BASECOST="5.0" LEVELS="0" ALIAS="Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // BOECV related
