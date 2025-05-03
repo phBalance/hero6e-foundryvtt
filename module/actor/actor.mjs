@@ -98,8 +98,30 @@ export class HeroSystem6eActor extends Actor {
             this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.unconsciousEffect.id) ||
             this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.asleepEffect.id)
         ) {
-            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
-                active: true,
+            if (!this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id)) {
+                await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+                    active: true,
+                });
+            }
+        }
+
+        // When knockedOut, remove stunned
+        if (
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id) &&
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id)
+        ) {
+            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
+                active: false,
+            });
+        }
+
+        // When dead, remove knockedOut
+        if (
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) &&
+            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
+        ) {
+            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
+                active: false,
             });
         }
 
@@ -375,12 +397,12 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // Mark as undefeated in combat tracker
-            if (data.system.characteristics.stun.value >= -stunThreshold) {
-                //this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    active: false,
-                });
-            }
+            // if (data.system.characteristics.stun.value >0) {
+            //     //this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
+            //     await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+            //         active: false,
+            //     });
+            // }
 
             if (data.system.characteristics.stun.value > 0) {
                 await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
@@ -1325,6 +1347,12 @@ export class HeroSystem6eActor extends Actor {
 
         // We just cleared encumbrance, check if it applies again
         await this.applyEncumbrancePenalty();
+
+        // Mini-Migration
+        for (const item of this.items) {
+            await item._postUpload();
+        }
+        await this._postUpload();
     }
 
     // Raw base is insufficient for 5e characters
@@ -1925,6 +1953,7 @@ export class HeroSystem6eActor extends Actor {
                             const power = getPowerInfo({
                                 xmlid: system2.XMLID,
                                 actor: this,
+                                xmlTag: system2.xmlTag,
                             });
                             let itemData2 = {
                                 name: system2.NAME || system2.ALIAS || system2.XMLID,
@@ -1934,6 +1963,7 @@ export class HeroSystem6eActor extends Actor {
                                     PARENTID: system.ID,
                                     POSITION: parseInt(system2.POSITION),
                                     sort: itemData.sort + 100 + parseInt(system2.POSITION),
+                                    errors: [...(system2.errors || []), "Added PARENTID for COMPOUNDPOWER child"],
                                 },
                             };
 
@@ -2269,6 +2299,7 @@ export class HeroSystem6eActor extends Actor {
                             await dupItem.update({
                                 [`system.idDuplicate`]: dupItem.system.ID,
                                 [`system.ID`]: new Date().getTime().toString(),
+                                [`system.error`]: [...(dupItem.system.error || []), "Duplicate ID, created new one"],
                             });
                             ui.notifications.warn(
                                 `Created new internal ID reference for <b>${item.name}</b>. Recommend deleting item from HDC file and re-creating it.`,
@@ -2537,15 +2568,70 @@ export class HeroSystem6eActor extends Actor {
                 this._xmlToJsonNode(jsonChild, child.children);
             }
 
+            // Some super old items use RANGED, but is now called RANGE
+            if (jsonChild.XMLID === "RANGED" && jsonChild.xmlTag === "ADDER") {
+                jsonChild.XMLID = "RANGE";
+                jsonChild.errors ??= [];
+                jsonChild.errors.push("RANGE ranamed to RANGED");
+            }
+
             // Items should have an XMLID
             // Some super old items are missing XMLID, which we will try to fix
+            // A bit more generic
             if (!jsonChild.XMLID) {
-                const powerInfo = getPowerInfo({ xmlid: jsonChild.xmlTag });
+                const powerInfo = getPowerInfo({
+                    xmlid: jsonChild.xmlTag,
+                    xmlTag: child.parentNode.tagName === "CHARACTERISTICS" ? jsonChild.xmlTag : null,
+                    is5e: true,
+                });
                 if (powerInfo) {
                     if (powerInfo.key != jsonChild.xmlTag) {
                         console.error(`powerInfo.key != xmlTag`, jsonChild);
                     }
                     jsonChild.XMLID = powerInfo.key;
+                    jsonChild.errors ??= [];
+                    jsonChild.errors.push("Missing XMLID, using xmlTag reference");
+                }
+            }
+
+            // Some super old items are missing OPTIONID, which we will try to fix
+            if (jsonChild.OPTION && !jsonChild.OPTIONID) {
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
+                jsonChild.OPTIONID = powerInfo?.optionIDFix?.(jsonChild) || jsonChild.OPTION.toUpperCase();
+                jsonChild.errors ??= [];
+                jsonChild.errors.push("Missing OPTIONID, using OPTION reference");
+            }
+
+            // Some super old items are missing and ID (like SCIENTIST skill enhancer)
+            if (jsonChild.XMLID && !jsonChild.ID) {
+                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
+
+                const PARENTID = child.nextElementSibling?.attributes?.PARENTID?.value;
+                if (PARENTID) {
+                    jsonChild.ID = PARENTID;
+                    jsonChild.errors ??= [];
+                    jsonChild.errors.push("Missing ID, using PARENTID from nextElementSibling");
+                }
+
+                if (!jsonChild.BASECOST) {
+                    // We are going to rebase this item as we have no BASECOST or likely any other properties
+                    if (!powerInfo.xml) {
+                        console.warn(`Unable to rebase ${jsonChild.XMLID} because powerInfo.xml is not available.`);
+                    } else {
+                        try {
+                            jsonChild.errors ??= [];
+                            const parser = new DOMParser();
+                            const rebase = parser.parseFromString(powerInfo.xml.trim(), "text/xml");
+                            for (const attribute of rebase.children[0].attributes) {
+                                if (!jsonChild[attribute.name]) {
+                                    jsonChild[attribute.name] ??= attribute.value;
+                                    jsonChild.errors.push(`${attribute.name} from config.mjs:xml`);
+                                }
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
                 }
             }
 
@@ -2967,13 +3053,16 @@ export class HeroSystem6eActor extends Actor {
             } else if (stringifiedTemplate?.match(/Normal/i)) {
                 // Have seen "Normal" and "CompetentNormal" - no 6e template
                 templateType = "Normal";
+            } else if (stringifiedTemplate?.match(/Super/i)) {
+                // 'builtIn.StandardSuper.hdt'
+                templateType = "Superheroic";
             }
 
             if (templateType === "" && this.type !== "base2" && this.flags.uploading !== true) {
                 // Custom Templates
                 // Automations
                 // Barrier
-                if (this.id) {
+                if (this.id && this.system.CHARACTER) {
                     console.warn(
                         `Unknown template type for ${this.name}.`,
                         this.system.CHARACTER?.TEMPLATE,

@@ -2004,7 +2004,7 @@ export class HeroSystem6eItem extends Item {
                                     continue;
                                 }
 
-                                switch (this.system.OPTIONID || this.system.OPTION) {
+                                switch (this.system.OPTIONID) {
                                     case "SINGLESINGLE": // Depricated ?
                                     case "SINGLE":
                                         if (count === 0) {
@@ -3525,7 +3525,7 @@ export class HeroSystem6eItem extends Item {
 
                     if (configPowerInfo?.type?.includes("skill")) {
                         const { roll } = this._getSkillRollComponents(system);
-                        system.description = system.ALIAS;
+                        system.description = system.ALIAS || system.XMLID;
                         this.name = system.NAME || system.ALIAS;
                         if (system?.INPUT) {
                             system.description += `: ${system.INPUT}`;
@@ -3872,7 +3872,7 @@ export class HeroSystem6eItem extends Item {
             system.description += this.createPowerDescriptionModifier(modifier);
         }
 
-        system.description = system.description
+        system.description = (system.description || "")
             .replace(";,", ";")
             .replace("; ,", ";")
             .replace("; ;", ";")
@@ -4088,7 +4088,7 @@ export class HeroSystem6eItem extends Item {
 
         if (modifier.XMLID === "FOCUS") {
             // Sometimes the focus description is in the ALIAS, sometimes it is in the COMMENTS
-            result += `(${modifier.ALIAS.replace("Focus", "")} ${modifier.COMMENTS}; `
+            result += `(${modifier.ALIAS.replace("Focus", "")} ${modifier.COMMENTS || ""}; `
                 .replace(/ {2}/g, " ")
                 .replace("( ", "(")
                 .replace("(; ", "(");
@@ -4592,7 +4592,7 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 11;
             } else if (enrageChance === "14-") {
                 rollValue = 14;
-            } else if (!enrageChance) {
+            } else {
                 // Shouldn't happen. Give it a default.
                 console.error(`ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`);
                 rollValue = 8;
@@ -4607,9 +4607,7 @@ export class HeroSystem6eItem extends Item {
         } else if (skillData.XMLID === "PSYCHOLOGICALLIMITATION") {
             // Intensity is based on an EGO roll
             const egoRoll = this.actor.system.characteristics.ego.roll || 0;
-            const intensity =
-                skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY")?.OPTIONID ||
-                skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY").OPTION?.toUpperCase();
+            const intensity = skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY")?.OPTIONID;
             let intensityValue;
 
             if (intensity === "MODERATE") {
@@ -4635,9 +4633,7 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${egoRoll + intensityValue}-`;
         } else if (skillData.XMLID === "SOCIALLIMITATION") {
-            const occurChance =
-                skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTIONID ||
-                skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTION;
+            const occurChance = skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTIONID;
             let rollValue;
 
             if (occurChance === "OCCASIONALLY" || occurChance.includes("8-")) {
@@ -4651,9 +4647,7 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 14;
             }
 
-            const intensity =
-                skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTIONID ||
-                skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTION.toUpperCase();
+            const intensity = skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTIONID;
             let intensityValue = 0;
 
             switch (intensity) {

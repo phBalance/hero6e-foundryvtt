@@ -6,6 +6,7 @@
 - Fixed issue where characteristic rolls may not show after initial actor upload. [#2224](https://github.com/dmdorman/hero6e-foundryvtt/issues/2224)
 - Improved Combat Skill Level support. [#2232](https://github.com/dmdorman/hero6e-foundryvtt/issues/2232)
 - Characteristic Maxima support [#2214](https://github.com/dmdorman/hero6e-foundryvtt/issues/2214)
+- Improved support for older HDC file formats [#2228](https://github.com/dmdorman/hero6e-foundryvtt/issues/2228)
 
 ## Version 4.0.26 20250420
 
