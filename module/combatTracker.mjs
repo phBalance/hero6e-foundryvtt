@@ -52,46 +52,46 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         //console.log("getData", this);
 
         const combat = this.viewed;
-        if (!combat) return context;
+        if (combat) {
+            let _combatant = null;
 
-        let _combatant = null;
-
-        // Remove extra combatants (a mini-migration)
-        if (HeroSystem6eCombatTracker.singleCombatantTracker) {
-            let firstDup = true;
-            for (let i = 0; i < combat.combatants.size; i++) {
-                const dups = combat.combatants.contents.filter(
-                    (c) => c.tokenId === combat.combatants.contents[i].tokenId,
-                );
-                if (dups.length > 1) {
-                    if (firstDup) {
-                        await combat.update({ [`flags.${game.system.id}.segment`]: game.combat.current.segment });
-                        _combatant = foundry.utils.deepClone(game.combat.current);
-                        firstDup = false;
-                    }
-                    await combat.deleteEmbeddedDocuments(
-                        "Combatant",
-                        dups.slice(1).map((o) => o.id),
+            // Remove extra combatants (a mini-migration)
+            if (HeroSystem6eCombatTracker.singleCombatantTracker) {
+                let firstDup = true;
+                for (let i = 0; i < combat.combatants.size; i++) {
+                    const dups = combat.combatants.contents.filter(
+                        (c) => c.tokenId === combat.combatants.contents[i].tokenId,
                     );
+                    if (dups.length > 1) {
+                        if (firstDup) {
+                            await combat.update({ [`flags.${game.system.id}.segment`]: game.combat.current.segment });
+                            _combatant = foundry.utils.deepClone(game.combat.current);
+                            firstDup = false;
+                        }
+                        await combat.deleteEmbeddedDocuments(
+                            "Combatant",
+                            dups.slice(1).map((o) => o.id),
+                        );
+                    }
+                }
+            } else {
+                _combatant = foundry.utils.deepClone(game.combat.current);
+                const count = combat.combatants.size;
+                await combat.extraCombatants();
+                if (count == combat.combatants.size) {
+                    _combatant = null;
                 }
             }
-        } else {
-            _combatant = foundry.utils.deepClone(game.combat.current);
-            const count = combat.combatants.size;
-            await combat.extraCombatants();
-            if (count == combat.combatants.size) {
-                _combatant = null;
-            }
-        }
 
-        // Sanity check for tokenId
-        if (_combatant) {
-            if (combat.tokenId !== _combatant.tokenId || combat.turn !== _combatant.turn) {
-                const newTurn = combat.turns.findIndex((t) => t.tokenId === _combatant.tokenId);
-                try {
-                    await combat.update({ turn: newTurn });
-                } catch (e) {
-                    console.error(e);
+            // Sanity check for tokenId
+            if (_combatant) {
+                if (combat.tokenId !== _combatant.tokenId || combat.turn !== _combatant.turn) {
+                    const newTurn = combat.turns.findIndex((t) => t.tokenId === _combatant.tokenId);
+                    try {
+                        await combat.update({ turn: newTurn });
+                    } catch (e) {
+                        console.error(e);
+                    }
                 }
             }
         }
