@@ -344,7 +344,7 @@ export class HeroSystem6eCombat extends Combat {
                     toDelete.map((o) => o.id),
                 );
             }
-            console.log(
+            console.debug(
                 `extraCombatants/after: ${this.current.name} segment=${this.current.segment} init=${this.current.initiative}`,
                 this,
             );
