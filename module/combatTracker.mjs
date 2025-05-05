@@ -46,7 +46,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         this.addHeroListeners.call(this, $(this.element));
     }
 
-    // V12 getData(options) is replaced by V13 _prepareContext(options)
+    // V12 getData(options) is replaced by V13 _prepareCombatContext
     async getData(options = {}) {
         // v13 does not call getData
         //console.log("getData", this);
@@ -97,16 +97,16 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         }
 
         const context = await super.getData(options);
-        await this._prepareCombatContext(context, options);
+        await this._prepareTrackerContext(context, options);
 
         return context;
     }
 
-    // V12 getData(options) is replaced by V13 _prepareContext(options)
-    async _prepareCombatContext(context, options) {
+    // V12 getData(options) is replaced by V13 _prepareTrackerContext
+    async _prepareTrackerContext(context, options) {
         // v13 has _prepareTrackerContext
         if (super._prepareCombatContext) {
-            await super._prepareCombatContext(context, options);
+            await super._prepareTrackerContext(context, options);
         }
 
         if (!this.viewed) {
@@ -117,6 +117,12 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         if (!combat) {
             return;
         }
+
+        if (!context.turns) {
+            return;
+        }
+
+        console.debug(context.turns);
 
         // Augment default turns
         if (!HeroSystem6eCombatTracker.singleCombatantTracker) {
@@ -131,7 +137,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                         effects: (combatant.actor?.temporaryEffects || []).filter(
                             (e) => !e.statuses.has(CONFIG.specialStatusEffects.DEFEATED) && e.statuses.size > 0,
                         ),
-                        segment: combatant.flags.segment,
+                        segment: combatant.flags[game.system.id]?.segment,
                     };
                 });
                 context.turns = turnsAugmented;
@@ -175,13 +181,25 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             context.segments = [];
             for (let s = 1; s <= 12; s++) {
                 context.segments[s] = [];
-                for (let [t, turn] of context.turns.entries()) {
-                    if (turn.flags?.segment === s) {
-                        context.segments[s].push(turn);
-                        turn.flags.turnNumber = t;
+                try {
+                    for (let [t, turn] of context.turns.entries()) {
+                        if (turn.flags?.[game.system.id]?.segment === s) {
+                            context.segments[s].push(turn);
+                            turn.flags[game.system.id].turnNumber = t;
+                        }
                     }
+                } catch (e) {
+                    console.error(e);
                 }
             }
+
+            // Debug: assign them to segment 12 if we don't know what to do with them
+            for (let [t, turn] of context.turns.entries()) {
+                if (isNaN(turn.flags?.[game.system.id]?.segment)) {
+                    context.segments[12].push(turn);
+                }
+            }
+            //context._segments = "test";
         } else {
             try {
                 // Create the 12 segments
@@ -247,7 +265,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
                 // Custom sort current segment (needed for holding actions)
                 for (let s = 1; s <= 12; s++) {
-                    if (s !== combat.flags[game.system.id].segment) {
+                    if (s !== combat.flags[game.system.id]?.segment) {
                         context.segments[s] = context.segments[s].sort(this._sortCombatantsOffSegment);
                     }
                 }
@@ -260,7 +278,9 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
     scrollToTurn() {
         const combat = this.viewed;
         if (!combat || combat.turn === null) return;
-        let active = this.element?.find(".combatant.active")[0];
+        if (!this.element) return;
+        const element = $(this.element);
+        const active = element?.find(".combatant.active")?.[0];
         if (!active) return;
         active.scrollIntoView({ block: "center" });
     }
