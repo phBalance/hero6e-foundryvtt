@@ -1,5 +1,9 @@
 # Releases
 
+## Version 4.1.01 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Initial V13 support
+
 ## Version 4.0.28 20250504 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed combat tracker issue when changing scenes or combats. [#2261](https://github.com/dmdorman/hero6e-foundryvtt/issues/2261), [#2262](https://github.com/dmdorman/hero6e-foundryvtt/issues/2262)

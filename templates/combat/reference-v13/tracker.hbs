@@ -12,24 +12,23 @@
             <div class="combatant-controls">
                 {{#if @root.user.isGM}}
                 <button type="button" class="inline-control combatant-control icon fa-solid fa-eye-slash {{#if hidden}}active{{/if}}"
-                        data-action="toggleHidden" data-tooltip="COMBAT.ToggleVis"
-                        aria-label="{{ localize "COMBAT.ToggleVis" }}"></button>
+                        data-action="toggleHidden" data-tooltip aria-label="{{ localize "COMBAT.ToggleVis" }}"></button>
                 <button type="button" class="inline-control combatant-control icon fa-solid fa-skull {{#if isDefeated}}active{{/if}}"
-                        data-action="toggleDefeated" data-tooltip="COMBAT.ToggleDead"
+                        data-action="toggleDefeated" data-tooltip
                         aria-label="{{ localize "COMBAT.ToggleDead" }}"></button>
                 {{/if}}
                 {{#if canPing}}
                 <button type="button" class="inline-control combatant-control icon fa-solid fa-bullseye-arrow"
-                        data-action="pingCombatant" data-tooltip="COMBAT.PingCombatant"
+                        data-action="pingCombatant" data-tooltip
                         aria-label="{{ localize "COMBAT.PingCombatant" }}"></button>
                 {{/if}}
                 {{#unless @root.user.isGM}}
                 <button type="button" class="inline-control combatant-control icon fa-solid fa-arrows-to-eye"
-                        data-action="panToCombatant" data-tooltip="COMBAT.PanToCombatant"
+                        data-action="panToCombatant" data-tooltip
                         aria-label="{{ localize "COMBAT.PanToCombatant" }}"></button>
                 {{/unless}}
                 {{!-- TODO: Target Control --}}
-                <div class="token-effects" data-tooltip="{{ effects.tooltip }}">
+                <div class="token-effects" data-tooltip-html="{{ effects.tooltip }}">
                     {{#each effects.icons}}
                     <img class="token-effect" src="{{ img }}" alt="{{ name }}">
                     {{/each}}
@@ -61,8 +60,8 @@
 
             {{!-- Roll Initiative --}}
             {{else if isOwner}}
-            <button type="button" class="combatant-control roll" data-action="rollInitiative"
-                    data-tooltip="COMBAT.InitiativeRoll" aria-label="{{ localize "COMBAT.InitiativeRoll" }}"
+            <button type="button" class="combatant-control roll" data-action="rollInitiative" data-tooltip
+                    aria-label="{{ localize "COMBAT.InitiativeRoll" }}"
                     style="--initiative-icon: url('{{ @root.initiativeIcon.icon }}'); --initiative-icon-hover: url('{{ @root.initiativeIcon.hover }}');"></button>
             {{/if}}
         </div>

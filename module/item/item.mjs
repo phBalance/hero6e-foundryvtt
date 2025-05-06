@@ -800,7 +800,7 @@ export class HeroSystem6eItem extends Item {
 
         const attr = "system.active";
         const newValue = !foundry.utils.getProperty(item, attr);
-        const firstAE = item.effects.find((ae) => ae.flags.type !== "adjustment");
+        const firstAE = item.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
 
         switch (this.type) {
             case "defense":
@@ -1450,7 +1450,7 @@ export class HeroSystem6eItem extends Item {
 
     // FIXME: This should be trimmed down
     isActivatable() {
-        const itemEffects = this.effects.find((ae) => ae.flags.type !== "adjustment");
+        const itemEffects = this.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
         if (itemEffects) {
             return true;
         }
@@ -1498,7 +1498,7 @@ export class HeroSystem6eItem extends Item {
         // showToggle
         item.system.showToggle = this.isActivatable();
 
-        const itemEffects = item.effects.find((ae) => ae.flags.type !== "adjustment");
+        const itemEffects = item.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
         if (itemEffects) {
             item.system.active = !itemEffects.disabled;
         }
@@ -1559,9 +1559,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Mental
-        if (item?.flags?.tags?.omcv) {
-            item.flags.tags.ocv ??= item.flags.tags.omcv;
-            item.flags.tags.dcv ??= item.flags.tags.dmcv;
+        if (item?.flags?.[game.system.id]?.tags?.omcv) {
+            item.flags[game.system.id] ??= {};
+            item.flags[game.system.id].tags.ocv ??= item.flags[game.system.id]?.tags.omcv;
+            item.flags[game.system.id].tags.dcv ??= item.flags[game.system.id]?.tags.dmcv;
         }
     }
 
@@ -1575,7 +1576,8 @@ export class HeroSystem6eItem extends Item {
             this.system.dcv = parseInt(this.system.DCV) || 0;
         }
 
-        this.flags.tags = {};
+        this.flags[game.system.id] ??= {};
+        this.flags[game.system.id].tags = {};
 
         // Combat Skill Levels
         const csls = combatSkillLevelsForAttack(this);
@@ -1586,13 +1588,13 @@ export class HeroSystem6eItem extends Item {
                 cslSummary[prop] = csl[prop] + parseInt(cslSummary[prop] || 0);
 
                 if (csl[prop] != 0) {
-                    if (this.flags.tags[prop]) {
-                        this.flags.tags[prop] += "\n";
+                    if (this.flags[game.system.id].tags[prop]) {
+                        this.flags[game.system.id].tags[prop] += "\n";
                     } else {
-                        this.flags.tags[prop] = "";
+                        this.flags[game.system.id].tags[prop] = "";
                     }
-                    this.flags.tags[prop] =
-                        `${this.flags.tags[prop]}${csl[prop].signedString()} ${prop === "dc" ? "DC " : ""}${csl.item.name}`;
+                    this.flags[game.system.id].tags[prop] =
+                        `${this.flags[game.system.id].tags[prop]}${csl[prop].signedString()} ${prop === "dc" ? "DC " : ""}${csl.item.name}`;
                 }
             }
         }
@@ -1610,12 +1612,12 @@ export class HeroSystem6eItem extends Item {
         if (this.system.ocv != undefined && this.system.uses === "ocv") {
             const ocv = parseInt(this.actor?.system.characteristics.ocv?.value || 0);
             if (parseInt(ocv) != 0) {
-                if (this.flags.tags.ocv) {
-                    this.flags.tags.ocv += "\n";
+                if (this.flags[game.system.id].tags.ocv) {
+                    this.flags[game.system.id].tags.ocv += "\n";
                 } else {
-                    this.flags.tags.ocv = "";
+                    this.flags[game.system.id].tags.ocv = "";
                 }
-                this.flags.tags.ocv = `${this.flags.tags.ocv}${ocv.signedString()} OCV`;
+                this.flags[game.system.id].tags.ocv = `${this.flags[game.system.id].tags.ocv}${ocv.signedString()} OCV`;
             }
             switch (this.system.ocv) {
                 case "--":
@@ -1637,12 +1639,12 @@ export class HeroSystem6eItem extends Item {
                         this.system.ocvEstimated = `${ocv + parseInt(cslSummary.ocv) + parseInt(velocity / 10)}`;
 
                         if (parseInt(velocity / 10) != 0) {
-                            if (this.flags.tags.ocv) {
-                                this.flags.tags.ocv += "\n";
+                            if (this.flags[game.system.id].tags.ocv) {
+                                this.flags[game.system.id].tags.ocv += "\n";
                             } else {
-                                this.flags.tags.ocv = "";
+                                this.flags[game.system.id].tags.ocv = "";
                             }
-                            this.flags.tags.ocv = `${this.flags.tags.ocv}${parseInt(
+                            this.flags[game.system.id].tags.ocv = `${this.flags[game.system.id].tags.ocv}${parseInt(
                                 velocity / 10,
                             ).signedString()} Velocity`;
                         }
@@ -1655,12 +1657,12 @@ export class HeroSystem6eItem extends Item {
                     this.system.ocvEstimated = `${ocv + parseInt(this.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)}`;
 
                     if (parseInt(this.system.ocv) != 0) {
-                        if (this.flags.tags.ocv) {
-                            this.flags.tags.ocv += "\n";
+                        if (this.flags[game.system.id].tags.ocv) {
+                            this.flags[game.system.id].tags.ocv += "\n";
                         } else {
-                            this.flags.tags.ocv = "";
+                            this.flags[game.system.id].tags.ocv = "";
                         }
-                        this.flags.tags.ocv += `${this.system.ocv} ${this.name}`;
+                        this.flags[game.system.id].tags.ocv += `${this.system.ocv} ${this.name}`;
                     }
             }
         }
@@ -1668,23 +1670,24 @@ export class HeroSystem6eItem extends Item {
         if (this.system.dcv != undefined && this.system.uses === "ocv") {
             const dcv = parseInt(this.actor?.system.characteristics.dcv?.value || 0);
             if (parseInt(dcv) !== 0) {
-                if (this.flags.tags.dcv) {
-                    this.flags.tags.dcv += "\n";
+                if (this.flags[game.system.id].tags.dcv) {
+                    this.flags[game.system.id].tags.dcv += "\n";
                 } else {
-                    this.flags.tags.dcv = "";
+                    this.flags[game.system.id].tags.dcv = "";
                 }
-                this.flags.tags.dcv = `${this.flags.tags.dcv}${dcv.signedString()} DCV`;
+                this.flags[game.system.id].tags.dcv = `${this.flags[game.system.id].tags.dcv}${dcv.signedString()} DCV`;
             }
             this.system.dcv = parseInt(this.system.dcv).signedString();
             this.system.dcvEstimated = `${dcv + parseInt(this.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)}`;
 
             if (parseInt(this.system.dcv) != 0) {
-                if (this.flags.tags.dcv) {
-                    this.flags.tags.dcv += "\n";
+                if (this.flags[game.system.id].tags.dcv) {
+                    this.flags[game.system.id].tags.dcv += "\n";
                 } else {
-                    this.flags.tags.dcv = "";
+                    this.flags[game.system.id].tags.dcv = "";
                 }
-                this.flags.tags.dcv = `${this.flags.tags.dcv}${this.system.dcv} ${this.name}`;
+                this.flags[game.system.id].tags.dcv =
+                    `${this.flags[game.system.id].tags.dcv}${this.system.dcv} ${this.name}`;
             }
         }
 
@@ -1692,23 +1695,25 @@ export class HeroSystem6eItem extends Item {
             const omcv = parseInt(this.actor?.system.characteristics.omcv?.value || 0);
             this.system.ocvEstimated = `${omcv + parseInt(cslSummary.omcv || 0)}`;
             if (omcv !== 0) {
-                if (this.flags.tags.omcv) {
-                    this.flags.tags.omcv += "\n";
+                if (this.flags[game.system.id].tags.omcv) {
+                    this.flags[game.system.id].tags.omcv += "\n";
                 } else {
-                    this.flags.tags.omcv = "";
+                    this.flags[game.system.id].tags.omcv = "";
                 }
-                this.flags.tags.omcv = `${this.flags.tags.omcv}${omcv.signedString()} OMCV`;
+                this.flags[game.system.id].tags.omcv =
+                    `${this.flags[game.system.id].tags.omcv}${omcv.signedString()} OMCV`;
             }
 
             const dmcv = parseInt(this.actor?.system.characteristics.dmcv?.value || 0);
             this.system.dcvEstimated = `${dmcv + parseInt(cslSummary.dmcv || 0)}`;
             if (dmcv !== 0) {
-                if (this.flags.tags.dmcv) {
-                    this.flags.tags.dmcv += "\n";
+                if (this.flags[game.system.id].tags.dmcv) {
+                    this.flags[game.system.id].tags.dmcv += "\n";
                 } else {
-                    this.flags.tags.dmcv = "";
+                    this.flags[game.system.id].tags.dmcv = "";
                 }
-                this.flags.tags.dmcv = `${this.flags.tags.dmcv}${dmcv.signedString()} DMCV`;
+                this.flags[game.system.id].tags.dmcv =
+                    `${this.flags[game.system.id].tags.dmcv}${dmcv.signedString()} DMCV`;
             }
         }
 
@@ -1719,12 +1724,12 @@ export class HeroSystem6eItem extends Item {
             if (this.system.ocvEstimated !== undefined) {
                 this.system.ocvEstimated = `${parseInt(this.system.ocvEstimated) + 1}`;
 
-                if (this.flags.tags.ocv) {
-                    this.flags.tags.ocv += "\n";
+                if (this.flags[game.system.id].tags.ocv) {
+                    this.flags[game.system.id].tags.ocv += "\n";
                 } else {
-                    this.flags.tags.ocv = "";
+                    this.flags[game.system.id].tags.ocv = "";
                 }
-                this.flags.tags.ocv += `+1 Set`;
+                this.flags[game.system.id].tags.ocv += `+1 Set`;
             }
         }
 
@@ -1737,12 +1742,12 @@ export class HeroSystem6eItem extends Item {
             if (this.system.dcvEstimated !== undefined) {
                 this.system.dcvEstimated = `${parseInt(this.system.dcvEstimated) - 5}`;
 
-                if (this.flags.tags.dcv) {
-                    this.flags.tags.dcv += "\n";
+                if (this.flags[game.system.id].tags.dcv) {
+                    this.flags[game.system.id].tags.dcv += "\n";
                 } else {
-                    this.flags.tags.dcv = "";
+                    this.flags[game.system.id].tags.dcv = "";
                 }
-                this.flags.tags.dcv += `-5 Haymaker`;
+                this.flags[game.system.id].tags.dcv += `-5 Haymaker`;
             }
         }
 
@@ -1755,12 +1760,12 @@ export class HeroSystem6eItem extends Item {
                 const adjustment = Math.floor(extraStr / 5);
                 this.system.ocvEstimated = `${parseInt(this.system.ocvEstimated) + adjustment}`;
 
-                if (this.flags.tags.ocv) {
-                    this.flags.tags.ocv += "\n";
+                if (this.flags[game.system.id].tags.ocv) {
+                    this.flags[game.system.id].tags.ocv += "\n";
                 } else {
-                    this.flags.tags.ocv = "";
+                    this.flags[game.system.id].tags.ocv = "";
                 }
-                this.flags.tags.ocv += `${adjustment.signedString()} ${strengthMinimumModifier.ALIAS}`;
+                this.flags[game.system.id].tags.ocv += `${adjustment.signedString()} ${strengthMinimumModifier.ALIAS}`;
             }
         }
 

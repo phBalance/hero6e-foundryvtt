@@ -19,7 +19,7 @@ export class Attack {
     // action effects have a flag for actions only
     // they also get pulled in the start of turn (nextPhase flag)
     static async removeActionActiveEffects(actor) {
-        const prevActiveEffects = actor.effects.filter((o) => o.flags.actionEffect);
+        const prevActiveEffects = actor.effects.filter((o) => o.flags[game.system.id]?.actionEffect);
         //console.log(prevActiveEffects);
         for (const ae of prevActiveEffects) {
             await ae.delete();
@@ -107,8 +107,10 @@ export class Attack {
                 seconds,
             },
             flags: {
-                nextPhase: true,
-                actionEffect: true,
+                [`${game.system.id}`]: {
+                    nextPhase: true,
+                    actionEffect: true,
+                },
             },
         };
         await actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);

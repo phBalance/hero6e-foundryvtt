@@ -35,7 +35,10 @@ export class HeroSystem6eCombat extends Combat {
             // Produce an initiative roll for the Combatant
             const characteristic = combatant.actor?.system?.initiativeCharacteristic || "dex";
             const initValue = combatant.actor?.system.characteristics[characteristic]?.value || 0;
-            if (combatant.flags.initiative != initValue || combatant.flags.initiativeCharacteristic != characteristic) {
+            if (
+                combatant.flags[game.system.id]?.initiative != initValue ||
+                combatant.flags[game.system.id]?.initiativeCharacteristic != characteristic
+            ) {
                 // monks-combat-marker shows error with tokenDocument.object is nul..
                 // tokenDocument is supposed to have an object.
                 // Unclear why it is missing sometimes.
@@ -43,8 +46,9 @@ export class HeroSystem6eCombat extends Combat {
                 if (combatant.token.object) {
                     updates.push({
                         _id: id,
-                        "flags.initiative": initValue,
-                        "flags.initiativeCharacteristic": characteristic,
+                        [`flags.${game.system.id}.initiative`]: initValue,
+                        [`flags.${game.system.id}.initiativeCharacteristic`]: characteristic,
+                        initiative: initValue,
                     });
                 }
             }
@@ -95,20 +99,28 @@ export class HeroSystem6eCombat extends Combat {
     _sortCombatants(a, b) {
         if (!HeroSystem6eCombat.singleCombatantTracker) {
             // Lightning Reflexes
-            const lrA = Number.isNumeric(a.flags.lightningReflexes?.levels) ? a.flags.lightningReflexes.levels : 0;
-            const lrB = Number.isNumeric(b.flags.lightningReflexes?.levels) ? b.flags.lightningReflexes.levels : 0;
+            const lrA = Number.isNumeric(a.flags[game.system.id]?.lightningReflexes?.levels)
+                ? a.flags[game.system.id]?.lightningReflexes.levels
+                : 0;
+            const lrB = Number.isNumeric(b.flags[game.system.id]?.lightningReflexes?.levels)
+                ? b.flags[game.system.id]?.lightningReflexes.levels
+                : 0;
 
             // Sort by segment first
-            const segA = Number.isNumeric(a.flags.segment) ? a.flags.segment : -Infinity;
-            const segB = Number.isNumeric(b.flags.segment) ? b.flags.segment : -Infinity;
+            const segA = Number.isNumeric(a.flags[game.system.id]?.segment)
+                ? a.flags[game.system.id].segment
+                : -Infinity;
+            const segB = Number.isNumeric(b.flags[game.system.id]?.segment)
+                ? b.flags[game.system.id].segment
+                : -Infinity;
 
             // Then by initiative (dex or ego)
             const initA = Number.isNumeric(a.initiative) ? a.initiative + lrA : -Infinity;
             const initB = Number.isNumeric(b.initiative) ? b.initiative + lrB : -Infinity;
 
             // Then by spd
-            const spdA = Number.isNumeric(a.flags.spd) ? a.flags.spd : -Infinity;
-            const spdB = Number.isNumeric(b.flags.spd) ? b.flags.spd : -Infinity;
+            const spdA = Number.isNumeric(a.flags[game.system.id]?.spd) ? a.flags[game.system.id].spd : -Infinity;
+            const spdB = Number.isNumeric(b.flags[game.system.id]?.spd) ? b.flags[game.system.id].spd : -Infinity;
 
             // Then by hasPlayerOwner
             // Finally by tokenId
@@ -121,8 +133,12 @@ export class HeroSystem6eCombat extends Combat {
                 (a.tokenId > b.tokenId ? 1 : -1)
             );
         } else {
-            const ia = a.flags.nextPhase?.initiative || (Number.isNumeric(a.initiative) ? a.initiative : -Infinity);
-            const ib = b.flags.nextPhase?.initiative || (Number.isNumeric(b.initiative) ? b.initiative : -Infinity);
+            const ia =
+                a.flags[game.system.id].nextPhase?.initiative ||
+                (Number.isNumeric(a.initiative) ? a.initiative : -Infinity);
+            const ib =
+                b.flags[game.system.id].nextPhase?.initiative ||
+                (Number.isNumeric(b.initiative) ? b.initiative : -Infinity);
             return ib - ia || (a.id > b.id ? 1 : -1);
         }
     }
@@ -229,24 +245,28 @@ export class HeroSystem6eCombat extends Combat {
                     const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
                     let update = {
                         _id: _combatant.id,
-                        initiative: _combatant.flags.initiative,
-                        "flags.segment": segment,
-                        "flags.spd": spd,
-                        "flags.initiativeTooltip": `${
-                            _combatant.flags.initiative
-                        }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD`,
+                        initiative: _combatant.flags[game.system.id]?.initiative,
+                        [`flags.${game.system.id}.segment`]: segment,
+                        [`flags.${game.system.id}.spd`]: spd,
+                        [`flags.${game.system.id}.initiativeTooltip`]: `${
+                            _combatant.flags[game.system.id].initiative
+                        }${_combatant.flags[game.system.id].initiativeCharacteristic?.toUpperCase()} ${spd}SPD`,
                     };
                     if (lightningReflexes && c % 2 === 0) {
                         update = {
                             ...update,
-                            "flags.initiativeTooltip": `${
-                                _combatant.flags.initiative
-                            }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD ${
+                            [`flags.${game.system.id}.initiativeTooltip`]: `${
+                                _combatant.flags[game.system.id].initiative
+                            }${_combatant.flags[game.system.id].initiativeCharacteristic?.toUpperCase()} ${spd}SPD ${
                                 lightningReflexes.system.LEVELS
                             }LR`,
-                            initiative: _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
-                            "flags.lightningReflexes.levels": parseInt(lightningReflexes.system.LEVELS),
-                            "flags.lightningReflexes.name":
+                            initiative:
+                                _combatant.flags[game.system.id]?.initiative +
+                                parseInt(lightningReflexes?.system.LEVELS || 0),
+                            [`flags.${game.system.id}.lightningReflexes.levels`]: parseInt(
+                                lightningReflexes.system.LEVELS,
+                            ),
+                            [`flags.${game.system.id}.lightningReflexes.name`]:
                                 lightningReflexes.system.OPTION_ALIAS ||
                                 lightningReflexes.system.INPUT ||
                                 "All Actions",
@@ -254,13 +274,14 @@ export class HeroSystem6eCombat extends Combat {
                     } else {
                         update = {
                             ...update,
-                            "flags.lightningReflexes": null,
+                            [`flags.${game.system.id}.lightningReflexes`]: null,
                         };
                     }
                     if (
                         update.initiative != _combatant.initiative ||
-                        update["flags.lightningReflexes.name"] != _combatant.flags?.lightningReflexes?.name ||
-                        update["flags.segment"] != _combatant.flags?.segment
+                        update[`flags.${game.system.id}.lightningReflexes.name`] !=
+                            _combatant.flags?.[game.system.id].lightningReflexes?.name ||
+                        update[`flags.${game.system.id}.segment`] != _combatant.flags?.[game.system.id].segment
                     ) {
                         updates.push(update);
                     }
@@ -415,7 +436,7 @@ export class HeroSystem6eCombat extends Combat {
             turn: this.turn ?? null,
             combatantId: combatant?.id || null,
             tokenId: combatant?.tokenId || null,
-            segment: combatant?.flags.segment || null,
+            segment: combatant?.flags[game.system.id]?.segment || null,
             name: combatant?.token?.name || combatant?.actor?.name || null,
             initiative: combatant?.initiative || null,
         };
@@ -430,14 +451,14 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`Hero | startCombat`);
         }
         // Hero combats start with round 1 and segment 12.
-        const firstSegment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || 0;
+        const firstSegment12turn = this.turns.findIndex((o) => o.flags[game.system.id]?.segment === 12) || 0;
 
         this._playCombatSound("startEncounter");
         const updateData = {
             round: 1,
             turn: firstSegment12turn,
-            "flags.-=postSegment12Round": null,
-            "flags.-heroCurrent": null,
+            [`flags.${game.system.id}.-=postSegment12Round`]: null,
+            [`flags.${game.system.id}-heroCurrent`]: null,
         };
         Hooks.callAll("combatStart", this, updateData);
         return this.update(updateData);
@@ -471,16 +492,21 @@ export class HeroSystem6eCombat extends Combat {
 
         // Save some properties for future support for rewinding combat tracker
         // TODO: Include charges for various items
-        combatant.flags.heroHistory ||= {};
-        if (combatant.actor && this.round && combatant.flags.segment) {
-            combatant.flags.heroHistory[
-                `r${String(this.round).padStart(2, "0")}s${String(combatant.flags.segment).padStart(2, "0")}`
+        combatant.flags[game.system.id].heroHistory ||= {};
+        if (combatant.actor && this.round && combatant.flags[game.system.id].segment) {
+            combatant.flags[game.system.id].heroHistory[
+                `r${String(this.round).padStart(2, "0")}s${String(combatant.flags[game.system.id].segment).padStart(2, "0")}`
             ] = {
                 end: combatant.actor.system.characteristics.end?.value,
                 stun: combatant.actor.system.characteristics.stun?.value,
                 body: combatant.actor.system.characteristics.body?.value,
             };
-            const updates = [{ _id: combatant.id, "flags.heroHistory": combatant.flags.heroHistory }];
+            const updates = [
+                {
+                    _id: combatant.id,
+                    [`flags.${game.system.id}.heroHistory`]: combatant.flags[game.system.id].heroHistory,
+                },
+            ];
             this.updateEmbeddedDocuments("Combatant", updates);
         }
 
@@ -530,22 +556,22 @@ export class HeroSystem6eCombat extends Combat {
 
         // Stop dodges and other maneuvers' active effects that expire automatically
         const maneuverNextPhaseAes = combatant.actor.effects.filter(
-            (ae) => ae.flags?.type === "maneuverNextPhaseEffect",
+            (ae) => ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect",
         );
         const maneuverNextPhaseTogglePromises = maneuverNextPhaseAes
-            .filter((ae) => ae.flags.toggle)
+            .filter((ae) => ae.flags[game.system.id]?.toggle)
             .map((toggleAes) => {
                 const maneuver =
-                    fromUuidSync(toggleAes.flags.itemUuid) ||
+                    fromUuidSync(toggleAes.flags[game.system.id]?.itemUuid) ||
                     rehydrateAttackItem(
-                        toggleAes.flags.dehydratedManeuverItem,
-                        fromUuidSync(toggleAes.flags.dehydratedManeuverActorUuid),
+                        toggleAes.flags[game.system.id]?.dehydratedManeuverItem,
+                        fromUuidSync(toggleAes.flags[game.system.id]?.dehydratedManeuverActorUuid),
                     ).item;
 
                 return maneuver.toggle();
             });
         const maneuverNextPhaseNonTogglePromises = maneuverNextPhaseAes
-            .filter((ae) => !ae.flags.toggle)
+            .filter((ae) => !ae.flags[game.system.id].toggle)
             .map((maneuverAes) => maneuverAes.delete());
         const combinedManeuvers = [...maneuverNextPhaseTogglePromises, ...maneuverNextPhaseNonTogglePromises];
         if (combinedManeuvers.length > 0) {
@@ -576,9 +602,9 @@ export class HeroSystem6eCombat extends Combat {
 
         // Spend resources for all active powers
         // But only if we haven't already done so (like when rewinding combat tracker and moving forward again)
-        const roundSegmentKey = this.round + combatant.flags.segment / 100;
-        if ((masterCombatant.flags.spentEndOn || 0) < roundSegmentKey) {
-            await masterCombatant.update({ "flags.spentEndOn": roundSegmentKey });
+        const roundSegmentKey = this.round + combatant.flags[game.system.id].segment / 100;
+        if ((masterCombatant.flags[game.system.id].spentEndOn || 0) < roundSegmentKey) {
+            await masterCombatant.update({ [`flags.${game.system.id}.spentEndOn`]: roundSegmentKey });
 
             let content = "";
             let tempContent = "";
@@ -635,9 +661,9 @@ export class HeroSystem6eCombat extends Combat {
             }
 
             // TODO: This should be END per turn calculated on the first phase of action for the actor.
-            const encumbered = combatant.actor.effects.find((effect) => effect.flags.encumbrance);
+            const encumbered = combatant.actor.effects.find((effect) => effect.flags[game.system.id].encumbrance);
             if (encumbered) {
-                const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.dcvDex)) - 1;
+                const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.[game.system.id]?.dcvDex)) - 1;
                 if (endCostPerTurn > 0) {
                     spentResources.totalEnd += endCostPerTurn;
                     spentResources.end += endCostPerTurn;
@@ -664,7 +690,7 @@ export class HeroSystem6eCombat extends Combat {
                 spentResources.totalReserveEnd > 0 ||
                 spentResources.totalCharges > 0
             ) {
-                const segment = this.combatant.flags.segment;
+                const segment = this.combatant.flags[game.system.id]?.segment;
 
                 if (
                     spentResources.totalEnd > 0 ||
@@ -699,14 +725,14 @@ export class HeroSystem6eCombat extends Combat {
             }
         } else {
             console.log(
-                `Skipping the check to spend resources for all active powers for ${combatant.name} because this was already performed up thru ${masterCombatant.flags.spentEndOn}`,
+                `Skipping the check to spend resources for all active powers for ${combatant.name} because this was already performed up thru ${masterCombatant.flags[game.system.id]?.spentEndOn}`,
             );
         }
 
         // Some attacks include a DCV penalty which was added as an ActiveEffect.
         // At the beginning of our turn we make sure that AE is deleted.
         const removeOnNextPhase = combatant.actor.effects.filter(
-            (o) => o.flags.nextPhase && o.duration.startTime < game.time.worldTime,
+            (o) => o.flags[game.system.id]?.nextPhase && o.duration.startTime < game.time.worldTime,
         );
         for (const ae of removeOnNextPhase) {
             await ae.delete();
@@ -738,7 +764,10 @@ export class HeroSystem6eCombat extends Combat {
         super._onEndTurn(combatant);
 
         // At the end of the Segment, any non-Persistent Powers, and any Skill Levels of any type, turn off for STUNNED actors.
-        if (this.turns?.[this.turn]?.flags.segment != this.turns?.[this.turn - 1]?.flags.segment) {
+        if (
+            this.turns?.[this.turn]?.flags[game.system.id]?.segment !=
+            this.turns?.[this.turn - 1]?.flags[game.system.id]?.segment
+        ) {
             for (let _combatant of this.combatants) {
                 if (_combatant?.actor?.statuses.has("stunned") || _combatant?.actor?.statuses.has("knockedout")) {
                     for (const item of _combatant.actor.getActiveConstantItems()) {
@@ -812,7 +841,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // Only run this once per turn.
         // So if we go back in time, then forward again, skip PostSegment12
-        if (this.flags.postSegment12Round?.[this.round]) {
+        if (this.flags[game.system.id]?.postSegment12Round?.[this.round]) {
             const content = `Post-Segment 12 (Turn ${this.round - 1})
             <p>Skipping because this has already been performed on this turn during this combat.
             This typically occurs when rewinding combat or during speed changes.</p>`;
@@ -825,10 +854,10 @@ export class HeroSystem6eCombat extends Combat {
             await ChatMessage.create(chatData);
             return;
         }
-        const postSegment12Round = this.flags.postSegment12Round || {};
+        const postSegment12Round = this.flags[game.system.id]?.postSegment12Round || {};
         postSegment12Round[this.round] = true;
 
-        this.update({ "flags.postSegment12Round": postSegment12Round });
+        this.update({ [`flags.${game.system.id}.postSegment12Round`]: postSegment12Round });
 
         const automation = game.settings.get(HEROSYS.module, "automation");
 
@@ -933,7 +962,7 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`%c Hero | nextTurn ${game.time.worldTime}`, "background: #229; color: #bada55");
         }
-        const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const originalRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
         //const originalRound = this.round;
         //const _nextTurn = await super.nextTurn();
 
@@ -957,7 +986,7 @@ export class HeroSystem6eCombat extends Combat {
             return this.nextRound();
         }
 
-        const newRunningSegment = this.round * 12 + this.nextCombatant?.flags.segment;
+        const newRunningSegment = this.round * 12 + this.nextCombatant?.flags[game.system.id]?.segment;
         //const newRound = this.round;
 
         //if (originalRunningSegment != newRunningSegment) {
@@ -1013,12 +1042,12 @@ export class HeroSystem6eCombat extends Combat {
         else if (this.turn <= 0 && this.turn !== null) return this.previousRound();
         let previousTurn = (this.turn ?? this.turns.length) - 1;
 
-        const originalRunningSegment = this.round * 12 + this.combatant.flags.segment;
+        const originalRunningSegment = this.round * 12 + this.combatant.flags[game.system.id]?.segment;
 
         // Hero combats start with round 1 and segment 12.
         // So anything less than segment 12 will call previousTurn
         if (this.round <= 1) {
-            const segment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || 0;
+            const segment12turn = this.turns.findIndex((o) => o.flags[game.system.id]?.segment === 12) || 0;
             if (this.turn <= segment12turn) {
                 return this.previousRound();
             }
@@ -1030,7 +1059,7 @@ export class HeroSystem6eCombat extends Combat {
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
         const _previousTurn = await this.update(updateData, updateOptions);
 
-        const newRunningSegment = this.round * 12 + this.combatant.flags.segment;
+        const newRunningSegment = this.round * 12 + this.combatant[game.system.id].segment;
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
             await game.time.advance(advanceTime);
@@ -1047,9 +1076,9 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | nextRound`);
         }
-        const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const originalRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
         const _nextRound = await super.nextRound();
-        const newRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const newRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
             await game.time.advance(advanceTime);
@@ -1061,9 +1090,9 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | previousRound`);
         }
-        const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const originalRunningSegment = this.round * 12 + this.combatant?.[game.system.id]?.segment;
         const _previousRound = await super.previousRound();
-        const newRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const newRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
             // NaN Typically occurs when previous round ends combat
@@ -1089,7 +1118,7 @@ export class HeroSystem6eCombat extends Combat {
         let combatTurn = this.turns.findIndex(
             (o) =>
                 o.tokenId === combatState.tokenId &&
-                o.flags.segment === combatState.segment &&
+                o.flags[game.system.id]?.segment === combatState.segment &&
                 o.initiative === combatState.initiative,
         );
 
@@ -1097,8 +1126,9 @@ export class HeroSystem6eCombat extends Combat {
         if (combatTurn === -1) {
             combatTurn = this.turns.findIndex(
                 (o) =>
-                    (o.flags.segment === combatState.segment && o.initiative <= combatState.initiative) ||
-                    o.flags.segment > combatState.segment,
+                    (o.flags[game.system.id]?.segment === combatState.segment &&
+                        o.initiative <= combatState.initiative) ||
+                    o.flags[game.system.id]?.segment > combatState.segment,
             );
             console.log(
                 `Combat Tracker was unable to find exact match.  Should only occur when current combatant changes SPD/Initiative.`,

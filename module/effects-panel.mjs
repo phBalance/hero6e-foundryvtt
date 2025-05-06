@@ -57,12 +57,14 @@ export class EffectsPanel extends Application {
                     }
 
                     if (d.duration) {
-                        ae.flags.label = d.label;
+                        ae.flags[game.system.id] ??= {};
+                        ae.flags[game.system.id].label = d.label;
                     }
                 } else {
                     if (d.duration) {
-                        ae.flags.label = d.label;
-                        ae.flags.targetDisplay ??= ae.flags.target;
+                        ae.flags[game.system.id] ??= {};
+                        ae.flags[game.system.id].label = d.label;
+                        ae.flags[game.system.id].targetDisplay ??= ae.flags[game.system.id]?.target;
                     } else if (!ae.statuses || ae.statuses.size === 0) {
                         //console.log(`Skipping ${ae.name}`);
                         continue;
@@ -76,19 +78,6 @@ export class EffectsPanel extends Application {
                 ae.description ??= ae.parent?.system.description;
                 context.effects.push(ae);
             }
-
-            // All the effects on items that are not transferred
-            // for (const item of this.actor.items) {
-            //     for (const ae of item.effects.filter((ae) => ae.transfer === false && ae.duration.seconds)) {
-            //         ae.flags.label = `${ae.duration.startTime + ae.duration.seconds - game.time.worldTime} seconds`;
-            //         for (const target of ae.flags.target) {
-            //             const item = fromUuidSync(target);
-            //             ae.flags.targetDisplay = `${item?.name} [${item.system.XMLID}]`;
-            //         }
-
-            //         context.effects.push(ae);
-            //     }
-            // }
 
             return context;
         } catch (e) {

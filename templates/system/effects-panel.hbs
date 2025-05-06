@@ -16,35 +16,32 @@
                     <div class="tag">{{this}}</div>
                 {{/each}} --}}
 
-                {{#if this.flags.XMLID}}
-                    <div class="tag">{{this.flags.XMLID}}</div>
+                {{#if this.flags.hero6efoundryvttv2.XMLID}}
+                    <div class="tag">{{this.flags.hero6efoundryvttv2.XMLID}}</div>
                 {{else if this.parent.system.XMLID}}
                     <div class="tag">{{this.parent.system.XMLID}}</div>
                 {{/if}}
             </div>
             
-            {{#if this.flags.label}}
-                {{#if (ne this.flags.label "None")}}
+            {{#if this.flags.hero6efoundryvttv2.label}}
+                {{#if (ne this.flags.hero6efoundryvttv2.label "None")}}
                 <div class="duration">
-                    Duration: {{this.flags.label}}
+                    Duration: {{this.flags.hero6efoundryvttv2.label}}
                 </div>
                 {{/if}}
             {{/if}}
 
-            {{!-- {{#if this.flags.affectedPoints}}
-            <div class="affectedPoints">
-                Affected Points: {{this.flags.affectedPoints}}
-            </div>
-            {{/if}} --}}
-
-            {{#if this.flags.target}}
+            {{#if this.flags.hero6efoundryvttv2.target}}
             <div class="target">
-                Target: {{this.flags.targetDisplay}}
+
+                Target: {{this.flags.hero6efoundryvttv2.targetDisplay}}
             </div>
             {{/if}}
 
+
             {{#if this.flags.source}}
             <div class="source">
+
                 Source: {{this.flags.source}}
             </div>
             {{/if}}

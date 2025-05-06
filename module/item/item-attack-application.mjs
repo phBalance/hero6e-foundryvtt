@@ -113,7 +113,7 @@ export class ItemAttackFormApplication extends FormApplication {
             // If so assume we are targeting the entangle
             const entangles = [];
             for (const target of this.data.targets) {
-                const ae = target.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+                const ae = target.actor?.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
                 if (ae) {
                     entangles.push(ae);
                 }
@@ -128,7 +128,10 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 if (entangle) {
                     // Mental attacks typically bypass entangles
-                    if (this.data.originalItem.attackDefenseVs === "MD" && entangle.flags.entangleDefense.rMD === 0) {
+                    if (
+                        this.data.originalItem.attackDefenseVs === "MD" &&
+                        entangle.flags[game.system.id]?.entangleDefense.rMD === 0
+                    ) {
                         this.data.targetEntangle = false;
                     }
 
@@ -797,14 +800,16 @@ export class ItemAttackFormApplication extends FormApplication {
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {
-                purpose: "AoE",
-                itemId: this.data.originalItem.id,
-                item,
-                actor,
-                aoeType,
-                aoeValue,
-                sizeConversionToMeters,
-                usesHexTemplate: HexTemplates && hexGrid,
+                [`${game.system.id}`]: {
+                    purpose: "AoE",
+                    itemId: this.data.originalItem.id,
+                    item,
+                    actor,
+                    aoeType,
+                    aoeValue,
+                    sizeConversionToMeters,
+                    usesHexTemplate: HexTemplates && hexGrid,
+                },
             },
         };
 
@@ -825,9 +830,10 @@ export class ItemAttackFormApplication extends FormApplication {
 
             case "ray":
                 {
+                    templateData[game.system.id] = {};
                     templateData.width = sizeConversionToMeters * areaOfEffect.width;
-                    templateData.flags.width = areaOfEffect.width;
-                    templateData.flags.height = areaOfEffect.height;
+                    templateData.flags[game.system.id].width = areaOfEffect.width;
+                    templateData.flags[game.system.id].height = areaOfEffect.height;
                 }
                 break;
 
@@ -875,15 +881,15 @@ export class ItemAttackFormApplication extends FormApplication {
         return Array.from(canvas.templates.getDocuments()).find(
             (template) =>
                 template.author.id === game.user.id &&
-                template.flags.purpose === "AoE" &&
-                template.flags.itemId === this.data.originalItem.id,
+                template.flags[game.system.id]?.purpose === "AoE" &&
+                template.flags[game.system.id]?.itemId === this.data.originalItem.id,
         );
     }
 }
 
 export function getAoeTemplateForItem(item) {
     let aoeTemplate = game.scenes.current.templates.find(
-        (o) => o.flags.itemId === fromUuidSync(item.system._active?.__originalUuid)?.id,
+        (o) => o.flags[game.system.id]?.itemId === fromUuidSync(item.system._active?.__originalUuid)?.id,
     );
     if (aoeTemplate) return aoeTemplate;
     console.warn(`Unable to match aoeTemplate with item.  Why are you looking for a template?`);

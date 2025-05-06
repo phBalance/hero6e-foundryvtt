@@ -113,7 +113,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
             label: characterName,
             type: "Item",
             flags: {
-                versionHeroSystem6eCreated: game.system.version,
+                [`${game.system.id}.versionHeroSystem6eCreated`]: game.system.version,
             },
         };
 

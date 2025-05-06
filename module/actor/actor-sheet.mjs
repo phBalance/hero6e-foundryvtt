@@ -62,7 +62,10 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         const data = super.getData();
-        if (data.actor.flags.uploading) return data;
+        data.actor.flags[game.system.id] ??= {};
+        if (data.actor.flags[game.system.id].uploading) {
+            return data;
+        }
 
         data.system = data.actor.system;
 
@@ -796,7 +799,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         event.preventDefault();
 
         // If we are updating, don't bother with anything special
-        if (this.actor.flags.updating) {
+        if (this.actor.flags[game.system.id]?.updating) {
             await super._updateObject(event, expandedData);
             return;
         }
@@ -1355,24 +1358,25 @@ export class HeroSystemActorSheet extends ActorSheet {
                 if (confirmed) {
                     const actionsToAwait = [];
 
-                    if (ae.flags?.type === "adjustment" && ae.flags.version >= 3) {
+                    if (ae.flags?.[game.system.id]?.type === "adjustment" && ae.flags[game.system.id]?.version >= 3) {
                         const parent = ae.parent;
-                        for (const target of ae.flags.target) {
+                        for (const target of ae.flags[game.system.id].target) {
                             if (parent.system.characteristics[target]) {
                                 // Target is a characteristic or movement
                                 const actor = parent;
-                                const newMax = actor.system.characteristics[target].max + ae.flags.affectedPoints;
+                                const newMax =
+                                    actor.system.characteristics[target].max + ae.flags[game.system.id]?.affectedPoints;
                                 const presentValue = actor.system.characteristics[target].value;
 
                                 let newValue = 0;
-                                if (ae.flags.affectedPoints < 0) {
+                                if (ae.flags[game.system.id]?.affectedPoints < 0) {
                                     // This is a positive adjustment. When it goes away
                                     // the points are lost but anything already lost doesn't go away.
                                     newValue = Math.min(presentValue, newMax);
                                 } else {
                                     // This is a negative adjustment. When it goes away
                                     // the points come back.
-                                    newValue = presentValue + ae.flags.affectedPoints;
+                                    newValue = presentValue + ae.flags[game.system.id]?.affectedPoints;
                                 }
 
                                 if (newValue !== presentValue) {

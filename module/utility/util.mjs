@@ -280,20 +280,20 @@ export async function expireEffects(actor) {
                 origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
 
             // What is this effect related to?
-            if (ae.flags.type === "adjustment") {
+            if (ae.flags[game.system.id]?.type === "adjustment") {
                 // Fade by up to 5 Active Points
                 let _fade;
-                if (ae.flags.adjustmentActivePoints >= 0) {
-                    _fade = 5; //Math.min(ae.flags.adjustmentActivePoints, 5);
+                if (ae.flags[game.system.id]?.adjustmentActivePoints >= 0) {
+                    _fade = 5;
                 } else {
-                    _fade = -5; //Math.max(ae.flags.adjustmentActivePoints, -5);
+                    _fade = -5;
                 }
 
                 if (item) {
                     adjustmentChatMessages.push(
                         await performAdjustment(
                             item,
-                            ae.flags.target, // nameOfCharOrPower
+                            ae.flags[game.system.id]?.target, // nameOfCharOrPower
                             -_fade, // thisAttackRawActivePointsDamage
                             "None - Effect Fade", // defenseDescription
                             "", // effectsDescription
@@ -317,10 +317,13 @@ export async function expireEffects(actor) {
                 // performAdjustment has deleted the active effect. In this case exit the loop so that
                 // we don't keep operating on an old view of a deleted active effect.
                 // Healing doesn't fade. The lockout just ends which guarantees a deleted effect.
-                if (ae.flags.adjustmentActivePoints === 0 || ae.flags.XMLID === "HEALING") {
+                if (
+                    ae.flags[game.system.id]?.adjustmentActivePoints === 0 ||
+                    ae.flags[game.system.id]?.XMLID === "HEALING"
+                ) {
                     break;
                 }
-            } else if (ae.flags.XMLID === "naturalBodyHealing") {
+            } else if (ae.flags[game.system.id]?.XMLID === "naturalBodyHealing") {
                 let bodyValue = parseInt((ae.target || actor).system.characteristics.body.value);
                 let bodyMax = parseInt((ae.target || actor).system.characteristics.body.max);
                 bodyValue = Math.min(bodyValue + 1, bodyMax);
@@ -354,7 +357,7 @@ export async function expireEffects(actor) {
             // Add duration to startTime (if ae wasn't deleted)
             if (ae.parent?.temporaryEffects.find((o) => o.id === ae.id)) {
                 // Sanity delete
-                if (ae.flags.adjustmentActivePoints === 0) {
+                if (ae.flags[game.system.id]?.adjustmentActivePoints === 0) {
                     console.error(`Sanity deleting ${ae.name}. Shouldn't need to do this.`);
                     await ae.delete();
                     break;
