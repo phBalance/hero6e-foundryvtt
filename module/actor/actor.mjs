@@ -1719,7 +1719,7 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance._d = new Date().getTime();
         this.name = characterName;
         changes["name"] = this.name;
-        changes["flags"] = {
+        changes[`flags.${game.system.id}`] = {
             uploading: true,
         };
 
@@ -1747,6 +1747,9 @@ export class HeroSystem6eActor extends Actor {
             }
         }
         if (this.id) {
+            for (let prop of Object.keys(this.flags).filter((f) => f !== game.system.id)) {
+                changes[`flags.-=${prop}`] = null;
+            }
             for (let prop of Object.keys(this.flags[game.system.id]).filter((f) => f !== "uploading")) {
                 changes[`flags.${game.system.id}-=${prop}`] = null;
             }
@@ -2358,7 +2361,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (this.id) {
-            await this.update({ [`flags.${game.system.id}-=uploading`]: null });
+            await this.update({ [`flags.${game.system.id}.-=uploading`]: null });
         }
         uploadPerformance.retainedDamage = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
