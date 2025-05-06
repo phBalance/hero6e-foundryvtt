@@ -56,7 +56,7 @@ async function CreateHeroMacros() {
 });
         `,
         flags: {
-            versionHeroSystem6eManuallyCreated: game.system.version,
+            [`${game.system.id}.versionHeroSystem6eManuallyCreated`]: game.system.version,
         },
     });
 

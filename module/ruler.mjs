@@ -52,8 +52,8 @@ export class HeroRuler extends Ruler {
             const activeMovement =
                 movementItems.length === 0
                     ? "none"
-                    : movementItems.find((o) => o._id === relevantToken.actor.flags.activeMovement)?._id ||
-                      movementItems[0]._id;
+                    : movementItems.find((o) => o._id === relevantToken.actor.flags[game.system.id]?.activeMovement)
+                          ?._id || movementItems[0]._id;
 
             const radioOptions = movementItems
                 .map(
@@ -76,7 +76,7 @@ export class HeroRuler extends Ruler {
                 const tool = $(this).attr("data-tool");
 
                 await relevantToken.actor.update({
-                    "flags.activeMovement": tool,
+                    [`flags.${game.system.id}.activeMovement`]: tool,
                 });
 
                 renderRadioOptions();
@@ -158,7 +158,7 @@ export class HeroRuler extends Ruler {
                  * @returns number
                  */
                 static getMovementSpeedInMetres(token) {
-                    const key = token.actor.flags.activeMovement || "running";
+                    const key = token.actor.flags[game.system.id]?.activeMovement || "running";
                     const is5e = !!token.actor.system.is5e;
                     const movementValue = parseInt(token.actor.system.characteristics[key]?.value) || 0;
 
@@ -227,7 +227,9 @@ export class HeroRuler extends Ruler {
                                 //  For example a natural 12m run with a 20m running power;
                                 //  you only need to adjust when you exceed 12m.
                                 const movementPower = actor.items.find(
-                                    (o) => o.system.XMLID === actor.flags.activeMovement?.toUpperCase() && o.isActive,
+                                    (o) =>
+                                        o.system.XMLID === actor.flags[game.system.id]?.activeMovement?.toUpperCase() &&
+                                        o.isActive,
                                 );
                                 const reducedEnd = movementPower?.findModsByXmlid("REDUCEDEND");
                                 if (reducedEnd) {
@@ -289,7 +291,7 @@ export class HeroRuler extends Ruler {
                                             parseInt(actor.system.characteristics.end.value) - costEnd,
                                     });
 
-                                    content += `${token.name} spent ${costEnd} END for ${actor.flags.activeMovement?.toUpperCase() || "movement"}. Total of ${Math.ceil(currentDistance)}m and ${totalEnd} END. Endurance use is capped at ${MaximumEndurance}.`;
+                                    content += `${token.name} spent ${costEnd} END for ${actor.flags[game.system.id]?.activeMovement?.toUpperCase() || "movement"}. Total of ${Math.ceil(currentDistance)}m and ${totalEnd} END. Endurance use is capped at ${MaximumEndurance}.`;
                                     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
                                     speaker.alias = actor.name;
                                     const chatData = {
@@ -352,8 +354,9 @@ export class HeroRuler extends Ruler {
 
             // Kludge to update actor right away so the render has proper data.
             // There is likely a better way to deal with this, possibly in the refreshToken hook.
-            if (args?.flags?.activeMovement) {
-                actor.flags.activeMovement = args.flags.activeMovement;
+            if (args?.flags?.[game.system.id]?.activeMovement) {
+                actor.flags[game.system.id] = {};
+                actor.flags[game.system.id].activeMovement = args.flags[game.system.id]?.activeMovement;
             }
 
             that._movementRadioSelectRender();
@@ -399,7 +402,8 @@ export class HeroRuler extends Ruler {
             const activeMovement =
                 movementItems.length === 0
                     ? "none"
-                    : movementItems.find((o) => o._id === actor.flags.activeMovement)?._id || movementItems[0]._id;
+                    : movementItems.find((o) => o._id === actor.flags[game.system.id]?.activeMovement)?._id ||
+                      movementItems[0]._id;
             const activeMovementLabel =
                 activeMovement === "none" ? "Running" : movementItems.find((e) => e._id === activeMovement)?.name;
 

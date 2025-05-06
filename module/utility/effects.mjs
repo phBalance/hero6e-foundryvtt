@@ -92,7 +92,7 @@ export async function onManageActiveEffect(event, owner) {
 
 export async function onActiveEffectToggle(effect, newActiveState) {
     // guard (we turned off an AID/DRAIN active effect, don't toggle the base item)
-    if (effect.flags.type === "adjustment") return;
+    if (effect.flags[game.system.id]?.type === "adjustment") return;
 
     if (newActiveState == undefined) {
         await effect.update({ disabled: !effect.disabled });

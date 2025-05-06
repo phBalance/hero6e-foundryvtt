@@ -195,6 +195,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
             // Debug: assign them to segment 12 if we don't know what to do with them
             for (let [t, turn] of context.turns.entries()) {
+                console.log(t, turn);
                 if (isNaN(turn.flags?.[game.system.id]?.segment)) {
                     context.segments[12].push(turn);
                 }
@@ -261,7 +262,8 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                         }
                     }
                 }
-                this.viewed.flags.segments = context.segments;
+                this.viewed.flags[game.system.id] ??= {};
+                this.viewed.flags[game.system.id].segments = context.segments;
 
                 // Custom sort current segment (needed for holding actions)
                 for (let s = 1; s <= 12; s++) {

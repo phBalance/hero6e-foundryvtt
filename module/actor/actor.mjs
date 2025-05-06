@@ -467,7 +467,9 @@ export class HeroSystem6eActor extends Actor {
             data?.system?.characteristics?.body?.value &&
             data?.system?.characteristics?.body?.value >= parseInt(this.system.characteristics.body.max)
         ) {
-            const naturalHealingTempEffect = this.temporaryEffects.find((o) => o.flags.XMLID === "naturalBodyHealing");
+            const naturalHealingTempEffect = this.temporaryEffects.find(
+                (o) => o.flags[game.system.id]?.XMLID === "naturalBodyHealing",
+            );
 
             // Fire and forget
             if (naturalHealingTempEffect) {
@@ -492,14 +494,14 @@ export class HeroSystem6eActor extends Actor {
             // Toggled on (entering ID)
             if (data.system.heroicIdentity) {
                 for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID") && !item.system.active)) {
-                    if (item.flags.preOIHID) {
+                    if (item.flags[game.system.id]?.preOIHID) {
                         await item.toggle(); // toggle on
                     }
                 }
             } else {
                 // Use flags to keep track which items were disabled so we will enable them when we go back into heroic ID
                 for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID"))) {
-                    await item.update({ "flags.preOIHID": item.system.active });
+                    await item.update({ [`flags.${game.system.id}.preOIHID`]: item.system.active });
                     if (item.system.active) {
                         await item.toggle(); // toggle off
                     }
@@ -681,7 +683,7 @@ export class HeroSystem6eActor extends Actor {
 
         if (asAction && this.inCombat) {
             // While Recovering, a character is at ½ DCV
-            const existingEffect = Array.from(this.temporaryEffects).find((o) => o.flags.takeRecovery);
+            const existingEffect = Array.from(this.temporaryEffects).find((o) => o.flags[game.system.id]?.takeRecovery);
             if (!existingEffect) {
                 const activeEffect = {
                     name: "TakeRecovery",
@@ -694,9 +696,13 @@ export class HeroSystem6eActor extends Actor {
                         },
                     ],
                     origin: this.uuid,
-                    flags: { takeRecovery: true },
-                    duration: {
-                        seconds: 1,
+                    flags: {
+                        [`${game.system.id}`]: {
+                            takeRecovery: true,
+                        },
+                        duration: {
+                            seconds: 1,
+                        },
                     },
                 };
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -1168,8 +1174,7 @@ export class HeroSystem6eActor extends Actor {
                 ],
                 origin: this.uuid,
                 flags: {
-                    dcvDex: dcvDex,
-                    encumbrance: true,
+                    [`${game.system.id}`]: { dcvDex: dcvDex, encumbrance: true },
                 },
             };
 
@@ -1260,7 +1265,9 @@ export class HeroSystem6eActor extends Actor {
                 ],
                 origin: this.uuid,
                 flags: {
-                    str0: true,
+                    [`${game.system.id}`]: {
+                        str0: true,
+                    },
                 },
             };
 
@@ -1740,8 +1747,8 @@ export class HeroSystem6eActor extends Actor {
             }
         }
         if (this.id) {
-            for (let prop of Object.keys(this.flags).filter((f) => f !== "uploading")) {
-                changes[`flags.-=${prop}`] = null;
+            for (let prop of Object.keys(this.flags[game.system.id]).filter((f) => f !== "uploading")) {
+                changes[`flags.${game.system.id}-=${prop}`] = null;
             }
 
             promiseArray.push(this.update(changes));
@@ -2351,7 +2358,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (this.id) {
-            await this.update({ "flags.-=uploading": null });
+            await this.update({ [`flags.${game.system.id}-=uploading`]: null });
         }
         uploadPerformance.retainedDamage = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
@@ -3058,7 +3065,7 @@ export class HeroSystem6eActor extends Actor {
                 templateType = "Superheroic";
             }
 
-            if (templateType === "" && this.type !== "base2" && this.flags.uploading !== true) {
+            if (templateType === "" && this.type !== "base2" && this.flags[game.system.id]?.uploading !== true) {
                 // Custom Templates
                 // Automations
                 // Barrier
@@ -3124,7 +3131,8 @@ export class HeroSystem6eActor extends Actor {
         const _activeMovement =
             movementItems.length === 0
                 ? "none"
-                : movementItems.find((o) => o._id === this.flags.activeMovement)?._id || movementItems[0]._id;
+                : movementItems.find((o) => o._id === this.flags[game.system.id]?.activeMovement)?._id ||
+                  movementItems[0]._id;
         return _activeMovement;
     }
 

@@ -347,7 +347,7 @@ async function handleMacroCreation(bar, data, slot, item) {
             type: "script",
             img: item.img,
             command: command,
-            flags: { "herosystem6e.itemMacro": true },
+            flags: { [`${game.system.id}.herosystem6e.itemMacro`]: true },
         });
     }
     game.user.assignHotbarMacro(macro, slot);
@@ -613,7 +613,9 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     for (const actor of actors) {
         try {
             // Create a natural body healing if needed (requires permissions)
-            const naturalBodyHealing = actor.temporaryEffects.find((o) => o.flags.XMLID === "naturalBodyHealing");
+            const naturalBodyHealing = actor.temporaryEffects.find(
+                (o) => o.flags[game.system.id]?.XMLID === "naturalBodyHealing",
+            );
             if (
                 actor.type === "pc" &&
                 !naturalBodyHealing &&
@@ -629,7 +631,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         seconds: secondsPerBody,
                     },
                     flags: {
-                        XMLID: "naturalBodyHealing",
+                        [`${game.system.id}.XMLID`]: "naturalBodyHealing",
                     },
                 };
                 await actor.addActiveEffect(activeEffect);
@@ -725,7 +727,9 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             }
 
             // Update Flash name?
-            const flashEffects = actor.temporaryEffects.filter((o) => ["FLASH", "MANEUVER"].includes(o.flags.XMLID));
+            const flashEffects = actor.temporaryEffects.filter((o) =>
+                ["FLASH", "MANEUVER"].includes(o.flags[game.system.id]?.XMLID),
+            );
             for (const flashAe of flashEffects) {
                 const senseAffectingItem = fromUuidSync(flashAe.origin);
 
@@ -768,7 +772,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     console.error(`${aeWithCharges.name} is inactive and will not expire.`);
                     continue;
                 }
-                if (game.time.worldTime >= aeWithCharges.flags.startTime + aeWithCharges.duration.seconds) {
+                if (
+                    game.time.worldTime >=
+                    aeWithCharges.flags[game.system.id]?.startTime + aeWithCharges.duration.seconds
+                ) {
                     await aeWithCharges.parent.toggle();
                 } else {
                     if (game.ready) game[HEROSYS.module].effectPanel.refresh();

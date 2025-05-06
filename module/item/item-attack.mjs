@@ -429,7 +429,9 @@ export async function doAoeActionToHit(item, options) {
                     seconds: seconds,
                 },
                 flags: {
-                    nextPhase: true,
+                    [`${game.system.id}`]: {
+                        nextPhase: true,
+                    },
                 },
             };
             await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -796,7 +798,9 @@ async function doSingleTargetActionToHit(item, options) {
                     seconds: seconds,
                 },
                 flags: {
-                    nextPhase: true,
+                    [`${game.system.id}`]: {
+                        nextPhase: true,
+                    },
                 },
             };
             await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -1778,7 +1782,10 @@ export async function _onRollDamage(event) {
             const targetToken = {
                 tokenId: id,
                 name: token.name,
-                subTarget: toHitData.targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
+                subTarget:
+                    toHitData.targetEntangle && entangleAE
+                        ? `${token.name} [${entangleAE.flags[game.system.id]?.XMLID}]`
+                        : null,
                 targetEntangle: !!toHitData.targetEntangle,
             };
 
@@ -2110,7 +2117,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
             // If entangle is transparent to damage, damage actor too
             if (targetToken.targetEntangle) {
                 const token = canvas.scene.tokens.get(targetToken.tokenId);
-                const ae = token.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+                const ae = token.actor?.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
                 if (ae) {
                     const { item: entangle } = rehydrateAttackItem(
                         ae.flags.dehydratedEntangleItem,
@@ -2682,9 +2689,18 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled"));
     const prevBody = parseInt(prevEntangle?.changes?.find((o) => o.key === "body")?.value) || 0;
     if (prevEntangle) {
-        entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense?.rPD) || 0);
-        entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense?.rED) || 0);
-        entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense?.rMD) || 0);
+        entangleDefense.rPD = Math.max(
+            entangleDefense.rPD,
+            parseInt(prevEntangle.flags[game.system.id]?.entangleDefense?.rPD) || 0,
+        );
+        entangleDefense.rED = Math.max(
+            entangleDefense.rED,
+            parseInt(prevEntangle.flags[game.system.id]?.entangleDefense?.rED) || 0,
+        );
+        entangleDefense.rMD = Math.max(
+            entangleDefense.rMD,
+            parseInt(prevEntangle.flags[game.system.id]?.entangleDefense?.rMD) || 0,
+        );
         (entangleDefense.string = `${
             entangleDefense.mentalEntangle
                 ? `${entangleDefense.rMD} rMD`
@@ -2699,11 +2715,13 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
         description: item.system.description,
         flags: {
-            entangleDefense,
-            XMLID: item.system.XMLID,
-            source: item.actor.name,
-            dehydratedEntangleItem: dehydrateAttackItem(item),
-            dehydratedEntangleActorUuid: item.actor.uuid,
+            [`${game.system.id}`]: {
+                entangleDefense,
+                XMLID: item.system.XMLID,
+                source: item.actor.name,
+                dehydratedEntangleItem: dehydrateAttackItem(item),
+                dehydratedEntangleActorUuid: item.actor.uuid,
+            },
         },
         origin: item.uuid,
     };
@@ -2771,8 +2789,11 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     }
 
     // Make sure this is an ENTANGLE
-    if (entangleAE.flags.XMLID !== "ENTANGLE") {
-        return ui.notifications.error(`Damaging ${entangleAE.flags.XMLID} is not currently supported.`);
+    entangleAE.flags[game.system.id] ??= {};
+    if (entangleAE.flags[game.system.id].XMLID !== "ENTANGLE") {
+        return ui.notifications.error(
+            `Damaging ${entangleAE.flags[game.system.id]?.XMLID} is not currently supported.`,
+        );
     }
 
     // We don't support adjustment powers on entangles
@@ -2788,15 +2809,15 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     let defenseType;
     switch (attackItem?.system.class) {
         case "physical":
-            defense = entangleAE.flags.entangleDefense.rPD;
+            defense = entangleAE.flags[game.system.id]?.entangleDefense.rPD;
             defenseType = "rPD";
             break;
         case "energy":
-            defense = entangleAE.flags.entangleDefense.rED;
+            defense = entangleAE.flags[game.system.id]?.entangleDefense.rED;
             defenseType = "rED";
             break;
         case "mental":
-            defense = entangleAE.flags.entangleDefense.rMD;
+            defense = entangleAE.flags[game.system.id]?.entangleDefense.rMD;
             defenseType = "rPMD";
             break;
     }
@@ -2833,7 +2854,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     if (bodyDamage > 0) {
         if (bodyDamage < body) {
             const newBody = body - bodyDamage;
-            const name = `${entangleAE.flags.XMLID} ${newBody} BODY ${entangleAE.flags.entangleDefense.string}`;
+            const name = `${entangleAE.flags[game.system.id]?.XMLID} ${newBody} BODY ${entangleAE.flags[game.system.id]?.entangleDefense.string}`;
             entangleAE.update({ name });
             entangleAE.changes[bodyChangeIdx].value = newBody;
             entangleAE.update({ changes: entangleAE.changes });
@@ -3204,9 +3225,11 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
                     seconds: senseGroup.bodyDamage,
                 },
                 flags: {
-                    bodyDamage: senseGroup.bodyDamage,
-                    XMLID: senseAffectingItem.system.XMLID,
-                    source: senseAffectingItem.actor.name,
+                    [`${game.system.id}`]: {
+                        bodyDamage: senseGroup.bodyDamage,
+                        XMLID: senseAffectingItem.system.XMLID,
+                        source: senseAffectingItem.actor.name,
+                    },
                 },
                 origin: senseAffectingItem.uuid,
             });

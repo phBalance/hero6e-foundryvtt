@@ -245,7 +245,7 @@ export class HeroSystem6eCombat extends Combat {
                     const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
                     let update = {
                         _id: _combatant.id,
-                        initiative: _combatant.flags.initiative,
+                        initiative: _combatant.flags[game.system.id]?.initiative,
                         [`flags.${game.system.id}.segment`]: segment,
                         [`flags.${game.system.id}.spd`]: spd,
                         [`flags.${game.system.id}.initiativeTooltip`]: `${
@@ -260,7 +260,9 @@ export class HeroSystem6eCombat extends Combat {
                             }${_combatant.flags[game.system.id].initiativeCharacteristic?.toUpperCase()} ${spd}SPD ${
                                 lightningReflexes.system.LEVELS
                             }LR`,
-                            initiative: _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
+                            initiative:
+                                _combatant.flags[game.system.id]?.initiative +
+                                parseInt(lightningReflexes?.system.LEVELS || 0),
                             [`flags.${game.system.id}.lightningReflexes.levels`]: parseInt(
                                 lightningReflexes.system.LEVELS,
                             ),
@@ -562,14 +564,14 @@ export class HeroSystem6eCombat extends Combat {
                 const maneuver =
                     fromUuidSync(toggleAes.flags[game.system.id]?.itemUuid) ||
                     rehydrateAttackItem(
-                        toggleAes.flags.dehydratedManeuverItem,
+                        toggleAes.flags[game.system.id]?.dehydratedManeuverItem,
                         fromUuidSync(toggleAes.flags[game.system.id]?.dehydratedManeuverActorUuid),
                     ).item;
 
                 return maneuver.toggle();
             });
         const maneuverNextPhaseNonTogglePromises = maneuverNextPhaseAes
-            .filter((ae) => !ae.flags.toggle)
+            .filter((ae) => !ae.flags[game.system.id].toggle)
             .map((maneuverAes) => maneuverAes.delete());
         const combinedManeuvers = [...maneuverNextPhaseTogglePromises, ...maneuverNextPhaseNonTogglePromises];
         if (combinedManeuvers.length > 0) {
@@ -600,7 +602,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // Spend resources for all active powers
         // But only if we haven't already done so (like when rewinding combat tracker and moving forward again)
-        const roundSegmentKey = this.round + combatant.flags.segment / 100;
+        const roundSegmentKey = this.round + combatant.flags[game.system.id].segment / 100;
         if ((masterCombatant.flags[game.system.id].spentEndOn || 0) < roundSegmentKey) {
             await masterCombatant.update({ [`flags.${game.system.id}.spentEndOn`]: roundSegmentKey });
 
@@ -855,7 +857,7 @@ export class HeroSystem6eCombat extends Combat {
         const postSegment12Round = this.flags[game.system.id]?.postSegment12Round || {};
         postSegment12Round[this.round] = true;
 
-        this.update({ [`flags.${game.systesm.id}.postSegment12Round`]: postSegment12Round });
+        this.update({ [`flags.${game.system.id}.postSegment12Round`]: postSegment12Round });
 
         const automation = game.settings.get(HEROSYS.module, "automation");
 
