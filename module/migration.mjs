@@ -136,6 +136,15 @@ export async function migrateWorld() {
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.26`, "background: #1111FF; color: #FFFFFF");
 
+    await migrateToVersion(
+        "4.1.0",
+        lastMigration,
+        getAllActorsInGame(),
+        "flag scopes",
+        async (actor) => await flagScopes(actor),
+    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.0`, "background: #1111FF; color: #FFFFFF");
+
     // Always rebuild the database for all actors by recreating actors and all their items (description, cost, etc)
     _start = Date.now();
     await migrateToVersion(
@@ -148,6 +157,48 @@ export async function migrateWorld() {
     console.log(`%c Took ${Date.now() - _start}ms to migrate to latest version`, "background: #1111FF; color: #FFFFFF");
 
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
+}
+
+// V13 requires scopes on all flags. Scoped flags work just fine in V12.
+// While not absultely necessasry, we will move all unscoped flags
+// into the 'hero6efoundryvttv2' scope so any ongoing effects/statuses/movementState/etc don't get lost.
+async function flagScopes(actor) {
+    try {
+        if (!actor) return false;
+
+        const actorUpdates = [];
+        for (let prop of Object.keys(actor.flags).filter((f) => f !== game.system.id)) {
+            actorUpdates[`flags.-=${prop}`] = null;
+            actorUpdates[`flags.${game.system.id}.${prop}`] = actor.flags[prop];
+        }
+        if (actorUpdates.length > 0) {
+            await actor.update(actorUpdates);
+        }
+
+        const itemUpdates = [];
+        for (const item of actor.items.filter((i) => Object.keys(i.flags).length > 0)) {
+            for (let prop of Object.keys(item.flags).filter((f) => f !== game.system.id)) {
+                itemUpdates[`flags.-=${prop}`] = null;
+                itemUpdates[`flags.${game.system.id}.${prop}`] = item.flags[prop];
+            }
+        }
+        if (itemUpdates.length > 0) {
+            await actor.updateEmbeddedDocuments("Item", itemUpdates);
+        }
+
+        const effectUpdates = [];
+        for (const effect of actor.effects.filter((i) => Object.keys(i.flags).length > 0)) {
+            for (let prop of Object.keys(effect.flags).filter((f) => f !== game.system.id)) {
+                effectUpdates[`flags.-=${prop}`] = null;
+                effectUpdates[`flags.${game.system.id}.${prop}`] = effect.flags[prop];
+            }
+        }
+        if (effectUpdates.length > 0) {
+            await actor.updateEmbeddedDocuments("ActiveEffect", effectUpdates);
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicProperty(actor) {
