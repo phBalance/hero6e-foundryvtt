@@ -3,6 +3,8 @@
 ## Version 4.1.0 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved V13 support. We do not recommend upgrading FoundryVTT to v13 yet as there are [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility).
+  - Fixed V13 Combat Tracker [#2269](https://github.com/dmdorman/hero6e-foundryvtt/issues/2269)
+  - Fixed V13 Generic Roller [#2267](https://github.com/dmdorman/hero6e-foundryvtt/issues/2267)
 
 ## Version 4.0.28 20250504 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
