@@ -1,16 +1,24 @@
-section.hero-roll-panel {
+#chat .hero-generic-roller {
+    align-items: center;
     flex: 0;
     border: 1px;
     padding: 0 5px;
+    pointer-events: all;
+    display: flex;
+    flex-direction: row;
 
     button {
-        display: flex;
-        flex-direction: row;
         background: rgb(70 130 180);
         border: 1px solid #000;
         box-shadow: 0 0 6px inset rgb(141 158 167);
         align-items: center;
         justify-content: center;
         color: rgb(255 255 255);
+        margin: 1px;
     }
+}
+
+#chat .hero-generic-roller.game-version-major-13 {
+    width: calc(100% - 12px);
+    padding: var(--chat-message-spacing);
 }
