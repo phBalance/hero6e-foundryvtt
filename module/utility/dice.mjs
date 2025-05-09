@@ -1375,11 +1375,15 @@ export class HeroRoller {
     }
 
     #buildTooltip() {
-        return `<div class="dice-tooltip">
-                    <section class="tooltip-part">
-                        ${this.#buildDiceTooltip()}
-                    </section>
-                </div>`;
+        return `
+<div class="dice-tooltip">
+    <div class="wrapper">
+        <section class="tooltip-part">
+            ${this.#buildDiceTooltip()}
+        </section>
+    </div>
+</div>
+            `;
     }
 
     #buildDiceTooltip() {
