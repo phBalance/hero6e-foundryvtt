@@ -32,7 +32,7 @@ export async function chatListeners(_html) {
     html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
     html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
     html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
-    html.on("click", "span.modal-damage-card", this._onModalDamageCard.bind(this));
+    html.on("click", "i.modal-damage-card, span.modal-damage-card", this._onModalDamageCard.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -4216,7 +4216,6 @@ export async function _onAdjustmentToolipExpandCollapse(event) {
 
 export async function _onModalDamageCard(event) {
     const target = $(event.currentTarget);
-    console.log(target);
 
     let content = target.closest(".message-content").clone();
     content.find(".modal-damage-card").remove();
@@ -4238,7 +4237,4 @@ export async function _onModalDamageCard(event) {
     };
     const d = new Dialog(data, { form: { closeOnSubmit: false } });
     await d.render(true);
-
-    //this.chatListeners(d.element);
-    console.log(d);
 }

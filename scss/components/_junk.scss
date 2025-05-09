@@ -230,3 +230,8 @@ li.directory-item.child-item {
 .dialog.end-to-end-testing .window-content li {
     margin-left: 10px;
 }
+
+/* V13 buttons don't seem to default to 100% like they do in v12 */
+.hero.chat-card button {
+    width: 100%;
+}
