@@ -45,6 +45,8 @@ Hooks.once("init", async function () {
     // In chrome use -/Deprecated since Version 13/ as a console log filter
     // Some v13 warning still slip in during initial load, re-applying filter is a temp fix.
 
+    CONFIG.debug.hooks = true;
+
     // Custom HeroSystem VisionMode
     setPerceptionModes();
 
@@ -830,19 +832,36 @@ Hooks.on("getCombatTrackerEntryContext", function (html, menu) {
     menu.push(entry);
 });
 
+// Hooks.on("setup", () => {
+//     //const $chat_form = html.find("#chat-form") || html.find("#chat");
+//     debugger;
+// });
+
+Hooks.on("renderSidebar", async (_sidebar, html, _context, options) => {
+    if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
+    if (!options.isFirstRender) return;
+
+    const $chatV13 = $(html).find("#chat");
+    if (!$chatV13) return;
+    const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`);
+    const $content = $(content);
+    $chatV13.after($content);
+});
+
 Hooks.on("renderSidebarTab", async (app, html) => {
     // Exit early if necessary;
     if (app.tabName !== "chat") return;
 
     if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
 
-    const $chat_form = html.find("#chat-form");
+    const $chatV12 = html.find("#chat-form");
+    if (!$chatV12) return;
     const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-panel.hbs`);
     if (content.length === 0) return;
 
     // Add template to chat
     const $content = $(content);
-    $chat_form.after($content);
+    $chatV12.after($content);
 
     $content.find("button").on("click", async (event) => {
         event.preventDefault();
