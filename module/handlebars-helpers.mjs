@@ -18,8 +18,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("appliesTo", appliesTo);
     Handlebars.registerHelper("checkInit", checkInit);
     Handlebars.registerHelper("objectNumKeys", objectNumKeys);
-    Handlebars.registerHelper("getFlag", getFlag);
-    Handlebars.registerHelper("getFlagKey2", getFlagKey2);
+    Handlebars.registerHelper("getScopedFlagValue", getScopedFlagValue);
 }
 
 function indexOf(str, searchTerm) {
@@ -108,20 +107,16 @@ function objectNumKeys(obj) {
     return Object.keys(obj).length;
 }
 
-function getFlag(obj, scope, key) {
+function getScopedFlagValue(obj, scope, key, ...args) {
     try {
-        // obj.getFlag assumes an object, which isn't always the case
-        return obj?.flags?.[scope]?.[key];
-    } catch (e) {
-        console.error(e);
-    }
-    return null;
-}
-
-function getFlagKey2(obj, scope, key, key2) {
-    try {
-        // obj.getFlag assumes an object, which isn't always the case
-        return obj?.flags?.[scope]?.[key]?.[key2];
+        // Handlebars will have an object at the end of the args. Ignore it and just get the strings we've passed in.
+        const keys = args.filter((arg) => typeof arg === "string");
+        let keyValue = obj.getFlag(scope, key);
+        keys.forEach((key) => {
+            if (typeof keyValue !== "object") throw Error(`${keyValue} doesn't have property ${key}`);
+            keyValue = keyValue[key];
+        });
+        return keyValue;
     } catch (e) {
         console.error(e);
     }
