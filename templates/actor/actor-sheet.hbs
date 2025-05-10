@@ -1,6 +1,5 @@
 {{!-- {{log 'actor-sheet' this}} --}}
 <form class="{{cssClass}}" autocomplete="off">
-    {{log 'game.system.id' gameSystemId (getFlag actor gameSystemId "uploading")}}
     {{#if (getFlag actor @root/gameSystemId "uploading")}}
         <aside>
             <div class="sidebar">

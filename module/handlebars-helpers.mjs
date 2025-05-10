@@ -110,7 +110,8 @@ function objectNumKeys(obj) {
 
 function getFlag(obj, scope, key) {
     try {
-        return obj.getFlag(scope, key);
+        // obj.getFlag assumes an object, which isn't always the case
+        return obj?.flags?.[scope]?.[key];
     } catch (e) {
         console.error(e);
     }
@@ -119,7 +120,8 @@ function getFlag(obj, scope, key) {
 
 function getFlagKey2(obj, scope, key, key2) {
     try {
-        return obj.getFlag(scope, key)?.[key2];
+        // obj.getFlag assumes an object, which isn't always the case
+        return obj?.flags?.[scope]?.[key]?.[key2];
     } catch (e) {
         console.error(e);
     }

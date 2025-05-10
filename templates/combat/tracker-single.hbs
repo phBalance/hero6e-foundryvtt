@@ -11,7 +11,7 @@
                 {{!-- loop thru each turn/combatant --}}
                 {{#each this}}
 
-                <li class="combatant directory-item {{this.css}} {{#if (and this.active (eq this.segment @root/combat.flags.hero6efoundryvttv2.segment))}}active{{/if}}" 
+                <li class="combatant directory-item {{this.css}} {{#if (and this.active (eq this.segment getFlag @root/combat @root/gameSystemId 'segment'))}}active{{/if}}" 
                     data-combatant-id="{{this.id}}"
                     draggable="true"
                 >
@@ -19,11 +19,9 @@
                         <img class="token-image" src="{{this.img}}" alt="{{this.name}}" loading="lazy"/>
                     {{/unless}}
                     <div class="token-name">
-                    <strong>{{this.name}} 
-                            {{!-- [{{this.flags.hero6efoundryvttv2.turnNumber}}] --}}
-                        </strong>
-                        {{#if this.flags.hero6efoundryvttv2.lightningReflexes.levels}}
-                            <strong title="Lightning Reflexes">LR {{this.flags.hero6efoundryvttv2.lightningReflexes.name}}</strong>
+                    <strong>{{this.name}}</strong>
+                        {{#if getFlagKey2 this @root/gameSystemId "lightningReflexes" "levels"}}
+                            <strong title="Lightning Reflexes">LR {{getFlagKey2 this @root/gameSystemId "lightningReflexes" "name"}}</strong>
                         {{else}}
                             <div class="combatant-controls">
                                 {{#if @root/user.isGM}}
@@ -62,7 +60,7 @@
                                 </button>
                                 {{/if}}
 
-                                {{#if (and this.active (eq this.segment @root/combat.flags.hero6efoundryvttv2.segment))}}
+                                {{#if (and this.active (eq this.segment getFlag @root/combat @root/gameSystemId 'segment'))}}
                                     <button type="button" class="inline-control combatant-control icon fa-solid fa-hourglass-start" 
                                         data-action="delayCombatant" 
                                         data-tooltip="COMBAT.DelayCombatant"
