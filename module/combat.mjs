@@ -249,8 +249,8 @@ export class HeroSystem6eCombat extends Combat {
                         [`flags.${game.system.id}.segment`]: segment,
                         [`flags.${game.system.id}.spd`]: spd,
                         [`flags.${game.system.id}.initiativeTooltip`]: `${
-                            _combatant.flags[game.system.id].initiative
-                        }${_combatant.flags[game.system.id].initiativeCharacteristic?.toUpperCase()} ${spd}SPD`,
+                            _combatant.flags[game.system.id]?.initiative
+                        }${_combatant.flags[game.system.id]?.initiativeCharacteristic?.toUpperCase()} ${spd}SPD`,
                     };
                     if (lightningReflexes && c % 2 === 0) {
                         update = {
@@ -312,51 +312,47 @@ export class HeroSystem6eCombat extends Combat {
                 const _combatant = this.combatants.find((o) => o.tokenId === _tokenId && o.actor);
                 if (!_combatant?.isOwner) continue;
                 const actor = _combatant?.actor;
-                if (actor) {
-                    const lightningReflexes = actor?.items.find(
-                        (o) =>
-                            o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
-                            o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
-                    );
-                    const targetCombatantCount =
-                        clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) *
-                        (lightningReflexes ? 2 : 1);
-                    const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
-                    const tokenCombatantCount = tokenCombatants.length;
+                if (!actor) continue;
+                const lightningReflexes = actor?.items.find(
+                    (o) =>
+                        o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+                );
+                const targetCombatantCount =
+                    clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) * (lightningReflexes ? 2 : 1);
+                const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
+                const tokenCombatantCount = tokenCombatants.length;
 
-                    if (tokenCombatantCount < targetCombatantCount) {
-                        for (let i = 0; i < targetCombatantCount - tokenCombatantCount; i++) {
-                            toCreate.push(_combatant);
-                        }
-                        //await this.createEmbeddedDocuments("Combatant", toCreate);
-                        //await this.assignSegments(_tokenId);
-                        continue;
+                if (tokenCombatantCount < targetCombatantCount) {
+                    for (let i = 0; i < targetCombatantCount - tokenCombatantCount; i++) {
+                        toCreate.push({
+                            ...foundry.utils.deepClone(_combatant),
+                            _id: null,
+                            flags: {
+                                [game.system.id]: {
+                                    segment: HeroSystem6eCombat.getSegment(actor.system.characteristics.spd.value, i),
+                                },
+                            },
+                        });
                     }
-
-                    if (tokenCombatantCount > targetCombatantCount) {
-                        const _combatants = this.combatants.filter((o) => o.tokenId === _tokenId && o.actor);
-                        toDelete.push(
-                            ..._combatants.filter((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
-                        );
-                        // await this.deleteEmbeddedDocuments(
-                        //     "Combatant",
-                        //     toDelete.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
-                        // );
-                        //await this.assignSegments(_tokenId);
-                        continue;
-                    }
-
-                    // Add custom hero flags for segments and such
-                    // if (tokenCombatantCount === targetCombatantCount) {
-                    //     await this.assignSegments(_tokenId);
-                    // }
+                    continue;
                 }
+
+                if (tokenCombatantCount > targetCombatantCount) {
+                    const _combatants = this.combatants.filter((o) => o.tokenId === _tokenId && o.actor);
+                    toDelete.push(
+                        ..._combatants.filter((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
+                    );
+                    continue;
+                }
+
+                // Add custom hero flags for segments and such
+                // if (tokenCombatantCount === targetCombatantCount) {
+                //     await this.assignSegments(_tokenId);
+                // }
             }
 
             if (toCreate.length > 0) {
-                await this.createEmbeddedDocuments("Combatant", toCreate, {
-                    combatant: foundry.utils.deepClone(this.combatant),
-                });
+                await this.createEmbeddedDocuments("Combatant", toCreate);
             }
 
             if (toDelete.length > 0) {

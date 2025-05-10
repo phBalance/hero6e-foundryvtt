@@ -51,50 +51,52 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         // v13 does not call getData
         //console.log("getData", this);
 
-        const combat = this.viewed;
-        if (combat) {
-            let _combatant = null;
+        //const combat = this.viewed;
+        // if (combat) {
+        //     let _combatant = null;
 
-            // Remove extra combatants (a mini-migration)
-            if (HeroSystem6eCombatTracker.singleCombatantTracker) {
-                let firstDup = true;
-                for (let i = 0; i < combat.combatants.size; i++) {
-                    const dups = combat.combatants.contents.filter(
-                        (c) => c.tokenId === combat.combatants.contents[i].tokenId,
-                    );
-                    if (dups.length > 1) {
-                        if (firstDup) {
-                            await combat.update({ [`flags.${game.system.id}.segment`]: game.combat.current.segment });
-                            _combatant = foundry.utils.deepClone(game.combat.current);
-                            firstDup = false;
-                        }
-                        await combat.deleteEmbeddedDocuments(
-                            "Combatant",
-                            dups.slice(1).map((o) => o.id),
-                        );
-                    }
-                }
-            } else {
-                _combatant = foundry.utils.deepClone(game.combat.current);
-                const count = combat.combatants.size;
-                await combat.extraCombatants();
-                if (count == combat.combatants.size) {
-                    _combatant = null;
-                }
-            }
+        //     // Remove extra combatants (a mini-migration)
+        //     if (HeroSystem6eCombatTracker.singleCombatantTracker) {
+        //         let firstDup = true;
+        //         for (let i = 0; i < combat.combatants.size; i++) {
+        //             const dups = combat.combatants.contents.filter(
+        //                 (c) => c.tokenId === combat.combatants.contents[i].tokenId,
+        //             );
+        //             if (dups.length > 1) {
+        //                 if (firstDup) {
+        //                     await combat.update({ [`flags.${game.system.id}.segment`]: game.combat.current.segment });
+        //                     _combatant = foundry.utils.deepClone(game.combat.current);
+        //                     firstDup = false;
+        //                 }
+        //                 console.warn(`combatants mini migration`);
+        //                 await combat.deleteEmbeddedDocuments(
+        //                     "Combatant",
+        //                     dups.slice(1).map((o) => o.id),
+        //                 );
+        //             }
+        //         }
+        //     } else {
+        //         // Add extra combatants (a mini backwards migration)
+        //         const uniqueTokens = Array.from(new Set(combat.combatants.map((o) => o.tokenId)));
+        //         if (uniqueTokens.length === combat.combatants.size) {
+        //             console.warn(`combatants mini backwards migration`);
+        //             await combat.extraCombatants();
+        //             _combatant = null;
+        //         }
+        //     }
 
-            // Sanity check for tokenId
-            if (_combatant) {
-                if (combat.tokenId !== _combatant.tokenId || combat.turn !== _combatant.turn) {
-                    const newTurn = combat.turns.findIndex((t) => t.tokenId === _combatant.tokenId);
-                    try {
-                        await combat.update({ turn: newTurn });
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-            }
-        }
+        //     // Sanity check for tokenId
+        //     if (_combatant) {
+        //         if (combat.tokenId !== _combatant.tokenId || combat.turn !== _combatant.turn) {
+        //             const newTurn = combat.turns.findIndex((t) => t.tokenId === _combatant.tokenId);
+        //             try {
+        //                 await combat.update({ turn: newTurn });
+        //             } catch (e) {
+        //                 console.error(e);
+        //             }
+        //         }
+        //     }
+        // }
 
         const context = await super.getData(options);
         await this._prepareTrackerContext(context, options);
@@ -195,7 +197,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
             // Debug: assign them to segment 12 if we don't know what to do with them
             for (let [t, turn] of context.turns.entries()) {
-                console.log(t, turn);
+                console.debug(t, turn);
                 if (isNaN(turn.flags?.[game.system.id]?.segment)) {
                     context.segments[12].push(turn);
                 }

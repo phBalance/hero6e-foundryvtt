@@ -140,7 +140,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             combat ??= game.combats.viewed;
         }
         if (combat) {
-            console.log(
+            console.debug(
                 `createCombatants/before: ${combat.current.name} segment=${combat.current.segment} init=${combat.current.initiative}`,
                 combat,
             );
@@ -149,7 +149,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         await super.createCombatants(tokens, combat);
 
         combat ??= game.combats.viewed;
-        console.log(
+        console.debug(
             `createCombatants/after: ${combat.current.name} segment=${combat.current.segment} init=${combat.current.initiative}`,
             combat,
         );
