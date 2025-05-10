@@ -18,6 +18,8 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("appliesTo", appliesTo);
     Handlebars.registerHelper("checkInit", checkInit);
     Handlebars.registerHelper("objectNumKeys", objectNumKeys);
+    Handlebars.registerHelper("getFlag", getFlag);
+    Handlebars.registerHelper("getFlagKey2", getFlagKey2);
 }
 
 function indexOf(str, searchTerm) {
@@ -104,4 +106,22 @@ function checkInit(value) {
 
 function objectNumKeys(obj) {
     return Object.keys(obj).length;
+}
+
+function getFlag(obj, scope, key) {
+    try {
+        return obj.getFlag(scope, key);
+    } catch (e) {
+        console.error(e);
+    }
+    return null;
+}
+
+function getFlagKey2(obj, scope, key, key2) {
+    try {
+        return obj.getFlag(scope, key)?.[key2];
+    } catch (e) {
+        console.error(e);
+    }
+    return null;
 }

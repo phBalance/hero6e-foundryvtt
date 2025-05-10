@@ -62,6 +62,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         const data = super.getData();
+        data.gameSystemId = game.system.id;
         data.actor.flags[game.system.id] ??= {};
         if (data.actor.flags[game.system.id].uploading) {
             return data;
