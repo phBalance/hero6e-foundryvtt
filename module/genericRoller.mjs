@@ -4,7 +4,26 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 
 export class GenericRoller {
     static Initialize() {
-        Hooks.on("renderSidebar", async (_sidebar, html, _context, options) => {
+        // Hooks.on("renderSidebar", async (_sidebar, html, _context, options) => {
+        //     if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
+        //     if (options && !options.isFirstRender) return;
+
+        //     const $chat = $(html).find(".chat-form");
+        //     if ($chat.length === 0) {
+        //         console.warn(`unable to find dom element`);
+        //         return;
+        //     }
+        //     const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
+        //         css: `game-version-major-${game.version.split(".")[0]}`,
+        //     });
+        //     const $content = $(content);
+        //     $chat.after($content);
+
+        //     GenericRoller.activateListeners($content);
+        // });
+
+        // V13
+        Hooks.on("renderAbstractSidebarTab", async (_sidebar, html, _context, options) => {
             if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
             if (options && !options.isFirstRender) return;
 

@@ -1,4 +1,4 @@
-#chat .hero-generic-roller {
+.hero-generic-roller {
     align-items: center;
     flex: 0;
     border: 1px;
@@ -18,7 +18,7 @@
     }
 }
 
-#chat .hero-generic-roller.game-version-major-13 {
+.hero-generic-roller.game-version-major-13 {
     width: calc(100% - 12px);
     padding: var(--chat-message-spacing);
 }
