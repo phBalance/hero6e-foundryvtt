@@ -107,15 +107,29 @@ function objectNumKeys(obj) {
     return Object.keys(obj).length;
 }
 
-function getScopedFlagValue(obj, scope, key, ...args) {
+/**
+ *
+ * @param {object} obj
+ * @param {string} scope
+ * @param {string} key
+ * @param  {...string} args
+ * @returns
+ */
+function getScopedFlagValue(obj, scope, ...args) {
     try {
+        if (!obj || !scope) {
+            throw Error(`Invalid arguments ${obj} ${scope}`);
+        }
+
         // Handlebars will have an object at the end of the args. Ignore it and just get the strings we've passed in.
         const keys = args.filter((arg) => typeof arg === "string");
-        let keyValue = obj.getFlag(scope, key);
+
+        let keyValue = obj.flags[scope];
         keys.forEach((key) => {
             if (typeof keyValue !== "object") throw Error(`${keyValue} doesn't have property ${key}`);
             keyValue = keyValue[key];
         });
+
         return keyValue;
     } catch (e) {
         console.error(e);
