@@ -7,12 +7,15 @@ export function combatSkillLevelsForAttack(item) {
 
     if (!item.actor) return results;
 
+    const originalItem = fromUuidSync(item.system._active?.__originalUuid) || item;
+
     const cslSkills = item.actor.items.filter(
         (o) =>
             ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) &&
-            (o.system.ADDER || []).find(
-                (adder) =>
-                    (adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name) && adder.targetId === item.id,
+            o.adders.find((adder) =>
+                adder.targetId
+                    ? adder.targetId === originalItem?.id
+                    : adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name,
             ) &&
             o.isActive != false,
     );
