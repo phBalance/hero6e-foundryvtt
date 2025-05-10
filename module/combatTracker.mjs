@@ -124,7 +124,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             return;
         }
 
-        console.debug(context.turns);
+        context.gameSystemId = game.system.id;
 
         // Augment default turns
         if (!HeroSystem6eCombatTracker.singleCombatantTracker) {

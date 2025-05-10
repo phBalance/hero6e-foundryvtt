@@ -14,11 +14,9 @@
                         <img class="token-image" src="{{this.img}}" alt="{{this.name}}" loading="lazy"/>
                     {{/unless}}
                     <div class="token-name">
-                        <strong>{{this.name}} 
-                            {{!-- [{{this.flags.hero6efoundryvttv2.turnNumber}}] --}}
-                        </strong>
-                        {{#if this.flags.hero6efoundryvttv2.lightningReflexes.levels}}
-                            <strong title="Lightning Reflexes">LR {{this.flags.hero6efoundryvttv2.lightningReflexes.name}}</strong>
+                        <strong>{{this.name}}</strong>
+                        {{#if getFlagKey2 this @root/gameSystemId 'lightningReflexes' 'levels'}}
+                            <strong title="Lightning Reflexes">LR {{getFlagKey2 this @root/gameSystemId 'lightningReflexes' 'name'}}</strong>
                         {{else}}
                             <div class="combatant-controls">
                                 {{#if @root/user.isGM}}

@@ -16,25 +16,25 @@
                     <div class="tag">{{this}}</div>
                 {{/each}} --}}
 
-                {{#if this.flags.hero6efoundryvttv2.XMLID}}
-                    <div class="tag">{{this.flags.hero6efoundryvttv2.XMLID}}</div>
+                {{#if (getFlag this gameSystemId 'XMLID')}}
+                    <div class="tag">{{getFlag this gameSystemId 'XMLID'}}</div>
                 {{else if this.parent.system.XMLID}}
                     <div class="tag">{{this.parent.system.XMLID}}</div>
                 {{/if}}
             </div>
             
-            {{#if this.flags.hero6efoundryvttv2.label}}
-                {{#if (ne this.flags.hero6efoundryvttv2.label "None")}}
+            {{#if (getFlag this gameSystemId 'label')}}
+                {{#if (ne (getFlag this gameSystemId 'label') "None")}}
                 <div class="duration">
-                    Duration: {{this.flags.hero6efoundryvttv2.label}}
+                    Duration: {{getFlag this gameSystemId 'label'}}
                 </div>
                 {{/if}}
             {{/if}}
 
-            {{#if this.flags.hero6efoundryvttv2.target}}
+            {{#if (getFlag this gameSystemId 'target')}}
             <div class="target">
 
-                Target: {{this.flags.hero6efoundryvttv2.targetDisplay}}
+                Target: {{getFlag this gameSystemId 'targetDisplay'}}
             </div>
             {{/if}}
 

@@ -44,6 +44,7 @@ export class EffectsPanel extends Application {
 
         try {
             const context = await super.getData(options);
+            context.gameSystemId = game.system.id;
             context.effects = [];
 
             for (const ae of foundry.utils.deepClone(this.actor?.appliedEffects)) {
