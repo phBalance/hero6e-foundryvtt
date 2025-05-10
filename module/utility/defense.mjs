@@ -161,8 +161,8 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
                         ...actorDefenses.defenseTags,
                         ...createDefenseProfile(ae, attackItem, parseInt(-change.value), {
                             ...newOptions,
-                            title: ae.flags?.XMLID,
-                            shortDesc: `${ae.flags?.XMLID}: ${ae.name}`,
+                            title: ae.flags?.[game.system.id]?.XMLID,
+                            shortDesc: `${ae.flags?.[game.system.id]?.XMLID}: ${ae.name}`,
                         }),
                     ];
                 }
@@ -173,8 +173,8 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
                         ...actorDefenses.defenseTags,
                         ...createDefenseProfile(ae, attackItem, parseInt(change.value), {
                             ...newOptions,
-                            title: ae.flags?.XMLID,
-                            shortDesc: `${ae.flags?.XMLID}: ${ae.name}`,
+                            title: ae.flags?.[game.system.id]?.XMLID,
+                            shortDesc: `${ae.flags?.[game.system.id]?.XMLID}: ${ae.name}`,
                         }),
                     ];
                 }

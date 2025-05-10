@@ -697,7 +697,7 @@ export class HeroSystem6eActor extends Actor {
                     ],
                     origin: this.uuid,
                     flags: {
-                        [`${game.system.id}`]: {
+                        [game.system.id]: {
                             takeRecovery: true,
                         },
                         duration: {
@@ -1112,7 +1112,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         const name = `Encumbered ${maxStrengthPct}%`;
-        const prevActiveEffects = this.effects.filter((o) => o.flags?.encumbrance);
+        const prevActiveEffects = this.effects.filter((o) => o.flags?.[game.system.id]?.encumbrance);
 
         // There should only be 1 encumbered effect, but with async loading we may have more
         // Use the first one, get rid of the rest
@@ -1120,7 +1120,7 @@ export class HeroSystem6eActor extends Actor {
             await prevActiveEffects[a].delete();
         }
         const prevActiveEffect = prevActiveEffects?.[0];
-        if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
+        if (dcvDex < 0 && prevActiveEffect?.flags?.[game.system.id]?.dcvDex != dcvDex) {
             const activeEffect = {
                 name: name,
                 id: "encumbered",
@@ -1174,7 +1174,7 @@ export class HeroSystem6eActor extends Actor {
                 ],
                 origin: this.uuid,
                 flags: {
-                    [`${game.system.id}`]: { dcvDex: dcvDex, encumbrance: true },
+                    [game.system.id]: { dcvDex: dcvDex, encumbrance: true },
                 },
             };
 
@@ -1225,7 +1225,7 @@ export class HeroSystem6eActor extends Actor {
             .reduce((accum, currItem) => accum + parseInt(currItem.system.LEVELS), 0);
         const minStr = massMultiplier * 5;
 
-        const prevStr0ActiveEffect = this.effects.find((effect) => effect.flags?.str0);
+        const prevStr0ActiveEffect = this.effects.find((effect) => effect.flags?.[game.system.id]?.str0);
         if (this.system.characteristics.str?.value <= minStr && !prevStr0ActiveEffect) {
             const str0ActiveEffect = {
                 name: "STR0",
@@ -1265,7 +1265,7 @@ export class HeroSystem6eActor extends Actor {
                 ],
                 origin: this.uuid,
                 flags: {
-                    [`${game.system.id}`]: {
+                    [game.system.id]: {
                         str0: true,
                     },
                 },
@@ -1747,10 +1747,11 @@ export class HeroSystem6eActor extends Actor {
             }
         }
         if (this.id) {
-            for (let prop of Object.keys(this.flags).filter((f) => f !== game.system.id)) {
+            // TODO: This shouldn't be required as we have migration handling this.
+            for (const prop of Object.keys(this.flags).filter((f) => f !== game.system.id)) {
                 changes[`flags.-=${prop}`] = null;
             }
-            for (let prop of Object.keys(this.flags[game.system.id]).filter((f) => f !== "uploading")) {
+            for (const prop of Object.keys(this.flags[game.system.id]).filter((f) => f !== "uploading")) {
                 changes[`flags.${game.system.id}-=${prop}`] = null;
             }
 

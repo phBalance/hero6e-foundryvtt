@@ -327,7 +327,7 @@ function _createNewAdjustmentEffect(options) {
             seconds: _determineEffectDurationInSeconds(attackItem, rawActivePointsDamage),
         },
         flags: {
-            [`${game.system.id}`]: {
+            [game.system.id]: {
                 type: "adjustment",
                 version: 3,
                 adjustmentActivePoints: 0,

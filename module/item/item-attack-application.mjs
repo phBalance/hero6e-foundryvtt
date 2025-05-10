@@ -800,7 +800,7 @@ export class ItemAttackFormApplication extends FormApplication {
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {
-                [`${game.system.id}`]: {
+                [game.system.id]: {
                     purpose: "AoE",
                     itemId: this.data.originalItem.id,
                     item,
