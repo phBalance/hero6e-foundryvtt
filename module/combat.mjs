@@ -245,7 +245,7 @@ export class HeroSystem6eCombat extends Combat {
                     const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
                     let update = {
                         _id: _combatant.id,
-                        initiative: _combatant.flags[game.system.id]?.initiative,
+                        initiative: _combatant.flags[game.system.id]?.initiative || _combatant.initiative,
                         [`flags.${game.system.id}.segment`]: segment,
                         [`flags.${game.system.id}.spd`]: spd,
                         [`flags.${game.system.id}.initiativeTooltip`]: `${
