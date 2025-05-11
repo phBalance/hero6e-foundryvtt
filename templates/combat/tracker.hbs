@@ -60,7 +60,7 @@
 
                     <div class="token-initiative">
                         {{#if this.hasRolled}}
-                            <span class="initiative" data-tooltip="{{{this.initiativeTooltip}}}" >{{this.initiative}} {{this.initiativeCharacteristic}}</span>
+                            <span class="initiative" data-tooltip="{{{getScopedFlagValue this @root/gameSystemId 'initiativeTooltip'}}}" >{{this.initiative}}</span>
                         {{/if}}
                     </div>
                 </li>
