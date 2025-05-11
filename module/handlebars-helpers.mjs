@@ -111,8 +111,7 @@ function objectNumKeys(obj) {
  *
  * @param {object} obj
  * @param {string} scope
- * @param {string} key
- * @param  {...string} args
+ * @param  {...string} args - 1 or more strings defining the property/key to examine
  * @returns
  */
 function getScopedFlagValue(obj, scope, ...args) {
