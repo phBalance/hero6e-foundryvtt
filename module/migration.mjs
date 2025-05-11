@@ -196,6 +196,8 @@ async function flagScopes(actor) {
         if (effectUpdates.length > 0) {
             await actor.updateEmbeddedDocuments("ActiveEffect", effectUpdates);
         }
+
+        // NOTE: we are not upgrading combat & combatants (see warning in 4.1.0 changelog)
     } catch (e) {
         console.error(e);
     }
