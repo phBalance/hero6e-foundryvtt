@@ -98,7 +98,7 @@ export class Attack {
             console.warn("Effect would have no effect:", cvModifier);
             return;
         }
-        let activeEffect = {
+        const activeEffect = {
             label,
             icon,
             changes,
@@ -107,7 +107,7 @@ export class Attack {
                 seconds,
             },
             flags: {
-                [`${game.system.id}`]: {
+                [game.system.id]: {
                     nextPhase: true,
                     actionEffect: true,
                 },

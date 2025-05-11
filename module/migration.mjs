@@ -160,14 +160,14 @@ export async function migrateWorld() {
 }
 
 // V13 requires scopes on all flags. Scoped flags work just fine in V12.
-// While not absultely necessasry, we will move all unscoped flags
-// into the 'hero6efoundryvttv2' scope so any ongoing effects/statuses/movementState/etc don't get lost.
+// While not absolutely necessasry, we will move all unscoped flags
+// into the game.system.id (typically 'hero6efoundryvttv2') scope so any ongoing effects/statuses/movementState/etc don't get lost.
 async function flagScopes(actor) {
     try {
         if (!actor) return false;
 
         const actorUpdates = [];
-        for (let prop of Object.keys(actor.flags).filter((f) => f !== game.system.id)) {
+        for (const prop of Object.keys(actor.flags).filter((f) => f !== game.system.id)) {
             actorUpdates[`flags.-=${prop}`] = null;
             actorUpdates[`flags.${game.system.id}.${prop}`] = actor.flags[prop];
         }
@@ -177,7 +177,7 @@ async function flagScopes(actor) {
 
         const itemUpdates = [];
         for (const item of actor.items.filter((i) => Object.keys(i.flags).length > 0)) {
-            for (let prop of Object.keys(item.flags).filter((f) => f !== game.system.id)) {
+            for (const prop of Object.keys(item.flags).filter((f) => f !== game.system.id)) {
                 itemUpdates[`flags.-=${prop}`] = null;
                 itemUpdates[`flags.${game.system.id}.${prop}`] = item.flags[prop];
             }
@@ -188,7 +188,7 @@ async function flagScopes(actor) {
 
         const effectUpdates = [];
         for (const effect of actor.effects.filter((i) => Object.keys(i.flags).length > 0)) {
-            for (let prop of Object.keys(effect.flags).filter((f) => f !== game.system.id)) {
+            for (const prop of Object.keys(effect.flags).filter((f) => f !== game.system.id)) {
                 effectUpdates[`flags.-=${prop}`] = null;
                 effectUpdates[`flags.${game.system.id}.${prop}`] = effect.flags[prop];
             }

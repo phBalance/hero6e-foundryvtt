@@ -406,7 +406,9 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     }
 
     // Applied effects
-    for (const ae of item.actor?.appliedEffects.filter((ae) => !ae.disabled && ae.flags?.target === item.uuid) || []) {
+    for (const ae of item.actor?.appliedEffects.filter(
+        (ae) => !ae.disabled && ae.flags?.[game.system.id]?.target === item.uuid,
+    ) || []) {
         for (const change of ae.changes.filter(
             (change) => change.key === "system.value" && change.value !== 0 && change.mode === 2,
         )) {

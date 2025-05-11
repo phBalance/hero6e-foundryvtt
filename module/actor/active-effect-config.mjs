@@ -15,7 +15,9 @@ export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
 
     async getData() {
         const context = await super.getData();
+
         context.gameSystemId = game.system.id;
+
         try {
             for (let i = 0; i < context.data.changes.length; i++) {
                 context.data.changes[i] = { ...context.data.changes[i], ...context.data.system.changes?.[i] };
@@ -43,6 +45,7 @@ export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
         } catch (e) {
             console.error(e);
         }
+
         return context;
     }
 

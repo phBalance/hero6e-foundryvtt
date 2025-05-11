@@ -60,11 +60,13 @@ function addOcvTraitToChanges(maneuverOcvChange) {
  */
 function buildManeuverNextPhaseFlags(item) {
     return {
-        type: "maneuverNextPhaseEffect",
-        itemUuid: item.uuid,
-        toggle: item.isActivatable(),
-        dehydratedManeuverItem: dehydrateAttackItem(item),
-        dehydratedManeuverActorUuid: item.actor.uuid,
+        [game.system.id]: {
+            type: "maneuverNextPhaseEffect",
+            itemUuid: item.uuid,
+            toggle: item.isActivatable(),
+            dehydratedManeuverItem: dehydrateAttackItem(item),
+            dehydratedManeuverActorUuid: item.actor.uuid,
+        },
     };
 }
 

@@ -30,10 +30,6 @@
             {{editor descriptionHTML target="description" button=false editable=editable engine="prosemirror" collaborate=false}}
         </div>
 
-        {{!-- <div class="description">
-            {{data.description}}
-        </div> --}}
-
         <div class="form-group">
             <label>{{ localize "EFFECT.Disabled" }}</label>
             <input type="checkbox" name="disabled" {{ checked data.disabled }}/>
@@ -77,23 +73,23 @@
             </div>
         </div>
 
-        {{! Custom HeroSystem Flags--}}
+        {{!-- Custom HeroSystem Flags --}}
         <div class="form-group">
              <label>{{ localize "EFFECT.XMLID" }}</label>
             <div class="form-fields">
-                <input type="text" name="flags.{{gameSystemId}}.XMLID" value="{{getFlag data gameSystemId 'XMLID'}}" disabled/>
+                <input type="text" name="{{concat "flags." @root/gameSystemId ".XMLID"}}" value="{{ getScopedFlagValue data @root/gameSystemId "XMLID" }}" disabled/>
             </div>
         </div>
         <div class="form-group">
              <label>{{ localize "EFFECT.key" }}</label>
             <div class="form-fields">
-                <input type="text" name="flags.{{gameSystemId}}.key" value="{{getFlag data gameSystemId 'key'}}" disabled/>
+                <input type="text" name="{{concat "flags." @root/gameSystemId ".key"}}" value="{{ getScopedFlagValue data @root/gameSystemId "key" }}" disabled/>
             </div>
         </div>
         <div class="form-group">
              <label>{{ localize "EFFECT.adjustmentActivePoints" }}</label>
             <div class="form-fields">
-                <input type="text" name="flags.{{gameSystemId}}.adjustmentActivePoints" value="{{getFlag data gameSystemId 'adjustmentActivePoints'}}" disabled/>
+                <input type="text" name="{{concat "flags." @root/gameSystemId ".adjustmentActivePoints"}}" value="{{ getScopedFlagValue data @root/gameSystemId "adjustmentActivePoints" }}" disabled/>
             </div>
         </div>
         <div class="form-group">
@@ -105,19 +101,19 @@
                 <div class="form-group">
              <label>{{ localize "EFFECT.target" }}</label>
             <div class="form-fields">
-                <input type="text" name="flags.{{gameSystemId}}.target" value="{{getFlag data gameSystemId 'target'}}" disabled/>
+                <input type="text" name="{{concat "flags." @root/gameSystemId ".target"}}" value="{{ getScopedFlagValue data @root/gameSystemId "target" }}" disabled/>
             </div>
         </div>
         <div class="form-group">
              <label>{{ localize "EFFECT.targetDisplay" }}</label>
             <div class="form-fields">
-                <input type="text" name="flags.{{gameSystemId}}.targetDisplay" value="{{getFlag data gameSystemId 'targetDisplay'}}" disabled/>
+                <input type="text" name="{{concat "flags." @root/gameSystemId ".targetDisplay"}}" value="{{ getScopedFlagValue data @root/gameSystemId "targetDisplay" }}" disabled/>
             </div>
         </div>
                 <div class="form-group">
              <label>{{ localize "EFFECT.type" }}</label>
             <div class="form-fields">
-                <input type="text" name="flags.{{gameSystemId}}.type" value="{{getFlag data gameSystemId 'type'}}" disabled/>
+                <input type="text" name="{{concat "flags." @root/gameSystemId ".type"}}" value="{{ getScopedFlagValue data @root/gameSystemId "type" }}" disabled/>
             </div>
         </div>
 

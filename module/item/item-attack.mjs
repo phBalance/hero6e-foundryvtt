@@ -429,7 +429,7 @@ export async function doAoeActionToHit(item, options) {
                     seconds: seconds,
                 },
                 flags: {
-                    [`${game.system.id}`]: {
+                    [game.system.id]: {
                         nextPhase: true,
                     },
                 },
@@ -798,7 +798,7 @@ async function doSingleTargetActionToHit(item, options) {
                     seconds: seconds,
                 },
                 flags: {
-                    [`${game.system.id}`]: {
+                    [game.system.id]: {
                         nextPhase: true,
                     },
                 },
@@ -1778,7 +1778,9 @@ export async function _onRollDamage(event) {
     for (const id of toHitData.targetIds.split(",")) {
         const token = canvas.scene.tokens.get(id);
         if (token) {
-            const entangleAE = token.actor?.temporaryEffects?.find((o) => o.flags?.XMLID === "ENTANGLE");
+            const entangleAE = token.actor?.temporaryEffects?.find(
+                (o) => o.flags[game.system.id]?.XMLID === "ENTANGLE",
+            );
             const targetToken = {
                 tokenId: id,
                 name: token.name,
@@ -2120,8 +2122,8 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
                 const ae = token.actor?.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
                 if (ae) {
                     const { item: entangle } = rehydrateAttackItem(
-                        ae.flags.dehydratedEntangleItem,
-                        fromUuidSync(ae.flags.dehydratedEntangleActorUuid),
+                        ae.flags[game.system.id].dehydratedEntangleItem,
+                        fromUuidSync(ae.flags[game.system.id].dehydratedEntangleActorUuid),
                     );
                     if (!entangle) {
                         console.error(ae);
@@ -2240,7 +2242,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     // Target ENTANGLE
-    const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
+    const entangleAE = token.actor.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
     if (entangleAE) {
         // Targeting ENTANGLE based on attack-application checkbox
         let targetEntangle = targetToken.targetEntangle;
@@ -2715,7 +2717,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
         description: item.system.description,
         flags: {
-            [`${game.system.id}`]: {
+            [game.system.id]: {
                 entangleDefense,
                 XMLID: item.system.XMLID,
                 source: item.actor.name,
@@ -3225,7 +3227,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
                     seconds: senseGroup.bodyDamage,
                 },
                 flags: {
-                    [`${game.system.id}`]: {
+                    [game.system.id]: {
                         bodyDamage: senseGroup.bodyDamage,
                         XMLID: senseAffectingItem.system.XMLID,
                         source: senseAffectingItem.actor.name,
@@ -3561,7 +3563,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         // Target is in the air -1d6
         // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
         //       when more than 0m off the ground? This same effect should also be considered for gliding.
-        const activeMovement = options.targetToken?.actor?.flags?.activeMovement;
+        const activeMovement = options.targetToken?.actor?.flags?.[game.system.id]?.activeMovement;
         if (["flight", "gliding"].includes(activeMovement)) {
             // Double check to make sure FLIGHT or GLIDING is still on
             if (
@@ -3573,7 +3575,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
                 knockbackTags.push({
                     value: "-1d6KB",
                     name: "target is in the air",
-                    title: `Knockback Modifier ${options.targetToken?.actor?.flags?.activeMovement}`,
+                    title: `Knockback Modifier ${options.targetToken?.actor?.flags?.[game.system.id]?.activeMovement}`,
                 });
             } else {
                 console.warn(`${activeMovement} selected but that power is not active.`);
