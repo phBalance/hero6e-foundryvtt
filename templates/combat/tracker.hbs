@@ -15,8 +15,8 @@
                     {{/unless}}
                     <div class="token-name">
                         <strong>{{this.name}}</strong>
-                        {{#if getFlagKey2 this @root/gameSystemId 'lightningReflexes' 'levels'}}
-                            <strong title="Lightning Reflexes">LR {{getFlagKey2 this @root/gameSystemId 'lightningReflexes' 'name'}}</strong>
+                        {{#if (getScopedFlagValue this @root/gameSystemId 'lightningReflexes' 'levels')}}
+                            <strong title="Lightning Reflexes">LR {{getScopedFlagValue this @root/gameSystemId 'lightningReflexes' 'name'}}</strong>
                         {{else}}
                             <div class="combatant-controls">
                                 {{#if @root/user.isGM}}

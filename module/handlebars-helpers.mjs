@@ -125,8 +125,8 @@ function getScopedFlagValue(obj, scope, ...args) {
 
         let keyValue = obj.flags[scope];
         keys.forEach((key) => {
-            if (typeof keyValue !== "object") throw Error(`${keyValue} doesn't have property ${key}`);
-            keyValue = keyValue[key];
+            // Silently swallow undefined and null dereferencing
+            keyValue = keyValue == null ? keyValue : keyValue[key];
         });
 
         return keyValue;
