@@ -196,8 +196,8 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             }
 
             // Debug: assign them to segment 12 if we don't know what to do with them
-            for (let [t, turn] of context.turns.entries()) {
-                console.debug(t, turn);
+            for (const [, turn] of context.turns.entries()) {
+                // console.debug(t, turn);
                 if (isNaN(turn.flags?.[game.system.id]?.segment)) {
                     context.segments[12].push(turn);
                 }

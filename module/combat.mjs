@@ -488,7 +488,8 @@ export class HeroSystem6eCombat extends Combat {
 
         // Save some properties for future support for rewinding combat tracker
         // TODO: Include charges for various items
-        combatant.flags[game.system.id].heroHistory ||= {};
+        combatant.flags[game.system.id] ??= {};
+        combatant.flags[game.system.id].heroHistory ??= {};
         if (combatant.actor && this.round && combatant.flags[game.system.id].segment) {
             combatant.flags[game.system.id].heroHistory[
                 `r${String(this.round).padStart(2, "0")}s${String(combatant.flags[game.system.id].segment).padStart(2, "0")}`

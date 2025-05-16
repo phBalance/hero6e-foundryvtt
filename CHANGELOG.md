@@ -1,13 +1,12 @@
 # Releases
 
-## Version 4.1.0 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.0 20250511 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Improved V13 support. We do not recommend upgrading FoundryVTT to v13 yet as there are [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility).
-  - Fixed V13 Combat Tracker [#2269](https://github.com/dmdorman/hero6e-foundryvtt/issues/2269)
-  - Fixed V13 Generic Roller [#2267](https://github.com/dmdorman/hero6e-foundryvtt/issues/2267)
+- WARNING: Finish any combat before upgrading. If you have problems you can end all combats and start them anew.
+- Improved V13 support. We DO NOT RECOMMEND upgrading FoundryVTT to v13 yet as there are [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility).
 - Fixed Combat Skill Levels where they were not applied during an attack. [#2287](https://github.com/dmdorman/hero6e-foundryvtt/issues/2287)
 
-## Version 4.0.28 20250504 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.28 20250504
 
 - Fixed combat tracker issue when changing scenes or combats. [#2261](https://github.com/dmdorman/hero6e-foundryvtt/issues/2261), [#2262](https://github.com/dmdorman/hero6e-foundryvtt/issues/2262)
 
