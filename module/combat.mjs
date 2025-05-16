@@ -261,7 +261,7 @@ export class HeroSystem6eCombat extends Combat {
                                 lightningReflexes.system.LEVELS
                             }LR`,
                             initiative:
-                                _combatant.flags[game.system.id]?.initiative +
+                                (_combatant.flags[game.system.id]?.initiative || _combatant.initiative) +
                                 parseInt(lightningReflexes?.system.LEVELS || 0),
                             [`flags.${game.system.id}.lightningReflexes.levels`]: parseInt(
                                 lightningReflexes.system.LEVELS,
