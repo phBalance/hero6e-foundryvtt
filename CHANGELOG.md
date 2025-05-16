@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.1.1 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.1 20250516 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Lightning Reflexes Fix [#2306](https://github.com/dmdorman/hero6e-foundryvtt/issues/2306)
 
