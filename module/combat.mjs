@@ -282,8 +282,8 @@ export class HeroSystem6eCombat extends Combat {
                     if (
                         update.initiative != _combatant.initiative ||
                         update[`flags.${game.system.id}.lightningReflexes.name`] !=
-                            _combatant.flags?.[game.system.id].lightningReflexes?.name ||
-                        update[`flags.${game.system.id}.segment`] != _combatant.flags?.[game.system.id].segment
+                            _combatant.flags?.[game.system.id]?.lightningReflexes?.name ||
+                        update[`flags.${game.system.id}.segment`] != _combatant.flags?.[game.system.id]?.segment
                     ) {
                         updates.push(update);
                     }
