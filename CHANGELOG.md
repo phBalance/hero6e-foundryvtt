@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.1.0 20250511 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.1 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Lightning Reflexes Fix [#2306](https://github.com/dmdorman/hero6e-foundryvtt/issues/2306)
+
+## Version 4.1.0 20250511
 
 - WARNING: Finish any combat before upgrading. If you have problems you can end all combats and start them anew.
 - Improved V13 support. We DO NOT RECOMMEND upgrading FoundryVTT to v13 yet as there are [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility).
