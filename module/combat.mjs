@@ -34,7 +34,9 @@ export class HeroSystem6eCombat extends Combat {
 
             // Produce an initiative roll for the Combatant
             const characteristic = combatant.actor?.system?.initiativeCharacteristic || "dex";
-            const initValue = combatant.actor?.system.characteristics[characteristic]?.value || 0;
+            const initValue =
+                (combatant.actor?.system.characteristics[characteristic]?.value || 0) +
+                parseInt(combatant.flags.hero6efoundryvttv2?.lightningReflexes?.levels || 0);
             if (
                 combatant.flags[game.system.id]?.initiative != initValue ||
                 combatant.flags[game.system.id]?.initiativeCharacteristic != characteristic
