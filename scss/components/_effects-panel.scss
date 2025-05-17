@@ -206,3 +206,21 @@
         width: 48px;
     }
 }
+
+// This really should be moved to #ui-right instead of #ui-top
+// The wider the browser dev tools is, the more pronounced the
+// formatting issue is.
+#effects-panel.game-version-major-13 {
+    right: 0px;
+    position: relative;
+    overflow: visible;
+    .effect-item {
+        .effect-info {
+            max-width: inherit;
+            //padding: 0.25em 0.5rem;
+            table {
+                margin: 0;
+            }
+        }
+    }
+}
