@@ -241,6 +241,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 const power = item.system.POWER.find((o) => o.XMLID === "ENDURANCERESERVEREC");
                 data.rec = parseInt(power?.LEVELS) || 0;
             }
+
+            // Debugging
+            window.item = item;
         } catch (e) {
             console.error(e);
         }
