@@ -208,12 +208,13 @@
 }
 
 #effects-panel.game-version-major-13 {
-    right: 0px;
     position: relative;
     overflow: visible;
+
     .effect-item {
         .effect-info {
             max-width: inherit;
+
             table {
                 margin: 0;
             }
