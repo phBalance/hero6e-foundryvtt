@@ -206,3 +206,18 @@
         width: 48px;
     }
 }
+
+#effects-panel.game-version-major-13 {
+    position: relative;
+    overflow: visible;
+
+    .effect-item {
+        .effect-info {
+            max-width: inherit;
+
+            table {
+                margin: 0;
+            }
+        }
+    }
+}
