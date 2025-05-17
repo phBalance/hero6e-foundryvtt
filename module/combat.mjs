@@ -660,7 +660,7 @@ export class HeroSystem6eCombat extends Combat {
             }
 
             // TODO: This should be END per turn calculated on the first phase of action for the actor.
-            const encumbered = combatant.actor.effects.find((effect) => effect.flags[game.system.id].encumbrance);
+            const encumbered = combatant.actor.effects.find((effect) => effect.flags?.[game.system.id]?.encumbrance);
             if (encumbered) {
                 const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.[game.system.id]?.dcvDex)) - 1;
                 if (endCostPerTurn > 0) {
