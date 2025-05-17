@@ -168,15 +168,15 @@ Hooks.once("init", async function () {
     GenericRoller.Initialize();
 
     // Insert EffectsPanel template into DOM tree so it can render
-    if (game.version.split(".")[0] === 12) {
+    if (parseInt(game.version.split(".")[0] || 0) === 12) {
         // Template element for effects-panel
-        const uiTop = document.querySelector("#ui-top");
-        if (uiTop) {
+        const ui = document.querySelector("#ui-top");
+        if (ui) {
             const template = document.createElement("template");
             template.setAttribute("id", "hero-effects-panel");
-            uiTop?.insertAdjacentElement("afterend", template);
+            ui.insertAdjacentElement("afterend", template);
         }
-    } else if (game.version.split(".")[0] > 12) {
+    } else if (parseInt(game.version.split(".")[0] || 0) > 12) {
         // Template element for effects-panel
         const ui = document.querySelector("#ui-right-column-1");
         if (ui) {
@@ -184,16 +184,6 @@ Hooks.once("init", async function () {
             template.setAttribute("id", "hero-effects-panel");
             ui?.insertAdjacentElement("afterend", template);
         }
-
-        // Hooks.on("renderSidebar", (_sidebar, html, _context, options) => {
-        //     if (!options.isFirstRender) return;
-        //     const uiElement = document.querySelector("section#ui-right");
-        //     if (uiElement) {
-        //         const template = document.createElement("template");
-        //         template.setAttribute("id", "hero-effects-panel");
-        //         uiElement.append(`<article id="effects-panel2" class="game-version-major-13">effects<article>`);
-        //     }
-        // });
     }
 
     game[HEROSYS.module] ??= {};
