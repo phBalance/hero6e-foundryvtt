@@ -18,6 +18,7 @@ import {
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
     whisperUserTargetsForActor,
+    tokenEducatedGuess,
 } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -679,6 +680,97 @@ export class HeroSystem6eItem extends Item {
                 return ui.notifications.error(`${item.name} ${resourceError}`);
             } else if (resourceWarning) {
                 return ui.notifications.warn(`${item.name} ${resourceWarning}`);
+            }
+
+            // Make sure VPP pool is large enough
+            const VPP = item.parentItem?.system.XMLID === "VPP" ? item.parentItem : null;
+            if (!item.isActive && VPP) {
+                // Pool points (LEVELS) is the total amount of Real
+                // Points’ worth of powers and abilities the character
+                // can create with his VPP at any one time.
+                const currentPool = VPP.childItems
+                    .filter((i) => i.system.active)
+                    .reduce((accumulator, _item) => accumulator + _item.system.realCost, 0);
+                if (currentPool + parseInt(item.system?.realCost || 0) > parseInt(VPP.system.LEVELS || 0)) {
+                    if (overrideCanAct) {
+                        const token = tokenEducatedGuess({
+                            item: this,
+                        });
+                        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+                        //speaker.alias = actor.name;
+                        const chatData = {
+                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            author: game.user._id,
+                            content: `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.`,
+                            speaker: speaker,
+                            whisper: whisperUserTargetsForActor(this.actor),
+                        };
+                        await ChatMessage.create(chatData);
+                    } else {
+                        const token = tokenEducatedGuess({
+                            item: this,
+                        });
+                        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+                        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+                        //speaker.alias = actor.name;
+                        const chatData = {
+                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            author: game.user._id,
+                            content:
+                                `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.` +
+                                `Use ${overrideKeyText} to override.`,
+                            speaker: speaker,
+                            whisper: whisperUserTargetsForActor(this.actor),
+                        };
+
+                        await ChatMessage.create(chatData);
+                        console.log(item, VPP, currentPool);
+                        return ui.notifications.error(
+                            `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.`,
+                        );
+                    }
+                }
+
+                const controlCost = parseInt(VPP.findModsByXmlid("CONTROLCOST")?.LEVELS || 0);
+                if (parseInt(item.system?.activePoints || 0) > controlCost) {
+                    console.log(item, VPP, controlCost);
+                    if (overrideCanAct) {
+                        const token = tokenEducatedGuess({
+                            item: this,
+                        });
+                        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+                        //speaker.alias = actor.name;
+                        const chatData = {
+                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            author: game.user._id,
+                            content: `${item.name} was activated even though it exceed the ${VPP.name} control cost`,
+                            speaker: speaker,
+                            whisper: whisperUserTargetsForActor(this.actor),
+                        };
+                        await ChatMessage.create(chatData);
+                    } else {
+                        const token = tokenEducatedGuess({
+                            item: this,
+                        });
+                        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+                        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+                        //speaker.alias = actor.name;
+                        const chatData = {
+                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            author: game.user._id,
+                            content:
+                                `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP. ` +
+                                `Use ${overrideKeyText} to override.`,
+                            speaker: speaker,
+                            whisper: whisperUserTargetsForActor(this.actor),
+                        };
+
+                        await ChatMessage.create(chatData);
+                        return ui.notifications.error(
+                            `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP.`,
+                        );
+                    }
+                }
             }
 
             const success = await requiresASkillRollCheck(this, event);

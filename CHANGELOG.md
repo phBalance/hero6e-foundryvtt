@@ -5,6 +5,7 @@
 - Improved V13 support. [#2295](https://github.com/dmdorman/hero6e-foundryvtt/issues/2295) [#2268](https://github.com/dmdorman/hero6e-foundryvtt/issues/2268)
 - Fixed and Improved Combat Tracker sorting. [#2318](https://github.com/dmdorman/hero6e-foundryvtt/issues/2318)
 - New setting to default initiative characteristic to DEX, even when EGO > DEX.
+- Variable Power Pool improvments. [#2329](https://github.com/dmdorman/hero6e-foundryvtt/issues/2329)
 
 ## Version 4.1.2 20250516
 
