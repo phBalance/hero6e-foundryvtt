@@ -12,8 +12,11 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         try {
             event.preventDefault();
             event.stopPropagation();
-            const li = event.currentTarget.closest(".directory-item");
-            const targetFolderId = li ? li.dataset.folderId : null;
+            //const li = event.currentTarget.closest(".directory-item");
+            //const targetFolderId = li ? li.dataset.folderId : null;
+            target = target || event.target;
+            const { folderId } = target.closest(".directory-item")?.dataset ?? {};
+
             const types = CONST.COMPENDIUM_DOCUMENT_TYPES.map((documentName) => {
                 return {
                     value: documentName,
@@ -21,74 +24,129 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                 };
             });
             game.i18n.sortObjects(types, "label");
-            const folders = this.collection._formatFolderSelectOptions();
-            let html = await renderTemplate("templates/sidebar/compendium-create.html", {
-                types,
-                folders,
-                folder: targetFolderId,
-                hasFolders: folders.length >= 1,
-            });
+            const folders = game.packs._formatFolderSelectOptions();
+
+            let html = await renderTemplate(
+                `templates/sidebar/compendium-create.${game.version.split(".")[0] === "12" ? "html" : "hbs"}`,
+                {
+                    types,
+                    folders,
+                    folder: folderId,
+                    hasFolders: folders.length,
+                },
+            );
             html = html.replace(
                 "Document.</p>",
                 `Document.</p><label>Hero Designer Prefab</label><input name="upload" class="upload" type="file" accept=".hdp"></input>`,
             );
 
-            function handleRender(html) {
-                html.on("change", "input.upload", (event) => {
-                    console.log(event, event.target.files[0]);
-                    const reader = new FileReader();
-                    reader.onload = async function (event) {
-                        const contents = event.target.result;
+            if (game.version.split(".")[0] !== "12") {
+                const { DialogV2 } = foundry.applications.api;
 
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(contents, "text/xml");
-                        // TODO create the Item compendium
-                        HeroSystem6eCompendiumDirectory.uploadFromXml(xmlDoc);
-                    }.bind(this);
-                    reader.readAsText(event.target.files[0]);
+                // DialogV2RenderCallback
+                function handleRender(event, dialog) {
+                    const inputUpload = dialog.element.querySelector("input.upload");
+                    inputUpload.addEventListener("change", (event) => {
+                        console.log(event, event.target.files[0]);
+                        const reader = new FileReader();
+                        reader.onload = async function (event) {
+                            const contents = event.target.result;
 
-                    // Close Create Compendium message box
-                    $(event.currentTarget).closest(".window-content").find("button").click();
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(contents, "text/xml");
+                            // TODO create the Item compendium
+                            HeroSystem6eCompendiumDirectory.uploadFromXml(xmlDoc);
+                        }.bind(this);
+                        reader.readAsText(event.target.files[0]);
+
+                        // Close Create Compendium message box
+                        $(event.currentTarget).closest(".window-content").find("button").click();
+                    });
+                }
+
+                const content = document.createElement("div");
+                content.innerHTML = html;
+                const metadata = await DialogV2.prompt({
+                    content: game.version.split(".")[0] === "12" ? html : content,
+                    id: "create-compendium",
+                    window: { title: "COMPENDIUM.Create" },
+                    position: { width: 480 },
+                    ok: {
+                        label: "COMPENDIUM.Create",
+                        callback: (_event, button) => new FormDataExtended(button.form).object,
+                    },
+                    render: handleRender,
                 });
-            }
+                if (!metadata) return;
+                if (metadata.upload) return;
+                const targetFolderId = metadata.folder;
+                delete metadata.folder;
+                if (!metadata.label) {
+                    const count = game.packs.size;
+                    metadata.label = game.i18n.format(count ? "DOCUMENT.NewCount" : "DOCUMENT.New", {
+                        count: count + 1,
+                        type: game.i18n.localize("PACKAGE.TagCompendium"),
+                    });
+                }
+                const pack = await CompendiumCollection.createCompendium(metadata);
+                if (targetFolderId) await pack.setFolder(targetFolderId);
+            } else {
+                function handleRender(html) {
+                    html.on("change", "input.upload", (event) => {
+                        console.log(event, event.target.files[0]);
+                        const reader = new FileReader();
+                        reader.onload = async function (event) {
+                            const contents = event.target.result;
 
-            return new Dialog({
-                title: game.i18n.localize("COMPENDIUM.Create"),
-                content: html,
-                //label: game.i18n.localize("COMPENDIUM.Create"),
-                buttons: {
-                    create: {
-                        label: game.i18n.localize("COMPENDIUM.Create"),
-                        callback: async (html) => {
-                            const form = html.find("#compendium-create")[0];
-                            const fd = new FormDataExtended(form);
-                            const metadata = fd.object;
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(contents, "text/xml");
+                            // TODO create the Item compendium
+                            HeroSystem6eCompendiumDirectory.uploadFromXml(xmlDoc);
+                        }.bind(this);
+                        reader.readAsText(event.target.files[0]);
 
-                            if (metadata.upload) {
-                                return; // We handle this in the onchage event above because browser security use fakepath
-                            }
+                        // Close Create Compendium message box
+                        $(event.currentTarget).closest(".window-content").find("button").click();
+                    });
+                }
+                return new Dialog({
+                    title: game.i18n.localize("COMPENDIUM.Create"),
+                    content: html,
+                    //label: game.i18n.localize("COMPENDIUM.Create"),
+                    buttons: {
+                        create: {
+                            label: game.i18n.localize("COMPENDIUM.Create"),
+                            callback: async (html) => {
+                                const form = html.find("#compendium-create")[0];
+                                const fd = new FormDataExtended(form);
+                                const metadata = fd.object;
 
-                            let targetFolderId = metadata.folder;
-                            if (metadata.folder) delete metadata.folder;
-                            if (!metadata.label) {
-                                let defaultName = game.i18n.format("DOCUMENT.New", {
-                                    type: game.i18n.localize("PACKAGE.TagCompendium"),
-                                });
-                                const count = game.packs.size;
-                                if (count > 0) defaultName += ` (${count + 1})`;
-                                metadata.label = defaultName;
-                            }
-                            const pack =
-                                // eslint-disable-next-line no-undef
-                                await CompendiumCollection.createCompendium(metadata);
-                            if (targetFolderId) await pack.setFolder(targetFolderId);
+                                if (metadata.upload) {
+                                    return; // We handle this in the onchage event above because browser security use fakepath
+                                }
+
+                                let targetFolderId = metadata.folder;
+                                if (metadata.folder) delete metadata.folder;
+                                if (!metadata.label) {
+                                    let defaultName = game.i18n.format("DOCUMENT.New", {
+                                        type: game.i18n.localize("PACKAGE.TagCompendium"),
+                                    });
+                                    const count = game.packs.size;
+                                    if (count > 0) defaultName += ` (${count + 1})`;
+                                    metadata.label = defaultName;
+                                }
+                                const pack =
+                                    // eslint-disable-next-line no-undef
+                                    await CompendiumCollection.createCompendium(metadata);
+                                if (targetFolderId) await pack.setFolder(targetFolderId);
+                            },
                         },
                     },
-                },
-                render: handleRender,
-                rejectClose: false,
-                options: { jQuery: false },
-            }).render(true);
+                    render: handleRender,
+                    rejectClose: false,
+                    options: { jQuery: false },
+                }).render(true);
+            }
         } catch (e) {
             console.error(e);
             super._onCreateEntry(event, target);
