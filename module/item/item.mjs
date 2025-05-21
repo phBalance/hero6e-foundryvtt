@@ -2624,15 +2624,15 @@ export class HeroSystem6eItem extends Item {
             return changed;
         } catch (error) {
             try {
-                if (foundry.utils.isNewerVersion(this.actor.system.versionHeroSystem6eCreated, "3.0.63")) {
+                if (foundry.utils.isNewerVersion(this.actor?.system.versionHeroSystem6eCreated, "3.0.63")) {
                     ui.notifications.error(
-                        `${this.detailedName()} for ${this.actor.name} failed to parse properly. Please report.  Error: ${error.message}`,
+                        `${this.detailedName()} for ${this.actor?.name} failed to parse properly. Please report.  Error: ${error.message}`,
                         { console: true, permanent: true },
                     );
                     console.error(error);
                 } else {
                     ui.notifications.error(
-                        `${this.detailedName()} for ${this.actor.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
+                        `${this.detailedName()} for ${this.actor?.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
                         { console: true, permanent: false },
                     );
                 }
@@ -2683,9 +2683,10 @@ export class HeroSystem6eItem extends Item {
 
         // Keep track of is5e as it may be important (compendiums, transfer between 5e/6e actors)
         itemData.system ??= {};
-        itemData.system.is5e = actor.system?.is5e;
+        itemData.system.is5e =
+            actor?.system?.is5e || (game.settings.get(HEROSYS.module, "DefaultEdition") === "five" ? true : false);
 
-        const powerList = (actor.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e).filter(
+        const powerList = (itemData.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e).filter(
             (possibleNonModifierOrAdder) =>
                 !(
                     possibleNonModifierOrAdder.behaviors.includes("adder") ||
@@ -2895,7 +2896,7 @@ export class HeroSystem6eItem extends Item {
         // Everything else is based on 1 END per 10 active points except for strength which is 1 per 5 when using heroic rules.
         const endUnitSize =
             this.system.XMLID === "__STRENGTHDAMAGE" &&
-            (this.actor._templateType === "Heroic" || game.settings.get(HEROSYS.module, "StrEnd") === "five")
+            (this.actor?._templateType === "Heroic" || game.settings.get(HEROSYS.module, "StrEnd") === "five")
                 ? 5
                 : 10;
 

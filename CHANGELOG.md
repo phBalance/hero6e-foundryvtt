@@ -6,6 +6,7 @@
 - Fixed and Improved Combat Tracker sorting. [#2318](https://github.com/dmdorman/hero6e-foundryvtt/issues/2318)
 - New setting to default initiative characteristic to DEX, even when EGO > DEX.
 - Variable Power Pool improvments. [#2329](https://github.com/dmdorman/hero6e-foundryvtt/issues/2329)
+- Fixed errors when importing a Hero Designer Prefab as a compendium. [#2331](https://github.com/dmdorman/hero6e-foundryvtt/issues/2331)
 
 ## Version 4.1.2 20250516
 
