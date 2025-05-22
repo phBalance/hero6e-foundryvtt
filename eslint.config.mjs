@@ -28,6 +28,7 @@ export default [
                 Combat: "readonly",
                 Combatant: "readonly",
                 CombatTracker: "readonly",
+                CompendiumCollection: "readonly",
                 CONFIG: "readonly",
                 CONST: "readonly",
                 DefaultTokenConfig: "readonly",

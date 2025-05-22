@@ -2775,12 +2775,14 @@ export class HeroSystem6eActor extends Actor {
                 this.system.characteristics.ego?.value > this.system.characteristics.dex?.value &&
                 this.system.characteristics.omcv?.value >= this.system.characteristics.ocv?.value
             ) {
-                if (this.id) {
-                    await this.update({
-                        "system.initiativeCharacteristic": "ego",
-                    });
-                } else {
-                    this.system.initiativeCharacteristic = "ego";
+                if (!game.settings.get(game.system.id, "defaultDexInitiative")) {
+                    if (this.id) {
+                        await this.update({
+                            "system.initiativeCharacteristic": "ego",
+                        });
+                    } else {
+                        this.system.initiativeCharacteristic = "ego";
+                    }
                 }
             }
         }

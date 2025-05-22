@@ -524,7 +524,7 @@ function defaultPowerDicePartsBundle(item, diceParts) {
 function standardBaseEffectDiceParts(item /* , options */) {
     const diceParts = {
         dc: item.dcRaw,
-        d6Count: parseInt(item.system.LEVELS || 0),
+        d6Count: parseInt(item.system?.LEVELS || 0),
         d6Less1DieCount: item.findModsByXmlid("MINUSONEPIP") ? 1 : 0,
         halfDieCount: item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0,
         constant: item.findModsByXmlid("PLUSONEPIP") ? 1 : 0,
@@ -534,7 +534,7 @@ function standardBaseEffectDiceParts(item /* , options */) {
 }
 
 function characteristicBaseEffectDiceParts(item /* , options */) {
-    const d6Count = parseInt(item.system.LEVELS || 0);
+    const d6Count = parseInt(item.system?.LEVELS || 0);
     const halfDieCount = item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0;
     const value = d6Count * 5 + (halfDieCount ? 3 : 0);
 
@@ -913,7 +913,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "PD":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = parseInt(actorItemDefense.system?.LEVELS || 0);
                         break;
                 }
                 if (value > 0) {
@@ -945,7 +945,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "ED":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = parseInt(actorItemDefense.system?.LEVELS || 0);
                         break;
                 }
                 if (value > 0) {
@@ -2885,7 +2885,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: function (item) {
                 // BASECOST is 3 but for some reason HDC shows 0
                 const baseCost = parseFloat(item.system.BASECOST) || (item.adders.length === 0 ? 3 : 0);
-                const levels = parseInt(item.system.LEVELS);
+                const levels = parseInt(item.system?.LEVELS || 0);
                 return baseCost + levels * this.costPerLevel();
             },
             categorized: true,
@@ -3594,7 +3594,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: function (item) {
                 // BASECOST is 3 but for some reason HDC shows 0
                 const baseCost = parseFloat(item.system.BASECOST) || (item.adders.length === 0 ? 3 : 0);
-                const levels = parseInt(item.system.LEVELS);
+                const levels = parseInt(item.system?.LEVELS || 0);
                 return baseCost + levels * this.costPerLevel();
             },
             categorized: true,
@@ -3771,7 +3771,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // For some reason HDC doens't update BASECOST.
                 // TODO: Check FAMALIERITY ONLY possibilities
                 const baseCost = parseFloat(item.system.BASECOST) || (item.adders.length === 0 ? 3 : 0);
-                const levels = parseInt(item.system.LEVELS);
+                const levels = parseInt(item.system?.LEVELS || 0);
                 return baseCost + levels * this.costPerLevel();
             },
             adderCostAdjustment: function ({ adder, adderCost }) {
@@ -4945,7 +4945,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             unusualDicePerDc: true,
             baseEffectDicePartsBundle: (item) => {
-                const numPips = parseInt(item.system.LEVELS || 0);
+                const numPips = parseInt(item.system?.LEVELS || 0);
                 const diceParts = {
                     dc: item.dcRaw,
                     d6Count: 0,
@@ -5457,7 +5457,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 4),
             basePoints: function (item) {
-                const levels = parseInt(item.system.LEVELS || 0);
+                const levels = parseInt(item.system?.LEVELS || 0);
                 return levels > 0 ? Math.max(1, Math.ceil(levels / 4)) : 0;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -5466,7 +5466,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             costPerLevel: fixedValueFunction(1 / 10),
             basePoints: function (item) {
-                const levels = parseInt(item.system.LEVELS || 0);
+                const levels = parseInt(item.system?.LEVELS || 0);
                 return levels > 0 ? Math.max(1, Math.ceil(levels / 10)) : 0;
             },
         },
@@ -5554,7 +5554,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(10),
             unusualDicePerDc: true,
             baseEffectDicePartsBundle: (item) => {
-                const baseBodyDice = parseInt(item.system.LEVELS || 0);
+                const baseBodyDice = parseInt(item.system?.LEVELS || 0);
                 let baseHalfDice = 0;
                 let additionalBodyDice = 0;
 
@@ -5741,7 +5741,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(3 / 2),
             cost: function (item) {
                 // 3 CP per 2 points of Resistant Defense
-                const levels = parseInt(item.system.LEVELS);
+                const levels = parseInt(item.system?.LEVELS || 0);
                 return Math.ceil(levels / 2) * 3;
             },
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -5792,7 +5792,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(3 / 2), // LEVELS are the sum of rPD and rED
             cost: function (item) {
                 let _cost = parseFloat(item.system.BASECOST);
-                _cost += parseInt(item.system.LEVELS) * this.costPerLevel();
+                _cost += parseInt(item.system?.LEVELS || 0) * this.costPerLevel();
                 _cost += parseInt(item.system.BODYLEVELS) || 0; // 6e only
                 _cost += (parseInt(item.system.LENGTHLEVELS) || 0) * (item.system.is5e ? 2 : 1);
                 _cost += (parseInt(item.system.HEIGHTLEVELS) || 0) * (item.system.is5e ? 2 : 1);
@@ -6309,7 +6309,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return 0;
             },
             activePoints: function (item) {
-                const _levels = parseInt(item.system.LEVELS);
+                const _levels = parseInt(item.system?.LEVELS || 0);
                 return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
             },
             realCost: function (item) {
@@ -6435,7 +6435,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
                     case "POWERDEFENSE":
-                        value = actorItemDefense.adjustedLevels; //parseInt(actorItemDefense.system.LEVELS) || 0;
+                        value = actorItemDefense.adjustedLevels;
                         break;
                 }
                 if (value > 0) {
@@ -6462,12 +6462,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2 / 3),
             cost: function (item) {
                 // 2 CP per 3 Active Points
-                const levels = parseInt(item.system.LEVELS);
+                const levels = parseInt(item.system?.LEVELS || 0);
                 return Math.ceil((levels * this.costPerLevel()) / 3) * 2;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             descriptionFactory: function (item) {
-                return `${item.system.ALIAS} (${parseInt(item.system.LEVELS)} Active Points' worth)`;
+                return `${item.system.ALIAS} (${parseInt(item.system?.LEVELS || 0)} Active Points' worth)`;
             },
             xml: `<POWER XMLID="REFLECTION" ID="1709333998486" BASECOST="0.0" LEVELS="1" ALIAS="Reflection" POSITION="69" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },

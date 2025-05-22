@@ -81,6 +81,11 @@ async function CreateHeroItems() {
     // eslint-disable-next-line no-undef
     pack = await CompendiumCollection.createCompendium(metadata);
 
+    // V13 seems to default new compendiums to locked
+    if (pack.locked) {
+        await pack.configure({ locked: false });
+    }
+
     // 5e vs 6e
     const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
     const powers = DefaultEdition === "five" ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
