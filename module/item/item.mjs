@@ -2827,9 +2827,16 @@ export class HeroSystem6eItem extends Item {
                     // We may want the parent reference at some point (like for ingame editing of items)
                     //pMod.parentId ??= this.parentItem.system.ID;
 
-                    // Sometimes the same modifiers is applied to item and items parent, we only keep the parent one
-                    _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
-                    _modifiers.push(new HeroSystem6eModifier(pMod._original || pMod, { item: this }));
+                    // Sometimes the same modifiers is applied to item and items parent, we keep the most expensive one
+                    const mod = _modifiers.find((mod) => mod.XMLID === pMod.XMLID);
+                    if (!mod || (pMod.cost < 0 && pMod.cost < mod.cost)) {
+                        // Keeping parent modifier
+                        _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
+                        _modifiers.push(new HeroSystem6eModifier(pMod._original || pMod, { item: this }));
+                    } else {
+                        // Keeping child modifier
+                        console.debug("Keeping child modifier instead of parent", pMod, mod);
+                    }
                 }
             }
         }
