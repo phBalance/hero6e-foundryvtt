@@ -684,6 +684,7 @@ export class HeroSystem6eItem extends Item {
 
             // Make sure VPP pool is large enough
             const VPP = item.parentItem?.system.XMLID === "VPP" ? item.parentItem : null;
+
             if (!item.isActive && VPP) {
                 // Pool points (LEVELS) is the total amount of Real
                 // Points’ worth of powers and abilities the character
@@ -712,13 +713,17 @@ export class HeroSystem6eItem extends Item {
                         });
                         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
                         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-                        //speaker.alias = actor.name;
                         const chatData = {
                             style: CONST.CHAT_MESSAGE_STYLES.OOC,
                             author: game.user._id,
                             content:
-                                `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.` +
-                                `Use ${overrideKeyText} to override.`,
+                                `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.` +
+                                `Use ${overrideKeyText} to override.` +
+                                `<ul>${VPP.childItems
+                                    .filter((i) => i.system.active)
+                                    .map((item) => `<li>${parseInt(item.system?.realCost || 0)}RC: ${item.name}</li>`)
+                                    .join("")}</ul>` +
+                                `<hr>${parseInt(item.system?.realCost || 0)}RC: ${item.name}`,
                             speaker: speaker,
                             whisper: whisperUserTargetsForActor(this.actor),
                         };
@@ -726,7 +731,7 @@ export class HeroSystem6eItem extends Item {
                         await ChatMessage.create(chatData);
                         console.log(item, VPP, currentPool);
                         return ui.notifications.error(
-                            `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.`,
+                            `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.`,
                         );
                     }
                 }
@@ -2822,9 +2827,16 @@ export class HeroSystem6eItem extends Item {
                     // We may want the parent reference at some point (like for ingame editing of items)
                     //pMod.parentId ??= this.parentItem.system.ID;
 
-                    // Sometimes the same modifiers is applied to item and items parent, we only keep the parent one
-                    _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
-                    _modifiers.push(new HeroSystem6eModifier(pMod._original || pMod, { item: this }));
+                    // Sometimes the same modifiers is applied to item and items parent, we keep the most expensive one
+                    const mod = _modifiers.find((mod) => mod.XMLID === pMod.XMLID);
+                    if (!mod || (pMod.cost < 0 && pMod.cost < mod.cost)) {
+                        // Keeping parent modifier
+                        _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
+                        _modifiers.push(new HeroSystem6eModifier(pMod._original || pMod, { item: this }));
+                    } else {
+                        // Keeping child modifier
+                        console.debug("Keeping child modifier instead of parent", pMod, mod);
+                    }
                 }
             }
         }

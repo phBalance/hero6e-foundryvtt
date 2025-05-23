@@ -509,6 +509,7 @@ export function tokenEducatedGuess(options = {}) {
     }
 
     // Any token on this canvas for Actor
+    options.actor ??= game.actors.get(options.actorId);
     const anyToken = options.actor?.getActiveTokens()?.[0];
     if (anyToken) {
         return anyToken;

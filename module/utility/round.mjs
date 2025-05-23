@@ -17,7 +17,11 @@ export function RoundFavorPlayerDown(number) {
     // const fraction = Math.floor((number % 1) * 10) / 10
     // (12 / 1.25) % 1 = 0.5999999999999996
     // if ((number % 1) < 0.6) return Math.floor(number)
-    if (Math.round((number % 1) * 10) / 10 < 0.6) return Math.floor(number);
+
+    // Worked most of the time (but doesn't work for 8 / 1.75), a pre-round to 1 decimal place is likely wrong.
+    //if (Math.round((number % 1) * 10) / 10 < 0.6) return Math.floor(number);
+    const epsilon = 0.0001;
+    if (number % 1 < 0.6 - epsilon) return Math.floor(number);
     return Math.ceil(number);
 }
 
