@@ -492,24 +492,24 @@ export function tokenEducatedGuess(options = {}) {
     }
 
     // Actor from Item
-    options.actorId ??= options.item.actor.id;
+    options.actorId ??= options.item?.actor?.id;
 
     // Actor in combat should provide a token
-    const combatant = game.combat?.combatants?.contents.find((o) => o.actorId === options.item.actor.id);
+    const combatant = game.combat?.combatants?.contents.find((o) => o.actorId === options.actorId);
     if (combatant) {
         return canvas.tokens.get(combatant.tokenId);
     }
 
-    // Controled token of provided actor
-    const controledToken = options.actor
+    // Controlled token of provided actor
+    options.actor ??= game.actors.get(options.actorId);
+    const controlledToken = options.actor
         ?.getActiveTokens()
         .find((t) => canvas.tokens.controlled.find((c) => c.id === t.id));
-    if (controledToken) {
-        return controledToken;
+    if (controlledToken) {
+        return controlledToken;
     }
 
     // Any token on this canvas for Actor
-    options.actor ??= game.actors.get(options.actorId);
     const anyToken = options.actor?.getActiveTokens()?.[0];
     if (anyToken) {
         return anyToken;
