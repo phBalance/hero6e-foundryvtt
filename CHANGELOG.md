@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.1.3 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.3 20250523 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - We DO NOT RECOMMEND upgrading FoundryVTT to v13 yet as there are [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility).
 - Improved V13 support. [#2295](https://github.com/dmdorman/hero6e-foundryvtt/issues/2295) [#2268](https://github.com/dmdorman/hero6e-foundryvtt/issues/2268) [#2311](https://github.com/dmdorman/hero6e-foundryvtt/issues/2311)
