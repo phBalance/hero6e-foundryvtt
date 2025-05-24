@@ -38,6 +38,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
     addHeroListeners(html) {
         html.find(".segment-has-items").click((ev) => this._onSegmentToggleContent(ev));
+        html.find(".token-effects").click((ev) => this._onCombatantControl(ev));
     }
 
     // // v13 uses _onRender instead of activateListeners
