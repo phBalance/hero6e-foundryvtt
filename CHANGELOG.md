@@ -2,14 +2,16 @@
 
 ## Version 4.1.4 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Improved V13 support. [#2316](https://github.com/dmdorman/hero6e-foundryvtt/issues/2316) [#2292](https://github.com/dmdorman/hero6e-foundryvtt/issues/2292)
+
 ## Version 4.1.3 20250523
 
 - We DO NOT RECOMMEND upgrading FoundryVTT to v13 yet as there are [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility).
-- Improved V13 support. [#2295](https://github.com/dmdorman/hero6e-foundryvtt/issues/2295) [#2268](https://github.com/dmdorman/hero6e-foundryvtt/issues/2268) [#2311](https://github.com/dmdorman/hero6e-foundryvtt/issues/2311)
+- Improved V13 support. [#2295](https://github.com/dmdorman/hero6e-foundryvtt/issues/2295) [#2268](https://github.com/dmdorman/hero6e-foundryvtt/issues/2268) [#2311](https://github.com/dmdorman/hero6e-foundryvtt/issues/2311) [#2330](https://github.com/dmdorman/hero6e-foundryvtt/issues/2330)
 - Fixed and Improved Combat Tracker sorting. [#2318](https://github.com/dmdorman/hero6e-foundryvtt/issues/2318)
 - New setting to default initiative characteristic to DEX, even when EGO > DEX.
 - Variable Power Pool improvments. [#2329](https://github.com/dmdorman/hero6e-foundryvtt/issues/2329)
-- Fixed errors when importing a Hero Designer Prefab as a compendium. [#2331](https://github.com/dmdorman/hero6e-foundryvtt/issues/2331)
+- Fixed errors when importing a Hero Designer Prefab as a compendium. [#2331](https://github.com/dmdorman/hero6e-foundryvtt/issues/2331) [#2330](https://github.com/dmdorman/hero6e-foundryvtt/issues/2330)
 
 ## Version 4.1.2 20250516
 
