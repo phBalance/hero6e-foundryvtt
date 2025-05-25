@@ -66,14 +66,18 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
 }
 
 export function setPerceptionModes() {
-    class HeroVisionMode extends VisionMode {
+    // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
+    const FoundryVttVisionMode = foundry.canvas.perception?.VisionMode || VisionMode;
+    const FoundryVttDetectionMode = foundry.canvas.perception?.DetectionMode || DetectionMode;
+
+    class HeroVisionMode extends FoundryVttVisionMode {
         constructor() {
             super({
                 id: "heroVision",
                 label: "Hero Vision",
                 // walls: true,
                 // angle: false,
-                type: DetectionMode.DETECTION_TYPES.SIGHT,
+                type: FoundryVttDetectionMode.DETECTION_TYPES.SIGHT,
             });
         }
     }
@@ -100,14 +104,14 @@ export function setPerceptionModes() {
     // });
     // Hero Generic Sense
 
-    class HeroDetectionSightMode extends DetectionMode {
+    class HeroDetectionSightMode extends FoundryVttDetectionMode {
         constructor() {
             super({
                 id: "heroDetectSight",
                 //label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
                 //walls: true,
                 //angle: false,
-                type: DetectionMode.DETECTION_TYPES.SIGHT,
+                type: FoundryVttDetectionMode.DETECTION_TYPES.SIGHT,
             });
         }
         static getDetectionFilter() {
