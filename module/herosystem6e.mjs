@@ -565,7 +565,7 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
         let element = document.createElement("a");
         element.setAttribute(`data-id`, data.actor.id);
         element.title = data.actor.type.toUpperCase().replace("2", "");
-        element.addEventListener("click", () => {
+        element.addEventListener("click", (event) => {
             const actor = game.actors.get(event.target.dataset.id);
             actor.ChangeType();
         });
