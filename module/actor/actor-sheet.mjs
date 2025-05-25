@@ -307,19 +307,19 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             for (const tag of defenseTagsPD.filter(
                 (o) => o.operation === "add" && (!o.options?.resistant || o.options?.resistantAdvantage),
             )) {
-                defense.PDtags = `${defense.PDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.PDtags = `${defense.PDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.rPD = resistantValuePD;
             for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && o.options?.resistant)) {
-                defense.rPDtags = `${defense.rPDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.rPDtags = `${defense.rPDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.drp = damageReductionValuePD;
             for (const tag of defenseTagsPD.filter((o) => o.operation === "pct")) {
-                defense.drptags = `${defense.drptags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.drptags = `${defense.drptags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.dnp = damageNegationValuePD;
             for (const tag of defenseTagsPD.filter((o) => o.operation === "subtract")) {
-                defense.dnptags = `${defense.dnptags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.dnptags = `${defense.dnptags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
 
             // Defense ED
@@ -337,19 +337,19 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             } = getActorDefensesVsAttack(this.actor, edAttack);
             defense.ED = defenseValueED;
             for (const tag of defenseTagsED.filter((o) => o.operation === "add" && !o.options?.resistant)) {
-                defense.EDtags = `${defense.EDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.EDtags = `${defense.EDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.rED = resistantValueED;
             for (const tag of defenseTagsED.filter((o) => o.operation === "add" && o.options?.resistant)) {
-                defense.rEDtags = `${defense.rEDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.rEDtags = `${defense.rEDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.dre = damageReductionValueED;
             for (const tag of defenseTagsED.filter((o) => o.operation === "pct")) {
-                defense.dretags = `${defense.dretags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.dretags = `${defense.dretags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.dne = damageNegationValueED;
             for (const tag of defenseTagsED.filter((o) => o.operation === "subtract")) {
-                defense.dnetags = `${defense.dnetags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.dnetags = `${defense.dnetags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
 
             // Defense MD
@@ -367,19 +367,19 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             } = getActorDefensesVsAttack(this.actor, mdAttack);
             defense.MD = defenseValueMD;
             for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
-                defense.MDtags = `${defense.MDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.MDtags = `${defense.MDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.rMD = resistantValueMD;
             for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && o.options?.resistant)) {
-                defense.rMDtags = `${defense.rMDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.rMDtags = `${defense.rMDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.drm = damageReductionValueMD;
             for (const tag of defenseTagsMD.filter((o) => o.operation === "pct")) {
-                defense.drmtags = `${defense.drmtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.drmtags = `${defense.drmtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.dnm = damageNegationValueMD;
             for (const tag of defenseTagsMD.filter((o) => o.operation === "subtract")) {
-                defense.dnmtags = `${defense.dnmtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+                defense.dnmtags = `${defense.dnmtags || ""}${tag.value.signedStringHero()} ${tag.name} ${tag.shortDesc}\n`;
             }
 
             // Defense POWD
@@ -395,13 +395,13 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             } = getActorDefensesVsAttack(this.actor, drainAttack);
             defense.POWD = defenseValuePOWD;
             for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
-                defense.POWDtags = `${defense.POWDtags || ""}${tag.value.signedString()} ${tag.name} ${
+                defense.POWDtags = `${defense.POWDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${
                     tag.shortDesc
                 }\n`;
             }
             defense.rPOWD = resistantValuePOWD;
             for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && o.options?.resistant)) {
-                defense.rPOWDtags = `${defense.rPOWDtags || ""}${tag.value.signedString()} ${tag.name} ${
+                defense.rPOWDtags = `${defense.rPOWDtags || ""}${tag.value.signedStringHero()} ${tag.name} ${
                     tag.shortDesc
                 }\n`;
             }

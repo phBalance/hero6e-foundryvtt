@@ -415,7 +415,7 @@ export async function doAoeActionToHit(item, options) {
             let _dcvValue = dmcv;
 
             const activeEffect = {
-                label: `${item.name} ${_dcvValue.signedString()} ${_dcvText}`,
+                label: `${item.name} ${_dcvValue.signedStringHero()} ${_dcvText}`,
                 icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
                 changes: [
                     {
@@ -784,7 +784,7 @@ async function doSingleTargetActionToHit(item, options) {
             let _dcvValue = dmcv;
 
             const activeEffect = {
-                label: `${item.name} ${_dcvValue.signedString()} ${_dcvText}`,
+                label: `${item.name} ${_dcvValue.signedStringHero()} ${_dcvText}`,
                 icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
                 changes: [
                     {

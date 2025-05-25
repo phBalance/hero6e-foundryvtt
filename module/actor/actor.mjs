@@ -888,7 +888,7 @@ export class HeroSystem6eActor extends Actor {
             fontSize += Math.floor((Math.abs(change) / options.max) * fontSize);
         }
 
-        canvas.interface.createScrollingText(token.center, change.signedString(), {
+        canvas.interface.createScrollingText(token.center, change.signedStringHero(), {
             anchor: change < 0 ? CONST.TEXT_ANCHOR_POINTS.BOTTOM : CONST.TEXT_ANCHOR_POINTS.TOP,
             direction: change < 0 ? 1 : 2,
             fontSize: clamp(fontSize, 50, 100),

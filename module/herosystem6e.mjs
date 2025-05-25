@@ -40,6 +40,19 @@ import "./utility/chat-dice.mjs";
 import "./testing/testing-main.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
+// SignedString
+function signedStringHero() {
+    const n = this.toLocaleString(game.i18n.lang);
+    //if (this === 0) return n;
+    if (this < 0)
+        //return n.replace("-", "−"); // Minus sign character
+        return n;
+    else return `+${n}`;
+}
+Object.defineProperties(Number.prototype, {
+    signedStringHero: { value: signedStringHero },
+});
+
 Hooks.once("init", async function () {
     // Compatibility warnings for initial release of v13
     // In chrome use -/Deprecated since Version 13/ as a console log filter

@@ -257,7 +257,7 @@ async function skillRoll(item, actor, target) {
     // render card
     const cardData = {
         tags: tags.map((tag) => {
-            return { ...tag, value: tag.value.signedString() };
+            return { ...tag, value: tag.value.signedStringHero() };
         }),
         rolls: skillRoller.rawRolls(),
         renderedRoll: rollHtml,
