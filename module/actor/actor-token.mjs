@@ -1,8 +1,11 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
-// import { clamp } from "../utility/compatibility.mjs";
 
-export class HeroSystem6eTokenDocument extends TokenDocument {
+// v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttTokenDocument = foundry.appv1?.sheets?.TokenDocument || TokenDocument;
+const FoundryVttToken = foundry.canvas?.placeables?.Token || Token;
+
+export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
     constructor(data, context) {
         super(data, context);
     }
@@ -165,7 +168,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
     }
 }
 
-export class HeroSystem6eToken extends Token {
+export class HeroSystem6eToken extends FoundryVttToken {
     constructor(document) {
         super(document);
     }
@@ -257,42 +260,4 @@ export class HeroSystem6eToken extends Token {
         }
         return super._onRelease(options);
     }
-
-    // _canHover(user, event) {
-    //     if (!game.user.isGM && !this.visible) {
-    //         return false;
-    //     }
-    //     return super._canHover(user, event);
-    // }
-
-    // _canViewMode(mode) {
-    //     try {
-    //         if (this.isVisable) {
-    //             const point = this.center;
-    //             const { width, height } = this.getSize();
-    //             const tolerance = Math.min(width, height) / 4;
-    //             //const visibility = canvas.visibility.testVisibility(this.center, { tolerance, object: this });
-
-    //             const sr = canvas.dimensions.sceneRect;
-    //             const inBuffer = !sr.contains(point.x, point.y);
-    //             const activeVisionSources = canvas.effects.visionSources.filter(
-    //                 (s) => s.active && inBuffer !== sr.contains(s.x, s.y),
-    //             );
-    //             const modes = CONFIG.Canvas.detectionModes;
-    //             const config = canvas.visibility._createVisibilityTestConfig(point, { tolerance, object: this });
-    //             for (const visionSource of activeVisionSources) {
-    //                 const basicMode = this.detectionModes.find((m) => m.id === "basicSight");
-    //                 if (basicMode) {
-    //                     const visibility = modes.basicSight.testVisibility(visionSource, basicMode, config);
-    //                     if (!visibility) {
-    //                         return false;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.error(e);
-    //     }
-    //     return super._canViewMode(mode);
-    // }
 }
