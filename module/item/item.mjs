@@ -1691,7 +1691,7 @@ export class HeroSystem6eItem extends Item {
                         this.flags[game.system.id].tags[prop] = "";
                     }
                     this.flags[game.system.id].tags[prop] =
-                        `${this.flags[game.system.id].tags[prop]}${csl[prop].signedString()} ${prop === "dc" ? "DC " : ""}${csl.item.name}`;
+                        `${this.flags[game.system.id].tags[prop]}${csl[prop].signedStringHero()} ${prop === "dc" ? "DC " : ""}${csl.item.name}`;
                 }
             }
         }
@@ -1714,7 +1714,8 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     this.flags[game.system.id].tags.ocv = "";
                 }
-                this.flags[game.system.id].tags.ocv = `${this.flags[game.system.id].tags.ocv}${ocv.signedString()} OCV`;
+                this.flags[game.system.id].tags.ocv =
+                    `${this.flags[game.system.id].tags.ocv}${ocv.signedStringHero()} OCV`;
             }
             switch (this.system.ocv) {
                 case "--":
@@ -1743,13 +1744,13 @@ export class HeroSystem6eItem extends Item {
                             }
                             this.flags[game.system.id].tags.ocv = `${this.flags[game.system.id].tags.ocv}${parseInt(
                                 velocity / 10,
-                            ).signedString()} Velocity`;
+                            ).signedStringHero()} Velocity`;
                         }
                     }
                     break;
 
                 default:
-                    this.system.ocv = parseInt(this.system.ocv).signedString();
+                    this.system.ocv = parseInt(this.system.ocv).signedStringHero();
 
                     this.system.ocvEstimated = `${ocv + parseInt(this.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)}`;
 
@@ -1772,9 +1773,10 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     this.flags[game.system.id].tags.dcv = "";
                 }
-                this.flags[game.system.id].tags.dcv = `${this.flags[game.system.id].tags.dcv}${dcv.signedString()} DCV`;
+                this.flags[game.system.id].tags.dcv =
+                    `${this.flags[game.system.id].tags.dcv}${dcv.signedStringHero()} DCV`;
             }
-            this.system.dcv = parseInt(this.system.dcv).signedString();
+            this.system.dcv = parseInt(this.system.dcv).signedStringHero();
             this.system.dcvEstimated = `${dcv + parseInt(this.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)}`;
 
             if (parseInt(this.system.dcv) != 0) {
@@ -1798,7 +1800,7 @@ export class HeroSystem6eItem extends Item {
                     this.flags[game.system.id].tags.omcv = "";
                 }
                 this.flags[game.system.id].tags.omcv =
-                    `${this.flags[game.system.id].tags.omcv}${omcv.signedString()} OMCV`;
+                    `${this.flags[game.system.id].tags.omcv}${omcv.signedStringHero()} OMCV`;
             }
 
             const dmcv = parseInt(this.actor?.system.characteristics.dmcv?.value || 0);
@@ -1810,7 +1812,7 @@ export class HeroSystem6eItem extends Item {
                     this.flags[game.system.id].tags.dmcv = "";
                 }
                 this.flags[game.system.id].tags.dmcv =
-                    `${this.flags[game.system.id].tags.dmcv}${dmcv.signedString()} DMCV`;
+                    `${this.flags[game.system.id].tags.dmcv}${dmcv.signedStringHero()} DMCV`;
             }
         }
 
@@ -1862,7 +1864,8 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     this.flags[game.system.id].tags.ocv = "";
                 }
-                this.flags[game.system.id].tags.ocv += `${adjustment.signedString()} ${strengthMinimumModifier.ALIAS}`;
+                this.flags[game.system.id].tags.ocv +=
+                    `${adjustment.signedStringHero()} ${strengthMinimumModifier.ALIAS}`;
             }
         }
 
@@ -3317,9 +3320,9 @@ export class HeroSystem6eItem extends Item {
                     if (isNaN(ocv)) {
                         system.description += `, -- OCV`;
                     } else {
-                        system.description += `, ${ocv.signedString()} OCV`;
+                        system.description += `, ${ocv.signedStringHero()} OCV`;
                     }
-                    system.description += `, ${dcv.signedString()} DCV`;
+                    system.description += `, ${dcv.signedStringHero()} DCV`;
                     if (system.EFFECT) {
                         let effect = system.EFFECT;
 
@@ -3433,7 +3436,7 @@ export class HeroSystem6eItem extends Item {
 
             case "SKILL_LEVELS":
                 //<i>Martial Practice:</i>  +10 with single Skill or Characteristic Roll
-                system.description = `${parseInt(system.value).signedString()} ${system.OPTION_ALIAS}`;
+                system.description = `${parseInt(system.value).signedStringHero()} ${system.OPTION_ALIAS}`;
                 break;
 
             case "VPP":
@@ -3847,7 +3850,7 @@ export class HeroSystem6eItem extends Item {
                     // can be for anything, we don't provide its cost if the cost is 0.
                     if (adder.ALIAS.trim()) {
                         _adderArray.push(
-                            `${adder.ALIAS}${parseInt(adder.BASECOST) !== 0 ? ` ${parseInt(adder.BASECOST)?.signedString()} Points` : ""}`,
+                            `${adder.ALIAS}${parseInt(adder.BASECOST) !== 0 ? ` ${parseInt(adder.BASECOST)?.signedStringHero()} Points` : ""}`,
                         );
                     }
                     break;

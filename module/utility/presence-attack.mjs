@@ -131,7 +131,7 @@ async function presenceAttackRoll(actor, html) {
 
     const cardData = {
         tags: tags.map((tag) => {
-            return { ...tag, value: tag.value.signedString() };
+            return { ...tag, value: tag.value.signedStringHero() };
         }),
         rolls: preAttackRoller.rawRolls(),
         renderedRoll: rollHtml,
