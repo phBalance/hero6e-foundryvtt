@@ -587,6 +587,7 @@ async function doSingleTargetActionToHit(item, options) {
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
     const actor = item.actor;
+    //const originalItem = fromUuidSync(item.system._active.__originalUuid);
 
     // Educated guess for token
     const token =
@@ -1110,6 +1111,7 @@ async function doSingleTargetActionToHit(item, options) {
 
         item,
         itemJsonStr: dehydrateAttackItem(item),
+        originalUuid: item.id || fromUuidSync(item.system._active.__originalUuid).id,
 
         adjustment,
         senseAffecting,
