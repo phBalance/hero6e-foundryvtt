@@ -40,7 +40,9 @@ import "./utility/chat-dice.mjs";
 import "./testing/testing-main.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
-// SignedString
+// V13 SignedString does not add a plus before a zero, also uses a non-standard minus sign.
+// V12 SignedString works great, unclear why V13 change it.
+// So we will create our own signedString.
 function signedStringHero() {
     const n = this.toLocaleString(game.i18n.lang);
     //if (this === 0) return n;
