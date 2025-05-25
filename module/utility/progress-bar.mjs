@@ -1,5 +1,3 @@
-import { isGameV13OrLater } from "./compatibility.mjs";
-
 /**
  * A v13 based progress bar wrapper around the underlying system.
  */
@@ -165,5 +163,5 @@ class HeroProgressBarV12 {
     }
 }
 
-// v13 backwards compatibility code. Can remove the v12 version when compatibility has ended.
-export const HeroProgressBar = isGameV13OrLater() ? HeroProgressBarV13 : HeroProgressBarV12;
+// v13 backwards compatibility code (new SceneNavigation API in v13). Can remove the v12 version when compatibility has ended.
+export const HeroProgressBar = foundry.applications?.ui?.SceneNavigation ? HeroProgressBarV13 : HeroProgressBarV12;
