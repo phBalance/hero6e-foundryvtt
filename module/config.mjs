@@ -7303,7 +7303,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEPENDENCE",
             type: ["disadvantage"],
             behaviors: ["activatable", "dice"],
-            costPerLevel: fixedValueFunction(0), // TODO: needs function
+            costPerLevel: fixedValueFunction(5), // NOTE: Doesn't use LEVELS but this helps our DC calculations
+            unusualDicePerDc: true,
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             baseEffectDicePartsBundle: (item) => {

@@ -620,7 +620,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
 
     // PH: FIXME: Some powers have "fixed" damage that doesn't get modified by advantages and DC modifiers (or at least not
     // in ways that I have taken the time to think through).
-    // Examples are 6e's Absorption, Possession, and change environment.
+    // Examples are 6e's Absorption, Possession, dependence, and change environment.
     if (item.baseInfo.unusualDicePerDc) {
         const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
         return diceParts;
