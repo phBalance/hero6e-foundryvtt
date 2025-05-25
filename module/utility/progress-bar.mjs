@@ -22,8 +22,6 @@ class HeroProgressBarV13 {
             );
         }
 
-        ++HeroProgressBarV13.#concurrentProgressBarCount;
-
         this.advance(this._message, 0);
 
         if (CONFIG.debug.HERO?.ui?.progress) console.debug(`${Date.now()} ${this}: creating`);
