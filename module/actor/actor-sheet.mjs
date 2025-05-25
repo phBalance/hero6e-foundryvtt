@@ -13,10 +13,11 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
-// v13 has namespaced TextEditor. When we remove this backwards compatibility then the eslint exception can be cleaned up.
+// v13 has namespaced these. When we remove this backwards compatibility then the eslint exception can be cleaned up.
 const FoundryVttTextEditor = foundry.applications.ux?.TextEditor.implementation || TextEditor;
+const FoundryVttActorSheet = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
 
-export class HeroSystemActorSheet extends ActorSheet {
+export class HeroSystemActorSheet extends FoundryVttActorSheet {
     /** @override */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
