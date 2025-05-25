@@ -1,5 +1,7 @@
-// eslint-disable-next-line no-undef
-export class HeroSystem6eItemDirectory extends ItemDirectory {
+// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttItemDirectory = foundry.applications?.sidebar?.tabs?.ItemDirectory || ItemDirectory;
+
+export class HeroSystem6eItemDirectory extends FoundryVttItemDirectory {
     async _handleDroppedFolder(target, data) {
         console.log("_handleDroppedFolder", target, data);
         super._handleDroppedFolder(target, data);

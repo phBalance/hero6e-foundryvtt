@@ -55,6 +55,7 @@ export default [
                 Hooks: "readonly",
                 ImageHelper: "readonly",
                 Item: "readonly",
+                ItemDirectory: "readonly",
                 Items: "readonly",
                 ItemSheet: "readonly",
                 loadTemplates: "readonly",
