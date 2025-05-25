@@ -46,7 +46,7 @@ export class Attack {
             if (ocv < 0) {
                 icon = "icons/svg/downgrade.svg";
             }
-            label += ` ${ocv.signedString()} OCV`;
+            label += ` ${ocv.signedStringHero()} OCV`;
             comma = true;
             changes.push({
                 key: `system.characteristics.ocv.value`,
@@ -59,7 +59,7 @@ export class Attack {
             if (dcv < 0) {
                 icon = "icons/svg/downgrade.svg";
             }
-            label += `${comma ? "," : ""} ${dcv.signedString()} DCV`;
+            label += `${comma ? "," : ""} ${dcv.signedStringHero()} DCV`;
             comma = true;
             changes.push({
                 key: `system.characteristics.dcv.value`,

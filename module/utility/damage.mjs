@@ -285,7 +285,7 @@ function addExtraDcsToBundle(item, dicePartsBundle) {
         dicePartsBundle.tags.push({
             value: `${formula}`,
             name: "Extra DCs",
-            title: `${numExtraDcs.signedString()}DC${numExtraDcs !== extraDcLevels ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
+            title: `${numExtraDcs.signedStringHero()}DC${numExtraDcs !== extraDcLevels ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
         });
     }
 }
@@ -339,7 +339,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         addedDamageBundle.tags.push({
             value: formula === "0" ? "" : `${formula}`, // Hide the formula if it's 0 as it looks ugly
             name: item.name,
-            title: `${rawManeuverDc.signedString()}DC${maneuverDC !== rawManeuverDc ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
+            title: `${rawManeuverDc.signedStringHero()}DC${maneuverDC !== rawManeuverDc ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
         });
     }
 
@@ -377,7 +377,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
             addedDamageBundle.tags.push({
                 value: `+${formula}`,
                 name: csl.item.name,
-                title: `${csl.dc.signedString()}DC -> ${formula}`,
+                title: `${csl.dc.signedStringHero()}DC -> ${formula}`,
             });
         }
     }
