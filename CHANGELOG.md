@@ -3,6 +3,7 @@
 ## Version 4.1.4 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved V13 support. [#2316](https://github.com/dmdorman/hero6e-foundryvtt/issues/2316) [#2292](https://github.com/dmdorman/hero6e-foundryvtt/issues/2292)
+- Heroic characters are no longer forced to use 1 END per 5 STR. They will now use whatever the world setting is.
 
 ## Version 4.1.3 20250523
 

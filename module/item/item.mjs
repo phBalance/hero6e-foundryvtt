@@ -2907,12 +2907,9 @@ export class HeroSystem6eItem extends Item {
             return 1;
         }
 
-        // Everything else is based on 1 END per 10 active points except for strength which is 1 per 5 when using heroic rules.
+        // Everything else is based on 1 END per 10 active points except for strength which is 1 per 5 when using optional heroic rules.
         const endUnitSize =
-            this.system.XMLID === "__STRENGTHDAMAGE" &&
-            (this.actor?._templateType === "Heroic" || game.settings.get(HEROSYS.module, "StrEnd") === "five")
-                ? 5
-                : 10;
+            this.system.XMLID === "__STRENGTHDAMAGE" && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
 
         const activePoints = this.system._active.originalActivePoints ?? this._activePoints;
 
