@@ -1,7 +1,10 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
 
-export class HeroSystem6eCombatTracker extends CombatTracker {
+// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttCombatTracker = foundry.applications?.sidebar?.tabs?.CombatTracker || CombatTracker;
+
+export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
     // V12 static get defaultOptions is replaced by V13 static DEFAULT_OPTIONS = {}
     // However I'm currently using static PARTS = {} in V13
     static get defaultOptions() {
