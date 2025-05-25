@@ -2330,6 +2330,7 @@ export class HeroSystem6eItem extends Item {
                 const activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
+                activeEffect.description = this.system.description;
                 activeEffect.changes = [
                     {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
@@ -2377,6 +2378,7 @@ export class HeroSystem6eItem extends Item {
                 const activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
+                activeEffect.description = this.system.description;
                 activeEffect.changes = [
                     {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,

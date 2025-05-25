@@ -124,7 +124,13 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         }
 
         if (JSON.stringify(targets) !== JSON.stringify(Array.from(game.user.targets).map((target) => target.id))) {
-            await game.user.updateTokenTargets(targets);
+            if (game.user._onUpdateTokenTargets) {
+                // V13 #2292
+                await game.user._onUpdateTokenTargets(targets);
+            } else {
+                // V12 #2292
+                await game.user.updateTokenTargets(targets);
+            }
         }
     }
 }
