@@ -55,6 +55,14 @@ Object.defineProperties(Number.prototype, {
     signedStringHero: { value: signedStringHero },
 });
 
+// v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
+const FoundryVttItems = foundry.documents?.collections?.Items || Items;
+const FoundryVttActorSheet = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
+const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
+const FoundryVttDocumentSheetConfig = foundry.applications?.apps?.DocumentSheetConfig || DocumentSheetConfig;
+const foundryVttLoadTemplates = foundry.applications?.handlebars?.loadTemplates || loadTemplates;
+
 Hooks.once("init", async function () {
     // Compatibility warnings for initial release of v13
     // In chrome use -/Deprecated since Version 13/ as a console log filter
@@ -128,20 +136,20 @@ Hooks.once("init", async function () {
     initializeItemHandlebarsHelpers();
 
     // Register sheet application classes
-    Actors.unregisterSheet("core", ActorSheet);
-    Actors.registerSheet("herosystem6e", HeroSystemActorSheet, {
+    FoundryVttActors.unregisterSheet("core", FoundryVttActorSheet);
+    FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheet, {
         makeDefault: true,
     });
-    Actors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
+    FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
         makeDefault: false,
     });
-    Items.unregisterSheet("core", ItemSheet);
-    Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
+    FoundryVttItems.unregisterSheet("core", FoundryVttItemSheet);
+    FoundryVttItems.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
         makeDefault: true,
     });
 
     //Not sure why ActiveEffect.registerSheet is missing.
-    DocumentSheetConfig.registerSheet(ActiveEffect, "herosystem6e", HeroSystemActiveEffectConfig, {
+    FoundryVttDocumentSheetConfig.registerSheet(ActiveEffect, "herosystem6e", HeroSystemActiveEffectConfig, {
         makeDefault: true,
         label: "HeroSystemActiveEffectConfig",
     });
@@ -172,7 +180,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/combat/footer.hbs`,
     ];
     // Handlebars Templates and Partials
-    loadTemplates(templatePaths);
+    foundryVttLoadTemplates(templatePaths);
 
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;
