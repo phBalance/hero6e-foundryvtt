@@ -1,6 +1,9 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 
-export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
+// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttMeasuredTemplate = foundry.canvas?.placeables?.MeasuredTemplate || MeasuredTemplate;
+
+export default class HeroSystem6eMeasuredTemplate extends FoundryVttMeasuredTemplate {
     async _onClickLeft(event) {
         await super._onClickLeft(event);
 

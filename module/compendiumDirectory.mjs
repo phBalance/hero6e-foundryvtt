@@ -2,8 +2,10 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import { getPowerInfo } from "./utility/util.mjs";
 
-// eslint-disable-next-line no-undef
-export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
+// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttCompendiumDirectory = foundry.applications?.sidebar?.tabs?.CompendiumDirectory || CompendiumDirectory;
+
+export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirectory {
     constructor(...args) {
         super(...args);
     }
@@ -135,9 +137,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                                     if (count > 0) defaultName += ` (${count + 1})`;
                                     metadata.label = defaultName;
                                 }
-                                const pack =
-                                    // eslint-disable-next-line no-undef
-                                    await CompendiumCollection.createCompendium(metadata);
+                                const pack = await CompendiumCollection.createCompendium(metadata);
                                 if (targetFolderId) await pack.setFolder(targetFolderId);
                             },
                         },
@@ -181,7 +181,6 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         };
 
         // Create Compendium
-        // eslint-disable-next-line no-undef
         const pack = await CompendiumCollection.createCompendium(metadata);
 
         if (targetFolderId) await pack.setFolder(targetFolderId);

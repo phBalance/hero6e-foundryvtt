@@ -1830,14 +1830,12 @@ export class HeroSystem6eActor extends Actor {
 
         // Need count of maneuvers for progress bar
         const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-        const freeStuffCount =
-            powerList.filter(
-                (power) =>
-                    !(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
-                    power.type.includes("maneuver"),
-            ).length +
-            1 + // Perception
-            1; // Weapon placeholder
+        const freeStuffFilter = (power) =>
+            (!(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
+                power.type.includes("maneuver")) ||
+            power.key === "PERCEPTION" || // Perception
+            power.key === "__STRENGTHDAMAGE"; // Weapon placeholder (this is a dirty hack to count it so we can filter on it later)
+        const freeStuffCount = powerList.filter(freeStuffFilter).length;
 
         const xmlItemsToProcess =
             1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
@@ -1854,23 +1852,24 @@ export class HeroSystem6eActor extends Actor {
             1 + // Final save
             1 + // Restore retained damage
             1; // Not really sure why we need an extra +1
-        const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 0);
+        const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess);
         uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
 
         // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
         if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
-            uploadProgressBar.advance(
-                `${this.name}: Adding non HDC items for PCs, NPCs, and Automatons`,
-                freeStuffCount,
-            );
+            uploadProgressBar.advance(`${this.name}: Evaluating non HDC items for PCs, NPCs, and Automatons`, 0);
+
             await this.addFreeStuff();
+
+            uploadProgressBar.advance(`${this.name}: Evaluated non HDC items for PCs, NPCs, and Automatons`, 0);
         }
 
         uploadPerformance.progressBarFreeStuff - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
         // ITEMS
-        let itemPromiseArray = [];
+        uploadProgressBar.advance(`${this.name}: Evaluating items`, 0);
+
         const itemsToCreate = [];
         let sortBase = 0;
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
@@ -1993,64 +1992,6 @@ export class HeroSystem6eActor extends Actor {
                             }
                         }
                     }
-                    // } else {
-                    //     const item = new HeroSystem6eItem(itemData, {
-                    //         parent: this,
-                    //     });
-                    //     this.items.set(item.system.XMLID + item.system.POSITION, item);
-                    //     if (system.XMLID === "COMPOUNDPOWER") {
-                    //         const compoundItems = [];
-                    //         for (const [key, value] of Object.entries(system)) {
-                    //             // We only care about arrays and objects (array of 1)
-                    //             if (typeof value === "object") {
-                    //                 debugger;
-                    //                 const values = value.length ? value : [value];
-                    //                 for (const system2 of values) {
-                    //                     if (system2.XMLID) {
-                    //                         const power = getPowerInfo({
-                    //                             xmlid: system2.XMLID,
-                    //                             actor: this,
-                    //                         });
-                    //                         if (!power) {
-                    //                             await ui.notifications.error(
-                    //                                 `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                    //                                 {
-                    //                                     console: true,
-                    //                                     permanent: true,
-                    //                                 },
-                    //                             );
-                    //                             continue;
-                    //                         }
-                    //                         compoundItems.push(system2);
-                    //                     }
-                    //                 }
-                    //                 // Remove property since we just created an item.
-                    //                 delete system[key];
-                    //             }
-                    //         }
-
-                    //         compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
-                    //         for (const system2 of compoundItems) {
-                    //             const power = getPowerInfo({
-                    //                 xmlid: system2.XMLID,
-                    //                 actor: this,
-                    //             });
-                    //             const itemData2 = {
-                    //                 name: system2.NAME || system2.ALIAS || system2.XMLID,
-                    //                 type: power.type.includes("skill") ? "skill" : "power",
-                    //                 system: {
-                    //                     ...system2,
-                    //                     PARENTID: system.ID,
-                    //                     POSITION: parseInt(system2.POSITION),
-                    //                 },
-                    //             };
-                    //             const item = new HeroSystem6eItem(itemData2, {
-                    //                 parent: this,
-                    //             });
-                    //             this.items.set(item.system.XMLID + item.system.POSITION, item);
-                    //         }
-                    //     }
-                    // }
 
                     if (this.id) {
                         itemsToCreate.push(itemData);
@@ -2069,6 +2010,9 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        uploadProgressBar.advance(`${this.name}: Evaluated Items`, 0);
+        uploadProgressBar.advance(`${this.name}: Creating Items`, 0);
+
         uploadPerformance.itemsToCreateActual = itemsToCreate.length;
 
         uploadPerformance.preItems = new Date().getTime() - uploadPerformance._d;
@@ -2077,34 +2021,37 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.createItems = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
-        await Promise.all(itemPromiseArray);
-        uploadPerformance.itemPromiseArray = new Date().getTime() - uploadPerformance._d;
-        uploadPerformance._d = new Date().getTime();
+        uploadProgressBar.advance(`${this.name}: Created Items`, 0);
+        uploadProgressBar.advance(`${this.name}: Processing characteristics`, 0);
 
         // Do CSLs last so we can property select the attacks
         // TODO: infinite loop of _postUpload until no changes?
         // Do CHARACTERISTICS first (mostly for applyEncumbrance)
 
-        await Promise.all(
-            this.items
-                .filter((o) => o.baseInfo?.type.includes("characteristic"))
-                .map((i) => i._postUpload({ render: false, uploadProgressBar })),
-        );
+        const characteristicItems = this.items.filter((item) => item.baseInfo?.type.includes("characteristic"));
+        await Promise.all(characteristicItems.map((item) => item._postUpload({ render: false, uploadProgressBar })));
         await this._postUpload({ render: false });
+
+        uploadProgressBar.advance(`${this.name}: Processed characteristics`, 0);
+        uploadProgressBar.advance(`${this.name}: Processing non characteristics`, 0);
+
         const doLastXmlids = ["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "MENTALDEFENSE"];
-        await Promise.all(
-            this.items
-                .filter((o) => !doLastXmlids.includes(o.system.XMLID) && !o.baseInfo?.type.includes("characteristic"))
-                .map((i) => i._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false })),
+        const nonCharacteristicItemsThatAreNotFreeItems = this.items.filter(
+            (item) => !doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
         );
-        // // Separate out equipment to avoid multiple encumbrance AE's
-        // for (const equipment of this.items.filter((o) => o.type === "equipment")) {
-        //     await equipment._postUpload({ render: false, applyEncumbrance: false });
-        // }
+        await Promise.all(
+            nonCharacteristicItemsThatAreNotFreeItems.map((item) =>
+                item._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false }),
+            ),
+        );
+
         await Promise.all(
             this.items
-                .filter((o) => doLastXmlids.includes(o.system.XMLID) && !o.baseInfo?.type.includes("characteristic"))
-                .map((i) => i._postUpload({ render: false, uploadProgressBar })),
+                .filter(
+                    (item) =>
+                        doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
+                )
+                .map((item) => item._postUpload({ render: false, uploadProgressBar })),
         );
 
         // retainValuesOnUpload Charges
@@ -2178,10 +2125,13 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        uploadProgressBar.advance(`${this.name}: Processed non characteristics`, 0);
+        uploadProgressBar.advance(`${this.name}: Processed all items`, 0);
+
         uploadPerformance.invalidTargets = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
-        uploadProgressBar.advance(`${this.name}: Uploading image`);
+        uploadProgressBar.advance(`${this.name}: Uploading image`, 0);
 
         // Images
         if (this.img.startsWith("tokenizer/") && game.modules.get("vtta-tokenizer")?.active) {
@@ -2244,7 +2194,8 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.image = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
-        uploadProgressBar.advance(`${this.name}: Saving core changes`);
+        uploadProgressBar.advance(`${this.name}: Uploaded image`);
+        uploadProgressBar.advance(`${this.name}: Saving core changes`, 0);
 
         // Non ITEMS stuff in CHARACTER
         changes = {
@@ -2339,10 +2290,11 @@ export class HeroSystem6eActor extends Actor {
             .forEach(async (item) => {
                 await item._postUpload({ render: false, applyEncumbrance: false });
             });
-
-        uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
         uploadPerformance.postUpload2 = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
+
+        uploadProgressBar.advance(`${this.name}: Saved core changes`);
+        uploadProgressBar.advance(`${this.name}: Restoring retained damage`, 0);
 
         // Apply retained damage
         if (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end) {
@@ -2367,6 +2319,8 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.retainedDamage = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
+        uploadProgressBar.advance(`${this.name}: Restored retained damage`);
+
         // If we have control of this token, reacquire to update movement types
         const myToken = this.getActiveTokens()?.[0];
         if (canvas.tokens.controlled.find((t) => t.id == myToken?.id)) {
@@ -2376,7 +2330,7 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.tokenControl = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
-        uploadProgressBar.close(`Done uploading ${this.name}`);
+        uploadProgressBar.close(`Uploaded ${this.name}`);
 
         uploadPerformance.totalTime = new Date().getTime() - uploadPerformance.startTime;
 
@@ -2391,17 +2345,12 @@ export class HeroSystem6eActor extends Actor {
                 whisper: whisperUserTargetsForActor(this),
             });
         }
-
-        // Sanity check HDC character points vs our character points
-        // const basePoints = parseInt(this.system.CHARACTER.BASIC_CONFIGURATION.BASE_POINTS);
-        // const experience = parseInt(this.system.CHARACTER.BASIC_CONFIGURATION.EXPERIENCE);
-        // if (this.system.points != basePoints + experience) {
-        //     console.warn(`Calculated CP (${this.system.points} is different than HDC plan (${basePoints + experience})`);
-        // }
     }
 
     /**
      * Characters get a few things for free that are not in the HDC.
+     * NOTE: None of these methods should call _postUpload as that is done separately during actor creation.
+     *
      * @returns
      */
     async addFreeStuff() {
@@ -2436,8 +2385,6 @@ export class HeroSystem6eActor extends Actor {
         if (!this.id) {
             this.items.set(perceptionItem.system.XMLID, perceptionItem);
         }
-
-        return perceptionItem._postUpload({ applyEncumbrance: false });
     }
 
     async addAttackPlaceholder() {
@@ -2460,7 +2407,6 @@ export class HeroSystem6eActor extends Actor {
         if (!this.id) {
             this.items.set(maneuverWeaponPlaceholderItem.name, maneuverWeaponPlaceholderItem);
         }
-        await maneuverWeaponPlaceholderItem._postUpload();
     }
 
     async addManeuver(maneuver) {
@@ -2520,8 +2466,6 @@ export class HeroSystem6eActor extends Actor {
         if (!this.id) {
             this.items.set(item.system.XMLID, item);
         }
-
-        return item._postUpload();
     }
 
     async addHeroSystemManeuvers() {

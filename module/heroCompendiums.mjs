@@ -33,7 +33,6 @@ async function CreateHeroMacros() {
         await pack.configure({ locked: false });
         await pack.deleteCompendium();
     }
-    // eslint-disable-next-line no-undef
     pack = await CompendiumCollection.createCompendium(metadata);
 
     const macroItemsArray = [];
@@ -78,7 +77,6 @@ async function CreateHeroItems() {
         await pack.configure({ locked: false });
         await pack.deleteCompendium();
     }
-    // eslint-disable-next-line no-undef
     pack = await CompendiumCollection.createCompendium(metadata);
 
     // V13 seems to default new compendiums to locked

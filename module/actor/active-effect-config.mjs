@@ -1,6 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 
-export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
+// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttActiveEffectConfig = foundry.applications?.sheets?.ActiveEffectConfig || ActiveEffectConfig;
+
+export class HeroSystemActiveEffectConfig extends FoundryVttActiveEffectConfig {
     static get defaultOptions() {
         const defaultOptions = super.defaultOptions;
         return foundry.utils.mergeObject(defaultOptions, {

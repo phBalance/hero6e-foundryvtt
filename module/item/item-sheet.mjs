@@ -3,11 +3,14 @@ import { createModifierOrAdderFromXml } from "./item.mjs";
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../utility/adjustment.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 
+// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
+
 /**
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-export class HeroSystem6eItemSheet extends ItemSheet {
+export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
     /** @override */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
