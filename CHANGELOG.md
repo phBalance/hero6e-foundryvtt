@@ -3,7 +3,7 @@
 ## Version 4.1.4 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved V13 support. [#2316](https://github.com/dmdorman/hero6e-foundryvtt/issues/2316) [#2292](https://github.com/dmdorman/hero6e-foundryvtt/issues/2292) [#2352](https://github.com/dmdorman/hero6e-foundryvtt/issues/2352)
-- Heroic characters are no longer forced to use 1 END per 5 STR. They will now use whatever the world setting is. [#2335](https://github.com/dmdorman/hero6e-foundryvtt/issues/2335)
+- Heroic characters are no longer forced to use 1 END per 5 STR. All actors will now use whatever the world setting is. [#2335](https://github.com/dmdorman/hero6e-foundryvtt/issues/2335)
 - Improved support for [Automated Animations](https://foundryvtt.com/packages/autoanimations) module. [#1090](https://github.com/dmdorman/hero6e-foundryvtt/issues/1090)
 
 ## Version 4.1.3 20250523
