@@ -587,7 +587,6 @@ async function doSingleTargetActionToHit(item, options) {
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
     const actor = item.actor;
-    //const originalItem = fromUuidSync(item.system._active.__originalUuid);
 
     // Educated guess for token
     const token =
