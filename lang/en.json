@@ -308,8 +308,8 @@
             "Hint": "Show only the combatants that you can currently see. When a combatant goes around a corner or turns invisible, they will not show up on the combat tracker. Currently experimental."
         },
         "StrEnd": {
-            "Name": "Heroic Strength & Endurance",
-            "Hint": "By default using STR costs 1 END per 10 points of STR used but can optionally be 1 END per 5 STR used.",
+            "Name": "Strength & Endurance",
+            "Hint": "Choose how much endurance STR costs. Standard rule is 1 END per 10 STR but can optionally be 1 END per 5 STR.",
             "Choices": {
                 "five": "1 END per 5 STR",
                 "ten": "1 END per 10 STR"

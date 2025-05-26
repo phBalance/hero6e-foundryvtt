@@ -84,7 +84,9 @@ export class HeroSystemActiveEffectConfig extends FoundryVttActiveEffectConfig {
 
         const durationSection = html.find("section[data-tab='duration']")?.[0];
         if (durationSection) {
-            const remaining = context.source.duration.startTime + context.source.duration.seconds - game.time.worldTime;
+            const remaining =
+                context.source.duration.startTime + context.source.duration.seconds - game.time.worldTime ||
+                "Does not fade";
             const startTimeDisplay = new Date(context.source.duration.startTime * 1000)
                 .toUTCString()
                 .replace(" GMT", "");
