@@ -1,7 +1,8 @@
 # Releases
 
-## Version 4.1.4 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.4 20250525 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Initial FoundryVTT V13 support. Note that there are many modules will not work and you may wish to delay updating FoundryVTT until your favorite modules are supported. There are still [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility) but we believe it will be good enough for a game.
 - Improved V13 support. [#2316](https://github.com/dmdorman/hero6e-foundryvtt/issues/2316) [#2292](https://github.com/dmdorman/hero6e-foundryvtt/issues/2292) [#2352](https://github.com/dmdorman/hero6e-foundryvtt/issues/2352)
 - Heroic characters are no longer forced to use 1 END per 5 STR. All actors will now use whatever the world setting is. [#2335](https://github.com/dmdorman/hero6e-foundryvtt/issues/2335)
 - Improved support for [Automated Animations](https://foundryvtt.com/packages/autoanimations) module. [#1090](https://github.com/dmdorman/hero6e-foundryvtt/issues/1090)
