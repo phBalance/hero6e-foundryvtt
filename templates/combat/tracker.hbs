@@ -3,8 +3,8 @@
     {{#each segments}}
 
         <li class="segment-container">
-            <h3 class="{{#if this.length}}segment-has-items{{else}}segment-inactive{{/if}} segment-header {{#if (eq @index @root.combat.current.segment)}}segment-active{{/if}}">Segment {{@index}} {{#if @root/alphaTesting}}[tokens:{{this.length}}]{{/if}}</h3>
-            <ol class="segment-content" {{#if (or (eq @index @root.combat.current.segment) (and (eq @root.combat.round 0) (eq @index 12)))}}{{else}} 
+            <h3 class="{{#if this.length}}segment-has-items{{else}}segment-inactive{{/if}} segment-header {{#if (activeSegment @index @root.combat)}}segment-active{{/if}}">Segment {{@index}} {{#if @root/alphaTesting}}[tokens:{{this.length}}]{{/if}}</h3>
+            <ol class="segment-content" {{#if (expandSegment @index @root.combat)}}{{else}} 
             style="display:none"
                 {{/if}} data-segment-id="{{@index}}">
 

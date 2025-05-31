@@ -12,7 +12,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
         return foundry.utils.mergeObject(super.defaultOptions, {
             // id: "combat",
             template: this.singleCombatantTracker
-                ? `systems/${HEROSYS.module}/templates/combat/combat-tracker-single.hbs`
+                ? `systems/${HEROSYS.module}/templates/combat/combat-tracker.hbs`
                 : `systems/${HEROSYS.module}/templates/combat/combat-tracker.hbs`,
             // title: "COMBAT.SidebarTitle",
             // scrollY: [".directory-list"],

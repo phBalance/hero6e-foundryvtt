@@ -269,6 +269,11 @@ export class HeroSystem6eCombat extends Combat {
     async assignSegments(tokenId) {
         if (!tokenId) return;
 
+        if (!HeroSystem6eCombat.singleCombatantTracker) {
+            console.warn("assignedSegments called for singleCombatantTracker");
+            return;
+        }
+
         try {
             const tokenCombatants = this.combatants.filter((o) => o.tokenId === tokenId);
             const tokenCombatantCount = tokenCombatants.length;
@@ -479,7 +484,7 @@ export class HeroSystem6eCombat extends Combat {
             turn: this.turn ?? null,
             combatantId: combatant?.id || null,
             tokenId: combatant?.tokenId || null,
-            segment: combatant?.flags[game.system.id]?.segment || null,
+            segment: combatant?.flags[game.system.id]?.segment || this?.flags[game.system.id]?.segment || null,
             name: combatant?.token?.name || combatant?.actor?.name || null,
             initiative: combatant?.initiative || null,
         };
@@ -1007,35 +1012,53 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`%c Hero | nextTurn ${game.time.worldTime}`, "background: #229; color: #bada55");
         }
         const originalRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
-        //const originalRound = this.round;
-        //const _nextTurn = await super.nextTurn();
 
         let turn = this.turn ?? -1;
-        let skip = this.settings.skipDefeated;
+        const skip = this.settings.skipDefeated;
 
         // Determine the next turn number
         let next = null;
-        if (skip) {
-            for (let [i, t] of this.turns.entries()) {
-                if (i <= turn) continue;
-                if (t.isDefeated) continue;
-                next = i;
-                break;
-            }
-        } else next = turn + 1;
 
-        // Maybe advance to the next round
-        let round = this.round;
-        if (this.round === 0 || next === null || next >= this.turns.length) {
-            return this.nextRound();
+        if (!HeroSystem6eCombat.singleCombatantTracker) {
+            if (skip) {
+                for (let [i, t] of this.turns.entries()) {
+                    if (i <= turn) continue;
+                    if (t.isDefeated) continue;
+                    next = i;
+                    break;
+                }
+            } else next = turn + 1;
+
+            // Maybe advance to the next round
+            if (this.round === 0 || next === null || next >= this.turns.length) {
+                return this.nextRound();
+            }
+        } else {
+            // SingleCombatant
+
+            // Loop thru turns to find the next combatant that hasPhase on this segment
+            for (let i = 0; i <= this.turns.length * 12; i++) {
+                this.turn++;
+                if (this.turn >= this.turns.length) {
+                    this.turn = 0;
+                    this.flags[game.system.id].segment++;
+                }
+                if (this.flags[game.system.id].segment > 12) {
+                    return this.nextRound();
+                }
+
+                if (this.turns[this.turn]?.hasPhase(this.flags[game.system.id].segment)) {
+                    if (!this.settings.skipDefeated || !this.turns[this.turn].isDefeated) {
+                        break;
+                    }
+                }
+            }
         }
 
         const newRunningSegment = this.round * 12 + this.nextCombatant?.flags[game.system.id]?.segment;
-        //const newRound = this.round;
 
-        //if (originalRunningSegment != newRunningSegment) {
         const advanceTime = newRunningSegment - originalRunningSegment;
-        const updateData = { round, turn: next };
+        const updateData = { round: this.round, turn: next };
         const updateOptions = { direction: 1, worldTime: { delta: advanceTime } };
 
         //console.log("nextTurn before game.time.advance", game.time.worldTime, advanceTime);
@@ -1043,30 +1066,6 @@ export class HeroSystem6eCombat extends Combat {
 
         //const _gt = game.time.worldTime;
         await this.update(updateData, updateOptions);
-
-        // Hack to let worldTime update, which we need to expire effects on the correct phase within each segment.
-        // if (advanceTime) {
-        //     for (let x = 0; x < 200; x++) {
-        //         const _gt2 = game.time.worldTime;
-        //         if (_gt2 != _gt) break;
-        //         console.warn("Waiting for game.time.advance", _gt, _gt2);
-        //         await new Promise((resolve) => setTimeout(resolve, 10));
-        //     }
-        //     if (game.time.worldTime === _gt) {
-        //         console.warn(`Worldtime did not advance when expected`, _gt, game.time.worldTime);
-        //     }
-        // }
-        // console.log("nextTurn after game.time.advance", game.time.worldTime);
-
-        // && originalRound === newRound) {
-
-        //console.log(originalRunningSegment, newRunningSegment, newRunningSegment - originalRunningSegment);
-        // console.log("nextTurn game.time.advance", game.time.worldTime);
-        // await game.time.advance(advanceTime);
-        // console.log("nextTurn game.time.advance", game.time.worldTime);
-        //}
-
-        //return;
     }
 
     async _onUpdate(...args) {
@@ -1120,9 +1119,11 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | nextRound`);
         }
-        const originalRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
+        const originalRunningSegment =
+            this.round * 12 + (this.combatant?.flags[game.system.id]?.segment || this.flags?.[game.system.id]?.segment);
         const _nextRound = await super.nextRound();
-        const newRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
+        const newRunningSegment =
+            this.round * 12 + (this.combatant?.flags[game.system.id]?.segment || this.flags?.[game.system.id]?.segment);
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
             await game.time.advance(advanceTime);

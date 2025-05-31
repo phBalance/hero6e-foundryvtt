@@ -70,6 +70,7 @@ Hooks.once("init", async function () {
     // Some v13 warning still slip in during initial load, re-applying filter is a temp fix.
 
     // CONFIG.debug.hooks = true;
+    CONFIG.debug.combat = true;
 
     // Custom HeroSystem VisionMode
     setPerceptionModes();

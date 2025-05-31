@@ -34,7 +34,7 @@ ol#combat-tracker {
 }
 
 .combat-sidebar .combat-tracker .segment-active {
-    background-color: var(--color-border-highlight);
+    background-color: var(--color-border-highlight, var(--color-shadow-primary, #ff6400));
 }
 
 .hero-combat-tracker-resource {
