@@ -2409,7 +2409,8 @@ export class HeroSystem6eItem extends Item {
             }
 
             if (changed && this.id && this.system.XMLID === "DENSITYINCREASE") {
-                const strAdd = Math.floor(this.system.value) * 5;
+                const noStrIncrease = this.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
+                const strAdd = noStrIncrease ? 0 : Math.floor(this.system.value) * 5;
                 const pdAdd = Math.floor(this.system.value);
                 const edAdd = Math.floor(this.system.value);
 
@@ -2936,15 +2937,6 @@ export class HeroSystem6eItem extends Item {
         const powerXmlId = system.XMLID;
 
         switch (powerXmlId) {
-            case "DENSITYINCREASE":
-                // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
-                system.description = `${system.ALIAS} (${Math.pow(2, system.value) * 100} kg mass, +${
-                    system.value * 5
-                } STR, +${system.value} PD/ED, -${
-                    this.actor?.system.is5e ? system.value + '"' : system.value * 2 + "m"
-                } KB)`;
-                break;
-
             case "GROWTH": {
                 // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide) // Growth5e (+5 STR, +1 BODY, +1 STUN, -1" KB, 200 kg, +0 DCV, +0 PER Rolls to perceive character, 2 m tall, 1 m wide)
                 // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.

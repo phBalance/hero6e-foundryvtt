@@ -1,4 +1,8 @@
-import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "./utility/units.mjs";
+import {
+    getRoundedUpDistanceInSystemUnits,
+    getSystemDisplayUnits,
+    hexDistanceToSystemDisplayString,
+} from "./utility/units.mjs";
 import * as heroDice from "./utility/dice.mjs";
 import { createDefenseProfile } from "./utility/defense.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
@@ -5331,6 +5335,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            descriptionFactory: function (item) {
+                const noStrIncrease = item.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
+                return `${item.system.ALIAS} (${Math.pow(2, item.system.value) * 100} kg mass, +${
+                    noStrIncrease ? 0 : item.system.value * 5
+                } STR, +${item.system.value} PD/ED, -${hexDistanceToSystemDisplayString(item.system.value, item.actor)} KB)`;
+            },
             xml: `<POWER XMLID="DENSITYINCREASE" ID="1709333874268" BASECOST="0.0" LEVELS="1" ALIAS="Density Increase" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {

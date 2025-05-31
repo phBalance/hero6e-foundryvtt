@@ -8446,6 +8446,95 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 26);
                 });
             });
+
+            describe("Density Increase", function () {
+                describe("5e", function () {
+                    const contents = `
+                        <POWER XMLID="DENSITYINCREASE" ID="1748706662356" BASECOST="0.0" LEVELS="5" ALIAS="Density Increase" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="NOSTRINCREASE" ID="1748707048387" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            `Density Increase (3200 kg mass, +0 STR, +5 PD/ED, -5" KB) (25 Active Points); No STR Increase (-1/2)`,
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 17);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 25);
+                    });
+                });
+
+                describe("6e", function () {
+                    const contents = `
+                        <POWER XMLID="DENSITYINCREASE" ID="1748707197339" BASECOST="0.0" LEVELS="7" ALIAS="Density Increase" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            `Density Increase (12800 kg mass, +35 STR, +7 PD/ED, -14m KB)`,
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 28);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 28);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
