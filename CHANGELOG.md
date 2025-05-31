@@ -2,6 +2,8 @@
 
 ## Version 4.1.5 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Correct Density Increase mass and STR with no STR increase limitation. [#2391](https://github.com/dmdorman/hero6e-foundryvtt/issues/2391)
+
 ## Version 4.1.4 20250525
 
 - Initial FoundryVTT V13 support. Note that there are many modules will not work and you may wish to delay updating FoundryVTT until your favorite modules are supported. There are still [known v13 compatibility issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av13compatibility) but we believe it will be good enough for a game.

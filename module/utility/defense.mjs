@@ -43,23 +43,6 @@ export function createDefenseProfile(actorItemDefense, attackItem, value, option
         });
     }
 
-    // Careful not to include KB in PD/ED defenses
-    // if (options?.knockback) {
-    //     defenseProfileArray.push({
-    //         name: options.name || `KB`,
-    //         value: options?.knockback * (actorItemDefense.actor?.is5e ? 0.5 : 1),
-    //         title:
-    //             options.title ||
-    //             `${itemNameExpanded}\nKnockback Resistance: ${distanceWithActorUnits(
-    //                 options.knockback,
-    //                 actorItemDefense.actor,
-    //             )}`,
-    //         shortDesc: itemNameExpanded,
-    //         operation: options.operation || "add",
-    //         options,
-    //     });
-    // }
-
     return defenseProfileArray;
 }
 
