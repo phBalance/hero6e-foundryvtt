@@ -2938,7 +2938,7 @@ export class HeroSystem6eItem extends Item {
         switch (powerXmlId) {
             case "DENSITYINCREASE":
                 // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
-                system.description = `${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass, +${
+                system.description = `${system.ALIAS} (${Math.pow(2, system.value) * 100} kg mass, +${
                     system.value * 5
                 } STR, +${system.value} PD/ED, -${
                     this.actor?.system.is5e ? system.value + '"' : system.value * 2 + "m"
