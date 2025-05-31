@@ -339,7 +339,7 @@ export class HeroSystem6eCombat extends Combat {
 
     async extraCombatants() {
         if (HeroSystem6eCombat.singleCombatantTracker) {
-            ui.notifications.error(`Calling extraCombatants with singleCombatantTracker`);
+            console.warn(`Calling extraCombatants with singleCombatantTracker`);
             return;
         }
 

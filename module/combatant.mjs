@@ -58,6 +58,6 @@ export class HeroSystem6eCombatant extends Combatant {
                 ids = [...ids, ...extraCombatantsWithSameTokenId.map((ec) => ec.id)];
             }
         }
-        await super.deleteDocuments(ids, operation);
+        return await super.deleteDocuments(ids, operation);
     }
 }
