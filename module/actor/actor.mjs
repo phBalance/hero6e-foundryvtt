@@ -239,9 +239,13 @@ export class HeroSystem6eActor extends Actor {
             new Dialog(data, null).render(true);
 
             async function _processChangeType(html) {
-                await actor.update({
-                    type: html.find("input:checked")[0].value,
-                });
+                await actor.update(
+                    {
+                        type: html.find("input:checked")[0].value,
+                        [`==system`]: actor.system,
+                    },
+                    { recursive: false },
+                );
             }
         });
     }
