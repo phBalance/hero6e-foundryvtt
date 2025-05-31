@@ -140,10 +140,6 @@ function getScopedFlagValue(obj, scope, ...args) {
 }
 
 function expandSegment(index, combat) {
-    //if (index === 6) debugger;
-    if (index === parseInt(combat.flags?.[game.system.id]?.segment)) {
-        return true;
-    }
     if (index === combat.current?.segment) {
         return true;
     }
@@ -158,9 +154,9 @@ function activeSegment(index, combat) {
     if (combat.round === 0) {
         return false;
     }
-    if (index === parseInt(combat.flags?.[game.system.id]?.segment)) {
-        return true;
-    }
+    // if (index === parseInt(combat.flags?.[game.system.id]?.segment)) {
+    //     return true;
+    // }
     if (index === combat.current?.segment) {
         return true;
     }

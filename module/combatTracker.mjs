@@ -107,6 +107,14 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
                 console.error(e);
             }
 
+            // try {
+            //     for (let t = 0; t < context.turns.length; t++) {
+            //         context.turns[t].turn = t;
+            //     }
+            // } catch (e) {
+            //     console.error(e);
+            // }
+
             try {
                 if (game.settings.get(HEROSYS.module, "combatTrackerDispositionHighlighting")) {
                     const turnsDisposition = context.turns.map((turn) => {
@@ -145,9 +153,12 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
                 context.segments[s] = [];
                 try {
                     for (let [t, turn] of context.turns.entries()) {
+                        // if (!turn.flags?.[game.system.id]?.segment) {
+                        //     console.warn(`missing segment:${s} turn:${t}`, turn);
+                        // }
                         if (turn.flags?.[game.system.id]?.segment === s) {
+                            turn.turnNumber = t;
                             context.segments[s].push(turn);
-                            turn.flags[game.system.id].turnNumber = t;
                         }
                     }
                 } catch (e) {
@@ -156,10 +167,11 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
             }
 
             // Debug: assign them to segment 12 if we don't know what to do with them
-            for (const [, turn] of context.turns.entries()) {
+            for (const [t, turn] of context.turns.entries()) {
                 // console.debug(t, turn);
                 if (isNaN(turn.flags?.[game.system.id]?.segment)) {
                     context.segments[12].push(turn);
+                    console.warn(`Missing segment`, t, turn);
                 }
             }
             //context._segments = "test";
@@ -220,7 +232,11 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
                     for (const turn of context.turns) {
                         const combatant = combat.combatants.find((c) => c.id === turn.id);
                         if (combatant.hasPhase(s)) {
-                            context.segments[s].push({ ...turn, segment: s, css: turn.css.replace("active", "") });
+                            context.segments[s].push({
+                                ...turn,
+                                segment: s,
+                                css: s !== combat.current.segment ? turn.css.replace("active", "") : turn.css,
+                            });
                         }
                     }
                 }
