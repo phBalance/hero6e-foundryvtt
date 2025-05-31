@@ -3,7 +3,7 @@
 ## Version 4.1.5 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Correct Density Increase mass and STR with no STR increase limitation. [#2391](https://github.com/dmdorman/hero6e-foundryvtt/issues/2391)
-- Minor combat tracker fixes [#2377](https://github.com/dmdorman/hero6e-foundryvtt/issues/2377)
+- Minor combat tracker fixes [#2377](https://github.com/dmdorman/hero6e-foundryvtt/issues/2377) [#2386](https://github.com/dmdorman/hero6e-foundryvtt/issues/2386)
 
 ## Version 4.1.4 20250525
 
