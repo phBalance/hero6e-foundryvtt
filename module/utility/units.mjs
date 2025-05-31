@@ -9,15 +9,26 @@ export function getSystemDisplayUnits(is5e) {
 
 /**
  *
+ * @param {number} distanceInSystemUnits
  * @param {object} actor
  * @returns number
  */
 export function convertSystemUnitsToMetres(distanceInSystemUnits, actor) {
-    return distanceInSystemUnits * actor?.system?.is5e ? 2 : 1;
+    return distanceInSystemUnits * (actor?.system?.is5e ? 2 : 1);
 }
 
-export function distanceWithActorUnits(distanceInSystemUnits, actor) {
-    return `${distanceInSystemUnits * (actor?.system?.is5e ? 2 : 1)}${actor?.system?.is5e ? `"` : `m`}`;
+/**
+ *
+ * @param {number} distanceInHexes
+ * @param {object} actor
+ * @returns number - number of system units of the hex (same for 5e and double for 6e)
+ */
+export function convertHexesToSystemUnits(distanceInHexes, actor) {
+    return distanceInHexes * (actor?.system?.is5e ? 1 : 2);
+}
+
+export function hexDistanceToSystemDisplayString(distanceInHexes, actor) {
+    return `${convertHexesToSystemUnits(distanceInHexes, actor)}${getSystemDisplayUnits(actor?.system?.is5e)}`;
 }
 
 /**
