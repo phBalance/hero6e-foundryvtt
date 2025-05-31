@@ -162,7 +162,7 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         await super.deleteCombatants(tokens, combat);
 
         combat ??= game.combats.viewed;
-        if (combat) {
+        if (combat?.extraCombatants) {
             await combat.extraCombatants();
         }
     }
