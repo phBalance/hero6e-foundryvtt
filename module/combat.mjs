@@ -100,91 +100,81 @@ export class HeroSystem6eCombat extends Combat {
      */
     _sortCombatants(a, b) {
         try {
-            if (!HeroSystem6eCombat.singleCombatantTracker) {
-                const actorA = game.actors.get(a.actorId);
-                const actorB = game.actors.get(b.actorId);
-                // Lightning Reflexes
-                // const lrA = Number.isNumeric(a.flags[game.system.id]?.lightningReflexes?.levels)
-                //     ? a.flags[game.system.id]?.lightningReflexes.levels
-                //     : 0;
-                // const lrB = Number.isNumeric(b.flags[game.system.id]?.lightningReflexes?.levels)
-                //     ? b.flags[game.system.id]?.lightningReflexes.levels
-                //     : 0;
+            const actorA = game.actors.get(a.actorId);
+            const actorB = game.actors.get(b.actorId);
+            // Lightning Reflexes
+            // const lrA = Number.isNumeric(a.flags[game.system.id]?.lightningReflexes?.levels)
+            //     ? a.flags[game.system.id]?.lightningReflexes.levels
+            //     : 0;
+            // const lrB = Number.isNumeric(b.flags[game.system.id]?.lightningReflexes?.levels)
+            //     ? b.flags[game.system.id]?.lightningReflexes.levels
+            //     : 0;
 
-                // Sort by segment first
-                const segA = Number.isNumeric(a.flags[game.system.id]?.segment)
-                    ? a.flags[game.system.id].segment
-                    : -Infinity;
-                const segB = Number.isNumeric(b.flags[game.system.id]?.segment)
-                    ? b.flags[game.system.id].segment
-                    : -Infinity;
+            // Sort by segment first
+            const segA = Number.isNumeric(a.flags[game.system.id]?.segment)
+                ? a.flags[game.system.id].segment
+                : -Infinity;
+            const segB = Number.isNumeric(b.flags[game.system.id]?.segment)
+                ? b.flags[game.system.id].segment
+                : -Infinity;
 
-                // Then by initiative
-                const initA = Number.isNumeric(a.initiative) ? a.initiative : -Infinity;
-                const initB = Number.isNumeric(b.initiative) ? b.initiative : -Infinity;
+            // Then by initiative
+            const initA = Number.isNumeric(a.initiative) ? a.initiative : -Infinity;
+            const initB = Number.isNumeric(b.initiative) ? b.initiative : -Infinity;
 
-                // Alternately, the GM may dispense with the
-                // DEX Roll (perhaps as a way of speeding up
-                // combat) and allow one of the characters to go first
-                // based on their respective abilities. Three possibilities
-                // include: the character with the highest INT
-                // acts first (if their INTs are also tied, use PRE); the
-                // character with Fast Draw acts first (if both have
-                // Fast Draw, the one with the highest roll acts first);
-                // or if one character has a Held Action and the other
-                // does not, the character with the Held Action gets
-                // to act first.
+            // Alternately, the GM may dispense with the
+            // DEX Roll (perhaps as a way of speeding up
+            // combat) and allow one of the characters to go first
+            // based on their respective abilities. Three possibilities
+            // include: the character with the highest INT
+            // acts first (if their INTs are also tied, use PRE); the
+            // character with Fast Draw acts first (if both have
+            // Fast Draw, the one with the highest roll acts first);
+            // or if one character has a Held Action and the other
+            // does not, the character with the Held Action gets
+            // to act first.
 
-                // Intelligence
-                const intA = Number.isNumeric(actorA.system.characteristics.int?.value)
-                    ? actorA.system.characteristics.int.value
-                    : -Infinity;
-                const intB = Number.isNumeric(actorB.system.characteristics.int?.value)
-                    ? actorB.system.characteristics.int.value
-                    : -Infinity;
+            // Intelligence
+            const intA = Number.isNumeric(actorA.system.characteristics.int?.value)
+                ? actorA.system.characteristics.int.value
+                : -Infinity;
+            const intB = Number.isNumeric(actorB.system.characteristics.int?.value)
+                ? actorB.system.characteristics.int.value
+                : -Infinity;
 
-                // Presence
-                const preA = Number.isNumeric(actorA.system.characteristics.pre?.value)
-                    ? actorA.system.characteristics.pre.value
-                    : -Infinity;
-                const preB = Number.isNumeric(actorB.system.characteristics.pre?.value)
-                    ? actorB.system.characteristics.pre.value
-                    : -Infinity;
+            // Presence
+            const preA = Number.isNumeric(actorA.system.characteristics.pre?.value)
+                ? actorA.system.characteristics.pre.value
+                : -Infinity;
+            const preB = Number.isNumeric(actorB.system.characteristics.pre?.value)
+                ? actorB.system.characteristics.pre.value
+                : -Infinity;
 
-                // Then by Speed
-                // Rules don't specifically state to use SPD for ties, but seems like the right thing to do
-                const spdA = Number.isNumeric(actorA.system.characteristics.spd?.value)
-                    ? actorA.system.characteristics.spd.value
-                    : -Infinity;
-                const spdB = Number.isNumeric(actorB.system.characteristics.spd?.value)
-                    ? actorB.system.characteristics.spd.value
-                    : -Infinity;
+            // Then by Speed
+            // Rules don't specifically state to use SPD for ties, but seems like the right thing to do
+            const spdA = Number.isNumeric(actorA.system.characteristics.spd?.value)
+                ? actorA.system.characteristics.spd.value
+                : -Infinity;
+            const spdB = Number.isNumeric(actorB.system.characteristics.spd?.value)
+                ? actorB.system.characteristics.spd.value
+                : -Infinity;
 
-                // Then by hasPlayerOwner
-                // Rules don't specifically state that ties go to players, but seems like the right thing to do
+            // Then by hasPlayerOwner
+            // Rules don't specifically state that ties go to players, but seems like the right thing to do
 
-                // Finally by tokenId
-                // We need some way to break ties.
-                // Champions suggests rolling a d6 (which we don't currently support)
+            // Finally by tokenId
+            // We need some way to break ties.
+            // Champions suggests rolling a d6 (which we don't currently support)
 
-                return (
-                    segA - segB ||
-                    initB - initA ||
-                    intB - intA ||
-                    preB - preA ||
-                    spdB - spdA ||
-                    (a.hasPlayerOwner === b.hasPlayerOwner ? 0 : a.hasPlayerOwner ? -1 : 1) ||
-                    a.tokenId.localeCompare(b.tokenId)
-                );
-            } else {
-                const ia =
-                    a.flags[game.system.id].nextPhase?.initiative ||
-                    (Number.isNumeric(a.initiative) ? a.initiative : -Infinity);
-                const ib =
-                    b.flags[game.system.id].nextPhase?.initiative ||
-                    (Number.isNumeric(b.initiative) ? b.initiative : -Infinity);
-                return ib - ia || (a.id > b.id ? 1 : -1);
-            }
+            return (
+                segA - segB ||
+                initB - initA ||
+                intB - intA ||
+                preB - preA ||
+                spdB - spdA ||
+                (a.hasPlayerOwner === b.hasPlayerOwner ? 0 : a.hasPlayerOwner ? -1 : 1) ||
+                a.tokenId.localeCompare(b.tokenId)
+            );
         } catch (e) {
             console.error(e);
             return 0;
@@ -239,11 +229,13 @@ export class HeroSystem6eCombat extends Combat {
             userId,
         );
 
-        // Add or remove extra combatants based on SPD or Lightning Reflexes
-        await this.extraCombatants();
+        if (!HeroSystem6eCombat.singleCombatantTracker) {
+            // Add or remove extra combatants based on SPD or Lightning Reflexes
+            await this.extraCombatants();
 
-        for (const tokenId of [...new Set(documents.map((o) => o.tokenId))]) {
-            await this.assignSegments(tokenId);
+            for (const tokenId of [...new Set(documents.map((o) => o.tokenId))]) {
+                await this.assignSegments(tokenId);
+            }
         }
     }
 
@@ -268,8 +260,10 @@ export class HeroSystem6eCombat extends Combat {
             userId,
         );
 
-        // Add or remove extra combatants based on SPD or Lightning Reflexes (shouldn't be needed as we have overrides for combatant deletes via UI)
-        //await this.extraCombatants();
+        // if (!HeroSystem6eCombat.singleCombatantTracker) {
+        //     // Add or remove extra combatants based on SPD or Lightning Reflexes (shouldn't be needed as we have overrides for combatant deletes via UI)
+        //     //await this.extraCombatants();
+        // }
     }
 
     async assignSegments(tokenId) {
@@ -344,6 +338,11 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async extraCombatants() {
+        if (HeroSystem6eCombat.singleCombatantTracker) {
+            ui.notifications.error(`Calling extraCombatants with singleCombatantTracker`);
+            return;
+        }
+
         if (CONFIG.debug.combat) {
             console.debug(`Hero | extraCombatants`);
         }
