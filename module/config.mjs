@@ -4431,12 +4431,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
             },
             appliesTo: function (item) {
-                // Maneuver or other poorly defined item, assume it applies
-                if (!item || !item.baseInfo) return true;
-                if (item.baseInfo.type.includes("adjustment")) return false;
-                if (item.baseInfo.type.includes("sense-affecting")) return false;
-                if (item.system.XMLID === "ENTANGLE") return false;
-                return true;
+                // Poorly defined item, assume it applies
+                if (!item || !item.baseInfo) {
+                    console.error(`DEADLYBLOW appliesTo invoked with invalid item`, item);
+                    return true;
+                }
+
+                // Deadly blow only applies either HKA or RKA as defined. Unfortunately HD doesn't
+                // specify if it's Hand-to-Hand or Ranged. For the time being we'll just consider it
+                // applicable to both and users will have to decide.
+                if (item.doesKillingDamage) {
+                    return true;
+                }
+
+                return false;
             },
             xml: `<TALENT XMLID="DEADLYBLOW" ID="1709159979031" BASECOST="0.0" LEVELS="2" ALIAS="Deadly Blow:  +2d6" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited circumstances]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" />`,
         },
