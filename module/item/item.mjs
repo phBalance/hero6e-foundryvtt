@@ -6,7 +6,14 @@ import {
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
-import { activateManeuver, maneuverCanBeAbortedTo, deactivateManeuver, enforceManeuverLimits } from "./maneuver.mjs";
+import {
+    activateManeuver,
+    maneuverCanBeAbortedTo,
+    deactivateManeuver,
+    enforceManeuverLimits,
+    maneuverHasBlockTrait,
+    maneuverHasFlashTrait,
+} from "./maneuver.mjs";
 import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,
@@ -657,7 +664,7 @@ export class HeroSystem6eItem extends Item {
     /**
      *
      * @param {Event} [event]
-     * @returns {Promise<any>}
+     * @returns {Promise<undefined>}
      */
     async toggle(event) {
         let item = this;
@@ -824,13 +831,11 @@ export class HeroSystem6eItem extends Item {
                             active: true,
                         },
                     );
-                    //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
                     active: true,
                 });
-                //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
             } else if (this.system.XMLID === "DESOLIDIFICATION") {
                 await this.actor.toggleStatusEffect(
                     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
@@ -838,7 +843,6 @@ export class HeroSystem6eItem extends Item {
                         active: true,
                     },
                 );
-                //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect);
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await activateManeuver(this);
             }
@@ -4328,7 +4332,27 @@ export class HeroSystem6eItem extends Item {
         this.system.noHitLocations = false;
 
         if (["maneuver", "martialart"].includes(this.type)) {
-            if (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
+            // Flash doesn't have a hit location
+            if (maneuverHasFlashTrait(this)) {
+                this.system.noHitLocations = true;
+            }
+
+            // Block doesn't use a hit location
+            if (maneuverHasBlockTrait(this)) {
+                this.system.noHitLocations = true;
+            }
+
+            // Many maneuvers don't use hit locations.
+            else if (
+                this.system.XMLID === "CHOKE" ||
+                this.system.XMLID === "DISARM" ||
+                this.system.XMLID === "DIVEFORCOVER" ||
+                this.system.XMLID === "GRAB" ||
+                this.system.XMLID === "GRABBY" ||
+                this.system.XMLID === "SHOVE" ||
+                this.system.XMLID === "THROW" ||
+                this.system.XMLID === "TRIP"
+            ) {
                 this.system.noHitLocations = true;
             }
         }

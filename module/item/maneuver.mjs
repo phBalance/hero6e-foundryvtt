@@ -76,7 +76,34 @@ function buildManeuverNextPhaseFlags(item) {
  */
 export function maneuverCanBeAbortedTo(item) {
     const maneuverHasAbortTrait = item.system.EFFECT?.toLowerCase().indexOf("abort") > -1;
-    return maneuverHasAbortTrait;
+    return !!maneuverHasAbortTrait;
+}
+
+/**
+ * Things which have the "block" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasBlockTrait(item) {
+    const maneuverHasBlockTrait = item.system.EFFECT?.search(/block/i) > -1;
+    return !!maneuverHasBlockTrait;
+}
+
+/**
+ * Things which have the "dodge" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasDodgeTrait(item) {
+    const maneuverHasDodgeTrait = item.system.EFFECT?.search(/dodge/i) > -1;
+    return !!maneuverHasDodgeTrait;
+}
+
+/**
+ * Things which have the "flash dc" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasFlashTrait(item) {
+    const maneuverHasFlashTrait = item.system.EFFECT?.search(/\[FLASHDC\]/i) > -1;
+    return !!maneuverHasFlashTrait;
 }
 
 /**
@@ -91,35 +118,29 @@ export async function activateManeuver(item) {
     // PH: FIXME: This could be simplified as it's really just an effect + the same modifiers
     const newActiveEffects = [];
 
-    // FIXME: These are supposed to be for HTH only and not apply to ranged combat by default
-    const maneuverDcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
-    const maneuverOcvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
+    // FIXME: These are supposed to be for HTH or ranged combat only except for dodge.
+    const dcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
+    const ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
 
-    // Enable the effect if there is one
-    const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
-    const maneuverHasBlockTrait = effect.indexOf("block") > -1;
+    // Types of effects for this maneuver?
+    const hasDodgeTrait = maneuverHasDodgeTrait(item);
+    const hasBlockTrait = maneuverHasBlockTrait(item);
 
     // Dodge effect
-    if (maneuverHasDodgeTrait) {
+    if (hasDodgeTrait) {
         const dodgeStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
         dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         dodgeStatusEffect.flags = buildManeuverNextPhaseFlags(item);
-        dodgeStatusEffect.changes = [
-            addDcvTraitToChanges(maneuverDcvTrait),
-            addOcvTraitToChanges(maneuverOcvTrait),
-        ].filter(Boolean);
+        dodgeStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
         newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
     // Block effect
-    else if (maneuverHasBlockTrait) {
+    else if (hasBlockTrait) {
         const blockStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect);
         blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         blockStatusEffect.flags = buildManeuverNextPhaseFlags(item);
-        blockStatusEffect.changes = [
-            addDcvTraitToChanges(maneuverDcvTrait),
-            addOcvTraitToChanges(maneuverOcvTrait),
-        ].filter(Boolean);
+        blockStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
         newActiveEffects.push(item.actor.addActiveEffect(blockStatusEffect));
     }
 
@@ -146,10 +167,7 @@ export async function activateManeuver(item) {
         const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
         maneuverEffect.flags = buildManeuverNextPhaseFlags(item);
         maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
-        maneuverEffect.changes = [
-            addDcvTraitToChanges(maneuverDcvTrait),
-            addOcvTraitToChanges(maneuverOcvTrait),
-        ].filter(Boolean);
+        maneuverEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
 
         if (item.actor.effects.find((ae) => ae.name === maneuverEffect.name)) {
             // Unclear why we are creating this effect a second time.
