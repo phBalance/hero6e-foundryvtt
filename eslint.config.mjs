@@ -1,13 +1,13 @@
 import js from "@eslint/js";
 import globals from "globals";
 
-import stylisticJs from "@stylistic/eslint-plugin-js";
+import stylistic from "@stylistic/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
     {
         plugins: {
-            "@stylistic/js": stylisticJs,
+            "@stylistic": stylistic,
         },
 
         languageOptions: {
