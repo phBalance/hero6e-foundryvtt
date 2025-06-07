@@ -2842,7 +2842,7 @@ export class HeroSystem6eItem extends Item {
                     const pCost = parseFloat(pMod.BASECOST || 0);
                     const mCost = parseFloat(mod?.BASECOST || 0);
                     if (mod && pCost === 0 && mCost === 0) {
-                        console.warn(`inconslusive parent/child mod BASECOST`);
+                        console.warn(`inconclusive parent/child mod BASECOST`);
                     }
                     if (!mod || (pCost < 0 && pCost < mCost)) {
                         // Keeping parent modifier
