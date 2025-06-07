@@ -19,6 +19,8 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("checkInit", checkInit);
     Handlebars.registerHelper("objectNumKeys", objectNumKeys);
     Handlebars.registerHelper("getScopedFlagValue", getScopedFlagValue);
+    Handlebars.registerHelper("expandSegment", expandSegment);
+    Handlebars.registerHelper("activeSegment", activeSegment);
 }
 
 function indexOf(str, searchTerm) {
@@ -73,6 +75,7 @@ function toUpperCase(str) {
 }
 
 function isActiveSegment(actives, index) {
+    console.error("isActiveSegment appears to be deprecated");
     return actives?.[index];
 }
 
@@ -134,4 +137,28 @@ function getScopedFlagValue(obj, scope, ...args) {
         console.error(e);
     }
     return null;
+}
+
+function expandSegment(index, combat) {
+    if (index === combat.current?.segment) {
+        return true;
+    }
+    if (index === 12 && combat.round === 0) {
+        return true;
+    }
+    return false;
+}
+
+function activeSegment(index, combat) {
+    //if (index === 6) debugger;
+    if (combat.round === 0) {
+        return false;
+    }
+    // if (index === parseInt(combat.flags?.[game.system.id]?.segment)) {
+    //     return true;
+    // }
+    if (index === combat.current?.segment) {
+        return true;
+    }
+    return false;
 }
