@@ -1116,27 +1116,25 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        if (true) {
-            // Loop thru turns to find the previous combatant that hasPhase on this segment
-            for (let i = 0; i <= this.turns.length * 12; i++) {
-                this.turn--;
-                if (this.turn < 0) {
-                    //await this.onPreviousHeroSegment();
-                    this.turn = this.turns.length;
-                    this.flags[game.system.id].segment--;
+        // Loop thru turns to find the previous combatant that hasPhase on this segment
+        for (let i = 0; i <= this.turns.length * 12; i++) {
+            this.turn--;
+            if (this.turn < 0) {
+                //await this.onPreviousHeroSegment();
+                this.turn = this.turns.length;
+                this.flags[game.system.id].segment--;
 
-                    if (this.flags[game.system.id].segment < 1) {
-                        return this.previousRound();
-                    }
-                }
-
-                if (this.round == 1 && this.flags[game.system.id].segment < 12) {
+                if (this.flags[game.system.id].segment < 1) {
                     return this.previousRound();
                 }
+            }
 
-                if (this.turns[this.turn]?.hasPhase(this.flags[game.system.id].segment)) {
-                    break;
-                }
+            if (this.round == 1 && this.flags[game.system.id].segment < 12) {
+                return this.previousRound();
+            }
+
+            if (this.turns[this.turn]?.hasPhase(this.flags[game.system.id].segment)) {
+                break;
             }
         }
 
