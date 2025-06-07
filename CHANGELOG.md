@@ -4,6 +4,7 @@
 
 - Correct Density Increase mass and STR with no STR increase limitation. [#2391](https://github.com/dmdorman/hero6e-foundryvtt/issues/2391)
 - Minor combat tracker fixes & tweaks [#2377](https://github.com/dmdorman/hero6e-foundryvtt/issues/2377) [#2386](https://github.com/dmdorman/hero6e-foundryvtt/issues/2386) [#2022](https://github.com/dmdorman/hero6e-foundryvtt/issues/2022)
+- Fix for complex powers with parent/child modifiers that prevented actor sheet from opening. [#2401](https://github.com/dmdorman/hero6e-foundryvtt/issues/2401)
 
 ## Version 4.1.4 20250525
 
