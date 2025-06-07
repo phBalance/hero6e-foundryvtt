@@ -2837,7 +2837,7 @@ export class HeroSystem6eItem extends Item {
                     // Sometimes the same modifiers is applied to item and items parent, we keep the most expensive one
                     const mod = _modifiers.find((mod) => mod.XMLID === pMod.XMLID);
 
-                    // Cannot use mod.cost because we trigger a stack overflow due to recursion.
+                    // Cannot use mod.cost because we may trigger a stack overflow due to recursion.
                     // Instead we will use a rough cost estimate using BASECOST
                     const pCost = parseFloat(pMod.BASECOST || 0);
                     const mCost = parseFloat(mod?.BASECOST || 0);
