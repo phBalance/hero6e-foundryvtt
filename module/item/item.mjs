@@ -2819,6 +2819,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get modifiers() {
+        //if (this.system.XMLID === "ENTANGLE") debugger;
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -2835,7 +2836,15 @@ export class HeroSystem6eItem extends Item {
 
                     // Sometimes the same modifiers is applied to item and items parent, we keep the most expensive one
                     const mod = _modifiers.find((mod) => mod.XMLID === pMod.XMLID);
-                    if (!mod || (pMod.cost < 0 && pMod.cost < mod.cost)) {
+
+                    // Cannot use mod.cost because we trigger a stack overflow due to recursion.
+                    // Instead we will use a rough cost estimate using BASECOST
+                    const pCost = parseFloat(pMod.BASECOST || 0);
+                    const mCost = parseFloat(mod?.BASECOST || 0);
+                    if (mod && pCost === 0 && mCost === 0) {
+                        console.warn(`inconslusive parent/child mod BASECOST`);
+                    }
+                    if (!mod || (pCost < 0 && pCost < mCost)) {
                         // Keeping parent modifier
                         _modifiers = _modifiers.filter((mod) => mod.XMLID !== pMod.XMLID);
                         _modifiers.push(new HeroSystem6eModifier(pMod._original || pMod, { item: this }));
