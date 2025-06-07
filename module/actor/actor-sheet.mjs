@@ -1071,7 +1071,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     }
 
     async _onItemDelete(event) {
-        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
+        const itemId = $(event.currentTarget.closest("[data-item-id]")).data().itemId;
         const item = this.actor.items.get(itemId);
 
         const content = `You are about to delete <b>${item.name}</b>${

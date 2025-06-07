@@ -1098,11 +1098,14 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | previousTurn`, "background: #222; color: #bada55");
         }
-        if (this.turn === 0 && this.round === 0) return this;
-        else if (this.turn <= 0 && this.turn !== null) return this.previousRound();
+        if (this.turn === 0 && this.round === 0) {
+            return this;
+        } else if (this.turn <= 0 && this.turn !== null) {
+            return this.previousRound();
+        }
         let previousTurn = (this.turn ?? this.turns.length) - 1;
 
-        const originalRunningSegment = this.round * 12 + this.combatant.flags[game.system.id]?.segment;
+        const originalRunningSegment = this.round * 12 + this.current.segment;
 
         // Hero combats start with round 1 and segment 12.
         // So anything less than segment 12 will call previousTurn
@@ -1110,6 +1113,30 @@ export class HeroSystem6eCombat extends Combat {
             const segment12turn = this.turns.findIndex((o) => o.flags[game.system.id]?.segment === 12) || 0;
             if (this.turn <= segment12turn) {
                 return this.previousRound();
+            }
+        }
+
+        if (true) {
+            // Loop thru turns to find the previous combatant that hasPhase on this segment
+            for (let i = 0; i <= this.turns.length * 12; i++) {
+                this.turn--;
+                if (this.turn < 0) {
+                    //await this.onPreviousHeroSegment();
+                    this.turn = this.turns.length;
+                    this.flags[game.system.id].segment--;
+
+                    if (this.flags[game.system.id].segment < 1) {
+                        return this.previousRound();
+                    }
+                }
+
+                if (this.round == 1 && this.flags[game.system.id].segment < 12) {
+                    return this.previousRound();
+                }
+
+                if (this.turns[this.turn]?.hasPhase(this.flags[game.system.id].segment)) {
+                    break;
+                }
             }
         }
 
@@ -1143,6 +1170,21 @@ export class HeroSystem6eCombat extends Combat {
         const originalRunningSegment =
             this.round * 12 + (this.combatant?.flags[game.system.id]?.segment || this.flags?.[game.system.id]?.segment);
         const _nextRound = await super.nextRound();
+
+        if (HeroSystem6eCombat.singleCombatantTracker) {
+            loop1: for (let s = 1; s <= 12; s++) {
+                for (const turn of this.turns) {
+                    if (turn.hasPhase(s)) {
+                        const updateData = {
+                            [`flags.${game.system.id}.segment`]: s,
+                        };
+                        await this.update(updateData);
+                        break loop1;
+                    }
+                }
+            }
+        }
+
         const newRunningSegment =
             this.round * 12 + (this.combatant?.flags[game.system.id]?.segment || this.flags?.[game.system.id]?.segment);
         if (originalRunningSegment != newRunningSegment) {
@@ -1150,8 +1192,10 @@ export class HeroSystem6eCombat extends Combat {
             await game.time.advance(advanceTime);
         }
 
-        const updateData = { [`flags.${game.system.id}.segment`]: this.turns[0].flags[game.system.id].segment };
-        await this.update(updateData);
+        if (!HeroSystem6eCombat.singleCombatantTracker) {
+            const updateData = { [`flags.${game.system.id}.segment`]: this.turns[0].flags[game.system.id].segment };
+            await this.update(updateData);
+        }
 
         return _nextRound;
     }
@@ -1170,10 +1214,14 @@ export class HeroSystem6eCombat extends Combat {
                 await game.time.advance(advanceTime);
             }
         }
-        const updateData = {
-            [`flags.${game.system.id}.segment`]: this.turns[this.turns.length - 1].flags[game.system.id].segment,
-        };
-        await this.update(updateData);
+
+        if (!HeroSystem6eCombat.singleCombatantTracker) {
+            const updateData = {
+                [`flags.${game.system.id}.segment`]: this.turns[this.turns.length - 1].flags[game.system.id].segment,
+            };
+            await this.update(updateData);
+        }
+
         return _previousRound;
     }
 
