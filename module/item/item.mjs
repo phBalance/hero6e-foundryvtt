@@ -57,6 +57,7 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("filterItem", filterItem);
     Handlebars.registerHelper("itemHasBehaviours", itemHasBehaviours);
     Handlebars.registerHelper("itemHasActionBehavior", itemHasActionBehavior);
+    Handlebars.registerHelper("itemPostHitActionString", itemPostHitActionString);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -172,6 +173,29 @@ function itemHasActionBehavior(item, actionBehavior) {
     } catch (e) {
         console.error(e);
         return false;
+    }
+}
+
+function itemPostHitActionString(item) {
+    try {
+        const isAdjustment = getPowerInfo({
+            item: item,
+        })?.type?.includes("adjustment");
+        const isSenseAffecting = item.isSenseAffecting();
+        const isManeuver = itemIsManeuver(item);
+
+        // Provide a more specific name
+        if (isAdjustment || isSenseAffecting) {
+            return `Roll ${item.system.XMLID}`;
+        } else if (isManeuver && (item.system.XMLID === "GRAB" || item.system.XMLID === "GRABBY")) {
+            return `Roll ${item.baseInfo.name}`;
+        }
+
+        // The default action
+        return "Roll Damage";
+    } catch (error) {
+        console.error(error);
+        return "invalid post to-hit action string";
     }
 }
 
