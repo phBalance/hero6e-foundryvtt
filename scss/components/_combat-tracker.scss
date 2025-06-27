@@ -60,3 +60,7 @@ $combat-tracker-hero-disposition-opacity-hover: 0.6;
     background: transparent;
     border: 1px solid var(--color-border-highlight, var(--color-shadow-primary, #ff6400));
 }
+
+.combat-sidebar .combatant {
+    border: 1px solid black;
+}

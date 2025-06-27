@@ -151,6 +151,17 @@ export class GenericRoller {
             },
         };
 
+        const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations");
+        if (includeHitLocation) {
+            options.hitLoc = [{ key: "none", label: `None/random` }];
+            for (const [key, obj] of Object.entries(CONFIG.HERO.hitLocations)) {
+                options.hitLoc.push({
+                    key: key,
+                    label: `${obj.label} (stun${obj.stunX} nStun${obj.nStunX} body${obj.bodyX})`,
+                });
+            }
+        }
+
         const template = await renderTemplate(
             `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
             options,
@@ -202,9 +213,7 @@ export class GenericRoller {
             .addHalfDice(userSelection.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
             .addDiceMinus1(userSelection.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
             .addNumber(userSelection.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
-
             .modifyTo5e(is5eAttack)
-
             .makeNormalRoll(damageType === "NORMAL")
             .makeKillingRoll(
                 damageType === "KILLING",
@@ -218,7 +227,13 @@ export class GenericRoller {
             .makeAdjustmentRoll(damageType === "ADJUSTMENT")
             .makeEntangleRoll(damageType === "ENTANGLE")
             .makeFlashRoll(damageType === "FLASH")
-            .makeEffectRoll(damageType === "EFFECT");
+            .makeEffectRoll(damageType === "EFFECT")
+            .addToHitLocation(
+                includeHitLocation,
+                userSelection.aim,
+                includeHitLocation && game.settings.get(HEROSYS.module, "hitLocTracking") === "all",
+                userSelection.aim === "none" ? "none" : userSelection.aimSide, // Can't just select a side to hit as that doesn't have a penalty
+            );
 
         await heroRoller.roll();
 
