@@ -34,9 +34,8 @@ export class HeroSystem6eCombat extends Combat {
 
             // Produce an initiative roll for the Combatant
             const characteristic = combatant.actor?.system?.initiativeCharacteristic || "dex";
-            const initValue =
-                (combatant.actor?.system.characteristics[characteristic]?.value || 0) +
-                parseInt(combatant.flags.hero6efoundryvttv2?.lightningReflexes?.levels || 0);
+            const initValue = combatant.actor?.system.characteristics[characteristic]?.value || 0;
+            //+parseInt(combatant.flags.hero6efoundryvttv2?.lightningReflexes?.levels || 0);
             if (
                 combatant.flags[game.system.id]?.initiative != initValue ||
                 combatant.flags[game.system.id]?.initiativeCharacteristic != characteristic
@@ -530,12 +529,12 @@ export class HeroSystem6eCombat extends Combat {
             );
         }
 
+        await super._onStartTurn(combatant);
+
         // We need a single combatant to store some flags. Like for DragRuler, end tracking, etc.
         // getCombatantByToken seems to get the first combatant in combat.turns that is for our token.
         // This likely causes issues when SPD/LightningReflexes changes.
         const masterCombatant = this.getCombatantByToken(combatant.tokenId);
-
-        await super._onStartTurn(combatant);
 
         if (!combatant) return;
 
@@ -827,26 +826,33 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        if (combatant.actor.statuses.has("stunned")) {
-            // const effect = combatant.actor.effects.contents.find((o) => o.statuses.has("stunned"));
-            // await effect.delete();
+        const lightningReflexes = combatant.actor?.items.find(
+            (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+        );
 
-            await combatant.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
-                active: false,
-            });
+        // If actor has Lightning Reflexes, then Only clear stunned/KO when on LR combatant
+        if (!lightningReflexes || combatant.flags[game.system.id]?.lightningReflexes) {
+            if (combatant.actor.statuses.has("stunned")) {
+                await combatant.actor.toggleStatusEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
+                    {
+                        active: false,
+                    },
+                );
 
-            const content = `${combatant.token.name} recovers from being stunned.`;
+                const content = `${combatant.token.name} recovers from being stunned.`;
 
-            const chatData = {
-                author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                content: content,
-            };
+                const chatData = {
+                    author: game.user._id,
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                    content: content,
+                };
 
-            await ChatMessage.create(chatData);
-        } else if (combatant.actor.statuses.has("knockedOut")) {
-            if (combatant.actor.system.characteristics.stun?.value >= -10) {
-                await combatant.actor.TakeRecovery(false, combatant.token);
+                await ChatMessage.create(chatData);
+            } else if (combatant.actor.statuses.has("knockedOut")) {
+                if (combatant.actor.system.characteristics.stun?.value >= -10) {
+                    await combatant.actor.TakeRecovery(false, combatant.token);
+                }
             }
         }
     }
