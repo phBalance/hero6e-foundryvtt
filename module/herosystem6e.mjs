@@ -5,7 +5,8 @@ import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import { HeroSystem6eCombatant } from "./combatant.mjs";
-import { HeroRuler } from "./ruler.mjs";
+import { HeroRuler } from "./heroRuler.mjs";
+import { HeroTokenRuler } from "./heroTokenRuler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { migrateWorld } from "./migration.mjs";
 import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
@@ -123,7 +124,12 @@ Hooks.once("init", async function () {
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-    CONFIG.Canvas.rulerClass = HeroRuler;
+    if (foundry.canvas.placeables) {
+        CONFIG.Token.rulerClass = HeroTokenRuler; //V13
+    } else {
+        CONFIG.Canvas.rulerClass = HeroRuler; // May not need for V13, needs more research
+    }
+
     CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
 
     Object.assign(CONFIG.ActiveEffect.dataModels, {

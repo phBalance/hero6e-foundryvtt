@@ -32,7 +32,7 @@ import {
     getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
-import { calculateVelocityInSystemUnits } from "../ruler.mjs";
+import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";

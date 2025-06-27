@@ -435,6 +435,12 @@ export class HeroRuler extends FoundryVttRuler {
  * @returns
  */
 export function calculateVelocityInSystemUnits(actor, token, targetToken) {
+    if (foundry.canvas.placeables) {
+        console.warn(
+            `V13: calculateVelocityInSystemUnits called in heroRuler.mjs.  Plan is to deprecate the heroRuler.mjs file.`,
+        );
+    }
+
     let velocity = 0;
 
     const combatants = game?.combat?.combatants;

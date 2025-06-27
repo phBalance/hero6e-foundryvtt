@@ -29,7 +29,7 @@ export class GenericRoller {
 
             const $chat = $(html).find(".chat-form");
             if ($chat.length === 0) {
-                console.warn(`unable to find dom element`);
+                //console.warn(`unable to find dom element`);
                 return;
             }
             const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
