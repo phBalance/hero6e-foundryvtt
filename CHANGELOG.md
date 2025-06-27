@@ -3,6 +3,7 @@
 ## Version 4.1.6 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Updated hitlocations labels. [#2403](https://github.com/dmdorman/hero6e-foundryvtt/issues/2403)
+- The STUNNED condition now only expires once per segment for actors with Lightning Reflexes. [#2404](https://github.com/dmdorman/hero6e-foundryvtt/issues/2404)
 
 ## Version 4.1.5 20250607
 
