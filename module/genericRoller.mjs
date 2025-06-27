@@ -213,9 +213,7 @@ export class GenericRoller {
             .addHalfDice(userSelection.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
             .addDiceMinus1(userSelection.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
             .addNumber(userSelection.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
-
             .modifyTo5e(is5eAttack)
-
             .makeNormalRoll(damageType === "NORMAL")
             .makeKillingRoll(
                 damageType === "KILLING",

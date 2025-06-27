@@ -4,6 +4,7 @@
 
 - Updated hitlocations labels. [#2403](https://github.com/dmdorman/hero6e-foundryvtt/issues/2403)
 - The STUNNED condition now only expires once per segment for actors with Lightning Reflexes. [#2404](https://github.com/dmdorman/hero6e-foundryvtt/issues/2404)
+- Generic damage roller now includes HIT LOCATION [#2398](https://github.com/dmdorman/hero6e-foundryvtt/issues/2398)
 
 ## Version 4.1.5 20250607
 
