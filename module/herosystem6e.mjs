@@ -126,6 +126,7 @@ Hooks.once("init", async function () {
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     if (foundry.canvas.placeables) {
         CONFIG.Token.rulerClass = HeroTokenRuler; //V13
+        CONFIG.Token.rulerClass.applyHeroMovementConfig();
     } else {
         CONFIG.Canvas.rulerClass = HeroRuler; // May not need for V13, needs more research
     }
