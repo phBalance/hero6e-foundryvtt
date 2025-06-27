@@ -17,4 +17,13 @@
             {{radioBoxes damageType.groupName damageType.choices checked=damageType.chosen localize=true}}
         </div>
     </div>
+
+    {{#if hitLoc}}
+        <div class="form-group">
+          <label>Placed Shot</label>
+          <select name="aim" style="max-width:234px">
+            {{selectOptions hitLoc selected=aim valueAttr="key" labelAttr="label" disabled="disabled"}}
+          </select>
+        </div>
+    {{/if}}
 </form>
