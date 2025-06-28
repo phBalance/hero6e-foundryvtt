@@ -62,28 +62,35 @@ export class HeroTokenRuler extends FoundryTokenRuler {
     #speedValueStyle(style, waypoint) {
         const colors = [0x33bc4e, 0xf1d836, 0x334ebc, 0xe72124];
 
+        // Technically should use RoundFavorPlayerDown,
+        // however in square grids the diagonals can make it hard to move so
+        // using Math.floor to provide a larger margin of rounding
         const movementCost = RoundFavorPlayerDown(waypoint.measurement.cost);
         let speed = waypoint.actionConfig.speed?.(this.token) ?? Infinity;
 
         if (speed % 2 !== 0) {
             speed += 1;
         }
+
+        // Exceeds non-combat (red)
         let index = 3;
 
         // NOTE: Comparing movementCost vs Speed works fine when there is
         // a single movement type.  But dones't work well for a mix of movement types.
 
-        // Noncombat
+        // Noncombat (blue)
         if (movementCost <= speed * 2) {
             index = 2;
         }
 
-        // Full Move
-        if (movementCost <= speed) {
+        // Full Move (yellow)
+        // diagonal moves with 1 (or super low) speed are tricky, a min of one square.
+        // Show it as full move instead of invalid
+        if (movementCost <= speed || movementCost <= 3) {
             index = 1;
         }
 
-        // Half Move
+        // Half Move (green)
         if (movementCost <= speed / 2) {
             index = 0;
         }
