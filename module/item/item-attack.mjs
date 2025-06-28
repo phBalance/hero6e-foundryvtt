@@ -15,7 +15,7 @@ import { HeroSystem6eItem, requiresASkillRollCheck, RequiresACharacteristicRollC
 import { ItemAttackFormApplication, getAoeTemplateForItem } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
-import { calculateVelocityInSystemUnits } from "../ruler.mjs";
+import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { Attack } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";

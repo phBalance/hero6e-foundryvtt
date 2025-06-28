@@ -1,10 +1,11 @@
 # Releases
 
-## Version 4.1.6 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.6 20250627 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Updated hitlocations labels. [#2403](https://github.com/dmdorman/hero6e-foundryvtt/issues/2403)
 - The STUNNED condition now only expires once per segment for actors with Lightning Reflexes. [#2404](https://github.com/dmdorman/hero6e-foundryvtt/issues/2404)
 - Generic damage roller now includes HIT LOCATION [#2398](https://github.com/dmdorman/hero6e-foundryvtt/issues/2398)
+- Improved V13 support for built in ruler. Movement selection + speed distance colors. [#2374](https://github.com/dmdorman/hero6e-foundryvtt/issues/2374) [#2366](https://github.com/dmdorman/hero6e-foundryvtt/issues/2366)
 
 ## Version 4.1.5 20250607
 

@@ -355,5 +355,13 @@
             "skill": "Skill",
             "talent": "Talent"
         }
+    },
+
+    "TOKEN.MOVEMENT":{
+    "ACTIONS": {
+      "teleport": {
+        "label": "Teleport"
+      }
     }
+  }
 }

@@ -32,7 +32,7 @@ import {
     getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
-import { calculateVelocityInSystemUnits } from "../ruler.mjs";
+import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -2694,8 +2694,16 @@ export class HeroSystem6eItem extends Item {
 
         // Keep track of is5e as it may be important (compendiums, transfer between 5e/6e actors)
         itemData.system ??= {};
+        if (actor?.system?.is5e == undefined) {
+            // Yuck
+            console.warn(`DefaultEdition was used to determine is5e for ${actor?.name}`);
+        }
         itemData.system.is5e =
-            actor?.system?.is5e || (game.settings.get(HEROSYS.module, "DefaultEdition") === "five" ? true : false);
+            actor?.system?.is5e == undefined
+                ? game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
+                    ? true
+                    : false
+                : actor?.system?.is5e;
 
         const powerList = (itemData.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e).filter(
             (possibleNonModifierOrAdder) =>

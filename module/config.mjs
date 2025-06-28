@@ -250,7 +250,7 @@ HERO.hitLocations = Object.freeze({
     },
 
     HeadShot: {
-        label: "HeadShot: Head - Shoulders",
+        label: "Head Shot: Head - Shoulders",
         stunX: null,
         nStunX: null,
         bodyX: null,
@@ -260,7 +260,7 @@ HERO.hitLocations = Object.freeze({
         isSpecialHl: true,
     },
     HighShot: {
-        label: "HighShot: Head - Vitals",
+        label: "High Shot: Head - Vitals",
         stunX: null,
         nStunX: null,
         bodyX: null,
@@ -270,7 +270,7 @@ HERO.hitLocations = Object.freeze({
         isSpecialHl: true,
     },
     BodyShot: {
-        label: "BodyShot: Hands - Legs)",
+        label: "Body Shot: Hands - Legs",
         stunX: null,
         nStunX: null,
         bodyX: null,
@@ -280,7 +280,7 @@ HERO.hitLocations = Object.freeze({
         isSpecialHl: true,
     },
     LowShot: {
-        label: "LowShot: Shoulders - Feet",
+        label: "Low Shot: Shoulders - Feet",
         stunX: null,
         nStunX: null,
         bodyX: null,
@@ -290,7 +290,7 @@ HERO.hitLocations = Object.freeze({
         isSpecialHl: true,
     },
     LegShot: {
-        label: "LegShot: Vitals - Feet",
+        label: "Leg Shot: Vitals - Feet",
         stunX: null,
         nStunX: null,
         bodyX: null,
