@@ -153,11 +153,14 @@ export class GenericRoller {
 
         const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations");
         if (includeHitLocation) {
-            options.hitLoc = [{ key: "none", label: `None/random` }];
+            options.hitLoc = [
+                { key: "noHitLocation", label: `No Hit Location` },
+                { key: "none", label: `Random` },
+            ];
             for (const [key, obj] of Object.entries(CONFIG.HERO.hitLocations)) {
                 options.hitLoc.push({
                     key: key,
-                    label: `${obj.label} (stun${obj.stunX} nStun${obj.nStunX} body${obj.bodyX})`,
+                    label: `${obj.label} ${obj.isSpecialHl ? "" : `(stun${obj.stunX} nStun${obj.nStunX} body${obj.bodyX})`}`,
                 });
             }
         }
@@ -229,7 +232,7 @@ export class GenericRoller {
             .makeFlashRoll(damageType === "FLASH")
             .makeEffectRoll(damageType === "EFFECT")
             .addToHitLocation(
-                includeHitLocation,
+                includeHitLocation && userSelection.aim !== "noHitLocation",
                 userSelection.aim,
                 includeHitLocation && game.settings.get(HEROSYS.module, "hitLocTracking") === "all",
                 userSelection.aim === "none" ? "none" : userSelection.aimSide, // Can't just select a side to hit as that doesn't have a penalty
