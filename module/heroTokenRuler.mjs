@@ -1,3 +1,5 @@
+import { RoundFavorPlayerDown } from "./utility/round.mjs";
+
 class HeroNullClass {}
 
 const FoundryTokenRuler = foundry.canvas.placeables?.tokens.TokenRuler || HeroNullClass;
@@ -28,6 +30,7 @@ export class HeroTokenRuler extends FoundryTokenRuler {
                 jump: {
                     canSelect: (token) => parseInt(token.actor?.system.characteristics.leaping?.value) > 0,
                     speed: (token) => parseInt(token.actor?.system.characteristics.leaping?.value) || 0,
+                    "-=getCostFunction": null, // default Foundry jump cost was "cost * 2"
                 },
                 swim: {
                     canSelect: (token) => parseInt(token.actor?.system.characteristics.swimming?.value) > 0,
@@ -43,6 +46,12 @@ export class HeroTokenRuler extends FoundryTokenRuler {
         );
     }
 
+    _getSegmentStyle(waypoint) {
+        const style = super._getSegmentStyle(waypoint);
+        this.#speedValueStyle(style, waypoint);
+        return style;
+    }
+
     _getGridHighlightStyle(waypoint, offset) {
         const style = super._getGridHighlightStyle(waypoint, offset);
         this.#speedValueStyle(style, waypoint);
@@ -51,19 +60,30 @@ export class HeroTokenRuler extends FoundryTokenRuler {
 
     /// Adjusts the grid or segment style based on the token's movement characteristics
     #speedValueStyle(style, waypoint) {
-        const colors = [0x33bc4e, 0xf1d836, 0xe72124];
+        const colors = [0x33bc4e, 0xf1d836, 0x334ebc, 0xe72124];
 
-        const movementCost = Math.floor(waypoint.measurement.cost);
-
+        const movementCost = RoundFavorPlayerDown(waypoint.measurement.cost);
         let speed = waypoint.actionConfig.speed?.(this.token) ?? Infinity;
-        if (speed % 2 !== 2) {
+
+        if (speed % 2 !== 0) {
             speed += 1;
         }
-        let index = 2;
+        let index = 3;
 
+        // NOTE: Comparing movementCost vs Speed works fine when there is
+        // a single movement type.  But dones't work well for a mix of movement types.
+
+        // Noncombat
+        if (movementCost <= speed * 2) {
+            index = 2;
+        }
+
+        // Full Move
         if (movementCost <= speed) {
             index = 1;
         }
+
+        // Half Move
         if (movementCost <= speed / 2) {
             index = 0;
         }
