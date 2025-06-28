@@ -62,11 +62,27 @@ export class HeroTokenRuler extends FoundryTokenRuler {
     #speedValueStyle(style, waypoint) {
         const colors = [0x33bc4e, 0xf1d836, 0x334ebc, 0xe72124];
 
+        const movementActions = [];
+        let _wayPoint = waypoint;
+        for (let i = 0; i < 99; i++) {
+            if (!_wayPoint) break;
+            movementActions[_wayPoint.action] = movementActions[_wayPoint.action] || 0 + _wayPoint.cost;
+            _wayPoint = _wayPoint.previous;
+        }
+
+        console.log(movementActions);
+
+        // foreach(const wp of movementActions)
+
         // Technically should use RoundFavorPlayerDown,
         // however in square grids the diagonals can make it hard to move so
         // using Math.floor to provide a larger margin of rounding
         const movementCost = RoundFavorPlayerDown(waypoint.measurement.cost);
         let speed = waypoint.actionConfig.speed?.(this.token) ?? Infinity;
+
+        // if (movementCost > 4) {
+        //     debugger;
+        // }
 
         if (speed % 2 !== 0) {
             speed += 1;
