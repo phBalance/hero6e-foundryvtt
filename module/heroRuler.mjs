@@ -10,7 +10,8 @@ const FoundryVttRuler = foundry.canvas?.interaction?.Ruler || Ruler;
 export class HeroRuler extends FoundryVttRuler {
     static _controlToken() {
         const sceneControls = ui.controls;
-        if (sceneControls.activeControl !== "token") {
+        // V13
+        if ((sceneControls.control.name || sceneControls.activeControl) !== "token") {
             return;
         }
         if (sceneControls.activeTool !== "select") {
