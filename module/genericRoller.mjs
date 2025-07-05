@@ -32,9 +32,13 @@ export class GenericRoller {
                 //console.warn(`unable to find dom element`);
                 return;
             }
-            const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
-                css: `game-version-major-${game.version.split(".")[0]}`,
-            });
+            // V13
+            const content = await (foundry.applications.handlebars.renderTemplate || renderTemplate)(
+                `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
+                {
+                    css: `game-version-major-${game.version.split(".")[0]}`,
+                },
+            );
             const $content = $(content);
             $chat.after($content);
 
@@ -165,7 +169,7 @@ export class GenericRoller {
             }
         }
 
-        const template = await renderTemplate(
+        const template = await (foundry.applications.handlebars.renderTemplate || renderTemplate)(
             `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
             options,
         );
