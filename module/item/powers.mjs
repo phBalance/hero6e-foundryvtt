@@ -51,7 +51,7 @@ export class HeroSystem6ePower {
         let _cost = 0;
         // Custom costs calculations
         if (this.baseInfo?.cost) {
-            _cost = this.baseInfo.cost(this, this.item);
+            _cost = this.baseInfo.cost(this.item);
         } else {
             // Generic cost calculations
             _cost = parseFloat(this.BASECOST);
