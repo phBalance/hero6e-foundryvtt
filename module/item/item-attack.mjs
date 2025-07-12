@@ -2309,7 +2309,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         return;
     }
 
-    // Some defenses require a roll not just to active, but on each use.  6e EVERYPHASE.  5e ACTIVATIONROLL
+    // Some defenses require a roll not just to activate, but on each use: 6e EVERYPHASE & 5e ACTIVATIONROLL
     const defenseEveryPhase = token.actor.items.filter(
         (o) =>
             o.isActive &&
