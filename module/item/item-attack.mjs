@@ -2312,9 +2312,9 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // Some defenses require a roll not just to active, but on each use.  6e EVERYPHASE.  5e ACTIVATIONROLL
     const defenseEveryPhase = token.actor.items.filter(
         (o) =>
-            (o.system.subType || o.system.type) === "defense" &&
             o.isActive &&
-            (o.findModsByXmlid("EVERYPHASE") || o.findModsByXmlid("ACTIVATIONROLL")),
+            (o.findModsByXmlid("EVERYPHASE") || o.findModsByXmlid("ACTIVATIONROLL")) &&
+            o.baseInfo.behaviors.includes("defense"),
     );
 
     for (const defense of defenseEveryPhase) {
