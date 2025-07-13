@@ -2319,9 +2319,14 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     for (const defense of defenseEveryPhase) {
         if (!ignoreDefenseIds.includes(defense.id)) {
-            const success = await requiresASkillRollCheck(defense);
-            if (!success) {
-                ignoreDefenseIds.push(defense.id);
+            // If a PD attack we only need to RAR for PD defenses
+            if (!["PD", "ED"].includes(defense.system.XMLID) || defense.system.XMLID === item.attackDefenseVs) {
+                const success = await requiresASkillRollCheck(defense);
+                if (!success) {
+                    ignoreDefenseIds.push(defense.id);
+                }
+            } else {
+                console.log(`requiresASkillRollCheck was not made for ${defense.name}`, defense, item);
             }
         }
     }
