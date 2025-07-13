@@ -7910,16 +7910,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    addPower(
-        {
-            // TRANSPARENT related
-            key: "ED",
-            behaviors: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="ED" ID="1752359726494" BASECOST="0.5" LEVELS="0" ALIAS="ED" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-        },
-        {},
-    );
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "ED",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="ED" ID="1752359726494" BASECOST="0.5" LEVELS="0" ALIAS="ED" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // INVISIBLE power efffects related
@@ -8000,6 +7997,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "FLASHD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="FLASHD" ID="1752364671800" BASECOST="0.25" LEVELS="0" ALIAS="Flash" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // FORCEFIELD related
@@ -8135,6 +8139,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "MD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="MD" ID="1752364670270" BASECOST="0.25" LEVELS="0" ALIAS="Mental" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             key: "MOBILE",
@@ -8238,16 +8249,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(
-        {
-            // TRANSPARENT related
-            key: "PD",
-            behaviors: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="PD" ID="1752038825401" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-        },
-        {},
-    );
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "PD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="PD" ID="1752038825401" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             key: "PLUSONEHALFDIE",
@@ -8267,6 +8275,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "POWD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="POWD" ID="1752364713968" BASECOST="0.25" LEVELS="0" ALIAS="Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
+
     addPower(
         {
             // DETECT related
