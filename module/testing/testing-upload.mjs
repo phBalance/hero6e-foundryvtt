@@ -2642,48 +2642,97 @@ export function registerUploadTests(quench) {
             });
 
             describe("ENDURANCERESERVE", async function () {
-                const contents = `
+                describe.only("6e", async function () {
+                    const contents = `
                     <POWER XMLID="ENDURANCERESERVE" ID="1690410553721" BASECOST="0.0" LEVELS="20" ALIAS="Endurance Reserve" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES />
-                    <POWER XMLID="ENDURANCERESERVEREC" ID="1690410749576" BASECOST="0.0" LEVELS="5" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         <NOTES />
-                    </POWER>
+                        <POWER XMLID="ENDURANCERESERVEREC" ID="1690410749576" BASECOST="0.0" LEVELS="5" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
                     </POWER>
                 `;
-                let item;
+                    let item;
 
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    await actor._postUpload();
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
                     });
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Endurance Reserve (20 END, 5 REC)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 9);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 9);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "0");
+                    });
                 });
 
-                it("description", function () {
-                    assert.equal(item.system.description, "Endurance Reserve (20 END, 5 REC)");
-                });
+                describe.only("5e", async function () {
+                    this.timeout(2000000);
+                    const contents = `
+                    <POWER XMLID="ENDURANCERESERVE" ID="1752369250791" BASECOST="0.0" LEVELS="20" ALIAS="Endurance Reserve" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <POWER XMLID="ENDURANCERESERVEREC" ID="1752369514353" BASECOST="0.0" LEVELS="5" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    </POWER>
+                `;
+                    let item;
 
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 9);
-                });
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+                        await actor._postUpload();
 
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 9);
-                });
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
 
-                it("end", function () {
-                    assert.equal(item.system.end, "0");
+                    it("description", function () {
+                        assert.equal(item.system.description, "Endurance Reserve (20 END, 5 REC)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 7);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 7);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "0");
+                    });
                 });
             });
 
@@ -8533,6 +8582,85 @@ export function registerUploadTests(quench) {
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 28);
                     });
+                });
+            });
+
+            // See issue #2421. Compound powers are not correctly calculating costs.
+            describe.skip("compound power 5e FORCEWALL", function () {
+                const contentsCompoundPower = `
+                    <POWER XMLID="COMPOUNDPOWER" ID="1752119161972" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="64" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <POWER XMLID="FORCEWALL" ID="1752119357777" BASECOST="0.0" LEVELS="10" ALIAS="Force Wall" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="10" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0">
+                            <NOTES />
+                            <MODIFIER XMLID="TRANSPARENT" ID="1752119370102" BASECOST="0.0" LEVELS="0" ALIAS="Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="PD" ID="1752119371843" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            <MODIFIER XMLID="REDUCEDEND" ID="1752119378292" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="RKA" ID="1752119423505" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="CONTINUOUS" ID="1752119432989" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="DAMAGESHIELD" ID="1752119437515" BASECOST="0.5" LEVELS="0" ALIAS="Damage Shield" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="OFFENSIVE" ID="1752119442232" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            <MODIFIER XMLID="REDUCEDEND" ID="1752119451612" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="NOKB" ID="1752119463052" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="LINKED" ID="1752119471190" BASECOST="-0.25" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FORCEWALL" OPTIONID="FORCEWALL" OPTION_ALIAS="Force Wall" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1752119357777">
+                                <NOTES />
+                                <ADDER XMLID="ONLYWHENGREATERATFULL" ID="1752119501255" BASECOST="-0.25" LEVELS="0" ALIAS="Lesser Power can only be used when character uses greater Power at full value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                        </POWER>
+                `;
+                let itemCompoundPower;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = true;
+                    await actor._postUpload();
+
+                    itemCompoundPower = new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contentsCompoundPower, actor),
+                        {
+                            parent: actor,
+                        },
+                    );
+                    await itemCompoundPower._postUpload();
+                    actor.items.set(itemCompoundPower.system.XMLID, itemCompoundPower);
+                });
+
+                it("compound power active points", function () {
+                    assert.equal(itemCompoundPower._activePoints, 88);
+                });
+
+                it("compound power realCost", function () {
+                    assert.equal(itemCompoundPower._realCost, 70);
+                });
+
+                it("compound power characterPoints", function () {
+                    assert.equal(itemCompoundPower.system._characterPointCost, 70);
                 });
             });
         },

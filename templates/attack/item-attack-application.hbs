@@ -328,11 +328,10 @@
   </div>
 
   {{!-- Conditional attack selection. DEADLY BLOW --}}
-  <div class="form-fields  csl-attack-list">
+  <div class="form-fields csl-attack-list">
     <table>      
-      {{!-- PH: FIXME: Not sure if this should be originalItem or effectiveItem   --}}
       {{#each originalItem.system.conditionalAttacks}}
-      {{! Don't show DEADLYBLOW/conditional attacks for adjustment or sense-affecting powers --}}
+        {{! Don't show DEADLYBLOW/conditional attacks for non killing attacks --}}
         {{#if (appliesTo this @root/originalItem)}}
           <tr>
               <td>

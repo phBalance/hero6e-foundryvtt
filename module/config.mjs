@@ -2886,10 +2886,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            cost: function (item) {
+            cost: function (skill) {
                 // BASECOST is 3 but for some reason HDC shows 0
-                const baseCost = parseFloat(item.system.BASECOST) || (item.adders.length === 0 ? 3 : 0);
-                const levels = parseInt(item.system?.LEVELS || 0);
+                const baseCost = parseFloat(skill.system.BASECOST) || (skill.adders.length === 0 ? 3 : 0);
+                const levels = parseInt(skill.system?.LEVELS || 0);
                 return baseCost + levels * this.costPerLevel();
             },
             categorized: true,
@@ -4431,12 +4431,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
             },
             appliesTo: function (item) {
-                // Maneuver or other poorly defined item, assume it applies
-                if (!item || !item.baseInfo) return true;
-                if (item.baseInfo.type.includes("adjustment")) return false;
-                if (item.baseInfo.type.includes("sense-affecting")) return false;
-                if (item.system.XMLID === "ENTANGLE") return false;
-                return true;
+                // Poorly defined item, assume it applies
+                if (!item || !item.baseInfo) {
+                    console.error(`DEADLYBLOW appliesTo invoked with invalid item`, item);
+                    return true;
+                }
+
+                // Deadly blow only applies either HKA or RKA as defined. Unfortunately HD doesn't
+                // specify if it's Hand-to-Hand or Ranged. For the time being we'll just consider it
+                // applicable to both and users will have to decide.
+                if (item.doesKillingDamage) {
+                    return true;
+                }
+
+                return false;
             },
             xml: `<TALENT XMLID="DEADLYBLOW" ID="1709159979031" BASECOST="0.0" LEVELS="2" ALIAS="Deadly Blow:  +2d6" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited circumstances]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" />`,
         },
@@ -5467,8 +5475,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 4),
             basePoints: function (item) {
-                const levels = parseInt(item.system?.LEVELS || 0);
-                return levels > 0 ? Math.max(1, Math.ceil(levels / 4)) : 0;
+                const levels = parseInt(item.system.LEVELS || 0);
+
+                if (!item.is5e) {
+                    return levels > 0 ? Math.max(1, Math.ceil(levels / 4)) : 0;
+                }
+
+                return levels > 0 ? Math.max(1, Math.ceil(levels / 10)) : 0;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="ENDURANCERESERVE" ID="1712448783608" BASECOST="0.0" LEVELS="0" ALIAS="Endurance Reserve" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><POWER XMLID="ENDURANCERESERVEREC" ID="1712448793952" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER></POWER>`,
@@ -5476,7 +5489,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             costPerLevel: fixedValueFunction(1 / 10),
             basePoints: function (item) {
-                const levels = parseInt(item.system?.LEVELS || 0);
+                const levels = parseInt(item.system.LEVELS || 0);
                 return levels > 0 ? Math.max(1, Math.ceil(levels / 10)) : 0;
             },
         },
@@ -5492,9 +5505,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(2 / 3),
-            cost: function (item) {
-                const levels = parseInt(item.LEVELS || 0);
-                return levels > 0 ? Math.max(1, Math.ceil(levels / 3) * 2) : 0;
+            cost: function (adderLikeItem) {
+                const levels = parseInt(adderLikeItem.LEVELS || 0);
+
+                if (!adderLikeItem.is5e) {
+                    return levels > 0 ? Math.max(1, Math.ceil(levels / 3) * 2) : 0;
+                }
+
+                return levels;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="ENDURANCERESERVEREC" ID="1713377825229" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -6315,7 +6333,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
-            cost: function () {
+            cost: function (/* item */) {
                 return 0;
             },
             activePoints: function (item) {
@@ -7902,6 +7920,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "ED",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="ED" ID="1752359726494" BASECOST="0.5" LEVELS="0" ALIAS="ED" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // INVISIBLE power efffects related
@@ -7982,6 +8007,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "FLASHD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="FLASHD" ID="1752364671800" BASECOST="0.25" LEVELS="0" ALIAS="Flash" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // FORCEFIELD related
@@ -8117,6 +8149,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "MD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="MD" ID="1752364670270" BASECOST="0.25" LEVELS="0" ALIAS="Mental" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             key: "MOBILE",
@@ -8220,6 +8259,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "PD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="PD" ID="1752038825401" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             key: "PLUSONEHALFDIE",
@@ -8239,6 +8285,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // TRANSPARENT related
+        key: "POWD",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="POWD" ID="1752364713968" BASECOST="0.25" LEVELS="0" ALIAS="Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
+
     addPower(
         {
             // DETECT related
@@ -9605,6 +9659,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="TRANSDIMENSIONAL" ID="1738534122034" BASECOST="0.5" LEVELS="0" ALIAS="Transdimensional" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRANSPARENT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="TRANSPARENT" ID="1752359726500" BASECOST="0.0" LEVELS="0" ALIAS="Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
