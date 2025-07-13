@@ -1,3 +1,4 @@
+import { dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { calculateDistanceBetween } from "./range.mjs";
 
 export class Attack {
@@ -68,17 +69,8 @@ export class Attack {
             });
         }
 
-        // if (cvModifier.cvMod.dc) {
-        //     const dc = cvModifier.cvMod.dc;
-        //     // changes.push({
-        //     //     key: `system.characteristics.dcv.value`,
-        //     //     value: cvModifier.cvMod.dcv,
-        //     //     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-        //     // });
-        // }
-
         // todo: this disallows setting the dcv to x0
-        if (cvModifier.cvMod.dcvMultiplier && cvModifier.cvMod.dcvMultiplier != 1) {
+        if (cvModifier.cvMod.dcvMultiplier && cvModifier.cvMod.dcvMultiplier !== 1) {
             const dcvMultiplier = cvModifier.cvMod.dcvMultiplier;
             let multiplierString = `${dcvMultiplier}`;
             if (dcvMultiplier < 1) {
@@ -480,11 +472,14 @@ export class Attack {
             currentItem: item,
             currentTargets: targetedTokens,
             targetedTokens,
-            item: {},
-            token: {},
+            item: {
+                [item.id]: item, // PH: FIXME: This is problematic for items which are not in the database. We do have original items for most items that are not in the DB.
+            },
+            token: {
+                [attackerToken.id]: attackerToken,
+            },
         };
-        system.item[item.id] = item; // PH: FIXME: This is problematic for items which are not in the database
-        system.token[attackerToken.id] = attackerToken;
+
         for (let i = 0; i < targetedTokens.length; i++) {
             system.token[targetedTokens[i].id] = targetedTokens[i];
         }
@@ -499,4 +494,44 @@ export class Attack {
 
         return action;
     }
+}
+
+export function actionToJSON(action) {
+    const data = {
+        maneuver: action.maneuver,
+        current: action.current,
+        // system: {},
+        system: {
+            actor: action.system.actor.uuid,
+            // attackerToken: action.system.attackerToken.toObject(), // FIXME: TokenDocument or Token?
+            currentItem: dehydrateAttackItem(action.system.currentItem),
+            // currentTargets: targetedTokens, // PH: FIXME:
+            // targetedTokens, // PH: FIXME:
+            item: {}, // PH: FIXME: This is a map. That is problematic for items which are not in the database. Turn into a proper Map
+            token: {}, // PH: FIXME: What is this supposed to be?
+        },
+    };
+
+    return JSON.stringify(data);
+}
+
+export function actionFromJSON(json) {
+    const data = JSON.parse(json);
+    const actor = fromUuidSync(data.system.actor);
+
+    const action = {
+        maneuver: data.maneuver,
+        current: data.current,
+        system: {
+            actor: actor,
+            // attackerToken: new TokenDocument(data.system.attackerToken), // FIXME: TokenDocument or Token?
+            currentItem: rehydrateAttackItem(data.system.item, actor),
+            // currentTargets: targetedTokens, // PH: FIXME:
+            // targetedTokens, // PH: FIXME:
+            item: {}, // PH: FIXME: Should this exist?
+            token: {}, // PH: FIXME: Should this exist?
+        },
+    };
+
+    return action;
 }

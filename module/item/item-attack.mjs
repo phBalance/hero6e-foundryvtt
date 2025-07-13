@@ -16,7 +16,7 @@ import { ItemAttackFormApplication, getAoeTemplateForItem } from "../item/item-a
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
-import { Attack } from "../utility/attack.mjs";
+import { Attack, actionToJSON } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { activateManeuver, doManeuverEffects } from "./maneuver.mjs";
@@ -1108,8 +1108,10 @@ async function doSingleTargetActionToHit(item, options) {
         actor,
         token,
 
+        actionData: actionToJSON(action),
+
         item,
-        itemJsonStr: dehydrateAttackItem(item),
+        itemJsonStr: dehydrateAttackItem(item), // PH: FIXME: Can remove some things like item etc because they're in the actionData.
         originalUuid: item.id || fromUuidSync(item.system._active.__originalUuid).id,
 
         adjustment,
@@ -1132,8 +1134,6 @@ async function doSingleTargetActionToHit(item, options) {
         inActiveCombat: token?.inCombat,
     };
     options.rolledResult = targetData;
-    action.system = {}; // clear out any system information that would interfere with parsing
-    cardData.actionData = JSON.stringify(action);
 
     // render card
     const template =
