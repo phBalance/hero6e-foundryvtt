@@ -2569,6 +2569,41 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
+            const MOBILITY = this.findModsByXmlid("MOBILITY");
+            if (changed && this.id && MOBILITY) {
+                const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
+
+                const activeEffect = Array.from(this.effects)?.[0] || {};
+                if (dcvValue !== null) {
+                    activeEffect.name =
+                        (this.name ? `${this.name}/${MOBILITY.parent.name || MOBILITY.parent.ALIAS}: ` : "") +
+                        `${MOBILITY.OPTIONID} ${dcvValue}`;
+                    activeEffect.img = "icons/svg/downgrade.svg";
+                    activeEffect.changes = [
+                        {
+                            key: "system.characteristics.dcv.value",
+                            value: dcvValue,
+                            mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        },
+                    ];
+                    activeEffect.transfer = true;
+                    activeEffect.disabled = !this.system.active;
+
+                    if (activeEffect.update) {
+                        await activeEffect.update({
+                            name: activeEffect.name,
+                            changes: activeEffect.changes,
+                        });
+                    } else {
+                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                    }
+                } else {
+                    if (activeEffect.delete) {
+                        await activeEffect.delete();
+                    }
+                }
+            }
+
             // CUSTOMPOWER LIGHT
             if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
                 if (changed && !game.modules.get("ATL")?.active) {
