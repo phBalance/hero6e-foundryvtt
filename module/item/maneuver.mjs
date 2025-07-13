@@ -59,9 +59,32 @@ function addOcvTraitToChanges(maneuverOcvChange) {
  * @returns
  */
 function buildManeuverNextPhaseFlags(item) {
+    return buildManeuverFlags(item, "maneuverNextPhaseEffect");
+}
+
+/**
+ * Create flags that will allow us to expire effects on the next phase. If the item is an
+ * original item then the item uuid will suffice otherwise the dehydrated item and actor uuid needs to be used
+ *
+ * @param {*} item
+ * @returns
+ */
+// function buildManeuverNextSegmentFlags(item) {
+//     return buildManeuverFlags(item, "maneuverNextSegementEffect");
+// }
+
+/**
+ * Create flags that will allow us to expire effects on the next phase. If the item is an
+ * original item then the item uuid will suffice otherwise the dehydrated item and actor uuid needs to be used
+ *
+ * @param {*} item
+ * @param {string} type
+ * @returns
+ */
+function buildManeuverFlags(item, type) {
     return {
         [game.system.id]: {
-            type: "maneuverNextPhaseEffect",
+            type: type,
             itemUuid: item.uuid,
             toggle: item.isActivatable(),
             dehydratedManeuverItem: dehydrateAttackItem(item),
@@ -76,7 +99,61 @@ function buildManeuverNextPhaseFlags(item) {
  */
 export function maneuverCanBeAbortedTo(item) {
     const maneuverHasAbortTrait = item.system.EFFECT?.toLowerCase().indexOf("abort") > -1;
-    return maneuverHasAbortTrait;
+    return !!maneuverHasAbortTrait;
+}
+
+/**
+ * Things which have the "Attacker Falls" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasAttackerFallsTrait(item) {
+    const maneuverHasAttackerFallsTrait = item.system.EFFECT?.search(/you fall/i) > -1;
+    return !!maneuverHasAttackerFallsTrait;
+}
+
+/**
+ * Things which have the "block" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasBlockTrait(item) {
+    const maneuverHasBlockTrait = item.system.EFFECT?.search(/block/i) > -1;
+    return !!maneuverHasBlockTrait;
+}
+
+/**
+ * Things which have the "dodge" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasDodgeTrait(item) {
+    const maneuverHasDodgeTrait = item.system.EFFECT?.search(/dodge/i) > -1;
+    return !!maneuverHasDodgeTrait;
+}
+
+/**
+ * Things which have the "flash dc" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasFlashTrait(item) {
+    const maneuverHasFlashTrait = item.system.EFFECT?.search(/\[FLASHDC\]/i) > -1;
+    return !!maneuverHasFlashTrait;
+}
+
+/**
+ * Things which have the "grab" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasGrabTrait(item) {
+    const maneuverHasGrabTrait = item.system.EFFECT?.search(/grab/i) > -1;
+    return !!maneuverHasGrabTrait;
+}
+
+/**
+ * Things which have the "Target Falls" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasTargetFallsTrait(item) {
+    const maneuverHasTargetFallsTrait = item.system.EFFECT?.search(/target falls/i) > -1;
+    return !!maneuverHasTargetFallsTrait;
 }
 
 /**
@@ -91,35 +168,29 @@ export async function activateManeuver(item) {
     // PH: FIXME: This could be simplified as it's really just an effect + the same modifiers
     const newActiveEffects = [];
 
-    // FIXME: These are supposed to be for HTH only and not apply to ranged combat by default
-    const maneuverDcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
-    const maneuverOcvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
+    // FIXME: These are supposed to be for HTH or ranged combat only except for dodge.
+    const dcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
+    const ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
 
-    // Enable the effect if there is one
-    const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
-    const maneuverHasBlockTrait = effect.indexOf("block") > -1;
+    // Types of effects for this maneuver?
+    const hasDodgeTrait = maneuverHasDodgeTrait(item);
+    const hasBlockTrait = maneuverHasBlockTrait(item);
 
     // Dodge effect
-    if (maneuverHasDodgeTrait) {
+    if (hasDodgeTrait) {
         const dodgeStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
         dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         dodgeStatusEffect.flags = buildManeuverNextPhaseFlags(item);
-        dodgeStatusEffect.changes = [
-            addDcvTraitToChanges(maneuverDcvTrait),
-            addOcvTraitToChanges(maneuverOcvTrait),
-        ].filter(Boolean);
+        dodgeStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
         newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
     // Block effect
-    else if (maneuverHasBlockTrait) {
+    else if (hasBlockTrait) {
         const blockStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect);
         blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         blockStatusEffect.flags = buildManeuverNextPhaseFlags(item);
-        blockStatusEffect.changes = [
-            addDcvTraitToChanges(maneuverDcvTrait),
-            addOcvTraitToChanges(maneuverOcvTrait),
-        ].filter(Boolean);
+        blockStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
         newActiveEffects.push(item.actor.addActiveEffect(blockStatusEffect));
     }
 
@@ -146,10 +217,7 @@ export async function activateManeuver(item) {
         const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
         maneuverEffect.flags = buildManeuverNextPhaseFlags(item);
         maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
-        maneuverEffect.changes = [
-            addDcvTraitToChanges(maneuverDcvTrait),
-            addOcvTraitToChanges(maneuverOcvTrait),
-        ].filter(Boolean);
+        maneuverEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
 
         if (item.actor.effects.find((ae) => ae.name === maneuverEffect.name)) {
             // Unclear why we are creating this effect a second time.
@@ -199,30 +267,44 @@ export async function deactivateManeuver(item) {
     return Promise.all(removedEffects);
 }
 
+/**
+ * For maneuvers that require a hit we may require some status changes in addition or instead of damage.
+ *
+ * @param {*} item
+ * @param {*} action
+ * @returns
+ */
 export async function doManeuverEffects(item, action) {
     const newActiveEffects = [];
+    const hasAttackerFallsTrait = maneuverHasAttackerFallsTrait(item);
+    const hasGrabTrait = maneuverHasGrabTrait(item);
+    const hasTargetFallsTrait = maneuverHasTargetFallsTrait(item);
 
-    const effect = item.system.EFFECT?.toLowerCase();
-    if (effect) {
-        const maneuverHasTargetFallsTrait = effect.indexOf("target falls") > -1;
-        const maneuverHasAttackerFallsTrait = effect.indexOf("you fall") > -1;
+    // PH: FIXME: action.system.currentTargets is no longer available at this point
 
-        // Add prone effects (attacker and target)
-        if (maneuverHasTargetFallsTrait) {
-            const currentTargets = action.system.currentTargets;
-            currentTargets.forEach((targetedToken) => {
-                const actor = HeroSystem6eActor.get(targetedToken.document.actorId);
-                newActiveEffects.push(
-                    actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect),
-                );
-            });
-        }
+    // Add prone effects (attacker and target)
+    if (hasTargetFallsTrait) {
+        const currentTargets = action.system.currentTargets;
+        currentTargets.forEach((targetedToken) => {
+            const actor = HeroSystem6eActor.get(targetedToken.document.actorId);
+            newActiveEffects.push(actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect));
+        });
+    }
 
-        if (maneuverHasAttackerFallsTrait) {
-            newActiveEffects.push(
-                item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect),
-            );
-        }
+    if (hasAttackerFallsTrait) {
+        newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect));
+    }
+
+    if (hasGrabTrait) {
+        // The attacker gets the grabbed state
+        newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect));
+
+        // The defender/target gets the grabbed state
+        const currentTargets = action.system.currentTargets;
+        currentTargets.forEach((targetedToken) => {
+            const actor = HeroSystem6eActor.get(targetedToken.document.actorId);
+            newActiveEffects.push(actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect));
+        });
     }
 
     return Promise.all(newActiveEffects);

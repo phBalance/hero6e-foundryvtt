@@ -2,7 +2,7 @@ import { getModifierInfo } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 
-export class HeroSystem6ePower {
+export class HeroSystem6eConnectingPower {
     #baseInfo = null;
     constructor(json, options) {
         // Item first so we can get baseInfo
@@ -12,14 +12,14 @@ export class HeroSystem6ePower {
 
         for (const key of Object.keys(json)) {
             /// Create getters (if we don't already have one)
-            if (!Object.getOwnPropertyDescriptor(HeroSystem6ePower.prototype, key)?.["get"]) {
+            if (!Object.getOwnPropertyDescriptor(HeroSystem6eConnectingPower.prototype, key)?.["get"]) {
                 {
                     Object.defineProperty(this, key, {
                         get() {
                             return this._original[key];
                         },
                         set(value) {
-                            this._original.LEVELS = value;
+                            this._original[key] = value;
                         },
                     });
                 }
@@ -51,7 +51,7 @@ export class HeroSystem6ePower {
         let _cost = 0;
         // Custom costs calculations
         if (this.baseInfo?.cost) {
-            _cost = this.baseInfo.cost(this, this.item);
+            _cost = this.baseInfo.cost(this);
         } else {
             // Generic cost calculations
             _cost = parseFloat(this.BASECOST);

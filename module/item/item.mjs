@@ -6,7 +6,14 @@ import {
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
-import { activateManeuver, maneuverCanBeAbortedTo, deactivateManeuver, enforceManeuverLimits } from "./maneuver.mjs";
+import {
+    activateManeuver,
+    maneuverCanBeAbortedTo,
+    deactivateManeuver,
+    enforceManeuverLimits,
+    maneuverHasBlockTrait,
+    maneuverHasFlashTrait,
+} from "./maneuver.mjs";
 import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,
@@ -40,7 +47,7 @@ import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 import { HeroSystem6eModifier } from "./modifier.mjs";
-import { HeroSystem6ePower } from "./powers.mjs";
+import { HeroSystem6eConnectingPower } from "./powers.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -50,6 +57,7 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("filterItem", filterItem);
     Handlebars.registerHelper("itemHasBehaviours", itemHasBehaviours);
     Handlebars.registerHelper("itemHasActionBehavior", itemHasActionBehavior);
+    Handlebars.registerHelper("itemPostHitActionString", itemPostHitActionString);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -165,6 +173,29 @@ function itemHasActionBehavior(item, actionBehavior) {
     } catch (e) {
         console.error(e);
         return false;
+    }
+}
+
+function itemPostHitActionString(item) {
+    try {
+        const isAdjustment = getPowerInfo({
+            item: item,
+        })?.type?.includes("adjustment");
+        const isSenseAffecting = item.isSenseAffecting();
+        const isManeuver = itemIsManeuver(item);
+
+        // Provide a more specific name
+        if (isAdjustment || isSenseAffecting) {
+            return `Roll ${item.system.XMLID}`;
+        } else if (isManeuver && (item.system.XMLID === "GRAB" || item.system.XMLID === "GRABBY")) {
+            return `Roll ${item.baseInfo.name}`;
+        }
+
+        // The default action
+        return "Roll Damage";
+    } catch (error) {
+        console.error(error);
+        return "invalid post to-hit action string";
     }
 }
 
@@ -657,7 +688,7 @@ export class HeroSystem6eItem extends Item {
     /**
      *
      * @param {Event} [event]
-     * @returns {Promise<any>}
+     * @returns {Promise<undefined>}
      */
     async toggle(event) {
         let item = this;
@@ -824,13 +855,11 @@ export class HeroSystem6eItem extends Item {
                             active: true,
                         },
                     );
-                    //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
                 }
             } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
                     active: true,
                 });
-                //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
             } else if (this.system.XMLID === "DESOLIDIFICATION") {
                 await this.actor.toggleStatusEffect(
                     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
@@ -838,7 +867,6 @@ export class HeroSystem6eItem extends Item {
                         active: true,
                     },
                 );
-                //this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect);
             } else if (["maneuver", "martialart"].includes(item.type)) {
                 await activateManeuver(this);
             }
@@ -2939,7 +2967,7 @@ export class HeroSystem6eItem extends Item {
 
             const _powers = [];
             for (const _powerJson of powersList) {
-                _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
+                _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
             return _powers;
         } catch (e) {
@@ -4363,7 +4391,27 @@ export class HeroSystem6eItem extends Item {
         this.system.noHitLocations = false;
 
         if (["maneuver", "martialart"].includes(this.type)) {
-            if (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
+            // Flash doesn't have a hit location
+            if (maneuverHasFlashTrait(this)) {
+                this.system.noHitLocations = true;
+            }
+
+            // Block doesn't use a hit location
+            if (maneuverHasBlockTrait(this)) {
+                this.system.noHitLocations = true;
+            }
+
+            // Many maneuvers don't use hit locations.
+            else if (
+                this.system.XMLID === "CHOKE" ||
+                this.system.XMLID === "DISARM" ||
+                this.system.XMLID === "DIVEFORCOVER" ||
+                this.system.XMLID === "GRAB" ||
+                this.system.XMLID === "GRABBY" ||
+                this.system.XMLID === "SHOVE" ||
+                this.system.XMLID === "THROW" ||
+                this.system.XMLID === "TRIP"
+            ) {
                 this.system.noHitLocations = true;
             }
         }
@@ -5773,14 +5821,14 @@ export class HeroSystem6eItem extends Item {
                 this.parentItem.system.XMLID === "MULTIPOWER" ||
                 this.parentItem.parentItem?.system.XMLID === "MULTIPOWER"
             ) {
-                // Fixed
+                // Fixed with minimum cost of 1
                 if (this.system.ULTRA_SLOT || this.parentItem?.system.ULTRA_SLOT) {
-                    _cost = RoundFavorPlayerDown(_cost / 10.0);
+                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 10.0));
                 }
 
-                // Variable
+                // Variable with minimum cost of 1
                 else {
-                    _cost = RoundFavorPlayerDown(_cost / 5.0);
+                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 5.0));
                 }
             }
         }

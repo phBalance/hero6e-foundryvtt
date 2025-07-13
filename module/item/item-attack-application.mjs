@@ -529,7 +529,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     /**
      * Can only push and reduce so much. Make sure we're not exceeding basic boundaries for strength or the item.
-     *  PH: FIXME: Should not be able to push if the power is bought to 0 END, don't cost END, or use charges.
+     *  PH: FIXME: Should not be able to push if the power is bought to 0 END, doesn't cost END, or use charges.
      *  PH: FIXME: Pushing for heroic has different rules than superheroic (which is what is implemented here)
      *  PH: FIXME: Allow pushing beyond 10 CP with override?
      *  PH: FIXME: How should pushing play with HTH Attack and Naked Advantages? I assume that they don't interact.

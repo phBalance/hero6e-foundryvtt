@@ -140,11 +140,7 @@
                     data-action-data="{{actionData}}"
                     data-effectiveStr="{{effectiveStr}}" data-effective-levels="{{effectiveLevels}}" data-target-ids="{{targetIds}}" data-velocity="{{velocity}}" 
                     data-boostable-charges="{{boostableChargesToUse}}" data-target-entangle="{{targetEntangle}}">
-                    {{#if (or adjustment senseAffecting)}}
-                        Roll {{item.system.XMLID}}
-                    {{else}}
-                        Roll Damage
-                    {{/if}}
+                    {{itemPostHitActionString item}}
                 </button>
             </div>
         {{/if}}
