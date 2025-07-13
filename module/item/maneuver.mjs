@@ -69,9 +69,9 @@ function buildManeuverNextPhaseFlags(item) {
  * @param {*} item
  * @returns
  */
-function buildManeuverNextSegmentFlags(item) {
-    return buildManeuverFlags(item, "maneuverNextSegementEffect");
-}
+// function buildManeuverNextSegmentFlags(item) {
+//     return buildManeuverFlags(item, "maneuverNextSegementEffect");
+// }
 
 /**
  * Create flags that will allow us to expire effects on the next phase. If the item is an

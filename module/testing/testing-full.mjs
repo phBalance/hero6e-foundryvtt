@@ -3168,7 +3168,7 @@ export function registerFullTests(quench) {
                 let rkaItem;
                 let hkaItem;
 
-                // let moveByManeuverItem;
+                let moveByManeuverItem;
                 let martialStrikeManeuverItem;
                 let customMartialFourDcManeuverItem;
 
@@ -3189,7 +3189,7 @@ export function registerFullTests(quench) {
                     rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
                     hkaItem = actor.items.find((item) => item.system.XMLID === "HKA");
 
-                    // moveByManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
+                    moveByManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
 
                     martialStrikeManeuverItem = actor.items.find(
                         (item) => item.system.XMLID === "MANEUVER" && item.name === "Martial Strike",
