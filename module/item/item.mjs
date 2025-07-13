@@ -5786,14 +5786,14 @@ export class HeroSystem6eItem extends Item {
                 this.parentItem.system.XMLID === "MULTIPOWER" ||
                 this.parentItem.parentItem?.system.XMLID === "MULTIPOWER"
             ) {
-                // Fixed
+                // Fixed with minimum cost of 1
                 if (this.system.ULTRA_SLOT || this.parentItem?.system.ULTRA_SLOT) {
-                    _cost = RoundFavorPlayerDown(_cost / 10.0);
+                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 10.0));
                 }
 
-                // Variable
+                // Variable with minimum cost of 1
                 else {
-                    _cost = RoundFavorPlayerDown(_cost / 5.0);
+                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 5.0));
                 }
             }
         }
