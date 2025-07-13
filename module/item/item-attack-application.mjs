@@ -44,7 +44,7 @@ export class ItemAttackFormApplication extends FormApplication {
         // If  CSLs change on the Actor we need to know
         const _updateItem = async function (item) {
             //, changes, options, userId) {
-            if (this.data.actor.id === item.actor.id && item.baseInfo?.refreshAttackDialogWhenChanged) {
+            if (this.data.actor?.id === item.actor?.id && item.baseInfo?.refreshAttackDialogWhenChanged) {
                 this.refresh();
             }
         };
