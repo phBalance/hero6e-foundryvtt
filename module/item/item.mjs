@@ -2709,6 +2709,7 @@ export class HeroSystem6eItem extends Item {
                         `${this.detailedName()} for ${this.actor?.name} failed to parse properly, it is no longer supported. Please upload the HDC file again.`,
                         { console: true, permanent: false },
                     );
+                    console.error(error);
                 }
             } catch (error2) {
                 ui.notifications.error(
