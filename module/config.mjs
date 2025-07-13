@@ -5475,8 +5475,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 4),
             basePoints: function (item) {
-                const levels = parseInt(item.system?.LEVELS || 0);
-                return levels > 0 ? Math.max(1, Math.ceil(levels / 4)) : 0;
+                const levels = parseInt(item.system.LEVELS || 0);
+
+                if (!item.is5e) {
+                    return levels > 0 ? Math.max(1, Math.ceil(levels / 4)) : 0;
+                }
+
+                return levels > 0 ? Math.max(1, Math.ceil(levels / 10)) : 0;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="ENDURANCERESERVE" ID="1712448783608" BASECOST="0.0" LEVELS="0" ALIAS="Endurance Reserve" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><POWER XMLID="ENDURANCERESERVEREC" ID="1712448793952" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER></POWER>`,
@@ -5484,7 +5489,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             costPerLevel: fixedValueFunction(1 / 10),
             basePoints: function (item) {
-                const levels = parseInt(item.system?.LEVELS || 0);
+                const levels = parseInt(item.system.LEVELS || 0);
                 return levels > 0 ? Math.max(1, Math.ceil(levels / 10)) : 0;
             },
         },
@@ -5500,9 +5505,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(2 / 3),
-            cost: function (item) {
-                const levels = parseInt(item.LEVELS || 0);
-                return levels > 0 ? Math.max(1, Math.ceil(levels / 3) * 2) : 0;
+            cost: function (adderLikeItem) {
+                const levels = parseInt(adderLikeItem.LEVELS || 0);
+
+                if (!adderLikeItem.is5e) {
+                    return levels > 0 ? Math.max(1, Math.ceil(levels / 3) * 2) : 0;
+                }
+
+                return levels;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="ENDURANCERESERVEREC" ID="1713377825229" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,

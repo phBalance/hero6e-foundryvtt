@@ -2642,48 +2642,97 @@ export function registerUploadTests(quench) {
             });
 
             describe("ENDURANCERESERVE", async function () {
-                const contents = `
+                describe.only("6e", async function () {
+                    const contents = `
                     <POWER XMLID="ENDURANCERESERVE" ID="1690410553721" BASECOST="0.0" LEVELS="20" ALIAS="Endurance Reserve" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES />
-                    <POWER XMLID="ENDURANCERESERVEREC" ID="1690410749576" BASECOST="0.0" LEVELS="5" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         <NOTES />
-                    </POWER>
+                        <POWER XMLID="ENDURANCERESERVEREC" ID="1690410749576" BASECOST="0.0" LEVELS="5" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
                     </POWER>
                 `;
-                let item;
+                    let item;
 
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    await actor._postUpload();
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
                     });
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Endurance Reserve (20 END, 5 REC)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 9);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 9);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "0");
+                    });
                 });
 
-                it("description", function () {
-                    assert.equal(item.system.description, "Endurance Reserve (20 END, 5 REC)");
-                });
+                describe.only("5e", async function () {
+                    this.timeout(2000000);
+                    const contents = `
+                    <POWER XMLID="ENDURANCERESERVE" ID="1752369250791" BASECOST="0.0" LEVELS="20" ALIAS="Endurance Reserve" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <POWER XMLID="ENDURANCERESERVEREC" ID="1752369514353" BASECOST="0.0" LEVELS="5" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    </POWER>
+                `;
+                    let item;
 
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 9);
-                });
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+                        await actor._postUpload();
 
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 9);
-                });
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
 
-                it("end", function () {
-                    assert.equal(item.system.end, "0");
+                    it("description", function () {
+                        assert.equal(item.system.description, "Endurance Reserve (20 END, 5 REC)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 7);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 7);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "0");
+                    });
                 });
             });
 

@@ -19,7 +19,7 @@ export class HeroSystem6eConnectingPower {
                             return this._original[key];
                         },
                         set(value) {
-                            this._original.LEVELS = value;
+                            this._original[key] = value;
                         },
                     });
                 }
@@ -51,7 +51,7 @@ export class HeroSystem6eConnectingPower {
         let _cost = 0;
         // Custom costs calculations
         if (this.baseInfo?.cost) {
-            _cost = this.baseInfo.cost(this.item);
+            _cost = this.baseInfo.cost(this);
         } else {
             // Generic cost calculations
             _cost = parseFloat(this.BASECOST);
