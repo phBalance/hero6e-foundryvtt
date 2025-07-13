@@ -2,7 +2,7 @@ import { getModifierInfo } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 
-export class HeroSystem6ePower {
+export class HeroSystem6eConnectingPower {
     #baseInfo = null;
     constructor(json, options) {
         // Item first so we can get baseInfo
@@ -12,7 +12,7 @@ export class HeroSystem6ePower {
 
         for (const key of Object.keys(json)) {
             /// Create getters (if we don't already have one)
-            if (!Object.getOwnPropertyDescriptor(HeroSystem6ePower.prototype, key)?.["get"]) {
+            if (!Object.getOwnPropertyDescriptor(HeroSystem6eConnectingPower.prototype, key)?.["get"]) {
                 {
                     Object.defineProperty(this, key, {
                         get() {

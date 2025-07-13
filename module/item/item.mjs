@@ -47,7 +47,7 @@ import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 import { HeroSystem6eModifier } from "./modifier.mjs";
-import { HeroSystem6ePower } from "./powers.mjs";
+import { HeroSystem6eConnectingPower } from "./powers.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -2932,7 +2932,7 @@ export class HeroSystem6eItem extends Item {
 
             const _powers = [];
             for (const _powerJson of powersList) {
-                _powers.push(new HeroSystem6ePower(_powerJson, { item: this, parent: this }));
+                _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
             return _powers;
         } catch (e) {
