@@ -3935,11 +3935,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["framework"],
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
-            cost: function (item) {
+            realCost: function (item) {
+                // Power Modifiers apply only to the Control Cost.
+
                 const poolCost = parseInt(item.system.LEVELS);
-                // controlCost is captured by _addersCost
-                //const controlCost = Math.ceil(parseInt(item.findModsByXmlid("CONTROLCOST")?.LEVELS || 0) / 2);
-                return poolCost;
+                let controlCost = Math.ceil(parseInt(item.findModsByXmlid("CONTROLCOST")?.LEVELS || 0) / 2);
+                const _limitationCost = item._limitationCost;
+
+                if (_limitationCost !== 0) {
+                    controlCost = RoundFavorPlayerDown(controlCost / (1 + _limitationCost));
+                }
+
+                return poolCost + controlCost;
             },
             costEnd: false,
             isContainer: true,
