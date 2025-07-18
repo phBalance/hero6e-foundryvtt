@@ -1032,18 +1032,16 @@ export class HeroSystem6eCombat extends Combat {
         let newSegment = this.current.segment;
 
         if (!HeroSystem6eCombat.singleCombatantTracker) {
-            if (skip) {
-                for (let [i, t] of this.turns.entries()) {
-                    if (i <= turn) continue;
-                    if (t.isDefeated) continue;
-                    next = i;
-                    newSegment = t.flags[game.system.id].segment;
-                    break;
-                }
+            for (let [i, t] of this.turns.entries()) {
+                if (i <= turn) continue;
+                if (skip && t.isDefeated) continue;
+                next = i;
+                newSegment = t.flags[game.system.id].segment;
+                break;
+            }
 
-                if (next === this.turns.length - 1 && this.turns[next].isDefeated) {
-                    return this.nextRound();
-                }
+            if (next === this.turns.length - 1 && this.turns[next].isDefeated) {
+                return this.nextRound();
             }
 
             // Maybe advance to the next round
