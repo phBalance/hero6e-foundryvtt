@@ -8755,6 +8755,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONTINUOUSCONCENTRATION",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
+            cost: function (modifier) {
+                // Must Concentrate throughout use of Constant Power x2
+                if (modifier._parent?.XMLID !== "CONCENTRATION") {
+                    console.warn(`Unexpected: ${modifier.XMLID} parent is ${modifier._parent.XMLID}`);
+                }
+                return parseFloat(modifier._parent?.BASECOST || 0);
+            },
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="CONTINUOUSCONCENTRATION" ID="1743878031238" BASECOST="1.0" LEVELS="0" ALIAS="Must Concentrate throughout use of Constant Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
