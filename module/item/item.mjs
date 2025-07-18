@@ -58,6 +58,23 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemHasBehaviours", itemHasBehaviours);
     Handlebars.registerHelper("itemHasActionBehavior", itemHasActionBehavior);
     Handlebars.registerHelper("itemPostHitActionString", itemPostHitActionString);
+    Handlebars.registerHelper("hasDefenseActiveEffect", itemHasDefenseActiveEffect);
+}
+
+function itemHasDefenseActiveEffect(item) {
+    if (!item) return false;
+    const defenseChange = item.effects.find((ae) =>
+        ae.changes.find((ch) =>
+            getPowerInfo({
+                xmlid: ch.key.match(/system\.characteristics\.([a-z]+)\.max/)?.[1].toUpperCase(),
+                xmlTag: this.system.xmlTag,
+            })?.behaviors.includes("defense"),
+        ),
+    );
+    if (defenseChange) {
+        return true;
+    }
+    return false;
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
