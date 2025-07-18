@@ -4,6 +4,7 @@
 
 - Fixed issue where 6e EVERYPHASE and 5e ACTIVATIONROLL were not actually rolling to check if PD/ED defense should apply. [#2425](https://github.com/dmdorman/hero6e-foundryvtt/issues/2425)
 - BULKY and IMMOBILE foci now reduce DCV. [#2416](https://github.com/dmdorman/hero6e-foundryvtt/issues/2416)
+- Fixed issue where combat tracker segment would get stuck. [#2423](https://github.com/dmdorman/hero6e-foundryvtt/issues/2423)
 
 ## Version 4.1.6 20250627
 
