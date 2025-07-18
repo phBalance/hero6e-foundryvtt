@@ -41,7 +41,7 @@
                 {{/if}}
             {{/if}}
         </td>
-        <td class="left{{#if this.parentItem.type}} item-framework-child-name{{#if this.parentItem.parentItem}}2{{/if}}{{/if}}">
+        <td class="left{{#if this.parentItem.type}} item-framework-child-name{{#if this.parentItem.parentItem}}2{{/if}}{{/if}} {{#if (and this.childIdx this.parentItem)}}parent-xmlid-{{toLowerCase this.parentItem.system.XMLID}} parent-xmlid-{{toLowerCase this.parentItem.parentItem.system.XMLID}}{{/if}}">
             {{#if (and this.childIdx this.parentItem)}}
                 {{this.childIdx}})
             {{/if}}
