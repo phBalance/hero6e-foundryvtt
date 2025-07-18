@@ -241,12 +241,42 @@ function isNonKillingStrengthBasedManeuver(item) {
     );
 }
 
-function isManeuverWithWeapon(item, options) {
-    return (item.type === "martialart" || item.type === "maneuver") && !!options.maWeaponItem;
+export function isRangedCombatManeuver(item) {
+    return (
+        item.type === "maneuver" &&
+        item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
+        item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
+    );
 }
 
-function isManeuverWithEmptyHand(item, options) {
-    return (item.type === "martialart" || item.type === "maneuver") && !options.maWeaponItem;
+export function isHthCombatManeuver(item) {
+    return item.type === "maneuver" && item.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+}
+
+export function isRangedMartialManeuver(item) {
+    return (
+        item.type === "martialart" &&
+        item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
+        item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
+    );
+}
+
+export function isHthMartialManeuver(item) {
+    return item.type === "martialart" && item.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+}
+
+function isManeuverThatIsUsingAWeapon(item, options) {
+    return (
+        (item.type === "martialart" || item.type === "maneuver") &&
+        !!(item.system._active.maWeaponItem || options.maWeaponItem)
+    );
+}
+
+function isManeuverThatIsUsingAnEmptyHand(item, options) {
+    return (
+        (item.type === "martialart" || item.type === "maneuver") &&
+        !(item.system._active.maWeaponItem || options.maWeaponItem)
+    );
 }
 
 // Maneuver's EFFECT indicates normal damage or is Strike/Pulling a Punch (exceptions)
@@ -319,7 +349,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main base (source of) damage and the maneuver is additional damage.
     // These maneuvers are added without consideration of advantages in 5e but not in 6e.
     // For maneuvers with a weapon, the weapon is the main base (source of) damage and the maneuver is additional damage.
-    if (isNonKillingStrengthBasedManeuver(item) || isManeuverWithWeapon(item, options)) {
+    if (isNonKillingStrengthBasedManeuver(item) || isManeuverThatIsUsingAWeapon(item, options)) {
         const rawManeuverDc = parseInt(item.system.DC);
 
         let maneuverDC = rawManeuverDc;
@@ -1004,7 +1034,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
     };
 
     // If unarmed combat
-    if (isManeuverWithEmptyHand(item, options)) {
+    if (isManeuverThatIsUsingAnEmptyHand(item, options)) {
         // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
         if (isNonKillingStrengthBasedManeuver(item)) {
             const { actorStrengthItem, str } = addStrengthToBundle(item, options, baseDicePartsBundle, false);
@@ -1092,9 +1122,10 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
         }
 
         return baseDicePartsBundle;
-    } else if (isManeuverWithWeapon(item, options)) {
-        // PH: FIXME: May wish to make maWeaponItem a UUID rather than the item itself.
-        let weaponItem = options.maWeaponItem;
+    } else if (isManeuverThatIsUsingAWeapon(item, options)) {
+        let weaponItem = item.system._active.maWeaponItem || options.maWeaponItem;
+
+        // PH: FIXME: The placeholder can be removed.
         if (!weaponItem) {
             console.warn(`Kludge: No weapon specified for ${item.detailedName()}. Using placeholder.`);
             weaponItem = item.actor?.items.find((item) => item.name === "__InternalManeuverPlaceholderWeapon");

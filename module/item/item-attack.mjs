@@ -85,6 +85,11 @@ export function dehydrateAttackItem(item) {
         dehydratedItem.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
     }
 
+    // If there is a weapon for marital art, dehydrate it
+    if (item.system._active.maWeaponItem) {
+        dehydratedItem.system._active.maWeaponItem = item.system._active.maWeaponItem.toObject(false);
+    }
+
     // If there are linked endurance items, then we need to dehydrate them as well.
     if (item.system._active.linkedEnd && dehydratedItem.system._active.linkedEnd.length > 0) {
         dehydratedItem.system._active.linkedEnd = item.system._active.linkedEnd.map((linkedEndItem) => {
@@ -144,6 +149,13 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
     // If there is a strength item, then we need to rehydrate it.
     if (item.system._active.effectiveStrItem) {
         item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(item.system._active.effectiveStrItem, {
+            parent: actor,
+        });
+    }
+
+    // If there is a strength item, then we need to rehydrate it.
+    if (item.system._active.maWeaponItem) {
+        item.system._active.maWeaponItem = HeroSystem6eItem.fromSource(item.system._active.maWeaponItem, {
             parent: actor,
         });
     }
