@@ -67,7 +67,7 @@ function itemHasDefenseActiveEffect(item) {
         ae.changes.find((ch) =>
             getPowerInfo({
                 xmlid: ch.key.match(/system\.characteristics\.([a-z]+)\.max/)?.[1].toUpperCase(),
-                xmlTag: this.system.xmlTag,
+                actor: item.actor,
             })?.behaviors.includes("defense"),
         ),
     );

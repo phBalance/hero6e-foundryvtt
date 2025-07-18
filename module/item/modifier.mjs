@@ -12,6 +12,7 @@ export class HeroSystem6eModifier {
         this._item = options?.item;
         this._id = json?.ID;
         this._original = json; //this.#original;
+        this._parent = options.parent;
         this.#baseInfo = getModifierInfo({
             xmlid: json.XMLID,
             actor: options?.item?.actor,
@@ -106,6 +107,11 @@ export class HeroSystem6eModifier {
         // Some MODIFIERs have ADDERs
         for (const adder of this.adders) {
             _cost += adder.cost;
+        }
+
+        // Some MODIFIERs have MODIFIERs (CONTINUOUSCONCENTRATION)
+        for (const modifier of this.modifiers) {
+            _cost += modifier.cost;
         }
 
         // Some modifiers have a minimumLimitation (REQUIRESASKILLROLL)
