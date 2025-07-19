@@ -3530,9 +3530,12 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "VPP":
+                system.description = `${system.ALIAS}, ${parseInt(system.LEVELS)} base + ${parseInt(this.findModsByXmlid("CONTROLCOST")?.LEVELS || RoundFavorPlayerDown(parseInt(system.LEVELS) / 2))} control cost`;
+                break;
+
             case "MULTIPOWER":
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
-                system.description = `${system.ALIAS}, ${parseInt(system.LEVELS)} base + ${parseInt(this.findModsByXmlid("CONTROLCOST").LEVELS)} control cost`;
+                system.description = `${system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`;
                 break;
 
             case "FLASH":

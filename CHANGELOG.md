@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.1.7 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.7 20250718 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed issue where 6e EVERYPHASE and 5e ACTIVATIONROLL were not actually rolling to check if PD/ED defense should apply. [#2425](https://github.com/dmdorman/hero6e-foundryvtt/issues/2425)
 - BULKY and IMMOBILE foci now reduce DCV. [#2416](https://github.com/dmdorman/hero6e-foundryvtt/issues/2416)

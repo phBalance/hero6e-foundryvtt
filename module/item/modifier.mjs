@@ -109,7 +109,7 @@ export class HeroSystem6eModifier {
             _cost += adder.cost;
         }
 
-        // Some MODIFIERs have MODIFIERs (CONTINUOUSCONCENTRATION)
+        // Some MODIFIERs have MODIFIERs (CONTINUOUSCONCENTRATION & ACTIVATEONLY)
         for (const modifier of this.modifiers) {
             _cost += modifier.cost;
         }
