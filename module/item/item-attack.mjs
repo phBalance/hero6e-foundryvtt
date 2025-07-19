@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { getActorDefensesVsAttack, getConditionalDefenses } from "../utility/defense.mjs";
+import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -2319,8 +2319,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     for (const defense of defenseEveryPhase) {
         if (!ignoreDefenseIds.includes(defense.id)) {
-            // If a PD attack we only need to RAR for PD defenses
-            if (!["PD", "ED"].includes(defense.system.XMLID) || defense.system.XMLID === item.attackDefenseVs) {
+            if (getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null) {
                 const success = await requiresASkillRollCheck(defense);
                 if (!success) {
                     ignoreDefenseIds.push(defense.id);

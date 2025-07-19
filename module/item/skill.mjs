@@ -141,6 +141,10 @@ export async function createSkillPopOutFromItem(item, actor) {
     });
 }
 
+// PH: FIXME: Create a chat message for resource consumption.
+
+// PH: FIXME: This will need some split apart into a "do I need to do a roll" and "do the skill roll".
+
 async function skillRoll(item, actor, target) {
     const token = actor.token;
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
