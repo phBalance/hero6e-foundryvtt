@@ -85,7 +85,7 @@ export function dehydrateAttackItem(item) {
         dehydratedItem.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
     }
 
-    // If there is a weapon for marital art, dehydrate it
+    // If there is a weapon for maneuvers, dehydrate it
     if (item.system._active.maWeaponItem) {
         dehydratedItem.system._active.maWeaponItem = item.system._active.maWeaponItem.toObject(false);
     }
@@ -153,7 +153,7 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
         });
     }
 
-    // If there is a strength item, then we need to rehydrate it.
+    // If there is a maneuver item, then we need to rehydrate it.
     if (item.system._active.maWeaponItem) {
         item.system._active.maWeaponItem = HeroSystem6eItem.fromSource(item.system._active.maWeaponItem, {
             parent: actor,
@@ -1179,22 +1179,39 @@ function getAttackTags(item) {
 
     if (!item) return attackTags;
 
+    // Provide the name of the original item in the tags.
+    let originalItemTag;
     if (item.system.ALIAS || item.system.XMLID) {
-        attackTags.push({ name: `${item.system.ALIAS || item.system.XMLID}`, title: `${item.system.XMLID}` });
+        originalItemTag = { name: `${item.system.ALIAS || item.system.XMLID}`, title: `${item.system.XMLID}` };
+        attackTags.push(originalItemTag);
+    }
+
+    // Use the effective item to figure out what this attack really is.
+    const baseAttackItem = item.baseInfo.baseEffectDicePartsBundle(item, {}).baseAttackItem;
+
+    // Provide the name of the actual attack item in the tag if it is different from the original item.
+    if (baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID) {
+        const baseAttackItemTag = {
+            name: `${baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID}`,
+            title: `${baseAttackItem.system.XMLID}`,
+        };
+        if (baseAttackItemTag.name !== originalItemTag?.name && baseAttackItemTag.title !== originalItemTag?.title) {
+            attackTags.push(baseAttackItemTag);
+        }
     }
 
     // Only add in class (which we should probably rename/deprecate) when we don't already have it from the ALIAS/XMLID
-    if (!attackTags.find((tag) => tag.name?.toLowerCase() === item.system.class?.toLowerCase())) {
-        attackTags.push({ name: item.system.class });
+    if (!attackTags.find((tag) => tag.name?.toLowerCase() === baseAttackItem.system.class?.toLowerCase())) {
+        attackTags.push({ name: baseAttackItem.system.class });
     }
 
-    if (item.doesKillingDamage) {
+    if (baseAttackItem.doesKillingDamage) {
         attackTags.push({ name: `killing` });
     }
 
     // Item adders
-    if (item.adders) {
-        for (const adder of item.adders) {
+    if (baseAttackItem.adders) {
+        for (const adder of baseAttackItem.adders) {
             switch (adder.XMLID) {
                 case "MINUSONEPIP":
                 case "PLUSONEHALFDIE":
@@ -1218,7 +1235,7 @@ function getAttackTags(item) {
     }
 
     // USESTANDARDEFFECT
-    if (item.system.USESTANDARDEFFECT) {
+    if (baseAttackItem.system.USESTANDARDEFFECT) {
         attackTags.push({
             name: `Standard Effect`,
             title: `USESTANDARDEFFECT`,
@@ -1226,26 +1243,29 @@ function getAttackTags(item) {
     }
 
     // STUN/BODY/EFFECT Only
-    if (item.system.stunBodyDamage && item.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody) {
+    if (
+        baseAttackItem.system.stunBodyDamage &&
+        baseAttackItem.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody
+    ) {
         attackTags.push({
-            name: item.system.stunBodyDamage,
-            title: item.system.stunBodyDamage,
+            name: baseAttackItem.system.stunBodyDamage,
+            title: baseAttackItem.system.stunBodyDamage,
         });
     }
 
     // FLASH
-    if (item.system.XMLID === "FLASH") {
-        attackTags.push({ name: item.system.OPTION_ALIAS, title: item.system.XMLID });
-        for (const adder of item.adders) {
+    if (baseAttackItem.system.XMLID === "FLASH") {
+        attackTags.push({ name: baseAttackItem.system.OPTION_ALIAS, title: baseAttackItem.system.XMLID });
+        for (const adder of baseAttackItem.adders) {
             attackTags.push({ name: adder.ALIAS, title: adder.XMLID });
         }
     }
 
     // ADJUSTMENT should include what we are adjusting
-    if (item.baseInfo.type.includes("adjustment")) {
-        const { valid, reducesArray, enhancesArray } = item.splitAdjustmentSourceAndTarget();
+    if (baseAttackItem.baseInfo.type.includes("adjustment")) {
+        const { valid, reducesArray, enhancesArray } = baseAttackItem.splitAdjustmentSourceAndTarget();
         if (!valid) {
-            attackTags.push({ name: item.system.INPUT });
+            attackTags.push({ name: baseAttackItem.system.INPUT });
         } else {
             for (const adjustTarget of reducesArray) {
                 attackTags.push({ name: `-${adjustTarget}` });
@@ -1257,7 +1277,7 @@ function getAttackTags(item) {
     }
 
     // item modifiers
-    for (const mod of item.system.MODIFIER || []) {
+    for (const mod of baseAttackItem.system.MODIFIER || []) {
         switch (mod.XMLID) {
             case "AUTOFIRE":
                 {
@@ -1333,7 +1353,7 @@ function getAttackTags(item) {
     }
 
     // MartialArts NND
-    if (item.system.EFFECT?.includes("NNDDC")) {
+    if (baseAttackItem.system.EFFECT?.includes("NNDDC")) {
         attackTags.push({
             name: `NND`,
             title: `No Normal Defense`,
@@ -1341,14 +1361,14 @@ function getAttackTags(item) {
     }
 
     // Martial FLASH
-    if (item.system.EFFECT?.includes("FLASHDC")) {
+    if (baseAttackItem.system.EFFECT?.includes("FLASHDC")) {
         attackTags.push({
             name: `Flash`,
-            title: item.name,
+            title: baseAttackItem.name,
         });
         attackTags.push({
-            name: item.system.INPUT,
-            title: item.name,
+            name: baseAttackItem.system.INPUT,
+            title: baseAttackItem.name,
         });
     }
 
