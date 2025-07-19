@@ -5249,68 +5249,71 @@ export class HeroSystem6eItem extends Item {
     }
 
     get attackDefenseVs() {
+        // What are we effectively using for attack?
+        const baseAttackItem = this.baseInfo.baseEffectDicePartsBundle(this, {}).baseAttackItem;
+
         // CONFIG overrides for specific XMLIDs
-        if (this.baseInfo?.attackDefenseVs) {
-            if (typeof this.baseInfo.attackDefenseVs === "function") {
-                return this.baseInfo.attackDefenseVs();
+        if (baseAttackItem.baseInfo?.attackDefenseVs) {
+            if (typeof baseAttackItem.baseInfo.attackDefenseVs === "function") {
+                return baseAttackItem.baseInfo.attackDefenseVs();
             }
-            return this.baseInfo.attackDefenseVs;
+            return baseAttackItem.baseInfo.attackDefenseVs;
         }
 
         // Adjustment
-        if (this.baseInfo?.type.includes("adjustment")) {
+        if (baseAttackItem.baseInfo?.type.includes("adjustment")) {
             return "POWERDEFENSE";
         }
 
         // Generic defense specification
-        if (["PD", "ED", "MD"].includes(this.system.INPUT)) {
-            return this.system.INPUT;
+        if (["PD", "ED", "MD"].includes(baseAttackItem.system.INPUT)) {
+            return baseAttackItem.system.INPUT;
         }
 
         // Mental
-        if (this.baseInfo?.type.includes("mental")) {
+        if (baseAttackItem.baseInfo?.type.includes("mental")) {
             return "MD";
         }
 
         // Flash
-        if (this.isSenseAffecting()) {
+        if (baseAttackItem.isSenseAffecting()) {
             return "FLASHDEFENSE";
         }
 
         // MARTIAL KILLING
-        if (this.system.WEAPONEFFECT?.includes("KILLINGDC")) {
+        if (baseAttackItem.system.WEAPONEFFECT?.includes("KILLINGDC")) {
             return "PD";
         }
 
         // MARTIAL STR
-        if (this.system.WEAPONEFFECT?.includes("STRDC")) {
+        if (baseAttackItem.system.WEAPONEFFECT?.includes("STRDC")) {
             return "PD";
         }
 
         // MARTIAL generic STR
-        if (this.system.WEAPONEFFECT?.includes("STR")) {
+        if (baseAttackItem.system.WEAPONEFFECT?.includes("STR")) {
             return "PD";
         }
 
         // STRIKE
-        if (this.system.EFFECT?.includes("STR")) {
+        if (baseAttackItem.system.EFFECT?.includes("STR")) {
             return "PD";
         }
 
-        if (this.system.XMLID === "TELEKINESIS") {
+        if (baseAttackItem.system.XMLID === "TELEKINESIS") {
             return "PD";
         }
 
         // MARTIAL FLASH
-        if (this.system.WEAPONEFFECT?.includes("FLASHDC")) {
+        if (baseAttackItem.system.WEAPONEFFECT?.includes("FLASHDC")) {
             return "FLASHDEFENSE";
         }
 
-        if (this.system.XMLID === "KNOCKBACK") {
+        if (baseAttackItem.system.XMLID === "KNOCKBACK") {
             return "KB";
         }
 
-        if (this.system.XMLID === "HANDTOHANDATTACK") {
+        if (baseAttackItem.system.XMLID === "HANDTOHANDATTACK") {
             return "PD";
         }
 

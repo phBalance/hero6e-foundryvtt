@@ -2,6 +2,7 @@ import {
     calculateReduceOrPushRealCost,
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
+    isRangedCombatManeuver,
     penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
@@ -242,6 +243,42 @@ export class ItemAttackFormApplication extends FormApplication {
                 this.data.hthAttackItems = {};
             }
 
+            // Weapons can be used with HTH or ranged martial maneuvers. The user needs to have Weapon Element.
+            // Weapons can also be used with ranged combat maneuvers.
+            // TODO: confirm the found Weapon Elements matches against the possible weapons.
+            this.data.maSelectedWeaponId ??= null;
+            this.data.maPossibleWeapons = [];
+            if (
+                (this.data.originalItem.type === "martialart" &&
+                    this.data.originalItem.actor.items.some((item) => item.system.XMLID === "WEAPON_ELEMENT")) ||
+                isRangedCombatManeuver(this.data.originalItem)
+            ) {
+                this.data.maPossibleWeapons = [
+                    {
+                        id: null,
+                        label: "No Weapon",
+                    },
+                    ...this.data.originalItem.actor.items
+                        .filter((item) => {
+                            // If a ranged maneuver, list all ranged weapons. Otherwise, it's a martial art
+                            // and list all HTH or ranged weapons depending on the martial maneuver type
+                            return (
+                                item.baseInfo.type.includes("attack") &&
+                                (isRangedCombatManeuver(this.data.originalItem)
+                                    ? item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
+                                      item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
+                                    : item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF)
+                            );
+                        })
+                        .map((item) => {
+                            return {
+                                id: item.id,
+                                label: item.name,
+                            };
+                        }),
+                ];
+            }
+
             // PH: FIXME: Need to only get the Naked Advantages that apply to this item.
             // PH: FIXME: need to distinguish between single power and group power
             const nakedAdvantagesItems = this.data.originalItem.actor.items.filter(
@@ -403,6 +440,20 @@ export class ItemAttackFormApplication extends FormApplication {
             effectiveStr: this.data.effectiveStr,
             effectiveStrPushedRealPoints: this.data.effectiveStrPushedRealPoints,
         });
+
+        if (this.data.maSelectedWeaponId) {
+            effectiveItem.system._active.maWeaponItem = this.data.originalItem.actor.items.find(
+                (item) => item.id === this.data.maSelectedWeaponId,
+            );
+
+            if (effectiveItem.system._active.maWeaponItem) {
+                effectiveItem.system._active.linkedAssociated ??= [];
+                effectiveItem.system._active.linkedAssociated.push({
+                    item: effectiveItem.system._active.maWeaponItem,
+                    uuid: effectiveItem.system._active.maWeaponItem.uuid,
+                });
+            }
+        }
 
         // Active points for the base item. For maneuvers this could be STR or a weapon.
         const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem.baseInfo.baseEffectDicePartsBundle(
