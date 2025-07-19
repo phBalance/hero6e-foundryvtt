@@ -1462,6 +1462,20 @@ export async function _onRollKnockback(event) {
     });
 }
 
+async function createTemporaryKnockbackItem(actor, knockbackDice) {
+    const knockbackAttackXml = `
+            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${knockbackDice}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                </MODIFIER>
+            </POWER>
+        `;
+    const knockbackAttackItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(knockbackAttackXml, actor), {});
+    await knockbackAttackItem._postUpload();
+    knockbackAttackItem.name ??= "KNOCKBACK";
+
+    return knockbackAttackItem;
+}
+
 /**
  * Roll and Apply Knockback
  * @param {HeroSystem6eToken} token
@@ -1478,18 +1492,10 @@ async function _rollApplyKnockback(token, knockbackDice) {
 
     const damageRenderedResult = await damageRoller.render();
 
-    // Bogus attack item
-    const pdContentsAttack = `
-            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                </MODIFIER>
-            </POWER>
-        `;
-    const pdAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {});
-    await pdAttack._postUpload();
-    pdAttack.name ??= "KNOCKBACK";
+    // Bogus knockback attack item
+    const knockbackAttackItem = await createTemporaryKnockbackItem(actor, damageRoller.getBaseTotal());
 
-    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, pdAttack, null);
+    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, knockbackAttackItem, null);
 
     let defense = "";
 
@@ -1502,7 +1508,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         damageNegationValue,
         knockbackResistanceValue,
         defenseTags,
-    } = getActorDefensesVsAttack(token.actor, pdAttack, { ignoreDefenseIds });
+    } = getActorDefensesVsAttack(token.actor, knockbackAttackItem, { ignoreDefenseIds });
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
@@ -1578,7 +1584,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         }
     }
 
-    const damageDetail = await _calcDamage(damageRoller, pdAttack, damageData);
+    const damageDetail = await _calcDamage(damageRoller, knockbackAttackItem, damageData);
     damageDetail.effects = `${damageDetail.effects || ""} Prone`.replace("; ", "").trim();
 
     const CANNOTBESTUNNED = token.actor.items.find((o) => o.system.XMLID === "AUTOMATON");
@@ -1594,9 +1600,9 @@ async function _rollApplyKnockback(token, knockbackDice) {
     }
 
     const cardData = {
-        item: pdAttack,
+        item: knockbackAttackItem,
         actor: actor,
-        itemJsonStr: dehydrateAttackItem(pdAttack),
+        itemJsonStr: dehydrateAttackItem(knockbackAttackItem),
 
         // Incoming Damage Information
         incomingDamageSummary: damageRoller.getTotalSummary(),
@@ -2368,15 +2374,8 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     let defense = "";
 
     // New Defense Stuff
-    let {
-        defenseValue,
-        resistantValue,
-        impenetrableValue,
-        damageReductionValue,
-        damageNegationValue,
-        //knockbackResistanceValue,
-        defenseTags,
-    } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
+    const { defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, defenseTags } =
+        getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
@@ -3578,12 +3577,8 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
 
     // KBRESISTANCE or other related power that reduces knockback
     if (actor) {
-        const kbContentsAttack = `
-            <POWER XMLID="KNOCKBACK" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-            </POWER>
-        `;
-        const kbAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {});
-        const { defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
+        const knockbackAttackItem = await createTemporaryKnockbackItem(actor, 1);
+        const { defenseTags } = getActorDefensesVsAttack(actor, knockbackAttackItem);
         knockbackTags = [...knockbackTags, ...defenseTags];
         for (const tag of defenseTags) {
             knockbackResistanceValue += Math.max(0, tag.value); // SHRINKING only applies to distance not to damage
