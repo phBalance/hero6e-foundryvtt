@@ -8429,6 +8429,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ACTIVATEONLY",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
+            cost: function () {
+                // TODO: HACK, should properly support this instead of hiding cost calc in EXTRATIME
+                return 0;
+            },
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ACTIVATEONLY" ID="1737920862488" BASECOST="-1.0" LEVELS="0" ALIAS="Only to Activate" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
