@@ -3937,7 +3937,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Power Modifiers apply only to the Control Cost.
 
                 const poolCost = parseInt(item.system.LEVELS);
-                let controlCost = Math.ceil(parseInt(item.findModsByXmlid("CONTROLCOST")?.LEVELS || 0) / 2);
+                let controlCost =
+                    Math.ceil(parseInt(item.findModsByXmlid("CONTROLCOST")?.LEVELS || 0) / 2) ||
+                    RoundFavorPlayerDown(poolCost / 2);
                 const _limitationCost = item._limitationCost;
 
                 if (_limitationCost !== 0) {

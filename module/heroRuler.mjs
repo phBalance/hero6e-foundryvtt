@@ -11,7 +11,9 @@ export class HeroRuler extends FoundryVttRuler {
     static _controlToken() {
         const sceneControls = ui.controls;
         // V13
-        if ((sceneControls.control.name || sceneControls.activeControl) !== "token") {
+        // SceneControls#activeControl is deprecated in favor of SceneControls#control#name
+        // Deprecated since Version 13
+        if ((sceneControls.control?.name || sceneControls.activeControl) !== "token") {
             return;
         }
         if (sceneControls.activeTool !== "select") {
