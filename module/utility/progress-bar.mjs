@@ -24,7 +24,11 @@ class HeroProgressBarV13 {
 
         this.advance(this._message, 0);
 
-        if (CONFIG.debug.HERO?.ui?.progress) console.debug(`${Date.now()} ${this}: creating`);
+        if (CONFIG.debug.HERO?.ui?.progress) {
+            console.debug(
+                `${Date.now()} ${this}: creating progress bar with label "${label}", max ${max}, startCount ${startCount}`,
+            );
+        }
     }
 
     toString() {
@@ -42,7 +46,7 @@ class HeroProgressBarV13 {
 
         if (this._count > this._max) {
             console.log(`${this}:: Count > Max - clamping at max`);
-            this._max = this._count;
+            this._count = this._max;
         } else if (this._count < 0) {
             console.error(`${this}: Count < 0 - clamping at 0`);
             this._count = 0;
@@ -52,7 +56,9 @@ class HeroProgressBarV13 {
 
         this._progressBar.update({ pct: percentage, message: message });
 
-        if (CONFIG.debug.HERO?.ui?.progress) console.debug(`${Date.now()} ${this}: ${percentage * 100}% ${message}`);
+        if (CONFIG.debug.HERO?.ui?.progress) {
+            console.debug(`${Date.now()} ${this}: ${percentage * 100}% (${this._count}/${this._max}) ${message}`);
+        }
     }
 
     /**

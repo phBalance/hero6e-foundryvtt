@@ -44,6 +44,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
         // KLUDGE fix
         let klugeDeleteItems = false;
+        const kludgeDeletedIds = [];
         for (const item of this.actor.items) {
             try {
                 const item2 = this.actor.items.find(
@@ -52,9 +53,13 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 );
                 if (item2) {
                     if (item2.link.includes("Scene.")) {
-                        console.warn(`Deleting duplicate item ${item2.name} from linked ${this.actor.name}`);
-                        await item2.delete();
+                        console.warn(
+                            `Deleting duplicate item ${item2.name}/${item2.system.ID}/${item2.id} from linked ${this.actor.name}`,
+                        );
+                        kludgeDeletedIds.push(item2.system.ID);
                         klugeDeleteItems = true;
+
+                        await item2.delete();
                     }
                 }
             } catch (e) {
@@ -62,7 +67,9 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             }
         }
         if (klugeDeleteItems) {
-            ui.notifications.warn(`${this.actor.name} had duplicate items which were deleted.`);
+            ui.notifications.warn(
+                `${this.actor.name} had duplicate items (${kludgeDeletedIds.join(", ")}) which were deleted.`,
+            );
         }
 
         const data = super.getData();
