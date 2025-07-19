@@ -6,6 +6,7 @@
 - BULKY and IMMOBILE foci now reduce DCV. [#2416](https://github.com/dmdorman/hero6e-foundryvtt/issues/2416)
 - Fixed issue where combat tracker segment would get stuck. [#2423](https://github.com/dmdorman/hero6e-foundryvtt/issues/2423)
 - Improved VPP description and points. [#2414](https://github.com/dmdorman/hero6e-foundryvtt/issues/2414)
+- 5e FORCEWALL powers with TRANSPARENT will now load. [#2421](https://github.com/dmdorman/hero6e-foundryvtt/issues/2421)
 
 ## Version 4.1.6 20250627
 
