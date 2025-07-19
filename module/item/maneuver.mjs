@@ -284,7 +284,7 @@ export async function doManeuverEffects(item, action) {
 
     // Add prone effects (attacker and target)
     if (hasTargetFallsTrait) {
-        const currentTargets = action.system.currentTargets;
+        const currentTargets = action.system.currentTargets || [];
         currentTargets.forEach((targetedToken) => {
             const actor = HeroSystem6eActor.get(targetedToken.document.actorId);
             newActiveEffects.push(actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect));
@@ -300,7 +300,7 @@ export async function doManeuverEffects(item, action) {
         newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect));
 
         // The defender/target gets the grabbed state
-        const currentTargets = action.system.currentTargets;
+        const currentTargets = action.system.currentTargets || [];
         currentTargets.forEach((targetedToken) => {
             const actor = HeroSystem6eActor.get(targetedToken.document.actorId);
             newActiveEffects.push(actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect));
