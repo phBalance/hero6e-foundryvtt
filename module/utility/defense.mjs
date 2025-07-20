@@ -88,7 +88,8 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
     console.error(
         `Unable to determine defenseTagVsAttack for ${actorItemDefense.actor.name}::${actorItemDefense.system.XMLID}`,
     );
-    return null; //createDefenseProfile(actorItemDefense, attackItem, 0, options);
+
+    return null;
 }
 
 export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) {

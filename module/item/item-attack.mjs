@@ -85,6 +85,11 @@ export function dehydrateAttackItem(item) {
         dehydratedItem.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
     }
 
+    // If there is a weapon for maneuvers, dehydrate it
+    if (item.system._active.maWeaponItem) {
+        dehydratedItem.system._active.maWeaponItem = item.system._active.maWeaponItem.toObject(false);
+    }
+
     // If there are linked endurance items, then we need to dehydrate them as well.
     if (item.system._active.linkedEnd && dehydratedItem.system._active.linkedEnd.length > 0) {
         dehydratedItem.system._active.linkedEnd = item.system._active.linkedEnd.map((linkedEndItem) => {
@@ -144,6 +149,13 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
     // If there is a strength item, then we need to rehydrate it.
     if (item.system._active.effectiveStrItem) {
         item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(item.system._active.effectiveStrItem, {
+            parent: actor,
+        });
+    }
+
+    // If there is a maneuver item, then we need to rehydrate it.
+    if (item.system._active.maWeaponItem) {
+        item.system._active.maWeaponItem = HeroSystem6eItem.fromSource(item.system._active.maWeaponItem, {
             parent: actor,
         });
     }
@@ -1017,6 +1029,7 @@ async function doSingleTargetActionToHit(item, options) {
             const toHitRollTotal = targetData[0].toHitRollTotal;
             const firstShotResult = targetData[0].result.hit;
             const autoSuccess = targetData[0].autoSuccess;
+            const aoeAlwaysHit = targetData[0].aoeAlwaysHit;
 
             const firstShotRenderedRoll = targetData[0].renderedRoll;
             const firstShotRoller = targetData[0].roller;
@@ -1031,9 +1044,13 @@ async function doSingleTargetActionToHit(item, options) {
                 }/${autofire.OPTION_ALIAS.toLowerCase()}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
 
                 let hit = "Miss";
+                let by = Math.abs(autofireShotRollTotal - value);
                 const value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value;
 
-                if (autoSuccess !== undefined) {
+                if (aoeAlwaysHit) {
+                    hit = "Hit";
+                    by = "AOE auto";
+                } else if (autoSuccess !== undefined) {
                     if (autoSuccess) {
                         hit = "Auto Hit";
                     } else {
@@ -1042,8 +1059,6 @@ async function doSingleTargetActionToHit(item, options) {
                 } else if (value <= autofireShotRollTotal) {
                     hit = "Hit";
                 }
-
-                let by = Math.abs(autofireShotRollTotal - value);
 
                 targetData.push({
                     id: singleTarget.id,
@@ -1167,22 +1182,39 @@ function getAttackTags(item) {
 
     if (!item) return attackTags;
 
+    // Provide the name of the original item in the tags.
+    let originalItemTag;
     if (item.system.ALIAS || item.system.XMLID) {
-        attackTags.push({ name: `${item.system.ALIAS || item.system.XMLID}`, title: `${item.system.XMLID}` });
+        originalItemTag = { name: `${item.system.ALIAS || item.system.XMLID}`, title: `${item.system.XMLID}` };
+        attackTags.push(originalItemTag);
+    }
+
+    // Use the effective item to figure out what this attack really is.
+    const baseAttackItem = item.baseInfo.baseEffectDicePartsBundle(item, {}).baseAttackItem;
+
+    // Provide the name of the actual attack item in the tag if it is different from the original item.
+    if (baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID) {
+        const baseAttackItemTag = {
+            name: `${baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID}`,
+            title: `${baseAttackItem.system.XMLID}`,
+        };
+        if (baseAttackItemTag.name !== originalItemTag?.name && baseAttackItemTag.title !== originalItemTag?.title) {
+            attackTags.push(baseAttackItemTag);
+        }
     }
 
     // Only add in class (which we should probably rename/deprecate) when we don't already have it from the ALIAS/XMLID
-    if (!attackTags.find((tag) => tag.name?.toLowerCase() === item.system.class?.toLowerCase())) {
-        attackTags.push({ name: item.system.class });
+    if (!attackTags.find((tag) => tag.name?.toLowerCase() === baseAttackItem.system.class?.toLowerCase())) {
+        attackTags.push({ name: baseAttackItem.system.class });
     }
 
-    if (item.doesKillingDamage) {
+    if (baseAttackItem.doesKillingDamage) {
         attackTags.push({ name: `killing` });
     }
 
     // Item adders
-    if (item.adders) {
-        for (const adder of item.adders) {
+    if (baseAttackItem.adders) {
+        for (const adder of baseAttackItem.adders) {
             switch (adder.XMLID) {
                 case "MINUSONEPIP":
                 case "PLUSONEHALFDIE":
@@ -1206,7 +1238,7 @@ function getAttackTags(item) {
     }
 
     // USESTANDARDEFFECT
-    if (item.system.USESTANDARDEFFECT) {
+    if (baseAttackItem.system.USESTANDARDEFFECT) {
         attackTags.push({
             name: `Standard Effect`,
             title: `USESTANDARDEFFECT`,
@@ -1214,26 +1246,29 @@ function getAttackTags(item) {
     }
 
     // STUN/BODY/EFFECT Only
-    if (item.system.stunBodyDamage && item.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody) {
+    if (
+        baseAttackItem.system.stunBodyDamage &&
+        baseAttackItem.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody
+    ) {
         attackTags.push({
-            name: item.system.stunBodyDamage,
-            title: item.system.stunBodyDamage,
+            name: baseAttackItem.system.stunBodyDamage,
+            title: baseAttackItem.system.stunBodyDamage,
         });
     }
 
     // FLASH
-    if (item.system.XMLID === "FLASH") {
-        attackTags.push({ name: item.system.OPTION_ALIAS, title: item.system.XMLID });
-        for (const adder of item.adders) {
+    if (baseAttackItem.system.XMLID === "FLASH") {
+        attackTags.push({ name: baseAttackItem.system.OPTION_ALIAS, title: baseAttackItem.system.XMLID });
+        for (const adder of baseAttackItem.adders) {
             attackTags.push({ name: adder.ALIAS, title: adder.XMLID });
         }
     }
 
     // ADJUSTMENT should include what we are adjusting
-    if (item.baseInfo.type.includes("adjustment")) {
-        const { valid, reducesArray, enhancesArray } = item.splitAdjustmentSourceAndTarget();
+    if (baseAttackItem.baseInfo.type.includes("adjustment")) {
+        const { valid, reducesArray, enhancesArray } = baseAttackItem.splitAdjustmentSourceAndTarget();
         if (!valid) {
-            attackTags.push({ name: item.system.INPUT });
+            attackTags.push({ name: baseAttackItem.system.INPUT });
         } else {
             for (const adjustTarget of reducesArray) {
                 attackTags.push({ name: `-${adjustTarget}` });
@@ -1245,7 +1280,7 @@ function getAttackTags(item) {
     }
 
     // item modifiers
-    for (const mod of item.system.MODIFIER || []) {
+    for (const mod of baseAttackItem.system.MODIFIER || []) {
         switch (mod.XMLID) {
             case "AUTOFIRE":
                 {
@@ -1321,7 +1356,7 @@ function getAttackTags(item) {
     }
 
     // MartialArts NND
-    if (item.system.EFFECT?.includes("NNDDC")) {
+    if (baseAttackItem.system.EFFECT?.includes("NNDDC")) {
         attackTags.push({
             name: `NND`,
             title: `No Normal Defense`,
@@ -1329,14 +1364,14 @@ function getAttackTags(item) {
     }
 
     // Martial FLASH
-    if (item.system.EFFECT?.includes("FLASHDC")) {
+    if (baseAttackItem.system.EFFECT?.includes("FLASHDC")) {
         attackTags.push({
             name: `Flash`,
-            title: item.name,
+            title: baseAttackItem.name,
         });
         attackTags.push({
-            name: item.system.INPUT,
-            title: item.name,
+            name: baseAttackItem.system.INPUT,
+            title: baseAttackItem.name,
         });
     }
 
@@ -1430,6 +1465,20 @@ export async function _onRollKnockback(event) {
     });
 }
 
+async function createTemporaryKnockbackItem(actor, knockbackDice) {
+    const knockbackAttackXml = `
+            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${knockbackDice}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                </MODIFIER>
+            </POWER>
+        `;
+    const knockbackAttackItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(knockbackAttackXml, actor), {});
+    await knockbackAttackItem._postUpload();
+    knockbackAttackItem.name ??= "KNOCKBACK";
+
+    return knockbackAttackItem;
+}
+
 /**
  * Roll and Apply Knockback
  * @param {HeroSystem6eToken} token
@@ -1446,18 +1495,10 @@ async function _rollApplyKnockback(token, knockbackDice) {
 
     const damageRenderedResult = await damageRoller.render();
 
-    // Bogus attack item
-    const pdContentsAttack = `
-            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                </MODIFIER>
-            </POWER>
-        `;
-    const pdAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {});
-    await pdAttack._postUpload();
-    pdAttack.name ??= "KNOCKBACK";
+    // Bogus knockback attack item
+    const knockbackAttackItem = await createTemporaryKnockbackItem(actor, damageRoller.getBaseTotal());
 
-    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, pdAttack, null);
+    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, knockbackAttackItem, null);
 
     let defense = "";
 
@@ -1470,7 +1511,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         damageNegationValue,
         knockbackResistanceValue,
         defenseTags,
-    } = getActorDefensesVsAttack(token.actor, pdAttack, { ignoreDefenseIds });
+    } = getActorDefensesVsAttack(token.actor, knockbackAttackItem, { ignoreDefenseIds });
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
@@ -1546,7 +1587,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         }
     }
 
-    const damageDetail = await _calcDamage(damageRoller, pdAttack, damageData);
+    const damageDetail = await _calcDamage(damageRoller, knockbackAttackItem, damageData);
     damageDetail.effects = `${damageDetail.effects || ""} Prone`.replace("; ", "").trim();
 
     const CANNOTBESTUNNED = token.actor.items.find((o) => o.system.XMLID === "AUTOMATON");
@@ -1562,9 +1603,9 @@ async function _rollApplyKnockback(token, knockbackDice) {
     }
 
     const cardData = {
-        item: pdAttack,
+        item: knockbackAttackItem,
         actor: actor,
-        itemJsonStr: dehydrateAttackItem(pdAttack),
+        itemJsonStr: dehydrateAttackItem(knockbackAttackItem),
 
         // Incoming Damage Information
         incomingDamageSummary: damageRoller.getTotalSummary(),
@@ -2336,15 +2377,8 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     let defense = "";
 
     // New Defense Stuff
-    let {
-        defenseValue,
-        resistantValue,
-        impenetrableValue,
-        damageReductionValue,
-        damageNegationValue,
-        //knockbackResistanceValue,
-        defenseTags,
-    } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
+    const { defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, defenseTags } =
+        getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
@@ -3546,12 +3580,8 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
 
     // KBRESISTANCE or other related power that reduces knockback
     if (actor) {
-        const kbContentsAttack = `
-            <POWER XMLID="KNOCKBACK" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-            </POWER>
-        `;
-        const kbAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {});
-        const { defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
+        const knockbackAttackItem = await createTemporaryKnockbackItem(actor, 1);
+        const { defenseTags } = getActorDefensesVsAttack(actor, knockbackAttackItem);
         knockbackTags = [...knockbackTags, ...defenseTags];
         for (const tag of defenseTags) {
             knockbackResistanceValue += Math.max(0, tag.value); // SHRINKING only applies to distance not to damage

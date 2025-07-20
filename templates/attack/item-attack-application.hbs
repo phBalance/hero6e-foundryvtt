@@ -236,6 +236,17 @@
         {{/if}}
       {{/if}}
 
+      {{#if (gt (objectNumKeys maPossibleWeapons) 0)}}
+        <div class="form-group">
+          <label>
+            Maneuver with Weapon
+          </label>
+          <select name="maSelectedWeaponId" id="maSelectedWeaponId">
+            {{selectOptions maPossibleWeapons selected=maSelectedWeaponId valueAttr="id" labelAttr="label" disabled="disabled"}}
+          </select>
+        </div>
+      {{/if}}
+
       {{#if (gt (objectNumKeys nakedAdvantagesItems) 0)}}
         <div class="form-group">
           <label>

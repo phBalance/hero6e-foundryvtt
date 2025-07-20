@@ -2,6 +2,8 @@
 
 ## Version 4.1.8 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Weapons can now be added to ranged combat maneuvers and martial arts. [#2447](https://github.com/dmdorman/hero6e-foundryvtt/issues/2447)
+
 ## Version 4.1.7 20250718
 
 - Fixed issue where 6e EVERYPHASE and 5e ACTIVATIONROLL were not actually rolling to check if PD/ED defense should apply. [#2425](https://github.com/dmdorman/hero6e-foundryvtt/issues/2425)
