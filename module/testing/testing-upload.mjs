@@ -8663,6 +8663,107 @@ export function registerUploadTests(quench) {
                     assert.equal(itemCompoundPower.system._characterPointCost, 70);
                 });
             });
+
+            describe("VPP 6e", function () {
+                const contents = `
+                    <VPP XMLID="GENERIC_OBJECT" ID="1747456137874" BASECOST="0.0" LEVELS="10" ALIAS="Variable Power Pool" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Gadget Pool" QUANTITY="1">
+                        <NOTES>Total Real Costs can't exceed gadget pool. No power in a VPP can have an Active Point cost higher than the Control Cost.</NOTES>
+                        <ADDER XMLID="CONTROLCOST" ID="1752275757727" BASECOST="0.0" LEVELS="6" ALIAS="Control Cost" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="No" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="FOCUS" ID="1752275757754" BASECOST="-0.25" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="IIF" OPTIONID="IIF" OPTION_ALIAS="IIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="MODIFIER" ID="1752275757758" BASECOST="-0.25" LEVELS="0" ALIAS="Slightly Limited Class of powers available (Gadgets)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="MODIFIER" ID="1752275757757" BASECOST="-0.5" LEVELS="0" ALIAS="VPP Powers Can Be Changed Only In Given Circumstance (can only be changed in a laboratory" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                    </VPP>
+                `;
+                let itemVppPower;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    itemVppPower = new HeroSystem6eItem(
+                        { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
+                        {
+                            parent: actor,
+                        },
+                    );
+                    await itemVppPower._postUpload();
+                    actor.items.set(itemVppPower.system.XMLID, itemVppPower);
+                });
+
+                it("compound power active points", function () {
+                    assert.equal(itemVppPower._activePoints, 13);
+                });
+
+                it("compound power realCost", function () {
+                    assert.equal(itemVppPower._realCost, 11);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        itemVppPower.system.description,
+                        "Variable Power Pool, 10 base + 6 control cost (Gadget Pool) (13 Active Points); all slots VPP Powers Can Be Changed Only In Given Circumstance (can only be changed in a laboratory (-1/2), all slots IIF (-1/4), all slots Slightly Limited Class of powers available (Gadgets) (-1/4)",
+                    );
+                });
+            });
+
+            describe("VPP 5e", function () {
+                const contents = `
+                    <VPP XMLID="GENERIC_OBJECT" ID="1753047620964" BASECOST="0.0" LEVELS="25" ALIAS="Variable Power Pool" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1">
+                    </VPP>
+                `;
+                let itemVppPower;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    itemVppPower = new HeroSystem6eItem(
+                        { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
+                        {
+                            parent: actor,
+                        },
+                    );
+                    await itemVppPower._postUpload();
+                    actor.items.set(itemVppPower.system.XMLID, itemVppPower);
+                });
+
+                it("compound power active points", function () {
+                    assert.equal(itemVppPower._activePoints, 25);
+                });
+
+                it("compound power realCost", function () {
+                    assert.equal(itemVppPower._realCost, 37);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        itemVppPower.system.description,
+                        "Variable Power Pool, 25 base + 12 control cost (25 Active Points)",
+                    );
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
