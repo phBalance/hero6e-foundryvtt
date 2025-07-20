@@ -62,7 +62,6 @@ export class HeroSystem6eActor extends Actor {
         // so we merge in the entire system
         // Also need to use force replace ==items for this to work in v13
         const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
-        this.items.clear();
 
         this.updateSource({
             prototypeToken: prototypeToken,
