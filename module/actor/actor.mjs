@@ -1585,14 +1585,21 @@ export class HeroSystem6eActor extends Actor {
 
             // CHARACTERISTIC MAXIMA
             if (this.system.CHARACTER?.RULES) {
-                const characteristicMax = parseInt(this.system.CHARACTER.RULES[key.toUpperCase() + "_MAX"] || 0);
-                if (characteristicMax && core > characteristicMax) {
-                    // Pay double for characteristics over CHARACTERISTIC MAXIMA
-                    cost += Math.ceil((core - characteristicMax) * (powerInfo.costPerLevel(this) || 1));
-                }
+                if (!this.is5e) {
+                    const characteristicMax = parseInt(this.system.CHARACTER.RULES[key.toUpperCase() + "_MAX"] || 0);
+                    if (characteristicMax && core > characteristicMax) {
+                        // Pay double for characteristics over CHARACTERISTIC MAXIMA
+                        cost += Math.ceil((core - characteristicMax) * (powerInfo.costPerLevel(this) || 1));
+                    }
 
-                if (this.system.characteristics[key].characteristicMax !== characteristicMax) {
-                    changes[`system.characteristics.${key}.characteristicMax`] = characteristicMax;
+                    if (this.system.characteristics[key].characteristicMax !== characteristicMax) {
+                        changes[`system.characteristics.${key}.characteristicMax`] = characteristicMax;
+                    }
+                } else {
+                    // 5e doesn't use characteristicMaximums
+                    if (this.system.characteristics[key].characteristicMax) {
+                        changes[`system.characteristics.${key}.-=characteristicMax`] = null;
+                    }
                 }
             }
 

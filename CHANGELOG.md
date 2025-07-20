@@ -4,6 +4,7 @@
 
 - Weapons can now be added to ranged combat maneuvers and martial arts. [#2447](https://github.com/dmdorman/hero6e-foundryvtt/issues/2447)
 - New actors now have COMBAT MANEUVERS and PERCEPTION skill added, you no longer have to import an HDC file to get these. [#2370](https://github.com/dmdorman/hero6e-foundryvtt/issues/2370)
+- 5e actors#2475 now ignore any characteristic maxima doubling rules. [#2475](https://github.com/dmdorman/hero6e-foundryvtt/issues/2475)
 
 ## Version 4.1.7 20250718
 
