@@ -1029,6 +1029,7 @@ async function doSingleTargetActionToHit(item, options) {
             const toHitRollTotal = targetData[0].toHitRollTotal;
             const firstShotResult = targetData[0].result.hit;
             const autoSuccess = targetData[0].autoSuccess;
+            const aoeAlwaysHit = targetData[0].aoeAlwaysHit;
 
             const firstShotRenderedRoll = targetData[0].renderedRoll;
             const firstShotRoller = targetData[0].roller;
@@ -1043,9 +1044,13 @@ async function doSingleTargetActionToHit(item, options) {
                 }/${autofire.OPTION_ALIAS.toLowerCase()}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
 
                 let hit = "Miss";
+                let by = Math.abs(autofireShotRollTotal - value);
                 const value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value;
 
-                if (autoSuccess !== undefined) {
+                if (aoeAlwaysHit) {
+                    hit = "Hit";
+                    by = "AOE auto";
+                } else if (autoSuccess !== undefined) {
                     if (autoSuccess) {
                         hit = "Auto Hit";
                     } else {
@@ -1054,8 +1059,6 @@ async function doSingleTargetActionToHit(item, options) {
                 } else if (value <= autofireShotRollTotal) {
                     hit = "Hit";
                 }
-
-                let by = Math.abs(autofireShotRollTotal - value);
 
                 targetData.push({
                     id: singleTarget.id,
