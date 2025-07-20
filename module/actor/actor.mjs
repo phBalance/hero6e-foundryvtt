@@ -52,6 +52,16 @@ export class HeroSystem6eActor extends Actor {
             };
         }
 
+        const is5e = game.settings.get(HEROSYS.module, "DefaultEdition") === "five" ? true : false;
+
+        this.updateSource({
+            prototypeToken: prototypeToken,
+            system: {
+                versionHeroSystem6eCreated: game.system.version,
+                is5e,
+            },
+        });
+
         //addFreeStuff
         await this.addFreeStuff();
         for (const item of this.items) {
@@ -62,13 +72,7 @@ export class HeroSystem6eActor extends Actor {
         // so we merge in the entire system
         // Also need to use force replace ==items for this to work in v13
         const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
-
         this.updateSource({
-            prototypeToken: prototypeToken,
-            system: {
-                versionHeroSystem6eCreated: game.system.version,
-                is5e: false,
-            },
             [`==items`]: items,
         });
 
