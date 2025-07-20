@@ -3123,12 +3123,61 @@ export class HeroSystem6eActor extends Actor {
         return _activeMovement;
     }
 
+    // HeroSystem is unique in that we only
+    // apply only one multiplier (whichever one reduces the most).
     /**
      * Apply any transformations to the Actor data which are caused by ActiveEffects.
      */
-    // *override
-    applyActiveEffects(...args) {
-        return super.applyActiveEffects(...args);
+    applyActiveEffects() {
+        const overrides = {};
+        this.statuses.clear();
+
+        // Organize non-disabled effects by their application priority
+        let changes = [];
+        for (const effect of this.allApplicableEffects()) {
+            if (!effect.active) continue;
+            changes.push(
+                ...effect.changes.map((change) => {
+                    const c = foundry.utils.deepClone(change);
+                    c.effect = effect;
+                    c.priority = c.priority ?? c.mode * 10;
+                    return c;
+                }),
+            );
+            for (const statusId of effect.statuses) this.statuses.add(statusId);
+        }
+
+        // Filter out redundant multiplies, keeping lowest value
+        const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+        if (mults.length > 1) {
+            const uniqueKeys = new Set();
+            mults.forEach((obj) => {
+                uniqueKeys.add(obj.key);
+            });
+
+            for (const key of uniqueKeys) {
+                const multsUniqueKey = mults.filter((c) => c.key === key);
+                if (multsUniqueKey.length > 1) {
+                    const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
+                    const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
+                    // remove all multsUnieuqKey and add back in the keepMult
+                    changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+                    changes.push(keepMult);
+                }
+            }
+        }
+
+        changes.sort((a, b) => a.priority - b.priority);
+
+        // Apply all changes
+        for (const change of changes) {
+            if (!change.key) continue;
+            const changes = change.effect.apply(this, change);
+            Object.assign(overrides, changes);
+        }
+
+        // Expand the set of final overrides
+        this.overrides = foundry.utils.expandObject(overrides);
     }
 
     /**
