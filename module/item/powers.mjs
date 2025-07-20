@@ -18,9 +18,6 @@ export class HeroSystem6eConnectingPower {
                         get() {
                             return this._original[key];
                         },
-                        set(value) {
-                            this._original[key] = value;
-                        },
                     });
                 }
                 // Should probably create setters too, but not yet as we only support LEVELS at the moment
