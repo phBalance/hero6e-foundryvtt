@@ -3,6 +3,7 @@
 ## Version 4.1.8 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Weapons can now be added to ranged combat maneuvers and martial arts. [#2447](https://github.com/dmdorman/hero6e-foundryvtt/issues/2447)
+- New actors now have COMBAT MANEUVERS and PERCEPTION skill added, you no longer have to import an HDC file to get these. [#2370](https://github.com/dmdorman/hero6e-foundryvtt/issues/2370)
 
 ## Version 4.1.7 20250718
 

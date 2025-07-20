@@ -29,6 +29,8 @@ export class HeroSystem6eActor extends Actor {
     ];
 
     /** @inheritdoc */
+    // Pre-process a creation operation for a single Document instance.
+    // Pre-operation events only occur for the client which requested the operation.
     async _preCreate(data, options, user) {
         await super._preCreate(data, options, user);
 
@@ -50,13 +52,37 @@ export class HeroSystem6eActor extends Actor {
             };
         }
 
+        const is5e = game.settings.get(HEROSYS.module, "DefaultEdition") === "five" ? true : false;
+
         this.updateSource({
             prototypeToken: prototypeToken,
             system: {
                 versionHeroSystem6eCreated: game.system.version,
-                is5e: false,
+                is5e,
             },
         });
+
+        //addFreeStuff
+        await this.addFreeStuff();
+        for (const item of this.items) {
+            await item._postUpload();
+        }
+        // REF: https://foundryvtt.wiki/en/development/api/document _preCreate
+        // Careful: toObject only returns system props that are part of schema
+        // so we merge in the entire system
+        // Also need to use force replace ==items for this to work in v13
+        const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
+        this.updateSource({
+            [`==items`]: items,
+        });
+
+        // For debugging purposes
+        window.actor = this;
+    }
+
+    // Post-process a creation operation for a single Document instance. Post-operation events occur for all connected clients.
+    _onCreate(data, options, userId) {
+        super._onCreate(data, options, userId);
     }
 
     /// Override and should probably be used instead of add/remove ActiveEffect
