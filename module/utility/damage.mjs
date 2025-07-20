@@ -273,6 +273,9 @@ function isManeuverThatIsUsingAWeapon(item, options) {
 }
 
 function isManeuverThatIsUsingAnEmptyHand(item, options) {
+    if (item.system._active === undefined) {
+        debugger;
+    }
     return (
         (item.type === "martialart" || item.type === "maneuver") &&
         !(item.system._active.maWeaponItem || options.maWeaponItem)
