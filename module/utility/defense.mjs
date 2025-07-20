@@ -80,6 +80,11 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
         return null;
     }
 
+    // Defense vs a Defense
+    if (actorItemDefense.baseInfo?.behaviors.includes("defense") || actorItemDefense.system.XMLID) {
+        return null;
+    }
+
     console.error(
         `Unable to determine defenseTagVsAttack for ${actorItemDefense.actor.name}::${actorItemDefense.system.XMLID}`,
     );
