@@ -203,6 +203,11 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                     )} upward`;
                 }
 
+                if (["SIZE", "BASESIZE"].includes(powerInfo.key)) {
+                    const sizeDetails = this.actor.sizeDetails();
+                    characteristic.notes = sizeDetails.description;
+                }
+
                 characteristic.delta = characteristic.max - characteristic.core;
                 if (data.actor.system.is5e) {
                     if (powerInfo.key.toLowerCase() === "pd") {

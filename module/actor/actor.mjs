@@ -492,6 +492,11 @@ export class HeroSystem6eActor extends Actor {
             await this.applyEncumbrancePenalty();
         }
 
+        // VEHICLE & BASE SIZE
+        if (data?.system?.characteristics?.size || data?.system?.characteristics?.basesize) {
+            await this.applySizeEffect();
+        }
+
         // Ensure natural healing effect is removed when returned to full BODY
         if (
             data?.system?.characteristics?.body?.value &&
@@ -569,6 +574,34 @@ export class HeroSystem6eActor extends Actor {
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);
         }
+    }
+
+    sizeDetails(size) {
+        let _size = Math.max(0, parseInt(size || this.system.characteristics.size?.value || 0));
+        if (this.type === "base2") {
+            _size = 6 + Math.max(0, parseInt(size || this.system.characteristics.basesize?.value || 0));
+        }
+
+        const values = {
+            length: 0,
+            width: 0,
+            height: 0,
+            volume: 0,
+            ocv: Math.floor((_size * 2) / 3),
+            mass: 0,
+            str: _size * 5,
+            kb: _size,
+            body: _size,
+        };
+        values.description =
+            _size > 0
+                ? // `L${values.length}, W${values.width}, ` +
+                  // `H${values.height}, V${values.volume}, ` +
+                  `${values.ocv ? `OCV+${values.ocv}, ` : ``}` +
+                  // `Mass${values.mass}, ` +
+                  `STR+${values.str}, KB-${values.kb}, BODY+${values.body}`
+                : "";
+        return values;
     }
 
     async TakeRecovery(asAction, token) {
@@ -1082,6 +1115,59 @@ export class HeroSystem6eActor extends Actor {
         strLiftKg = m ? m[1] * 1000 * 1000 : strLiftKg;
 
         return { strLiftText, strThrow: strRunningThrow, strLiftKg };
+    }
+
+    async applySizeEffect() {
+        const size = parseInt(
+            this.type === "base2"
+                ? this.system.characterName.basesize.value
+                : this.system.characteristics.size.value || 0,
+        );
+        const _sizeDetails = this.sizeDetails();
+
+        const sizeActiveEffect =
+            this.effects.find(
+                (effect) => effect.name?.includes("size") && effect.flags[game.system.id]?.size === true,
+            ) || {};
+        if (_sizeDetails.body) {
+            sizeActiveEffect.name = `size${size}`;
+            sizeActiveEffect.img ??= "icons/svg/teleport.svg";
+            sizeActiveEffect.flags ??= {
+                [game.system.id]: {
+                    size: true,
+                },
+            };
+            sizeActiveEffect.changes = [];
+            sizeActiveEffect.changes.push({
+                key: "system.characteristics.ocv.value",
+                value: _sizeDetails.ocv,
+                mode: 2,
+            });
+            sizeActiveEffect.changes.push({
+                key: "system.characteristics.str.value",
+                value: _sizeDetails.str,
+                mode: 2,
+            });
+            sizeActiveEffect.changes.push({
+                key: "kb",
+                value: _sizeDetails.kb,
+                mode: 2,
+            });
+            sizeActiveEffect.changes.push({
+                key: "system.characteristics.body.value",
+                value: _sizeDetails.body,
+                mode: 2,
+            });
+            if (sizeActiveEffect.id) {
+                await sizeActiveEffect.update({ name: sizeActiveEffect.name, changes: sizeActiveEffect.changes });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [sizeActiveEffect]);
+            }
+        } else {
+            if (sizeActiveEffect.id) {
+                await sizeActiveEffect.delete();
+            }
+        }
     }
 
     async applyEncumbrancePenalty() {
@@ -1845,14 +1931,14 @@ export class HeroSystem6eActor extends Actor {
 
             // Update actor type
             const targetType = this.system.CHARACTER.TEMPLATE.match(
-                /\.(ai|automaton|base|computer|heroic|normal|superheroic|vehicle)\./i,
+                /\.(ai|automaton|base|computer|heroic|normal|superheroic|vehicle)[56.]/i,
             )?.[1]
                 .toLowerCase()
                 .replace("base", "base2")
                 .replace("normal", "pc")
                 .replace("heroic", "pc")
                 .replace("superheroic", "pc");
-            if (this.type.replace("npc", "pc") !== targetType) {
+            if (targetType && this.type.replace("npc", "pc") !== targetType) {
                 await this.update({ type: targetType, [`==system`]: this.system });
             }
         }
@@ -2094,6 +2180,7 @@ export class HeroSystem6eActor extends Actor {
                 item._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false }),
             ),
         );
+        await this.applySizeEffect();
 
         await Promise.all(
             this.items
