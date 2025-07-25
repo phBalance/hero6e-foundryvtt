@@ -1842,6 +1842,19 @@ export class HeroSystem6eActor extends Actor {
             ) {
                 this.system.is5e = false;
             }
+
+            // Update actor type
+            const targetType = this.system.CHARACTER.TEMPLATE.match(
+                /\.(ai|automaton|base|computer|heroic|normal|superheroic|vehicle)\./i,
+            )?.[1]
+                .toLowerCase()
+                .replace("base", "base2")
+                .replace("normal", "pc")
+                .replace("heroic", "pc")
+                .replace("superheroic", "pc");
+            if (this.type.replace("npc", "pc") !== targetType) {
+                await this.update({ type: targetType, [`==system`]: this.system });
+            }
         }
         if (this.system.COM && !this.system.is5e) {
             this.system.is5e = true;

@@ -6,6 +6,7 @@
 - New actors now have COMBAT MANEUVERS and PERCEPTION skill added, you no longer have to import an HDC file to get these. [#2370](https://github.com/dmdorman/hero6e-foundryvtt/issues/2370)
 - 5e actors#2475 now ignore any characteristic maxima doubling rules. [#2475](https://github.com/dmdorman/hero6e-foundryvtt/issues/2475)
 - Characteristics now properly apply only the greatest reducing modifier (halve/zero). [#2462](https://github.com/dmdorman/hero6e-foundryvtt/issues/2462) [#2004](https://github.com/dmdorman/hero6e-foundryvtt/issues/2004) [#1992](https://github.com/dmdorman/hero6e-foundryvtt/issues/1992) [#362](https://github.com/dmdorman/hero6e-foundryvtt/issues/362)
+- Improved BASE support [#2479](https://github.com/dmdorman/hero6e-foundryvtt/issues/2479)
 
 ## Version 4.1.7 20250718
 
