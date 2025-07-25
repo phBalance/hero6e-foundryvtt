@@ -1121,7 +1121,7 @@ export class HeroSystem6eActor extends Actor {
         const size = parseInt(
             this.type === "base2"
                 ? this.system.characterName.basesize.value
-                : this.system.characteristics.size.value || 0,
+                : this.system.characteristics.size?.value || 0,
         );
         const _sizeDetails = this.sizeDetails();
 
