@@ -7,6 +7,9 @@ import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 
+// v13 compatibility
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
@@ -248,7 +251,7 @@ export class HeroSystem6eActor extends Actor {
             ), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         };
-        const html = await renderTemplate(template, cardData);
+        const html = await foundryVttRenderTemplate(template, cardData);
         return new Promise((resolve) => {
             const data = {
                 title: `Change ${this.name} Type`,

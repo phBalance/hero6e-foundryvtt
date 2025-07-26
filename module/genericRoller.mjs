@@ -2,6 +2,9 @@ import { HEROSYS } from "./herosystem6e.mjs";
 import { dehydrateAttackItem } from "./item/item-attack.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 
+// v13 compatibility
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+
 export class GenericRoller {
     static Initialize() {
         // Hooks.on("renderSidebar", async (_sidebar, html, _context, options) => {
@@ -13,7 +16,7 @@ export class GenericRoller {
         //         console.warn(`unable to find dom element`);
         //         return;
         //     }
-        //     const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
+        //     const content = await foundryVttRenderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
         //         css: `game-version-major-${game.version.split(".")[0]}`,
         //     });
         //     const $content = $(content);
@@ -55,9 +58,12 @@ export class GenericRoller {
                 console.warn(`unable to find dom element`);
                 return;
             }
-            const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
-                css: `game-version-major-${game.version.split(".")[0]}`,
-            });
+            const content = await foundryVttRenderTemplate(
+                `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
+                {
+                    css: `game-version-major-${game.version.split(".")[0]}`,
+                },
+            );
             const $content = $(content);
             html.append($content);
 
@@ -88,7 +94,10 @@ export class GenericRoller {
 
     static async toHit() {
         const options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
-        const template = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`, options);
+        const template = await foundryVttRenderTemplate(
+            `systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`,
+            options,
+        );
 
         const userSelection = await Dialog.prompt({
             title: "Roll ToHit",
