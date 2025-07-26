@@ -3431,16 +3431,23 @@ export class HeroSystem6eItem extends Item {
                                 // This does some damage.
                                 const damageFormula = dicePartsToEffectFormula(diceParts);
                                 if (damageFormula) {
-                                    const nnd = system.EFFECT.indexOf("NNDDC") > -1;
+                                    const nnd =
+                                        system.EFFECT.indexOf("NNDDC") > -1 ||
+                                        system.EFFECT.indexOf("WEAPONNNDDC") > -1;
                                     const killing =
-                                        system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLINGDC") > -1;
+                                        system.EFFECT.indexOf("KILLINGDC") > -1 ||
+                                        system.EFFECT.indexOf("WEAPONKILLINGDC") > -1;
 
-                                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? " HKA" : ""}`;
+                                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (system.CATEGORY === "Hand To Hand" ? " HKA" : " RKA") : ""}`;
 
                                     effect = system.EFFECT.replace("[NORMALDC]", diceFormula)
                                         .replace("[KILLINGDC]", diceFormula)
                                         .replace("[FLASHDC]", diceFormula)
-                                        .replace("[NNDDC]", diceFormula);
+                                        .replace("[NNDDC]", diceFormula)
+                                        .replace("[WEAPONDC]", diceFormula)
+                                        .replace("[WEAPONKILLINGDC]", diceFormula)
+                                        .replace("[WEAPONFLASHDC]", diceFormula)
+                                        .replace("[WEAPONNNDDC]", diceFormula);
                                 }
                             }
                         }
