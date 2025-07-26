@@ -1936,8 +1936,8 @@ export class HeroSystem6eActor extends Actor {
                 .toLowerCase()
                 .replace("base", "base2")
                 .replace("normal", "pc")
-                .replace("heroic", "pc")
-                .replace("superheroic", "pc");
+                .replace("superheroic", "pc")
+                .replace("heroic", "pc");
             if (targetType && this.type.replace("npc", "pc") !== targetType) {
                 await this.update({ type: targetType, [`==system`]: this.system });
             }
