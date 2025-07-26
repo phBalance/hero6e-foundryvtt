@@ -211,7 +211,7 @@ export class HeroSystem6eActor extends Actor {
     // Assumes ActiveEffect is a statusEffects.
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
     async addActiveEffect(activeEffect) {
-        console.warn("Consider using 'toggleStatusEffect'", this);
+        console.warn("Consider using 'toggleStatusEffect'", activeEffect);
         const newEffect = foundry.utils.deepClone(activeEffect);
 
         // Check for standard StatusEffects
