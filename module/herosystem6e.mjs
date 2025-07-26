@@ -42,6 +42,8 @@ import "./utility/chat-dice.mjs";
 import "./testing/testing-main.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
+import { isGameV13OrLater } from "./utility/compatibility.mjs";
+
 // V13 SignedString does not add a plus before a zero, also uses a non-standard minus sign.
 // V12 SignedString works great, unclear why V13 change it.
 // So we will create our own signedString.
@@ -264,11 +266,23 @@ Hooks.once("ready", async function () {
     }
 });
 
-Hooks.on("renderChatMessage", (app, html, data) => {
-    // Display action buttons
-    chat.displayChatActionButtons(app, html, data);
-    HeroSystem6eCardHelpers.onMessageRendered(html);
-});
+// The renderChatMessage hook is deprecated. Please use renderChatMessageHTML instead, which now passes an HTMLElement argument instead of jQuery.
+// Deprecated since Version 13
+// Backwards-compatible support will be removed in Version 15
+if (isGameV13OrLater()) {
+    Hooks.on("renderChatMessageHTML", (app, html, data) => {
+        // Display action buttons
+        chat.displayChatActionButtons(app, $(html), data);
+        HeroSystem6eCardHelpers.onMessageRendered($(html));
+    });
+} else {
+    Hooks.on("renderChatMessage", (app, html, data) => {
+        // Display action buttons
+        chat.displayChatActionButtons(app, html, data);
+        HeroSystem6eCardHelpers.onMessageRendered(html);
+    });
+}
+
 Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 
