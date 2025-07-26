@@ -245,7 +245,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // Weapons can be used with HTH or ranged martial maneuvers. The user needs to have Weapon Element.
             // Weapons can also be used with ranged combat maneuvers.
-            // TODO: confirm the found Weapon Elements matches against the possible weapons.
+            // TODO: confirm the found Weapon Elements matches against the possible weapons. HDC doesn't support this.
             this.data.maSelectedWeaponId ??= null;
             this.data.maPossibleWeapons = [];
             if (
@@ -257,6 +257,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     {
                         id: null,
                         label: "No Weapon",
+                        description: "Use no weapon",
                     },
                     ...this.data.originalItem.actor.items
                         .filter((item) => {
@@ -267,13 +268,15 @@ export class ItemAttackFormApplication extends FormApplication {
                                 (isRangedCombatManeuver(this.data.originalItem)
                                     ? item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
                                       item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
-                                    : item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF)
+                                    : item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF) &&
+                                !item.system.XMLID.startsWith("__") // No internal placeholder powers/items
                             );
                         })
                         .map((item) => {
                             return {
                                 id: item.id,
                                 label: item.name,
+                                description: item.system.description,
                             };
                         }),
                 ];

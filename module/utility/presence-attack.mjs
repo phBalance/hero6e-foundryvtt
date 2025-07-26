@@ -1,6 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoller } from "./dice.mjs";
 
+// v13 compatibility
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+
 async function _renderForm(actor, stateData) {
     const token = actor.token;
 
@@ -31,7 +34,7 @@ async function _renderForm(actor, stateData) {
     };
 
     const path = `systems/${HEROSYS.module}/templates/pop-out/presence-attack-card.hbs`;
-    return await renderTemplate(path, templateData);
+    return await foundryVttRenderTemplate(path, templateData);
 }
 
 function clampFractionalPortionToZeroOrHalf(value) {
@@ -139,7 +142,7 @@ async function presenceAttackRoll(actor, html) {
         speaker: speaker,
     };
     const template = `systems/${HEROSYS.module}/templates/chat/presence-attack-result-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,

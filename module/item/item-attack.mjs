@@ -22,6 +22,9 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { activateManeuver, doManeuverEffects } from "./maneuver.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 
+// v13 compatibility
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+
 export async function chatListeners(_html) {
     const html = $(_html); // v13 compatibility
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -527,7 +530,7 @@ export async function doAoeActionToHit(item, options) {
     };
 
     const template = `systems/${HEROSYS.module}/templates/chat/item-toHitAoe-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
 
@@ -1155,7 +1158,7 @@ async function doSingleTargetActionToHit(item, options) {
         blockIndex > -1
             ? `systems/${HEROSYS.module}/templates/chat/item-toHit-block-card.hbs`
             : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
@@ -1659,7 +1662,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor });
     speaker.alias = actor.name;
 
@@ -1886,7 +1889,7 @@ export async function _onRollDamage(event) {
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     speaker.alias = item.actor.name;
 
@@ -1948,7 +1951,7 @@ export async function _onRollMindScan(event) {
     };
 
     const template2 = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
-    const content = await renderTemplate(template2, data);
+    const content = await foundryVttRenderTemplate(template2, data);
     const chatData = {
         author: game.user._id,
         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
@@ -2083,7 +2086,7 @@ export async function _onRollMindScanEffectRoll(event) {
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/attack/item-mindscan-damage-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     speaker.alias = item.actor.name;
 
@@ -2642,7 +2645,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     speaker.alias = item.actor.name;
 
@@ -2710,7 +2713,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
         // render card
         const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
-        const cardHtml = await renderTemplate(template, cardData);
+        const cardHtml = await foundryVttRenderTemplate(template, cardData);
         const speaker = ChatMessage.getSpeaker({ actor: item.actor });
         speaker.alias = item.actor.name;
 
@@ -2811,7 +2814,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     speaker.alias = item.actor.name;
 
@@ -2943,7 +2946,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: attackItem.actor });
     speaker.alias = attackItem.actor.name;
 
@@ -3296,7 +3299,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-sense-affecting-card.hbs`;
-    const cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: senseAffectingItem.actor });
 
     const chatData = {

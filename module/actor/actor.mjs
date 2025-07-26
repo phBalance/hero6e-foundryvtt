@@ -7,6 +7,10 @@ import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 
+// v13 compatibility
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const FoundryVttFilePicker = foundry.applications?.apps?.FilePicker?.implementation || FilePicker;
+
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
@@ -248,7 +252,7 @@ export class HeroSystem6eActor extends Actor {
             ), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         };
-        const html = await renderTemplate(template, cardData);
+        const html = await foundryVttRenderTemplate(template, cardData);
         return new Promise((resolve) => {
             const data = {
                 title: `Change ${this.name} Type`,
@@ -2282,14 +2286,14 @@ export class HeroSystem6eActor extends Actor {
 
             // Create a directory if it doesn't already exist
             try {
-                await FilePicker.createDirectory("user", path);
+                await FoundryVttFilePicker.createDirectory("user", path);
             } catch (error) {
                 console.debug("create directory error", error);
             }
 
             // Set the image, uploading if not already in the file system
             try {
-                const imageFileExists = (await FilePicker.browse("user", path)).files.includes(
+                const imageFileExists = (await FoundryVttFilePicker.browse("user", path)).files.includes(
                     encodeURI(relativePathName),
                 );
                 if (!imageFileExists) {

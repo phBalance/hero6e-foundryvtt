@@ -3,7 +3,9 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 import { getPowerInfo } from "./util.mjs";
 
-//export function createDefenseProfile
+// v13 compatibility
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+
 export function createDefenseProfile(actorItemDefense, attackItem, value, options = {}) {
     let itemNameExpanded =
         options.shortDesc ||
@@ -534,7 +536,7 @@ export async function getConditionalDefenses(token, item, avad) {
         };
 
         const conditionalDefenseCardTemplate = `systems/${HEROSYS.module}/templates/attack/item-conditional-defense-card.hbs`;
-        const html = await renderTemplate(conditionalDefenseCardTemplate, data);
+        const html = await foundryVttRenderTemplate(conditionalDefenseCardTemplate, data);
 
         async function getDialogOutput() {
             return new Promise((resolve) => {

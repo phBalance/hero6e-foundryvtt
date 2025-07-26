@@ -4,6 +4,7 @@ import { getPowerInfo } from "./utility/util.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttCompendiumDirectory = foundry.applications?.sidebar?.tabs?.CompendiumDirectory || CompendiumDirectory;
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
 
 export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirectory {
     constructor(...args) {
@@ -28,7 +29,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
             game.i18n.sortObjects(types, "label");
             const folders = game.packs._formatFolderSelectOptions();
 
-            let html = await renderTemplate(
+            let html = await foundryVttRenderTemplate(
                 `templates/sidebar/compendium-create.${game.version.split(".")[0] === "12" ? "html" : "hbs"}`,
                 {
                     types,
