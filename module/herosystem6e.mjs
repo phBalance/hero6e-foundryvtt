@@ -241,7 +241,7 @@ Hooks.on("canvasReady", () => {
 
 Hooks.once("ready", async function () {
     if (game.settings.get(game.system.id, "alphaTesting")) {
-        //CONFIG.compatibility.mode = 0;
+        CONFIG.compatibility.mode = 0;
         //CONFIG.debug.combat = true;
     }
 
