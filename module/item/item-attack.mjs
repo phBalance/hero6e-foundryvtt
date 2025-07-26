@@ -1192,8 +1192,12 @@ function getAttackTags(item) {
     // Use the effective item to figure out what this attack really is.
     const baseAttackItem = item.baseInfo.baseEffectDicePartsBundle(item, {}).baseAttackItem;
 
-    // Provide the name of the actual attack item in the tag if it is different from the original item.
-    if (baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID) {
+    // Provide the name of the actual attack item in the tag if it is different from the original item. However,
+    // make sure we ignore internal placeholders.
+    if (
+        (baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID) &&
+        baseAttackItem.system.XMLID !== "__STRENGTHDAMAGE"
+    ) {
         const baseAttackItemTag = {
             name: `${baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID}`,
             title: `${baseAttackItem.system.XMLID}`,
