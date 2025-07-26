@@ -5998,8 +5998,17 @@ export class HeroSystem6eItem extends Item {
             xmlTag: "ADDER",
         });
 
+        // In the future, LEVELS should be something fixed by the actual XML.
         // Set the level for the number of dice.
-        this.system.LEVELS = diceParts.d6Count.toString();
+        if (this.system.XMLID === "TELEKINESIS") {
+            this.system.LEVELS =
+                diceParts.d6Count * 5 + (diceParts.halfDieCount + diceParts.d6Less1DieCount) * 3 + diceParts.constant;
+
+            // TK does not use adders so we are done.
+            return;
+        } else {
+            this.system.LEVELS = diceParts.d6Count.toString();
+        }
 
         // Set/clear a d6-1 adder
         const minusOnePipAdder = this.adders.find((adder) => adder.XMLID === "MINUSONEPIP");
