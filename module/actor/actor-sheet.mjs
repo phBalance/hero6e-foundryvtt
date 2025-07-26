@@ -16,6 +16,7 @@ import { RoundFavorPlayerUp } from "../utility/round.mjs";
 // v13 has namespaced these. When we remove this backwards compatibility then the eslint exception can be cleaned up.
 const FoundryVttTextEditor = foundry.applications.ux?.TextEditor.implementation || TextEditor;
 const FoundryVttActorSheet = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
 
 export class HeroSystemActorSheet extends FoundryVttActorSheet {
     /** @override */
@@ -1029,7 +1030,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
         // render card
         const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
-        const cardHtml = await renderTemplate(template, cardData);
+        const cardHtml = await foundryVttRenderTemplate(template, cardData);
         const speaker = ChatMessage.getSpeaker({ actor: this.actor });
         speaker.alias = this.actor.name;
 

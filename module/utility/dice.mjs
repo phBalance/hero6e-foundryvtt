@@ -1,3 +1,6 @@
+// v13 compatibility
+const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+
 export const DICE_SO_NICE_CUSTOM_SETS = Object.freeze({
     HIT_LOC: {
         colorset: "Hit Location - Body Part",
@@ -589,7 +592,7 @@ export class HeroRoller {
             total: this.getTotalSummary(),
         };
 
-        return renderTemplate(template, chatData);
+        return foundryVttRenderTemplate(template, chatData);
     }
 
     tags() {
