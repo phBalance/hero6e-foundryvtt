@@ -211,7 +211,7 @@ export class HeroSystem6eActor extends Actor {
     // Assumes ActiveEffect is a statusEffects.
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
     async addActiveEffect(activeEffect) {
-        console.warn("Consider using 'toggleStatusEffect'", this);
+        console.warn("Consider using 'toggleStatusEffect'", activeEffect);
         const newEffect = foundry.utils.deepClone(activeEffect);
 
         // Check for standard StatusEffects
@@ -1936,8 +1936,8 @@ export class HeroSystem6eActor extends Actor {
                 .toLowerCase()
                 .replace("base", "base2")
                 .replace("normal", "pc")
-                .replace("heroic", "pc")
-                .replace("superheroic", "pc");
+                .replace("superheroic", "pc")
+                .replace("heroic", "pc");
             if (targetType && this.type.replace("npc", "pc") !== targetType) {
                 await this.update({ type: targetType, [`==system`]: this.system });
             }
