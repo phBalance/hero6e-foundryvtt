@@ -30,6 +30,7 @@ import {
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
     buildStrengthItem,
+    calculateApPerDieForItem,
     calculateDicePartsForItem,
     calculateDicePartsFromDcForItem,
     calculateStrengthMinimumForItem,
@@ -6021,11 +6022,9 @@ export class HeroSystem6eItem extends Item {
             // Add the adder
             let xml = plusHalfDieAdderData.xml;
 
-            // BASECOST is either 1.5, 3, 5, or 10 depending on the base LEVELS cost
-            const baseApPerDie =
-                (this.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
-                this.baseInfo.costPerLevel(this);
+            const { baseApPerDie } = calculateApPerDieForItem(this);
 
+            // BASECOST is either 1.5, 3, 5, or 10 depending on the base LEVELS cost
             let baseCost = 0;
             switch (baseApPerDie) {
                 case 3:
@@ -6067,11 +6066,9 @@ export class HeroSystem6eItem extends Item {
             // Add the adder
             let xml = plusOnePipAdderData.xml;
 
-            // BASECOST is either 1,2,3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
-            const baseApPerDie =
-                (this.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
-                this.baseInfo.costPerLevel(this);
+            const { baseApPerDie } = calculateApPerDieForItem(this);
 
+            // BASECOST is either 1,2,3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
             let baseCost = 0;
             switch (baseApPerDie) {
                 case 3:

@@ -244,25 +244,26 @@ function isNonKillingStrengthBasedManeuver(item) {
 export function isRangedCombatManeuver(item) {
     return (
         item.type === "maneuver" &&
+        // PH: FIXME: should add CATEGORY to match martial maneuvers
         item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
         item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
     );
 }
 
 export function isHthCombatManeuver(item) {
-    return item.type === "maneuver" && item.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE;
-}
-
-export function isRangedMartialManeuver(item) {
     return (
-        item.type === "martialart" &&
-        item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
-        item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
+        item.type === "maneuver" &&
+        // PH: FIXME: should add CATEGORY to match martial maneuvers
+        (item.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE || item.system.range === CONFIG.HERO.RANGE_TYPES.SELF)
     );
 }
 
+export function isRangedMartialManeuver(item) {
+    return item.type === "martialart" && item.system.CATEGORY === "Ranged";
+}
+
 export function isHthMartialManeuver(item) {
-    return item.type === "martialart" && item.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+    return item.type === "martialart" && item.system.CATEGORY === "Hand To Hand";
 }
 
 function isManeuverThatIsUsingAWeapon(item, options) {
@@ -294,24 +295,35 @@ function doubleDamageLimit() {
     return game.settings.get(HEROSYS.module, "DoubleDamageLimit");
 }
 
-function addExtraDcsToBundle(item, dicePartsBundle) {
-    const extraDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
+function addExtraMartialDcsToBundle(item, dicePartsBundle) {
+    let extraDcItems;
+    if (isHthMartialManeuver(item)) {
+        const extraHthDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
+        extraDcItems = extraHthDcItems;
+    } else if (isRangedMartialManeuver(item)) {
+        const extraRangedDcItems = item.actor?.items.filter((item) => item.system.XMLID === "RANGEDDC") || [];
+        extraDcItems = extraRangedDcItems;
+    } else {
+        console.error(`addExtraMartialDcsToBundle called with item ${item.name} that is not a martial maneuver`);
+    }
 
-    // Consider all EXTRADCs as one
+    // Consider all EXTRADCs/RANGEDDCs as one
     const numExtraDcs = extraDcItems.reduce((accum, current) => accum + parseInt(current.system.LEVELS || 0), 0);
     let extraDcLevels = numExtraDcs;
 
+    const baseAttackItem = dicePartsBundle.baseAttackItem || item;
+
     // 5E extraDCLevels are halved for unarmed killing attacks
     // PH FIXME: Need better logic here for 6e damage doubling behavior
-    if (item.is5e && item.doesKillingDamage) {
+    if (baseAttackItem.is5e && baseAttackItem.doesKillingDamage) {
         extraDcLevels = Math.floor(extraDcLevels / 2);
     }
 
     if (extraDcLevels > 0) {
-        const extraDcDiceParts = calculateDicePartsFromDcForItem(item, extraDcLevels);
-        const formula = dicePartsToFullyQualifiedEffectFormula(item, extraDcDiceParts);
+        const extraDcDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, extraDcLevels);
+        const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, extraDcDiceParts);
 
-        dicePartsBundle.diceParts = addDiceParts(item, dicePartsBundle.diceParts, extraDcDiceParts);
+        dicePartsBundle.diceParts = addDiceParts(baseAttackItem, dicePartsBundle.diceParts, extraDcDiceParts);
         dicePartsBundle.tags.push({
             value: `${formula}`,
             name: "Extra DCs",
@@ -338,12 +350,11 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         tags: [],
     };
 
-    // EXTRADCs
-    // 5e EXTRADC for armed killing attacks count at full DCs but do NOT count towards the base DC.
+    // EXTRADCs and RANGEDDCs
+    // 5e EXTRADC and RANGEDDCs for armed killing attacks count at full DCs but do NOT count towards the base DC.
     // 6e doesn't have the concept of base and added DCs but do the same in case they turn on the doubling rule.
     if (item.type === "martialart" && options.maWeaponItem) {
-        // PH: FIXME: 3rd parameter needs fixing
-        addExtraDcsToBundle(baseDamageItem, addedDamageBundle);
+        addExtraMartialDcsToBundle(baseDamageItem, addedDamageBundle);
     }
 
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main base (source of) damage and the maneuver is additional damage.
@@ -604,6 +615,39 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     };
 }
 
+export function calculateApPerDieForItem(item) {
+    const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
+    let martialOrManeuverEquivalentApPerDice = 0;
+    if (isMartialOrManeuver) {
+        const effect = item.system.EFFECT;
+        if (
+            effect.search(/\[NORMALDC\]/) !== -1 ||
+            effect.search(/\[WEAPONDC\]/) !== -1 ||
+            effect.search(/\[FLASHDC\]/) !== -1 ||
+            effect.search(/\[WEAPONDC\]/) !== -1 ||
+            effect.search(/\[STRDC\]/) !== -1 ||
+            effect.search(/STR/) !== -1
+        ) {
+            martialOrManeuverEquivalentApPerDice = 5;
+        } else if (effect.search(/\[NNDDC\]/) !== -1 || effect.search(/\[WEAPONNNDDC\]/) !== -1) {
+            martialOrManeuverEquivalentApPerDice = 10;
+        } else if (effect.search(/\[KILLINGDC\]/) !== -1 || effect.search(/\[WEAPONKILLINGDC\]/) !== -1) {
+            martialOrManeuverEquivalentApPerDice = 15;
+        } else {
+            // FIXME: We shouldn't be calculating damage dice for things that don't do damage
+            // Most maneuvers don't do damage. However there are some that use STR as a base so assume normal damage.
+            martialOrManeuverEquivalentApPerDice = 5;
+        }
+    }
+
+    const baseApPerDie =
+        martialOrManeuverEquivalentApPerDice ||
+        (item.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
+        item.baseInfo.costPerLevel(item);
+
+    return { baseApPerDie, isMartialOrManeuver };
+}
+
 /**
  * Given a number of DCs, return the dice formula parts for this item
  *
@@ -625,28 +669,7 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
  * @returns
  */
 export function calculateDicePartsFromDcForItem(item, dc) {
-    const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
-    let martialOrManeuverEquivalentApPerDice = 0;
-    if (isMartialOrManeuver) {
-        // PH: FIXME: Need to handle weapons
-        const effect = item.system.EFFECT;
-        if (
-            effect.search(/\[NORMALDC\]/) !== -1 ||
-            effect.search(/\[FLASHDC\]/) !== -1 ||
-            effect.search(/\[STRDC\]/) !== -1 ||
-            effect.search(/STR/) !== -1
-        ) {
-            martialOrManeuverEquivalentApPerDice = 5;
-        } else if (effect.search(/\[NNDDC\]/) !== -1) {
-            martialOrManeuverEquivalentApPerDice = 10;
-        } else if (effect.search(/\[KILLINGDC\]/) !== -1) {
-            martialOrManeuverEquivalentApPerDice = 15;
-        } else {
-            // FIXME: We shouldn't be calculating damage dice for things that don't do damage
-            // Most maneuvers don't do damage. However there are some that use STR as a base so assume normal damage.
-            martialOrManeuverEquivalentApPerDice = 5;
-        }
-    }
+    const { baseApPerDie, isMartialOrManeuver } = calculateApPerDieForItem(item);
 
     // PH: FIXME: Some powers have "fixed" damage that doesn't get modified by advantages and DC modifiers (or at least not
     // in ways that I have taken the time to think through).
@@ -655,11 +678,6 @@ export function calculateDicePartsFromDcForItem(item, dc) {
         const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
         return diceParts;
     }
-
-    const baseApPerDie =
-        martialOrManeuverEquivalentApPerDice ||
-        (item.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
-        item.baseInfo.costPerLevel(item);
 
     // What break points do we have for 1 pip and 1/2 die?
     const fullDieValue = 1;
@@ -1116,33 +1134,39 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             });
         }
 
-        // 5e martial arts EXTRADCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
+        // 5e martial arts EXTRADCs and RANGEDDCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
         if (item.type === "martialart" && !item.system.USEWEAPON) {
-            addExtraDcsToBundle(item, baseDicePartsBundle);
+            addExtraMartialDcsToBundle(item, baseDicePartsBundle);
         }
 
         return baseDicePartsBundle;
     } else if (isManeuverThatIsUsingAWeapon(item, options)) {
+        // PH: FIXME: Remove options.maWeaponItem when we have a better way of doing tests using a weapon.
         let weaponItem = item.system._active.maWeaponItem || options.maWeaponItem;
-
-        // PH: FIXME: The placeholder can be removed.
+        // PH: FIXME: The placeholder can presumably be removed at the point.
         if (!weaponItem) {
             console.warn(`Kludge: No weapon specified for ${item.detailedName()}. Using placeholder.`);
             weaponItem = item.actor?.items.find((item) => item.name === "__InternalManeuverPlaceholderWeapon");
         }
 
-        // PH: FIXME: STR minima apply to base weapon damage
-        // PH: FIXME: Add rule that apply to breaking a weapon (but not here). If more than 3xBODY done to the target than base DC then weapon breaks.
-
         // Base damage of this maneuver with a weapon is the weapon itself.
         // PH: FIXME: getFullyQualifiedEffectFormulaFromItem
         const { diceParts, tags } = weaponItem.baseInfo.baseEffectDicePartsBundle(weaponItem, options);
-
-        return {
+        const weaponDicePartBundle = {
             diceParts,
             tags,
             baseAttackItem: weaponItem,
         };
+
+        // 5e martial arts RANGEDDCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
+        if (item.type === "martialart") {
+            addExtraMartialDcsToBundle(item, weaponDicePartBundle);
+        }
+
+        // PH: FIXME: STR minima apply to base weapon damage
+        // PH: FIXME: Add rule that apply to breaking a weapon (but not here). If more than 3xBODY done to the target than base DC then weapon breaks.
+
+        return weaponDicePartBundle;
     } else {
         console.error(`${item.detailedName()} should not be calling MANEUVER base damage`);
 
