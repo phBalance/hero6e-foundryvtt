@@ -3668,10 +3668,15 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             });
         }
 
+        // Calculate the knockback considering:
+        // - the knockback multiplier is a calculation to the attacker's advantage (so round up)
         knockbackRoller = new HeroRoller()
             .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
-            .addNumber(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), "Max potential knockback")
+            .addNumber(
+                RoundFavorPlayerUp(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1)),
+                "Max potential knockback",
+            )
             .addNumber(-parseInt(knockbackResistanceValue), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
@@ -3684,7 +3689,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         if (actor) {
             for (const shrinkItem of actor.items.filter((i) => i.system.XMLID === "SHRINKING" && i.isActive)) {
                 console.log(shrinkItem, shrinkItem.baseInfo);
-                shrinkingKB += (parseInt(shrinkItem.system.LEVELS) || 0) * 3; //(shrinkItem.is5e ? 3 : 6);
+                shrinkingKB += (parseInt(shrinkItem.system.LEVELS) || 0) * 3;
             }
         }
 
