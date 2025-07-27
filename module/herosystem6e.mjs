@@ -598,7 +598,7 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
         element.title = data.actor.type.toUpperCase().replace("2", "");
         element.addEventListener("click", (event) => {
             const actor = game.actors.get(event.target.dataset.id);
-            actor.ChangeType();
+            actor.changeType();
         });
 
         element.innerHTML = `<i class="fal fa-user-robot"></i>Type`;
@@ -618,7 +618,7 @@ Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
         callback: async function (target) {
             const dataset = { ...target[0].dataset };
             const actor = game.actors.get(dataset.entryId);
-            return actor.ChangeType();
+            return actor.changeType();
         },
     };
     html.push(menu);
