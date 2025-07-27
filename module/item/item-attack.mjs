@@ -3697,7 +3697,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             knockbackMessage = "No Knockback";
         } else if (knockbackResultTotal + shrinkingKB == 0) {
             knockbackMessage = "Inflicts Knockdown";
-            //actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
             await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
                 active: true,
             });
@@ -3706,7 +3705,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             knockbackMessage = `Knocked Back ${
                 (knockbackResultTotal + shrinkingKB) * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
             }${getSystemDisplayUnits(item.actor?.is5e || item.system.is5e)}`;
-            //actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
             await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
                 active: true,
             });
