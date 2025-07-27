@@ -734,7 +734,7 @@ export class HeroSystem6eItem extends Item {
             // Make sure VPP pool is large enough
             const VPP = item.parentItem?.system.XMLID === "VPP" ? item.parentItem : null;
 
-            if (!item.isActive && VPP) {
+            if (VPP) {
                 // Pool points (LEVELS) is the total amount of Real
                 // Points’ worth of powers and abilities the character
                 // can create with his VPP at any one time.
@@ -785,8 +785,9 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
 
+                // PH: FIXME: This check is wrong for 5e where the pool cost determines the max AP
                 const controlCost = parseInt(VPP.findModsByXmlid("CONTROLCOST")?.LEVELS || 0);
-                if (parseInt(item.system?.activePoints || 0) > controlCost) {
+                if (!item.is5e && parseInt(item.system?.activePoints || 0) > controlCost) {
                     console.log(item, VPP, controlCost);
                     if (overrideCanAct) {
                         const token = tokenEducatedGuess({
