@@ -240,7 +240,7 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
-    async ChangeType() {
+    async changeType() {
         const template = `systems/${HEROSYS.module}/templates/chat/actor-change-type-dialog.hbs`;
         const actor = this;
         let cardData = {
