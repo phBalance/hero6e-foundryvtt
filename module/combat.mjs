@@ -549,7 +549,7 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<void>}
      * @protected
      */
-    async _onStartTurn(combatant, context) {
+    async _onStartTurn(combatant) {
         // if (!this.turns[context?.turn]?.hasPhase()) {
         //     console.debug(
         //         `skipping _onStartTurn because ${combatant.name} does not hasPhase`,
@@ -839,7 +839,7 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<void>}
      * @protected
      */
-    async _onEndTurn(combatant, context) {
+    async _onEndTurn(combatant) {
         // if (!this.turns[context?.turn]?.hasPhase()) {
         //     console.debug(`skipping _onEndTurn because ${combatant.name} does not hasPhase`, this.turns[context?.turn]);
         //     return;
@@ -1619,21 +1619,9 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async triggerTurnEvents() {
-        const { turns, current, previous } = this;
+        const { current, previous } = this;
         const intervals = [];
         let roundDelta = current.round - previous.round;
-
-        // Add intervals for turn advancement within the current round
-        // if (roundDelta === 0) {
-        //if (current.round > 0 && previous.turn < current.turn) intervals.push([previous.turn + 1, current.turn]);
-        // }
-
-        //Add intervals for round advancement
-        // else if (roundDelta > 0) {
-        //     if (previous.round > 0) intervals.push([previous.turn + 1, turns.length - 1]);
-        //     while (--roundDelta) intervals.push([0, turns.length - 1]);
-        //     intervals.push([0, current.turn ?? 0]);
-        // }
 
         // In Hero we only do 1 interval
         if (roundDelta >= 0) {
@@ -1649,38 +1637,30 @@ export class HeroSystem6eCombat extends Combat {
                 skipped: false,
                 segment: previous.segment,
             };
-            for (const [from, to] of intervals) {
-                //for (let turn = from; turn <= to; turn++) {
-                //const round = prior.round;
-                const next = {
-                    combatant: current.combatant,
-                    round: current.round,
-                    turn: current.turn,
-                    //skipped: round !== current.round || turn !== current.turn,
-                    segment: current.segment,
-                };
-                if (prior.combatant && prior.combatant.hasPhase(prior.segment)) {
-                    await this._onEndTurn(prior.combatant, {
-                        round: prior.round,
-                        turn: prior.turn,
-                        skipped: prior.skipped,
-                        segment: prior.segment,
-                    });
-                }
-                // if (prior.round !== next.round) {
-                //     await this._onEndRound({ round: prior.round, skipped: prior.round !== previous.round });
-                //     await this._onStartRound({ round: next.round, skipped: next.round !== current.round });
-                // }
-                if (next.combatant && next.combatant.hasPhase(next.segment)) {
-                    await this._onStartTurn(next.combatant, {
-                        round: next.round,
-                        turn: next.turn,
-                        skipped: next.skipped,
-                        segment: next.segment,
-                    });
-                }
-                prior = next;
-                //}
+
+            const next = {
+                combatant: current.combatant,
+                round: current.round,
+                turn: current.turn,
+                //skipped: round !== current.round || turn !== current.turn,
+                segment: current.segment,
+            };
+            if (prior.combatant && prior.combatant.hasPhase(prior.segment)) {
+                await this._onEndTurn(prior.combatant, {
+                    round: prior.round,
+                    turn: prior.turn,
+                    skipped: prior.skipped,
+                    segment: prior.segment,
+                });
+            }
+
+            if (next.combatant && next.combatant.hasPhase(next.segment)) {
+                await this._onStartTurn(next.combatant, {
+                    round: next.round,
+                    turn: next.turn,
+                    skipped: next.skipped,
+                    segment: next.segment,
+                });
             }
         }
 
