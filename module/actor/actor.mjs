@@ -240,7 +240,7 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
-    async ChangeType() {
+    async changeType() {
         const template = `systems/${HEROSYS.module}/templates/chat/actor-change-type-dialog.hbs`;
         const actor = this;
         let cardData = {
@@ -586,24 +586,37 @@ export class HeroSystem6eActor extends Actor {
             _size = 6 + Math.max(0, parseInt(size || this.system.characteristics.basesize?.value || 0));
         }
 
-        const values = {
-            length: 0,
-            width: 0,
-            height: 0,
-            volume: 0,
-            ocv: Math.floor((_size * 2) / 3),
-            mass: 0,
-            str: _size * 5,
-            kb: _size,
-            body: _size,
-        };
+        const values =
+            this.type === "base2"
+                ? {
+                      length: 0,
+                      width: 0,
+                      height: 0,
+                      volume: 0,
+                      dcv: -Math.floor((_size * 2) / 3), // 5e has DCV penalty to base/vehicle. 6e has OCV bonus to attacker. Need to distinguish.
+                      mass: 0,
+                      str: 0, // TODO: bases don't have STR so this really shouldn't be here.
+                      kbResistance: 0, // TODO: bases don't have STR so this really shouldn't be here.
+                      body: 0,
+                  }
+                : {
+                      length: 0,
+                      width: 0,
+                      height: 0,
+                      volume: 0,
+                      dcv: -Math.floor((_size * 2) / 3),
+                      mass: 0,
+                      str: _size * 5,
+                      kbResistance: _size,
+                      body: _size,
+                  };
         values.description =
             _size > 0
                 ? // `L${values.length}, W${values.width}, ` +
                   // `H${values.height}, V${values.volume}, ` +
-                  `${values.ocv ? `OCV+${values.ocv}, ` : ``}` +
+                  `${values.dcv ? `DCV${values.dcv}, ` : ``}` +
                   // `Mass${values.mass}, ` +
-                  `STR+${values.str}, KB-${values.kb}, BODY+${values.body}`
+                  `STR+${values.str}, KB-${values.kbResistance}, BODY+${values.body}`
                 : "";
         return values;
     }
@@ -1124,7 +1137,7 @@ export class HeroSystem6eActor extends Actor {
     async applySizeEffect() {
         const size = parseInt(
             this.type === "base2"
-                ? this.system.characterName.basesize.value
+                ? this.system.characteristics.basesize.value
                 : this.system.characteristics.size?.value || 0,
         );
         const _sizeDetails = this.sizeDetails();
@@ -1142,26 +1155,30 @@ export class HeroSystem6eActor extends Actor {
                 },
             };
             sizeActiveEffect.changes = [];
+
+            // TODO: This is a DCV penalty to the base/vehicle in 5e and an OCV bonus to the attacker in 6e
             sizeActiveEffect.changes.push({
-                key: "system.characteristics.ocv.value",
-                value: _sizeDetails.ocv,
-                mode: 2,
+                key: "system.characteristics.dcv.value",
+                value: _sizeDetails.dcv,
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
             });
+
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.str.value",
                 value: _sizeDetails.str,
-                mode: 2,
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
             });
             sizeActiveEffect.changes.push({
-                key: "kb",
-                value: _sizeDetails.kb,
-                mode: 2,
+                key: "kbResistance",
+                value: _sizeDetails.kbResistance,
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
             });
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.body.value",
                 value: _sizeDetails.body,
-                mode: 2,
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
             });
+
             if (sizeActiveEffect.id) {
                 await sizeActiveEffect.update({ name: sizeActiveEffect.name, changes: sizeActiveEffect.changes });
             } else {
