@@ -173,7 +173,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async removeActiveEffect(activeEffect) {
-        console.warn("Consider using 'toggleStatusEffect'", this);
+        console.warn("Consider using 'toggleStatusEffect'", this, activeEffect);
         if (!activeEffect) {
             console.warn("removeActiveEffect is missing a parameter", this);
         }

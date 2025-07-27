@@ -6,6 +6,9 @@ export function combatSkillLevelsForAttack(item) {
     const results = [];
 
     if (!item.actor) return results;
+    if (!item.system._active) {
+        console.error(`Missing _active`, item, this);
+    }
 
     const originalItem = fromUuidSync(item.system._active?.__originalUuid) || item;
 
@@ -267,6 +270,9 @@ export function isHthMartialManeuver(item) {
 }
 
 function isManeuverThatIsUsingAWeapon(item, options) {
+    if (!item.system._active) {
+        console.error(`Missing _active`, item, options, this);
+    }
     return (
         (item.type === "martialart" || item.type === "maneuver") &&
         !!(item.system._active.maWeaponItem || options.maWeaponItem)
@@ -274,6 +280,9 @@ function isManeuverThatIsUsingAWeapon(item, options) {
 }
 
 function isManeuverThatIsUsingAnEmptyHand(item, options) {
+    if (!item.system._active) {
+        console.error(`Missing _active`, item, options, this);
+    }
     return (
         (item.type === "martialart" || item.type === "maneuver") &&
         !(item.system._active.maWeaponItem || options.maWeaponItem)
@@ -967,6 +976,9 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     const baseEffectiveStrength = effectiveStrength(item, options);
 
     // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage.
+    if (!item.system._active) {
+        console.error(`Missing _active`, item, options, dicePartsBundle, strengthAddsToDamage, this);
+    }
 
     let actorStrengthItem = item.system._active.effectiveStrItem;
     if (!actorStrengthItem) {

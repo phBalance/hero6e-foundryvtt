@@ -175,7 +175,9 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
                 }
             }
             //context._segments = "test";
-        } else {
+        }
+        //singleCombatantTracker
+        else {
             try {
                 // Create the 12 segments
                 context.segments = [];
