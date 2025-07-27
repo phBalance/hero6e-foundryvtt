@@ -3312,7 +3312,7 @@ export function registerFullTests(quench) {
                 });
             });
 
-            describe.only("5e - MA with ranged weapons", function () {
+            describe("5e - MA with ranged weapons", function () {
                 const contents = `<?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Normal.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="40" DISAD_POINTS="25" EXPERIENCE="0" />
