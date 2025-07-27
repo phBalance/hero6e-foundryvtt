@@ -140,6 +140,14 @@ function getScopedFlagValue(obj, scope, ...args) {
 }
 
 function expandSegment(index, combat) {
+    const singleCombatantTracker =
+        game.settings.get(game.system.id, "alphaTesting") &&
+        game.settings.get(game.system.id, "singleCombatantTracker");
+
+    if (singleCombatantTracker) {
+        return true;
+    }
+
     if (index === combat.current?.segment) {
         return true;
     }
