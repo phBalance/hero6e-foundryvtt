@@ -307,6 +307,11 @@ function addExtraMartialDcsToBundle(item, dicePartsBundle) {
         console.error(`addExtraMartialDcsToBundle called with item ${item.name} that is not a martial maneuver`);
     }
 
+    // If the actor has no EXTRADCs or RANGEDDCs then we can stop here.
+    if (!extraDcItems || extraDcItems.length === 0) {
+        return;
+    }
+
     // Consider all EXTRADCs/RANGEDDCs as one
     const numExtraDcs = extraDcItems.reduce((accum, current) => accum + parseInt(current.system.LEVELS || 0), 0);
     let extraDcLevels = numExtraDcs;
