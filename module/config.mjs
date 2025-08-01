@@ -4139,6 +4139,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
+            // The minimum cost for the Positive Reputation Perk is 1 Character Point per
+            // level, regardless of modifiers.
+            minimumCost: 1,
             xml: `<PERK XMLID="REPUTATION" ID="1709161449527" BASECOST="0.0" LEVELS="1" ALIAS="Positive Reputation" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                     <ADDER XMLID="HOWWIDE" ID="1709161582270" BASECOST="0.0" LEVELS="0" ALIAS="How Widely Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMALLGROUP" OPTIONID="SMALLGROUP" OPTION_ALIAS="A small to medium sized group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES" />
                     <ADDER XMLID="HOWWELL" ID="1709161582276" BASECOST="-1.0" LEVELS="0" ALIAS="How Well Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES" />
@@ -4638,6 +4641,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
+            cost: function (item) {
+                const levels = parseInt(item.system.LEVELS);
+                switch (item.system.OPTIONID) {
+                    case "ALLHTH":
+                        return Math.max(1, Math.min(levels / 2)) * this.costPerLevel();
+                    case "LARGEGROUP":
+                        return Math.max(Math.min(levels / 3)) * this.costPerLevel();
+                    case "SMALLGROUP":
+                        return Math.max(Math.min(levels / 4)) * this.costPerLevel();
+                    case "SINGLE":
+                        return Math.max(Math.min(levels / 5)) * this.costPerLevel();
+                }
+                return levels * this.costPerLevel(); // ALL ACTIONS
+            },
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
