@@ -3363,13 +3363,17 @@ export class HeroSystem6eActor extends Actor {
     }
 
     getBaseInit(segmentNumber) {
-        if (segmentNumber != this.segmentNumber) {
-            const characteristic = this.system?.initiativeCharacteristic || "dex";
-            const initValue = this.system.characteristics[characteristic]?.value || 0;
-            const r = Math.floor(Math.random(6)) + 1;
-            this.currentInit = parseInt(initValue) + Number((r / 10).toFixed(2));
-            this.segmentNumber = segmentNumber;
-        }
-        return this.currentInit;
+        const characteristic = this.system?.initiativeCharacteristic || "dex";
+        const initValue = this.system.characteristics[characteristic]?.value || 0;
+        return parseInt(initValue);
+
+        // if (segmentNumber != this.segmentNumber) {
+        //     const characteristic = this.system?.initiativeCharacteristic || "dex";
+        //     const initValue = this.system.characteristics[characteristic]?.value || 0;
+        //     const r = Math.floor(Math.random(6)) + 1;
+        //     this.currentInit = parseInt(initValue) + Number((r / 10).toFixed(2));
+        //     this.segmentNumber = segmentNumber;
+        // }
+        // return this.currentInit;
     }
 }
