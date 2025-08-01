@@ -1641,7 +1641,7 @@ export class HeroSystem6eCombat extends Combat {
             };
 
             const next = {
-                combatant: current.combatant,
+                combatant: this.combatants.get(current.combatantId) ?? null,
                 round: current.round,
                 turn: current.turn,
                 //skipped: round !== current.round || turn !== current.turn,
