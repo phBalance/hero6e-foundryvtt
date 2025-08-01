@@ -156,27 +156,27 @@ export class HeroSystem6eCombat extends Combat {
             // to act first.
 
             // Intelligence
-            const intA = Number.isNumeric(actorA.system.characteristics.int?.value)
+            const intA = Number.isNumeric(actorA?.system.characteristics.int?.value)
                 ? actorA.system.characteristics.int.value
                 : -Infinity;
-            const intB = Number.isNumeric(actorB.system.characteristics.int?.value)
+            const intB = Number.isNumeric(actorB?.system.characteristics.int?.value)
                 ? actorB.system.characteristics.int.value
                 : -Infinity;
 
             // Presence
-            const preA = Number.isNumeric(actorA.system.characteristics.pre?.value)
+            const preA = Number.isNumeric(actorA?.system.characteristics.pre?.value)
                 ? actorA.system.characteristics.pre.value
                 : -Infinity;
-            const preB = Number.isNumeric(actorB.system.characteristics.pre?.value)
+            const preB = Number.isNumeric(actorB?.system.characteristics.pre?.value)
                 ? actorB.system.characteristics.pre.value
                 : -Infinity;
 
             // Then by Speed
             // Rules don't specifically state to use SPD for ties, but seems like the right thing to do
-            const spdA = Number.isNumeric(actorA.system.characteristics.spd?.value)
+            const spdA = Number.isNumeric(actorA?.system.characteristics.spd?.value)
                 ? actorA.system.characteristics.spd.value
                 : -Infinity;
-            const spdB = Number.isNumeric(actorB.system.characteristics.spd?.value)
+            const spdB = Number.isNumeric(actorB?.system.characteristics.spd?.value)
                 ? actorB.system.characteristics.spd.value
                 : -Infinity;
 
@@ -573,6 +573,10 @@ export class HeroSystem6eCombat extends Combat {
         const _segmentNumber = combatant.flags[game.system.id]?.segment || this.segmentNumber;
 
         if (!combatant) return;
+        if (!combatant.actor) {
+            console.warn(`${combatant.name} has no actor`);
+            return;
+        }
 
         // Save some properties for future support for rewinding combat tracker
         // TODO: Include charges for various items
@@ -851,6 +855,12 @@ export class HeroSystem6eCombat extends Combat {
             );
         }
         super._onEndTurn(combatant);
+
+        if (!combatant) return;
+        if (!combatant.actor) {
+            console.debug(`${combatant.name} has no actor`);
+            return;
+        }
 
         // At the end of the Segment, any non-Persistent Powers, and any Skill Levels of any type, turn off for STUNNED actors.
         if (
@@ -1509,13 +1519,13 @@ export class HeroSystem6eCombat extends Combat {
 
     computeInitiative(c, updList) {
         const id = c._id || c.id;
-        const hasSegment = c.actor.hasPhase(this.getFlag(game.system.id, "segment"));
+        const hasSegment = c.hasPhase(this.getFlag(game.system.id, "segment"));
         const isOnHold = false; //c.actor.getHoldAction();
         const isOnAbort = false; //c.actor.getAbortAction();
         let name = c.name;
         //if (true || hasSegment || isOnHold || isOnAbort) {
         const baseInit = c.actor ? c.actor.getBaseInit(this.segmentNumber) : 0;
-        const LIGHTNINGREFLEXES = c.actor.items.find((i) => i.system.XMLID.includes("LIGHTNING_REFLEXES"));
+        const LIGHTNINGREFLEXES = c.actor?.items.find((i) => i.system.XMLID.includes("LIGHTNING_REFLEXES"));
         const initiative = baseInit + parseInt(LIGHTNINGREFLEXES?.system.LEVELS || 0);
         if (isOnHold) {
             if (hasSegment) {
