@@ -3362,7 +3362,7 @@ export class HeroSystem6eActor extends Actor {
         return phases.includes(segmentNumber);
     }
 
-    getBaseInit(segmentNumber) {
+    getBaseInit() {
         const characteristic = this.system?.initiativeCharacteristic || "dex";
         const initValue = this.system.characteristics[characteristic]?.value || 0;
         return parseInt(initValue);
