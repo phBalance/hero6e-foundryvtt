@@ -4638,6 +4638,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
+            cost: function (item) {
+                const levels = parseInt(item.system.LEVELS);
+                switch (item.system.OPTIONID) {
+                    case "ALLHTH":
+                        return Math.min(levels / 2) * this.costPerLevel();
+                    case "LARGEGROUP":
+                        return Math.min(levels / 3) * this.costPerLevel();
+                    case "SMALLGROUP":
+                        return Math.min(levels / 4) * this.costPerLevel();
+                    case "SINGLE":
+                        return Math.min(levels / 5) * this.costPerLevel();
+                }
+                return levels * this.costPerLevel(); // ALL ACTIONS
+            },
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
