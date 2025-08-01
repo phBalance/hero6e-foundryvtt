@@ -858,7 +858,7 @@ export class HeroSystem6eCombat extends Combat {
 
         if (!combatant) return;
         if (!combatant.actor) {
-            console.debugger(`${combatant.name} has no actor`);
+            console.debug(`${combatant.name} has no actor`);
             return;
         }
 
