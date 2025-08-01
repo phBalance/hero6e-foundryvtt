@@ -1508,28 +1508,30 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     computeInitiative(c, updList) {
-        let id = c._id || c.id;
-        let hasSegment = c.actor.hasPhase(this.getFlag(game.system.id, "segment"));
-        let isOnHold = false; //c.actor.getHoldAction();
-        let isOnAbort = false; //c.actor.getAbortAction();
-        let name = c.actor.name;
+        const id = c._id || c.id;
+        const hasSegment = c.actor.hasPhase(this.getFlag(game.system.id, "segment"));
+        const isOnHold = false; //c.actor.getHoldAction();
+        const isOnAbort = false; //c.actor.getAbortAction();
+        let name = c.name;
         //if (true || hasSegment || isOnHold || isOnAbort) {
-        let baseInit = c.actor ? c.actor.getBaseInit(this.segmentNumber) : 0;
+        const baseInit = c.actor ? c.actor.getBaseInit(this.segmentNumber) : 0;
+        const LIGHTNINGREFLEXES = c.actor.items.find((i) => i.system.XMLID.includes("LIGHTNING_REFLEXES"));
+        const initiative = baseInit + parseInt(LIGHTNINGREFLEXES?.system.LEVELS || 0);
         if (isOnHold) {
             if (hasSegment) {
                 // On hold + current segment -> auto-disable on hold
                 c.actor.disableHoldAction();
             } else {
-                name = c.actor.name + " (H)";
+                name += " (H)";
             }
         }
         if (isOnAbort) {
-            name = c.actor.name + " (A)";
+            name += " (A)";
             if (c.actor.incAbortActionCount()) {
                 c.actor.disableAbortAction();
             }
         }
-        updList.push({ _id: id, name: name, initiative: baseInit, holdAction: c.holdAction, hasSegment });
+        updList.push({ _id: id, name: name, initiative, holdAction: c.holdAction, hasSegment });
         // } else {
         //     updList.push({ _id: id, name: name, initiative: 0, holdAction: c.holdAction });
         // }
@@ -1639,7 +1641,7 @@ export class HeroSystem6eCombat extends Combat {
             };
 
             const next = {
-                combatant: current.combatant,
+                combatant: this.combatants.get(current.combatantId) ?? null,
                 round: current.round,
                 turn: current.turn,
                 //skipped: round !== current.round || turn !== current.turn,
