@@ -1,5 +1,6 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
+import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttCombatTracker = foundry.applications?.sidebar?.tabs?.CombatTracker || CombatTracker;
@@ -334,5 +335,23 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
         const segment = header.closest(".segment-container");
         const content = segment.querySelector(".segment-content");
         content.style.display = content.style.display === "none" ? "block" : "none";
+    }
+
+    _getEntryContextOptions() {
+        const options = super._getEntryContextOptions();
+        const getCombatant = (li) => this.viewed.combatants.get(li.dataset.combatantId);
+
+        options.push({
+            name: "Toggle Hold",
+            // This seems hacky, can use use FontAwsome?  Use CSS instead of inline styles?
+            icon: '<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="icons/svg/clockwork.svg"></img>',
+            condition: (li) => getCombatant(li)?.isOwner,
+            callback: (li) =>
+                getCombatant(li)?.actor.toggleStatusEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.id,
+                ),
+        });
+
+        return options;
     }
 }
