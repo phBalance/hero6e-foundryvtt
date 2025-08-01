@@ -5724,14 +5724,15 @@ export class HeroSystem6eItem extends Item {
         }
 
         const advantageCosts = 1 + this._advantageCost;
-        const baseCost = this._basePoints + this._addersCost;
+        let ap = this._basePoints + this._addersCost;
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCosts !== 1) {
-            return RoundFavorPlayerDown(baseCost * advantageCosts);
-        } else {
-            return baseCost;
+            ap = RoundFavorPlayerDown(ap * advantageCosts);
         }
+
+        ap = Math.max(this.baseInfo?.minimumCost || 0, ap);
+        return ap;
     }
 
     get _activePointsForEnd() {
