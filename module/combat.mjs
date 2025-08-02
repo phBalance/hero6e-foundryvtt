@@ -574,7 +574,7 @@ export class HeroSystem6eCombat extends Combat {
 
         if (!combatant) return;
         if (!combatant.actor) {
-            console.warn(`${combatant.name} has no actor`);
+            console.debug(`${combatant.name} has no actor`);
             return;
         }
 
@@ -1520,8 +1520,8 @@ export class HeroSystem6eCombat extends Combat {
     computeInitiative(c, updList) {
         const id = c._id || c.id;
         const hasSegment = c.hasPhase(this.getFlag(game.system.id, "segment"));
-        const isOnHold = false; //c.actor.getHoldAction();
-        const isOnAbort = false; //c.actor.getAbortAction();
+        const isOnHold = false; //c.actor?.getHoldAction();
+        const isOnAbort = false; //c.actor?.getAbortAction();
         let name = c.name;
         //if (true || hasSegment || isOnHold || isOnAbort) {
         const baseInit = c.actor ? c.actor.getBaseInit(this.segmentNumber) : 0;
