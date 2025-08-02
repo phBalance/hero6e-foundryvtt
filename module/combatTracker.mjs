@@ -344,7 +344,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
         options.push({
             name: "Toggle Hold",
             // This seems hacky, can use use FontAwsome?  Use CSS instead of inline styles?
-            icon: '<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="icons/svg/clockwork.svg"></img>',
+            icon: `<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.img}"></img>`,
             condition: (li) => getCombatant(li)?.isOwner,
             callback: (li) =>
                 getCombatant(li)?.actor.toggleStatusEffect(
@@ -355,7 +355,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
         options.push({
             name: "Toggle Abort",
             // This seems hacky, can use use FontAwsome?  Use CSS instead of inline styles?
-            icon: `<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="systems/${game.system.id}/icons/aborted.svg"></img>`,
+            icon: `<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.img}"></img>`,
             condition: (li) => getCombatant(li)?.isOwner,
             callback: (li) =>
                 getCombatant(li)?.actor.toggleStatusEffect(
