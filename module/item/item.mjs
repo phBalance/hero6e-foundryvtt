@@ -5377,6 +5377,8 @@ export class HeroSystem6eItem extends Item {
             // Preferred Methods to determine KILLING
             if (this.system.XMLID.startsWith("__")) {
                 return false;
+            } else if (this.system._active.maWeaponItem) {
+                return this.system._active.maWeaponItem.doesKillingDamage;
             } else if (this.baseInfo.doesKillingDamage != undefined) {
                 return this.baseInfo.doesKillingDamage;
             } else if (this.baseInfo.nonDmgEffect) {

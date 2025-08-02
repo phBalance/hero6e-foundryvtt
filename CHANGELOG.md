@@ -2,6 +2,8 @@
 
 ## Version 4.1.9 So Far.... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Martial arts with weapons can now do killing damage. [#2531](https://github.com/dmdorman/hero6e-foundryvtt/issues/2531)
+
 ## Version 4.1.8 20250727
 
 - Weapons can now be added to ranged combat maneuvers and all martial arts. See issue for more details. [#2447](https://github.com/dmdorman/hero6e-foundryvtt/issues/2447)
