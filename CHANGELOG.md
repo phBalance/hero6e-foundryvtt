@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.1.9 So Far.... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.9 20250801 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Martial arts with weapons can now do killing damage. [#2531](https://github.com/dmdorman/hero6e-foundryvtt/issues/2531)
 
