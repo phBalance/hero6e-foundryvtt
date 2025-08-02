@@ -339,7 +339,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
 
     _getEntryContextOptions() {
         const options = super._getEntryContextOptions();
-        const getCombatant = (li) => this.viewed.combatants.get(li.dataset.combatantId);
+        const getCombatant = (li) => this.viewed.combatants.get(li.dataset?.combatantId);
 
         options.push({
             name: "Toggle Hold",
