@@ -347,7 +347,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
             icon: `<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.img}"></img>`,
             condition: (li) => getCombatant(li)?.isOwner,
             callback: (li) =>
-                getCombatant(li)?.actor.toggleStatusEffect(
+                getCombatant(li)?.actor?.toggleStatusEffect(
                     HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.id,
                 ),
         });
@@ -358,7 +358,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
             icon: `<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.img}"></img>`,
             condition: (li) => getCombatant(li)?.isOwner,
             callback: (li) =>
-                getCombatant(li)?.actor.toggleStatusEffect(
+                getCombatant(li)?.actor?.toggleStatusEffect(
                     HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.id,
                 ),
         });
