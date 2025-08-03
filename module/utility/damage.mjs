@@ -367,10 +367,12 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     const addedDamageBundle = {
         diceParts: zeroDiceParts,
         tags: [],
+        baseAttackItem,
     };
     const velocityDamageBundle = {
         diceParts: zeroDiceParts,
         tags: [],
+        baseAttackItem,
     };
 
     // EXTRADCs and RANGEDDCs
