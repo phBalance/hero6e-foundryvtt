@@ -1,6 +1,7 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
+import { isGameV13OrLater } from "./utility/compatibility.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttCombatTracker = foundry.applications?.sidebar?.tabs?.CombatTracker || CombatTracker;
@@ -339,12 +340,15 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
 
     _getEntryContextOptions() {
         const options = super._getEntryContextOptions();
-        const getCombatant = (li) => this.viewed.combatants.get(li.dataset?.combatantId);
+        const getCombatant = (li) => this.viewed.combatants.get(li.dataset?.combatantId || li.data?.("combatant-id"));
+        const style =
+            `width:15px;height:auto;display:inline-block;margin-right:8px;` +
+            `box-sizing:border-box;vertical-align:bottom;${isGameV13OrLater() ? "" : "margin-bottom:10px;"}`;
 
         options.push({
             name: "Toggle Hold",
             // This seems hacky, can use use FontAwsome?  Use CSS instead of inline styles?
-            icon: `<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.img}"></img>`,
+            icon: `<img style="${style}" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.img}"></img>`,
             condition: (li) => getCombatant(li)?.isOwner,
             callback: (li) =>
                 getCombatant(li)?.actor?.toggleStatusEffect(
@@ -355,7 +359,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
         options.push({
             name: "Toggle Abort",
             // This seems hacky, can use use FontAwsome?  Use CSS instead of inline styles?
-            icon: `<img style="width:15px;display:inline-block;margin-right:8px;box-sizing:border-box;vertical-align:bottom;" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.img}"></img>`,
+            icon: `<img style="${style}" src="${HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.img}"></img>`,
             condition: (li) => getCombatant(li)?.isOwner,
             callback: (li) =>
                 getCombatant(li)?.actor?.toggleStatusEffect(
