@@ -58,7 +58,15 @@ async function migrateToVersion(migratesToVersion, lastMigration, queue, queueTy
                 `Migrating ${queueType} ${originalTotal - queue.length} of ${originalTotal} to ${migratesToVersion}`,
             );
 
-            await asyncFn(queueElement);
+            try {
+                await asyncFn(queueElement);
+            } catch (error) {
+                console.error(
+                    `Exception executing migration (${migratesToVersion}) function ${asyncFn.name} with queue (${queue.length}): `,
+                    error,
+                    queueElement,
+                );
+            }
         }
 
         migrationProgressBar.close(`Done migrating ${originalTotal} ${queueType} to ${migratesToVersion}`);
