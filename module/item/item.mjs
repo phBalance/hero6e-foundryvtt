@@ -38,6 +38,7 @@ import {
     dicePartsToEffectFormula,
     getEffectFormulaFromItem,
     getFullyQualifiedEffectFormulaFromItem,
+    isManeuverHthCategory,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
@@ -3440,7 +3441,7 @@ export class HeroSystem6eItem extends Item {
                                         system.EFFECT.indexOf("KILLINGDC") > -1 ||
                                         system.EFFECT.indexOf("WEAPONKILLINGDC") > -1;
 
-                                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (system.CATEGORY === "Hand To Hand" ? " HKA" : " RKA") : ""}`;
+                                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (isManeuverHthCategory(this) ? " HKA" : " RKA") : ""}`;
 
                                     effect = system.EFFECT.replace("[NORMALDC]", diceFormula)
                                         .replace("[KILLINGDC]", diceFormula)
