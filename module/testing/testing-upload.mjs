@@ -2480,7 +2480,6 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.str.value = 10;
-                    await actor.addAttackPlaceholder();
                     await actor._postUpload();
 
                     item = new HeroSystem6eItem(
@@ -2778,11 +2777,9 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 4);
                 });
 
-                // Can't test this as martial maneuvers don't cost END but regular maneuvers don't cost. There is not enough content in
-                // contents to distinguish between them
-                // it("end", function () {
-                //     assert.equal(item.system.end, "0");
-                // });
+                it("end", function () {
+                    assert.equal(item.system.end, "0");
+                });
             });
 
             describe("Skill Levels", function () {
@@ -6665,7 +6662,6 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.dex.value = 15;
-                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = new HeroSystem6eItem(
@@ -6725,7 +6721,6 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = new HeroSystem6eItem(
@@ -6789,7 +6784,6 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = new HeroSystem6eItem(
@@ -6832,10 +6826,10 @@ export function registerUploadTests(quench) {
 
                 describe("Nerve Strike", async function () {
                     const contents = `
-                    <MANEUVER XMLID="MANEUVER" ID="1717892734727" BASECOST="4.0" LEVELS="0" ALIAS="Nerve Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Nerve Strike" OCV="-1" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NNDDC]" ADDSTR="No" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[NNDDC]">
-                        <NOTES />
-                    </MANEUVER>
-                `;
+                        <MANEUVER XMLID="MANEUVER" ID="1717892734727" BASECOST="4.0" LEVELS="0" ALIAS="Nerve Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Nerve Strike" OCV="-1" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NNDDC]" ADDSTR="No" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[NNDDC]">
+                            <NOTES />
+                        </MANEUVER>
+                    `;
                     let item;
 
                     before(async () => {
@@ -6854,7 +6848,6 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.dex.value = 15;
-                        await actor.addAttackPlaceholder();
                         await actor._postUpload();
 
                         item = await new HeroSystem6eItem(
@@ -6884,6 +6877,66 @@ export function registerUploadTests(quench) {
 
                     it("damage", function () {
                         assert.equal(item.system.damage, "2d6");
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("Custom Martial Art Maneuver (HTH)", async function () {
+                    const contents = `
+                        <MANEUVER XMLID="MANEUVER" ID="1754187078696" BASECOST="3.0" LEVELS="0" ALIAS="Custom Martial Strike (HTH)" POSITION="56" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="+0" DCV="+0" DC="2" PHASE="1/2" EFFECT="Strike" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Strike">
+                            <NOTES />
+                        </MANEUVER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const previousDoubleDamageLimitSetting = await game.settings.set(
+                            HEROSYS.module,
+                            "DoubleDamageLimit",
+                        );
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        actor.system.characteristics.dex.value = 15;
+                        await actor._postUpload();
+
+                        item = await new HeroSystem6eItem(
+                            {
+                                ...HeroSystem6eItem.itemDataFromXml(contents, actor),
+                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                            },
+                            { parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+
+                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "1/2 Phase, +0 OCV, +0 DCV, Strike");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 3);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 3);
+                    });
+
+                    it("damage", function () {
+                        assert.equal(item.system.damage, "4d6");
                     });
 
                     it("end", function () {

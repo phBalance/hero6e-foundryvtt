@@ -266,7 +266,12 @@ export function isRangedMartialManeuver(item) {
 }
 
 export function isHthMartialManeuver(item) {
-    return item.type === "martialart" && item.system.CATEGORY === "Hand To Hand";
+    return item.type === "martialart" && isManeuverHthCategory(item);
+}
+
+export function isManeuverHthCategory(item) {
+    // NOTE: HD has a bug where custom martial maneuvers have CATEGORY of "Hand to Hand" (note lower case)
+    return item.system.CATEGORY === "Hand To Hand" || item.system.CATEGORY === "Hand to Hand";
 }
 
 function isManeuverThatIsUsingAWeapon(item, options) {
@@ -305,6 +310,8 @@ function doubleDamageLimit() {
 }
 
 function addExtraMartialDcsToBundle(item, dicePartsBundle) {
+    // PH: FIXME: It is possible to use fewer than the maximum number of EXTRADCs and RANGEDCs. Need a mechanism for this.
+
     let extraDcItems;
     if (isHthMartialManeuver(item)) {
         const extraHthDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
@@ -313,7 +320,9 @@ function addExtraMartialDcsToBundle(item, dicePartsBundle) {
         const extraRangedDcItems = item.actor?.items.filter((item) => item.system.XMLID === "RANGEDDC") || [];
         extraDcItems = extraRangedDcItems;
     } else {
-        console.error(`addExtraMartialDcsToBundle called with item ${item.name} that is not a martial maneuver`);
+        console.error(
+            `addExtraMartialDcsToBundle called for ${item.actor?.name}/${item.detailedName()} that is not a martial maneuver`,
+        );
     }
 
     // If the actor has no EXTRADCs or RANGEDDCs then we can stop here.
@@ -352,23 +361,25 @@ function addExtraMartialDcsToBundle(item, dicePartsBundle) {
  * @param {HeroSystem6eItem} item
  * @param {Object} options
  */
-export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
+export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     // PH: FIXME: Consider separating out into maneuver and non maneuver components as much of the complication is realted to that.
 
     const addedDamageBundle = {
         diceParts: zeroDiceParts,
         tags: [],
+        baseAttackItem,
     };
     const velocityDamageBundle = {
         diceParts: zeroDiceParts,
         tags: [],
+        baseAttackItem,
     };
 
     // EXTRADCs and RANGEDDCs
-    // 5e EXTRADC and RANGEDDCs for armed killing attacks count at full DCs but do NOT count towards the base DC.
+    // 5e EXTRADC and RANGEDDCs for armed killing attacks count at full DCs but do NOT count towards the base DC. FRed pg. 406.
     // 6e doesn't have the concept of base and added DCs but do the same in case they turn on the doubling rule.
-    if (item.type === "martialart" && options.maWeaponItem) {
-        addExtraMartialDcsToBundle(baseDamageItem, addedDamageBundle);
+    if (item.type === "martialart" && (item.system._active.maWeaponItem || options.maWeaponItem)) {
+        addExtraMartialDcsToBundle(item, addedDamageBundle);
     }
 
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main base (source of) damage and the maneuver is additional damage.
@@ -378,19 +389,19 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         const rawManeuverDc = parseInt(item.system.DC);
 
         let maneuverDC = rawManeuverDc;
-        if (item.is5e && baseDamageItem.doesKillingDamage) {
+        if (item.is5e && baseAttackItem.doesKillingDamage) {
             maneuverDC = Math.floor(rawManeuverDc / 2);
         }
 
         // Martial Maneuvers in 5e ignore advantages. Everything else care about them.
         const alteredManeuverDc =
             item.is5e && item.type === "martialart"
-                ? maneuverDC * (1 + baseDamageItem._advantagesAffectingDc)
+                ? maneuverDC * (1 + baseAttackItem._advantagesAffectingDc)
                 : maneuverDC;
-        const maneuverDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, alteredManeuverDc);
-        const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, maneuverDiceParts);
+        const maneuverDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredManeuverDc);
+        const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, maneuverDiceParts);
 
-        addedDamageBundle.diceParts = addDiceParts(baseDamageItem, addedDamageBundle.diceParts, maneuverDiceParts);
+        addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, maneuverDiceParts);
         addedDamageBundle.tags.push({
             value: formula === "0" ? "" : `${formula}`, // Hide the formula if it's 0 as it looks ugly
             name: item.name,
@@ -399,18 +410,18 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     }
 
     // Add in STR if it isn't the base damage type
-    if (baseDamageItem.system.usesStrength) {
-        addStrengthToBundle(baseDamageItem, options, addedDamageBundle, true);
+    if (baseAttackItem.system.usesStrength) {
+        addStrengthToBundle(baseAttackItem, options, addedDamageBundle, true);
     }
 
     // Boostable Charges
     if (options.boostableCharges != undefined && options.boostableCharges > 0) {
         // Each used boostable charge, to a max of 4, increases the damage class by 1.
         const boostChargesDc = Math.min(4, parseInt(options.boostableCharges));
-        const boostableDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, boostChargesDc);
-        const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, boostableDiceParts);
+        const boostableDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, boostChargesDc);
+        const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, boostableDiceParts);
 
-        addedDamageBundle.diceParts = addDiceParts(baseDamageItem, addedDamageBundle.diceParts, boostableDiceParts);
+        addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, boostableDiceParts);
         addedDamageBundle.tags.push({
             value: `${formula}`,
             name: "Boostable Charges",
@@ -426,9 +437,9 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         if (csl.dc > 0) {
             // CSLs in 5e ignore advantages. In 6e they care about it.
             const alteredCslDc = item.is5e ? csl.dc * (1 + item._advantagesAffectingDc) : csl.dc;
-            const cslDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, alteredCslDc);
-            const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, cslDiceParts);
-            addedDamageBundle.diceParts = addDiceParts(baseDamageItem, addedDamageBundle.diceParts, cslDiceParts);
+            const cslDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredCslDc);
+            const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, cslDiceParts);
+            addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, cslDiceParts);
             addedDamageBundle.tags.push({
                 value: `+${formula}`,
                 name: csl.item.name,
@@ -446,13 +457,13 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         const divisor = parseInt(velocityMatch[1]);
         const velocityDc = Math.floor(velocity / divisor); // There is no rounding
 
-        const velocityDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, velocityDc);
-        const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, velocityDiceParts);
+        const velocityDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, velocityDc);
+        const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, velocityDiceParts);
 
         // Velocity adding to normal damage does not count towards any doubling rules.
         const bundleToUse = item.doesKillingDamage ? addedDamageBundle : velocityDamageBundle;
 
-        bundleToUse.diceParts = addDiceParts(baseDamageItem, bundleToUse.diceParts, velocityDiceParts);
+        bundleToUse.diceParts = addDiceParts(baseAttackItem, bundleToUse.diceParts, velocityDiceParts);
         bundleToUse.tags.push({
             value: `${formula}`,
             name: "Velocity",
@@ -468,10 +479,10 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
             (change) => change.key === "system.value" && change.value !== 0 && change.mode === 2,
         )) {
             const value = parseInt(change.value);
-            const aeDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, value);
-            const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, aeDiceParts);
+            const aeDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, value);
+            const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, aeDiceParts);
 
-            addedDamageBundle.diceParts = addDiceParts(baseDamageItem, addedDamageBundle.diceParts, aeDiceParts);
+            addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, aeDiceParts);
             addedDamageBundle.tags.push({
                 value: `${formula}`,
                 name: ae.name,
@@ -499,10 +510,10 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
             // 5e does not consider advantages so we have to compensate and as a consequence we may have a fractional DC (yes, the rules are not self consistent).
             // 6e is sensible in this regard.
             const alteredHaymakerDc = item.is5e ? haymakerDC * (1 + item._advantagesAffectingDc) : haymakerDC;
-            const haymakerDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, alteredHaymakerDc);
-            const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, haymakerDiceParts);
+            const haymakerDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredHaymakerDc);
+            const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, haymakerDiceParts);
 
-            addedDamageBundle.diceParts = addDiceParts(baseDamageItem, addedDamageBundle.diceParts, haymakerDiceParts);
+            addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, haymakerDiceParts);
             addedDamageBundle.tags.push({
                 value: `${formula}`,
                 name: "Haymaker",
@@ -518,11 +529,11 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
         const weaponMatch = (weaponMaster.system.ADDER || []).find((o) => o.XMLID === "ADDER" && o.ALIAS === item.name);
         if (weaponMatch) {
             const weaponMasterDcBonus = 3 * Math.max(1, parseInt(weaponMaster.system.LEVELS) || 1);
-            const weaponMasterDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, weaponMasterDcBonus);
-            const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, weaponMasterDiceParts);
+            const weaponMasterDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, weaponMasterDcBonus);
+            const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, weaponMasterDiceParts);
 
             addedDamageBundle.diceParts = addDiceParts(
-                baseDamageItem,
+                baseAttackItem,
                 addedDamageBundle.diceParts,
                 weaponMasterDiceParts,
             );
@@ -575,11 +586,11 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
                 case "DEADLYBLOW": {
                     if (!options.ignoreDeadlyBlow) {
                         const deadlyDc = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-                        const deadlyBlowDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, deadlyDc);
-                        const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, deadlyBlowDiceParts);
+                        const deadlyBlowDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, deadlyDc);
+                        const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, deadlyBlowDiceParts);
 
                         addedDamageBundle.diceParts = addDiceParts(
-                            baseDamageItem,
+                            baseAttackItem,
                             addedDamageBundle.diceParts,
                             deadlyBlowDiceParts,
                         );
@@ -608,11 +619,11 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     // Poor Footing penalties) unless he makes a Breakfall roll.
     if (item.actor?.statuses?.has("underwater")) {
         const underwaterDc = 2; // NOTE: Working with 2 DC and then subtracting
-        const underwaterDiceParts = calculateDicePartsFromDcForItem(baseDamageItem, underwaterDc);
-        const formula = dicePartsToFullyQualifiedEffectFormula(baseDamageItem, underwaterDiceParts);
+        const underwaterDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, underwaterDc);
+        const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, underwaterDiceParts);
 
         addedDamageBundle.diceParts = subtractDiceParts(
-            baseDamageItem,
+            baseAttackItem,
             addedDamageBundle.diceParts,
             underwaterDiceParts,
         );
@@ -1151,7 +1162,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             });
         }
 
-        // 5e martial arts EXTRADCs and RANGEDDCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
+        // 5e martial arts EXTRADCs and RANGEDDCs are baseDCs when unarmed. Do the same for 6e in case they use the optional damage doubling rules too.
         if (item.type === "martialart" && !item.system.USEWEAPON) {
             addExtraMartialDcsToBundle(item, baseDicePartsBundle);
         }
@@ -1159,12 +1170,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
         return baseDicePartsBundle;
     } else if (isManeuverThatIsUsingAWeapon(item, options)) {
         // PH: FIXME: Remove options.maWeaponItem when we have a better way of doing tests using a weapon.
-        let weaponItem = item.system._active.maWeaponItem || options.maWeaponItem;
-        // PH: FIXME: The placeholder can presumably be removed at the point.
-        if (!weaponItem) {
-            console.warn(`Kludge: No weapon specified for ${item.detailedName()}. Using placeholder.`);
-            weaponItem = item.actor?.items.find((item) => item.name === "__InternalManeuverPlaceholderWeapon");
-        }
+        const weaponItem = item.system._active.maWeaponItem || options.maWeaponItem;
 
         // Base damage of this maneuver with a weapon is the weapon itself.
         // PH: FIXME: getFullyQualifiedEffectFormulaFromItem
@@ -1175,10 +1181,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             baseAttackItem: weaponItem,
         };
 
-        // 5e martial arts RANGEDDCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
-        if (item.type === "martialart") {
-            addExtraMartialDcsToBundle(item, weaponDicePartBundle);
-        }
+        // NOTE: 5e martial arts EXTRADCs and RANGEDDCs are not baseDCs if they are armed. Do the same for 6e in case they use the optional damage doubling rules too.
 
         // PH: FIXME: STR minima apply to base weapon damage
         // PH: FIXME: Add rule that apply to breaking a weapon (but not here). If more than 3xBODY done to the target than base DC then weapon breaks.
@@ -1193,6 +1196,22 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             baseAttackItem: null,
         };
     }
+}
+
+// A few maneuver may do killing damage on their own but most will only do killing damage based on if it's
+// being used with a weapon or not.
+export function maneuverDoesKillingDamage(item) {
+    if (item.system._active.maWeaponItem) {
+        return item.system._active.maWeaponItem.doesKillingDamage;
+    }
+
+    if (item.system.WEAPONEFFECT) {
+        return item.system.WEAPONEFFECT.includes("KILLING");
+    } else if (item.system.EFFECT) {
+        return item.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
+    }
+
+    return false;
 }
 
 /**

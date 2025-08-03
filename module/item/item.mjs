@@ -38,6 +38,7 @@ import {
     dicePartsToEffectFormula,
     getEffectFormulaFromItem,
     getFullyQualifiedEffectFormulaFromItem,
+    isManeuverHthCategory,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
@@ -1574,6 +1575,11 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        // Does it perform a strike?
+        else if (effect.search(/Strike/) > -1) {
+            return false;
+        }
+
         // Does it use Strength damage?
         else if (effect.search(/\[STRDC\]/) > -1) {
             return false;
@@ -1585,7 +1591,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Does it require an attack to hit roll like BLOCK?
-        else if (effect.search(/Block/) > -1) {
+        else if (maneuverHasBlockTrait(this)) {
             return false;
         }
 
@@ -3440,7 +3446,7 @@ export class HeroSystem6eItem extends Item {
                                         system.EFFECT.indexOf("KILLINGDC") > -1 ||
                                         system.EFFECT.indexOf("WEAPONKILLINGDC") > -1;
 
-                                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (system.CATEGORY === "Hand To Hand" ? " HKA" : " RKA") : ""}`;
+                                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (isManeuverHthCategory(this) ? " HKA" : " RKA") : ""}`;
 
                                     effect = system.EFFECT.replace("[NORMALDC]", diceFormula)
                                         .replace("[KILLINGDC]", diceFormula)
@@ -5353,7 +5359,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isSense() {
-        //SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
+        // SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
         return (
             this.baseInfo?.type.includes("sense") &&
             (["SIGHTGROUP", "TOUCHGROUP", "HEARINGGROUP", "RADIOGROUP", "SMELLGROUP"].includes(this.system.GROUP) ||
@@ -5363,7 +5369,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isTargeting() {
-        //SightGroup has TARGETING builtIn
+        // SightGroup has TARGETING builtIn
         return (
             this.baseInfo?.type.includes("sense") &&
             (["TARGETINGSENSE"].includes(this.system.GROUP) ||
@@ -5374,25 +5380,16 @@ export class HeroSystem6eItem extends Item {
 
     get doesKillingDamage() {
         if (this.system.XMLID && this.baseInfo) {
+            // PH: FIXME: THis is what we ultamitely want
+            // return this.baseInfo.doesKillingDamage(this);
+
             // Preferred Methods to determine KILLING
             if (this.system.XMLID.startsWith("__")) {
                 return false;
-            } else if (this.system._active.maWeaponItem) {
-                return this.system._active.maWeaponItem.doesKillingDamage;
             } else if (this.baseInfo.doesKillingDamage != undefined) {
-                return this.baseInfo.doesKillingDamage;
+                return this.baseInfo.doesKillingDamage(this);
             } else if (this.baseInfo.nonDmgEffect) {
                 return false;
-            } else if (this.isSenseAffecting()) {
-                return false;
-            } else if (this.baseInfo.type.includes("adjustment")) {
-                return false;
-            } else if (this.baseInfo.type.includes("mental")) {
-                return false;
-            } else if (this.system.WEAPONEFFECT) {
-                return this.system.WEAPONEFFECT.includes("KILLING");
-            } else if (this.system.EFFECT) {
-                return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
             } else if (this.type === "disadvantage") {
                 return false;
             } else if (this.baseInfo.type.includes("disadvantage")) {
@@ -6121,8 +6118,6 @@ export class HeroSystem6eItem extends Item {
         if (this.system.XMLID === "__STRENGTHDAMAGE") {
             if (this.system.ALIAS === "__InternalStrengthPlaceholder") {
                 return "Your STRENGTH";
-            } else if (this.system.ALIAS === "__InternalManeuverPlaceholderWeapon") {
-                return "Weapon Placeholder";
             }
         }
 

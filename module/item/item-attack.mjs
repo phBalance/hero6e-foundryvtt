@@ -19,7 +19,7 @@ import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { Attack, actionToJSON } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { activateManeuver, doManeuverEffects } from "./maneuver.mjs";
+import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 // v13 compatibility
@@ -1097,8 +1097,8 @@ async function doSingleTargetActionToHit(item, options) {
     }
 
     // Block (which is a repeatable abort) has a different to-hit behavior
-    const blockIndex = item.system.EFFECT?.toLowerCase().indexOf("block");
-    if (blockIndex > -1) {
+    const isBlockManeuver = maneuverHasBlockTrait(item);
+    if (isBlockManeuver) {
         if (targetData.length === 1) {
             const hitRollTotal = targetData[0].toHitRollTotal;
             const hitRollText = `Block roll of ${hitRollTotal} vs. OCV of pending attack`;
@@ -1154,10 +1154,9 @@ async function doSingleTargetActionToHit(item, options) {
     options.rolledResult = targetData;
 
     // render card
-    const template =
-        blockIndex > -1
-            ? `systems/${HEROSYS.module}/templates/chat/item-toHit-block-card.hbs`
-            : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
+    const template = isBlockManeuver
+        ? `systems/${HEROSYS.module}/templates/chat/item-toHit-block-card.hbs`
+        : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
