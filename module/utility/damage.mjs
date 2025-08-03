@@ -1159,12 +1159,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
         return baseDicePartsBundle;
     } else if (isManeuverThatIsUsingAWeapon(item, options)) {
         // PH: FIXME: Remove options.maWeaponItem when we have a better way of doing tests using a weapon.
-        let weaponItem = item.system._active.maWeaponItem || options.maWeaponItem;
-        // PH: FIXME: The placeholder can presumably be removed at the point.
-        if (!weaponItem) {
-            console.warn(`Kludge: No weapon specified for ${item.detailedName()}. Using placeholder.`);
-            weaponItem = item.actor?.items.find((item) => item.name === "__InternalManeuverPlaceholderWeapon");
-        }
+        const weaponItem = item.system._active.maWeaponItem || options.maWeaponItem;
 
         // Base damage of this maneuver with a weapon is the weapon itself.
         // PH: FIXME: getFullyQualifiedEffectFormulaFromItem
