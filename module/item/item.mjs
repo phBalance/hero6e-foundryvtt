@@ -1575,6 +1575,11 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        // Does it perform a strike?
+        else if (effect.search(/Strike/) > -1) {
+            return false;
+        }
+
         // Does it use Strength damage?
         else if (effect.search(/\[STRDC\]/) > -1) {
             return false;
@@ -1586,7 +1591,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Does it require an attack to hit roll like BLOCK?
-        else if (effect.search(/Block/) > -1) {
+        else if (maneuverHasBlockTrait(this)) {
             return false;
         }
 
@@ -5375,6 +5380,9 @@ export class HeroSystem6eItem extends Item {
 
     get doesKillingDamage() {
         if (this.system.XMLID && this.baseInfo) {
+            // PH: FIXME: THis is what we ultamitely want
+            // return this.baseInfo.doesKillingDamage(this);
+
             // Preferred Methods to determine KILLING
             if (this.system.XMLID.startsWith("__")) {
                 return false;
