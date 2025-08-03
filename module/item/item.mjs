@@ -6109,8 +6109,6 @@ export class HeroSystem6eItem extends Item {
         if (this.system.XMLID === "__STRENGTHDAMAGE") {
             if (this.system.ALIAS === "__InternalStrengthPlaceholder") {
                 return "Your STRENGTH";
-            } else if (this.system.ALIAS === "__InternalManeuverPlaceholderWeapon") {
-                return "Weapon Placeholder";
             }
         }
 

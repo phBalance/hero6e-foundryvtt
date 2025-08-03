@@ -1262,7 +1262,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor.addAttackPlaceholder();
                     await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
@@ -1303,7 +1302,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor.addAttackPlaceholder();
                     await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
@@ -1526,7 +1524,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor.addAttackPlaceholder();
                     await actor._postUpload();
 
                     item = new HeroSystem6eItem(
@@ -1569,7 +1566,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor.addAttackPlaceholder();
                     await actor._postUpload();
 
                     item = new HeroSystem6eItem(

@@ -252,11 +252,7 @@ async function replaceActorsBuiltInManeuvers(actor) {
             return;
         }
 
-        // Add in the new placeholder items and all built in maneuvers
-        timer.placeholderStart = Date.now();
-        await actor.addAttackPlaceholder();
-        timer.placeholderEnd = Date.now();
-
+        // Add in all built in maneuvers
         timer.maneuversStart = Date.now();
         await actor.addHeroSystemManeuvers();
         timer.maneuversEnd = Date.now();

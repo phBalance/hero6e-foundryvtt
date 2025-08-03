@@ -2513,9 +2513,6 @@ export class HeroSystem6eActor extends Actor {
      */
     async addFreeStuff() {
         await this.addPerception();
-
-        // MANEUVERS
-        await this.addAttackPlaceholder();
         await this.addHeroSystemManeuvers();
     }
 
@@ -2542,28 +2539,6 @@ export class HeroSystem6eActor extends Actor {
 
         if (!this.id) {
             this.items.set(perceptionItem.system.XMLID, perceptionItem);
-        }
-    }
-
-    async addAttackPlaceholder() {
-        // Maneuver Weapon Placeholder
-        // PH: FIXME: Figure out how to hide this (has name "__InternalManeuverPlaceholderWeapon") in the UI
-        const maneuverWeaponPlaceholderItemContent = `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792633" BASECOST="0.0" LEVELS="1" ALIAS="__InternalManeuverPlaceholderWeapon" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="__InternalManeuverPlaceholderWeapon" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`;
-        const maneuverWeaponPlaceholderItemData = HeroSystem6eItem.itemDataFromXml(
-            maneuverWeaponPlaceholderItemContent,
-            this,
-        );
-        const maneuverWeaponPlaceholderItem = this.id
-            ? await HeroSystem6eItem.create(maneuverWeaponPlaceholderItemData, {
-                  parent: this,
-              })
-            : new HeroSystem6eItem(maneuverWeaponPlaceholderItemData, {
-                  parent: this,
-              });
-
-        // Work around if temporary actor
-        if (!this.id) {
-            this.items.set(maneuverWeaponPlaceholderItem.name, maneuverWeaponPlaceholderItem);
         }
     }
 
