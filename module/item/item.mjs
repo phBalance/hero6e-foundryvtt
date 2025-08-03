@@ -5353,7 +5353,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isSense() {
-        //SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
+        // SightGroup/ToughGroup/HearingGroup/RadioGroup/SmellGroup have SENSE builtIn
         return (
             this.baseInfo?.type.includes("sense") &&
             (["SIGHTGROUP", "TOUCHGROUP", "HEARINGGROUP", "RADIOGROUP", "SMELLGROUP"].includes(this.system.GROUP) ||
@@ -5363,7 +5363,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isTargeting() {
-        //SightGroup has TARGETING builtIn
+        // SightGroup has TARGETING builtIn
         return (
             this.baseInfo?.type.includes("sense") &&
             (["TARGETINGSENSE"].includes(this.system.GROUP) ||
@@ -5377,22 +5377,10 @@ export class HeroSystem6eItem extends Item {
             // Preferred Methods to determine KILLING
             if (this.system.XMLID.startsWith("__")) {
                 return false;
-            } else if (this.system._active.maWeaponItem) {
-                return this.system._active.maWeaponItem.doesKillingDamage;
             } else if (this.baseInfo.doesKillingDamage != undefined) {
-                return this.baseInfo.doesKillingDamage;
+                return this.baseInfo.doesKillingDamage(this);
             } else if (this.baseInfo.nonDmgEffect) {
                 return false;
-            } else if (this.isSenseAffecting()) {
-                return false;
-            } else if (this.baseInfo.type.includes("adjustment")) {
-                return false;
-            } else if (this.baseInfo.type.includes("mental")) {
-                return false;
-            } else if (this.system.WEAPONEFFECT) {
-                return this.system.WEAPONEFFECT.includes("KILLING");
-            } else if (this.system.EFFECT) {
-                return this.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
             } else if (this.type === "disadvantage") {
                 return false;
             } else if (this.baseInfo.type.includes("disadvantage")) {

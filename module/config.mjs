@@ -11,6 +11,7 @@ import {
     characteristicValueToDiceParts,
     dicePartsToFullyQualifiedEffectFormula,
     maneuverBaseEffectDicePartsBundle,
+    maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
 
 export const HERO = { heroDice };
@@ -479,7 +480,7 @@ function validatePowers() {
     }
     numViolations += modifiersWithoutDcAffectingFunction.length;
 
-    // All effect causing powers have a effect rolling function that is async
+    // All effect causing powers have a effect rolling function
     const powersOrManeuversWithoutEffectsDicePartsFunction = this.filter(
         (power) =>
             !(power.behaviors.includes("modifier") || power.behaviors.includes("adder")) &&
@@ -490,6 +491,17 @@ function validatePowers() {
         console.log(`Powers without effects dice parts function: `, powersOrManeuversWithoutEffectsDicePartsFunction);
     }
     numViolations += powersOrManeuversWithoutEffectsDicePartsFunction.length;
+
+    // All powers that roll damage/effect dice should have a doesKillingDamage boolean field
+    const damageEffectPowersWithoutDoesKillingDamageFunction = this.filter(
+        (power) => power.behaviors.includes("dice") && typeof power.doesKillingDamage !== "function",
+    );
+    if (damageEffectPowersWithoutDoesKillingDamageFunction.length > 0) {
+        console.log(
+            `Damage/Effect powers missing doesKillingDamage field: ${damageEffectPowersWithoutDoesKillingDamageFunction}`,
+        );
+    }
+    numViolations += damageEffectPowersWithoutDoesKillingDamageFunction.length;
 
     if (numViolations === 0) {
         console.log(`Powers look valid`);
@@ -1286,6 +1298,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             useWeapon: false,
         },
         baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+        doesKillingDamage: maneuverDoesKillingDamage,
     });
     addPower(
         {
@@ -1366,6 +1379,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         undefined,
     );
@@ -1449,6 +1463,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {},
     );
@@ -1531,6 +1546,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {
             maneuverDesc: {
@@ -1569,6 +1585,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {
             maneuverDesc: {
@@ -1685,6 +1702,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {
             maneuverDesc: {
@@ -1723,6 +1741,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {
             maneuverDesc: {
@@ -1761,6 +1780,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         undefined,
     );
@@ -1789,6 +1809,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {},
     );
@@ -1844,6 +1865,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             useWeapon: false,
         },
         baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+        doesKillingDamage: maneuverDoesKillingDamage,
     });
     addPower(
         {
@@ -1953,6 +1975,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         undefined,
     );
@@ -1980,6 +2003,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {},
     );
@@ -2007,6 +2031,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         undefined,
     );
@@ -2034,6 +2059,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {},
     );
@@ -2061,6 +2087,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {
             maneuverDesc: {
@@ -2124,6 +2151,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         undefined,
     );
@@ -2151,6 +2179,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         undefined,
     );
@@ -4998,6 +5027,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 return defaultPowerDicePartsBundle(item, diceParts);
             },
+            doesKillingDamage: fixedValueFunction(false),
             xml: ` <POWER XMLID="ABSORPTION" ID="1709333775419" BASECOST="0.0" LEVELS="1" ALIAS="Absorption" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ENERGY" OPTIONID="ENERGY" OPTION_ALIAS="energy" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="STR" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {
@@ -5006,6 +5036,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5),
             unusualDicePerDc: false,
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
         },
     );
     addPower(
@@ -5021,6 +5052,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             hasNoDefense: true,
             costPerLevel: fixedValueFunction(6),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="AID" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" USE_END_RESERVE="No" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="STR" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {
@@ -5069,7 +5101,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "Target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
-            doesKillingDamage: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(0),
             unusualDicePerDc: true,
@@ -5090,6 +5121,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 };
                 return defaultPowerDicePartsBundle(item, diceParts);
             },
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="CHANGEENVIRONMENT" ID="1711932803443" BASECOST="0.0" LEVELS="0" ALIAS="Change Environment" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         { costPerLevel: fixedValueFunction(5) },
@@ -5413,6 +5445,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(3),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="DISPEL" ID="1711933464095" BASECOST="0.0" LEVELS="1" ALIAS="Dispel" POSITION="34" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -5444,6 +5477,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(10),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="DRAIN" ID="1711933555522" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         { range: HERO.RANGE_TYPES.NO_RANGE },
@@ -5483,10 +5517,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "dmcv",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
-            doesKillingDamage: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(10),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="EGOATTACK" ID="1709333954550" BASECOST="0.0" LEVELS="1" ALIAS="Mental Blast" POSITION="58" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {
@@ -5562,9 +5596,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
-            doesKillingDamage: false,
             usesStrength: false,
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="ENERGYBLAST" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {
@@ -5635,6 +5669,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 };
                 return defaultPowerDicePartsBundle(item, diceParts);
             },
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="ENTANGLE" ID="1709342612255" BASECOST="0.0" LEVELS="1" ALIAS="Entangle" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -5717,6 +5752,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
             },
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="FLASH" ID="1711933970815" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="44" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6047,10 +6083,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,
-            doesKillingDamage: false,
             usesStrength: true,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="HANDTOHANDATTACK" ID="1711934318209" BASECOST="0.0" LEVELS="1" ALIAS="Hand-To-Hand Attack" POSITION="48" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
             <MODIFIER XMLID="HANDTOHANDATTACK" ID="1711934557552" BASECOST="-0.25" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
@@ -6073,6 +6109,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             hasNoDefense: true,
             costPerLevel: fixedValueFunction(10),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="HEALING" ID="1711934391072" BASECOST="0.0" LEVELS="1" ALIAS="Healing" POSITION="49" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6086,9 +6123,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
-            doesKillingDamage: true,
             usesStrength: true,
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(true),
             xml: `<POWER XMLID="HKA" ID="1711934431692" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="52" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6106,6 +6143,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="IMAGES" ID="1711934509070" BASECOST="10.0" LEVELS="0" ALIAS="Images" POSITION="50" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6209,10 +6247,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            doesKillingDamage: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="LUCK" ID="1709333951260" BASECOST="0.0" LEVELS="1" ALIAS="Luck" POSITION="57" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6265,6 +6303,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="MENTALILLUSIONS" ID="1709333959742" BASECOST="0.0" LEVELS="1" ALIAS="Mental Illusions" POSITION="60" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6281,6 +6320,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="MINDCONTROL" ID="1709333962182" BASECOST="0.0" LEVELS="1" ALIAS="Mind Control" POSITION="61" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6313,6 +6353,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="MINDSCAN" ID="1709333966801" BASECOST="0.0" LEVELS="1" ALIAS="Mind Scan" POSITION="63" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6466,6 +6507,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 };
                 return defaultPowerDicePartsBundle(item, diceParts);
             },
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="POSSESSION" ID="1711934925655" BASECOST="60.0" LEVELS="0" ALIAS="Possession" POSITION="67" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Human" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
             <ADDER XMLID="MINDCONTROLEFFECT" ID="1711935222251" BASECOST="0.0" LEVELS="0" ALIAS="+0 Points of Mind Control effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
@@ -6571,7 +6613,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
-            doesKillingDamage: true,
             usesStrength: true,
             sheet: {
                 INPUT: {
@@ -6583,6 +6624,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 },
             },
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(true),
             xml: `<POWER XMLID="RKA" ID="1711934450257" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6664,6 +6706,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="SUCCOR" ID="1709342717305" BASECOST="0.0" LEVELS="5" ALIAS="Succor" POSITION="60" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="END" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
     );
@@ -6692,6 +6735,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costEnd: true,
         costPerLevel: fixedValueFunction(5),
         baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<POWER XMLID="SUPPRESS" ID="1709342722293" BASECOST="0.0" LEVELS="1" ALIAS="Suppress" POSITION="62" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="SPD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
 
@@ -6705,7 +6749,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
-            doesKillingDamage: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(3 / 2),
             unusualDicePerDc: true,
@@ -6719,6 +6762,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 return defaultPowerDicePartsBundle(item, characteristicValueToDiceParts(str));
             },
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="TELEKINESIS" ID="1709334027228" BASECOST="0.0" LEVELS="2" ALIAS="Telekinesis" POSITION="79" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6735,6 +6779,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="TELEPATHY" ID="1709334029488" BASECOST="0.0" LEVELS="1" ALIAS="Telepathy" POSITION="80" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6750,6 +6795,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costEnd: true,
         costPerLevel: fixedValueFunction(15),
         baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<POWER XMLID="TRANSFER" ID="1709342746179" BASECOST="0.0" LEVELS="1" ALIAS="Transfer" POSITION="70" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="STR -&gt; CON" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
     addPower(
@@ -6778,10 +6824,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return 1;
             },
             costEnd: true,
-            doesKillingDamage: false,
             usesStrength: false,
             attackDefenseVs: "POWERDEFENSE",
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="TRANSFORM" ID="1709334039303" BASECOST="0.0" LEVELS="1" ALIAS="Transform" POSITION="84" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COSMETIC" OPTIONID="COSMETIC" OPTION_ALIAS="Cosmetic" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6801,6 +6847,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -6830,6 +6877,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
         },
         {},
     );
@@ -7386,6 +7434,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 };
                 return defaultPowerDicePartsBundle(item, diceParts);
             },
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<DISAD XMLID="DEPENDENCE" ID="1709445727918" BASECOST="0.0" LEVELS="0" ALIAS="Dependence" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
             <NOTES />
             <ADDER XMLID="EFFECT" ID="1709447139841" BASECOST="5.0" LEVELS="0" ALIAS="Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DAMAGE1D6" OPTIONID="DAMAGE1D6" OPTION_ALIAS="Takes 1d6 Damage" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -7651,6 +7700,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 };
                 return defaultPowerDicePartsBundle(item, diceParts);
             },
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<DISAD XMLID="SUSCEPTIBILITY" ID="1709445759247" BASECOST="0.0" LEVELS="0" ALIAS="Susceptibility" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
             <NOTES />
             <ADDER XMLID="DICE" ID="1709447177129" BASECOST="0.0" LEVELS="0" ALIAS="Number of Dice" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1D6" OPTIONID="1D6" OPTION_ALIAS="1d6 damage" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -7677,6 +7727,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            doesKillingDamage: fixedValueFunction(false),
             xml: `<DISAD XMLID="UNLUCK" ID="1709445762298" BASECOST="0.0" LEVELS="1" ALIAS="Unluck: 1d6" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},

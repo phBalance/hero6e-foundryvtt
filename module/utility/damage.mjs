@@ -1195,6 +1195,22 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
     }
 }
 
+// A few maneuver may do killing damage on their own but most will only do killing damage based on if it's
+// being used with a weapon or not.
+export function maneuverDoesKillingDamage(item) {
+    if (item.system._active.maWeaponItem) {
+        return item.system._active.maWeaponItem.doesKillingDamage;
+    }
+
+    if (item.system.WEAPONEFFECT) {
+        return item.system.WEAPONEFFECT.includes("KILLING");
+    } else if (item.system.EFFECT) {
+        return item.system.EFFECT.includes("KILLING"); // Pretty sure there are no KILLING Combat Maneuvers
+    }
+
+    return false;
+}
+
 /**
  * Calculate the number of character points this item should use. If no option to override full power is the default.
  *
