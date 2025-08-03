@@ -112,12 +112,14 @@ export function maneuverHasAttackerFallsTrait(item) {
 }
 
 /**
- * Things which have the "block" trait in their effect.
+ * Things which have the "block" trait in their effect. Need to be careful that we're not triggering on
+ * the "Must Follow Block" trait in their effect.
  * @returns {boolean}
  */
 export function maneuverHasBlockTrait(item) {
-    const maneuverHasBlockTrait = item.system.EFFECT?.search(/block/i) > -1;
-    return !!maneuverHasBlockTrait;
+    const maneuverHasBlockTrait =
+        item.system.EFFECT?.search(/block/i) > -1 && !(item.system.EFFECT?.search(/follow block/i) > -1);
+    return maneuverHasBlockTrait;
 }
 
 /**
@@ -239,8 +241,8 @@ export async function deactivateManeuver(item) {
 
     const effect = item.system.EFFECT?.toLowerCase();
     if (effect) {
-        const maneuverHasDodgeTrait = effect.indexOf("dodge") > -1;
-        const maneuverHasBlockTrait = effect.indexOf("block") > -1;
+        const maneuverHasDodgeTrait = maneuverHasDodgeTrait(item);
+        const maneuverHasBlockTrait = maneuverHasBlockTrait(item);
 
         if (maneuverHasDodgeTrait) {
             removedEffects.push(
