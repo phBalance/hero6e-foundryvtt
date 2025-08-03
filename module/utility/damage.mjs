@@ -266,7 +266,11 @@ export function isRangedMartialManeuver(item) {
 }
 
 export function isHthMartialManeuver(item) {
-    return item.type === "martialart" && item.system.CATEGORY === "Hand To Hand";
+    // NOTE: HD has a bug where custom martial maneuvers have CATEGORY of "Hand to Hand" (note lower case)
+    return (
+        item.type === "martialart" &&
+        (item.system.CATEGORY === "Hand To Hand" || item.system.CATEGORY === "Hand to Hand")
+    );
 }
 
 function isManeuverThatIsUsingAWeapon(item, options) {
