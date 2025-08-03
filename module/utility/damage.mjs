@@ -305,6 +305,8 @@ function doubleDamageLimit() {
 }
 
 function addExtraMartialDcsToBundle(item, dicePartsBundle) {
+    // PH: FIXME: It is possible to use fewer than the maximum number of EXTRADCs and RANGEDCs. Need a mechanism for this.
+
     let extraDcItems;
     if (isHthMartialManeuver(item)) {
         const extraHthDcItems = item.actor?.items.filter((item) => item.system.XMLID === "EXTRADC") || [];
@@ -313,7 +315,9 @@ function addExtraMartialDcsToBundle(item, dicePartsBundle) {
         const extraRangedDcItems = item.actor?.items.filter((item) => item.system.XMLID === "RANGEDDC") || [];
         extraDcItems = extraRangedDcItems;
     } else {
-        console.error(`addExtraMartialDcsToBundle called with item ${item.name} that is not a martial maneuver`);
+        console.error(
+            `addExtraMartialDcsToBundle called for ${item.actor?.name}/${item.detailedName()} that is not a martial maneuver`,
+        );
     }
 
     // If the actor has no EXTRADCs or RANGEDDCs then we can stop here.
@@ -365,10 +369,10 @@ export function calculateAddedDicePartsFromItem(item, baseDamageItem, options) {
     };
 
     // EXTRADCs and RANGEDDCs
-    // 5e EXTRADC and RANGEDDCs for armed killing attacks count at full DCs but do NOT count towards the base DC.
+    // 5e EXTRADC and RANGEDDCs for armed killing attacks count at full DCs but do NOT count towards the base DC. FRed pg. 406.
     // 6e doesn't have the concept of base and added DCs but do the same in case they turn on the doubling rule.
-    if (item.type === "martialart" && options.maWeaponItem) {
-        addExtraMartialDcsToBundle(baseDamageItem, addedDamageBundle);
+    if (item.type === "martialart" && (item.system._active.maWeaponItem || options.maWeaponItem)) {
+        addExtraMartialDcsToBundle(item, addedDamageBundle);
     }
 
     // For Haymaker (with Strike presumably) and non killing Martial Maneuvers, STR is the main base (source of) damage and the maneuver is additional damage.
@@ -1151,7 +1155,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             });
         }
 
-        // 5e martial arts EXTRADCs and RANGEDDCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
+        // 5e martial arts EXTRADCs and RANGEDDCs are baseDCs when unarmed. Do the same for 6e in case they use the optional damage doubling rules too.
         if (item.type === "martialart" && !item.system.USEWEAPON) {
             addExtraMartialDcsToBundle(item, baseDicePartsBundle);
         }
@@ -1170,10 +1174,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             baseAttackItem: weaponItem,
         };
 
-        // 5e martial arts RANGEDDCs are baseDCs. Do the same for 6e in case they use the optional damage doubling rules too.
-        if (item.type === "martialart") {
-            addExtraMartialDcsToBundle(item, weaponDicePartBundle);
-        }
+        // NOTE: 5e martial arts EXTRADCs and RANGEDDCs are not baseDCs if they are armed. Do the same for 6e in case they use the optional damage doubling rules too.
 
         // PH: FIXME: STR minima apply to base weapon damage
         // PH: FIXME: Add rule that apply to breaking a weapon (but not here). If more than 3xBODY done to the target than base DC then weapon breaks.
