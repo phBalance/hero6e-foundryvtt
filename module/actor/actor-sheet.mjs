@@ -41,7 +41,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     static sampleAttacks = {};
 
     /** @override */
-    async getData() {
+    async getData(options = {}) {
         // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
         // KLUDGE fix
         let klugeDeleteItems = false;
@@ -73,7 +73,8 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             );
         }
 
-        const data = super.getData();
+        const data = super.getData(options);
+        data.token = options?.token;
         data.gameSystemId = game.system.id;
         data.actor.flags[game.system.id] ??= {};
         if (data.actor.flags[game.system.id].uploading) {
