@@ -16,7 +16,7 @@ import { ItemAttackFormApplication, getAoeTemplateForItem } from "../item/item-a
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
-import { Attack, actionToJSON } from "../utility/attack.mjs";
+import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
@@ -1738,13 +1738,14 @@ export async function _onRollDamage(event) {
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
 
+    // PH: FIXME: This is now included in the action data and this can be cleaned up
     const { actor, item } = rehydrateActorAndAttackItem(toHitData);
 
     if (!item || !actor) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const action = JSON.parse(toHitData.actionData);
+    const action = actionFromJSON(toHitData.actionData);
     const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
@@ -1883,7 +1884,7 @@ export async function _onRollDamage(event) {
 
         attackTags: getAttackTags(item),
         targetTokens: targetTokens,
-        actionDataJSON: JSON.stringify(action),
+        actionDataJSON: actionToJSON(action),
     };
 
     // render card
@@ -2139,7 +2140,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
 
     const damageData = { ...button.dataset };
     const targetTokens = JSON.parse(damageData.targetTokens);
-    const action = JSON.parse(damageData.actionData);
+    const action = actionFromJSON(damageData.actionData);
 
     const actor = actorParam || fromUuidSync(damageData.actorUuid);
 
@@ -2639,7 +2640,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
         targetToken: token,
-        actionData: JSON.stringify(action),
+        actionData: actionToJSON(action),
     };
 
     // render card
@@ -3207,21 +3208,21 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
 
     // We currently only support sense groups, not individual senses
     const senseGroups = [
-        { XMLID: "SIGHTGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect },
-        { XMLID: "TOUCHGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect },
         {
             XMLID: "HEARINGGROUP",
             statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.hearingSenseDisabledEffect,
-        },
-        { XMLID: "RADIOGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.radioSenseDisabledEffect },
-        {
-            XMLID: "SMELLGROUP",
-            statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.smellTasteSenseDisabledEffect,
         },
         {
             XMLID: "MENTALGROUP",
             statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.mentalSenseDisabledEffect,
         },
+        { XMLID: "RADIOGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.radioSenseDisabledEffect },
+        { XMLID: "SIGHTGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect },
+        {
+            XMLID: "SMELLGROUP",
+            statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.smellTasteSenseDisabledEffect,
+        },
+        { XMLID: "TOUCHGROUP", statusEffect: HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect },
     ];
 
     // Target groups are we attacking
