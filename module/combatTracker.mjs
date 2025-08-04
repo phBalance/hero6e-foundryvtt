@@ -54,7 +54,11 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
         // Replace V13 Round with Turn
         const encounterTitle = $(this.element).find(".encounter-title");
         if (encounterTitle) {
-            encounterTitle.text(encounterTitle.text().replace("Round", "Turn"));
+            const combat = this.viewed;
+            if (combat) {
+                //encounterTitle.text(encounterTitle.text().replace("Round", "Turn"));
+                encounterTitle.text(`Round=${combat.round} Turn=${combat.turn} Segment=${combat.segment}`);
+            }
         }
     }
 
