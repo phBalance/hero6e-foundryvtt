@@ -80,7 +80,7 @@ export async function migrateWorld() {
     // as we know that this system was not around then.
     // Newly created worlds have a lastMigration === "1.0.0" and we should CreateHeroCompendiums
     if (lastMigration === "1.0.0") {
-        CreateHeroCompendiums();
+        await CreateHeroCompendiums();
         return;
     }
 
@@ -102,7 +102,7 @@ export async function migrateWorld() {
     await ChatMessage.create(chatData);
 
     // Create or recreate Compendiums
-    CreateHeroCompendiums();
+    await CreateHeroCompendiums();
 
     // Migrate maneuvers for all things that have strength (PC, NPC) but ignore Vehicles and automatons since we don't give them free stuff at this point.
     let _start = Date.now();
