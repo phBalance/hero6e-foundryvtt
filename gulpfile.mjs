@@ -5,6 +5,7 @@ import gulpPrettier from "gulp-prettier";
 import gulpSass from "gulp-sass";
 import * as dartSass from "sass";
 import gulpStylelint from "gulp-stylelint-esm";
+import gulpPlumber from "gulp-plumber";
 
 const sass = gulpSass(dartSass);
 
@@ -58,7 +59,10 @@ function autoFixScssFilesByLint() {
 const lintAutoFix = gulp.parallel(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint);
 
 function validateFilesByPrettier() {
-    return gulp.src([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES]).pipe(gulpPrettier.check());
+    return gulp
+        .src([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES])
+        .pipe(gulpPlumber()) // stop plugin throwing from ending things in watch mode
+        .pipe(gulpPrettier.check());
 }
 const prettier = gulp.series(validateFilesByPrettier);
 
