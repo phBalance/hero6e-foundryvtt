@@ -484,3 +484,7 @@ export function tokenEducatedGuess(options = {}) {
 
     return null;
 }
+
+export function gmActive() {
+    return !!game.users.filter((u) => u.active && u.isGM).length;
+}

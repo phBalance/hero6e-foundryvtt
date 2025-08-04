@@ -43,6 +43,7 @@ import "./testing/testing-main.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
 import { isGameV13OrLater } from "./utility/compatibility.mjs";
+import { HeroSocketHandler } from "./heroSocketHandler.mjs";
 
 // V13 SignedString does not add a plus before a zero, also uses a non-standard minus sign.
 // V12 SignedString works great, unclear why V13 change it.
@@ -200,6 +201,7 @@ Hooks.once("init", async function () {
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     GenericRoller.Initialize();
+    HeroSocketHandler.Initialize();
 
     // Insert EffectsPanel template into DOM tree so it can render
     if (parseInt(game.version.split(".")[0] || 0) === 12) {

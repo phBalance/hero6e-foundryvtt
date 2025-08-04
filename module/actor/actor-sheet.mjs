@@ -46,6 +46,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         // KLUDGE fix
         let klugeDeleteItems = false;
         const kludgeDeletedIds = [];
+        window.actor = this.actor;
         for (const item of this.actor.items) {
             try {
                 const item2 = this.actor.items.find(
