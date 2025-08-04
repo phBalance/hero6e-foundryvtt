@@ -588,11 +588,17 @@ export class HeroSystem6eCombat extends Combat {
             round: 1,
             turn: firstSegment12turn,
             [`flags.${game.system.id}.-=postSegment12Round`]: null,
-            [`flags.${game.system.id}.-heroCurrent`]: null,
+            [`flags.${game.system.id}.-=heroCurrent`]: null,
             [`flags.${game.system.id}.segment`]: 12,
         };
         Hooks.callAll("combatStart", this, updateData);
-        return this.update(updateData);
+        await this.update(updateData);
+
+        // Remove spentEndOn
+        for (const combatant of this.combatants) {
+            await combatant.unsetFlag(game.system.id, "heroHistory");
+            await combatant.unsetFlag(game.system.id, "spentEndOn");
+        }
     }
 
     /**
@@ -1303,6 +1309,17 @@ export class HeroSystem6eCombat extends Combat {
     // }
 
     _onUpdate(changed, options, userId) {
+        if (isGameV13OrLater()) {
+            this._onUpdateV13(changed, options, userId);
+            return;
+        }
+
+        // super has problem when same token/actor goes back to back with SingleCombatant code.
+        // Not going to worry about this in V12 at the moment.
+        super._onUpdate(changed, options, userId);
+    }
+
+    _onUpdateV13(changed, options) {
         //super._onUpdate(changed, options, userId);
         const priorState = foundry.utils.deepClone(this.current);
         if (!this.previous) this.previous = priorState; // Just in case
@@ -1688,7 +1705,7 @@ export class HeroSystem6eCombat extends Combat {
     computeInitiative(c, updList) {
         const id = c._id || c.id;
         const hasSegment = c.hasPhase(this.segment || 12);
-        const isOnHold = false; //c.actor?.getHoldAction();
+        const isOnHold = false; //c.actor.statuses.has("holding"); //false; //c.actor?.getHoldAction();
         const isOnAbort = false; //c.actor?.getAbortAction();
         let name = c.name;
         //if (true || hasSegment || isOnHold || isOnAbort) {
