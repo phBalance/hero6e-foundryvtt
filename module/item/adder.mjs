@@ -4,11 +4,8 @@ export class HeroSystem6eAdder {
     #baseInfo;
 
     constructor(json, options) {
-        // These are needed first
         this.item = options.item;
-        // if (!this.item) {
-        //     debugger;
-        // }
+
         this.#baseInfo = getModifierInfo({
             xmlid: json.XMLID,
             actor: this.item?.actor,
@@ -83,8 +80,10 @@ export class HeroSystem6eAdder {
         if (this.SELECTED === false && this.item?.type === "skill") {
             const maxCost = parseFloat(this.BASECOST) || 0;
             if (maxCost > 0 && _cost > maxCost) {
-                if (this.item?.system.XMLID != "TRANSPORT_FAMILIARITY") {
-                    console.warn(`We found another example of a skill with category limitations ${this.system.XMLID}`);
+                if (this.item?.system.XMLID !== "TRANSPORT_FAMILIARITY") {
+                    console.warn(
+                        `We found another example of a skill with category limitations ${this.item.system.XMLID}`,
+                    );
                 }
                 _cost = Math.min(maxCost, _cost);
             }
