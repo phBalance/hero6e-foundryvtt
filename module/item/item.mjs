@@ -277,6 +277,11 @@ export class HeroSystem6eItem extends Item {
         return super._onCreate(data, options, userId);
     }
 
+    prepareData() {
+        super.prepareData();
+        this.system._active ??= {};
+    }
+
     async update(...args) {
         if (!this.id) {
             // This is either an effective item or just an item that's not in the database.
@@ -1946,6 +1951,11 @@ export class HeroSystem6eItem extends Item {
 
     async _postUpload(options) {
         try {
+            // Compendium?
+            if (this.pack) {
+                console.log(`skipping _postUpload for ${this.pack}.${this.name}`, this);
+                return;
+            }
             // PH: FIXME: Not sure if I like this.
             this.system._active ??= {};
 
