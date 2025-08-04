@@ -34,6 +34,7 @@
     "gulp": "^5.0.0",
     "gulp-autoprefixer": "^9.0.0",
     "gulp-eslint-new": "^2.4.0",
+    "gulp-plumber": "^1.2.1",
     "gulp-prettier": "^6.0.0",
     "gulp-sass": "^6.0.1",
     "gulp-stylelint-esm": "^3.0.0",
