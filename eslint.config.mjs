@@ -80,6 +80,7 @@ export default [
                 DocumentSheetConfig: "readonly",
                 ActiveEffectConfig: "readonly",
                 Scene: "readonly",
+                User: "readonly",
                 VisionMode: "readonly",
             },
         },

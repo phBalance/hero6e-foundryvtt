@@ -1,12 +1,39 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { clamp, isGameV13OrLater } from "./utility/compatibility.mjs";
-import { whisperUserTargetsForActor, expireEffects, toHHMMSS } from "./utility/util.mjs";
+import { whisperUserTargetsForActor, expireEffects, toHHMMSS, gmActive } from "./utility/util.mjs";
 import { rehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-attack.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 
-// export class HeroSystem6eCombat extends Combat {}
-
 export class HeroSystem6eCombat extends Combat {
+    // static defineSchema() {
+    //     const superSchema = super.defineSchema();
+    //     const schema = foundry.utils.mergeObject(superSchema, {
+    //         segment: new foundry.fields.NumberField({
+    //             required: true,
+    //             nullable: true,
+    //             integer: true,
+    //             min: 0,
+    //             initial: 12,
+    //         }),
+    //         //turn: new foundry.fields.NumberField({ required: true, integer: true, min: 0, initial: null }),
+    //     });
+    //     return schema;
+    // }
+
+    static metadata = Object.freeze(
+        foundry.utils.mergeObject(
+            super.metadata,
+            {
+                // Special permissions to allow updating "segment"
+                // which is not part of Combat class
+                permissions: {
+                    update: this.#canUpdate,
+                },
+            },
+            { inplace: false },
+        ),
+    );
+
     constructor(data, context) {
         data ??= {};
         data.flags ??= {};
@@ -17,6 +44,30 @@ export class HeroSystem6eCombat extends Combat {
         this.previous = this.previous || {
             combatantId: null,
         };
+    }
+
+    static #canUpdate(user, doc, data) {
+        if (user.isGM) return true; // GM users can do anything
+        const turnOnly = ["_id", "round", "turn", "combatants", "system"]; // Players may only modify a subset of fields
+        if (Object.keys(data).some((k) => !turnOnly.includes(k))) return false;
+        if ("round" in data && !doc._canChangeRound(user)) return false;
+        if ("turn" in data && !doc._canChangeTurn(user)) return false;
+        if ("system" in data && !doc._canChangeSystem(user)) return false;
+        if ("combatants" in data && !doc.#canModifyCombatants(user, data.combatants)) return false;
+        return true;
+    }
+
+    _canChangeSystem() {
+        return true;
+    }
+
+    #canModifyCombatants(user, combatants) {
+        for (const { _id, ...change } of combatants) {
+            const c = this.combatants.get(_id);
+            if (!c) return false;
+            if (!c.canUserModify(user, "update", change)) return false;
+        }
+        return true;
     }
 
     async rollInitiative(ids) {
@@ -511,7 +562,7 @@ export class HeroSystem6eCombat extends Combat {
             turn: this.turn ?? null,
             combatantId: combatant?.id || null,
             tokenId: combatant?.tokenId || null,
-            segment: this?.flags[game.system.id]?.segment || null,
+            segment: this.system.segment || this?.flags[game.system.id]?.segment || null,
             name: combatant?.token?.name || combatant?.actor?.name || null,
             initiative: combatant?.initiative || null,
         };
@@ -570,7 +621,7 @@ export class HeroSystem6eCombat extends Combat {
         // getCombatantByToken seems to get the first combatant in combat.turns that is for our token.
         // This likely causes issues when SPD/LightningReflexes changes.
         const masterCombatant = this.getCombatantByToken(combatant.tokenId);
-        const _segmentNumber = combatant.flags[game.system.id]?.segment || this.segmentNumber;
+        const _segmentNumber = combatant.flags[game.system.id]?.segment || this.system.segmentNumber;
 
         if (!combatant) return;
         if (!combatant.actor) {
@@ -939,6 +990,21 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | PostSegment12`);
         }
+
+        if (!game.user.isGM) {
+            if (!gmActive()) {
+                ui.notifications.warn(`Could not perform this operation because there is no GM connected.`);
+            } else {
+                // Request GM perform this operation
+                console.log(`emit PostSegment12`);
+                game.socket.emit(`system.${game.system.id}`, {
+                    operation: "PostSegment12",
+                    userId: game.user.id,
+                });
+            }
+            return;
+        }
+
         // POST-SEGMENT 12 RECOVERY
         // After Segment 12 each Turn, all characters (except those deeply
         // unconscious or holding their breath) get a free Post-Segment 12
@@ -963,7 +1029,18 @@ export class HeroSystem6eCombat extends Combat {
         const postSegment12Round = this.flags[game.system.id]?.postSegment12Round || {};
         postSegment12Round[this.round] = true;
 
-        this.update({ [`flags.${game.system.id}.postSegment12Round`]: postSegment12Round });
+        try {
+            this.update({ [`flags.${game.system.id}.postSegment12Round`]: postSegment12Round });
+        } catch (e) {
+            console.warn(
+                `Unable to update postSegment12Round. ` +
+                    `Likely occured because ${this.name} clicked END TURN, triggering PostSegment12, ` +
+                    `and doees not have permissions to update [combat.flags]. ` +
+                    `Future solution is to store "postSegment12Round" in root of Combat schema like we do for "segment". ` +
+                    `This is only a problem when rewinding combat tracker.`,
+            );
+            console.error(e);
+        }
 
         const automation = game.settings.get(HEROSYS.module, "automation");
 
@@ -1074,6 +1151,20 @@ export class HeroSystem6eCombat extends Combat {
             return;
         }
 
+        if (!game.user.isGM) {
+            if (!gmActive()) {
+                ui.notifications.warn(`Could not perform this operation because there is no GM connected.`);
+            } else {
+                // Request GM perform this operation
+                console.log(`emit nextTurn`);
+                game.socket.emit(`system.${game.system.id}`, {
+                    operation: "nextTurn",
+                    userId: game.user.id,
+                });
+            }
+            return;
+        }
+
         const originalRunningSegment = this.round * 12 + this.current.segment;
 
         let turn = this.turn ?? -1;
@@ -1104,28 +1195,6 @@ export class HeroSystem6eCombat extends Combat {
             if (this.round === 0 || next === null || next >= this.turns.length) {
                 return this.nextRound();
             }
-        } else {
-            // SingleCombatant
-
-            next = this.turn;
-
-            // Loop thru turns to find the next combatant that hasPhase on this segment
-            for (let i = 0; i <= this.turns.length * 12; i++) {
-                next++;
-                if (next >= this.turns.length) {
-                    next = 0;
-                    newSegment++;
-                }
-                if (newSegment > 12) {
-                    return this.nextRound();
-                }
-
-                if (this.turns[next]?.hasPhase(newSegment)) {
-                    if (!this.settings.skipDefeated || !this.turns[next].isDefeated) {
-                        break;
-                    }
-                }
-            }
         }
 
         const newRunningSegment = this.round * 12 + newSegment;
@@ -1146,6 +1215,20 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async nextHeroCombatantSingle() {
+        if (!game.user.isGM) {
+            if (!gmActive()) {
+                ui.notifications.warn(`Could not perform this operation because there is no GM connected.`);
+            } else {
+                // Request GM perform this operation
+                console.log(`emit nextHeroCombatantSingle`);
+                game.socket.emit(`system.${game.system.id}`, {
+                    operation: "nextHeroCombatantSingle",
+                    userId: game.user.id,
+                });
+            }
+            return;
+        }
+
         this.previous = this.current;
         if (CONFIG.debug.combat) {
             console.debug(
@@ -1154,9 +1237,7 @@ export class HeroSystem6eCombat extends Combat {
             );
         }
         const startIndex = this.turn + 1;
-        let foundIndexInSlice = this.turns
-            .slice(startIndex)
-            .findIndex((t) => t.hasPhase(this.flags[game.system.id]?.segment));
+        let foundIndexInSlice = this.turns.slice(startIndex).findIndex((t) => t.hasPhase(this.system.segment));
 
         if (foundIndexInSlice > -1) {
             const updateData = {
@@ -1169,7 +1250,7 @@ export class HeroSystem6eCombat extends Combat {
         await this.nextHeroSegmentSingle();
         return this;
 
-        // const nbC = this.combatants.filter((c) => c.hasPhase(this.segmentNumber)).length; //this.combatants.filter((c) => c.initiative > 0).length;
+        // const nbC = this.combatants.filter((c) => c.hasPhase(this.system.segmentNumber)).length; //this.combatants.filter((c) => c.initiative > 0).length;
         // //console.log("Next turn called....", this.turn, nbC)
         // if (this.turn < nbC - 1) {
         //     super.nextTurn();
@@ -1183,7 +1264,7 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`%c Hero | nextHeroSegmentSingle ${game.time.worldTime}`, "background: #229; color: #bada55");
         }
         let segmentHasCombatants = false;
-        const segmentNumberInitial = this.getFlag(game.system.id, "segment");
+        const segmentNumberInitial = this.current.segment || 12;
         let segmentNumberNext = segmentNumberInitial;
         let advanceTime = 0;
         const updateData = {};
@@ -1193,10 +1274,10 @@ export class HeroSystem6eCombat extends Combat {
             if (segmentNumberNext > 12) {
                 await this.PostSegment12();
                 segmentNumberNext = 1;
-                const heroTurn = parseInt(this.getFlag(game.system.id, "heroTurn") || 0) + 1;
-                await this.setFlag(game.system.id, "heroTurn", heroTurn);
+                //this.system.heroTurn = (this.system.heroTurn || 0) + 1;
             }
-            await this.setFlag(game.system.id, "segment", segmentNumberNext);
+            this.system.segment = segmentNumberNext;
+
             updateData.direction = 1;
             updateData.worldTime = { delta: advanceTime };
             segmentHasCombatants = await this.rebuildInitiative();
@@ -1205,13 +1286,15 @@ export class HeroSystem6eCombat extends Combat {
         // Rounds don't really mean anything (we use HeroTurns), just need to change it to trigger _OnStartTurn etal
         updateData.round = this.round + 1;
         updateData.turn = turn;
+        updateData.system = { segment: this.system.segment };
+        //updateData.system = { heroTurn: this.system.heroTurn };
         await this.update(updateData);
         return this;
     }
 
-    async _onUpdate(...args) {
-        //console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", args);
-        super._onUpdate(...args);
+    async _onUpdate(changed, options, userId) {
+        console.log(`%c combat._onUpdate`, "background: #229; color: #bada55", changed, options, userId);
+        super._onUpdate(changed, options, userId);
     }
 
     /**
@@ -1225,6 +1308,20 @@ export class HeroSystem6eCombat extends Combat {
 
         if (HeroSystem6eCombat.singleCombatantTracker) {
             return await this.previousHeroCombatantSingle();
+        }
+
+        if (!game.user.isGM) {
+            if (!gmActive()) {
+                ui.notifications.warn(`Could not perform this operation because there is no GM connected.`);
+            } else {
+                // Request GM perform this operation
+                console.log(`emit previousTurn`);
+                game.socket.emit(`system.${game.system.id}`, {
+                    operation: "previousTurn",
+                    userId: game.user.id,
+                });
+            }
+            return;
         }
 
         if (this.turn === 0 && this.round === 0) {
@@ -1295,9 +1392,7 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         const endIndex = this.turn;
-        let foundIndexInSlice = this.turns
-            .slice(0, endIndex)
-            .findLastIndex((t) => t.hasPhase(this.flags[game.system.id]?.segment));
+        let foundIndexInSlice = this.turns.slice(0, endIndex).findLastIndex((t) => t.hasPhase(this.system.segment));
 
         if (foundIndexInSlice > -1) {
             await this.update({ turn: foundIndexInSlice, direction: -1 });
@@ -1326,7 +1421,7 @@ export class HeroSystem6eCombat extends Combat {
             );
         }
         let segmentHasCombatants = false;
-        const segmentNumberInitial = this.getFlag(game.system.id, "segment");
+        const segmentNumberInitial = this.current.segment;
         let segmentNumberNext = segmentNumberInitial;
         let advanceTime = 0;
         const updateData = {};
@@ -1335,10 +1430,10 @@ export class HeroSystem6eCombat extends Combat {
             advanceTime--;
             if (segmentNumberNext < 1) {
                 segmentNumberNext = 12;
-                const heroTurn = parseInt(this.getFlag(game.system.id, "heroTurn") || 0) - 1;
-                await this.setFlag(game.system.id, "heroTurn", heroTurn);
+                //const heroTurn = parseInt(this.getFlag(game.system.id, "heroTurn") || 0) - 1;
+                //this.system.heroTurn = parseInt(this.system.heroTurn || 0) - 1;
             }
-            await this.setFlag(game.system.id, "segment", segmentNumberNext);
+            this.system.segment = segmentNumberNext;
             updateData.direction = -1;
             updateData.worldTime = { delta: advanceTime };
             segmentHasCombatants = await this.rebuildInitiative();
@@ -1347,6 +1442,8 @@ export class HeroSystem6eCombat extends Combat {
         // Rounds don't really mean anything (we use HeroTurns), just need to change it to trigger _OnStartTurn etal
         updateData.round = this.round - 1;
         updateData.turn = turn;
+        updateData.system = { segment: this.system.segment };
+        //updateData.system = { heroTurn: this.system.heroTurn };
         await this.update(updateData);
         return this;
     }
@@ -1358,6 +1455,20 @@ export class HeroSystem6eCombat extends Combat {
     async nextRound() {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | nextRound`);
+        }
+
+        if (!game.user.isGM) {
+            if (!gmActive()) {
+                ui.notifications.warn(`Could not perform this operation because there is no GM connected.`);
+            } else {
+                // Request GM perform this operation
+                console.log(`emit nextRound`);
+                game.socket.emit(`system.${game.system.id}`, {
+                    operation: "nextRound",
+                    userId: game.user.id,
+                });
+            }
+            return;
         }
 
         if (HeroSystem6eCombat.singleCombatantTracker) {
@@ -1386,7 +1497,7 @@ export class HeroSystem6eCombat extends Combat {
         let nextRound = this.round;
         let advanceTime = 0;
         let turn = this.turn === null ? null : 0; // Preserve the fact that it's no-one's turn currently.
-        let turnData = this.getFlag("world", "turnData");
+        //let turnData = this.getFlag("world", "turnData");
 
         //console.log("Next round called....", nextRound, turnData)
         while (!hasCombatants) {
@@ -1401,23 +1512,25 @@ export class HeroSystem6eCombat extends Combat {
             advanceTime += CONFIG.time.roundTime;
             nextRound = nextRound + 1;
             //console.log("Next round called....2", nextRound, turnData)
-            turnData = this.getFlag("world", "turnData");
-            if (!turnData) {
-                turnData = { turnNumber: 0, segmentNumber: 12 };
-                this.setFlag("world", "turnData", turnData);
-            }
-            turnData = foundry.utils.duplicate(turnData);
-            turnData.segmentNumber += 1;
-            if (turnData.segmentNumber > 12) {
-                turnData.segmentNumber = 1;
-                turnData.turnNumber++;
+            // turnData = this.getFlag("world", "turnData");
+            // if (!turnData) {
+            //     turnData = { turnNumber: 0, segmentNumber: 12 };
+            //     this.setFlag("world", "turnData", turnData);
+            // }
+            // turnData = foundry.utils.duplicate(turnData);
+            this.system.segment ??= 12;
+            //this.system.turnNumber ??= 0;
+            this.system.segment += 1;
+            if (this.system.segment > 12) {
+                this.system.segment = 1;
+                //this.system.turnNumber++;
                 ChatMessage.create({
                     content: "Complete Post-Segment 12 Recoveries.",
                 });
             }
-            await this.setFlag("world", "turnData", turnData);
-            this.turnNumber = turnData.turnNumber;
-            this.segmentNumber = turnData.segmentNumber;
+            await this.update({ [`system.segment`]: this.system.segment });
+            // this.turnNumber = turnData.turnNumber;
+            // this.system.segmentNumber = turnData.segmentNumber;
 
             //console.log("Next round called....3", nextRound, turnData)
 
@@ -1427,13 +1540,15 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // Update the document, passing data through a hook first
-        const updateData = { round: nextRound, turn, [`flags.${game.system.id}.segment`]: this.segmentNumber };
-
-        await this.update(updateData);
+        const updateData = {
+            round: nextRound,
+            turn,
+            [`system.segment`]: this.system.segment,
+        };
 
         const updateOptions = { advanceTime, direction: 1 };
         Hooks.callAll("combatRound", this, updateData, updateOptions);
-        console.log(this);
+
         return this.update(updateData, updateOptions);
     }
 
@@ -1475,7 +1590,7 @@ export class HeroSystem6eCombat extends Combat {
         //console.log("Next round called....", nextRound, turnData)
         while (!hasCombatants) {
             // if (this.settings.skipDefeated && turn !== null) {
-            //     turn = this.turns.findLastIndex((t) => !t.isDefeated && t.hasPhase(this.segmentNumber));
+            //     turn = this.turns.findLastIndex((t) => !t.isDefeated && t.hasPhase(this.system.segmentNumber));
             //     if (turn === -1) {
             //         ui.notifications.warn("COMBAT.NoneRemaining", { localize: true });
             //         turn = 0;
@@ -1487,20 +1602,21 @@ export class HeroSystem6eCombat extends Combat {
             nextRound = nextRound - 1;
             //console.log("Next round called....2", nextRound, turnData)
             turnData = this.getFlag("world", "turnData");
-            if (!turnData) {
-                turnData = { turnNumber: 0, segmentNumber: 12 };
-                this.setFlag("world", "turnData", turnData);
+            // if (!turnData) {
+            //     turnData = { turnNumber: 0, segmentNumber: 12 };
+            //     this.setFlag("world", "turnData", turnData);
+            // }
+            // turnData = foundry.utils.duplicate(turnData);
+            this.system.segment ??= 12;
+            this.system.segment -= 1;
+            if (this.system.segment <= 0) {
+                this.system.segment = 12;
+                //turnData.turnNumber--;
             }
-            turnData = foundry.utils.duplicate(turnData);
-            turnData.segmentNumber -= 1;
-            if (turnData.segmentNumber <= 0) {
-                turnData.segmentNumber = 12;
-                turnData.turnNumber--;
-            }
-            turn = this.turns.findLastIndex((t) => t.hasPhase(turnData.segmentNumber));
+            turn = this.turns.findLastIndex((t) => t.hasPhase(this.system.segment));
             await this.setFlag("world", "turnData", turnData);
-            this.turnNumber = turnData.turnNumber;
-            this.segmentNumber = turnData.segmentNumber;
+            //this.turnNumber = turnData.turnNumber;
+            //this.system.segmentNumber = turnData.segmentNumber;
             //console.log("Next round called....3", nextRound, turnData)
 
             // Re-compute init of actors
@@ -1510,7 +1626,7 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // Update the document, passing data through a hook first
-        const updateData = { round: nextRound, turn, [`flags.${game.system.id}.segment`]: this.segmentNumber };
+        const updateData = { round: nextRound, turn, [`system.segment`]: this.system.segment };
         const updateOptions = { advanceTime, direction: -1 };
         Hooks.callAll("combatRound", this, updateData, updateOptions);
         console.log(this);
@@ -1519,12 +1635,12 @@ export class HeroSystem6eCombat extends Combat {
 
     computeInitiative(c, updList) {
         const id = c._id || c.id;
-        const hasSegment = c.hasPhase(this.getFlag(game.system.id, "segment"));
+        const hasSegment = c.hasPhase(this.system.segment || 12);
         const isOnHold = false; //c.actor?.getHoldAction();
         const isOnAbort = false; //c.actor?.getAbortAction();
         let name = c.name;
         //if (true || hasSegment || isOnHold || isOnAbort) {
-        const baseInit = c.actor ? c.actor.getBaseInit(this.segmentNumber) : 0;
+        const baseInit = c.actor ? c.actor.getBaseInit(this.system.segment) : 0;
         const LIGHTNINGREFLEXES = c.actor?.items.find((i) => i.system.XMLID.includes("LIGHTNING_REFLEXES"));
         const initiative = baseInit + parseInt(LIGHTNINGREFLEXES?.system.LEVELS || 0);
         if (isOnHold) {
