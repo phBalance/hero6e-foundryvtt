@@ -580,7 +580,7 @@ function noDamageBaseEffectDicePartsBundle(item /* , _options */) {
 
 function pdEdCostPerLevel(itemOrActor) {
     const actor = itemOrActor instanceof HeroSystem6eActor ? itemOrActor : itemOrActor.actor;
-    const isAutomatonWithNoStun = !!actor.items.find(
+    const isAutomatonWithNoStun = !!actor?.items.find(
         (power) =>
             power.system.XMLID === "AUTOMATON" &&
             (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),

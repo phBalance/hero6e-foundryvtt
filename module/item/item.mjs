@@ -303,6 +303,616 @@ export class HeroSystem6eItem extends Item {
         this.setSkills();
         this.setToHit();
         this.setAttack();
+        this.buildRangeParameters();
+        this.setAoeModifier();
+        this.setCombatSkillLevels();
+        this.updateItemDescription();
+    }
+
+    async setActiveEffects() {
+        // ACTIVE EFFECTS
+        if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
+            const activeEffect = Array.from(this.effects)?.[0] || {};
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
+            activeEffect.img = "icons/svg/upgrade.svg";
+            activeEffect.description = this.system.description;
+            activeEffect.changes = [
+                {
+                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                    value: parseInt(this.system.LEVELS),
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+            ];
+            for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
+                let foundMatch = false;
+                for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
+                    if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
+                        activeEffect.changes.push({
+                            key: `system.characteristics.${movementKey.toLowerCase()}.max`,
+                            value: parseInt(this.system.LEVELS),
+                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        });
+                        foundMatch = true;
+                    }
+                }
+                if (!foundMatch) {
+                    ui.notifications.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`);
+                    console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
+                }
+            }
+            activeEffect.transfer = true;
+            activeEffect.disabled = !this.system.active;
+
+            if (activeEffect.update) {
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    changes: activeEffect.changes,
+                });
+                if (this.actor) {
+                    await this.actor.update({
+                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
+                            this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
+                    });
+                }
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+        }
+
+        if (this.id && this.baseInfo?.type?.includes("characteristic")) {
+            const activeEffect = Array.from(this.effects)?.[0] || {};
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
+            activeEffect.img = "icons/svg/upgrade.svg";
+            activeEffect.description = this.system.description;
+            activeEffect.changes = [
+                {
+                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                    value: this.system.value,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+            ];
+            activeEffect.transfer = true;
+            activeEffect.disabled = !this.system.active;
+
+            if (activeEffect.update) {
+                const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    changes: activeEffect.changes,
+                });
+                const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
+                await this.actor.update({
+                    [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
+                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax,
+                });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+        }
+
+        if (this.id && this.system.XMLID === "DENSITYINCREASE") {
+            const noStrIncrease = this.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
+            const strAdd = noStrIncrease ? 0 : Math.floor(this.system.value) * 5;
+            const pdAdd = Math.floor(this.system.value);
+            const edAdd = Math.floor(this.system.value);
+
+            let activeEffect = Array.from(this.effects)?.[0] || {};
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
+            activeEffect.img = "icons/svg/upgrade.svg";
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.str.max",
+                    value: strAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+                {
+                    key: "system.characteristics.pd.max",
+                    value: pdAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+                {
+                    key: "system.characteristics.ed.max",
+                    value: edAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+            ];
+            activeEffect.transfer = true;
+            activeEffect.disabled = !this.system.active;
+
+            if (activeEffect.update) {
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    changes: activeEffect.changes,
+                });
+                await this.actor.update({
+                    [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
+                });
+                await this.actor.update({
+                    [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
+                });
+                await this.actor.update({
+                    [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
+                });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+        }
+
+        // 5e GROWTH
+        // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
+        // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
+        // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
+        if (this.id && this.system.XMLID === "GROWTH") {
+            const details = this.baseInfo?.details(this) || {};
+            let activeEffect = Array.from(this.effects)?.[0] || {};
+            activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
+            activeEffect.name += `${this.system.XMLID} ${this.is5e ? this.system.value : this.system.OPTIONID}`;
+            activeEffect.img = "icons/svg/upgrade.svg";
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.str.max",
+                    value: details.str,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+                {
+                    key: "system.characteristics.body.max",
+                    value: details.body,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+                {
+                    key: "system.characteristics.stun.max",
+                    value: details.stun,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+                {
+                    // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
+                    // should technicaly add to OCV of attacker.
+                    // However 5e use the -DCV concept and we will implement 6e in kind for now.
+                    key: "system.characteristics.dcv.max",
+                    value: -details.dcv,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+            ];
+            if (!this.is5e) {
+                activeEffect.changes.push({
+                    key: "system.characteristics.con.max",
+                    value: details.con,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.pre.max",
+                    value: details.pre,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.pd.max",
+                    value: details.pd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.ed.max",
+                    value: details.ed,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.running.max",
+                    value: details.running,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+            }
+            activeEffect.transfer = true;
+
+            if (activeEffect.update) {
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    changes: activeEffect.changes,
+                });
+                await this.actor.update({
+                    [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
+                });
+                await this.actor.update({
+                    [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
+                });
+                await this.actor.update({
+                    [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
+                });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+        }
+
+        // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+        // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
+        if (this.id && this.system.XMLID === "SHRINKING") {
+            const dcvAdd = Math.floor(this.system.value) * 2;
+
+            let activeEffect = Array.from(this.effects)?.[0] || {};
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
+            activeEffect.img = "icons/svg/upgrade.svg";
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.dcv.max",
+                    value: dcvAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+            ];
+            activeEffect.transfer = true;
+
+            if (activeEffect.update) {
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    changes: activeEffect.changes,
+                });
+                await this.actor.update({
+                    [`system.characteristics.dcv.value`]: this.actor.system.characteristics.dcv.max,
+                });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+        }
+
+        const MOBILITY = this.findModsByXmlid("MOBILITY");
+        if (this.id && MOBILITY) {
+            const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
+
+            const activeEffect = Array.from(this.effects)?.[0] || {};
+            if (dcvValue !== null) {
+                activeEffect.name =
+                    (this.name ? `${this.name}/${MOBILITY.parent.name || MOBILITY.parent.ALIAS}: ` : "") +
+                    `${MOBILITY.OPTIONID} ${dcvValue}`;
+                activeEffect.img = "icons/svg/downgrade.svg";
+                activeEffect.changes = [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: dcvValue,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                ];
+                activeEffect.transfer = true;
+                activeEffect.disabled = !this.system.active;
+
+                if (activeEffect.update) {
+                    await activeEffect.update({
+                        name: activeEffect.name,
+                        changes: activeEffect.changes,
+                    });
+                } else {
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                }
+            } else {
+                if (activeEffect.delete) {
+                    await activeEffect.delete();
+                }
+            }
+        }
+
+        // CUSTOMPOWER LIGHT
+        if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
+            if (!game.modules.get("ATL")?.active) {
+                ui.notifications.warn(
+                    `You must install the <b>Active Token Effects</b> module for carried lights to work`,
+                );
+            }
+            let activeEffect = Array.from(this.effects)?.[0] || {};
+            if (this.system.active || !activeEffect.update) {
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
+                activeEffect.img = "icons/svg/light.svg";
+                activeEffect.changes = [
+                    {
+                        key: "ATL.light.bright",
+                        value: parseFloat(this.system.QUANTITY),
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ];
+                if (!activeEffect.update) {
+                    activeEffect.disabled = true;
+                }
+
+                if (activeEffect.update) {
+                    await activeEffect.update({
+                        name: activeEffect.name,
+                        changes: activeEffect.changes,
+                        disabled: false,
+                    });
+                } else {
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                }
+            } else {
+                // Light was turned off?
+                if (activeEffect?.update) {
+                    await activeEffect.update({
+                        name: activeEffect.name,
+                        disabled: true,
+                    });
+                }
+            }
+        }
+
+        // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
+        if (
+            this.system.showToggle &&
+            this.system.active === undefined &&
+            this.system.charges === undefined &&
+            !this.system.end &&
+            this.parentItem?.system.XMLID === "MULTIPOWER"
+        ) {
+            this.system.active ??= true;
+        }
+
+        if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
+            // Invisibility status effect for SIGHTGROUP?
+            if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
+            }
+        }
+    }
+
+    setDescription() {
+        const startDate = new Date();
+
+        window.prepareData.startDate = (window.prepareData.startDate || 0) + (new Date() - startDate);
+    }
+
+    setCombatSkillLevels() {
+        const startDate = new Date();
+
+        if (this.system.XMLID == "COMBAT_LEVELS") {
+            // Make sure CSLs are defined; but don't override them if they are already present
+            this.system.csl ??= {};
+            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
+                this.system.csl[c] ??= "ocv";
+            }
+        }
+
+        if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
+            // Make sure CSLs are defined; but don't override them if they are already present
+            this.system.csl ??= {};
+            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
+                this.system.csl[c] ??= "omcv";
+            }
+        }
+
+        // Attempt default weapon selection if showAttacks is defined and there are no custom adders
+        // Or the OPTIONID=ALL is specified
+        if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
+            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER") || this.system.OPTIONID === "ALL") {
+                let count = 0;
+                for (const attackItem of this.actor._cslItems) {
+                    let addMe = false;
+
+                    switch (this.system.XMLID) {
+                        case "WEAPON_MASTER":
+                            // Skip mental powers
+                            if (attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+                            switch (this.system.OPTIONID) {
+                                case "VERYLIMITED":
+                                    if (count === 0) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "LIMITED":
+                                    if (count < 3) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "ANYHTH":
+                                    if (attackItem.baseInfo.range === "No Range") {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "ANYRANGED":
+                                    if (attackItem.baseInfo.range === "Standard") {
+                                        addMe = true;
+                                    }
+                                    break;
+                                default:
+                                    console.warn("Unhandled attack automatic selection", this);
+                            }
+                            break;
+                        case "COMBAT_LEVELS":
+                            // Skip mental powers for 6e as they have a different XMLID
+                            if (!this.is5e && attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+
+                            switch (this.system.OPTIONID) {
+                                case "SINGLESINGLE": // Depricated ?
+                                case "SINGLE":
+                                    if (count === 0) {
+                                        // Is this part of a framework/compound power/list?
+                                        if (this.parentItem) {
+                                            if (this.parentItem.id === attackItem.parentItem?.id) {
+                                                addMe = true;
+                                            }
+                                        } else {
+                                            addMe = true;
+                                        }
+                                    }
+                                    break;
+                                case "TIGHT":
+                                    if (count < 3) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "BROAD":
+                                    if (count < 6) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "HTH":
+                                    if (attackItem.baseInfo.range === "No Range") {
+                                        addMe = true;
+                                    }
+                                    break;
+
+                                case "RANGED":
+                                    if (attackItem.baseInfo.range === "Standard") {
+                                        addMe = true;
+                                    }
+                                    break;
+                                /// 5e only: +1 DCV against all attacks (HTH and Ranged)
+                                // — no matter how many opponents attack a
+                                // character in a given Segment, or with how many
+                                // diff erent attacks, a 5-point DCV CSL provides +1
+                                // DCV versus all of them.
+                                case "DCV":
+                                    addMe = true;
+                                    break;
+                                case "ALL":
+                                    addMe = true;
+                                    break;
+                                default:
+                                    console.error(`Unknown OPTIONID ${this.system.OPTIONID}`);
+                                    addMe = false;
+                                    break;
+                            }
+                            break;
+                        case "PENALTY_SKILL_LEVELS":
+                            // Skip mental powers
+                            if (attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+                            switch (this.system.OPTIONID) {
+                                case "SINGLE":
+                                    if (count === 0) {
+                                        // Is this part of a framework/compound power/list?
+                                        if (this.parentItem) {
+                                            if (this.parentItem.id === attackItem.parentItem?.id) {
+                                                addMe = true;
+                                            }
+                                        } else {
+                                            addMe = true;
+                                        }
+
+                                        // Assumed penalty type
+                                        if (
+                                            addMe &&
+                                            ["limited range", "standard", "range based on str"].includes(
+                                                attackItem.system.range,
+                                            )
+                                        ) {
+                                            this.system.penalty ??= "range";
+                                        }
+                                    }
+                                    break;
+                                case "THREE":
+                                    if (count < 3) {
+                                        addMe = true;
+
+                                        // Assumed penalty type
+                                        if (
+                                            addMe &&
+                                            ["limited range", "standard", "range based on str"].includes(
+                                                attackItem.system.range,
+                                            )
+                                        ) {
+                                            this.system.penalty ??= "range";
+                                        }
+                                    }
+                                    break;
+                                case "ALL":
+                                    addMe = true;
+
+                                    // Assumed penalty type
+                                    if (
+                                        addMe &&
+                                        ["limited range", "standard", "range based on str"].includes(
+                                            attackItem.system.range,
+                                        )
+                                    ) {
+                                        this.system.penalty ??= "range";
+                                    }
+                                    break;
+                            }
+                            break;
+                        case "MENTAL_COMBAT_LEVELS":
+                            // Skip non-mental powers
+                            if (!attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+                            switch (this.system.OPTIONID) {
+                                case "SINGLE":
+                                    if (count === 0) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "TIGHT":
+                                    if (count < 3) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "BROAD":
+                                case "ALL":
+                                    addMe = true;
+                                    break;
+                            }
+                            break;
+                        default:
+                            console.warn("Unhandled attack automatic selection", this);
+                    }
+
+                    if (addMe && !this.adders.find((adder) => adder.ALIAS === attackItem.name)) {
+                        const newAdder = {
+                            XMLID: "ADDER",
+                            ID: new Date().getTime().toString(),
+                            ALIAS: attackItem.name,
+                            BASECOST: "0.0",
+                            LEVELS: "0",
+                            NAME: "",
+                            PRIVATE: false,
+                            SELECTED: true,
+                            BASECOST_total: 0,
+                            targetId: attackItem.id,
+                        };
+                        this.system.ADDER ??= [];
+                        this.system.ADDER.push(newAdder);
+                        count++;
+                    }
+                }
+            } else {
+                // Try to associate CSL adders with specific attack
+                if (this.baseInfo?.editOptions?.showAttacks) {
+                    let addersChanged = false;
+                    for (const adder of (this.system.ADDER || []).filter((a) => !a.targetId)) {
+                        const item = this.actor._cslItems.find(
+                            (o) => o.name === adder.ALIAS || o.system.ALIAS === adder.ALIAS,
+                        );
+                        if (item) {
+                            adder.targetId = item.id;
+                            addersChanged = true;
+                        }
+                    }
+                    if (addersChanged) {
+                        // AARON: The update causes error and it seems to work without it
+                        //await this.update({ [`system.ADDER`]: this.system.ADDER });
+                    }
+                }
+            }
+
+            if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
+                if (this.system.OPTION_ALIAS.match(/range/i)) {
+                    this.system.penalty ??= "range";
+                } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+                    this.system.penalty ??= "hitLocation";
+                } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+                    this.system.penalty ??= "encumbrance";
+                }
+            }
+        }
+
+        window.prepareData.setCombatSkillLevels =
+            (window.prepareData.setCombatSkillLevels || 0) + (new Date() - startDate);
+    }
+
+    setAoeModifier() {
+        const startDate = new Date();
+        const aoeModifier = this.getAoeModifier();
+        if (aoeModifier) {
+            this.buildAoeAttackParameters(aoeModifier);
+        }
+        window.prepareData.setAoeModifier = (window.prepareData.setAoeModifier || 0) + (new Date() - startDate);
     }
 
     setAttack() {
@@ -423,6 +1033,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     setCharges() {
+        // CHARGES are also messed with in _postUploadDetails, should probably consolidate
         const CHARGES = this.findModsByXmlid("CHARGES");
         if (CHARGES) {
             this.system.charges = {
@@ -1844,6 +2455,7 @@ export class HeroSystem6eItem extends Item {
         item.updateRoll();
 
         // Charges
+        // Not sure why we do CHARGES here and in setCharges();
         if (parseInt(item.system.charges?.max || 0) > 0) {
             const costsEnd = item.findModsByXmlid("COSTSEND");
             if (item.system.endEstimate === 0 || !costsEnd) {
@@ -2114,627 +2726,19 @@ export class HeroSystem6eItem extends Item {
                 return;
             }
 
-            let changed = false;
-
-            changed = this.buildRangeParameters() || changed;
-
-            const aoeModifier = this.getAoeModifier();
-            if (aoeModifier) {
-                this.buildAoeAttackParameters(aoeModifier);
-            }
-
-            if (this.system.XMLID == "COMBAT_LEVELS") {
-                // Make sure CSLs are defined; but don't override them if they are already present
-                this.system.csl ??= {};
-                for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                    this.system.csl[c] ??= "ocv";
+            // Progress Bar (plan to deprecate)
+            if (options?.uploadProgressBar) {
+                if (this.system.versionHeroSystem6eCreated === undefined) {
+                    this.system.versionHeroSystem6eCreated = game.system.version;
+                    options.uploadProgressBar.advance(`${this.actor.name}: Adding ${this.name}`);
                 }
             }
 
-            if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
-                // Make sure CSLs are defined; but don't override them if they are already present
-                this.system.csl ??= {};
-                for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                    this.system.csl[c] ??= "omcv";
-                }
-            }
-
-            // Attempt default weapon selection if showAttacks is defined and there are no custom adders
-            // Or the OPTIONID=ALL is specified
-            if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
-                if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER") || this.system.OPTIONID === "ALL") {
-                    let count = 0;
-                    for (const attackItem of this.actor._cslItems) {
-                        let addMe = false;
-
-                        switch (this.system.XMLID) {
-                            case "WEAPON_MASTER":
-                                // Skip mental powers
-                                if (attackItem.baseInfo.type.includes("mental")) {
-                                    continue;
-                                }
-                                switch (this.system.OPTIONID) {
-                                    case "VERYLIMITED":
-                                        if (count === 0) {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    case "LIMITED":
-                                        if (count < 3) {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    case "ANYHTH":
-                                        if (attackItem.baseInfo.range === "No Range") {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    case "ANYRANGED":
-                                        if (attackItem.baseInfo.range === "Standard") {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    default:
-                                        console.warn("Unhandled attack automatic selection", this);
-                                }
-                                break;
-                            case "COMBAT_LEVELS":
-                                // Skip mental powers for 6e as they have a different XMLID
-                                if (!this.is5e && attackItem.baseInfo.type.includes("mental")) {
-                                    continue;
-                                }
-
-                                switch (this.system.OPTIONID) {
-                                    case "SINGLESINGLE": // Depricated ?
-                                    case "SINGLE":
-                                        if (count === 0) {
-                                            // Is this part of a framework/compound power/list?
-                                            if (this.parentItem) {
-                                                if (this.parentItem.id === attackItem.parentItem?.id) {
-                                                    addMe = true;
-                                                }
-                                            } else {
-                                                addMe = true;
-                                            }
-                                        }
-                                        break;
-                                    case "TIGHT":
-                                        if (count < 3) {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    case "BROAD":
-                                        if (count < 6) {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    case "HTH":
-                                        if (attackItem.baseInfo.range === "No Range") {
-                                            addMe = true;
-                                        }
-                                        break;
-
-                                    case "RANGED":
-                                        if (attackItem.baseInfo.range === "Standard") {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    /// 5e only: +1 DCV against all attacks (HTH and Ranged)
-                                    // — no matter how many opponents attack a
-                                    // character in a given Segment, or with how many
-                                    // diff erent attacks, a 5-point DCV CSL provides +1
-                                    // DCV versus all of them.
-                                    case "DCV":
-                                        addMe = true;
-                                        break;
-                                    case "ALL":
-                                        addMe = true;
-                                        break;
-                                    default:
-                                        console.error(`Unknown OPTIONID ${this.system.OPTIONID}`);
-                                        addMe = false;
-                                        break;
-                                }
-                                break;
-                            case "PENALTY_SKILL_LEVELS":
-                                // Skip mental powers
-                                if (attackItem.baseInfo.type.includes("mental")) {
-                                    continue;
-                                }
-                                switch (this.system.OPTIONID) {
-                                    case "SINGLE":
-                                        if (count === 0) {
-                                            // Is this part of a framework/compound power/list?
-                                            if (this.parentItem) {
-                                                if (this.parentItem.id === attackItem.parentItem?.id) {
-                                                    addMe = true;
-                                                }
-                                            } else {
-                                                addMe = true;
-                                            }
-
-                                            // Assumed penalty type
-                                            if (
-                                                addMe &&
-                                                ["limited range", "standard", "range based on str"].includes(
-                                                    attackItem.system.range,
-                                                )
-                                            ) {
-                                                this.system.penalty ??= "range";
-                                            }
-                                        }
-                                        break;
-                                    case "THREE":
-                                        if (count < 3) {
-                                            addMe = true;
-
-                                            // Assumed penalty type
-                                            if (
-                                                addMe &&
-                                                ["limited range", "standard", "range based on str"].includes(
-                                                    attackItem.system.range,
-                                                )
-                                            ) {
-                                                this.system.penalty ??= "range";
-                                            }
-                                        }
-                                        break;
-                                    case "ALL":
-                                        addMe = true;
-
-                                        // Assumed penalty type
-                                        if (
-                                            addMe &&
-                                            ["limited range", "standard", "range based on str"].includes(
-                                                attackItem.system.range,
-                                            )
-                                        ) {
-                                            this.system.penalty ??= "range";
-                                        }
-                                        break;
-                                }
-                                break;
-                            case "MENTAL_COMBAT_LEVELS":
-                                // Skip non-mental powers
-                                if (!attackItem.baseInfo.type.includes("mental")) {
-                                    continue;
-                                }
-                                switch (this.system.OPTIONID) {
-                                    case "SINGLE":
-                                        if (count === 0) {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    case "TIGHT":
-                                        if (count < 3) {
-                                            addMe = true;
-                                        }
-                                        break;
-                                    case "BROAD":
-                                    case "ALL":
-                                        addMe = true;
-                                        break;
-                                }
-                                break;
-                            default:
-                                console.warn("Unhandled attack automatic selection", this);
-                        }
-
-                        if (addMe && !this.adders.find((adder) => adder.ALIAS === attackItem.name)) {
-                            const newAdder = {
-                                XMLID: "ADDER",
-                                ID: new Date().getTime().toString(),
-                                ALIAS: attackItem.name,
-                                BASECOST: "0.0",
-                                LEVELS: "0",
-                                NAME: "",
-                                PRIVATE: false,
-                                SELECTED: true,
-                                BASECOST_total: 0,
-                                targetId: attackItem.id,
-                            };
-                            this.system.ADDER ??= [];
-                            this.system.ADDER.push(newAdder);
-                            count++;
-                        }
-                    }
-                } else {
-                    // Try to associate CSL adders with specific attack
-                    if (this.baseInfo?.editOptions?.showAttacks) {
-                        let addersChanged = false;
-                        for (const adder of (this.system.ADDER || []).filter((a) => !a.targetId)) {
-                            const item = this.actor._cslItems.find(
-                                (o) => o.name === adder.ALIAS || o.system.ALIAS === adder.ALIAS,
-                            );
-                            if (item) {
-                                adder.targetId = item.id;
-                                addersChanged = true;
-                            }
-                        }
-                        if (addersChanged) {
-                            // AARON: The update causes error and it seems to work without it
-                            //await this.update({ [`system.ADDER`]: this.system.ADDER });
-                        }
-                    }
-                }
-
-                if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
-                    if (this.system.OPTION_ALIAS.match(/range/i)) {
-                        this.system.penalty ??= "range";
-                    } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
-                        this.system.penalty ??= "hitLocation";
-                    } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
-                        this.system.penalty ??= "encumbrance";
-                    }
-                }
-            }
-
-            // DESCRIPTION
-            const oldDescription = this.system.description;
-            const oldName = this.name;
-            this.updateItemDescription();
-            changed = oldDescription !== this.system.description || oldName !== this.name || changed;
-
-            // Save changes
-            if (changed && this.id && this.isEmbedded) {
-                if (options?.uploadProgressBar) {
-                    if (this.system.versionHeroSystem6eCreated === undefined) {
-                        this.system.versionHeroSystem6eCreated = game.system.version;
-                        options.uploadProgressBar.advance(`${this.actor.name}: Adding ${this.name}`);
-                    }
-                }
-
-                const changeObject = { system: this.system };
-                if (oldName !== this.name) {
-                    changeObject.name = this.name;
-                }
-                if (!changeObject.name && !this.name) {
-                    console.warn("Name is empty");
-                    changeObject.name = this.system.XMLID || "undefined";
-                }
-                await this.update(changeObject, options);
-            }
-
-            // ACTIVE EFFECTS
-            if (changed && this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
-                const activeEffect = Array.from(this.effects)?.[0] || {};
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
-                activeEffect.description = this.system.description;
-                activeEffect.changes = [
-                    {
-                        key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
-                        value: parseInt(this.system.LEVELS),
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                ];
-                for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
-                    let foundMatch = false;
-                    for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
-                        if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
-                            activeEffect.changes.push({
-                                key: `system.characteristics.${movementKey.toLowerCase()}.max`,
-                                value: parseInt(this.system.LEVELS),
-                                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                            });
-                            foundMatch = true;
-                        }
-                    }
-                    if (!foundMatch) {
-                        ui.notifications.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`);
-                        console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
-                    }
-                }
-                activeEffect.transfer = true;
-                activeEffect.disabled = !this.system.active;
-
-                if (activeEffect.update) {
-                    await activeEffect.update({
-                        name: activeEffect.name,
-                        changes: activeEffect.changes,
-                    });
-                    if (this.actor) {
-                        await this.actor.update({
-                            [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                                this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
-                        });
-                    }
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
-            if (changed && this.id && this.baseInfo?.type?.includes("characteristic")) {
-                const activeEffect = Array.from(this.effects)?.[0] || {};
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
-                activeEffect.description = this.system.description;
-                activeEffect.changes = [
-                    {
-                        key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
-                        value: this.system.value,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                ];
-                activeEffect.transfer = true;
-                activeEffect.disabled = !this.system.active;
-
-                if (activeEffect.update) {
-                    const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
-                    await activeEffect.update({
-                        name: activeEffect.name,
-                        changes: activeEffect.changes,
-                    });
-                    const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
-                    await this.actor.update({
-                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                            this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax,
-                    });
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
-            if (changed && this.id && this.system.XMLID === "DENSITYINCREASE") {
-                const noStrIncrease = this.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
-                const strAdd = noStrIncrease ? 0 : Math.floor(this.system.value) * 5;
-                const pdAdd = Math.floor(this.system.value);
-                const edAdd = Math.floor(this.system.value);
-
-                let activeEffect = Array.from(this.effects)?.[0] || {};
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
-                activeEffect.changes = [
-                    {
-                        key: "system.characteristics.str.max",
-                        value: strAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                    {
-                        key: "system.characteristics.pd.max",
-                        value: pdAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                    {
-                        key: "system.characteristics.ed.max",
-                        value: edAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                ];
-                activeEffect.transfer = true;
-                activeEffect.disabled = !this.system.active;
-
-                if (activeEffect.update) {
-                    await activeEffect.update({
-                        name: activeEffect.name,
-                        changes: activeEffect.changes,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
-                    });
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
-            // 5e GROWTH
-            // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
-            // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
-            // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
-            if (changed && this.id && this.system.XMLID === "GROWTH") {
-                const details = this.baseInfo?.details(this) || {};
-                let activeEffect = Array.from(this.effects)?.[0] || {};
-                activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
-                activeEffect.name += `${this.system.XMLID} ${this.is5e ? this.system.value : this.system.OPTIONID}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
-                activeEffect.changes = [
-                    {
-                        key: "system.characteristics.str.max",
-                        value: details.str,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                    {
-                        key: "system.characteristics.body.max",
-                        value: details.body,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                    {
-                        key: "system.characteristics.stun.max",
-                        value: details.stun,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                    {
-                        // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
-                        // should technicaly add to OCV of attacker.
-                        // However 5e use the -DCV concept and we will implement 6e in kind for now.
-                        key: "system.characteristics.dcv.max",
-                        value: -details.dcv,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                ];
-                if (!this.is5e) {
-                    activeEffect.changes.push({
-                        key: "system.characteristics.con.max",
-                        value: details.con,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    });
-                    activeEffect.changes.push({
-                        key: "system.characteristics.pre.max",
-                        value: details.pre,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    });
-                    activeEffect.changes.push({
-                        key: "system.characteristics.pd.max",
-                        value: details.pd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    });
-                    activeEffect.changes.push({
-                        key: "system.characteristics.ed.max",
-                        value: details.ed,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    });
-                    activeEffect.changes.push({
-                        key: "system.characteristics.running.max",
-                        value: details.running,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    });
-                }
-                activeEffect.transfer = true;
-
-                if (activeEffect.update) {
-                    await activeEffect.update({
-                        name: activeEffect.name,
-                        changes: activeEffect.changes,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
-                    });
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
-            // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
-            // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
-            if (changed && this.id && this.system.XMLID === "SHRINKING") {
-                const dcvAdd = Math.floor(this.system.value) * 2;
-
-                let activeEffect = Array.from(this.effects)?.[0] || {};
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
-                activeEffect.changes = [
-                    {
-                        key: "system.characteristics.dcv.max",
-                        value: dcvAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                    },
-                ];
-                activeEffect.transfer = true;
-
-                if (activeEffect.update) {
-                    await activeEffect.update({
-                        name: activeEffect.name,
-                        changes: activeEffect.changes,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.dcv.value`]: this.actor.system.characteristics.dcv.max,
-                    });
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
-            const MOBILITY = this.findModsByXmlid("MOBILITY");
-            if (changed && this.id && MOBILITY) {
-                const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
-
-                const activeEffect = Array.from(this.effects)?.[0] || {};
-                if (dcvValue !== null) {
-                    activeEffect.name =
-                        (this.name ? `${this.name}/${MOBILITY.parent.name || MOBILITY.parent.ALIAS}: ` : "") +
-                        `${MOBILITY.OPTIONID} ${dcvValue}`;
-                    activeEffect.img = "icons/svg/downgrade.svg";
-                    activeEffect.changes = [
-                        {
-                            key: "system.characteristics.dcv.value",
-                            value: dcvValue,
-                            mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
-                        },
-                    ];
-                    activeEffect.transfer = true;
-                    activeEffect.disabled = !this.system.active;
-
-                    if (activeEffect.update) {
-                        await activeEffect.update({
-                            name: activeEffect.name,
-                            changes: activeEffect.changes,
-                        });
-                    } else {
-                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                    }
-                } else {
-                    if (activeEffect.delete) {
-                        await activeEffect.delete();
-                    }
-                }
-            }
-
-            // CUSTOMPOWER LIGHT
-            if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
-                if (changed && !game.modules.get("ATL")?.active) {
-                    ui.notifications.warn(
-                        `You must install the <b>Active Token Effects</b> module for carried lights to work`,
-                    );
-                }
-                let activeEffect = Array.from(this.effects)?.[0] || {};
-                if (this.system.active || !activeEffect.update) {
-                    activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
-                    activeEffect.img = "icons/svg/light.svg";
-                    activeEffect.changes = [
-                        {
-                            key: "ATL.light.bright",
-                            value: parseFloat(this.system.QUANTITY),
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                    ];
-                    if (!activeEffect.update) {
-                        activeEffect.disabled = true;
-                    }
-
-                    if (activeEffect.update) {
-                        await activeEffect.update({
-                            name: activeEffect.name,
-                            changes: activeEffect.changes,
-                            disabled: false,
-                        });
-                    } else {
-                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                    }
-                } else {
-                    // Light was turned off?
-                    if (activeEffect?.update) {
-                        await activeEffect.update({
-                            name: activeEffect.name,
-                            disabled: true,
-                        });
-                    }
-                }
-            }
-
-            // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
-            if (
-                this.system.showToggle &&
-                this.system.active === undefined &&
-                this.system.charges === undefined &&
-                !this.system.end &&
-                this.parentItem?.system.XMLID === "MULTIPOWER"
-            ) {
-                changed = true;
-                this.system.active ??= true;
-            }
-
-            if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
-                // Invisibility status effect for SIGHTGROUP?
-                if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-                    this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
-                }
-            }
+            await this.setActiveEffects();
 
             this._postUploadDetails(options);
 
-            return changed;
+            return true;
         } catch (error) {
             try {
                 if (foundry.utils.isNewerVersion(this.actor?.system.versionHeroSystem6eCreated, "3.0.63")) {
@@ -2930,8 +2934,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     get modifiers() {
-        //if (this.system.XMLID === "ENTANGLE") debugger;
-        if (this._modifiers) return this._modifiers;
+        // Caching for performance
+        // Aaron suspects that "new HeroSystem6eModifier" is the crux of the performance issue.
+        // The HeroSystem6eModifier class is pretty handy.
+        // Perhaps struct or prototype overrideing could be alternative solution.
+        // The core (database) uses an array of JSON values.
+        // Type
+        if (this._modifiers && Date.now() - this._modifiers.dt < 5) return this._modifiers.value;
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -2968,7 +2977,10 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-        this._modifiers = _modifiers;
+        this._modifiers = {
+            value: _modifiers,
+            dt: Date.now(),
+        };
         return _modifiers;
     }
 
@@ -2981,17 +2993,22 @@ export class HeroSystem6eItem extends Item {
     }
 
     get adders() {
-        if (this._adders) return this._adders;
+        // Caching for performance
+        if (this._adders && Date.now() - this._adders.dt < 5) return this._adders.value;
         const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
             _adders.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
         }
-        this._adders = _adders;
+        this._adders = {
+            value: _adders,
+            dt: Date.now(),
+        };
         return _adders;
     }
 
     get powers() {
-        if (this._powers) return this._powers;
+        // Caching for performance
+        if (this._powers && Date.now() - this._powers.dt < 5) return this._powers.value;
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
@@ -3014,7 +3031,10 @@ export class HeroSystem6eItem extends Item {
             for (const _powerJson of powersList) {
                 _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
-            this._powers = _powers;
+            this._powers = {
+                value: _powers,
+                dt: Date.now(),
+            };
             return _powers;
         } catch (e) {
             console.error(e);
@@ -4162,7 +4182,7 @@ export class HeroSystem6eItem extends Item {
 
                     const maxCharges = parseInt(modifier.OPTION_ALIAS);
                     if (maxCharges !== parseInt(system.charges?.max)) {
-                        console.error("CHARGES mismatch", item);
+                        console.warn(`CHARGES mismatch ${item.actor?.name}:${item.name}`, item);
                     }
                     const currentCharges = parseInt(this.system.charges?.value);
                     if (currentCharges != maxCharges) {
