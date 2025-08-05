@@ -5,6 +5,7 @@
 - "Must follow block" martial arts response element no longer behaves as a block maneuver. [#2528](https://github.com/dmdorman/hero6e-foundryvtt/issues/2528)
 - Added "Toggle Hold" and "Toggle Abort" to Combat Tracker context menu. [#2563](https://github.com/dmdorman/hero6e-foundryvtt/issues/2563)
 - Players can now advance Combat Tracker when they are done with their turn. [#2569](https://github.com/dmdorman/hero6e-foundryvtt/issues/2569)
+- Maneuvers with "Target Falls" and "Grab" maneuvers now automatically apply the appropriate effect to all targets.
 
 ## Version 4.1.9 20250801
 
