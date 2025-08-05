@@ -1956,8 +1956,6 @@ export class HeroSystem6eItem extends Item {
                 console.log(`skipping _postUpload for ${this.pack}.${this.name}`, this);
                 return;
             }
-            // PH: FIXME: Not sure if I like this.
-            this.system._active ??= {};
 
             const configPowerInfo = this.baseInfo;
             if (!configPowerInfo) {
