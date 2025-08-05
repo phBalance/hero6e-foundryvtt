@@ -279,7 +279,164 @@ export class HeroSystem6eItem extends Item {
 
     prepareData() {
         super.prepareData();
+        window.prepareData ??= {};
         this.system._active ??= {};
+
+        // Basic Validatiton, we need an XMLID
+        if (!this.baseInfo) {
+            if (this.system.XMLID) {
+                console.warn(`${this.actor?.name}/${this.system.XMLID} doesn't have power defined`);
+            } else {
+                console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
+            }
+        }
+        this.setInitialItemValueAndMax();
+        this.setInitialRange(this.baseInfo);
+        this.updateRoll();
+        this.determinePointCosts();
+        this.setCharges();
+        this.setShowToggle();
+        this.calcEndurance();
+        this.setCarried();
+        this.setShowToggleActiveDefault();
+        this.setMovement();
+        this.setSkills();
+        this.setToHit();
+        this.setAttack();
+    }
+
+    setAttack() {
+        const startDate = new Date();
+        // ATTACK
+        if (this.causesDamageEffect()) {
+            // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach.
+            const attack = "attack";
+            if (this.system.subType !== attack) {
+                this.system.subType = attack;
+                this.makeAttack();
+            } else {
+                // Newer item edit may change system.LEVELS or adder/modifier
+                this.makeAttack();
+            }
+
+            // text description of damage
+            this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, {});
+        }
+        window.prepareData.setAttack = (window.prepareData.setAttack || 0) + (new Date() - startDate);
+    }
+
+    setToHit() {
+        const startDate = new Date();
+        // TO HIT
+        if (this.rollsToHit()) {
+            this.makeToHit();
+        }
+        window.prepareData.setToHit = (window.prepareData.setToHit || 0) + (new Date() - startDate);
+    }
+
+    setSkills() {
+        const startDate = new Date();
+        // SKILLS
+        if (this.baseInfo?.type.includes("skill")) {
+            const skill = "skill";
+            if (this.system.subType !== skill) {
+                this.system.subType = skill;
+            }
+        }
+        window.prepareData.setSkills = (window.prepareData.setSkills || 0) + (new Date() - startDate);
+    }
+
+    setMovement() {
+        const startDate = new Date();
+        // MOVEMENT
+        if (this.baseInfo?.type.includes("movement")) {
+            const movement = "movement";
+            if (this.system.subType !== movement) {
+                this.system.subType = movement;
+                this.system.showToggle = true;
+
+                // Movement power typically default to active
+                if (
+                    !this.system.charges?.value &&
+                    this.parentItem?.system.XMLID !== "MULTIPOWER" &&
+                    !this.baseInfo?.behaviors.includes("defaultoff")
+                ) {
+                    this.system.active ??= true;
+                }
+            }
+        }
+        window.prepareData.setMovement = (window.prepareData.setMovement || 0) + (new Date() - startDate);
+    }
+
+    setShowToggleActiveDefault() {
+        const startDate = new Date();
+        // ShowToggles & Activatable & default active
+        // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
+        if (
+            this.baseInfo?.type.includes("defense") ||
+            this.baseInfo?.behaviors?.includes("defense") ||
+            this.baseInfo?.type?.includes("characteristic") ||
+            (["power", "equipment"].includes(this.type) && this.baseInfo?.type?.includes("sense"))
+        ) {
+            const newDefenseValue = "defense";
+
+            if (this.system.subType !== newDefenseValue && this.baseInfo?.behaviors.includes("activatable")) {
+                this.system.subType = newDefenseValue;
+                this.system.showToggle = true;
+            }
+
+            // Default toggles to ON unless they are instant, have charges, part of a MULTIPOWER, etc
+            if (
+                this.system.charges?.value > 0 ||
+                this.system.AFFECTS_TOTAL === false ||
+                this.baseInfo?.duration === "instant" ||
+                this.parentItem?.system.XMLID === "MULTIPOWER" ||
+                this.baseInfo?.behaviors.includes("defaultoff")
+            ) {
+                this.system.active ??= false;
+            } else {
+                if (this.system.active === undefined) {
+                    this.system.active ??= true;
+                }
+            }
+        }
+        window.prepareData.setShowToggleActiveDefault =
+            (window.prepareData.setShowToggleActiveDefault || 0) + (new Date() - startDate);
+    }
+
+    setCarried() {
+        const startDate = new Date();
+        if (this.system.CARRIED && this.system.active === undefined && this.system.end === 0) {
+            this.system.active ??= true;
+        }
+        window.prepareData.setCarried = (window.prepareData.setCarried || 0) + (new Date() - startDate);
+    }
+
+    setShowToggle() {
+        const startDate = new Date();
+        if (this.baseInfo?.behaviors.includes("activatable")) {
+            if (!this.system.showToggle) {
+                this.system.showToggle = true;
+            }
+        }
+        window.prepareData.setShowToggle = (window.prepareData.setShowToggle || 0) + (new Date() - startDate);
+    }
+
+    setCharges() {
+        const CHARGES = this.findModsByXmlid("CHARGES");
+        if (CHARGES) {
+            this.system.charges = {
+                max: parseInt(CHARGES.OPTION_ALIAS),
+                value: parseInt(CHARGES.OPTION_ALIAS),
+                clipsMax: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
+                clips: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
+                recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
+                continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
+                boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
+                fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
+                ...this.system.charges,
+            };
+        }
     }
 
     async update(...args) {
@@ -1217,7 +1374,7 @@ export class HeroSystem6eItem extends Item {
         switch (this.system.XMLID) {
             case "MENTALDEFENSE":
                 // 5e gets some levels for free
-                if (this.actor?.system.is5e) {
+                if (this.actor?.is5e) {
                     newValue =
                         newValue > 0
                             ? newValue +
@@ -1957,158 +2114,7 @@ export class HeroSystem6eItem extends Item {
                 return;
             }
 
-            const configPowerInfo = this.baseInfo;
-            if (!configPowerInfo) {
-                if (this.system.XMLID) {
-                    ui.notifications.warn(`${this.actor?.name}/${this.system.XMLID} doesn't have power defined`);
-                } else {
-                    console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
-                }
-            }
-
-            let changed = this.setInitialItemValueAndMax();
-
-            changed = this.setInitialRange(configPowerInfo) || changed;
-
-            this.updateRoll();
-
-            changed = this.determinePointCosts() || changed; // Moved to prepareDerivedData
-
-            // CHARGES
-            const CHARGES = this.findModsByXmlid("CHARGES");
-            if (CHARGES) {
-                this.system.charges = {
-                    max: parseInt(CHARGES.OPTION_ALIAS),
-                    value: parseInt(CHARGES.OPTION_ALIAS),
-                    clipsMax: Math.pow(
-                        parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1),
-                        2,
-                    ),
-                    clips: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
-                    recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
-                    continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
-                    boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
-                    fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
-                    ...this.system.charges,
-                };
-
-                // The first time through, on creation, there will be no value (number of charges) defined.
-                // if (this.system.charges?.value == null) {
-                //     this.system.charges.value = this.system.charges.max;
-                //     changed = true;
-                // }
-            } else {
-                // When CHARGES is manually deleted
-                if (this.system.charges) {
-                    delete this.system.charges;
-                    this.update({ "system.-=charges": null });
-                }
-            }
-
-            // Toggles
-            if (this.baseInfo?.behaviors.includes("activatable")) {
-                if (!this.system.showToggle) {
-                    this.system.showToggle = true;
-                    changed = true;
-                }
-            }
-
-            this.calcEndurance();
-
-            // Carried Equipment
-            if (this.system.CARRIED && this.system.active === undefined && this.system.end === 0) {
-                this.system.active ??= true;
-                changed = true;
-            }
-
-            // ShowToggles & Activatable & default active
-            // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
-            if (
-                this.baseInfo?.type.includes("defense") ||
-                this.baseInfo?.behaviors?.includes("defense") ||
-                this.baseInfo?.type?.includes("characteristic") ||
-                (["power", "equipment"].includes(this.type) && this.baseInfo?.type?.includes("sense"))
-            ) {
-                const newDefenseValue = "defense";
-
-                if (this.system.subType !== newDefenseValue && this.baseInfo?.behaviors.includes("activatable")) {
-                    this.system.subType = newDefenseValue;
-                    this.system.showToggle = true;
-                    changed = true;
-                }
-
-                // Default toggles to ON unless they are instant, have charges, part of a MULTIPOWER, etc
-                if (
-                    this.system.charges?.value > 0 ||
-                    this.system.AFFECTS_TOTAL === false ||
-                    this.baseInfo?.duration === "instant" ||
-                    this.parentItem?.system.XMLID === "MULTIPOWER" ||
-                    this.baseInfo?.behaviors.includes("defaultoff")
-                ) {
-                    this.system.active ??= false;
-                } else {
-                    if (this.system.active === undefined) {
-                        changed = true;
-                        this.system.active ??= true;
-                    }
-                }
-            }
-
-            // MOVEMENT
-            if (this.baseInfo?.type.includes("movement")) {
-                const movement = "movement";
-                if (this.system.subType !== movement) {
-                    this.system.subType = movement;
-                    this.system.showToggle = true;
-
-                    // Movement power typically default to active
-                    if (
-                        !this.system.charges?.value &&
-                        this.parentItem?.system.XMLID !== "MULTIPOWER" &&
-                        !this.baseInfo?.behaviors.includes("defaultoff")
-                    ) {
-                        this.system.active ??= true;
-                    }
-
-                    changed = true;
-                }
-            }
-
-            // SKILLS
-            if (this.baseInfo?.type.includes("skill")) {
-                const skill = "skill";
-                if (this.system.subType !== skill) {
-                    this.system.subType = skill;
-                    changed = true;
-                }
-            }
-
-            // TO HIT
-            if (this.rollsToHit()) {
-                this.makeToHit();
-                changed = true; // FIXME: Obviously not always true. Shouldn't be modifying anything in system frankly.
-            }
-
-            // ATTACK
-            if (this.causesDamageEffect()) {
-                // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach.
-                const attack = "attack";
-                if (this.system.subType !== attack) {
-                    this.system.subType = attack;
-                    changed = true;
-                    this.makeAttack();
-                } else {
-                    // Newer item edit may change system.LEVELS or adder/modifier
-                    if (changed) {
-                        this.makeAttack();
-                    }
-                }
-
-                if (changed) {
-                    // text description of damage
-                    this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, {});
-                }
-            }
+            let changed = false;
 
             changed = this.buildRangeParameters() || changed;
 
@@ -2390,7 +2396,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // ACTIVE EFFECTS
-            if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {
+            if (changed && this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
                 const activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
@@ -2438,7 +2444,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            if (changed && this.id && configPowerInfo?.type?.includes("characteristic")) {
+            if (changed && this.id && this.baseInfo?.type?.includes("characteristic")) {
                 const activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
@@ -2522,7 +2528,7 @@ export class HeroSystem6eItem extends Item {
             // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
             // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
             if (changed && this.id && this.system.XMLID === "GROWTH") {
-                const details = configPowerInfo?.details(this) || {};
+                const details = this.baseInfo?.details(this) || {};
                 let activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
                 activeEffect.name += `${this.system.XMLID} ${this.is5e ? this.system.value : this.system.OPTIONID}`;
@@ -2925,6 +2931,7 @@ export class HeroSystem6eItem extends Item {
 
     get modifiers() {
         //if (this.system.XMLID === "ENTANGLE") debugger;
+        if (this._modifiers) return this._modifiers;
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -2947,7 +2954,8 @@ export class HeroSystem6eItem extends Item {
                     const pCost = parseFloat(pMod.BASECOST || 0);
                     const mCost = parseFloat(mod?.BASECOST || 0);
                     if (mod && pCost === 0 && mCost === 0) {
-                        console.warn(`inconclusive parent/child mod BASECOST`);
+                        console.warn(`inconclusive parent/child mod BASECOST for ${this.actor?.name}:${this.name}`),
+                            this;
                     }
                     if (!mod || (pCost < 0 && pCost < mCost)) {
                         // Keeping parent modifier
@@ -2960,7 +2968,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-
+        this._modifiers = _modifiers;
         return _modifiers;
     }
 
@@ -2973,14 +2981,17 @@ export class HeroSystem6eItem extends Item {
     }
 
     get adders() {
-        const _addres = [];
+        if (this._adders) return this._adders;
+        const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
-            _addres.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
+            _adders.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
         }
-        return _addres;
+        this._adders = _adders;
+        return _adders;
     }
 
     get powers() {
+        if (this._powers) return this._powers;
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
@@ -3003,6 +3014,7 @@ export class HeroSystem6eItem extends Item {
             for (const _powerJson of powersList) {
                 _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
+            this._powers = _powers;
             return _powers;
         } catch (e) {
             console.error(e);

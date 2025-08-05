@@ -56,7 +56,9 @@ export function getPowerInfo(options) {
         is5e = options.is5e;
     }
     if (is5e == undefined) {
-        console.warn(`DefaultEdition was used to determine is5e for ${actor?.name}`);
+        console.warn(
+            `DefaultEdition was used to determine is5e for ${actor?.name || options.item?.pack || (Item.get(options.item?.id) ? "Item" : undefined)}:${options.item?.name}`,
+        );
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
         const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
         if (DefaultEdition === "five") {
