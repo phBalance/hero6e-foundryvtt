@@ -192,7 +192,7 @@ export class Attack {
         // todo: if there is some character that doesn't have a STRIKE maneuver, then this find will fail.
         // if the character has been loaded from an HDC then they will have the default maneuvers
         // if they have not been loaded from and HDC they won't have multiple attack and shouldn't get here.
-        let strike = item.actor.items.find((item) => "STRIKE" === item.system.XMLID);
+        const strike = item.actor.items.find((item) => "STRIKE" === item.system.XMLID);
         return strike?.id;
     }
 
@@ -246,12 +246,16 @@ export class Attack {
         return true;
     }
 
-    static getAttackerToken(item) {
+    /**
+     *
+     * @param {HeroSystem6eActor} actor
+     * @returns {TokenDocument | PrototypeToken}
+     */
+    static getAttackerToken(actor) {
         // Careful:  you may have a controlled token, but use an attack from actor on sidebar
-        //const attackerToken = item.actor?.getActiveTokens()[0] || canvas.tokens.controlled.find;
         const attackerToken =
-            item.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-            item.actor.prototypeToken;
+            actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+            actor?.prototypeToken;
         if (!attackerToken) {
             console.error("There is no actor token!");
         }
@@ -465,7 +469,7 @@ export class Attack {
             return null;
         }
 
-        const attackerToken = Attack.getAttackerToken(item);
+        const attackerToken = Attack.getAttackerToken(item.actor);
         const system = {
             actor: item.actor,
             attackerToken,
@@ -475,13 +479,19 @@ export class Attack {
             item: {
                 [item.id]: item, // PH: FIXME: This is problematic for items which are not in the database. We do have original items for most items that are not in the DB.
             },
-            token: {
-                [attackerToken.id]: attackerToken,
-            },
+            token: {},
         };
 
+        // PH: FIXME: token id is not unique so can't uniquely be pulled from a Map. A token id is, however, unique within a scene and scenes are unique.
+        // PH: FIXME: PrototypeToken, however, doesn't even have an id because it's special based on an actor. It will show up as an `undefined` id in this map.
+        // PH: FIXME: We can't support multiple PrototypeTokens
+        system.token[attackerToken.id] = attackerToken;
         for (let i = 0; i < targetedTokens.length; i++) {
-            system.token[targetedTokens[i].id] = targetedTokens[i];
+            const id = targetedTokens[i].id;
+            if (system.token[id]) {
+                console.error(`Attempting to overwrite an existing token entry in action`, id);
+            }
+            system.token[id] = targetedTokens[i];
         }
 
         const maneuver = Attack.getManeuverInfo(item, targetedTokens, options, system);
@@ -498,17 +508,23 @@ export class Attack {
 
 export function actionToJSON(action) {
     const data = {
-        maneuver: action.maneuver,
         current: action.current,
-        // system: {},
+        maneuver: action.maneuver,
         system: {
             actor: action.system.actor.uuid,
-            // attackerToken: action.system.attackerToken.toObject(), // FIXME: TokenDocument or Token?
+            attackerTokenObj: tokenToTokenObj(action.system.attackerToken),
             currentItem: dehydrateAttackItem(action.system.currentItem),
-            // currentTargets: targetedTokens, // PH: FIXME:
-            // targetedTokens, // PH: FIXME:
-            item: {}, // PH: FIXME: This is a map. That is problematic for items which are not in the database. Turn into a proper Map
-            token: {}, // PH: FIXME: What is this supposed to be?
+            currentTargetTokenObjs: action.system.currentTargets.map((token) => tokenToTokenObj(token)),
+            targetedTokenObjs: action.system.targetedTokens.map((token) => tokenToTokenObj(token)),
+
+            item: {}, // PH: FIXME: This is a map. That is problematic for items which are not in the database since it's based on id. Turn into a proper Map
+            tokens: {}, // PH: FIXME: This is a map. Problematic as ids are not unique and can sometimes be undefined
+            // tokenObjs: action.system.token.map((token) => tokenToTokenObj(token)),
+            //             Object.fromEntries(
+            //     Object.entries(obj).map(
+            //       ([k, v], i) => [k, fn(v, k, i)]
+            //     )
+            //   )
         },
     };
 
@@ -520,18 +536,65 @@ export function actionFromJSON(json) {
     const actor = fromUuidSync(data.system.actor);
 
     const action = {
-        maneuver: data.maneuver,
         current: data.current,
+        maneuver: data.maneuver,
         system: {
             actor: actor,
-            // attackerToken: new TokenDocument(data.system.attackerToken), // FIXME: TokenDocument or Token?
-            currentItem: rehydrateAttackItem(data.system.item, actor),
-            // currentTargets: targetedTokens, // PH: FIXME:
-            // targetedTokens, // PH: FIXME:
-            item: {}, // PH: FIXME: Should this exist?
-            token: {}, // PH: FIXME: Should this exist?
+            attackerToken: tokenFromTokenObj(data.system.attackerTokenObj, actor),
+            currentItem: rehydrateAttackItem(data.system.currentItem, actor).item,
+            currentTargets: data.system.currentTargetTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj, actor)),
+            targetedTokens: data.system.targetedTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj, actor)),
+
+            item: {}, // PH: FIXME: This is a Map of Items by id
+            token: {}, // PH: FIXME: This is a Map of Tokens
         },
     };
 
     return action;
+}
+
+/**
+ * A way to serialize a token (either a TokenDocument or PrototypeToken).
+ *
+ * A token is not globally unique, so to serialize it we must save both the scene id and the token id.
+ * A prototype token is unique but doesn't have either a scene or an id.
+ *
+ * @param {TokenDocument | PrototypeToken} token
+ * @returns {TokenObj}
+ */
+function tokenToTokenObj(token) {
+    return {
+        sceneId: token.scene?.id,
+        tokenId: token.id,
+    };
+}
+
+/**
+ * Deserialize a token from the tokenObj created by tokenToTokenObj
+ *
+ * @param {TokenObj} tokenObj
+ * @param {HeroSystem6eActor} actor
+ * @returns {TokenDocument | PrototypeToken}
+ */
+function tokenFromTokenObj(tokenObj, actor) {
+    // Is this a tokenObj made from a PrototypeToken?
+    if (!tokenObj.sceneId) {
+        if (!actor) {
+            console.error(`No actor provided`);
+            return null;
+        }
+
+        // PH: FIXME: This needs to be a prototypeToken recreated or does it sometimes not have a constructor etc?
+        return actor.prototypeToken;
+    }
+
+    // Embedded Token from a scene
+    const scene = game.scenes.get(tokenObj.sceneId);
+    const embeddedToken = scene.getEmbeddedDocument("Token", tokenObj.tokenId);
+
+    if (!embeddedToken) {
+        console.error("There is no embeddedToken!");
+    }
+
+    return embeddedToken;
 }
