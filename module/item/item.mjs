@@ -280,6 +280,15 @@ export class HeroSystem6eItem extends Item {
     prepareData() {
         super.prepareData();
         this.system._active ??= {};
+
+        // Basic Validatiton, we need an XMLID
+        if (!this.baseInfo) {
+            if (this.system.XMLID) {
+                console.warn(`${this.actor?.name}/${this.system.XMLID} doesn't have power defined`);
+            } else {
+                console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
+            }
+        }
     }
 
     async update(...args) {
@@ -1957,18 +1966,18 @@ export class HeroSystem6eItem extends Item {
                 return;
             }
 
-            const configPowerInfo = this.baseInfo;
-            if (!configPowerInfo) {
-                if (this.system.XMLID) {
-                    ui.notifications.warn(`${this.actor?.name}/${this.system.XMLID} doesn't have power defined`);
-                } else {
-                    console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
-                }
-            }
+            // const configPowerInfo = this.baseInfo;
+            // if (!configPowerInfo) {
+            //     if (this.system.XMLID) {
+            //         ui.notifications.warn(`${this.actor?.name}/${this.system.XMLID} doesn't have power defined`);
+            //     } else {
+            //         console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
+            //     }
+            // }
 
             let changed = this.setInitialItemValueAndMax();
 
-            changed = this.setInitialRange(configPowerInfo) || changed;
+            changed = this.setInitialRange(this.baseInfo) || changed;
 
             this.updateRoll();
 
@@ -2390,7 +2399,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // ACTIVE EFFECTS
-            if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {
+            if (changed && this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
                 const activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
@@ -2438,7 +2447,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            if (changed && this.id && configPowerInfo?.type?.includes("characteristic")) {
+            if (changed && this.id && this.baseInfo?.type?.includes("characteristic")) {
                 const activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
@@ -2522,7 +2531,7 @@ export class HeroSystem6eItem extends Item {
             // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
             // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
             if (changed && this.id && this.system.XMLID === "GROWTH") {
-                const details = configPowerInfo?.details(this) || {};
+                const details = this.baseInfo?.details(this) || {};
                 let activeEffect = Array.from(this.effects)?.[0] || {};
                 activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
                 activeEffect.name += `${this.system.XMLID} ${this.is5e ? this.system.value : this.system.OPTIONID}`;
