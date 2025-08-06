@@ -1046,9 +1046,9 @@ async function doSingleTargetActionToHit(item, options) {
                     shot + 1
                 }/${autofire.OPTION_ALIAS.toLowerCase()}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
 
+                const value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value;
                 let hit = "Miss";
                 let by = Math.abs(autofireShotRollTotal - value);
-                const value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value;
 
                 if (aoeAlwaysHit) {
                     hit = "Hit";

@@ -61,6 +61,7 @@ class RollMock extends Roll {
 
         const formula = Roll.getFormula(newTerms);
 
+        // eslint-disable-next-line no-use-before-define -- Recursive definition should be fine here
         const mock = new Roll1Mock(formula, options);
         mock.terms = newTerms;
 
