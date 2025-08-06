@@ -2663,7 +2663,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         return 8;
                     default:
                         console.error(
-                            `Unknown 5e combat level type ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                            `Unknown 5e combat level type ${item.system.OPTIONID} for ${item.actor?.name}/${item.name}`,
                         );
                         return 0;
                 }
