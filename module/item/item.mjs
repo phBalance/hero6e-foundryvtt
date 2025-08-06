@@ -2726,6 +2726,11 @@ export class HeroSystem6eItem extends Item {
                 return;
             }
 
+            // Adding this back in (was only called in prepareData).
+            // Needed for when we add/remove attacks as we need to update CSL's.
+            // TODO: move this into Actor addEmbeddedItems or similar
+            this.setCombatSkillLevels();
+
             // Progress Bar (plan to deprecate)
             if (options?.uploadProgressBar) {
                 if (this.system.versionHeroSystem6eCreated === undefined) {
@@ -6161,6 +6166,45 @@ export class HeroSystem6eItem extends Item {
         }
 
         return `${this.name}/${this.system.XMLID}`;
+    }
+
+    toXML() {
+        const primaryAttributes = [
+            "XMLID",
+            "ID",
+            "BASECOST",
+            "LEVELS",
+            "ALIAS",
+            "POSITION",
+            "MULTIPLIER",
+            "GRAPHIC",
+            "COLOR",
+            "SFX",
+            "SHOW_ACTIVE_COST",
+            "OPTION",
+            "OPTIONID",
+            "OPTION_ALIAS",
+            "INCLUDE_NOTES_IN_PRINTOUT",
+            "PARENTID",
+            "NAME",
+        ];
+        let primaryXML = "";
+        for (const htmlAttribute of primaryAttributes) {
+            if (this.system[htmlAttribute]) {
+                primaryXML += ` ${htmlAttribute}="${this.system[htmlAttribute]}"`;
+            }
+        }
+        const secondaryAttributes = Object.keys(this.system)
+            .filter((o) => !primaryAttributes.includes(o) && o.match(/^[A-Z]+$/))
+            .sort();
+        let secondaryXML = "";
+        for (const htmlAttribute of secondaryAttributes) {
+            if (this.system[htmlAttribute] && typeof this.system[htmlAttribute] === "string") {
+                secondaryXML += ` ${htmlAttribute}="${this.system[htmlAttribute]}"`;
+            }
+        }
+        const xml = `<${this.system.xmlTag}` + primaryXML + secondaryXML + `></${this.system.xmlTag}>`;
+        return xml;
     }
 }
 
