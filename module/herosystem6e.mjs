@@ -29,6 +29,7 @@ import {
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
+import { HeroSystem6eItemTypeDataModelMisc } from "./item/HeroSystem6eItemTypeDataModelMisc.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
@@ -176,6 +177,11 @@ Hooks.once("init", async function () {
     Object.assign(CONFIG.ActiveEffect.dataModels, {
         // REF: https://foundryvtt.wiki/en/development/api/DataModel
         base: HeroSystem6eActorActiveEffectsSystemData,
+    });
+
+    Object.assign(CONFIG.Item.dataModels, {
+        // The keys are the types defined in our template.json
+        misc: HeroSystem6eItemTypeDataModelMisc,
     });
 
     HeroRuler.initialize();
