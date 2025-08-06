@@ -2561,7 +2561,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe.only("Martial Arts with CSLs", function () {
+                describe("Martial Arts with CSLs", function () {
                     let cslItem;
                     let cslPreviousActiveState;
                     let cslPreviousAllocation;
@@ -2575,6 +2575,9 @@ export function registerFullTests(quench) {
                         // Set the CSLs for DCs
                         cslPreviousAllocation = cslItem.system.csl;
                         cslItem.system.csl = Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc");
+                        // for (let idx = 0; idx < parseInt(cslItem.system.LEVELS || 0); idx++) {
+                        //     cslItem.system.csl[idx] = "dc";
+                        // }
                     });
 
                     afterEach(function () {
