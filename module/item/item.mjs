@@ -6162,6 +6162,45 @@ export class HeroSystem6eItem extends Item {
 
         return `${this.name}/${this.system.XMLID}`;
     }
+
+    toXML() {
+        const primaryAttributes = [
+            "XMLID",
+            "ID",
+            "BASECOST",
+            "LEVELS",
+            "ALIAS",
+            "POSITION",
+            "MULTIPLIER",
+            "GRAPHIC",
+            "COLOR",
+            "SFX",
+            "SHOW_ACTIVE_COST",
+            "OPTION",
+            "OPTIONID",
+            "OPTION_ALIAS",
+            "INCLUDE_NOTES_IN_PRINTOUT",
+            "PARENTID",
+            "NAME",
+        ];
+        let primaryXML = "";
+        for (const htmlAttribute of primaryAttributes) {
+            if (this.system[htmlAttribute]) {
+                primaryXML += ` ${htmlAttribute}="${this.system[htmlAttribute]}"`;
+            }
+        }
+        const secondaryAttributes = Object.keys(this.system)
+            .filter((o) => !primaryAttributes.includes(o) && o.match(/^[A-Z]+$/))
+            .sort();
+        let secondaryXML = "";
+        for (const htmlAttribute of secondaryAttributes) {
+            if (this.system[htmlAttribute] && typeof this.system[htmlAttribute] === "string") {
+                secondaryXML += ` ${htmlAttribute}="${this.system[htmlAttribute]}"`;
+            }
+        }
+        const xml = `<${this.system.xmlTag}` + primaryXML + secondaryXML + `></${this.system.xmlTag}>`;
+        return xml;
+    }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER

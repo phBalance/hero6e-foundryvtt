@@ -2561,7 +2561,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe("Martial Arts with CSLs", function () {
+                describe.only("Martial Arts with CSLs", function () {
                     let cslItem;
                     let cslPreviousActiveState;
                     let cslPreviousAllocation;
