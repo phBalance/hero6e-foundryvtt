@@ -3,6 +3,181 @@ import { CreateHeroCompendiums } from "../heroCompendiums.mjs";
 
 export let overrideCanAct = false;
 
+class StunMultiplierMenu extends FormApplication {
+    static get defaultOptions() {
+        const defaultOptions = super.defaultOptions;
+        const options = foundry.utils.mergeObject(defaultOptions, {
+            classes: ["form"],
+            popOut: true,
+            template: `systems/${HEROSYS.module}/templates/configuration/custom-stun-multiplier.hbs`,
+            id: "stun-multiplier-form-application",
+            closeOnSubmit: false, // do not close when submitted
+            submitOnChange: true, // submit when any input changes
+            title: "Custom STUN Multiplier Settings",
+            width: "640",
+        });
+
+        return options;
+    }
+
+    async getData() {
+        const customStunMultiplier = game.settings.get(
+            game.system.id,
+            "NonStandardStunMultiplierForKillingAttackBackingSetting",
+        );
+
+        return customStunMultiplier;
+    }
+
+    async _updateObject(_event, formData) {
+        const data = foundry.utils.expandObject(formData);
+
+        if (typeof data.d6Count !== "number") {
+            data.d6Count = 0;
+        }
+        if (typeof data.halfDieCount !== "number") {
+            data.halfDieCount = 0;
+        }
+        if (typeof data.d6Less1DieCount !== "number") {
+            data.d6Less1DieCount = 0;
+        }
+        if (typeof data.constant !== "number") {
+            data.constant = 0;
+        }
+
+        await game.settings.set(game.system.id, "NonStandardStunMultiplierForKillingAttackBackingSetting", data);
+        await this.render();
+    }
+}
+
+class AutomationMenu extends FormApplication {
+    static get defaultOptions() {
+        let options = super.defaultOptions;
+        options = foundry.utils.mergeObject(options, {
+            classes: ["form"],
+            popOut: true,
+            template: `systems/${HEROSYS.module}/templates/configuration/automation-menu.hbs`,
+            id: "automation-form-application",
+            closeOnSubmit: false, // do not close when submitted
+            submitOnChange: true, // submit when any input changes
+            title: "Automation Settings",
+        });
+
+        return options;
+    }
+
+    async getData() {
+        const automation = game.settings.get(game.system.id, "automation");
+        const settings = [
+            { name: "Body", enabled: false },
+            { name: "Stun", enabled: false },
+            { name: "Endurance", enabled: false },
+            { name: "Movement", enabled: false },
+        ];
+        switch (automation) {
+            case "none":
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "none",
+                    gm: false,
+                    owner: false,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "none",
+                    gm: false,
+                    owner: false,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "none",
+                    gm: false,
+                    owner: false,
+                };
+                break;
+            case "npcOnly":
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                break;
+            case "pcEndOnly": //pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "all",
+                    gm: true,
+                    owner: false,
+                };
+                break;
+            default:
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "all",
+                    gm: true,
+                    owner: true,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "all",
+                    gm: true,
+                    owner: true,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "all",
+                    gm: true,
+                    owner: true,
+                };
+                break;
+        }
+
+        return {
+            settings,
+
+            choices: {
+                none: game.i18n.localize("Settings.AutomationPreview.Choices.None"),
+                npcOnly: game.i18n.localize("Settings.AutomationPreview.Choices.NpcOnly"),
+                pcEndOnly: game.i18n.localize("Settings.AutomationPreview.Choices.PcEndOnly"),
+                all: game.i18n.localize("Settings.AutomationPreview.Choices.All"),
+            },
+
+            automation,
+        };
+    }
+
+    async _updateObject(_event, formData) {
+        const data = foundry.utils.expandObject(formData);
+        await game.settings.set(game.system.id, "automation", data.automation);
+        await this.render();
+    }
+}
+
 export default class SettingsHelpers {
     // Initialize System Settings after the Init Hook
     static initLevelSettings() {
@@ -373,179 +548,4 @@ function handleOverrideCanAct(event) {
     }
 
     return false;
-}
-
-class AutomationMenu extends FormApplication {
-    static get defaultOptions() {
-        let options = super.defaultOptions;
-        options = foundry.utils.mergeObject(options, {
-            classes: ["form"],
-            popOut: true,
-            template: `systems/${HEROSYS.module}/templates/configuration/automation-menu.hbs`,
-            id: "automation-form-application",
-            closeOnSubmit: false, // do not close when submitted
-            submitOnChange: true, // submit when any input changes
-            title: "Automation Settings",
-        });
-
-        return options;
-    }
-
-    async getData() {
-        const automation = game.settings.get(game.system.id, "automation");
-        const settings = [
-            { name: "Body", enabled: false },
-            { name: "Stun", enabled: false },
-            { name: "Endurance", enabled: false },
-            { name: "Movement", enabled: false },
-        ];
-        switch (automation) {
-            case "none":
-                settings[0] = {
-                    ...settings[0],
-                    tokenType: "none",
-                    gm: false,
-                    owner: false,
-                };
-                settings[1] = {
-                    ...settings[1],
-                    tokenType: "none",
-                    gm: false,
-                    owner: false,
-                };
-                settings[2] = {
-                    ...settings[2],
-                    tokenType: "none",
-                    gm: false,
-                    owner: false,
-                };
-                break;
-            case "npcOnly":
-                settings[0] = {
-                    ...settings[0],
-                    tokenType: "npc",
-                    gm: true,
-                    owner: false,
-                };
-                settings[1] = {
-                    ...settings[1],
-                    tokenType: "npc",
-                    gm: true,
-                    owner: false,
-                };
-                settings[2] = {
-                    ...settings[2],
-                    tokenType: "npc",
-                    gm: true,
-                    owner: false,
-                };
-                break;
-            case "pcEndOnly": //pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
-                settings[0] = {
-                    ...settings[0],
-                    tokenType: "npc",
-                    gm: true,
-                    owner: false,
-                };
-                settings[1] = {
-                    ...settings[1],
-                    tokenType: "npc",
-                    gm: true,
-                    owner: false,
-                };
-                settings[2] = {
-                    ...settings[2],
-                    tokenType: "all",
-                    gm: true,
-                    owner: false,
-                };
-                break;
-            default:
-                settings[0] = {
-                    ...settings[0],
-                    tokenType: "all",
-                    gm: true,
-                    owner: true,
-                };
-                settings[1] = {
-                    ...settings[1],
-                    tokenType: "all",
-                    gm: true,
-                    owner: true,
-                };
-                settings[2] = {
-                    ...settings[2],
-                    tokenType: "all",
-                    gm: true,
-                    owner: true,
-                };
-                break;
-        }
-
-        return {
-            settings,
-
-            choices: {
-                none: game.i18n.localize("Settings.AutomationPreview.Choices.None"),
-                npcOnly: game.i18n.localize("Settings.AutomationPreview.Choices.NpcOnly"),
-                pcEndOnly: game.i18n.localize("Settings.AutomationPreview.Choices.PcEndOnly"),
-                all: game.i18n.localize("Settings.AutomationPreview.Choices.All"),
-            },
-
-            automation,
-        };
-    }
-
-    async _updateObject(_event, formData) {
-        const data = foundry.utils.expandObject(formData);
-        await game.settings.set(game.system.id, "automation", data.automation);
-        await this.render();
-    }
-}
-
-class StunMultiplierMenu extends FormApplication {
-    static get defaultOptions() {
-        const defaultOptions = super.defaultOptions;
-        const options = foundry.utils.mergeObject(defaultOptions, {
-            classes: ["form"],
-            popOut: true,
-            template: `systems/${HEROSYS.module}/templates/configuration/custom-stun-multiplier.hbs`,
-            id: "stun-multiplier-form-application",
-            closeOnSubmit: false, // do not close when submitted
-            submitOnChange: true, // submit when any input changes
-            title: "Custom STUN Multiplier Settings",
-            width: "640",
-        });
-
-        return options;
-    }
-
-    async getData() {
-        const customStunMultiplier = game.settings.get(
-            game.system.id,
-            "NonStandardStunMultiplierForKillingAttackBackingSetting",
-        );
-
-        return customStunMultiplier;
-    }
-
-    async _updateObject(_event, formData) {
-        const data = foundry.utils.expandObject(formData);
-
-        if (typeof data.d6Count !== "number") {
-            data.d6Count = 0;
-        }
-        if (typeof data.halfDieCount !== "number") {
-            data.halfDieCount = 0;
-        }
-        if (typeof data.d6Less1DieCount !== "number") {
-            data.d6Less1DieCount = 0;
-        }
-        if (typeof data.constant !== "number") {
-            data.constant = 0;
-        }
-
-        await game.settings.set(game.system.id, "NonStandardStunMultiplierForKillingAttackBackingSetting", data);
-        await this.render();
-    }
 }

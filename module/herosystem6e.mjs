@@ -68,6 +68,44 @@ const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
 const FoundryVttDocumentSheetConfig = foundry.applications?.apps?.DocumentSheetConfig || DocumentSheetConfig;
 const foundryVttLoadTemplates = foundry.applications?.handlebars?.loadTemplates || loadTemplates;
 
+export class HEROSYS {
+    static ID = "HEROSYS";
+
+    static #module = undefined;
+
+    static get module() {
+        if (HEROSYS.#module === undefined) {
+            console.error(`HEROSYS.module accessed before it is assigned`);
+            ui.notifications.error(`HEROSYS.module accessed before it is assigned`);
+        }
+        return HEROSYS.#module;
+    }
+
+    static set module(value) {
+        if (HEROSYS.#module !== undefined) {
+            console.error(`HEROSYS.module assigned after it is assigned`);
+            ui.notifications.error(`HEROSYS.module accessed before it is assigned`);
+        }
+        HEROSYS.#module = value;
+    }
+
+    static log(force, ...args) {
+        const shouldLog = force || game.settings.get(game.system.id, "alphaTesting");
+
+        if (shouldLog) {
+            console.log(this.ID, "|", ...args);
+        }
+    }
+
+    static trace(force, ...args) {
+        const shouldTrace = force || game.settings.get(game.system.id, "alphaTesting");
+
+        if (shouldTrace) {
+            console.trace(this.ID, "|", ...args);
+        }
+    }
+}
+
 Hooks.once("init", async function () {
     // Compatibility warnings for initial release of v13
     // In chrome use -/Deprecated since Version 13/ as a console log filter
@@ -334,44 +372,6 @@ Hooks.on("changeSidebarTab", async (app) => {
 Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
     registerPackageDebugFlag(HEROSYS.ID);
 });
-
-export class HEROSYS {
-    static ID = "HEROSYS";
-
-    static #module = undefined;
-
-    static get module() {
-        if (HEROSYS.#module === undefined) {
-            console.error(`HEROSYS.module accessed before it is assigned`);
-            ui.notifications.error(`HEROSYS.module accessed before it is assigned`);
-        }
-        return HEROSYS.#module;
-    }
-
-    static set module(value) {
-        if (HEROSYS.#module !== undefined) {
-            console.error(`HEROSYS.module assigned after it is assigned`);
-            ui.notifications.error(`HEROSYS.module accessed before it is assigned`);
-        }
-        HEROSYS.#module = value;
-    }
-
-    static log(force, ...args) {
-        const shouldLog = force || game.settings.get(game.system.id, "alphaTesting");
-
-        if (shouldLog) {
-            console.log(this.ID, "|", ...args);
-        }
-    }
-
-    static trace(force, ...args) {
-        const shouldTrace = force || game.settings.get(game.system.id, "alphaTesting");
-
-        if (shouldTrace) {
-            console.trace(this.ID, "|", ...args);
-        }
-    }
-}
 
 /* -------------------------------------------- */
 /*  Hotbar Macros                               */

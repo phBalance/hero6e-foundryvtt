@@ -241,16 +241,16 @@ export async function deactivateManeuver(item) {
 
     const effect = item.system.EFFECT?.toLowerCase();
     if (effect) {
-        const maneuverHasDodgeTrait = maneuverHasDodgeTrait(item);
-        const maneuverHasBlockTrait = maneuverHasBlockTrait(item);
+        const hasDodgeTrait = maneuverHasDodgeTrait(item);
+        const hasBlockTrait = maneuverHasBlockTrait(item);
 
-        if (maneuverHasDodgeTrait) {
+        if (hasDodgeTrait) {
             removedEffects.push(
                 item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect),
             );
         }
 
-        if (maneuverHasBlockTrait) {
+        if (hasBlockTrait) {
             removedEffects.push(
                 item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect),
             );

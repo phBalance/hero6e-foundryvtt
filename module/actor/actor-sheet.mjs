@@ -818,13 +818,13 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     async _updateObject(event, formData) {
         event.preventDefault();
 
+        let expandedData = foundry.utils.expandObject(formData);
+
         // If we are updating, don't bother with anything special
         if (this.actor.flags[game.system.id]?.updating) {
             await super._updateObject(event, expandedData);
             return;
         }
-
-        let expandedData = foundry.utils.expandObject(formData);
 
         // Left Sidebar of actor sheet has Xsystem characteristics
         const characteristics = getCharacteristicInfoArrayForActor(this.actor).filter((o) =>

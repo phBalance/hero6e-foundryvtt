@@ -86,5 +86,19 @@ export default [
         },
     },
     js.configs.recommended,
+    {
+        // Extra rules beyond the recommended set
+        rules: {
+            "no-use-before-define": [
+                "error",
+                {
+                    functions: false,
+                    classes: true,
+                    variables: true,
+                    allowNamedExports: true,
+                },
+            ],
+        },
+    },
     eslintConfigPrettier,
 ];
