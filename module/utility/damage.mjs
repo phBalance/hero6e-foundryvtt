@@ -161,9 +161,6 @@ export function buildStrengthItem(effectiveStr, actor, name) {
 
     strengthItem.name = name;
 
-    // PH: FIXME: Shouldn't have to kludge this in here.
-    strengthItem.system._active = {};
-
     strengthItem.changePowerLevel(effectiveStr);
 
     return strengthItem;

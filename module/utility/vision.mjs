@@ -10,10 +10,6 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
 
             const start = new Date();
 
-            // if (this.token?.name === "Onyx") {
-            //     debugger;
-            // }
-
             const defaultBlind =
                 (this.data.radius === 0 && (this.data.lightRadius === 0 || !this.visionMode?.perceivesLight)) ||
                 Object.values(this.blinded).includes(true);

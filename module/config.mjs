@@ -631,12 +631,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription6e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription6e.type ??= [];
                 powerDescription6e.xmlTag ??= xml.children[0].tagName.toUpperCase();
-            } else {
-                //debugger;
             }
         }
         if (!powerDescription6e.key) {
-            //debugger;
             return;
         }
         HERO.powers6e.push(foundry.utils.deepClone(powerDescription6e));
@@ -663,12 +660,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription5e.type ??= [];
                 powerDescription5e.xmlTag ??= xml.children[0].tagName.toUpperCase();
-            } else {
-                //debugger;
             }
         }
         if (!powerDescription5e.key) {
-            //debugger;
             return;
         }
 

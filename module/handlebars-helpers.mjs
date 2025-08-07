@@ -140,33 +140,25 @@ function getScopedFlagValue(obj, scope, ...args) {
 }
 
 function expandSegment(index, combat) {
-    // const singleCombatantTracker =
-    //     game.settings.get(game.system.id, "alphaTesting") &&
-    //     game.settings.get(game.system.id, "singleCombatantTracker");
-
-    // if (singleCombatantTracker) {
-    //     return true;
-    // }
-
     if (index === combat.current?.segment) {
         return true;
     }
+
     if (index === 12 && combat.round === 0) {
         return true;
     }
+
     return false;
 }
 
 function activeSegment(index, combat) {
-    //if (index === 6) debugger;
     if (combat.round === 0) {
         return false;
     }
-    // if (index === parseInt(combat.flags?.[game.system.id]?.segment)) {
-    //     return true;
-    // }
+
     if (index === combat.current?.segment) {
         return true;
     }
+
     return false;
 }
