@@ -955,15 +955,10 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
                     console.warn(msg);
                 } else {
                     console.error(msg);
-                    //debugger;
                 }
 
                 const previousChanges = foundry.utils.deepClone(ae.changes);
                 ae.changes[0].value = _targetValue;
-                // if (_targetValue === 0 && !CONFIG.debug.adjustmentFadeKeep) {
-                //     await ae.delete();
-                //     console.log(`${ae.name} deleted`);
-                // } else {
                 const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
                 const startingActorMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
 
@@ -1034,19 +1029,7 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
                 }
             }
         }
-        // const targetStartingValue = targetSystem.characteristics[targetValuePath];
-        // const newValue = Math.min(
-        //     targetStartingValue + totalPointsDifference,
-        //     targetStartingMax + totalPointsDifference,
-        // );
-        // const changes = { [targetValuePath]: newValue };
-        // await targetSystem.update(changes);
-        // console.log(`Updated characteristices`);
     }
-    // else {
-    //     console.error(`Unhandled targetSystem`);
-    //     debugger;
-    // }
 }
 
 function updateEffectName(activeEffect) {

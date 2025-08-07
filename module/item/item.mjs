@@ -282,6 +282,11 @@ export class HeroSystem6eItem extends Item {
         window.prepareData ??= {};
         this.system._active ??= {};
 
+        if (!this.actor) {
+            console.error(`Bailing on item ${this.name} which has no actor (probably Items collection)`);
+            return;
+        }
+
         // Basic Validatiton, we need an XMLID
         if (!this.baseInfo) {
             if (this.system.XMLID) {
@@ -290,6 +295,7 @@ export class HeroSystem6eItem extends Item {
                 console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
             }
         }
+
         this.setInitialItemValueAndMax();
         this.setInitialRange(this.baseInfo);
         this.updateRoll();
@@ -308,6 +314,8 @@ export class HeroSystem6eItem extends Item {
         this.setCombatSkillLevels();
         this.updateItemDescription();
     }
+
+    doShit() {}
 
     async setActiveEffects() {
         // ACTIVE EFFECTS

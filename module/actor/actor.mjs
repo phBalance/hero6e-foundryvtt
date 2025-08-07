@@ -2802,7 +2802,6 @@ export class HeroSystem6eActor extends Actor {
             newValue = Math.floor(newValue); // For 5e SPD
 
             if (this.system.characteristics[key].max !== newValue) {
-                //if (charHasEffect) debugger;
                 this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue);
                 if (this.id) {
                     changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue);
@@ -2814,7 +2813,6 @@ export class HeroSystem6eActor extends Actor {
                 this.system.characteristics[key.toLowerCase()].max !== null &&
                 overrideValues
             ) {
-                //if (charHasEffect) debugger;
                 this.system.characteristics[key.toLowerCase()].value =
                     this.system.characteristics[key.toLowerCase()].max;
                 if (this.id) {
@@ -2824,7 +2822,6 @@ export class HeroSystem6eActor extends Actor {
                 changed = true;
             }
             if (this.system.characteristics[key].core !== newValue && overrideValues) {
-                //if (charHasEffect) debugger;
                 changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue;
                 this.system.characteristics[key.toLowerCase()].core = newValue;
                 changed = true;
@@ -2833,7 +2830,6 @@ export class HeroSystem6eActor extends Actor {
             // Rollable Characteristics
             const rollableChanges = this.updateRollable(key.toLowerCase());
             if (rollableChanges) {
-                //if (charHasEffect) debugger;
                 changed = true;
                 foundry.utils.mergeObject(changes, rollableChanges);
             }
@@ -2841,7 +2837,6 @@ export class HeroSystem6eActor extends Actor {
 
         // Save changes
         if (changed && this.id) {
-            //console.log(`update ${Object.keys(changes).length} for ${this.name}`, changes);
             await this.update(changes);
         }
 

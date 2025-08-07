@@ -103,10 +103,6 @@ export class HeroTokenRuler extends FoundryTokenRuler {
         }
         let maxCombatDistanceMeters = waypoint.actionConfig.maxCombatDistanceMeters?.(this.token) ?? Infinity;
 
-        // if (movementCost > 4) {
-        //     debugger;
-        // }
-
         if (maxCombatDistanceMeters % 2 !== 0) {
             maxCombatDistanceMeters += 1;
         }
