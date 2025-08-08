@@ -258,6 +258,7 @@ async function removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicPr
 }
 
 async function replaceActorsBuiltInManeuvers(actor) {
+    ``;
     try {
         if (!actor) return false;
 
