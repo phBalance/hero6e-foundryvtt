@@ -776,7 +776,9 @@ export class HeroSystem6eItem extends Item {
                                     addMe = true;
                                     break;
                                 default:
-                                    console.error(`Unknown OPTIONID ${this.system.OPTIONID}`);
+                                    console.error(
+                                        `Unknown OPTIONID ${this.actor?.name}:${this.name}:${this.system.OPTIONID}`,
+                                    );
                                     addMe = false;
                                     break;
                             }
