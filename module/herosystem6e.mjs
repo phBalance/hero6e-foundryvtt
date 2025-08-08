@@ -524,6 +524,31 @@ function rollItemMacro(itemName, itemType) {
 // REF: https://github.com/dmdorman/hero6e-foundryvtt/issues/40
 Hooks.on("setup", () => (CONFIG.MeasuredTemplate.defaults.angle = 60));
 
+Hooks.on("setup", async () => {
+    // Found undefined item name in old Raymond game
+    // This Should never happen, but it did and prevents game.ready
+    // Every item requires a name and an id.
+    // Shouldn't be able to create an item without name + id.
+    const allActorsInGame = [
+        ...game.actors.contents,
+        ...game.scenes.contents
+            .map((scene) => scene.tokens)
+            .map((token) => token.actorLink)
+            .filter((actorLink) => actorLink),
+    ];
+    for (const actor of allActorsInGame) {
+        const noNameItems = actor.items.filter((i) => i.name == undefined);
+        if (noNameItems.length > 0) {
+            console.error(`noNameItems found`, noNameItems);
+            const promises = noNameItems.map((o) => o.delete());
+            await Promise.all(promises);
+            ui.notifications.error(`Deleted items with an undefined name. Refresh may be necessary.`, {
+                permanent: true,
+            });
+        }
+    }
+});
+
 // Migration Script
 // For now we will migrate EVERY time
 // TODO: add version setting check
