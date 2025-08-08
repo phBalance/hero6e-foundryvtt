@@ -8527,6 +8527,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Typically part of SIDEEFFECTS
             key: "ALWAYSOCCURS",
             behaviors: ["modifier"],
+            cost: function (heroModifier /*, item*/) {
+                const sideEffectCost = parseFloat(heroModifier._parent._original.BASECOST || 0);
+
+                // Always occurs doubles the cost (so this costs the same as the parent).
+                return sideEffectCost;
+            },
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ALWAYSOCCURS" ID="1743877800818" BASECOST="1.0" LEVELS="0" ALIAS="Side Effect occurs automatically whenever Power is used" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
