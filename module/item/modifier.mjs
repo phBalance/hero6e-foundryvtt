@@ -4,7 +4,73 @@ import { HeroSystem6eAdder } from "./adder.mjs";
 
 export class HeroSystem6eModifier {
     #baseInfo = null;
+
+    // get XMLID() {
+    //     return this._original.XMLID;
+    // }
+    // get ID() {
+    //     return this._original.ID;
+    // }
+    // get BASECOST() {
+    //     return this._original.BASECOST;
+    // }
+    // get LEVELS() {
+    //     return this._original.LEVELS;
+    // }
+    // get ALIAS() {
+    //     return this._original.ALIAS;
+    // }
+    // get MULTIPLIER() {
+    //     return this._original.MULTIPLIER;
+    // }
+    // get GRAPHIC() {
+    //     return this._original.GRAPHIC;
+    // }
+    // get COLOR() {
+    //     return this._original.COLOR;
+    // }
+    // get SFX() {
+    //     return this._original.SFX;
+    // }
+    // get SHOW_ACTIVE_COST() {
+    //     return this._original.SHOW_ACTIVE_COST;
+    // }
+    // get OPTION() {
+    //     return this._original.OPTION;
+    // }
+    // get OPTIONID() {
+    //     return this._original.OPTIONID;
+    // }
+    // get OPTION_ALIAS() {
+    //     return this._original.OPTION_ALIAS;
+    // }
+    // get INCLUDE_NOTES_IN_PRINTOUT() {
+    //     return this._original.INCLUDE_NOTES_IN_PRINTOUT;
+    // }
+    // get NAME() {
+    //     return this._original.NAME;
+    // }
+    // get COMMENTS() {
+    //     return this._original.COMMENTS;
+    // }
+    // get PRIVATE() {
+    //     return this._original.PRIVATE;
+    // }
+    // get FORCEALLOW() {
+    //     return this._original.FORCEALLOW;
+    // }
+    // get NOTES() {
+    //     return this._original.NOTES;
+    // }
+    // get xmlTag() {
+    //     return this._original.xmlTag;
+    // }
+    // get POSITION() {
+    //     return this._original.POSITION;
+    // }
+
     constructor(json, options) {
+        window.testModifier = (window.testModifier || 0) + 1;
         if (json?.constructor !== Object) {
             console.error(`Expected JSON object`, this, json, options);
         }
@@ -27,8 +93,8 @@ export class HeroSystem6eModifier {
                 {
                     Object.defineProperty(this, key, {
                         get() {
-                            const original = this._original;
-                            return original[key];
+                            //const original = this._original;
+                            return this._original[key];
                         },
 
                         // set() {
@@ -37,22 +103,32 @@ export class HeroSystem6eModifier {
                     });
                 }
             } else {
-                console.warn(
-                    `${this.item?.actor?.name}/${this.item?.detailedName()}/${json.XMLID}: Unexpected modifier property (${key}). Shouldn't be a problem, re-uploading from HDC should resolve.`,
-                    this,
-                    json,
-                    options,
-                );
+                if (key === "adders") {
+                    console.console.error(
+                        `${this.item?.actor?.name}/${this.item?.detailedName()}/${json.XMLID}: Unexpected "adders" modifier property (${key}). Shouldn't be a problem, re-uploading from HDC should resolve.`,
+                        this,
+                        json,
+                        options,
+                    );
+                } else {
+                    console.warn(
+                        `${this.item?.actor?.name}/${this.item?.detailedName()}/${json.XMLID}: Unexpected modifier property (${key}). Shouldn't be a problem, re-uploading from HDC should resolve.`,
+                        this,
+                        json,
+                        options,
+                    );
+                }
 
                 // AARON: DO NOT UPDATE database!!!
                 // We may be able to fix the legacy mistaken value on the fly so a re-upload isn't really necessary
                 // if (key === "adders") {
-                //     try {
-                //         delete options.item.system.MODIFIER.find((m) => m.XMLID === json.XMLID)[key];
-                //         options.item.update({ [`system.MODIFIER`]: options.item.system.MODIFIER });
-                //     } catch (e) {
-                //         console.error(e);
-                //     }
+                //     debugger;
+                //     // try {
+                //     //     delete options.item.system.MODIFIER.find((m) => m.XMLID === json.XMLID)[key];
+                //     //     options.item.update({ [`system.MODIFIER`]: options.item.system.MODIFIER });
+                //     // } catch (e) {
+                //     //     console.error(e);
+                //     // }
                 // }
             }
         }

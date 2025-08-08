@@ -2949,13 +2949,20 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
+    useModifierCache = true;
     get modifiers() {
         // Caching for performance
         // Aaron suspects that "new HeroSystem6eModifier" is the crux of the performance issue.
         // The HeroSystem6eModifier class is pretty handy.
         // Perhaps struct or prototype overrideing could be alternative solution.
         // The core (database) uses an array of JSON values.
-        if (this._modifiers && this.id && this.id === this._modifiers.id && Date.now() - this._modifiers.dt < 5)
+        if (
+            this.useModifierCache &&
+            this._modifiers &&
+            this.id &&
+            this.id === this._modifiers.id &&
+            Date.now() - this._modifiers.dt < 5
+        )
             return this._modifiers.value;
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
