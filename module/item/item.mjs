@@ -772,6 +772,7 @@ export class HeroSystem6eItem extends Item {
                                     addMe = true;
                                     break;
                                 case "ALL":
+                                case "HTHMENTAL": // 5e with HTH and Mental Combat
                                     addMe = true;
                                     break;
                                 default:
