@@ -2423,6 +2423,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     _postUploadDetails() {
+        // TODO: Should move most of this stuff into prepareData
         const item = this;
 
         // Make sure we have an actor (like when creating compendiums)
@@ -2458,48 +2459,48 @@ export class HeroSystem6eItem extends Item {
         this.configureAttackParameters();
 
         // Defense
-        if (item.type === "defense") {
-            item.system.description =
-                CONFIG.HERO.defenseTypes[item.system.defenseType] ||
-                CONFIG.HERO.defenseTypes5e[item.system.defenseType];
-        }
+        // if (item.type === "defense") {
+        //     item.system.description =
+        //         CONFIG.HERO.defenseTypes[item.system.defenseType] ||
+        //         CONFIG.HERO.defenseTypes5e[item.system.defenseType];
+        // }
 
-        item.updateRoll();
+        //item.updateRoll();
 
         // Charges
         // Not sure why we do CHARGES here and in setCharges();
-        if (parseInt(item.system.charges?.max || 0) > 0) {
-            const costsEnd = item.findModsByXmlid("COSTSEND");
-            if (item.system.endEstimate === 0 || !costsEnd) {
-                item.system.endEstimate = "";
-            }
+        // if (parseInt(item.system.charges?.max || 0) > 0) {
+        //     const costsEnd = item.findModsByXmlid("COSTSEND");
+        //     if (item.system.endEstimate === 0 || !costsEnd) {
+        //         item.system.endEstimate = "";
+        //     }
 
-            const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${
-                item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1
-                    ? `x${item.system.charges?.clips}`
-                    : ""
-            }`;
-            const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
-            const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
-            const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
-            const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
+        //     const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${
+        //         item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1
+        //             ? `x${item.system.charges?.clips}`
+        //             : ""
+        //     }`;
+        //     const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
+        //     const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
+        //     const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
+        //     const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
 
-            item.system.endEstimate = `${
-                item.system.endEstimate ? `${item.system.endEstimate} ` : ""
-            }[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
-        }
+        //     item.system.endEstimate = `${
+        //         item.system.endEstimate ? `${item.system.endEstimate} ` : ""
+        //     }[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
+        // }
 
-        // 0 END
-        if (!item.system.endEstimate) {
-            item.system.endEstimate = "";
-        }
+        // // 0 END
+        // if (!item.system.endEstimate) {
+        //     item.system.endEstimate = "";
+        // }
 
-        // Mental
-        if (item?.flags?.[game.system.id]?.tags?.omcv) {
-            item.flags[game.system.id] ??= {};
-            item.flags[game.system.id].tags.ocv ??= item.flags[game.system.id]?.tags.omcv;
-            item.flags[game.system.id].tags.dcv ??= item.flags[game.system.id]?.tags.dmcv;
-        }
+        // // Mental
+        // if (item?.flags?.[game.system.id]?.tags?.omcv) {
+        //     item.flags[game.system.id] ??= {};
+        //     item.flags[game.system.id].tags.ocv ??= item.flags[game.system.id]?.tags.omcv;
+        //     item.flags[game.system.id].tags.dcv ??= item.flags[game.system.id]?.tags.dmcv;
+        // }
     }
 
     configureAttackParameters() {
@@ -3854,9 +3855,9 @@ export class HeroSystem6eItem extends Item {
                     // Add a success roll, if it has one, but only for skills, talents, or perks
                     if (configPowerInfo?.behaviors?.includes("success")) {
                         // PH: FIXME: Why is this not based purely on behavior?
-                        if (!["skill", "talent", "perk"].includes(this.type)) {
+                        if (!this.system.CHARACTERISTIC) {
                             console.error(
-                                `${this.actor?.name}: ${this.detailedName()} has a success behavior but isn't a skill, talent, or perk`,
+                                `${this.actor?.name}: ${this.detailedName()} has a success behavior but no CHARACTERISTIC specified`,
                             );
                         }
                         system.description += ` ${system.roll}`;
@@ -4213,7 +4214,10 @@ export class HeroSystem6eItem extends Item {
 
                     const maxCharges = parseInt(modifier.OPTION_ALIAS);
                     if (maxCharges !== parseInt(system.charges?.max)) {
-                        console.warn(`CHARGES mismatch ${item.actor?.name}:${item.name}`, item);
+                        console.warn(
+                            `CHARGES mismatch ${item.actor?.name}:${item.name} is it ${maxCharges} or ${parseInt(system.charges?.max)}. Check parent ${item.parentItem?.name}.`,
+                            item,
+                        );
                     }
                     const currentCharges = parseInt(this.system.charges?.value);
                     if (currentCharges != maxCharges) {
