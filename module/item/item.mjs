@@ -2949,7 +2949,7 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
-    useModifierCache = true;
+    _modifiersCache = null;
     get modifiers() {
         // Caching for performance
         // Aaron suspects that "new HeroSystem6eModifier" is the crux of the performance issue.
@@ -2957,13 +2957,12 @@ export class HeroSystem6eItem extends Item {
         // Perhaps struct or prototype overrideing could be alternative solution.
         // The core (database) uses an array of JSON values.
         if (
-            this.useModifierCache &&
-            this._modifiers &&
+            this._modifiersCache &&
             this.id &&
-            this.id === this._modifiers.id &&
-            Date.now() - this._modifiers.dt < 5
+            this.id === this._modifiersCache.id &&
+            Date.now() - this._modifiersCache.dt < 5
         )
-            return this._modifiers.value;
+            return this._modifiersCache.value;
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -3000,7 +2999,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-        this._modifiers = {
+        this._modifiersCache = {
             value: _modifiers,
             id: this.id,
             dt: Date.now(),
@@ -3016,15 +3015,16 @@ export class HeroSystem6eItem extends Item {
         return this.modifiers.filter((o) => o.cost < 0);
     }
 
+    _addersCache = null;
     get adders() {
         // Caching for performance
-        if (this._adders && this.id && this.id === this._adders.id && Date.now() - this._adders.dt < 5)
-            return this._adders.value;
+        if (this._addersCache && this.id && this.id === this._addersCache.id && Date.now() - this._addersCache.dt < 5)
+            return this._addersCache.value;
         const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
             _adders.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
         }
-        this._adders = {
+        this._addersCache = {
             value: _adders,
             id: this.id,
             dt: Date.now(),
@@ -3032,10 +3032,11 @@ export class HeroSystem6eItem extends Item {
         return _adders;
     }
 
+    _powersCache = null;
     get powers() {
         // Caching for performance
-        if (this._powers && this.id && this.id === this._powers.id && Date.now() - this._powers.dt < 5)
-            return this._powers.value;
+        if (this._powersCache && this.id && this.id === this._powersCache.id && Date.now() - this._powersCache.dt < 5)
+            return this._powersCache.value;
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
@@ -3058,7 +3059,7 @@ export class HeroSystem6eItem extends Item {
             for (const _powerJson of powersList) {
                 _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
-            this._powers = {
+            this._powersCache = {
                 value: _powers,
                 id: this.id,
                 dt: Date.now(),
