@@ -9205,17 +9205,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "LIMITEDRANGE",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="LIMITEDRANGE" ID="1596334078773" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        undefined,
-    );
-
-    addPower(
-        {
             key: "LIMITEDPOWER",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
