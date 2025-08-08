@@ -68,7 +68,7 @@ export default class HeroSystem6eMeasuredTemplate extends FoundryVttMeasuredTemp
         await super._refreshTemplate(...args);
 
         // A tad hacky here. When template is first rendered we don't want to selectObjects
-        if (game.user.id !== this.document.author.id) return;
+        if (game.user.id !== this.document.author?.id) return;
 
         await this.selectObjects({ checkPositions: true, templateData: this });
 

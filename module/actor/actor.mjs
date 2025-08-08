@@ -1935,6 +1935,7 @@ export class HeroSystem6eActor extends Actor {
 
         // is5e
         if (typeof this.system.CHARACTER?.TEMPLATE == "string") {
+            this.system.template = this.system.CHARACTER.TEMPLATE;
             if (
                 this.system.CHARACTER.TEMPLATE.includes("builtIn.") &&
                 !this.system.CHARACTER.TEMPLATE.includes("6E.") &&
