@@ -283,12 +283,17 @@ export class HeroSystem6eItem extends Item {
         this.system._active ??= {};
 
         if (!this.actor) {
+            // Aaron thinks we should still run most of the prepareData.
+            // Things like item description, default values and such are still valid.
+            // The Make Attack is likely the only broken thing here when missing an Actor.
             console.error(`Bailing on item ${this.name} which has no actor (probably Items collection)`);
             return;
         }
 
-        if (!this.actor.versionHeroSystem6eCreated || this.actor.versionHeroSystem6eCreated === "0.0.0") {
-            console.error(`Bailing on item ${this.name} whos actor has super old versionHeroSystem6eCreated`);
+        if (!this.actor.system.versionHeroSystem6eUpload) {
+            console.error(
+                `Bailing on item ${this.name} whos actor [${this.actor.name}] has super old versionHeroSystem6eUpload`,
+            );
             return;
         }
 

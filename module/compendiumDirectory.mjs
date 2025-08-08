@@ -191,7 +191,8 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
         const folders = [];
 
         try {
-            const is5e = !heroJson.PREFAB?.TEMPLATE.includes("6");
+            const template = heroJson.PREFAB?.TEMPLATE;
+            const is5e = !template?.includes("6");
 
             let errorCount = 0;
             for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
@@ -214,7 +215,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                             const itemData = {
                                 name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                                 type: itemTag.toLowerCase().replace(/s$/, ""),
-                                system: { ...system, is5e },
+                                system: { ...system, is5e, template },
                                 folder: folders[itemTag].id,
                             };
 
@@ -259,7 +260,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                                             if (system2.XMLID) {
                                                 const power = getPowerInfo({
                                                     xmlid: system2.XMLID,
-                                                    is5e: heroJson.PREFAB.TEMPLATE.indexOf("5E") > 0,
+                                                    is5e,
                                                 });
                                                 if (!power) {
                                                     await ui.notifications.error(
@@ -271,6 +272,8 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                                                     );
                                                     continue;
                                                 }
+                                                system2.is5e = is5e;
+                                                system2.template = template;
                                                 compoundItems.push(system2);
                                             }
                                         }
@@ -280,7 +283,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                                 for (const system2 of compoundItems) {
                                     const power = getPowerInfo({
                                         xmlid: system2.XMLID,
-                                        is5e: heroJson.PREFAB.TEMPLATE.indexOf("5E") > 0,
+                                        is5e,
                                     });
                                     let itemData2 = {
                                         name: system2.NAME || system2.ALIAS || system2.XMLID,
