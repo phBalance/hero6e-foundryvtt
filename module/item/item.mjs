@@ -287,6 +287,11 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
+        if (!this.actor.versionHeroSystem6eCreated || this.actor.versionHeroSystem6eCreated === "0.0.0") {
+            console.error(`Bailing on item ${this.name} whos actor has super old versionHeroSystem6eCreated`);
+            return;
+        }
+
         // Basic Validatiton, we need an XMLID
         if (!this.baseInfo) {
             if (this.system.XMLID) {

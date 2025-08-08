@@ -191,6 +191,8 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
         const folders = [];
 
         try {
+            const is5e = !heroJson.PREFAB?.TEMPLATE.includes("6");
+
             let errorCount = 0;
             for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
                 if (heroJson.PREFAB?.[itemTag]) {
@@ -212,11 +214,9 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                             const itemData = {
                                 name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                                 type: itemTag.toLowerCase().replace(/s$/, ""),
-                                system: system,
+                                system: { ...system, is5e },
                                 folder: folders[itemTag].id,
                             };
-
-                            itemData.system.is5e = heroJson.PREFAB.TEMPLATE.indexOf("5E") > 0;
 
                             const power = getPowerInfo({
                                 xmlid: system.XMLID,

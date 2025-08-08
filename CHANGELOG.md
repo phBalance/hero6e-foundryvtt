@@ -7,6 +7,7 @@
 - Players can now advance Combat Tracker when they are done with their turn. [#2569](https://github.com/dmdorman/hero6e-foundryvtt/issues/2569)
 - Maneuvers with "Target Falls" and "Grab" maneuvers now automatically apply the appropriate effect to all targets.
 - Dragging actors from a compendium to a scene should work now. [#2573](https://github.com/dmdorman/hero6e-foundryvtt/issues/2569)
+- Refactored item code to more closely align with FoundryVTT recommendations. This dramatically improved migration times. Initial loading of the world is slower, potentially minute with large worlds. We are investigating ways to improve the performance for large world load times.
 
 ## Version 4.1.9 20250801
 
