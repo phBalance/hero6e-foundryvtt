@@ -772,6 +772,7 @@ export class HeroSystem6eItem extends Item {
                                     addMe = true;
                                     break;
                                 case "ALL":
+                                case "HTHMENTAL": // 5e with HTH and Mental Combat
                                     addMe = true;
                                     break;
                                 default:
@@ -2422,6 +2423,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     _postUploadDetails() {
+        // TODO: Should move most of this stuff into prepareData
         const item = this;
 
         // Make sure we have an actor (like when creating compendiums)
@@ -2457,48 +2459,48 @@ export class HeroSystem6eItem extends Item {
         this.configureAttackParameters();
 
         // Defense
-        if (item.type === "defense") {
-            item.system.description =
-                CONFIG.HERO.defenseTypes[item.system.defenseType] ||
-                CONFIG.HERO.defenseTypes5e[item.system.defenseType];
-        }
+        // if (item.type === "defense") {
+        //     item.system.description =
+        //         CONFIG.HERO.defenseTypes[item.system.defenseType] ||
+        //         CONFIG.HERO.defenseTypes5e[item.system.defenseType];
+        // }
 
-        item.updateRoll();
+        //item.updateRoll();
 
         // Charges
         // Not sure why we do CHARGES here and in setCharges();
-        if (parseInt(item.system.charges?.max || 0) > 0) {
-            const costsEnd = item.findModsByXmlid("COSTSEND");
-            if (item.system.endEstimate === 0 || !costsEnd) {
-                item.system.endEstimate = "";
-            }
+        // if (parseInt(item.system.charges?.max || 0) > 0) {
+        //     const costsEnd = item.findModsByXmlid("COSTSEND");
+        //     if (item.system.endEstimate === 0 || !costsEnd) {
+        //         item.system.endEstimate = "";
+        //     }
 
-            const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${
-                item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1
-                    ? `x${item.system.charges?.clips}`
-                    : ""
-            }`;
-            const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
-            const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
-            const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
-            const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
+        //     const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${
+        //         item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1
+        //             ? `x${item.system.charges?.clips}`
+        //             : ""
+        //     }`;
+        //     const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
+        //     const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
+        //     const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
+        //     const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
 
-            item.system.endEstimate = `${
-                item.system.endEstimate ? `${item.system.endEstimate} ` : ""
-            }[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
-        }
+        //     item.system.endEstimate = `${
+        //         item.system.endEstimate ? `${item.system.endEstimate} ` : ""
+        //     }[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
+        // }
 
-        // 0 END
-        if (!item.system.endEstimate) {
-            item.system.endEstimate = "";
-        }
+        // // 0 END
+        // if (!item.system.endEstimate) {
+        //     item.system.endEstimate = "";
+        // }
 
-        // Mental
-        if (item?.flags?.[game.system.id]?.tags?.omcv) {
-            item.flags[game.system.id] ??= {};
-            item.flags[game.system.id].tags.ocv ??= item.flags[game.system.id]?.tags.omcv;
-            item.flags[game.system.id].tags.dcv ??= item.flags[game.system.id]?.tags.dmcv;
-        }
+        // // Mental
+        // if (item?.flags?.[game.system.id]?.tags?.omcv) {
+        //     item.flags[game.system.id] ??= {};
+        //     item.flags[game.system.id].tags.ocv ??= item.flags[game.system.id]?.tags.omcv;
+        //     item.flags[game.system.id].tags.dcv ??= item.flags[game.system.id]?.tags.dmcv;
+        // }
     }
 
     configureAttackParameters() {
@@ -2949,14 +2951,20 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
+    _modifiersCache = null;
     get modifiers() {
         // Caching for performance
         // Aaron suspects that "new HeroSystem6eModifier" is the crux of the performance issue.
         // The HeroSystem6eModifier class is pretty handy.
         // Perhaps struct or prototype overrideing could be alternative solution.
         // The core (database) uses an array of JSON values.
-        if (this._modifiers && this.id && this.id === this._modifiers.id && Date.now() - this._modifiers.dt < 5)
-            return this._modifiers.value;
+        if (
+            this._modifiersCache &&
+            this.id &&
+            this.id === this._modifiersCache.id &&
+            Date.now() - this._modifiersCache.dt < 5
+        )
+            return this._modifiersCache.value;
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -2979,8 +2987,9 @@ export class HeroSystem6eItem extends Item {
                     const pCost = parseFloat(pMod.BASECOST || 0);
                     const mCost = parseFloat(mod?.BASECOST || 0);
                     if (mod && pCost === 0 && mCost === 0) {
-                        console.warn(`inconclusive parent/child mod BASECOST for ${this.actor?.name}:${this.name}`),
-                            this;
+                        // Do we really care, likely not, leave warn code commented out as we may want it later.
+                        // console.warn(`inconclusive parent/child mod BASECOST for ${this.actor?.name}:${this.name}`),
+                        //     this;
                     }
                     if (!mod || (pCost < 0 && pCost < mCost)) {
                         // Keeping parent modifier
@@ -2993,7 +3002,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-        this._modifiers = {
+        this._modifiersCache = {
             value: _modifiers,
             id: this.id,
             dt: Date.now(),
@@ -3009,15 +3018,16 @@ export class HeroSystem6eItem extends Item {
         return this.modifiers.filter((o) => o.cost < 0);
     }
 
+    _addersCache = null;
     get adders() {
         // Caching for performance
-        if (this._adders && this.id && this.id === this._adders.id && Date.now() - this._adders.dt < 5)
-            return this._adders.value;
+        if (this._addersCache && this.id && this.id === this._addersCache.id && Date.now() - this._addersCache.dt < 5)
+            return this._addersCache.value;
         const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
             _adders.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
         }
-        this._adders = {
+        this._addersCache = {
             value: _adders,
             id: this.id,
             dt: Date.now(),
@@ -3025,10 +3035,11 @@ export class HeroSystem6eItem extends Item {
         return _adders;
     }
 
+    _powersCache = null;
     get powers() {
         // Caching for performance
-        if (this._powers && this.id && this.id === this._powers.id && Date.now() - this._powers.dt < 5)
-            return this._powers.value;
+        if (this._powersCache && this.id && this.id === this._powersCache.id && Date.now() - this._powersCache.dt < 5)
+            return this._powersCache.value;
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
@@ -3051,7 +3062,7 @@ export class HeroSystem6eItem extends Item {
             for (const _powerJson of powersList) {
                 _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
-            this._powers = {
+            this._powersCache = {
                 value: _powers,
                 id: this.id,
                 dt: Date.now(),
@@ -3844,9 +3855,9 @@ export class HeroSystem6eItem extends Item {
                     // Add a success roll, if it has one, but only for skills, talents, or perks
                     if (configPowerInfo?.behaviors?.includes("success")) {
                         // PH: FIXME: Why is this not based purely on behavior?
-                        if (!["skill", "talent", "perk"].includes(this.type)) {
+                        if (!this.system.CHARACTERISTIC) {
                             console.error(
-                                `${this.actor?.name}: ${this.detailedName()} has a success behavior but isn't a skill, talent, or perk`,
+                                `${this.actor?.name}: ${this.detailedName()} has a success behavior but no CHARACTERISTIC specified`,
                             );
                         }
                         system.description += ` ${system.roll}`;
@@ -4203,7 +4214,10 @@ export class HeroSystem6eItem extends Item {
 
                     const maxCharges = parseInt(modifier.OPTION_ALIAS);
                     if (maxCharges !== parseInt(system.charges?.max)) {
-                        console.warn(`CHARGES mismatch ${item.actor?.name}:${item.name}`, item);
+                        console.warn(
+                            `CHARGES mismatch ${item.actor?.name}:${item.name} is it ${maxCharges} or ${parseInt(system.charges?.max)}. Check parent ${item.parentItem?.name}.`,
+                            item,
+                        );
                     }
                     const currentCharges = parseInt(this.system.charges?.value);
                     if (currentCharges != maxCharges) {
