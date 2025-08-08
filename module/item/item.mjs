@@ -2986,8 +2986,9 @@ export class HeroSystem6eItem extends Item {
                     const pCost = parseFloat(pMod.BASECOST || 0);
                     const mCost = parseFloat(mod?.BASECOST || 0);
                     if (mod && pCost === 0 && mCost === 0) {
-                        console.warn(`inconclusive parent/child mod BASECOST for ${this.actor?.name}:${this.name}`),
-                            this;
+                        // Do we really care, likely not, leave warn code commented out as we may want it later.
+                        // console.warn(`inconclusive parent/child mod BASECOST for ${this.actor?.name}:${this.name}`),
+                        //     this;
                     }
                     if (!mod || (pCost < 0 && pCost < mCost)) {
                         // Keeping parent modifier
