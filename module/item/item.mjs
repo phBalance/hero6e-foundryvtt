@@ -290,13 +290,6 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
-        if (!this.actor.system.versionHeroSystem6eUpload) {
-            console.error(
-                `Bailing on item ${this.name} whos actor [${this.actor.name}] has super old versionHeroSystem6eUpload`,
-            );
-            return;
-        }
-
         // Basic Validatiton, we need an XMLID
         if (!this.baseInfo) {
             if (this.system.XMLID) {
@@ -2962,7 +2955,8 @@ export class HeroSystem6eItem extends Item {
         // The HeroSystem6eModifier class is pretty handy.
         // Perhaps struct or prototype overrideing could be alternative solution.
         // The core (database) uses an array of JSON values.
-        //if (this._modifiers && Date.now() - this._modifiers.dt < 5) return this._modifiers.value;
+        if (this._modifiers && this.id && this.id === this._modifiers.id && Date.now() - this._modifiers.dt < 5)
+            return this._modifiers.value;
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -2999,10 +2993,11 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-        // this._modifiers = {
-        //     value: _modifiers,
-        //     dt: Date.now(),
-        // };
+        this._modifiers = {
+            value: _modifiers,
+            id: this.id,
+            dt: Date.now(),
+        };
         return _modifiers;
     }
 
@@ -3016,21 +3011,24 @@ export class HeroSystem6eItem extends Item {
 
     get adders() {
         // Caching for performance
-        //if (this._adders && Date.now() - this._adders.dt < 5) return this._adders.value;
+        if (this._adders && this.id && this.id === this._adders.id && Date.now() - this._adders.dt < 5)
+            return this._adders.value;
         const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
             _adders.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
         }
-        // this._adders = {
-        //     value: _adders,
-        //     dt: Date.now(),
-        // };
+        this._adders = {
+            value: _adders,
+            id: this.id,
+            dt: Date.now(),
+        };
         return _adders;
     }
 
     get powers() {
         // Caching for performance
-        //if (this._powers && Date.now() - this._powers.dt < 5) return this._powers.value;
+        if (this._powers && this.id && this.id === this._powers.id && Date.now() - this._powers.dt < 5)
+            return this._powers.value;
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
@@ -3053,10 +3051,11 @@ export class HeroSystem6eItem extends Item {
             for (const _powerJson of powersList) {
                 _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
-            // this._powers = {
-            //     value: _powers,
-            //     dt: Date.now(),
-            // };
+            this._powers = {
+                value: _powers,
+                id: this.id,
+                dt: Date.now(),
+            };
             return _powers;
         } catch (e) {
             console.error(e);
