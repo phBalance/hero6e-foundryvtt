@@ -8817,6 +8817,161 @@ export function registerUploadTests(quench) {
                     );
                 });
             });
+
+            describe("SIDEEFFECTS", function () {
+                describe("6e minor side effect", function () {
+                    const contents = `
+                        <POWER XMLID="HKA" ID="1754613516361" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Stupid Slash" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="SIDEEFFECTS" ID="1754613565809" BASECOST="-0.25" LEVELS="0" ALIAS="Side Effects -1DCV" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINOR" OPTIONID="MINOR" OPTION_ALIAS="Minor Side Effect" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <MODIFIER XMLID="ALWAYSOCCURS" ID="1754613565832" BASECOST="1.0" LEVELS="0" ALIAS="Side Effect occurs automatically whenever Power is used" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let itemWithSideEffect;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        itemWithSideEffect = new HeroSystem6eItem(
+                            { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await itemWithSideEffect._postUpload();
+                        actor.items.set(itemWithSideEffect.system.XMLID, itemWithSideEffect);
+                    });
+
+                    it("active points", function () {
+                        assert.equal(itemWithSideEffect._activePoints, 15);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(itemWithSideEffect._realCost, 10);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            itemWithSideEffect.system.description,
+                            "Killing Attack - Hand-To-Hand 1½d6 (PD) (15 Active Points); Side Effects -1DCV (Minor Side Effect; Side Effect occurs automatically whenever Power is used, -1/2)",
+                        );
+                    });
+                });
+
+                describe("6e major side effect", function () {
+                    const contents = `
+                        <POWER XMLID="HKA" ID="1754626219754" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Stupid Slash" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="SIDEEFFECTS" ID="1754626224759" BASECOST="-0.5" LEVELS="0" ALIAS="Side Effects -1DCV" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MAJOR" OPTIONID="MAJOR" OPTION_ALIAS="Major Side Effect" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <MODIFIER XMLID="ALWAYSOCCURS" ID="1754626224746" BASECOST="1.0" LEVELS="0" ALIAS="Side Effect occurs automatically whenever Power is used" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let itemWithSideEffect;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        itemWithSideEffect = new HeroSystem6eItem(
+                            { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await itemWithSideEffect._postUpload();
+                        actor.items.set(itemWithSideEffect.system.XMLID, itemWithSideEffect);
+                    });
+
+                    it("active points", function () {
+                        assert.equal(itemWithSideEffect._activePoints, 15);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(itemWithSideEffect._realCost, 7);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            itemWithSideEffect.system.description,
+                            "Killing Attack - Hand-To-Hand 1½d6 (PD) (15 Active Points); Side Effects -1DCV (Major Side Effect; Side Effect occurs automatically whenever Power is used, -1)",
+                        );
+                    });
+                });
+
+                describe("6e extreme side effect", function () {
+                    const contents = `
+                        <POWER XMLID="HKA" ID="1754626221805" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Stupid Slash" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="SIDEEFFECTS" ID="1754626233197" BASECOST="-1.0" LEVELS="0" ALIAS="Side Effects -1DCV" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTREME" OPTIONID="EXTREME" OPTION_ALIAS="Extreme Side Effect" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <MODIFIER XMLID="ALWAYSOCCURS" ID="1754626233184" BASECOST="1.0" LEVELS="0" ALIAS="Side Effect occurs automatically whenever Power is used" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let itemWithSideEffect;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        itemWithSideEffect = new HeroSystem6eItem(
+                            { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await itemWithSideEffect._postUpload();
+                        actor.items.set(itemWithSideEffect.system.XMLID, itemWithSideEffect);
+                    });
+
+                    it("active points", function () {
+                        assert.equal(itemWithSideEffect._activePoints, 15);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(itemWithSideEffect._realCost, 5);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            itemWithSideEffect.system.description,
+                            "Killing Attack - Hand-To-Hand 1½d6 (PD) (15 Active Points); Side Effects -1DCV (Extreme Side Effect; Side Effect occurs automatically whenever Power is used, -2)",
+                        );
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

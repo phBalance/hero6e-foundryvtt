@@ -76,6 +76,10 @@ export class HeroSystem6eModifier {
         }
     }
 
+    get parent() {
+        return this._parent;
+    }
+
     get item() {
         return this._item;
     }
