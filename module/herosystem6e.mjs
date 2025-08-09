@@ -45,6 +45,7 @@ import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 
 import { isGameV13OrLater } from "./utility/compatibility.mjs";
 import { HeroSocketHandler } from "./heroSocketHandler.mjs";
+import { HeroSystem6eChatMessage } from "./heroChatMessage.mjs";
 
 // V13 SignedString does not add a plus before a zero, also uses a non-standard minus sign.
 // V12 SignedString works great, unclear why V13 change it.
@@ -140,6 +141,7 @@ Hooks.once("init", async function () {
     CONFIG.Combat.documentClass = HeroSystem6eCombat;
     CONFIG.Combatant.documentClass = HeroSystem6eCombatant;
     CONFIG.Combat.defeatedStatusId = "dead";
+    CONFIG.ChatMessage.documentClass = HeroSystem6eChatMessage;
 
     // V11 now support ActiveEffects on items without
     // the need to transfer the effect to the actor.
