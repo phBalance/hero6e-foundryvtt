@@ -2,7 +2,7 @@ import { dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mj
 import { calculateDistanceBetween } from "./range.mjs";
 
 // PH: FIXME: Need to confirm this will work with v12
-const FoundryVttPrototypeToken = foundry.data?.PrototypeToken || PrototypeToken;
+const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
 
 export class Attack {
     static async makeActionActiveEffects(action) {
