@@ -2228,7 +2228,9 @@ export class HeroSystem6eActor extends Actor {
                 item.updateItemDescription();
                 await item.update({ "system.description": item.system.description });
             } else {
-                await ui.notifications.warn(`Unable to locate ${item.ALIAS} to consume charges after upload.`);
+                await ui.notifications.warn(
+                    `Unable to locate ${chargeData.NAME}/${chargeData.ALIAS} to consume charges after upload.`,
+                );
             }
         }
         uploadPerformance.postUpload = new Date().getTime() - uploadPerformance._d;
