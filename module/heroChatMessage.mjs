@@ -12,7 +12,7 @@ export class HeroSystem6eChatMessage extends ChatMessage {
 
                 if (token) {
                     const [imageUrl, scale] = (() => {
-                        const tokenImage = token.texture.src;
+                        //const tokenImage = token.texture.src;
                         // const hasTokenImage = tokenImage && fh.media.ImageHelper.hasImageExtension(tokenImage);
                         // if (!hasTokenImage) {
                         // || isDefaultTokenImage(token)) {
@@ -55,6 +55,13 @@ export class HeroSystem6eChatMessage extends ChatMessage {
                     portrait.append(image);
 
                     header.prepend(portrait);
+
+                    // if (this.author) {
+                    //     const authorSpan = document.createElement("span");
+                    //     authorSpan.classList.add("user");
+                    //     authorSpan.append(this.author.name);
+                    //     header.append(authorSpan);
+                    // }
                 }
             } catch (e) {
                 console.error(e);
