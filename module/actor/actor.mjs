@@ -2213,6 +2213,10 @@ export class HeroSystem6eActor extends Actor {
                 .map((item) => item._postUpload({ render: false, uploadProgressBar })),
         );
 
+        // Make sure any powers with characteristic properties
+        // reflect in current VALUE
+        await this.FullHealth();
+
         // retainValuesOnUpload Charges
         for (const chargeData of retainValuesOnUpload.charges) {
             const item = this.items.find((i) => i.system.ID === chargeData.ID);
