@@ -9858,7 +9858,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 // Some MODIFIERS (like EXPANDEDEFFECT) base a BASECOST -0.5 with LEVELS=2 and CostPerLevel 0.5, making them appear to be limitations, but actually advantages.
 // Plan is to remove ModifierOverride and add them to the powers list as modifiers.
 // HERO.ModifierOverride = {
-//     //ALWAYSOCCURS: { dcAffecting: fixedValueFunction(false), BASECOST: 0, MULTIPLIER: 2 },
 //     //CONTINUOUSCONCENTRATION: { dcAffecting: fixedValueFunction(false), BASECOST: -0.25 },
 //     //DEFBONUS: { dcAffecting: fixedValueFunction(false), BASECOST: 2 },
 // };
