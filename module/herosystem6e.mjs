@@ -724,7 +724,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         seconds: secondsPerBody,
                     },
                     flags: {
-                        [`${game.system.id}.XMLID`]: "naturalBodyHealing",
+                        [`${game.system.id}`]: {
+                            XMLID: "naturalBodyHealing",
+                            expiresOn: "segment",
+                        },
                     },
                 };
                 await actor.addActiveEffect(activeEffect);
@@ -733,24 +736,27 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             // Active Effects
             // When in combat we expire effects on onStartTurn, but for some async reason gameTime cause issues if they are first in the segment.
             // So we will expireEffects here if this actor is the current combatant.
-            if (
-                !actor.inCombat ||
-                game.combats.viewed.combatant?.actorId === actor.id ||
-                actor.temporaryEffects.find((o) => o.name === "TakeRecovery")
-            ) {
-                if (actor.inCombat) {
-                    console.debug(`calling expireEffects for ${actor.name} who is inCombat`);
-                }
-                await expireEffects(actor);
-            } else {
-                if (actor.inCombat) {
-                    // We are only expiring temporary effects in expireEffects.
-                    // Drains should expire on worldTime regardless of combat status, which we currently don't do.
-                    console.debug(
-                        `skipping expireEffects for ${actor.name} who is inCombat. ${game.combats.viewed.combatant?.actorId !== actor.id ? "Not active combatant" : ""}`,
-                    );
-                }
-            }
+            // if (
+            //     !actor.inCombat ||
+            //     game.combats.viewed.combatant?.actorId === actor.id ||
+            //     actor.temporaryEffects.find((o) => o.name === "TakeRecovery")
+            // ) {
+            //     if (actor.inCombat) {
+            //         console.debug(`calling expireEffects for ${actor.name} who is inCombat`);
+            //     }
+            //     await expireEffects(actor);
+            // } else {
+            //     if (actor.inCombat) {
+            //         // We are only expiring temporary effects in expireEffects.
+            //         // Drains should expire on worldTime regardless of combat status, which we currently don't do.
+            //         console.debug(
+            //             `skipping expireEffects for ${actor.name} who is inCombat. ${game.combats.viewed.combatant?.actorId !== actor.id ? "Not active combatant" : ""}`,
+            //         );
+            //     }
+            // }
+            // Always expire effects
+            // AARON: We are now expecting flags[game.system.id].expiresOn property
+            await expireEffects(actor, "segment");
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.

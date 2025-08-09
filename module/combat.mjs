@@ -639,6 +639,19 @@ export class HeroSystem6eCombat extends Combat {
         const masterCombatant = this.getCombatantByToken(combatant.tokenId);
         const _segmentNumber = combatant.flags[game.system.id]?.segment || this.segment;
 
+        if (
+            !combatant.flags[game.system.id].lightningReflexes &&
+            game.combat.combatants.find(
+                (c) => combatant.tokenId === c.tokenId && combatant.flags[game.system.id].lightningReflexes,
+            )
+        ) {
+            console.log(
+                `skipping onStartTurn for ${combatant.name} because non lightning reflexes version of combatant`,
+                combatant,
+            );
+            return;
+        }
+
         // Save some properties for future support for rewinding combat tracker
         // TODO: Include charges for various items
         combatant.flags[game.system.id] ??= {};
@@ -663,7 +676,7 @@ export class HeroSystem6eCombat extends Combat {
         // Expire Effects
         // We expire on our phase, not on our segment.
         try {
-            await expireEffects(combatant.actor);
+            await expireEffects(combatant.actor, "turnStart");
         } catch (e) {
             console.error(e);
         }

@@ -203,22 +203,22 @@ export async function getTemporaryEffectsOwnedByActorInCombat(actor) {
 }
 
 /// Check the actor for any effects that should expire, and expire them.
-export async function expireEffects(actor) {
+export async function expireEffects(actor, expiresOn) {
     // if (actor.inCombat) {
     //     console.log(`%c ExpireEffects ${actor.name} ${game.time.worldTime}`, "background: #229; color: #bada55");
     // }
 
     // AARON UGLY HACK
     // Prevent worldtime + onTurnStart from both running expireEffects at the same time (async issues)
-    window.expireEffects ??= {};
-    if (window.expireEffects[actor.id]) {
-        console.warn(
-            `expireEffects for ${actor.name} was called twice in quick succession which can cause issues. Suppressing this call.`,
-        );
-        return;
-    } else {
-        window.expireEffects[actor.id] = game.time.worldTime;
-    }
+    // window.expireEffects ??= {};
+    // if (window.expireEffects[actor.id]) {
+    //     console.warn(
+    //         `expireEffects for ${actor.name} was called twice in quick succession which can cause issues. Suppressing this call.`,
+    //     );
+    //     return;
+    // } else {
+    //     window.expireEffects[actor.id] = game.time.worldTime;
+    // }
 
     const temporaryEffects = actor.temporaryEffects;
 
@@ -238,10 +238,27 @@ export async function expireEffects(actor) {
             }
         }
 
+        // We are expecting expiresOn flag
+        const aeExpiresOn = ae.flags[game.system.id]?.expiresOn || (!ae.duration?.seconds ? "turnStart" : undefined);
+        const validExpiresOnValues = ["turnStart", "turnEnd", "segmentStart", "segmentEnd"];
+        if (!aeExpiresOn || !validExpiresOnValues.includes(aeExpiresOn)) {
+            console.warn(`ActiveEffect ${ae.name} has invalid expiresOn flag ${aeExpiresOn}`, ae);
+        }
+
+        if (!expiresOn) {
+            console.error(`missing expiresOn`);
+        }
+
+        if (expiresOn.includes("segment") && aeExpiresOn.includes("turn") && actor.inCombat) {
+            return;
+        }
+
+        const zero = aeExpiresOn === "segmentEnd" ? -1 : 0;
+
         // With Simple Calendar you can move time ahead in large steps.
         // Need to loop as multiple fades may be required.
         // The null check is for AE that have no duration.
-        while (ae._prepareDuration().remaining <= 0 && ae._prepareDuration().remaining !== null) {
+        while (ae._prepareDuration().remaining <= zero && ae._prepareDuration().remaining !== null) {
             const origin = fromUuidSync(ae.origin);
             const item =
                 origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
@@ -342,7 +359,7 @@ export async function expireEffects(actor) {
         }
     }
 
-    delete window.expireEffects[actor.id];
+    //delete window.expireEffects[actor.id];
 
     await renderAdjustmentChatCards(adjustmentChatMessages);
 }
