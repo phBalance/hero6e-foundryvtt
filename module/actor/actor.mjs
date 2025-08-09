@@ -776,12 +776,12 @@ export class HeroSystem6eActor extends Actor {
                         },
                     ],
                     origin: this.uuid,
+                    duration: {
+                        seconds: 1,
+                    },
                     flags: {
                         [game.system.id]: {
                             takeRecovery: true,
-                        },
-                        duration: {
-                            seconds: 1,
                         },
                     },
                 };
