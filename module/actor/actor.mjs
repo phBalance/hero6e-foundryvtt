@@ -2057,7 +2057,7 @@ export class HeroSystem6eActor extends Actor {
                     const itemData = {
                         name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                         type: itemTag.toLowerCase().replace(/s$/, ""),
-                        system: system,
+                        system: { ...system, is5e: this.is5e },
                         sort: sortBase + parseInt(system.POSITION || 0),
                     };
 
@@ -2136,6 +2136,7 @@ export class HeroSystem6eActor extends Actor {
                                     POSITION: parseInt(system2.POSITION),
                                     sort: itemData.sort + 100 + parseInt(system2.POSITION),
                                     errors: [...(system2.errors || []), "Added PARENTID for COMPOUNDPOWER child"],
+                                    is5e: this.is5e,
                                 },
                             };
 
