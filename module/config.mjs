@@ -9202,7 +9202,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
     addPower(
         {
             key: "LIMITEDPOWER",
@@ -9223,16 +9222,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         undefined,
     );
-    // DUPLICATE?
-    // addPower(
-    //     {
-    //         key: "LINKED",
-    //         costPerLevel: fixedValueFunction(0),
-    //         dcAffecting: fixedValueFunction(false),
-    //         xml: ` <MODIFIER XMLID="LINKED" ID="1580691372338" BASECOST="-0.5" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No" LINKED_ID="1577313774747"></MODIFIER>`,
-    //     },
-    //     undefined,
-    // );
     addPower(
         {
             key: "LOS",

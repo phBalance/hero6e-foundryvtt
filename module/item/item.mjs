@@ -2468,7 +2468,8 @@ export class HeroSystem6eItem extends Item {
         //         CONFIG.HERO.defenseTypes5e[item.system.defenseType];
         // }
 
-        //item.updateRoll();
+        // This seems to still be required. See #2624.
+        item.updateRoll();
 
         // Charges
         // Not sure why we do CHARGES here and in setCharges();
@@ -2743,7 +2744,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Adding this back in (was only called in prepareData).
-            // Needed for when we add/remove attacks as we need to update CSL's.
+            // Needed for when we add/remove attacks as we need to update CSLs.
             // TODO: move this into Actor addEmbeddedItems or similar
             this.setCombatSkillLevels();
 
