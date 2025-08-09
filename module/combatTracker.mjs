@@ -177,7 +177,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
                 // console.debug(t, turn);
                 if (isNaN(turn.flags?.[game.system.id]?.segment)) {
                     context.segments[12].push(turn);
-                    console.warn(`Missing segment`, t, turn);
+                    console.debug(`Missing segment assigned to segment 12`, t, turn);
                 }
             }
             //context._segments = "test";
