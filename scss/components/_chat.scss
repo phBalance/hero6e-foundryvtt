@@ -235,3 +235,10 @@
         padding: 0.25em 0;
     }
 }
+
+.chat-message .message-header.with-image .portrait img {
+    border: none;
+    height: 36px;
+    object-fit: contain;
+    width: 36px;
+}
