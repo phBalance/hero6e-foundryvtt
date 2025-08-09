@@ -2245,7 +2245,7 @@ export async function _onGenericRollerApplyDamage(event) {
 }
 
 /**
- * Event handler for when the Apply Damage button is clicked on item-damage-card.hbsNotice the chatListeners function in this file.
+ * Event handler for when the Apply Damage button is clicked on item-damage-card.hbs Notice the chatListeners function in this file.
  */
 export async function _onApplyDamage(event, actorParam, itemParam) {
     const button = event.currentTarget;
