@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.1.10 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.10 20250809 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - "Must follow block" martial arts response element no longer behaves as a block maneuver. [#2528](https://github.com/dmdorman/hero6e-foundryvtt/issues/2528)
 - Added "Toggle Hold" and "Toggle Abort" to Combat Tracker context menu. [#2563](https://github.com/dmdorman/hero6e-foundryvtt/issues/2563)
