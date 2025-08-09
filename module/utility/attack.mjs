@@ -1,6 +1,9 @@
 import { dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { calculateDistanceBetween } from "./range.mjs";
 
+// PH: FIXME: Need to confirm this will work with v12
+const FoundryVttPrototypeToken = foundry.data?.PrototypeToken || PrototypeToken;
+
 export class Attack {
     static async makeActionActiveEffects(action) {
         const cvModifiers = action.current.cvModifiers;
@@ -249,7 +252,7 @@ export class Attack {
     /**
      *
      * @param {HeroSystem6eActor} actor
-     * @returns {TokenDocument | PrototypeToken}
+     * @returns {HeroSystem6eToken | PrototypeToken}
      */
     static getAttackerToken(actor) {
         // Careful:  you may have a controlled token, but use an attack from actor on sidebar
@@ -511,7 +514,7 @@ export function actionToJSON(action) {
         current: action.current,
         maneuver: action.maneuver,
         system: {
-            actor: action.system.actor.uuid,
+            actorUuid: action.system.actor.uuid,
             attackerTokenObj: tokenToTokenObj(action.system.attackerToken),
             currentItem: dehydrateAttackItem(action.system.currentItem),
             currentTargetTokenObjs: action.system.currentTargets.map((token) => tokenToTokenObj(token)),
@@ -533,17 +536,17 @@ export function actionToJSON(action) {
 
 export function actionFromJSON(json) {
     const data = JSON.parse(json);
-    const actor = fromUuidSync(data.system.actor);
+    const actor = fromUuidSync(data.system.actorUuid);
 
     const action = {
         current: data.current,
         maneuver: data.maneuver,
         system: {
             actor: actor,
-            attackerToken: tokenFromTokenObj(data.system.attackerTokenObj, actor),
+            attackerToken: tokenFromTokenObj(data.system.attackerTokenObj),
             currentItem: rehydrateAttackItem(data.system.currentItem, actor).item,
-            currentTargets: data.system.currentTargetTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj, actor)),
-            targetedTokens: data.system.targetedTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj, actor)),
+            currentTargets: data.system.currentTargetTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj)),
+            targetedTokens: data.system.targetedTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj)),
 
             item: {}, // PH: FIXME: This is a Map of Items by id
             token: {}, // PH: FIXME: This is a Map of Tokens
@@ -554,18 +557,26 @@ export function actionFromJSON(json) {
 }
 
 /**
- * A way to serialize a token (either a TokenDocument or PrototypeToken).
+ * A way to serialize a token (either a HeroSystem6eToken, HeroSystem6eTokenDocument or PrototypeToken). It will, however,
+ * only lead to deserializing a HeroSystem6eTokenDocument or PrototypeToken. HeroSystem6eToken will be convered into a HeroSystem6eTokenDocument
+ * upon deserialization by tokenFromTokenObj.
  *
- * A token is not globally unique, so to serialize it we must save both the scene id and the token id.
- * A prototype token is unique but doesn't have either a scene or an id.
+ * A Token has a TokenDocument that we can restore from a uuid (Scene and TokenDocument id)
+ * A PrototypeToken is unique but doesn't have and id so needs to be serialized with the parent actor's uuid
  *
- * @param {TokenDocument | PrototypeToken} token
+ * @param {HeroSystem6eToken | HeroSystem6eTokenDocument | PrototypeToken} token
  * @returns {TokenObj}
  */
 function tokenToTokenObj(token) {
+    const isPrototypeToken = token instanceof FoundryVttPrototypeToken;
+
     return {
-        sceneId: token.scene?.id,
-        tokenId: token.id,
+        // uuid of Token Document accessed via Token || uuid of TokenDocument
+        uuid: token.document?.uuid || token.uuid,
+
+        // PrototypeToken
+        protoObj: isPrototypeToken ? token.toObject(false) : null,
+        actorUuid: isPrototypeToken ? token.actor.uuid : null,
     };
 }
 
@@ -573,28 +584,14 @@ function tokenToTokenObj(token) {
  * Deserialize a token from the tokenObj created by tokenToTokenObj
  *
  * @param {TokenObj} tokenObj
- * @param {HeroSystem6eActor} actor
- * @returns {TokenDocument | PrototypeToken}
+ * @returns {HeroSystem6eTokenDocument | PrototypeToken}
  */
-function tokenFromTokenObj(tokenObj, actor) {
-    // Is this a tokenObj made from a PrototypeToken?
-    if (!tokenObj.sceneId) {
-        if (!actor) {
-            console.error(`No actor provided`);
-            return null;
-        }
-
-        // PH: FIXME: This needs to be a prototypeToken recreated or does it sometimes not have a constructor etc?
-        return actor.prototypeToken;
+function tokenFromTokenObj(tokenObj) {
+    // Does this need to become a TokenDocument?
+    if (tokenObj.uuid) {
+        return fromUuidSync(tokenObj.uuid);
     }
 
-    // Embedded Token from a scene
-    const scene = game.scenes.get(tokenObj.sceneId);
-    const embeddedToken = scene.getEmbeddedDocument("Token", tokenObj.tokenId);
-
-    if (!embeddedToken) {
-        console.error("There is no embeddedToken!");
-    }
-
-    return embeddedToken;
+    // This needs to become a PrototypeToken by deserializing and adding the actor/parent link
+    return FoundryVttPrototypeToken.fromSource(tokenObj.protoObj, { parent: fromUuidSync(tokenObj.actorUuid) });
 }

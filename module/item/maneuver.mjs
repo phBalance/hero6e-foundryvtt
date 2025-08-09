@@ -1,5 +1,4 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
-import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { dehydrateAttackItem } from "./item-attack.mjs";
 
 /**
@@ -282,14 +281,12 @@ export async function doManeuverEffects(item, action) {
     const hasGrabTrait = maneuverHasGrabTrait(item);
     const hasTargetFallsTrait = maneuverHasTargetFallsTrait(item);
 
-    // PH: FIXME: action.system.currentTargets is no longer available at this point
-
     // Add prone effects (attacker and target)
     if (hasTargetFallsTrait) {
         const currentTargets = action.system.currentTargets || [];
         currentTargets.forEach((targetedToken) => {
-            // NOTE: A targetedToken can be a PrototypeToken or a TokenDocument
-            const actor = HeroSystem6eActor.get(targetedToken.actorId || targetedToken.document.actorId);
+            // NOTE: A targetedToken can be a PrototypeToken or a TokenDocument.
+            const actor = targetedToken.actor;
             newActiveEffects.push(actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect));
         });
     }
@@ -305,8 +302,8 @@ export async function doManeuverEffects(item, action) {
         // The defender/target gets the grabbed state
         const currentTargets = action.system.currentTargets || [];
         currentTargets.forEach((targetedToken) => {
-            // NOTE: A targetedToken can be a PrototypeToken or a TokenDocument
-            const actor = HeroSystem6eActor.get(targetedToken.actorId || targetedToken.document.actorId);
+            // NOTE: A targetedToken can be a PrototypeToken or a TokenDocument.
+            const actor = targetedToken.actor;
             newActiveEffects.push(actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect));
         });
     }
