@@ -241,12 +241,23 @@ async function CreateHeroItems() {
 
     // Compendium should be unlocked, but for some reason it may not be
     if (pack.locked) {
-        console.error(`${pack.name} compendium was unexpectely locked`);
+        console.error(`${pack.name} compendium was unexpectedly locked`);
         await pack.configure({ locked: false });
     }
 
     // Create the array of items in the compendium
-    await createItem(itemDataArray, pack.metadata.id);
+    try {
+        await createItem(itemDataArray, pack.metadata.id);
+    } catch (e) {
+        console.error(e);
+
+        // KLUGE: Try again because we it commonly thinks we are locked
+        if (pack.locked) {
+            console.error(`${pack.name} compendium was unexpectedly locked`);
+            await pack.configure({ locked: false });
+            await createItem(itemDataArray, pack.metadata.id);
+        }
+    }
 
     // Lock Compendium
     await pack.configure({ locked: true });
