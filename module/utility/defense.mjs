@@ -129,8 +129,8 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     const attackDefenseVs = options.attackDefenseVs || attackItem.attackDefenseVs;
     options = { ...options, attackDefenseVs };
 
-    const penetrating = parseInt((options.penetrating = attackItem.findModsByXmlid("PENETRATING")?.LEVELS)) || 0;
-    const armorPiercing = parseInt((options.penetrating = attackItem.findModsByXmlid("ARMORPIERCING")?.LEVELS)) || 0;
+    const penetrating = parseInt(attackItem.findModsByXmlid("PENETRATING")?.LEVELS) || 0;
+    const armorPiercing = parseInt(attackItem.findModsByXmlid("ARMORPIERCING")?.LEVELS) || 0;
 
     // Basic characteristics (PD & ED)
     if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {

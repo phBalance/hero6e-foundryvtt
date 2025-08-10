@@ -66,8 +66,10 @@ export class HeroSystem6eActor extends Actor {
             },
         });
 
-        //addFreeStuff
-        await this.addFreeStuff();
+        if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
+            await this.addFreeStuff();
+        }
+
         for (const item of this.items) {
             await item._postUpload();
         }
