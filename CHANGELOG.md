@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.1.11 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.11 20250809 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Knockback no longer counts PD as KB resistance and no longer ignores KB resistance. [#2512](https://github.com/dmdorman/hero6e-foundryvtt/issues/2512)
 - Not every actor type should have combat maneuvers added. [#2632](https://github.com/dmdorman/hero6e-foundryvtt/issues/2632)
