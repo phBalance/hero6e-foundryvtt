@@ -347,7 +347,9 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
                 if (!foundMatch) {
-                    ui.notifications.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`);
+                    ui.notifications.warn(
+                        `${this.name} has unknown USABLE AS "${usableas.ALIAS}. Expected format is "Usable as Swimming"`,
+                    );
                     console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
                 }
             }
@@ -359,14 +361,15 @@ export class HeroSystem6eItem extends Item {
                     name: activeEffect.name,
                     changes: activeEffect.changes,
                 });
-                if (this.actor) {
-                    await this.actor.update({
-                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                            this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
-                    });
-                }
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+            if (this.actor) {
+                for (const change of activeEffect.changes) {
+                    await this.actor.update({
+                        [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
+                    });
+                }
             }
         }
 
@@ -1147,25 +1150,23 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
+        await this.setActiveEffects();
+
         // If our value has changed, we need to rebuild this item.
-        if (changed.system?.value != null) {
-            // TODO: Update everything!
-            changed = this.calcItemPoints() || changed;
+        // if (changed.system?.value != null) {
+        //     // TODO: Update everything!
+        //     changed = this.calcItemPoints() || changed;
 
-            // DESCRIPTION
-            const oldDescription = this.system.description;
-            this.updateItemDescription();
-            changed = oldDescription !== this.system.description || changed;
+        //     // DESCRIPTION
+        //     const oldDescription = this.system.description;
+        //     this.updateItemDescription();
+        //     changed = oldDescription !== this.system.description || changed;
 
-            // Save changes
-            await this.update({ system: this.system });
-        }
+        //     // Save changes
+        //     await this.update({ system: this.system });
+        // }
 
-        if (this.actor && this.type === "equipment") {
-            await this.actor.applyEncumbrancePenalty();
-        }
-
-        if (this.actor && this.system.XMLID === "PENALTY_SKILL_LEVELS") {
+        if (this.actor && (this.type === "equipment" || this.system.XMLID === "PENALTY_SKILL_LEVELS")) {
             await this.actor.applyEncumbrancePenalty();
         }
 
