@@ -1,12 +1,14 @@
 # Releases
 
-## Version 4.1.10 20250809 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.11 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+## Version 4.1.10 20250809
 
 - "Must follow block" martial arts response element no longer behaves as a block maneuver. [#2528](https://github.com/dmdorman/hero6e-foundryvtt/issues/2528)
 - Added "Toggle Hold" and "Toggle Abort" to Combat Tracker context menu. [#2563](https://github.com/dmdorman/hero6e-foundryvtt/issues/2563)
 - Players can now advance Combat Tracker when they are done with their turn. [#2569](https://github.com/dmdorman/hero6e-foundryvtt/issues/2569)
 - Maneuvers with "Target Falls" and "Grab" maneuvers now automatically apply the appropriate effect to all targets.
-- Dragging actors from a compendium to a scene should work now. [#2573](https://github.com/dmdorman/hero6e-foundryvtt/issues/2569)
+- Dragging actors from a compendium to a scene should work now. [#2573](https://github.com/dmdorman/hero6e-foundryvtt/issues/2573)
 - Refactored item code to more closely align with FoundryVTT recommendations. This dramatically improved migration times. Initial loading of the world is slower, potentially several seconds with worlds that have lots of actors (50+). We are investigating ways to improve the performance for large world load times.
 - Correct costs for powers with side effects that always occurs. [#2453](https://github.com/dmdorman/hero6e-foundryvtt/issues/2453)
 - Fixed issues with Take Recovery penalty. [#2613](https://github.com/dmdorman/hero6e-foundryvtt/issues/2453)
