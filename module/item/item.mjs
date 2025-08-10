@@ -361,15 +361,15 @@ export class HeroSystem6eItem extends Item {
                     name: activeEffect.name,
                     changes: activeEffect.changes,
                 });
-                if (this.actor) {
-                    for (const change of activeEffect.changes) {
-                        await this.actor.update({
-                            [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
-                        });
-                    }
-                }
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+            if (this.actor) {
+                for (const change of activeEffect.changes) {
+                    await this.actor.update({
+                        [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
+                    });
+                }
             }
         }
 
