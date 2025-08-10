@@ -347,7 +347,9 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
                 if (!foundMatch) {
-                    ui.notifications.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`);
+                    ui.notifications.warn(
+                        `${this.name} has unknown USABLE AS "${usableas.ALIAS}. Expected format is "Usable as Swimming"`,
+                    );
                     console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
                 }
             }
