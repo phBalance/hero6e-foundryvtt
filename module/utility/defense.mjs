@@ -118,7 +118,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         return actorDefenses;
     }
 
-    const attackDefenseVs = attackItem.attackDefenseVs;
+    const attackDefenseVs = options.attackDefenseVs || attackItem.attackDefenseVs;
     options = { ...options, attackDefenseVs };
 
     const penetrating = parseInt((options.penetrating = attackItem.findModsByXmlid("PENETRATING")?.LEVELS)) || 0;

@@ -3702,7 +3702,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     // KBRESISTANCE or other related power that reduces knockback
     if (actor) {
         const knockbackAttackItem = await createTemporaryKnockbackItem(actor, 1);
-        const { defenseTags } = getActorDefensesVsAttack(actor, knockbackAttackItem);
+        const { defenseTags } = getActorDefensesVsAttack(actor, knockbackAttackItem, { attackDefenseVs: "KB" });
         knockbackTags = [...knockbackTags, ...defenseTags];
         for (const tag of defenseTags) {
             knockbackResistanceValue += Math.max(0, tag.value); // SHRINKING only applies to distance not to damage
