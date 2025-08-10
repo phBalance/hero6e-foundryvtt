@@ -1539,7 +1539,7 @@ export async function _onRollKnockback(event) {
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 4,
                 item.actor,
-            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes.
+            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes. <strong>This is the default value below</strong>.
         </p>
         <p>
             The character typically winds up prone.
