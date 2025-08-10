@@ -1539,7 +1539,7 @@ export async function _onRollKnockback(event) {
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 4,
                 item.actor,
-            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes.
+            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes. <strong>This is the default value below</strong>.
         </p>
         <p>
             The character typically winds up prone.
@@ -3702,7 +3702,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     // KBRESISTANCE or other related power that reduces knockback
     if (actor) {
         const knockbackAttackItem = await createTemporaryKnockbackItem(actor, 1);
-        const { defenseTags } = getActorDefensesVsAttack(actor, knockbackAttackItem);
+        const { defenseTags } = getActorDefensesVsAttack(actor, knockbackAttackItem, { attackDefenseVs: "KB" });
         knockbackTags = [...knockbackTags, ...defenseTags];
         for (const tag of defenseTags) {
             knockbackResistanceValue += Math.max(0, tag.value); // SHRINKING only applies to distance not to damage

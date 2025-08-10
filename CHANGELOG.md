@@ -2,6 +2,8 @@
 
 ## Version 4.1.11 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Knockback no longer counts PD as KB resistance and no longer ignores KB resistance. [#2512](https://github.com/dmdorman/hero6e-foundryvtt/issues/2512)
+
 ## Version 4.1.10 20250809
 
 - "Must follow block" martial arts response element no longer behaves as a block maneuver. [#2528](https://github.com/dmdorman/hero6e-foundryvtt/issues/2528)
@@ -11,7 +13,7 @@
 - Dragging actors from a compendium to a scene should work now. [#2573](https://github.com/dmdorman/hero6e-foundryvtt/issues/2573)
 - Refactored item code to more closely align with FoundryVTT recommendations. This dramatically improved migration times. Initial loading of the world is slower, potentially several seconds with worlds that have lots of actors (50+). We are investigating ways to improve the performance for large world load times.
 - Correct costs for powers with side effects that always occurs. [#2453](https://github.com/dmdorman/hero6e-foundryvtt/issues/2453)
-- Fixed issues with Take Recovery penalty. [#2613](https://github.com/dmdorman/hero6e-foundryvtt/issues/2453)
+- Fixed issues with Take Recovery penalty. [#2613](https://github.com/dmdorman/hero6e-foundryvtt/issues/2613)
 
 ## Version 4.1.9 20250801
 

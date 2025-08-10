@@ -94,6 +94,14 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
     return null;
 }
 
+/**
+ *
+ * @param {HeroSystem6eActor} targetActor
+ * @param {HeroSystem6eItem} attackItem
+ * @param {Object} options
+ * @param {String} [options.attackDefenseVs] - optional override to attackItem's attackDefenseVs result
+ * @returns
+ */
 export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) {
     const actorDefenses = {
         defenseTotalValue: 0,
@@ -118,7 +126,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         return actorDefenses;
     }
 
-    const attackDefenseVs = attackItem.attackDefenseVs;
+    const attackDefenseVs = options.attackDefenseVs || attackItem.attackDefenseVs;
     options = { ...options, attackDefenseVs };
 
     const penetrating = parseInt((options.penetrating = attackItem.findModsByXmlid("PENETRATING")?.LEVELS)) || 0;
