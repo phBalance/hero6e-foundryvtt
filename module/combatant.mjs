@@ -44,8 +44,8 @@ export class HeroSystem6eCombatant extends Combatant {
             return true;
         }
 
-        if (this.actor.statuses.has("holding")) {
-            if (segmentNumber === this.combat.segment) {
+        if (segmentNumber === this.combat.segment) {
+            if (this.actor.statuses.has("holding") || this.actor.statuses.has("haymaker")) {
                 return true;
             }
         }

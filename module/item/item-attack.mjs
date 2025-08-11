@@ -2000,6 +2000,11 @@ export async function _onRollDamage(event) {
         actionDataJSON: actionToJSON(action),
     };
 
+    // turn off haymaker
+    await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
+        active: false,
+    });
+
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
