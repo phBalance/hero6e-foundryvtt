@@ -239,7 +239,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
                 for (let s = 1; s <= 12; s++) {
                     for (const turn of context.turns) {
                         const combatant = combat.combatants.find((c) => c.id === turn.id);
-                        if (combatant.hasPhase(s)) {
+                        if (combatant.hasPhaseOrHolding(s)) {
                             context.segments[s].push({
                                 ...turn,
                                 segment: s,

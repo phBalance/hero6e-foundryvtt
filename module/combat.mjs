@@ -504,54 +504,54 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
-    static getSegment(spd, index) {
-        let i = index;
-        for (let segment = 1; segment <= 12; segment++) {
-            if (HeroSystem6eCombat.hasPhase(spd, segment)) {
-                i--;
-                if (i < 0) {
-                    return segment;
-                }
-            }
-        }
-        return 12;
-    }
+    // static getSegment(spd, index) {
+    //     let i = index;
+    //     for (let segment = 1; segment <= 12; segment++) {
+    //         if (HeroSystem6eCombat.hasPhase(spd, segment)) {
+    //             i--;
+    //             if (i < 0) {
+    //                 return segment;
+    //             }
+    //         }
+    //     }
+    //     return 12;
+    // }
 
-    static hasPhase(spd, segment) {
-        switch (clamp(parseInt(spd), 0, 12)) {
-            case 0:
-                // At SPD 0, a character is frozen in place, unable to move or take any other Actions. He can only take Post-Segment 12 Recoveries,
-                return [12].includes(segment);
-            case 1:
-                return [12].includes(segment);
-            case 2:
-                return [6, 12].includes(segment);
-            case 3:
-                return [4, 8, 12].includes(segment);
-            case 4:
-                return [3, 6, 9, 12].includes(segment);
-            case 5:
-                return [3, 5, 8, 10, 12].includes(segment);
-            case 6:
-                return [2, 4, 6, 8, 10, 12].includes(segment);
-            case 7:
-                return [2, 4, 6, 7, 9, 11, 12].includes(segment);
-            case 8:
-                return [2, 3, 5, 6, 8, 9, 11, 12].includes(segment);
-            case 9:
-                return [2, 3, 4, 6, 7, 8, 10, 11, 12].includes(segment);
-            case 10:
-                return [2, 3, 4, 5, 6, 8, 9, 10, 11, 12].includes(segment);
-            case 11:
-                return [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(segment);
-            case 12:
-                return true;
-            default:
-                // if (spd < 1 && segment === 12) return true;
-                // if (spd === undefined && segment === 12) return true;
-                return false;
-        }
-    }
+    // static hasPhase(spd, segment) {
+    //     switch (clamp(parseInt(spd), 0, 12)) {
+    //         case 0:
+    //             // At SPD 0, a character is frozen in place, unable to move or take any other Actions. He can only take Post-Segment 12 Recoveries,
+    //             return [12].includes(segment);
+    //         case 1:
+    //             return [12].includes(segment);
+    //         case 2:
+    //             return [6, 12].includes(segment);
+    //         case 3:
+    //             return [4, 8, 12].includes(segment);
+    //         case 4:
+    //             return [3, 6, 9, 12].includes(segment);
+    //         case 5:
+    //             return [3, 5, 8, 10, 12].includes(segment);
+    //         case 6:
+    //             return [2, 4, 6, 8, 10, 12].includes(segment);
+    //         case 7:
+    //             return [2, 4, 6, 7, 9, 11, 12].includes(segment);
+    //         case 8:
+    //             return [2, 3, 5, 6, 8, 9, 11, 12].includes(segment);
+    //         case 9:
+    //             return [2, 3, 4, 6, 7, 8, 10, 11, 12].includes(segment);
+    //         case 10:
+    //             return [2, 3, 4, 5, 6, 8, 9, 10, 11, 12].includes(segment);
+    //         case 11:
+    //             return [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(segment);
+    //         case 12:
+    //             return true;
+    //         default:
+    //             // if (spd < 1 && segment === 12) return true;
+    //             // if (spd === undefined && segment === 12) return true;
+    //             return false;
+    //     }
+    // }
 
     /**
      * Get the current history state of the Combat encounter.
@@ -682,7 +682,7 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // Stop holding
-        if (combatant.actor.statuses.has("holding")) {
+        if (combatant.actor.statuses.has("holding") && combatant.actor.hasPhase(this.segment)) {
             //const ae = combatant.actor.effects.find((effect) => effect.statuses.has("holding"));
             //combatant.actor.removeActiveEffect(ae);
             await combatant.actor.toggleStatusEffect(
@@ -1265,7 +1265,7 @@ export class HeroSystem6eCombat extends Combat {
             );
         }
         const startIndex = this.turn + 1;
-        let foundIndexInSlice = this.turns.slice(startIndex).findIndex((t) => t.hasPhase(this.segment));
+        let foundIndexInSlice = this.turns.slice(startIndex).findIndex((t) => t.hasPhaseOrHolding(this.segment));
 
         if (foundIndexInSlice > -1) {
             const updateData = {
@@ -1311,7 +1311,7 @@ export class HeroSystem6eCombat extends Combat {
             updateData.worldTime = { delta: advanceTime };
             segmentHasCombatants = await this.rebuildInitiative();
         }
-        const turn = this.turns.findIndex((t) => t.hasPhase(segmentNumberNext));
+        const turn = this.turns.findIndex((t) => t.hasPhaseOrHolding(segmentNumberNext));
         // Rounds don't really mean anything (we use HeroTurns), just need to change it to trigger _OnStartTurn etal
         //updateData.round = this.round + 1;
         updateData.turn = turn;
@@ -1529,7 +1529,7 @@ export class HeroSystem6eCombat extends Combat {
             updateData.worldTime = { delta: advanceTime };
             segmentHasCombatants = await this.rebuildInitiative();
         }
-        const turn = this.turns.findLastIndex((t) => t.hasPhase(segmentNumberNext));
+        const turn = this.turns.findLastIndex((t) => t.hasPhaseOrHolding(segmentNumberNext));
         // Rounds don't really mean anything (we use HeroTurns), just need to change it to trigger _OnStartTurn etal
         //updateData.round = this.round - 1;
         updateData.turn = turn;
@@ -1700,7 +1700,7 @@ export class HeroSystem6eCombat extends Combat {
                 await this.setFlag(game.system.id, "segment", 12);
                 //turnData.turnNumber--;
             }
-            turn = this.turns.findLastIndex((t) => t.hasPhase(this.segment));
+            turn = this.turns.findLastIndex((t) => t.hasPhaseOrHolding(this.segment));
             //await this.setFlag("world", "turnData", turnData);
             //this.turnNumber = turnData.turnNumber;
             //this.system.segmentNumber = turnData.segmentNumber;
@@ -1722,7 +1722,7 @@ export class HeroSystem6eCombat extends Combat {
 
     computeInitiative(c, updList) {
         const id = c._id || c.id;
-        const hasSegment = c.hasPhase(this.segment || 12);
+        const hasSegment = c.hasPhaseOrHolding(this.segment || 12);
         const isOnHold = false; //c.actor.statuses.has("holding"); //false; //c.actor?.getHoldAction();
         const isOnAbort = false; //c.actor?.getAbortAction();
         let name = c.name;
