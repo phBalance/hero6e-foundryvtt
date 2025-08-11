@@ -728,7 +728,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     flags: {
                         [`${game.system.id}`]: {
                             XMLID: "naturalBodyHealing",
-                            expiresOn: "segment",
+                            expiresOn: "segmentStart",
                         },
                     },
                 };
