@@ -32,8 +32,25 @@ export class HeroSystem6eCombatant extends Combatant {
             }
         }
 
-        let _hasPhase = phases.includes(segmentNumber);
-        return _hasPhase;
+        if (phases.includes(segmentNumber)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    hasPhaseOrHolding(segmentNumber) {
+        if (this.hasPhase(segmentNumber)) {
+            return true;
+        }
+
+        if (segmentNumber === this.combat.segment) {
+            if (this.actor.statuses.has("holding") || this.actor.statuses.has("haymaker")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     getSegments(options) {
