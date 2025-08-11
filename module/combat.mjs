@@ -640,9 +640,9 @@ export class HeroSystem6eCombat extends Combat {
         const _segmentNumber = combatant.flags[game.system.id]?.segment || this.segment;
 
         if (
-            !combatant.flags[game.system.id].lightningReflexes &&
+            !combatant.flags?.[game.system.id]?.lightningReflexes &&
             game.combat.combatants.find(
-                (c) => combatant.tokenId === c.tokenId && combatant.flags[game.system.id].lightningReflexes,
+                (c) => combatant.tokenId === c.tokenId && combatant.flags?.[game.system.id]?.lightningReflexes,
             )
         ) {
             console.log(
@@ -715,6 +715,11 @@ export class HeroSystem6eCombat extends Combat {
         const HAYMAKER = combatant.actor.items.find((i) => i.system.XMLID === "HAYMAKER");
         if (HAYMAKER?.system.active === true) {
             await HAYMAKER.toggle();
+        }
+
+        // Stop ABORT
+        if (combatant.actor.statuses.has("aborted")) {
+            await combatant.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.id);
         }
 
         // Stop dodges and other maneuvers' active effects that expire automatically
