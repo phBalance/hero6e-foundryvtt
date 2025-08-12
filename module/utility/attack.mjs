@@ -1,3 +1,4 @@
+import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { calculateDistanceBetween } from "./range.mjs";
 
@@ -259,9 +260,11 @@ export class Attack {
         const attackerToken =
             actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
             actor?.prototypeToken;
+
         if (!attackerToken) {
             console.error("There is no actor token!");
         }
+
         return attackerToken;
     }
 
@@ -514,7 +517,7 @@ export function actionToJSON(action) {
         current: action.current,
         maneuver: action.maneuver,
         system: {
-            actorUuid: action.system.actor.uuid,
+            actorObj: actorToActorObj(action.system.actor),
             attackerTokenObj: tokenToTokenObj(action.system.attackerToken),
             currentItem: dehydrateAttackItem(action.system.currentItem),
             currentTargetTokenObjs: action.system.currentTargets.map((token) => tokenToTokenObj(token)),
@@ -536,7 +539,7 @@ export function actionToJSON(action) {
 
 export function actionFromJSON(json) {
     const data = JSON.parse(json);
-    const actor = fromUuidSync(data.system.actorUuid);
+    const actor = actorObjToActor(data.system.actorObj);
 
     const action = {
         current: data.current,
@@ -576,7 +579,7 @@ function tokenToTokenObj(token) {
 
         // PrototypeToken
         protoObj: isPrototypeToken ? token.toObject(false) : null,
-        actorUuid: isPrototypeToken ? token.actor.uuid : null,
+        actorObj: isPrototypeToken ? actorToActorObj(token.actor) : null,
     };
 }
 
@@ -593,5 +596,36 @@ function tokenFromTokenObj(tokenObj) {
     }
 
     // This needs to become a PrototypeToken by deserializing and adding the actor/parent link
-    return FoundryVttPrototypeToken.fromSource(tokenObj.protoObj, { parent: fromUuidSync(tokenObj.actorUuid) });
+    return FoundryVttPrototypeToken.fromSource(tokenObj.protoObj, { parent: actorObjToActor(tokenObj.actorObj) });
+}
+
+/**
+ * Actors can be temporary or in the database. Serialize an actor depending on which it is.
+ *
+ * @param {HeroSystem6eActor} actor
+ * @returns {ActorObj}
+ */
+function actorToActorObj(actor) {
+    const uuid = actor.uuid;
+
+    return {
+        uuid: uuid, // actor from the database
+        json: !uuid ? actor.toObject(false) : null, // temporary actors get turned into json
+    };
+}
+
+/**
+ * Deserialize an ActorObj into a HeroSystem6eActor.
+ *
+ * @param {ActorObj} actorObj
+ * @returns {HeroSystem6eActor}
+ */
+function actorObjToActor(actorObj) {
+    // DB based actor?
+    if (actorObj.uuid) {
+        return fromUuidSync(actorObj.uuid);
+    }
+
+    // Create a HeroSystem6eActor from our serialized json.
+    return HeroSystem6eActor.fromSource(actorObj.json);
 }
