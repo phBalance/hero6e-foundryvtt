@@ -1,10 +1,14 @@
 # Releases
 
+## Version 4.1.12 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix broken generic roller when token not selected. [#2641](https://github.com/dmdorman/hero6e-foundryvtt/issues/2641)
+- Community contribution from ndguarino: COSTSENDONLYTOACTIVATE should not use END every phase. [#2640](https://github.com/dmdorman/hero6e-foundryvtt/issues/2640)
+
 ## Version 4.1.11 20250809 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Knockback no longer counts PD as KB resistance and no longer ignores KB resistance. [#2512](https://github.com/dmdorman/hero6e-foundryvtt/issues/2512)
 - Not every actor type should have combat maneuvers added. [#2632](https://github.com/dmdorman/hero6e-foundryvtt/issues/2632)
-- Fix broken generic roller when token not selected. [#2641](https://github.com/dmdorman/hero6e-foundryvtt/issues/2641)
 
 ## Version 4.1.10 20250809
 
