@@ -2235,9 +2235,7 @@ export async function _onGenericRollerApplyDamage(event) {
               type: "npc",
           });
 
-    const item = HeroSystem6eItem.fromSource(JSON.parse(damageData.itemJsonStr), {
-        parent: actor,
-    });
+    const item = rehydrateAttackItem(damageData.itemJsonStr, actor).item;
 
     actor.system.is5e = item.system.is5e;
     await actor._postUpload();

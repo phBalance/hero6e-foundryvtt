@@ -1,4 +1,5 @@
 import { HEROSYS } from "./herosystem6e.mjs";
+import { actionToJSON, Attack } from "./utility/attack.mjs";
 import { dehydrateAttackItem } from "./item/item-attack.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 
@@ -214,7 +215,7 @@ export class GenericRoller {
         const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
         const is5eAttack = actor !== undefined ? canvas.tokens.controlled.at(0).actor.is5e : DefaultEdition === "five";
         const tempActor = new HeroSystem6eActor({
-            name: `Generic Actor`,
+            name: "Generic Actor",
             type: "npc",
         });
         tempActor.system.is5e = is5eAttack;
@@ -284,8 +285,7 @@ export class GenericRoller {
         // PH: FIXME: Should put this into handlebars
         let cardHtml = await heroRoller.render(`Roll Generic ${damageTypeString} Damage`);
 
-        // PH: FIXME: Is this an actual field of action or just a kludge?
-        const action = { damageType: damageType };
+        const action = Attack.getActionInfo(item, [], {});
 
         if (["NORMAL", "KILLING"].includes(damageType)) {
             cardHtml += `
@@ -294,7 +294,7 @@ export class GenericRoller {
                                 title="Apply damage to selected tokens."
                                 ${actor ? `data-actor-uuid='${actor.uuid}'` : ""}
                                 ${item ? `data-item-json-str='${dehydrateAttackItem(item)}'` : ""}
-                                data-action-data='${JSON.stringify(action)}'
+                                data-action-data='${actionToJSON(action)}'
                                 data-roller='${heroRoller.toJSON()}'
                                 data-target-tokens='${JSON.stringify([])}'
                             >
