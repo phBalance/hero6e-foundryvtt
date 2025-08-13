@@ -517,41 +517,41 @@ export class HeroSystem6eCombat extends Combat {
         return 12;
     }
 
-    // static hasPhase(spd, segment) {
-    //     switch (clamp(parseInt(spd), 0, 12)) {
-    //         case 0:
-    //             // At SPD 0, a character is frozen in place, unable to move or take any other Actions. He can only take Post-Segment 12 Recoveries,
-    //             return [12].includes(segment);
-    //         case 1:
-    //             return [12].includes(segment);
-    //         case 2:
-    //             return [6, 12].includes(segment);
-    //         case 3:
-    //             return [4, 8, 12].includes(segment);
-    //         case 4:
-    //             return [3, 6, 9, 12].includes(segment);
-    //         case 5:
-    //             return [3, 5, 8, 10, 12].includes(segment);
-    //         case 6:
-    //             return [2, 4, 6, 8, 10, 12].includes(segment);
-    //         case 7:
-    //             return [2, 4, 6, 7, 9, 11, 12].includes(segment);
-    //         case 8:
-    //             return [2, 3, 5, 6, 8, 9, 11, 12].includes(segment);
-    //         case 9:
-    //             return [2, 3, 4, 6, 7, 8, 10, 11, 12].includes(segment);
-    //         case 10:
-    //             return [2, 3, 4, 5, 6, 8, 9, 10, 11, 12].includes(segment);
-    //         case 11:
-    //             return [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(segment);
-    //         case 12:
-    //             return true;
-    //         default:
-    //             // if (spd < 1 && segment === 12) return true;
-    //             // if (spd === undefined && segment === 12) return true;
-    //             return false;
-    //     }
-    // }
+    static hasPhase(spd, segment) {
+        switch (clamp(parseInt(spd), 0, 12)) {
+            case 0:
+                // At SPD 0, a character is frozen in place, unable to move or take any other Actions. He can only take Post-Segment 12 Recoveries,
+                return [12].includes(segment);
+            case 1:
+                return [12].includes(segment);
+            case 2:
+                return [6, 12].includes(segment);
+            case 3:
+                return [4, 8, 12].includes(segment);
+            case 4:
+                return [3, 6, 9, 12].includes(segment);
+            case 5:
+                return [3, 5, 8, 10, 12].includes(segment);
+            case 6:
+                return [2, 4, 6, 8, 10, 12].includes(segment);
+            case 7:
+                return [2, 4, 6, 7, 9, 11, 12].includes(segment);
+            case 8:
+                return [2, 3, 5, 6, 8, 9, 11, 12].includes(segment);
+            case 9:
+                return [2, 3, 4, 6, 7, 8, 10, 11, 12].includes(segment);
+            case 10:
+                return [2, 3, 4, 5, 6, 8, 9, 10, 11, 12].includes(segment);
+            case 11:
+                return [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(segment);
+            case 12:
+                return true;
+            default:
+                // if (spd < 1 && segment === 12) return true;
+                // if (spd === undefined && segment === 12) return true;
+                return false;
+        }
+    }
 
     /**
      * Get the current history state of the Combat encounter.
