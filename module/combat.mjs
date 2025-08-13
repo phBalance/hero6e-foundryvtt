@@ -504,18 +504,18 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
-    // static getSegment(spd, index) {
-    //     let i = index;
-    //     for (let segment = 1; segment <= 12; segment++) {
-    //         if (HeroSystem6eCombat.hasPhase(spd, segment)) {
-    //             i--;
-    //             if (i < 0) {
-    //                 return segment;
-    //             }
-    //         }
-    //     }
-    //     return 12;
-    // }
+    static getSegment(spd, index) {
+        let i = index;
+        for (let segment = 1; segment <= 12; segment++) {
+            if (HeroSystem6eCombat.hasPhase(spd, segment)) {
+                i--;
+                if (i < 0) {
+                    return segment;
+                }
+            }
+        }
+        return 12;
+    }
 
     // static hasPhase(spd, segment) {
     //     switch (clamp(parseInt(spd), 0, 12)) {
