@@ -235,3 +235,8 @@ li.directory-item.child-item {
 .hero.chat-card button {
     width: 100%;
 }
+
+/* V13 generic roller buttons don't seem to default to 100% like they do in v12 */
+.message-content button.generic-roller-apply-damage {
+    width: 100%;
+}
