@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.1.12 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.12 20250813 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed broken generic roller. [#2641](https://github.com/dmdorman/hero6e-foundryvtt/issues/2641)
 - Community contribution from ndguarino: COSTSENDONLYTOACTIVATE should not use END every phase. [#2640](https://github.com/dmdorman/hero6e-foundryvtt/issues/2640)
