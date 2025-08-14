@@ -4,6 +4,7 @@
 
 - Fix broken generic roller when token not selected. [#2641](https://github.com/dmdorman/hero6e-foundryvtt/issues/2641)
 - Community contribution from ndguarino: COSTSENDONLYTOACTIVATE should not use END every phase. [#2640](https://github.com/dmdorman/hero6e-foundryvtt/issues/2640)
+- Improved FoundryVTT DARK color scheme. [#2283](https://github.com/dmdorman/hero6e-foundryvtt/issues/2283)
 
 ## Version 4.1.11 20250809 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
