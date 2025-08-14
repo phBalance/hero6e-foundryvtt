@@ -1879,6 +1879,9 @@ export class HeroSystem6eActor extends Actor {
             {
                 name: "Test Actor",
                 type: this.type,
+                system: {
+                    is5e: this.is5e,
+                },
             },
             {},
         );
@@ -2541,6 +2544,7 @@ export class HeroSystem6eActor extends Actor {
                 CHARACTERISTIC: "INT",
                 state: "trained",
                 levels: "0",
+                is5e: this.is5e,
             },
         };
         const perceptionItem = this.id
@@ -2593,6 +2597,7 @@ export class HeroSystem6eActor extends Actor {
                 ADDSTR,
                 USEWEAPON,
                 WEAPONEFFECT,
+                is5e: this.is5e,
             },
         };
 
