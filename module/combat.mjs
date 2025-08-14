@@ -640,9 +640,9 @@ export class HeroSystem6eCombat extends Combat {
         const _segmentNumber = combatant.flags[game.system.id]?.segment || this.segment;
 
         if (
-            !combatant.flags?.[game.system.id]?.lightningReflexes &&
+            !combatant.flags[game.system.id]?.lightningReflexes &&
             game.combat.combatants.find(
-                (c) => combatant.tokenId === c.tokenId && combatant.flags?.[game.system.id]?.lightningReflexes,
+                (c) => combatant.tokenId === c.tokenId && combatant.flags[game.system.id]?.lightningReflexes,
             )
         ) {
             console.log(
