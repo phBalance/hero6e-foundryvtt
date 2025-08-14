@@ -36,8 +36,7 @@ export class GenericRoller {
                 //console.warn(`unable to find dom element`);
                 return;
             }
-            // V13
-            const content = await (foundry.applications.handlebars.renderTemplate || renderTemplate)(
+            const content = await foundryVttRenderTemplate(
                 `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
                 {
                     css: `game-version-major-${game.version.split(".")[0]}`,
@@ -49,7 +48,7 @@ export class GenericRoller {
             GenericRoller.activateListeners($content);
         });
 
-        //V12 only
+        // V12 only
         Hooks.on("renderSidebarTab", async (app, html) => {
             if (app.tabName !== "chat") return;
             if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
@@ -179,7 +178,7 @@ export class GenericRoller {
             }
         }
 
-        const template = await (foundry.applications.handlebars.renderTemplate || renderTemplate)(
+        const template = await foundryVttRenderTemplate(
             `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
             options,
         );
