@@ -1352,7 +1352,7 @@ function getAttackTags(item) {
                 default:
                     attackTags.push({
                         name: `${adder.ALIAS || adder.XMLID}`,
-                        title: `${adder.OPTION_ALIAS || ""}`,
+                        title: `${adder.OPTION_ALIAS || adder.XMLID || ""}`,
                     });
             }
         }
@@ -1379,7 +1379,7 @@ function getAttackTags(item) {
 
     // FLASH
     if (baseAttackItem.system.XMLID === "FLASH") {
-        attackTags.push({ name: baseAttackItem.system.OPTION_ALIAS, title: baseAttackItem.system.XMLID });
+        attackTags.push({ name: baseAttackItem.system.OPTION_ALIAS, title: baseAttackItem.system.OPTIONID });
         for (const adder of baseAttackItem.adders) {
             attackTags.push({ name: adder.ALIAS, title: adder.XMLID });
         }
@@ -1495,6 +1495,11 @@ function getAttackTags(item) {
             title: baseAttackItem.name,
         });
     }
+
+    // Remove any duplicates.  Like with FLASH #2629
+    attackTags = Array.from(
+        new Set(attackTags.map((o) => o.name)).map((name) => attackTags.find((p) => p.name === name)),
+    );
 
     return attackTags;
 }
