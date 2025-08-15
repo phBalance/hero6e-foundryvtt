@@ -355,7 +355,7 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
 }
 
 // PH: FIXME: formData is insufficient ... why are we doing it this way?
-export async function processActionToHit(item, formData) {
+export async function processActionToHit(item, formData, options = {}) {
     if (!item) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
@@ -412,14 +412,14 @@ export async function processActionToHit(item, formData) {
         }
     }
 
-    const action = Attack.getActionInfo(item, _targetArray, formData);
+    const action = Attack.getActionInfo(item, _targetArray, { ...formData, ...options });
     item = action.system.item[action.current.itemId];
 
     // PH: FIXME: Need to not pass in formData presumably or at least pass in action
     if (item.getAoeModifier()) {
-        await doAoeActionToHit(item, formData);
+        await doAoeActionToHit(item, { ...formData, ...options });
     } else {
-        await doSingleTargetActionToHit(item, formData);
+        await doSingleTargetActionToHit(item, { ...formData, ...options });
     }
 }
 
@@ -1863,7 +1863,10 @@ export async function _onRollDamage(event) {
     }
 
     const action = actionFromJSON(toHitData.actionData);
-    const token = getTokenEducatedGuess({ action });
+    if (!action?.current.attackerTokenId) {
+        console.warn("expecting action.current.attackerTokenId");
+    }
+    const token = getTokenEducatedGuess({ action, actor: item.actor });
     const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
@@ -4425,8 +4428,8 @@ export function getTokenEducatedGuess(options = {}) {
     const scene = game.scenes.current;
     const token =
         scene.tokens.get(tokenId) ||
-        actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-        actor.getActiveTokens()[0];
+        actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+        actor?.getActiveTokens()[0];
     if (!token) {
         console.error(`Unable to find token for ${actor.name}`);
     }

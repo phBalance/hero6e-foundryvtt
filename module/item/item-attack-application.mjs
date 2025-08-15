@@ -700,7 +700,7 @@ export class ItemAttackFormApplication extends FormApplication {
             canvas.tokens.activate();
             await this.close();
 
-            return processActionToHit(this.data.effectiveItem, formData);
+            return processActionToHit(this.data.effectiveItem, formData, { token: this.data.token });
         }
 
         this.data.formData ??= {};
