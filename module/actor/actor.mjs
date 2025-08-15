@@ -1781,7 +1781,7 @@ export class HeroSystem6eActor extends Actor {
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    async uploadFromXml(xml) {
+    async uploadFromXml(xml, options) {
         // Convert xml string to xml document (if necessary)
         if (typeof xml === "string") {
             const parser = new DOMParser();
@@ -1873,6 +1873,13 @@ export class HeroSystem6eActor extends Actor {
         changes["name"] = this.name;
         changes[`flags.${game.system.id}`] = {
             uploading: true,
+            file: {
+                lastModifiedDate: options?.file?.lastModifiedDate,
+                name: options?.file?.name,
+                size: options?.file?.size,
+                type: options?.file?.type,
+                webkitRelativePath: options?.file?.webkitRelativePath,
+            },
         };
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
