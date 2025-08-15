@@ -2,7 +2,7 @@
 
 ## Version 4.1.13 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
--
+- Improved ChatMessage to show token image, name, and user. [#2608](https://github.com/dmdorman/hero6e-foundryvtt/issues/2608)
 
 ## Version 4.1.12 20250813
 

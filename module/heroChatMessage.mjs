@@ -36,12 +36,22 @@ export class HeroSystem6eChatMessage extends ChatMessage {
         return ChatMessage?.getSpeakerActor?.(this.speaker);
     }
 
+    get speakerToken() {
+        if (!game.scenes) return null; // In case we're in the middle of game setup
+        const sceneId = this.speaker.scene ?? "";
+        const tokenId = this.speaker.token ?? "";
+        if (!tokenId) {
+            console.warn("missing tokenId from speaker");
+        }
+        return game.scenes.get(sceneId)?.tokens.get(tokenId) ?? this.speakerActor?.prototypeToken ?? null;
+    }
+
     heroHeader(html) {
         const header = html?.querySelector("header.message-header");
         if (header) {
             try {
                 const actor = this.speakerActor;
-                const token = this.token ?? actor?.prototypeToken;
+                const token = this.speakerToken;
 
                 if (token) {
                     const [imageUrl, scale] = (() => {
@@ -89,12 +99,14 @@ export class HeroSystem6eChatMessage extends ChatMessage {
 
                     header.prepend(portrait);
 
-                    // if (this.author) {
-                    //     const authorSpan = document.createElement("span");
-                    //     authorSpan.classList.add("user");
-                    //     authorSpan.append(this.author.name);
-                    //     header.append(authorSpan);
-                    // }
+                    const messageSender = header.querySelector(".message-sender");
+
+                    if (messageSender && this.author) {
+                        const authorElement = document.createElement("span");
+                        authorElement.classList.add("user");
+                        authorElement.append(this.author.name);
+                        messageSender.append(authorElement);
+                    }
                 }
             } catch (e) {
                 console.error(e);

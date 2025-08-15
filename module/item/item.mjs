@@ -1269,7 +1269,7 @@ export class HeroSystem6eItem extends Item {
         return false;
     }
 
-    async roll(event) {
+    async roll(event, options = {}) {
         if (!this.actor.canAct(true, event)) return;
 
         if (this.actor.needsToAbortToAct() && !this.canBeAbortedTo()) {
@@ -1301,7 +1301,7 @@ export class HeroSystem6eItem extends Item {
                 case "TELEKINESIS":
                 case "TRANSFER":
                 case "TRANSFORM":
-                    return collectActionDataBeforeToHitOptions(this, event);
+                    return collectActionDataBeforeToHitOptions(this, { ...options, event });
 
                 case "ABSORPTION":
                 case "DISPEL":
