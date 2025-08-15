@@ -788,6 +788,7 @@ export class HeroSystem6eActor extends Actor {
                     flags: {
                         [game.system.id]: {
                             takeRecovery: true,
+                            expiresOn: "segmentStart",
                         },
                     },
                 };
