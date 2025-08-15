@@ -321,18 +321,18 @@ if (isGameV13OrLater()) {
     Hooks.on("renderChatMessageHTML", (app, html, data) => {
         // Display action buttons
         chat.displayChatActionButtons(app, $(html), data);
-        HeroSystem6eCardHelpers.onMessageRendered($(html));
+        //HeroSystem6eCardHelpers.onMessageRendered($(html));
     });
 } else {
     Hooks.on("renderChatMessage", (app, html, data) => {
         // Display action buttons
         chat.displayChatActionButtons(app, html, data);
-        HeroSystem6eCardHelpers.onMessageRendered(html);
+        //HeroSystem6eCardHelpers.onMessageRendered(html);
     });
 }
 
-Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
-Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
+// Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
+// Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 
 // When actor SPD is changed we need to setupTurns again
 Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
