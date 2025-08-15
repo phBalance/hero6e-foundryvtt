@@ -70,6 +70,7 @@ function itemHasDefenseActiveEffect(item) {
             getPowerInfo({
                 xmlid: ch.key.match(/system\.characteristics\.([a-z]+)\.max/)?.[1].toUpperCase(),
                 actor: item.actor,
+                xmlTag: ch.key.match(/system\.characteristics\.([a-z]+)\.max/)?.[1].toUpperCase(), // only search for characteristic not adders and such
             })?.behaviors.includes("defense"),
         ),
     );
