@@ -2,6 +2,18 @@
     display: none;
 }
 
+.upload-button:not(.is-owner) > span {
+    color: #4b4a44;
+}
+
+.upload-button.is-owner {
+    &:hover,
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 5px red;
+    }
+}
+
 .upload-button {
     height: 30px;
     margin: 3px 5px;
@@ -13,12 +25,6 @@
     font-family: Signika, sans-serif;
     align-content: center;
     text-align: center;
-
-    &:hover,
-    &:focus {
-        outline: none;
-        box-shadow: 0 0 5px red;
-    }
 
     &:disabled {
         color: #4b4a44;

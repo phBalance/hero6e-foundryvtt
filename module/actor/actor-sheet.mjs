@@ -76,6 +76,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
         const data = super.getData(options);
         data.token = options?.token;
+        data.isOwner = this.object.isOwner;
         data.gameSystemId = game.system.id;
         data.actor.flags[game.system.id] ??= {};
         if (data.actor.flags[game.system.id].uploading) {
@@ -1350,7 +1351,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(contents, "text/xml");
-            await this.actor.uploadFromXml(xmlDoc);
+            await this.actor.uploadFromXml(xmlDoc, { file });
         }.bind(this);
         reader.readAsText(file);
     }

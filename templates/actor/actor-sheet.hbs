@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sheet' this}} --}}
+{{log 'actor-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off">
     {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}
         <aside>
@@ -154,7 +154,7 @@
     <!-- TOP DIV -->
     <header class="char-header sheet-header ">
         <div class="header-fields flexrow" style="width: 100%">
-            <h1 class="charname flex4"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
+            <h1 class="charname flex4" title='"{{getScopedFlagValue actor @root/gameSystemId "file" "name"}}" was uploaded by {{getScopedFlagValue actor @root/gameSystemId "file" "uploadedBy"}}']"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
 
 
             {{#if actor.system.is5e}}
@@ -171,9 +171,10 @@
                 <div class="points flex0" title="{{activePointsTitle}}">{{actor._activePointsForDisplay}}AP</div>
             {{/if}}
 
-            <label class="upload-button flex0">
+
+            <label class="upload-button flex0 {{#if isOwner}}is-owner{{/if}}">
                 <span>Upload&nbsp;.HDC</span>
-                <input type="file" accept=".hdc" />
+                <input type="file" accept=".hdc" \>
             </label>
         </div>
     </header>
