@@ -119,7 +119,7 @@ export class GenericRoller {
 
         // Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
         const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
-            .addNumber(userSelection.ocv, "OCV")
+            .addNumber(Math.clamp(parseInt(userSelection.ocv) || 0, -99, 99), "OCV")
             .addNumber(11, "Base to hit")
             .addDice(-3)
             .makeSuccessRoll();
@@ -225,7 +225,7 @@ export class GenericRoller {
 
         // Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
         const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
-            .addDice(userSelection.dice, "DICE")
+            .addDice(Math.clamp(userSelection.dice, 0, 999), "DICE")
             .addHalfDice(userSelection.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
             .addDiceMinus1(userSelection.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
             .addNumber(userSelection.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
