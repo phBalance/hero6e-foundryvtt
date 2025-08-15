@@ -25,6 +25,17 @@ export class HeroSystem6eChatMessage extends ChatMessage {
         return html;
     }
 
+    get speakerActor() {
+        // V13
+        if (super.speakerActor) {
+            // return this.constructor.getSpeakerActor(this.speaker) ?? this.author?.character ?? null;
+            return super.speakerActor;
+        }
+
+        // V12
+        return ChatMessage?.getSpeakerActor?.(this.speaker);
+    }
+
     heroHeader(html) {
         const header = html?.querySelector("header.message-header");
         if (header) {
