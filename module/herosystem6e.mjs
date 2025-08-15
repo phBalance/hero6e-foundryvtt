@@ -32,7 +32,7 @@ import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.m
 import { HeroSystem6eItemTypeDataModelMisc } from "./item/HeroSystem6eItemTypeDataModelMisc.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 
-import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
+//import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
 
 import SettingsHelpers from "./settings/settings-helpers.mjs";
 

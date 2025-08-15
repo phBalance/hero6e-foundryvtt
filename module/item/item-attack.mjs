@@ -7,7 +7,6 @@ import {
     calculateDicePartsForItem,
     calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
-    getEffectFormulaFromItem,
     penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
