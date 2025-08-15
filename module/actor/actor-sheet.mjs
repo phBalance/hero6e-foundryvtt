@@ -880,7 +880,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         event.preventDefault();
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
-        item.roll(event);
+        item.roll(event, { token: this.token });
     }
 
     async _onItemChat(event) {

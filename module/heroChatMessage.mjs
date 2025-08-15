@@ -1,14 +1,57 @@
+import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
+
 export class HeroSystem6eChatMessage extends ChatMessage {
     // REF: https://github.com/foundryvtt/pf2e/blob/acf49e6130dc43e80c9b1f63fcb58a1ab611b4ce/src/module/chat-message/document.ts#L23
 
+    // V12
+    async getHTML() {
+        let html = await super.getHTML();
+
+        this.heroHeader(html?.[0]);
+        HeroSystem6eCardHelpers.onMessageRendered($(html));
+        HeroSystem6eCardHelpers.chatListeners($(html));
+
+        return html;
+    }
+
+    // V13
     async renderHTML(options) {
         const html = await super.renderHTML(options);
 
+        this.heroHeader(html);
+        HeroSystem6eCardHelpers.onMessageRendered($(html));
+        HeroSystem6eCardHelpers.chatListeners($(html));
+
+        return html;
+    }
+
+    get speakerActor() {
+        // V13
+        if (super.speakerActor) {
+            // return this.constructor.getSpeakerActor(this.speaker) ?? this.author?.character ?? null;
+            return super.speakerActor;
+        }
+
+        // V12
+        return ChatMessage?.getSpeakerActor?.(this.speaker);
+    }
+
+    get speakerToken() {
+        if (!game.scenes) return null; // In case we're in the middle of game setup
+        const sceneId = this.speaker.scene ?? "";
+        const tokenId = this.speaker.token ?? "";
+        if (!tokenId) {
+            console.warn("missing tokenId from speaker");
+        }
+        return game.scenes.get(sceneId)?.tokens.get(tokenId) ?? this.speakerActor?.prototypeToken ?? null;
+    }
+
+    heroHeader(html) {
         const header = html?.querySelector("header.message-header");
         if (header) {
             try {
                 const actor = this.speakerActor;
-                const token = this.token ?? actor?.prototypeToken;
+                const token = this.speakerToken;
 
                 if (token) {
                     const [imageUrl, scale] = (() => {
@@ -56,18 +99,18 @@ export class HeroSystem6eChatMessage extends ChatMessage {
 
                     header.prepend(portrait);
 
-                    // if (this.author) {
-                    //     const authorSpan = document.createElement("span");
-                    //     authorSpan.classList.add("user");
-                    //     authorSpan.append(this.author.name);
-                    //     header.append(authorSpan);
-                    // }
+                    const messageSender = header.querySelector(".message-sender");
+
+                    if (messageSender && this.author) {
+                        const authorElement = document.createElement("span");
+                        authorElement.classList.add("user");
+                        authorElement.append(this.author.name);
+                        messageSender.append(authorElement);
+                    }
                 }
             } catch (e) {
                 console.error(e);
             }
         }
-
-        return html;
     }
 }

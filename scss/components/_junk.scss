@@ -240,3 +240,12 @@ li.directory-item.child-item {
 .message-content button.generic-roller-apply-damage {
     width: 100%;
 }
+
+.chat-message .message-header h4.message-sender {
+    font-size: 18px;
+}
+
+.chat-message .message-header h4.message-sender .user {
+    font-size: 14px;
+    display: block;
+}

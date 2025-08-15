@@ -310,9 +310,9 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
  * Dialog box for collectActionDataBeforeToHitOptions. The action doesn't have to be an attack (such as
  * the Block maneuver).
  */
-export async function collectActionDataBeforeToHitOptions(item) {
+export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     const actor = item.actor;
-    const token = actor.getActiveTokens()[0];
+    const token = getTokenEducatedGuess({ token: options.token, tokenId: actor.getActiveTokens()?.[0].id });
     const data = {
         originalItem: item,
         actor: actor,
@@ -339,12 +339,15 @@ export async function collectActionDataBeforeToHitOptions(item) {
     // [NORMALDC] +v/5 Strike, FMove
     if ((item.system.EFFECT || "").match(/v\/\d+/)) {
         // Educated guess for token
-        const token =
+        const token2 =
             actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
             actor.getActiveTokens()[0];
+        if (token.id !== token2.id) {
+            console.error("token mismatch");
+        }
 
         data.showVelocity = true;
-        data.velocity = calculateVelocityInSystemUnits(item.actor, token);
+        data.velocity = calculateVelocityInSystemUnits(item.actor, token2);
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
@@ -430,12 +433,12 @@ export async function doAoeActionToHit(item, options) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const token = actor.getActiveTokens()[0];
+    const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
+
+    const token = getTokenEducatedGuess({ action, actor });
     if (!token) {
         return ui.notifications.error(`Unable to find a token on this scene associated with ${actor.name}.`);
     }
-
-    const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
 
     const aoeTemplate = getAoeTemplateForItem(item);
     if (!aoeTemplate) {
@@ -645,7 +648,7 @@ export async function doAoeActionToHit(item, options) {
     const template = `systems/${HEROSYS.module}/templates/chat/item-toHitAoe-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    speaker.alias = actor.name;
+    //speaker.alias = actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -717,9 +720,8 @@ async function doSingleTargetActionToHit(item, options) {
     const actor = item.actor;
 
     // Educated guess for token
-    const token =
-        actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-        actor.getActiveTokens()[0];
+    const token = getTokenEducatedGuess({ actor, action });
+    options.token ??= token;
 
     // STR 0 character must succeed with
     // a STR Roll in order to perform any Action that uses STR, such
@@ -1194,7 +1196,7 @@ async function doSingleTargetActionToHit(item, options) {
     }
 
     if (!item) {
-        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
         speaker["alias"] = item.actor.name;
 
         const chatData = {
@@ -1273,7 +1275,7 @@ async function doSingleTargetActionToHit(item, options) {
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    speaker.alias = actor.name;
+    //speaker.alias = actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -1511,7 +1513,7 @@ export async function _onRollKnockback(event) {
 
     const kbOptions = { ...button.dataset };
     const { item } = rehydrateActorAndAttackItem(kbOptions);
-    const token = game.scenes.current.tokens.get(kbOptions.targetTokenId);
+    const token = getTokenEducatedGuess({ tokenId: kbOptions.targetTokenId });
     const knockbackResultTotal = kbOptions.knockbackResultTotal;
     if (!item || !token || !knockbackResultTotal) {
         return ui.notifications.error(`Knockback details are not available.`);
@@ -1777,8 +1779,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: actor });
-    speaker.alias = actor.name;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+    //speaker.alias = actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -1861,6 +1863,7 @@ export async function _onRollDamage(event) {
     }
 
     const action = actionFromJSON(toHitData.actionData);
+    const token = getTokenEducatedGuess({ action });
     const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
@@ -2010,8 +2013,8 @@ export async function _onRollDamage(event) {
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-    speaker.alias = item.actor.name;
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
+    //speaker.alias = item.actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -2207,8 +2210,8 @@ export async function _onRollMindScanEffectRoll(event) {
     // render card
     const template = `systems/${HEROSYS.module}/templates/attack/item-mindscan-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-    speaker.alias = item.actor.name;
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
+    //speaker.alias = item.actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -2313,7 +2316,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
 
 export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetToken) {
     const damageData = foundry.utils.deepClone(_damageData);
-    const token = canvas.scene.tokens.get(targetToken.tokenId);
+    const token = getTokenEducatedGuess({ tokenId: targetToken?.tokenId }); // canvas.scene.tokens.get(targetToken.tokenId);
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
@@ -2764,8 +2767,8 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-    speaker.alias = item.actor.name;
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
+    //speaker.alias = item.actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -2832,8 +2835,8 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         // render card
         const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
         const cardHtml = await foundryVttRenderTemplate(template, cardData);
-        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-        speaker.alias = item.actor.name;
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
+        //speaker.alias = item.actor.name;
 
         const chatData = {
             style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -2933,8 +2936,8 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-    speaker.alias = item.actor.name;
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
+    //speaker.alias = item.actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -3065,8 +3068,8 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: attackItem.actor });
-    speaker.alias = attackItem.actor.name;
+    const speaker = ChatMessage.getSpeaker({ actor: attackItem.actor, token });
+    //speaker.alias = attackItem.actor.name;
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -3111,7 +3114,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                     actor: actor,
                     token,
                 });
-                speaker.alias = actor.name;
+                //speaker.alias = actor.name;
 
                 const chatData = {
                     style: CONST.CHAT_MESSAGE_STYLES.OOC,
@@ -3973,8 +3976,9 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     if (!useResources && resourcesUsedDescription) {
         const speaker = ChatMessage.getSpeaker({
             actor: actor,
+            token: options.token,
         });
-        speaker.alias = item.actor.name;
+        //speaker.alias = item.actor.name;
         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
         const chatData = {
             author: game.user._id,
@@ -4403,4 +4407,28 @@ export async function _onModalDamageCard(event) {
     };
     const d = new Dialog(data, { form: { closeOnSubmit: false } });
     await d.render(true);
+}
+
+export function getTokenEducatedGuess(options = {}) {
+    // If we passed in a token, consider it authorative
+    if (options.token) {
+        return options.token;
+    }
+
+    // action will be our next best bet, although tokenId is pretty good too
+    if (!options?.action && !options.tokenId) {
+        console.warn(`Unable to find action in getTokenEducatedGuess`);
+    }
+
+    const actor = options.actor ?? options?.action?.current.actor;
+    const tokenId = options?.action?.current.attackerTokenId ?? options?.tokenId ?? "";
+    const scene = game.scenes.current;
+    const token =
+        scene.tokens.get(tokenId) ||
+        actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+        actor.getActiveTokens()[0];
+    if (!token) {
+        console.error(`Unable to find token for ${actor.name}`);
+    }
+    return token;
 }
