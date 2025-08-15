@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sheet' this}} --}}
+{{log 'actor-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off">
     {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}
         <aside>
@@ -171,9 +171,10 @@
                 <div class="points flex0" title="{{activePointsTitle}}">{{actor._activePointsForDisplay}}AP</div>
             {{/if}}
 
-            <label class="upload-button flex0">
+
+            <label class="upload-button flex0 {{#if isOwner}}is-owner{{/if}}">
                 <span>Upload&nbsp;.HDC</span>
-                <input type="file" accept=".hdc" />
+                <input type="file" accept=".hdc" \>
             </label>
         </div>
     </header>
