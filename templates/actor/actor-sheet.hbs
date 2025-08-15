@@ -7,7 +7,7 @@
         </aside>
         <header class="char-header sheet-header ">
             <div class="header-fields flexrow" style="width: 100%">
-                <h1 class="charname flex4"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" disabled/></h1>
+                <h1 class="charname flex4" title="{{getScopedFlagValue actor @root/gameSystemId "file" "name"}}"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" disabled/></h1>
 
                 {{#if actor.system.is5e}}
                     <div class="fifth-ed flex0" title="5th edition {{actor._templateType}} {{actor.type}}">5{{actor._templateTypeAbreviation}}</div>
@@ -154,7 +154,7 @@
     <!-- TOP DIV -->
     <header class="char-header sheet-header ">
         <div class="header-fields flexrow" style="width: 100%">
-            <h1 class="charname flex4"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
+            <h1 class="charname flex4" title="{{getScopedFlagValue actor @root/gameSystemId "file" "name"}}"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
 
 
             {{#if actor.system.is5e}}
