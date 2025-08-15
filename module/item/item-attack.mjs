@@ -1352,7 +1352,7 @@ function getAttackTags(item) {
                 default:
                     attackTags.push({
                         name: `${adder.ALIAS || adder.XMLID}`,
-                        title: `${adder.OPTION_ALIAS || ""}`,
+                        title: `${adder.OPTION_ALIAS || adder.XMLID || ""}`,
                     });
             }
         }
@@ -1379,7 +1379,7 @@ function getAttackTags(item) {
 
     // FLASH
     if (baseAttackItem.system.XMLID === "FLASH") {
-        attackTags.push({ name: baseAttackItem.system.OPTION_ALIAS, title: baseAttackItem.system.XMLID });
+        attackTags.push({ name: baseAttackItem.system.OPTION_ALIAS, title: baseAttackItem.system.OPTIONID });
         for (const adder of baseAttackItem.adders) {
             attackTags.push({ name: adder.ALIAS, title: adder.XMLID });
         }
@@ -1495,6 +1495,11 @@ function getAttackTags(item) {
             title: baseAttackItem.name,
         });
     }
+
+    // Remove any duplicates.  Like with FLASH #2629
+    attackTags = Array.from(
+        new Set(attackTags.map((o) => o.name)).map((name) => attackTags.find((p) => p.name === name)),
+    );
 
     return attackTags;
 }
@@ -3353,9 +3358,28 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     const targetGroups = [senseAffectingItem.system.OPTIONID || senseAffectingItem.system.INPUT];
     targetGroups.push(...senseAffectingItem.adders.map((a) => a.XMLID));
     for (const adder of targetGroups) {
-        const senseGroup = senseGroups.find((sg) => sg.XMLID === adder);
+        let adder2 = adder;
+
+        // Martial Flash MANEUVER is for the entire GROUP
+        if (senseAffectingItem.system.XMLID === "MANEUVER") {
+            adder2 =
+                senseGroups.find((o) => o.XMLID.match(new RegExp(senseAffectingItem.system.INPUT, "i")))?.XMLID ||
+                adder2;
+        }
+
+        // Single sense kluge
+        if (adder2.match(/normal/i) && !adder2.includes("GROUP")) {
+            adder2 =
+                senseGroups.find((o) => o.XMLID.match(new RegExp(adder2.toUpperCase().replace("NORMAL", ""), "i")))
+                    ?.XMLID || adder2;
+            console.warn(`KLUGE: using ${adder2} instead of ${adder}`);
+        }
+
+        const senseGroup = senseGroups.find((sg) => sg.XMLID === adder2);
         if (senseGroup) {
             senseGroup.bodyDamage = damageData.bodyDamage;
+        } else {
+            console.warn(`Unable to find senseGroup ${adder2}`);
         }
     }
 
