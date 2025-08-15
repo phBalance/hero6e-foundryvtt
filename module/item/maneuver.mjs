@@ -296,15 +296,29 @@ export async function doManeuverEffects(item, action) {
     }
 
     if (hasGrabTrait) {
+        const currentTargets = action.system.currentTargets || [];
+
         // The attacker gets the grabbed state
-        newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect));
+        newActiveEffects.push(
+            item.actor.addActiveEffect({
+                ...HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect,
+                name: `Grabbing ${currentTargets.map((o) => o.name).join(" + ")}`,
+                flags: { [game.id]: { targetIds: currentTargets.map((o) => o.id) } },
+            }),
+        );
 
         // The defender/target gets the grabbed state
-        const currentTargets = action.system.currentTargets || [];
+
         currentTargets.forEach((targetedToken) => {
             // NOTE: A targetedToken can be a PrototypeToken or a TokenDocument.
             const actor = targetedToken.actor;
-            newActiveEffects.push(actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect));
+            newActiveEffects.push(
+                actor.addActiveEffect({
+                    ...HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect,
+                    name: `Grabbed by ${item.actor.name}`,
+                    flags: { [game.system.id]: { grabberById: item.actor.id } },
+                }),
+            );
         });
     }
 
