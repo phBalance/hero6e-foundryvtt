@@ -1449,11 +1449,12 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Remove all active effects with ACTOR as the parent
-        for (const ae of this.effects) {
-            if (ae.parent instanceof HeroSystem6eActor) {
-                await ae.delete();
-            }
-        }
+        // Shouldn't need this and sometimes causes duplicate delete
+        // for (const ae of this.effects) {
+        //     if (ae.parent instanceof HeroSystem6eActor) {
+        //         await ae.delete();
+        //     }
+        // }
 
         // Set Characteristics MAX to CORE
         const characteristicChangesMax = {};
@@ -1879,6 +1880,9 @@ export class HeroSystem6eActor extends Actor {
             {
                 name: "Test Actor",
                 type: this.type,
+                system: {
+                    is5e: this.is5e,
+                },
             },
             {},
         );
@@ -2541,6 +2545,7 @@ export class HeroSystem6eActor extends Actor {
                 CHARACTERISTIC: "INT",
                 state: "trained",
                 levels: "0",
+                is5e: this.is5e,
             },
         };
         const perceptionItem = this.id
@@ -2593,6 +2598,7 @@ export class HeroSystem6eActor extends Actor {
                 ADDSTR,
                 USEWEAPON,
                 WEAPONEFFECT,
+                is5e: this.is5e,
             },
         };
 

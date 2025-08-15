@@ -70,6 +70,7 @@ function itemHasDefenseActiveEffect(item) {
             getPowerInfo({
                 xmlid: ch.key.match(/system\.characteristics\.([a-z]+)\.max/)?.[1].toUpperCase(),
                 actor: item.actor,
+                xmlTag: ch.key.match(/system\.characteristics\.([a-z]+)\.max/)?.[1].toUpperCase(), // only search for characteristic not adders and such
             })?.behaviors.includes("defense"),
         ),
     );
@@ -282,13 +283,13 @@ export class HeroSystem6eItem extends Item {
         window.prepareData ??= {};
         this.system._active ??= {};
 
-        if (!this.actor) {
-            // Aaron thinks we should still run most of the prepareData.
-            // Things like item description, default values and such are still valid.
-            // The Make Attack is likely the only broken thing here when missing an Actor.
-            console.error(`Bailing on item ${this.name} which has no actor (probably Items collection)`);
-            return;
-        }
+        // if (!this.actor) {
+        //     // Aaron thinks we should still run most of the prepareData.
+        //     // Things like item description, default values and such are still valid.
+        //     // The Make Attack is likely the only broken thing here when missing an Actor.
+        //     console.error(`Bailing on item ${this.name} which has no actor (probably Items collection)`);
+        //     return;
+        // }
 
         // Basic Validatiton, we need an XMLID
         if (!this.baseInfo) {
