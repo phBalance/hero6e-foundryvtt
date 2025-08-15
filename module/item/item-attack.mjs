@@ -3357,25 +3357,29 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     // Target groups are we attacking
     const targetGroups = [senseAffectingItem.system.OPTIONID || senseAffectingItem.system.INPUT];
     targetGroups.push(...senseAffectingItem.adders.map((a) => a.XMLID));
-    for (let adder of targetGroups) {
+    for (const adder of targetGroups) {
+        let adder2 = adder;
+
         // Martial Flash MANEUVER is for the entire GROUP
         if (senseAffectingItem.system.XMLID === "MANEUVER") {
-            adder =
+            adder2 =
                 senseGroups.find((o) => o.XMLID.match(new RegExp(senseAffectingItem.system.INPUT, "i")))?.XMLID ||
-                adder;
+                adder2;
         }
 
-        // Single sense hack
-        // switch (adder) {
-        //     case "Hearing":
-        //         adder = "HEARINGGROUP";
-        // }
+        // Single sense kluge
+        if (adder2.match(/normal/i) && !adder2.includes("GROUP")) {
+            adder2 =
+                senseGroups.find((o) => o.XMLID.match(new RegExp(adder2.toUpperCase().replace("NORMAL", ""), "i")))
+                    ?.XMLID || adder2;
+            console.warn(`KLUGE: using ${adder2} instead of ${adder}`);
+        }
 
-        const senseGroup = senseGroups.find((sg) => sg.XMLID === adder);
+        const senseGroup = senseGroups.find((sg) => sg.XMLID === adder2);
         if (senseGroup) {
             senseGroup.bodyDamage = damageData.bodyDamage;
         } else {
-            console.warn(`Unable to find senseGroup ${adder}`);
+            console.warn(`Unable to find senseGroup ${adder2}`);
         }
     }
 
