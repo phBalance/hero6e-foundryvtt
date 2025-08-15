@@ -3357,10 +3357,25 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     // Target groups are we attacking
     const targetGroups = [senseAffectingItem.system.OPTIONID || senseAffectingItem.system.INPUT];
     targetGroups.push(...senseAffectingItem.adders.map((a) => a.XMLID));
-    for (const adder of targetGroups) {
+    for (let adder of targetGroups) {
+        // Martial Flash MANEUVER is for the entire GROUP
+        if (senseAffectingItem.system.XMLID === "MANEUVER") {
+            adder =
+                senseGroups.find((o) => o.XMLID.match(new RegExp(senseAffectingItem.system.INPUT, "i")))?.XMLID ||
+                adder;
+        }
+
+        // Single sense hack
+        // switch (adder) {
+        //     case "Hearing":
+        //         adder = "HEARINGGROUP";
+        // }
+
         const senseGroup = senseGroups.find((sg) => sg.XMLID === adder);
         if (senseGroup) {
             senseGroup.bodyDamage = damageData.bodyDamage;
+        } else {
+            console.warn(`Unable to find senseGroup ${adder}`);
         }
     }
 
