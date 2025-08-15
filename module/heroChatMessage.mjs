@@ -3,9 +3,29 @@ import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
 export class HeroSystem6eChatMessage extends ChatMessage {
     // REF: https://github.com/foundryvtt/pf2e/blob/acf49e6130dc43e80c9b1f63fcb58a1ab611b4ce/src/module/chat-message/document.ts#L23
 
+    // V12
+    async getHTML() {
+        let html = await super.getHTML();
+
+        this.heroHeader(html?.[0]);
+        HeroSystem6eCardHelpers.onMessageRendered($(html));
+        HeroSystem6eCardHelpers.chatListeners($(html));
+
+        return html;
+    }
+
+    // V13
     async renderHTML(options) {
         const html = await super.renderHTML(options);
 
+        this.heroHeader(html);
+        HeroSystem6eCardHelpers.onMessageRendered($(html));
+        HeroSystem6eCardHelpers.chatListeners($(html));
+
+        return html;
+    }
+
+    heroHeader(html) {
         const header = html?.querySelector("header.message-header");
         if (header) {
             try {
@@ -69,10 +89,5 @@ export class HeroSystem6eChatMessage extends ChatMessage {
                 console.error(e);
             }
         }
-
-        HeroSystem6eCardHelpers.onMessageRendered($(html));
-        HeroSystem6eCardHelpers.chatListeners($(html));
-
-        return html;
     }
 }
