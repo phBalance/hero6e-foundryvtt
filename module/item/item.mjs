@@ -5112,9 +5112,9 @@ export class HeroSystem6eItem extends Item {
                 });
             }
 
-            if (this.actor) {
+            if (this.actor && skillData.XMLID === "PERCEPTION") {
                 for (const enhancedPerception of this.actor.items.filter(
-                    (o) => o.system.XMLID === "ENHANCEDPERCEPTION" && o.system.OPTIONID === "ALL",
+                    (o) => o.system.XMLID === "ENHANCEDPERCEPTION",
                 )) {
                     enhancedPerception.system.checked = true;
                     if (enhancedPerception.system.active) {
