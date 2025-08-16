@@ -354,14 +354,60 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     await new ItemAttackFormApplication(data).render(true);
 }
 
-// PH: FIXME: formData is insufficient ... why are we doing it this way?
-export async function processActionToHit(item, formData, options = {}) {
-    if (!item) {
+export async function getTargetArray(formData) {
+    let targetArray = Array.from(game.user.targets);
+
+    // Make sure player who rolled attack is still the same
+    if (formData.userId && formData.userId !== game.user.id && game.users.get(formData.userId)) {
+        // GM or someone else intervened.  Likely an AOE template placement confirmation.
+        // Need to check if they are the same targets
+        const userTargetArray = Array.from(game.users.get(formData.userId).targets);
+        if (
+            JSON.stringify(targetArray.map((o) => o.document.id)) !==
+            JSON.stringify(userTargetArray.map((o) => o.document.id))
+        ) {
+            let html = `<table><tr><th width="50%">${game.user.name}</th><th width="50%">${game.users.get(formData.userId).name}</th></tr><tr><td><ol>`;
+            for (const target of targetArray) {
+                html += `<li style="text-align:left">${target.name}</li>`;
+            }
+            html += "</ol></td><td><ol>";
+            for (const target of userTargetArray) {
+                html += `<li style="text-align:left">${target.name}</li>`;
+            }
+            html += "</ol></td></tr></table>";
+            targetArray = await Dialog.wait({
+                title: `Pick target list`,
+                content: html,
+                buttons: {
+                    gm: {
+                        label: game.user.name,
+                        callback: async function () {
+                            return targetArray;
+                        },
+                    },
+                    user: {
+                        label: game.users.get(formData.userId).name,
+                        callback: async function () {
+                            return userTargetArray;
+                        },
+                    },
+                },
+            });
+        }
+    }
+
+    return targetArray;
+}
+
+export async function processActionToHit(item, formData) {
+    const targetArray = await getTargetArray(formData);
+    const action = Attack.getActionInfo(item, targetArray, formData);
+    if (!action) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
     const haymakerManeuverActive = item.actor?.items.find(
-        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
+        (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "HAYMAKER" && anItem.system.active,
     );
     if (haymakerManeuverActive) {
         // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
@@ -372,69 +418,23 @@ export async function processActionToHit(item, formData, options = {}) {
         }
     }
 
-    let _targetArray = Array.from(game.user.targets);
-    // Make sure player who rolled attack is still the same
-    if (formData.userId && formData.userId !== game.user.id && game.users.get(formData.userId)) {
-        // GM or someone else intervened.  Likely an AOE template placement confirmation.
-        // Need to check if they are the same targets
-        const _userTargetArray = Array.from(game.users.get(formData.userId).targets);
-        if (
-            JSON.stringify(_targetArray.map((o) => o.document.id)) !==
-            JSON.stringify(_userTargetArray.map((o) => o.document.id))
-        ) {
-            let html = `<table><tr><th width="50%">${game.user.name}</th><th width="50%">${game.users.get(formData.userId).name}</th></tr><tr><td><ol>`;
-            for (const target of _targetArray) {
-                html += `<li style="text-align:left">${target.name}</li>`;
-            }
-            html += "</ol></td><td><ol>";
-            for (const target of _userTargetArray) {
-                html += `<li style="text-align:left">${target.name}</li>`;
-            }
-            html += "</ol></td></tr></table>";
-            _targetArray = await Dialog.wait({
-                title: `Pick target list`,
-                content: html,
-                buttons: {
-                    gm: {
-                        label: game.user.name,
-                        callback: async function () {
-                            return _targetArray;
-                        },
-                    },
-                    user: {
-                        label: game.users.get(formData.userId).name,
-                        callback: async function () {
-                            return _userTargetArray;
-                        },
-                    },
-                },
-            });
-        }
-    }
-
-    const action = Attack.getActionInfo(item, _targetArray, { ...formData, ...options });
-    item = action.system.item[action.current.itemId];
-
-    // PH: FIXME: Need to not pass in formData presumably or at least pass in action
+    // PH: FIXME: Need to not pass in formData and move the interesting stuff into action
     if (item.getAoeModifier()) {
-        await doAoeActionToHit(item, { ...formData, ...options });
+        await doAoeActionToHit(action, formData);
     } else {
-        await doSingleTargetActionToHit(item, { ...formData, ...options });
+        await doSingleTargetActionToHit(action, formData);
     }
 }
 
-export async function doAoeActionToHit(item, options) {
-    if (!item) {
+export async function doAoeActionToHit(action, options) {
+    if (!action) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const actor = item.actor;
-    if (!actor) {
-        return ui.notifications.error(`Attack details are no longer available.`);
-    }
-
-    const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
-
+    const item = action.system.currentItem;
+    const actor = action.system.actor;
+    // const token = action.system.attackerToken;
+    // PH: FIXME: Why are we building a token from the action? It's in the action already.
     const token = getTokenEducatedGuess({ action, actor });
     if (!token) {
         return ui.notifications.error(`Unable to find a token on this scene associated with ${actor.name}.`);
@@ -456,10 +456,10 @@ export async function doAoeActionToHit(item, options) {
         (item) => item.type == "maneuver" && item.name === "Set" && item.isActive,
     );
 
-    const attackHeroRoller = new HeroRoller().makeSuccessRoll().addNumber(11, "Base to hit");
-
-    attackHeroRoller.addNumber(hitCharacteristic, item.system.uses);
-    attackHeroRoller
+    const attackHeroRoller = new HeroRoller()
+        .makeSuccessRoll()
+        .addNumber(11, "Base to hit")
+        .addNumber(hitCharacteristic, item.system.uses)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
@@ -635,6 +635,8 @@ export async function doAoeActionToHit(item, options) {
         item,
         itemJsonStr: dehydrateAttackItem(item),
 
+        actionData: actionToJSON(action),
+
         ...options,
 
         // misc
@@ -669,58 +671,15 @@ export async function doAoeActionToHit(item, options) {
 /// chose with the die-roll icon and adjusted with the Attack Options
 /// menu.
 /// There was a die roll, and we display the attack to hit results.
-async function doSingleTargetActionToHit(item, options) {
-    if (!item) {
+async function doSingleTargetActionToHit(action, options) {
+    if (!action) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    let _targetArray = Array.from(game.user.targets);
-    // Make sure player who rolled attack is still the same
-    if (options.userId && options.userId !== game.user.id && game.users.get(options.userId)) {
-        // GM or someone else intervened.  Likely an AOE template placement confirmation.
-        // Need to check if they are the same targets
-        const _userTargetArray = Array.from(game.users.get(options.userId).targets);
-        if (
-            JSON.stringify(_targetArray.map((o) => o.document.id)) !==
-            JSON.stringify(_userTargetArray.map((o) => o.document.id))
-        ) {
-            let html = `<table><tr><th width="50%">${game.user.name}</th><th width="50%">${game.users.get(options.userId).name}</th></tr><tr><td><ol>`;
-            for (const target of _targetArray) {
-                html += `<li style="text-align:left">${target.name}</li>`;
-            }
-            html += "</ol></td><td><ol>";
-            for (const target of _userTargetArray) {
-                html += `<li style="text-align:left">${target.name}</li>`;
-            }
-            html += "</ol></td></tr></table>";
-            _targetArray = await Dialog.wait({
-                title: `Pick target list`,
-                content: html,
-                buttons: {
-                    gm: {
-                        label: game.user.name,
-                        callback: async function () {
-                            return _targetArray;
-                        },
-                    },
-                    user: {
-                        label: game.users.get(options.userId).name,
-                        callback: async function () {
-                            return _userTargetArray;
-                        },
-                    },
-                },
-            });
-        }
-    }
-
-    const action = Attack.getActionInfo(item, _targetArray, options);
-    item = action.system.item[action.current.itemId];
+    const item = action.system.currentItem;
+    const actor = action.system.actor;
+    const token = action.system.attackerToken;
     const targets = action.system.currentTargets;
-    const actor = item.actor;
-
-    // Educated guess for token
-    const token = getTokenEducatedGuess({ actor, action });
     options.token ??= token;
 
     // STR 0 character must succeed with
@@ -802,9 +761,10 @@ async function doSingleTargetActionToHit(item, options) {
 
     let stunForEndHeroRoller = null;
 
-    const attackHeroRoller = new HeroRoller().makeSuccessRoll().addNumber(11, "Base to hit");
-    attackHeroRoller.addNumber(hitCharacteristic, itemData.uses);
-    attackHeroRoller
+    const attackHeroRoller = new HeroRoller()
+        .makeSuccessRoll()
+        .addNumber(11, "Base to hit")
+        .addNumber(hitCharacteristic, itemData.uses)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
@@ -1511,8 +1471,8 @@ export async function _onRollAoeDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
-    const { item } = rehydrateActorAndAttackItem(toHitData);
-    return doSingleTargetActionToHit(item, JSON.parse(toHitData.formData));
+    const action = actionFromJSON(toHitData.actionData);
+    return doSingleTargetActionToHit(action, JSON.parse(toHitData.formData));
 }
 
 export async function _onRollKnockback(event) {

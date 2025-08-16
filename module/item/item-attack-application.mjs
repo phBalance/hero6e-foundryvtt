@@ -721,6 +721,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 // this is the roll:
                 await processActionToHit(this.data.effectiveItem, this.data.formData);
+
                 this.data.formData.execute = this.data.action.current.execute + 1;
             }
 
