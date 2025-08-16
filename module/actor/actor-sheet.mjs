@@ -672,6 +672,19 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             return;
         }
 
+        // 5/6e only
+        const baseInfoCheck = getPowerInfo({
+            xmlid: item.system.XMLID,
+            is5e: this.actor.is5e,
+            xmlTag: item.xmlTag,
+        });
+        if (!baseInfoCheck) {
+            ui.notifications.error(
+                `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item, and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
+            );
+            return;
+        }
+
         await this.DropItemFramework(item);
     }
 
@@ -735,8 +748,8 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     /** @override */
     // eslint-disable-next-line no-unused-vars
     async _onDropItemCreate(itemData, event) {
-        itemData = itemData instanceof Array ? itemData : [itemData];
-        for (const i of itemData) {
+        const itemDataArray = itemData instanceof Array ? itemData : [itemData];
+        for (const i of itemDataArray) {
             // Make sure newly dropped items are not active
             if (i.system.active) {
                 i.system.active = false;
@@ -744,7 +757,23 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             // Remove all active effects, _postUpload will recreate them if necessary
             i.effects = [];
         }
-        const newItems = await this.actor.createEmbeddedDocuments("Item", itemData);
+
+        // Make sure XMLID exists in the actor's 5e/6e
+        for (const itemData of itemDataArray) {
+            const baseInfoCheck = getPowerInfo({
+                xmlid: itemData.system.XMLID,
+                is5e: this.actor.is5e,
+                xmlTag: itemData.xmlTag,
+            });
+            if (!baseInfoCheck) {
+                ui.notifications.error(
+                    `${itemData.system.XMLID} is not valid for ${this.actor.is5e ? "5e" : "6e"}. "${itemData.name}" was not transferred to ${this.actor.name} `,
+                );
+                return;
+            }
+        }
+
+        const newItems = await this.actor.createEmbeddedDocuments("Item", itemDataArray);
         for (const newItem of newItems) {
             await newItem._postUpload();
         }

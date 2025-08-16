@@ -247,6 +247,7 @@ export async function expireEffects(actor, expiresOn) {
 
         if (!expiresOn) {
             console.error(`missing expiresOn`);
+            return;
         }
 
         if (expiresOn.includes("segment") && aeExpiresOn.includes("turn") && actor.inCombat) {

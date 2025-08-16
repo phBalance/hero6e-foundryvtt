@@ -169,7 +169,9 @@ function itemHasBehaviours(item, ...desiredBehaviourArgs) {
     const desiredBehaviours = [...desiredBehaviourArgs];
     for (const desiredbehaviour of desiredBehaviours) {
         // Unfortunately handlebars seems to pass metadata in the last argument as an object. We use only strings.
-        if (typeof desiredbehaviour === "string" && item.baseInfo.behaviors.includes(desiredbehaviour)) {
+        // Rare occurance where a 5e item (SUPPRESS) is in a 6e actor, we don't allow this, but you never know,
+        // and we want to make sure the Actor sheet opens.
+        if (typeof desiredbehaviour === "string" && item.baseInfo?.behaviors.includes(desiredbehaviour)) {
             return true;
         }
     }
@@ -287,7 +289,13 @@ export class HeroSystem6eItem extends Item {
             // Aaron thinks we should still run most of the prepareData.
             // Things like item description, default values and such are still valid.
             // The Make Attack is likely the only broken thing here when missing an Actor.
-            console.error(`Bailing on item ${this.name} which has no actor (probably Items collection)`);
+            console.error(`Partial prepareData on item ${this.name} which has no actor (probably Items collection)`);
+            try {
+                this.setAoeModifier();
+                this.updateItemDescription();
+            } catch (e) {
+                console.error(e);
+            }
             return;
         }
 
