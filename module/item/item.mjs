@@ -5123,6 +5123,7 @@ export class HeroSystem6eItem extends Item {
                             value: levels,
                             name: enhancedPerception.name,
                             itemId: enhancedPerception.id,
+                            title: `${enhancedPerception.system.OPTIONID} ${enhancedPerception.adders.map((a) => a.XMLID).join(" ")}`,
                         });
                         rollVal += levels;
                     }
