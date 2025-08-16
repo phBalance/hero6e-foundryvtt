@@ -653,7 +653,7 @@ export async function doAoeActionToHit(action, options) {
     //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: attackHeroRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -1238,7 +1238,7 @@ async function doSingleTargetActionToHit(action, options) {
     //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()
@@ -1751,7 +1751,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: damageRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -1801,7 +1801,7 @@ export async function rollEffect(item) {
 
     const speaker = ChatMessage.getSpeaker();
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: effectRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -1988,7 +1988,7 @@ export async function _onRollDamage(event) {
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: damageRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2185,7 +2185,7 @@ export async function _onRollMindScanEffectRoll(event) {
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: mindScanRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2742,7 +2742,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: damageDetail.knockbackRoller?.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2810,7 +2810,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         //speaker.alias = item.actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
             author: game.user._id,
             content: cardHtml,
             speaker: speaker,
@@ -2911,7 +2911,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -3043,7 +3043,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     //speaker.alias = attackItem.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -3088,7 +3088,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                 //speaker.alias = actor.name;
 
                 const chatData = {
-                    style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                    style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
                     rolls: absorptionRoller.rawRolls(),
                     author: game.user._id,
                     content: cardHtml,
