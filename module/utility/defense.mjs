@@ -133,7 +133,10 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     const armorPiercing = parseInt(attackItem.findModsByXmlid("ARMORPIERCING")?.LEVELS) || 0;
 
     // Basic characteristics (PD & ED)
-    if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {
+    if (
+        (targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0 &&
+        !(options?.ignoreDefenseIds || []).includes(attackDefenseVs.toUpperCase())
+    ) {
         let value = targetActor.system.characteristics[attackDefenseVs.toLowerCase()].value;
         const newOptions = foundry.utils.deepClone(options);
 
@@ -227,7 +230,8 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             (o.baseInfo?.type?.includes("defense") || o.baseInfo?.behaviors?.includes("defense")) &&
             o.isActive &&
             o.system.XMLID &&
-            !(options?.ignoreDefenseIds || []).includes(o.id),
+            !(options?.ignoreDefenseIds || []).includes(o.id) &&
+            !(options?.ignoreDefenseIds || []).includes(o.system.XMLID),
     );
     for (const defenseItem of activeDefenses) {
         const defenseProfile = getItemDefenseVsAttack(defenseItem, attackItem, options);
@@ -445,6 +449,7 @@ export async function getConditionalDefenses(token, item, avad) {
             const option = {
                 id: defense.id,
                 name: defense.name,
+                xmlid: defense.system.XMLID,
                 checked: !avad && defenseConditionalCheckedByDefault(defense, item),
                 conditions: "",
             };
@@ -578,21 +583,30 @@ export async function getConditionalDefenses(token, item, avad) {
             return { ignoreDefenseIds: null, conditionalDefenses: null };
         }
 
-        const defenses = [];
+        const defensesIgnored = [];
         for (const input of inputs) {
             // FIXME: PD & ED from characteristics do not have an id as they're not in the database. Ignore for simplicity but it's not fully correct.
-            if (!input.checked && input.id) {
-                ignoreDefenseIds.push(input.id);
-                defenses.push(token.actor.items.get(input.id) || conditionalDefenses.find((o) => o.id === input.id));
+            if (!input.checked) {
+                if (input.dataset.itemId) {
+                    ignoreDefenseIds.push(input.dataset.itemId);
+                    defensesIgnored.push(
+                        token.actor.items.get(input.dataset.itemId) ||
+                            conditionalDefenses.find((o) => o.id === input.dataset.itemId),
+                    );
+                } else {
+                    console.warn("no input.dataset.itemId", input.dataset, conditionalDefenses);
+                    ignoreDefenseIds.push(input.dataset.itemXmlid);
+                    defensesIgnored.push(conditionalDefenses.find((o) => o.system.XMLID === input.dataset.itemXmlid));
+                }
             }
         }
 
-        if (defenses.length > 0) {
+        if (defensesIgnored.length > 0) {
             let content = `The following defenses were not applied vs <span title="${item.name.replace(
                 /"/g,
                 "",
             )}: ${item.system.description.replace(/"/g, "")}">${item.name}</span>:<ul>`;
-            for (const def of defenses) {
+            for (const def of defensesIgnored) {
                 content += `<li title="${def.system.description.replace(/"/g, "")}">${def.conditionalDefenseShortDescription}</li>`;
             }
             content += "</ul>";

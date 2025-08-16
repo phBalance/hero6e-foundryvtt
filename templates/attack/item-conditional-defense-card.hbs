@@ -16,7 +16,7 @@
             {{#each conditionalDefenses}}
             <tr>
                 <td>
-                    <input type="checkbox" id="{{this.id}}" {{checked this.checked}} data-dtype="Boolean" />
+                    <input type="checkbox" data-item-id="{{this.id}}" data-item-xmlid="{{this.xmlid}}"  {{checked this.checked}} data-dtype="Boolean" />
                 </td>
                 <td class="left">
                     <b>{{this.name}}{{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}</b>: {{this.description}}
