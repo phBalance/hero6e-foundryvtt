@@ -853,6 +853,10 @@ async function doSingleTargetActionToHit(action, options) {
     // Combat Skill Levels
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item)) {
+        // Requires A Roll
+        if (!(await requiresASkillRollCheck(csl.item))) {
+            continue;
+        }
         const id = csl.skill.id;
         skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
