@@ -284,6 +284,11 @@ export class GenericRoller {
         // PH: FIXME: Should put this into handlebars
         let cardHtml = await heroRoller.render(`Roll Generic ${damageTypeString} Damage`);
 
+        if (!item) {
+            ui.notifications.error(`Generic roller not working for ${damageType}`);
+            return;
+        }
+
         const action = Attack.getActionInfo(item, [], {});
 
         if (["NORMAL", "KILLING"].includes(damageType)) {
