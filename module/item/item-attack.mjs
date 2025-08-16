@@ -737,6 +737,11 @@ async function doSingleTargetActionToHit(action, options) {
         return ui.notifications.warn(`${item.name} ${resourceWarning}`);
     }
 
+    // Requires A Roll
+    if (!(await requiresASkillRollCheck(item, { showUI: true, resourcesRequired, resourcesUsedDescription }))) {
+        return;
+    }
+
     const itemData = item.system;
 
     const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.uses]?.value);

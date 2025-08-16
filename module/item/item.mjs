@@ -6329,7 +6329,7 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     return succeeded;
 }
 
-export async function requiresASkillRollCheck(item) {
+export async function requiresASkillRollCheck(item, options = {}) {
     // Toggles don't need a roll to turn off
     //if (item.system?.active === true) return true;
 
@@ -6471,7 +6471,10 @@ export async function requiresASkillRollCheck(item) {
         const actor = item.actor;
         const token = actor.token;
         const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-        speaker.alias = actor.name;
+        //speaker.alias = actor.name;
+        if (!succeeded && options.resourcesUsedDescription) {
+            cardHtml += `Spent ${options.resourcesUsedDescription}.`;
+        }
 
         const chatData = {
             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
@@ -6482,6 +6485,10 @@ export async function requiresASkillRollCheck(item) {
         };
 
         await ChatMessage.create(chatData);
+
+        if (!succeeded && options.showUi) {
+            ui.notifications.warn(cardHtml);
+        }
 
         return succeeded;
     }
