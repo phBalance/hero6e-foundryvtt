@@ -187,7 +187,7 @@ async function skillRoll(item, actor, target) {
 
     item.updateRoll();
 
-    const tags = foundry.utils.deepClone(item.system.tags);
+    let tags = foundry.utils.deepClone(item.system.tags);
 
     // Build success requirement from the base tags
     let successValue = 0;
@@ -195,40 +195,47 @@ async function skillRoll(item, actor, target) {
         successValue = successValue + tag.value;
     }
 
-    // Skill Levels
-    const skillLevelInputs = formElement.querySelectorAll("INPUT:checked");
-    for (const skillLevelInput of skillLevelInputs) {
-        const skillModItem = actor.items.get(skillLevelInput.id);
-
-        let modifier = parseInt(skillModItem.system.LEVELS || 0);
-        if (skillModItem.system.XMLID === "REPUTATION") {
-            if (skillModItem.type === "disadvantage") {
-                const recognizedOptionId = (skillModItem.system.ADDER || []).find(
-                    (adder) => adder.XMLID === "RECOGNIZED",
-                )?.OPTIONID;
-
-                if (recognizedOptionId === "SOMETIMES") {
-                    modifier = -1;
-                } else if (recognizedOptionId === "FREQUENTLY") {
-                    modifier = -2;
-                } else if (recognizedOptionId === "ALWAYS") {
-                    modifier = -3;
-                } else {
-                    console.error(`Unrecognized REPUTATION (disad) OPTIONID ${recognizedOptionId}`);
-                    modifier = 0;
-                }
-            }
+    // Skill Levels (back out the ones that are unchecked)
+    const skillLevelInputsChecked = formElement.querySelectorAll("INPUT:not(:checked)");
+    for (const skillLevelInput of skillLevelInputsChecked) {
+        const skillModItem = actor.items.get(skillLevelInput.dataset.itemId);
+        if (!skillModItem) {
+            continue;
         }
 
-        // TODO: Do we need this find check?
-        if (modifier !== 0 && !tags.find((o) => o.itemId === skillModItem.id)) {
-            tags.push({
-                value: modifier,
-                name: skillModItem.name,
-                title: skillModItem.system.description,
-            });
-            successValue += modifier;
+        const tag = tags.find((o) => o.itemId === skillModItem.id);
+        if (tag) {
+            successValue -= tag.value;
+            tags = tags.filter((t) => t.itemId !== tag.itemId);
+        } else {
+            console.error("Unable to find tag");
         }
+
+        // let modifier = parseInt(skillModItem.system.LEVELS || 0);
+        // if (skillModItem.system.XMLID === "REPUTATION") {
+        //     if (skillModItem.type === "disadvantage") {
+        //         const recognizedOptionId = (skillModItem.system.ADDER || []).find(
+        //             (adder) => adder.XMLID === "RECOGNIZED",
+        //         )?.OPTIONID;
+
+        //         if (recognizedOptionId === "SOMETIMES") {
+        //             modifier = -1;
+        //         } else if (recognizedOptionId === "FREQUENTLY") {
+        //             modifier = -2;
+        //         } else if (recognizedOptionId === "ALWAYS") {
+        //             modifier = -3;
+        //         } else {
+        //             console.error(`Unrecognized REPUTATION (disad) OPTIONID ${recognizedOptionId}`);
+        //             modifier = 0;
+        //         }
+        //     }
+        // }
+        // tags.push({
+        //     value: modifier,
+        //     name: skillModItem.name,
+        //     title: skillModItem.system.description,
+        // });
+        //successValue += modifier;
     }
 
     // Roll Modifier, from form, which can be negative or positive.
