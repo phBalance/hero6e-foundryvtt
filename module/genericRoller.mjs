@@ -130,7 +130,7 @@ export class GenericRoller {
         const resultHtml = `Hits a DCV of ${heroRoller.getSuccessTotal()}`;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: heroRoller.rawRolls(),
             author: game.user._id,
             content: `${cardHtml}${resultHtml}`,
@@ -304,7 +304,7 @@ export class GenericRoller {
         }
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: heroRoller.rawRolls(),
             author: game.user._id,
             content: `${cardHtml}`,

@@ -653,7 +653,7 @@ export async function doAoeActionToHit(action, options) {
     //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: attackHeroRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -735,6 +735,11 @@ async function doSingleTargetActionToHit(action, options) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
     } else if (resourceWarning) {
         return ui.notifications.warn(`${item.name} ${resourceWarning}`);
+    }
+
+    // Requires A Roll
+    if (!(await requiresASkillRollCheck(item, { showUI: true, resourcesRequired, resourcesUsedDescription }))) {
+        return;
     }
 
     const itemData = item.system;
@@ -848,6 +853,10 @@ async function doSingleTargetActionToHit(action, options) {
     // Combat Skill Levels
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item)) {
+        // Requires A Roll
+        if (!(await requiresASkillRollCheck(csl.item))) {
+            continue;
+        }
         const id = csl.skill.id;
         skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
@@ -1054,7 +1063,10 @@ async function doSingleTargetActionToHit(action, options) {
         if (aoeModifier) {
             // Distance from aoeTemplate origin to target/token center
             if (aoeTemplate && target.id) {
-                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center).distance;
+                const distanceInMetres = calculateDistanceBetween(
+                    aoeTemplate,
+                    target.center || target.getCenterPoint(),
+                ).distance;
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from template origin)`;
@@ -1238,7 +1250,7 @@ async function doSingleTargetActionToHit(action, options) {
     //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()
@@ -1751,7 +1763,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: damageRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -1801,7 +1813,7 @@ export async function rollEffect(item) {
 
     const speaker = ChatMessage.getSpeaker();
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: effectRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -1988,7 +2000,7 @@ export async function _onRollDamage(event) {
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: damageRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2185,7 +2197,7 @@ export async function _onRollMindScanEffectRoll(event) {
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: mindScanRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2742,7 +2754,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: damageDetail.knockbackRoller?.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2810,7 +2822,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         //speaker.alias = item.actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
             author: game.user._id,
             content: cardHtml,
             speaker: speaker,
@@ -2911,7 +2923,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -3043,7 +3055,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     //speaker.alias = attackItem.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -3088,7 +3100,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                 //speaker.alias = actor.name;
 
                 const chatData = {
-                    style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                    style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
                     rolls: absorptionRoller.rawRolls(),
                     author: game.user._id,
                     content: cardHtml,

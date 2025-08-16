@@ -278,7 +278,7 @@ async function skillRoll(item, actor, target) {
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: skillRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,

@@ -1487,7 +1487,7 @@ export class HeroSystem6eItem extends Item {
         const chatData = {
             author: game.user._id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
             content: content,
             whisper: [game.user.id],
         };
@@ -1540,7 +1540,7 @@ export class HeroSystem6eItem extends Item {
                         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
                         //speaker.alias = actor.name;
                         const chatData = {
-                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
                             author: game.user._id,
                             content: `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.`,
                             speaker: speaker,
@@ -1554,7 +1554,7 @@ export class HeroSystem6eItem extends Item {
                         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
                         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
                         const chatData = {
-                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
                             author: game.user._id,
                             content:
                                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.` +
@@ -1587,7 +1587,7 @@ export class HeroSystem6eItem extends Item {
                         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
                         //speaker.alias = actor.name;
                         const chatData = {
-                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
                             author: game.user._id,
                             content: `${item.name} was activated even though it exceed the ${VPP.name} control cost`,
                             speaker: speaker,
@@ -1602,7 +1602,7 @@ export class HeroSystem6eItem extends Item {
                         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
                         //speaker.alias = actor.name;
                         const chatData = {
-                            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
                             author: game.user._id,
                             content:
                                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP. ` +
@@ -6317,7 +6317,7 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
         rolls: activationRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -6329,7 +6329,7 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     return succeeded;
 }
 
-export async function requiresASkillRollCheck(item) {
+export async function requiresASkillRollCheck(item, options = {}) {
     // Toggles don't need a roll to turn off
     //if (item.system?.active === true) return true;
 
@@ -6397,7 +6397,7 @@ export async function requiresASkillRollCheck(item) {
                             const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
 
                             const chatData = {
-                                style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                                style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
                                 author: game.user._id,
                                 content:
                                     `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
@@ -6471,10 +6471,13 @@ export async function requiresASkillRollCheck(item) {
         const actor = item.actor;
         const token = actor.token;
         const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-        speaker.alias = actor.name;
+        //speaker.alias = actor.name;
+        if (!succeeded && options.resourcesUsedDescription) {
+            cardHtml += `Spent ${options.resourcesUsedDescription}.`;
+        }
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.OOC,
+            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
             rolls: activationRoller.rawRolls(),
             author: game.user._id,
             content: cardHtml,
@@ -6482,6 +6485,10 @@ export async function requiresASkillRollCheck(item) {
         };
 
         await ChatMessage.create(chatData);
+
+        if (!succeeded && options.showUi) {
+            ui.notifications.warn(cardHtml);
+        }
 
         return succeeded;
     }

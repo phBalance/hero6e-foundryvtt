@@ -5,6 +5,8 @@
 - Improved ChatMessage to show token image, name, and user. [#2608](https://github.com/dmdorman/hero6e-foundryvtt/issues/2608)
 - Martial FLASH now properly targets the sense group.
 - FLASH for normal senses are implemented as if they target the entire sense group.
+- Fixed issues with Requires A Roll. [#2675](https://github.com/dmdorman/hero6e-foundryvtt/issues/2675) [#2672](https://github.com/dmdorman/hero6e-foundryvtt/issues/2672) [#1313](https://github.com/dmdorman/hero6e-foundryvtt/issues/1313) [#1139](https://github.com/dmdorman/hero6e-foundryvtt/issues/1139)
+- Fixed center and distance issue with V13 AOE tempaltes. [#2692](https://github.com/dmdorman/hero6e-foundryvtt/issues/2692)
 
 ## Version 4.1.12 20250813
 

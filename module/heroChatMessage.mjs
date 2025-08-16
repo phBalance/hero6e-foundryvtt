@@ -40,9 +40,6 @@ export class HeroSystem6eChatMessage extends ChatMessage {
         if (!game.scenes) return null; // In case we're in the middle of game setup
         const sceneId = this.speaker.scene ?? "";
         const tokenId = this.speaker.token ?? "";
-        if (!tokenId) {
-            console.warn("missing tokenId from speaker");
-        }
         return game.scenes.get(sceneId)?.tokens.get(tokenId) ?? this.speakerActor?.prototypeToken ?? null;
     }
 
@@ -102,10 +99,14 @@ export class HeroSystem6eChatMessage extends ChatMessage {
                     const messageSender = header.querySelector(".message-sender");
 
                     if (messageSender && this.author) {
-                        const authorElement = document.createElement("span");
-                        authorElement.classList.add("user");
-                        authorElement.append(this.author.name);
-                        messageSender.append(authorElement);
+                        if (messageSender.textContent === this.author.name) {
+                            console.warn(`speaker.alias === author.name. Verify CONST.CHAT_MESSAGE_STYLES.IC`);
+                        } else {
+                            const authorElement = document.createElement("span");
+                            authorElement.classList.add("user");
+                            authorElement.append(this.author.name);
+                            messageSender.append(authorElement);
+                        }
                     }
                 }
             } catch (e) {
