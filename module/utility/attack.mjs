@@ -252,25 +252,6 @@ export class Attack {
         return true;
     }
 
-    /**
-     *
-     * @param {HeroSystem6eActor} actor
-     * @returns {HeroSystem6eToken | PrototypeToken}
-     */
-    static getAttackerToken(actor, options) {
-        // Careful:  you may have a controlled token, but use an attack from actor on sidebar
-        const attackerToken =
-            options?.token ||
-            actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-            actor?.prototypeToken;
-
-        if (!attackerToken) {
-            console.error("There is no actor token!");
-        }
-
-        return attackerToken;
-    }
-
     static getRangeModifier(item, range) {
         const actor = item.actor;
 
