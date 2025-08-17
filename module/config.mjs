@@ -9484,11 +9484,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            // descriptionFactory: function (mod) {
-            //     return `${mod.ALIAS}`;
-            // },
-            descriptionModifierFactory: function (mod, item) {
-                return `${item.actor.strDetails().strThrow}${getSystemDisplayUnits(item.actor.is5e)}, `;
+            descriptionModifier: function (mod, item) {
+                const actor = item.actor;
+
+                return actor
+                    ? `${item.actor.strDetails().strThrow}${getSystemDisplayUnits(item.actor.is5e)}; `
+                    : "[Range based on actor STR]; ";
             },
             xml: `<MODIFIER XMLID="RANGEBASEDONSTR" ID="1703219636358" BASECOST="-0.25" LEVELS="0" ALIAS="Range Based On Strength" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
