@@ -487,6 +487,7 @@ export class Attack {
                 [item.id]: item, // PH: FIXME: This is problematic for items which are not in the database. We do have original items for most items that are not in the DB.
             },
             token: {},
+            statuses: item.actor?.statuses.toObject() || [],
         };
 
         // PH: FIXME: token id is not unique so can't uniquely be pulled from a Map. A token id is, however, unique within a scene and scenes are unique.
@@ -521,6 +522,7 @@ export function actionToJSON(action) {
             actorObj: actorToActorObj(action.system.actor),
             attackerTokenObj: tokenToTokenObj(action.system.attackerToken),
             currentItem: dehydrateAttackItem(action.system.currentItem),
+            statuses: action.system.statuses || [],
             currentTargetTokenObjs: action.system.currentTargets.map((token) => tokenToTokenObj(token)),
             targetedTokenObjs: action.system.targetedTokens.map((token) => tokenToTokenObj(token)),
 
@@ -550,6 +552,7 @@ export function actionFromJSON(json) {
             attackerToken: tokenFromTokenObj(data.system.attackerTokenObj),
             currentItem: rehydrateAttackItem(data.system.currentItem, actor).item,
             currentTargets: data.system.currentTargetTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj)),
+            statuses: data.system.statuses || [],
             targetedTokens: data.system.targetedTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj)),
 
             item: {}, // PH: FIXME: This is a Map of Items by id
