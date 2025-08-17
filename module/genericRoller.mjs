@@ -155,10 +155,12 @@ export class GenericRoller {
                     NORMAL_MD: "Normal MD",
                     KILLING_PD: "Killing PD",
                     KILLING_ED: "Killing ED",
-                    ADJUSTMENT: "Adjustment",
-                    ENTANGLE: "Entangle",
-                    FLASH: "Flash",
-                    EFFECT: "Effect",
+
+                    // TODO: These probably need default items and a different interface
+                    // ADJUSTMENT: "Adjustment",
+                    // ENTANGLE: "Entangle",
+                    // FLASH: "Flash",
+                    // EFFECT: "Effect",
                 },
                 chosen: "NORMAL_PD",
             },
