@@ -424,6 +424,11 @@ export async function processActionToHit(item, formData) {
     } else {
         await doSingleTargetActionToHit(action, formData);
     }
+
+    // turn off haymaker
+    await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
+        active: false,
+    });
 }
 
 export async function doAoeActionToHit(action, options) {
@@ -1851,7 +1856,10 @@ export async function _onRollDamage(event) {
     toHitData.hthAttackItems = hthAttackItems;
 
     const haymakerManeuverActiveItem = item.actor?.items.find(
-        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER" && item.system.active,
+        (item) =>
+            item.type === "maneuver" &&
+            item.system.XMLID === "HAYMAKER" &&
+            (item.system.active || item.actor?.statuses.has("haymaker") || action.system.statuses.includes("haymaker")),
     );
 
     // Coerce type to boolean
@@ -2005,9 +2013,9 @@ export async function _onRollDamage(event) {
     await ChatMessage.create(chatData);
 
     // turn off haymaker
-    // await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
-    //     active: false,
-    // });
+    await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
+        active: false,
+    });
 
     return;
 }
