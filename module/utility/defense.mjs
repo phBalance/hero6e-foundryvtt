@@ -585,7 +585,6 @@ export async function getConditionalDefenses(token, item, avad) {
 
         const defensesIgnored = [];
         for (const input of inputs) {
-            // FIXME: PD & ED from characteristics do not have an id as they're not in the database. Ignore for simplicity but it's not fully correct.
             if (!input.checked) {
                 if (input.dataset.itemId) {
                     ignoreDefenseIds.push(input.dataset.itemId);

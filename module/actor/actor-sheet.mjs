@@ -672,7 +672,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             return;
         }
 
-        // 5/6e only
+        // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
         const baseInfoCheck = getPowerInfo({
             xmlid: item.system.XMLID,
             is5e: this.actor.is5e,
@@ -680,7 +680,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         });
         if (!baseInfoCheck) {
             ui.notifications.error(
-                `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item, and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
+                `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
             );
             return;
         }
@@ -758,7 +758,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             i.effects = [];
         }
 
-        // Make sure XMLID exists in the actor's 5e/6e
+        // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
         for (const itemData of itemDataArray) {
             const baseInfoCheck = getPowerInfo({
                 xmlid: itemData.system.XMLID,
