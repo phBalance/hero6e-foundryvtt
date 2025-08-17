@@ -286,6 +286,12 @@ function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
         seconds = 12;
     }
 
+    // The 5e SUPPRESS lasts as long as actor spends END, which we don't currently support.
+    // KLUGE: Make SUPPRESS last all day, GM will be required to get rid of it.
+    if (item.system.XMLID === "SUPPRESS") {
+        seconds = Math.max(seconds, hdcTimeOptionIdToSeconds("DAY"));
+    }
+
     return seconds;
 }
 

@@ -239,7 +239,12 @@ export async function expireEffects(actor, expiresOn) {
         }
 
         // We are expecting expiresOn flag
-        const aeExpiresOn = ae.flags[game.system.id]?.expiresOn || (!ae.duration?.seconds ? "turnStart" : undefined);
+        const aeExpiresOn =
+            ae.flags[game.system.id]?.expiresOn ||
+            (!ae.duration?.seconds ? "turnStart" : undefined) ||
+            (ae.flags[game.system.id]?.XMLID && ae.flags[game.system.id]?.type === "adjustment"
+                ? "turnStart"
+                : undefined);
         const validExpiresOnValues = ["turnStart", "turnEnd", "segmentStart", "segmentEnd"];
         if (!aeExpiresOn || !validExpiresOnValues.includes(aeExpiresOn)) {
             console.warn(`ActiveEffect ${ae.name} has invalid expiresOn flag ${aeExpiresOn}`, ae);
