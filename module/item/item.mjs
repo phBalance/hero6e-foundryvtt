@@ -289,7 +289,9 @@ export class HeroSystem6eItem extends Item {
             // Aaron thinks we should still run most of the prepareData.
             // Things like item description, default values and such are still valid.
             // The Make Attack is likely the only broken thing here when missing an Actor.
-            console.error(`Partial prepareData on item ${this.name} which has no actor (probably Items collection)`);
+            console.error(
+                `Partial prepareData on item ${this.detailedName()} which has no actor (probably Items collection)`,
+            );
             try {
                 this.setAoeModifier();
                 this.updateItemDescription();
@@ -326,8 +328,6 @@ export class HeroSystem6eItem extends Item {
         this.setCombatSkillLevels();
         this.updateItemDescription();
     }
-
-    doShit() {}
 
     async setActiveEffects() {
         // ACTIVE EFFECTS
@@ -4412,8 +4412,8 @@ export class HeroSystem6eItem extends Item {
                 .replace("(; ", "(");
         }
 
-        if (modifierInfo?.descriptionModifierFactory) {
-            result += modifierInfo.descriptionModifierFactory(modifier, item);
+        if (modifierInfo?.descriptionModifier) {
+            result += modifierInfo.descriptionModifier(modifier, item);
         }
 
         let fraction = "";

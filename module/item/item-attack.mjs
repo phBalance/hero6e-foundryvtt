@@ -312,7 +312,7 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
  */
 export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     const actor = item.actor;
-    const token = getTokenEducatedGuess({ token: options.token, tokenId: actor.getActiveTokens()?.[0].id });
+    const token = getTokenEducatedGuess({ token: options.token, actor: actor });
     const data = {
         originalItem: item,
         actor: actor,
@@ -443,6 +443,17 @@ export async function doAoeActionToHit(action, options) {
     const token = getTokenEducatedGuess({ action, actor });
     if (!token) {
         return ui.notifications.error(`Unable to find a token on this scene associated with ${actor.name}.`);
+    }
+
+    // Paranoia setting = HIGH. Can be removed if we feel the need.
+    const tokenId = token.id || token.document.id;
+    const storedTokenId = action.system.attackerToken.id || action.system.attackerToken.document.id;
+    if (tokenId === storedTokenId) {
+        console.error(
+            `Token stored for attacker in action is not the same as the educated guess!`,
+            action.system.attackerToken,
+            token,
+        );
     }
 
     const aoeTemplate = getAoeTemplateForItem(item);
@@ -4421,19 +4432,40 @@ export async function _onModalDamageCard(event) {
     await d.render(true);
 }
 
+/**
+ * Given information, find the best guess for the token in the scene which we should use.
+ *
+ * NOTE: Typically we want the token that is making an attack or receiving the attack so that we can
+ *       make distance calculations.
+ *
+ * @param {Object} options
+ * @param {action} options.action
+ * @param {HeroSystem6eActor} options.actor
+ * @param {Token | TokenDocument} options.token
+ * @param {string} options.tokenId we should really get rid of this.
+ *
+ * @returns {Token | TokenDocument}
+ */
 export function getTokenEducatedGuess(options = {}) {
-    // If we passed in a token, consider it authorative
+    // NOTE: This is a catch in case we've done something stupid as FoundryVTT has 3 types of tokens.
+    const isPrototypeToken = options.token instanceof foundry.data.PrototypeToken;
+    if (isPrototypeToken) {
+        console.error("Ignoring provided PrototypeToken");
+        delete options.token;
+    }
+
+    // If we passed in a Token or TokenDocument, consider it authorative
     if (options.token) {
         return options.token;
     }
 
     // action will be our next best bet, although tokenId is pretty good too
-    if (!options?.action && !options.tokenId) {
+    if (!options.action && !options.tokenId) {
         console.warn(`Unable to find action in getTokenEducatedGuess`);
     }
 
-    const actor = options.actor ?? options?.action?.current.actor;
-    const tokenId = options?.action?.current.attackerTokenId ?? options?.tokenId ?? "";
+    const actor = options.actor ?? options.action?.current.actor;
+    const tokenId = options.action?.current.attackerTokenId ?? options.tokenId ?? "";
     const scene = game.scenes.current;
     const token =
         scene.tokens.get(tokenId) ||

@@ -1,9 +1,11 @@
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
+import { dehydrateAttackItem, getTokenEducatedGuess, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { calculateDistanceBetween } from "./range.mjs";
 
 // PH: FIXME: Need to confirm this will work with v12
 const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
+
+// PH: TODO: Actually define the type of an action
 
 export class Attack {
     static async makeActionActiveEffects(action) {
@@ -250,25 +252,6 @@ export class Attack {
         return true;
     }
 
-    /**
-     *
-     * @param {HeroSystem6eActor} actor
-     * @returns {HeroSystem6eToken | PrototypeToken}
-     */
-    static getAttackerToken(actor, options) {
-        // Careful:  you may have a controlled token, but use an attack from actor on sidebar
-        const attackerToken =
-            options?.token ||
-            actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-            actor?.prototypeToken;
-
-        if (!attackerToken) {
-            console.error("There is no actor token!");
-        }
-
-        return attackerToken;
-    }
-
     static getRangeModifier(item, range) {
         const actor = item.actor;
 
@@ -476,7 +459,7 @@ export class Attack {
             return null;
         }
 
-        const attackerToken = Attack.getAttackerToken(item.actor, options);
+        const attackerToken = getTokenEducatedGuess({ actor: item.actor, ...options });
         const system = {
             actor: item.actor,
             attackerToken,
@@ -487,7 +470,7 @@ export class Attack {
                 [item.id]: item, // PH: FIXME: This is problematic for items which are not in the database. We do have original items for most items that are not in the DB.
             },
             token: {},
-            statuses: item.actor?.statuses.toObject() || [],
+            statuses: Array.from(item.actor?.statuses || []),
         };
 
         // PH: FIXME: token id is not unique so can't uniquely be pulled from a Map. A token id is, however, unique within a scene and scenes are unique.
@@ -522,7 +505,7 @@ export function actionToJSON(action) {
             actorObj: actorToActorObj(action.system.actor),
             attackerTokenObj: tokenToTokenObj(action.system.attackerToken),
             currentItem: dehydrateAttackItem(action.system.currentItem),
-            statuses: action.system.statuses || [],
+            statuses: action.system.statuses,
             currentTargetTokenObjs: action.system.currentTargets.map((token) => tokenToTokenObj(token)),
             targetedTokenObjs: action.system.targetedTokens.map((token) => tokenToTokenObj(token)),
 
@@ -552,7 +535,7 @@ export function actionFromJSON(json) {
             attackerToken: tokenFromTokenObj(data.system.attackerTokenObj),
             currentItem: rehydrateAttackItem(data.system.currentItem, actor).item,
             currentTargets: data.system.currentTargetTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj)),
-            statuses: data.system.statuses || [],
+            statuses: data.system.statuses,
             targetedTokens: data.system.targetedTokenObjs.map((tokenObj) => tokenFromTokenObj(tokenObj)),
 
             item: {}, // PH: FIXME: This is a Map of Items by id

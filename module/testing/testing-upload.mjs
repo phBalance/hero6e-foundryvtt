@@ -4746,7 +4746,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        `Suppress Flight 5½d6, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (8", -1/4)`,
+                        `Suppress Flight 5½d6, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (8"; -1/4)`,
                     );
                 });
 
@@ -6175,7 +6175,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            `Energy Blast 1d6 (ED) (5 Active Points); Range Based On Strength (16m, -1/4)`,
+                            `Energy Blast 1d6 (ED) (5 Active Points); Range Based On Strength (16m; -1/4)`,
                         );
                     });
 
@@ -6391,7 +6391,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Ego Attack 1d6 (10 Active Points); Range Based On Strength (16m, -1/4)",
+                            "Ego Attack 1d6 (10 Active Points); Range Based On Strength (16m; -1/4)",
                         );
                     });
 

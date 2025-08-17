@@ -10,6 +10,7 @@
 - ENHANCEDPERCEPTION now only applies to PERCEPTION skill [#2688](https://github.com/dmdorman/hero6e-foundryvtt/issues/2688)
 - Can now deselect PD/ED during conditional defense selection. [#2382](https://github.com/dmdorman/hero6e-foundryvtt/issues/2382)
 - The 5e SUPPRESS power lasts as long as actor spends END. We don't have a mechanism to spend END for SUPPRESS. For now SUPPRESS lasts a full day. GM will be required to track END use and remove the active effect when END is no longer being spent.
+- Removed support for adjustment, entangle, effect, and flash from the generic roller as the existing interface didn't support it well. Please let us know if you did use these and would like them added back.
 
 ## Version 4.1.12 20250813
 
