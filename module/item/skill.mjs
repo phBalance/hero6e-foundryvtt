@@ -196,8 +196,8 @@ async function skillRoll(item, actor, target) {
     }
 
     // Skill Levels (back out the ones that are unchecked)
-    const skillLevelInputsChecked = formElement.querySelectorAll("INPUT:not(:checked)");
-    for (const skillLevelInput of skillLevelInputsChecked) {
+    const skillLevelInputsNotChecked = formElement.querySelectorAll("INPUT:not(:checked)");
+    for (const skillLevelInput of skillLevelInputsNotChecked) {
         const skillModItem = actor.items.get(skillLevelInput.dataset.itemId);
         if (!skillModItem) {
             continue;
@@ -208,34 +208,49 @@ async function skillRoll(item, actor, target) {
             successValue -= tag.value;
             tags = tags.filter((t) => t.itemId !== tag.itemId);
         } else {
-            console.error("Unable to find tag");
+            console.log(`Unable to find tag for ${skillModItem.name}`);
+        }
+    }
+
+    // Skill Levels (additive)
+    const skillLevelInputsChecked = formElement.querySelectorAll("INPUT:checked");
+    for (const skillLevelInput of skillLevelInputsChecked) {
+        const skillModItem = actor.items.get(skillLevelInput.dataset.itemId);
+        if (!skillModItem) {
+            continue;
         }
 
-        // let modifier = parseInt(skillModItem.system.LEVELS || 0);
-        // if (skillModItem.system.XMLID === "REPUTATION") {
-        //     if (skillModItem.type === "disadvantage") {
-        //         const recognizedOptionId = (skillModItem.system.ADDER || []).find(
-        //             (adder) => adder.XMLID === "RECOGNIZED",
-        //         )?.OPTIONID;
+        // ENHANCEDPERCEPTION is already included in item.updateRoll()
+        // and we just backed them out above  (skillLevelInputsNotChecked)
+        if (skillModItem.system.XMLID === "ENHANCEDPERCEPTION") {
+            continue;
+        }
 
-        //         if (recognizedOptionId === "SOMETIMES") {
-        //             modifier = -1;
-        //         } else if (recognizedOptionId === "FREQUENTLY") {
-        //             modifier = -2;
-        //         } else if (recognizedOptionId === "ALWAYS") {
-        //             modifier = -3;
-        //         } else {
-        //             console.error(`Unrecognized REPUTATION (disad) OPTIONID ${recognizedOptionId}`);
-        //             modifier = 0;
-        //         }
-        //     }
-        // }
-        // tags.push({
-        //     value: modifier,
-        //     name: skillModItem.name,
-        //     title: skillModItem.system.description,
-        // });
-        //successValue += modifier;
+        let modifier = parseInt(skillModItem.system.LEVELS || 0);
+        if (skillModItem.system.XMLID === "REPUTATION") {
+            if (skillModItem.type === "disadvantage") {
+                const recognizedOptionId = (skillModItem.system.ADDER || []).find(
+                    (adder) => adder.XMLID === "RECOGNIZED",
+                )?.OPTIONID;
+
+                if (recognizedOptionId === "SOMETIMES") {
+                    modifier = -1;
+                } else if (recognizedOptionId === "FREQUENTLY") {
+                    modifier = -2;
+                } else if (recognizedOptionId === "ALWAYS") {
+                    modifier = -3;
+                } else {
+                    console.error(`Unrecognized REPUTATION (disad) OPTIONID ${recognizedOptionId}`);
+                    modifier = 0;
+                }
+            }
+        }
+        tags.push({
+            value: modifier,
+            name: skillModItem.name,
+            title: skillModItem.system.description,
+        });
+        successValue += modifier;
     }
 
     // Roll Modifier, from form, which can be negative or positive.
