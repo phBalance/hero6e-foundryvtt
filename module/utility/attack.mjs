@@ -476,7 +476,11 @@ export class Attack {
         // PH: FIXME: token id is not unique so can't uniquely be pulled from a Map. A token id is, however, unique within a scene and scenes are unique.
         // PH: FIXME: PrototypeToken, however, doesn't even have an id because it's special based on an actor. It will show up as an `undefined` id in this map.
         // PH: FIXME: We can't support multiple PrototypeTokens
-        system.token[attackerToken.id] = attackerToken;
+        if (attackerToken) {
+            system.token[attackerToken.id] = attackerToken;
+        } else {
+            console.warn(`attackerToken = ${attackerToken}`);
+        }
         for (let i = 0; i < targetedTokens.length; i++) {
             const id = targetedTokens[i].id;
             if (system.token[id]) {
@@ -558,6 +562,10 @@ export function actionFromJSON(json) {
  * @returns {TokenObj}
  */
 function tokenToTokenObj(token) {
+    if (!token) {
+        console.warn(`token = ${token}`);
+        return null;
+    }
     const isPrototypeToken = token instanceof FoundryVttPrototypeToken;
 
     return {
@@ -577,6 +585,11 @@ function tokenToTokenObj(token) {
  * @returns {HeroSystem6eTokenDocument | PrototypeToken}
  */
 function tokenFromTokenObj(tokenObj) {
+    if (!tokenObj) {
+        console.warn(`tokenObj = ${tokenObj}`);
+        return null;
+    }
+
     // Does this need to become a TokenDocument?
     if (tokenObj.uuid) {
         return fromUuidSync(tokenObj.uuid);
