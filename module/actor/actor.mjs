@@ -1782,6 +1782,13 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async uploadFromXml(xml, options) {
+        // Is this a linked actor?  If so upload into parent.
+        if (this.uuid.includes("Scene")) {
+            console.warn(`Tried to upload a linked actor, redirecting to parent actor`);
+            await game.actors.get(this.id).uploadFromXml(xml, options);
+            return;
+        }
+
         // Convert xml string to xml document (if necessary)
         if (typeof xml === "string") {
             const parser = new DOMParser();

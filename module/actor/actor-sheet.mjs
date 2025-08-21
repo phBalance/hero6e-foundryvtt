@@ -773,6 +773,33 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             }
         }
 
+        // STACKABLE EQUIPMENT: If this is EQUIPMENT and destination has similar, and it has CHARGES then add the charges.
+        if (itemDataArray.length === 1) {
+            const stackItem = itemDataArray[0];
+            if (stackItem.type === "equipment") {
+                const charges = stackItem.system.MODIFIER.find((o) => o.XMLID === "CHARGES");
+                const levels = parseInt(charges?.OPTION_ALIAS);
+                if (levels > 0) {
+                    const existingItem = this.actor.items.find(
+                        (o) =>
+                            o.type === "equipment" &&
+                            o.system.XMLID === stackItem.system.XMLID &&
+                            o.system.ALIAS === stackItem.system.ALIAS &&
+                            o.findModsByXmlid("CHARGES"),
+                    );
+                    if (existingItem) {
+                        console.log(`Adding charges instead of a new item`, existingItem);
+                        await existingItem.update({
+                            [`system.charges.value`]: existingItem.system.charges.value + levels,
+                            [`system.charges.max`]: existingItem.system.charges.max + levels,
+                        });
+
+                        return [existingItem];
+                    }
+                }
+            }
+        }
+
         const newItems = await this.actor.createEmbeddedDocuments("Item", itemDataArray);
         for (const newItem of newItems) {
             await newItem._postUpload();
