@@ -138,6 +138,43 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         }
     }
 
+    getCenterPoint(data = {}) {
+        // v13
+        if (super.getCenterPoint) {
+            return super.getCenterPoint(data);
+        }
+
+        // v12
+        if (this.center) {
+            return this.center;
+        }
+
+        // v12 fallback
+        console.warn(`token center is undefined`);
+        const x = data.x ?? this.x;
+        const y = data.y ?? this.y;
+        const elevation = data.elevation ?? this.elevation;
+
+        // Hexagonal shape
+        // const grid = this.parent?.grid ?? BaseScene.defaultGrid;
+        // if ( grid.isHexagonal ) {
+        //   const width = data.width ?? this.width;
+        //   const height = data.height ?? this.height;
+        //   const hexagonalShape = BaseToken.#getHexagonalShape(width, height, data.shape ?? this.shape, grid.columns);
+        //   if ( hexagonalShape ) {
+        //     const center = hexagonalShape.center;
+        //     return {x: x + (center.x * grid.sizeX), y: y + (center.y * grid.sizeY), elevation};
+        //   }
+
+        //   // No hexagonal shape for this combination of shape type, width, and height.
+        //   // Fallback to the center of the rectangle.
+        // }
+
+        // Rectangular shape
+        //const { width, height } = this.getSize(data);
+        return { x: x + this.width / 2, y: y + this.height / 2, elevation };
+    }
+
     static async createCombatants(tokens, { combat } = {}) {
         if (combat === undefined && game.combats.viewed) {
             combat ??= game.combats.viewed;

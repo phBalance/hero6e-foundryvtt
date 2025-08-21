@@ -1079,10 +1079,7 @@ async function doSingleTargetActionToHit(action, options) {
         if (aoeModifier) {
             // Distance from aoeTemplate origin to target/token center
             if (aoeTemplate && target.id) {
-                const distanceInMetres = calculateDistanceBetween(
-                    aoeTemplate,
-                    target.center || target.getCenterPoint(),
-                ).distance;
+                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.getCenterPoint()).distance;
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from template origin)`;
