@@ -304,9 +304,13 @@ export class HeroSystem6eItem extends Item {
         // Basic Validatiton, we need an XMLID
         if (!this.baseInfo) {
             if (this.system.XMLID) {
-                console.warn(`${this.actor?.name}/${this.system.XMLID} doesn't have power defined`);
+                console.warn(
+                    `${this.actor?.token?.parent?.name} / ${this.actor?.token?.name}/${this.system.XMLID} doesn't have power defined`,
+                );
             } else {
-                console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
+                console.error(
+                    `${this.actor?.token?.parent?.name} / ${this.actor?.token?.name}/${this.system.XMLID} doesn't have power defined`,
+                );
             }
         }
 
