@@ -44,5 +44,9 @@
 
     </section>
 
-
+    {{#if (eq item.type 'equipment')}}
+        <button class="convert-to-power" style="flex:unset;width:unset">Convert to POWER</button>
+    {{else}}
+        <button class="convert-to-equipment" style="flex:unset;width:unset">Convert to EQUIPMENT</button>
+    {{/if}}
 </form>
