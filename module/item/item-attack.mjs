@@ -4460,9 +4460,9 @@ export function getTokenEducatedGuess(options = {}) {
     }
 
     // action will be our next best bet, although tokenId is pretty good too
-    if (!options.action && !options.tokenId) {
-        console.warn(`Unable to find action in getTokenEducatedGuess`);
-    }
+    // if (!options.action && !options.tokenId) {
+    //     console.warn(`Unable to find action in getTokenEducatedGuess`);
+    // }
 
     const actor = options.actor ?? options.action?.current.actor;
     const tokenId = options.action?.current.attackerTokenId ?? options.tokenId ?? "";
@@ -4472,7 +4472,11 @@ export function getTokenEducatedGuess(options = {}) {
         actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
         actor?.getActiveTokens()[0];
     if (!token) {
-        console.error(`Unable to find token for ${actor.name}`);
+        if (actor.id) {
+            console.warn(`Unable to find token for ${actor.name}`);
+        } else {
+            console.log(`${actor.name} has no id, likely a temporary actor. No associated token is expected.`);
+        }
     }
     return token;
 }
