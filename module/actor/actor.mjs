@@ -1783,16 +1783,23 @@ export class HeroSystem6eActor extends Actor {
 
     async uploadFromXml(xml, options) {
         // Is this a linked actor?  If so upload into parent.
-        if (this.uuid.includes("Scene")) {
-            console.warn(`Tried to upload a linked actor, redirecting to parent actor`);
-            await game.actors.get(this.id).uploadFromXml(xml, options);
-            return;
-        }
+        // if (this.uuid.includes("Scene")) {
+        //     console.warn(`Tried to upload a linked actor, redirecting to parent actor`);
+        //     await game.actors.get(this.id).uploadFromXml(xml, options);
+        //     return;
+        // }
 
         // Convert xml string to xml document (if necessary)
         if (typeof xml === "string") {
             const parser = new DOMParser();
             xml = parser.parseFromString(xml.trim(), "text/xml");
+        }
+
+        // Check for parser error
+        if (xml.getElementsByTagName("parsererror")?.[0]) {
+            console.error(xml.getElementsByTagName("parsererror")[0].innerText);
+            ui.notifications.error(`Parser Error. Verify file is a valid HDC file`);
+            return;
         }
 
         // Ask if certain values should be retained across the upload

@@ -42,37 +42,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
     /** @override */
     async getData(options = {}) {
-        // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
-        // KLUDGE fix
-        let klugeDeleteItems = false;
-        const kludgeDeletedIds = [];
         window.actor = this.actor;
-        for (const item of this.actor.items) {
-            try {
-                const item2 = this.actor.items.find(
-                    (i) =>
-                        i.system.ID === item.system.ID && i.id !== item.id && (item.system.ID || item.name === i.name),
-                );
-                if (item2) {
-                    if (item2.link.includes("Scene.")) {
-                        console.warn(
-                            `Deleting duplicate item ${item2.name}/${item2.system.ID}/${item2.id} from linked ${this.actor.name}`,
-                        );
-                        kludgeDeletedIds.push(item2.system.ID);
-                        klugeDeleteItems = true;
-
-                        await item2.delete();
-                    }
-                }
-            } catch (e) {
-                console.warn(e);
-            }
-        }
-        if (klugeDeleteItems) {
-            ui.notifications.warn(
-                `${this.actor.name} had duplicate items (${kludgeDeletedIds.join(", ")}) which were deleted.`,
-            );
-        }
 
         const data = super.getData(options);
         data.token = options?.token;
@@ -82,8 +52,31 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         if (data.actor.flags[game.system.id].uploading) {
             return data;
         }
-
         data.system = data.actor.system;
+
+        // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
+        // This should NEVER happen, but checking to make sure.
+        const kludgeDuplicateItemNames = [];
+        for (const item of this.actor.items) {
+            try {
+                const item2 = this.actor.items.find(
+                    (i) => i.system.ID === item.system.ID && i.id !== item.id && item.name === i.name,
+                );
+                if (item2) {
+                    if (item2.link.includes("Scene.")) {
+                        console.warn(`Duplciate item ${item2.detailedName()}`, item2);
+                        kludgeDuplicateItemNames.push(item2.detailedName());
+                    }
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+        if (kludgeDuplicateItemNames.length > 0) {
+            ui.notifications.warn(
+                `${this.actor.name} has ${kludgeDuplicateItemNames.length} duplicate items. This can occur when the prototype actor is uploaded and unlinked tokens are on a scene.`,
+            );
+        }
 
         try {
             // Show an unsupported actor warning when the sheet opens. An actor can be unsupported if:
