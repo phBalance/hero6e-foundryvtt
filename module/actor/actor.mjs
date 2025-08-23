@@ -1802,9 +1802,7 @@ export class HeroSystem6eActor extends Actor {
             return;
         }
 
-        const previousItems = this.items.map((o) => o.toObject());
-
-        // Ask if certain values should be retained across the upload
+        // Keep track of damage & charge uses, which we will apply at end of the upload
         const retainValuesOnUpload = {
             body: parseInt(this.system.characteristics?.body?.max) - parseInt(this.system.characteristics?.body?.value),
             stun: parseInt(this.system.characteristics?.stun?.max) - parseInt(this.system.characteristics?.stun?.value),
@@ -1820,33 +1818,33 @@ export class HeroSystem6eActor extends Actor {
                 )
                 .map((o) => o.system),
         };
-        if (
-            retainValuesOnUpload.body ||
-            retainValuesOnUpload.stun ||
-            retainValuesOnUpload.end ||
-            retainValuesOnUpload.charges.length > 0
-        ) {
-            let content = `${this.name} has:<ul>`;
-            if (retainValuesOnUpload.body) content += `<li>${retainValuesOnUpload.body} BODY damage</li>`;
-            if (retainValuesOnUpload.stun) content += `<li>${retainValuesOnUpload.stun} STUN damage</li>`;
-            if (retainValuesOnUpload.end) content += `<li>${retainValuesOnUpload.end} END used</li>`;
-            for (const c of retainValuesOnUpload.charges) {
-                content += `<li>Charges: ${c.NAME || c.ALIAS}</li>`;
-            }
-            content += `</ul><p>Do you want to apply resource usage after the upload?</p>`;
-            const confirmed = await Dialog.confirm({
-                title: "Retain resource usage after upload?",
-                content: content,
-            });
-            if (confirmed === null) {
-                return ui.notifications.warn(`${this.name} upload canceled.`);
-            } else if (!confirmed) {
-                retainValuesOnUpload.body = 0;
-                retainValuesOnUpload.stun = 0;
-                retainValuesOnUpload.end = 0;
-                retainValuesOnUpload.charges = [];
-            }
-        }
+        // if (
+        //     retainValuesOnUpload.body ||
+        //     retainValuesOnUpload.stun ||
+        //     retainValuesOnUpload.end ||
+        //     retainValuesOnUpload.charges.length > 0
+        // ) {
+        //     let content = `${this.name} has:<ul>`;
+        //     if (retainValuesOnUpload.body) content += `<li>${retainValuesOnUpload.body} BODY damage</li>`;
+        //     if (retainValuesOnUpload.stun) content += `<li>${retainValuesOnUpload.stun} STUN damage</li>`;
+        //     if (retainValuesOnUpload.end) content += `<li>${retainValuesOnUpload.end} END used</li>`;
+        //     for (const c of retainValuesOnUpload.charges) {
+        //         content += `<li>Charges: ${c.NAME || c.ALIAS}</li>`;
+        //     }
+        //     content += `</ul><p>Do you want to apply resource usage after the upload?</p>`;
+        //     const confirmed = await Dialog.confirm({
+        //         title: "Retain resource usage after upload?",
+        //         content: content,
+        //     });
+        //     if (confirmed === null) {
+        //         return ui.notifications.warn(`${this.name} upload canceled.`);
+        //     } else if (!confirmed) {
+        //         retainValuesOnUpload.body = 0;
+        //         retainValuesOnUpload.stun = 0;
+        //         retainValuesOnUpload.end = 0;
+        //         retainValuesOnUpload.charges = [];
+        //     }
+        // }
 
         const uploadPerformance = {
             startTime: new Date(),
@@ -2210,7 +2208,7 @@ export class HeroSystem6eActor extends Actor {
         // Working on a merge to update previously existing items.
         // Add existing item.id (if it exists), which we will use for the pending update.
         itemsToCreate = itemsToCreate.map((m) =>
-            foundry.utils.mergeObject(m, { _id: this.items.find((i) => i.system.ID === m.system.ID).id }),
+            foundry.utils.mergeObject(m, { _id: this.items.find((i) => i.system.ID === m.system.ID)?.id }),
         );
         const itemsToUpdate = itemsToCreate.filter((o) => o._id);
         itemsToCreate = itemsToCreate.filter((o) => !o._id);
@@ -2562,19 +2560,32 @@ export class HeroSystem6eActor extends Actor {
             });
         }
 
-        // KLUGE: Delete any old items that weren't updated or added
+        // Delete any old items that weren't updated or added
         const itemsToDelete = this.items.filter(
             (item) =>
                 item.system.ID &&
-                itemsToUpdate.find((o) => item.id !== o.id) &&
-                itemsToCreate.find((p) => item.system.ID !== p.system.ID),
+                !itemsToUpdate.find((o) => item.id === o._id) &&
+                !itemsToCreate.find((p) => item.system.ID === p.system.ID),
         );
         if (itemsToDelete.length > 0) {
-            console.warn(`Deleting ${itemsToDelete.length} items because they were not present in the HDC file.`);
-            await this.deleteEmbeddedDocuments(
-                "Item",
-                itemsToDelete.map((o) => o.id),
-            );
+            const content =
+                `The following items were not included in the HDC file. Do you want to delete them?` +
+                `<div style="max-height:100px;overflow-y:scroll"><ul>` +
+                itemsToDelete.map((m) => `<li>${m.name}</li>`).join("") +
+                `</ul></div>`;
+
+            const confirmDeleteExtraItems = await Dialog.confirm({
+                title: "Delete extra items?",
+                content: content,
+            });
+
+            if (confirmDeleteExtraItems) {
+                console.log(`Deleting ${itemsToDelete.length} items because they were not present in the HDC file.`);
+                await this.deleteEmbeddedDocuments(
+                    "Item",
+                    itemsToDelete.map((o) => o.id),
+                );
+            }
         }
     }
 
@@ -2619,7 +2630,7 @@ export class HeroSystem6eActor extends Actor {
                 ALIAS: "Perception",
                 CHARACTERISTIC: "INT",
                 state: "trained",
-                levels: "0",
+                LEVELS: "0",
                 is5e: this.is5e,
             },
         };

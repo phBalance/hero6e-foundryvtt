@@ -14,6 +14,8 @@
 - Fixed PD/ED for Automations [#2709](https://github.com/dmdorman/hero6e-foundryvtt/issues/2709)
 - Initial support for stackable items. [#2716](https://github.com/dmdorman/hero6e-foundryvtt/issues/2716)
 - Improved how unlinked actors are handled. [#2723](https://github.com/dmdorman/hero6e-foundryvtt/issues/2723)
+- Uploads now always apply damage & charge uses at end of upload.
+- Uploads now prompt to keep any equipment/powers that are on the actor, but not included in the HDC during an upload.
 
 ## Version 4.1.12 20250813
 
