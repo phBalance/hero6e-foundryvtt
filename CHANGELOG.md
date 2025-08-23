@@ -6,13 +6,14 @@
 - Martial FLASH now properly targets the sense group.
 - FLASH for normal senses are implemented as if they target the entire sense group.
 - Fixed issues with Requires A Roll. [#2672](https://github.com/dmdorman/hero6e-foundryvtt/issues/2672) [#1313](https://github.com/dmdorman/hero6e-foundryvtt/issues/1313) [#1139](https://github.com/dmdorman/hero6e-foundryvtt/issues/1139)
-- Fixed center and distance issue with V13 AOE tempaltes. [#2692](https://github.com/dmdorman/hero6e-foundryvtt/issues/2692)
+- Fixed center and distance issue with V13 AOE templates. [#2692](https://github.com/dmdorman/hero6e-foundryvtt/issues/2692)
 - ENHANCEDPERCEPTION now only applies to PERCEPTION skill [#2688](https://github.com/dmdorman/hero6e-foundryvtt/issues/2688)
 - Can now deselect PD/ED during conditional defense selection. [#2382](https://github.com/dmdorman/hero6e-foundryvtt/issues/2382)
 - The 5e SUPPRESS power lasts as long as actor spends END. We don't have a mechanism to spend END for SUPPRESS. For now SUPPRESS lasts a full day. GM will be required to track END use and remove the active effect when END is no longer being spent.
 - Removed support for adjustment, entangle, effect, and flash from the generic roller as the existing interface didn't support it well. Please let us know if you did use these and would like them added back.
 - Fixed PD/ED for Automations [#2709](https://github.com/dmdorman/hero6e-foundryvtt/issues/2709)
 - Initial support for stackable items. [#2716](https://github.com/dmdorman/hero6e-foundryvtt/issues/2716)
+- Improved how unlinked actors are handled. [#2723](https://github.com/dmdorman/hero6e-foundryvtt/issues/2723)
 
 ## Version 4.1.12 20250813
 

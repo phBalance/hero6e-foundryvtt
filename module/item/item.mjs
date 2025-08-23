@@ -675,13 +675,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     setDescription() {
-        const startDate = new Date();
+        const startDate = Date.now();
 
-        window.prepareData.startDate = (window.prepareData.startDate || 0) + (new Date() - startDate);
+        window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
     }
 
     setCombatSkillLevels() {
-        const startDate = new Date();
+        const startDate = Date.now();
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
             // Make sure CSLs are defined; but don't override them if they are already present
@@ -934,20 +934,20 @@ export class HeroSystem6eItem extends Item {
         }
 
         window.prepareData.setCombatSkillLevels =
-            (window.prepareData.setCombatSkillLevels || 0) + (new Date() - startDate);
+            (window.prepareData.setCombatSkillLevels || 0) + (Date.now() - startDate);
     }
 
     setAoeModifier() {
-        const startDate = new Date();
+        const startDate = Date.now();
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
             this.buildAoeAttackParameters(aoeModifier);
         }
-        window.prepareData.setAoeModifier = (window.prepareData.setAoeModifier || 0) + (new Date() - startDate);
+        window.prepareData.setAoeModifier = (window.prepareData.setAoeModifier || 0) + (Date.now() - startDate);
     }
 
     setAttack() {
-        const startDate = new Date();
+        const startDate = Date.now();
         // ATTACK
         if (this.causesDamageEffect()) {
             // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach.
@@ -963,20 +963,20 @@ export class HeroSystem6eItem extends Item {
             // text description of damage
             this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, {});
         }
-        window.prepareData.setAttack = (window.prepareData.setAttack || 0) + (new Date() - startDate);
+        window.prepareData.setAttack = (window.prepareData.setAttack || 0) + (Date.now() - startDate);
     }
 
     setToHit() {
-        const startDate = new Date();
+        const startDate = Date.now();
         // TO HIT
         if (this.rollsToHit()) {
             this.makeToHit();
         }
-        window.prepareData.setToHit = (window.prepareData.setToHit || 0) + (new Date() - startDate);
+        window.prepareData.setToHit = (window.prepareData.setToHit || 0) + (Date.now() - startDate);
     }
 
     setSkills() {
-        const startDate = new Date();
+        const startDate = Date.now();
         // SKILLS
         if (this.baseInfo?.type.includes("skill")) {
             const skill = "skill";
@@ -984,11 +984,11 @@ export class HeroSystem6eItem extends Item {
                 this.system.subType = skill;
             }
         }
-        window.prepareData.setSkills = (window.prepareData.setSkills || 0) + (new Date() - startDate);
+        window.prepareData.setSkills = (window.prepareData.setSkills || 0) + (Date.now() - startDate);
     }
 
     setMovement() {
-        const startDate = new Date();
+        const startDate = Date.now();
         // MOVEMENT
         if (this.baseInfo?.type.includes("movement")) {
             const movement = "movement";
@@ -1006,11 +1006,11 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-        window.prepareData.setMovement = (window.prepareData.setMovement || 0) + (new Date() - startDate);
+        window.prepareData.setMovement = (window.prepareData.setMovement || 0) + (Date.now() - startDate);
     }
 
     setShowToggleActiveDefault() {
-        const startDate = new Date();
+        const startDate = Date.now();
         // ShowToggles & Activatable & default active
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
         if (
@@ -1042,25 +1042,25 @@ export class HeroSystem6eItem extends Item {
             }
         }
         window.prepareData.setShowToggleActiveDefault =
-            (window.prepareData.setShowToggleActiveDefault || 0) + (new Date() - startDate);
+            (window.prepareData.setShowToggleActiveDefault || 0) + (Date.now() - startDate);
     }
 
     setCarried() {
-        const startDate = new Date();
+        const startDate = Date.now();
         if (this.system.CARRIED && this.system.active === undefined && this.system.end === 0) {
             this.system.active ??= true;
         }
-        window.prepareData.setCarried = (window.prepareData.setCarried || 0) + (new Date() - startDate);
+        window.prepareData.setCarried = (window.prepareData.setCarried || 0) + (Date.now() - startDate);
     }
 
     setShowToggle() {
-        const startDate = new Date();
+        const startDate = Date.now();
         if (this.baseInfo?.behaviors.includes("activatable")) {
             if (!this.system.showToggle) {
                 this.system.showToggle = true;
             }
         }
-        window.prepareData.setShowToggle = (window.prepareData.setShowToggle || 0) + (new Date() - startDate);
+        window.prepareData.setShowToggle = (window.prepareData.setShowToggle || 0) + (Date.now() - startDate);
     }
 
     setCharges() {
@@ -2967,6 +2967,7 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
+    _cacheLength = 1000;
     _modifiersCache = null;
     get modifiers() {
         // Caching for performance
@@ -2978,7 +2979,7 @@ export class HeroSystem6eItem extends Item {
             this._modifiersCache &&
             this.id &&
             this.id === this._modifiersCache.id &&
-            Date.now() - this._modifiersCache.dt < 5
+            Date.now() - this._modifiersCache.dt < this._cacheLength
         )
             return this._modifiersCache.value;
         let _modifiers = [];
@@ -3037,7 +3038,12 @@ export class HeroSystem6eItem extends Item {
     _addersCache = null;
     get adders() {
         // Caching for performance
-        if (this._addersCache && this.id && this.id === this._addersCache.id && Date.now() - this._addersCache.dt < 5)
+        if (
+            this._addersCache &&
+            this.id &&
+            this.id === this._addersCache.id &&
+            Date.now() - this._addersCache.dt < this._cacheLength
+        )
             return this._addersCache.value;
         const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
@@ -3054,7 +3060,12 @@ export class HeroSystem6eItem extends Item {
     _powersCache = null;
     get powers() {
         // Caching for performance
-        if (this._powersCache && this.id && this.id === this._powersCache.id && Date.now() - this._powersCache.dt < 5)
+        if (
+            this._powersCache &&
+            this.id &&
+            this.id === this._powersCache.id &&
+            Date.now() - this._powersCache.dt < this._cacheLength
+        )
             return this._powersCache.value;
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
@@ -4620,19 +4631,23 @@ export class HeroSystem6eItem extends Item {
     makeAttack() {
         // AARON: Do we really need makeAttack?
         // Many of these properties can converted into get properties on the item and calculated on the fly.
-        const xmlid = this.system.XMLID;
 
+        window.prepareData.makeAttack ??= {};
+
+        let startDate = Date.now();
+        const xmlid = this.system.XMLID;
         this.system.subType = "attack";
         this.system.killing = false;
         this.system.knockbackMultiplier = 1;
         this.system.usesStrength = true;
         this.system.piercing = 0;
         this.system.penetrating = 0;
-
         this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
+        window.prepareData.makeAttack.init = (window.prepareData.makeAttack.init || 0) + (Date.now() - startDate);
 
         // Maneuvers and martial arts may allow strength to be added or have extra effects.
         // PH: FIXME: Weapons?
+        startDate = Date.now();
         if (["maneuver", "martialart"].includes(this.type)) {
             if (this.system.ADDSTR != undefined) {
                 this.system.usesStrength = this.system.ADDSTR;
@@ -4649,8 +4664,10 @@ export class HeroSystem6eItem extends Item {
                 this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
             }
         }
+        window.prepareData.makeAttack.effect = (window.prepareData.makeAttack.effect || 0) + (Date.now() - startDate);
 
         // Specific power overrides
+        startDate = Date.now();
         if (xmlid === "ENTANGLE") {
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
@@ -4714,32 +4731,44 @@ export class HeroSystem6eItem extends Item {
         } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
             this.system.usesStrength = false;
         }
+        window.prepareData.makeAttack.overrides =
+            (window.prepareData.makeAttack.overrides || 0) + (Date.now() - startDate);
 
         // AVAD
+        startDate = Date.now();
         const avad = this.findModsByXmlid("AVAD");
         if (avad) {
             this.system.class = "avad";
         }
+        window.prepareData.makeAttack.avad = (window.prepareData.makeAttack.avad || 0) + (Date.now() - startDate);
 
         // Armor Piercing
+        startDate = Date.now();
         const armorPiercing = this.findModsByXmlid("ARMORPIERCING");
         if (armorPiercing) {
             this.system.piercing = parseInt(armorPiercing.LEVELS);
         }
+        window.prepareData.makeAttack.ap = (window.prepareData.makeAttack.ap || 0) + (Date.now() - startDate);
 
         // Penetrating
+        startDate = Date.now();
         const penetrating = this.findModsByXmlid("PENETRATING");
         if (penetrating) {
             this.system.penetrating = parseInt(penetrating.LEVELS);
         }
+        window.prepareData.makeAttack.penetrating =
+            (window.prepareData.makeAttack.penetrating || 0) + (Date.now() - startDate);
 
         // No Knockback
+        startDate = Date.now();
         const noKb = this.findModsByXmlid("NOKB");
         if (noKb) {
             this.system.knockbackMultiplier = 0;
         }
+        window.prepareData.makeAttack.noKb = (window.prepareData.makeAttack.noKb || 0) + (Date.now() - startDate);
 
         // Double Knockback
+        startDate = Date.now();
         const doubleKb = this.findModsByXmlid("DOUBLEKB");
         if (doubleKb) {
             const cost = doubleKb.cost;
@@ -4758,29 +4787,42 @@ export class HeroSystem6eItem extends Item {
                 this.system.knockbackMultiplier = multiplier;
             }
         }
+        window.prepareData.makeAttack.doubleKb =
+            (window.prepareData.makeAttack.doubleKb || 0) + (Date.now() - startDate);
 
+        startDate = Date.now();
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
             this.system.killing = true;
         } else if (xmlid === "TELEKINESIS") {
             this.system.usesStrength = false;
             this.system.usesTk = true;
         }
+        window.prepareData.makeAttack.killing = (window.prepareData.makeAttack.killing || 0) + (Date.now() - startDate);
 
         // Damage effect/type modifiers
+        startDate = Date.now();
         const noStrBonus = this.findModsByXmlid("NOSTRBONUS");
         if (noStrBonus) {
             this.system.usesStrength = false;
         }
+        window.prepareData.makeAttack.noStrBonus =
+            (window.prepareData.makeAttack.noStrBonus || 0) + (Date.now() - startDate);
 
+        startDate = Date.now();
         const stunOnly = this.findModsByXmlid("STUNONLY");
         if (stunOnly) {
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
         }
+        window.prepareData.makeAttack.stunOnly =
+            (window.prepareData.makeAttack.stunOnly || 0) + (Date.now() - startDate);
 
+        startDate = Date.now();
         const doesBody = this.findModsByXmlid("DOESBODY");
         if (doesBody) {
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
         }
+        window.prepareData.makeAttack.doesBody =
+            (window.prepareData.makeAttack.doesBody || 0) + (Date.now() - startDate);
     }
 
     updateRoll() {

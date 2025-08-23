@@ -675,7 +675,7 @@ let lastDate = 0;
  */
 Hooks.on("updateWorldTime", async (worldTime, options) => {
     //console.log(`updateWorldTime`, game.time.worldTime);
-    const start = new Date();
+    const start = Date.now();
 
     // Ensure that this only runs for 1 user to we don't have multiple user attempting to
     // initiate actions. For simplicity we will limit it to the GM.
@@ -894,7 +894,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
     // If there are lots of actors updateWorldTime may result in performance issues.
     // Notify GM when this is a concern.
-    const deltaMs = new Date() - start;
+    const deltaMs = Date.now() - start;
     if (game.settings.get(game.system.id, "alphaTesting") && deltaMs > 100) {
         ui.notifications.warn(
             `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
