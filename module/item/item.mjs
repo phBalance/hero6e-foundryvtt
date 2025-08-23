@@ -675,7 +675,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     setDescription() {
-        const startDate = nDate.now();
+        const startDate = Date.now();
 
         window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
     }
