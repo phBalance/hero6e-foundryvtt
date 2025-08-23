@@ -2506,7 +2506,7 @@ export class HeroSystem6eActor extends Actor {
         uploadProgressBar.advance(`${this.name}: Restoring retained damage`, 0);
 
         // Apply retained damage
-        if (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end) {
+        if (this.id && (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end)) {
             this.system.characteristics.body.value -= retainValuesOnUpload.body;
             this.system.characteristics.stun.value -= retainValuesOnUpload.stun;
             this.system.characteristics.end.value -= retainValuesOnUpload.end;
@@ -2556,30 +2556,44 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Delete any old items that weren't updated or added
-        const itemsToDelete = this.items.filter(
-            (item) =>
-                item.system.ID &&
-                !itemsToUpdate.find((o) => item.id === o._id) &&
-                !itemsToCreate.find((p) => item.system.ID === p.system.ID),
-        );
-        if (itemsToDelete.length > 0) {
-            const content =
-                `The following items were not included in the HDC file. Do you want to delete them?` +
-                `<div style="max-height:100px;overflow-y:scroll"><ul>` +
-                itemsToDelete.map((m) => `<li>${m.name}</li>`).join("") +
-                `</ul></div>`;
+        if (this.id) {
+            const itemsToDelete = this.items.filter(
+                (item) =>
+                    item.system.ID &&
+                    !itemsToUpdate.find((o) => item.id === o._id) &&
+                    !itemsToCreate.find((p) => item.system.ID === p.system.ID),
+            );
+            if (itemsToDelete.length > 0) {
+                const unorderedList =
+                    `<div style="max-height:200px;overflow-y:scroll"><ul>` +
+                    itemsToDelete
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((m) => `<li title='${m.system.description}'>${m.type.toUpperCase()}: ${m.name}</li>`)
+                        .join("") +
+                    `</ul></div>`;
+                const content = `The following items were not included in the HDC file. Do you want to delete them? ${unorderedList}`;
+                const confirmDeleteExtraItems = await Dialog.confirm({
+                    title: "Delete extra items?",
+                    content: content,
+                });
 
-            const confirmDeleteExtraItems = await Dialog.confirm({
-                title: "Delete extra items?",
-                content: content,
-            });
-
-            if (confirmDeleteExtraItems) {
-                console.log(`Deleting ${itemsToDelete.length} items because they were not present in the HDC file.`);
-                await this.deleteEmbeddedDocuments(
-                    "Item",
-                    itemsToDelete.map((o) => o.id),
-                );
+                if (confirmDeleteExtraItems) {
+                    console.log(
+                        `Deleting ${itemsToDelete.length} items because they were not present in the HDC file.`,
+                    );
+                    await this.deleteEmbeddedDocuments(
+                        "Item",
+                        itemsToDelete.map((o) => o.id),
+                    );
+                    await this.postUpload(); // Needed for actor CP/AP
+                } else {
+                    ChatMessage.create({
+                        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                        author: game.user._id,
+                        content: `<b>${this.name}</b> kept a few items that were not in the HDC upload: ${unorderedList}`,
+                        whisper: whisperUserTargetsForActor(this),
+                    });
+                }
             }
         }
     }
