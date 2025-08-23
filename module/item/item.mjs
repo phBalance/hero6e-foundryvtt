@@ -2986,7 +2986,7 @@ export class HeroSystem6eItem extends Item {
             ? true
             : false;
     }
-  
+
     static _modifiersCache = HeroSystemGenericSharedCache.create("modifiers");
     get modifiers() {
         // Caching for performance
