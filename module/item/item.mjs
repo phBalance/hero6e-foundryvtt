@@ -2976,7 +2976,14 @@ export class HeroSystem6eItem extends Item {
     // You would think there would be a built in property, perhaps in token.delta
     // to determine this, but I was unable to find one.
     get isFromBaseActor() {
-        return this.baseActor?.items.find((o) => o.id === this.id);
+        if (!this.baseActor) {
+            return true;
+        }
+        return this.baseActor?.items.find(
+            (o) => (o.id === this.id && JSON.stringify(o.toObject())) === JSON.stringify(this.toObject()),
+        )
+            ? true
+            : false;
     }
 
     _cacheLength = 1000;
