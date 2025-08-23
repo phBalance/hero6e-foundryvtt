@@ -2076,20 +2076,21 @@ export class HeroSystem6eItem extends Item {
 
     /**
      * Calculate all the AOE related parameters.
+     * 5e's modifier is either AOE or EXPLOSION. 6e is always AOE. There are of course ADDERS which modify the two possibilities.
      *
-     * @param {Modifier} modifier
+     * @param {Modifier} aoeModifier - Must be AOE or EXPLOSION modifier.
      * @returns
      */
-    buildAoeAttackParameters(modifier) {
+    buildAoeAttackParameters(aoeModifier) {
         const is5e = !!this.actor?.system?.is5e;
 
         let changed = false;
 
         const widthDouble = parseInt(
-            (modifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEWIDTH")?.LEVELS || 0,
+            (aoeModifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEWIDTH")?.LEVELS || 0,
         );
         const heightDouble = parseInt(
-            (modifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEHEIGHT")?.LEVELS || 0,
+            (aoeModifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEHEIGHT")?.LEVELS || 0,
         );
         // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
         const width = is5e ? Math.pow(2, widthDouble) : widthDouble || 2;
@@ -2100,8 +2101,8 @@ export class HeroSystem6eItem extends Item {
         // 5e has a calculated size
         if (is5e) {
             const activePointsWithoutAoeAdvantage = this._activePointsWithoutAoe;
-            if (modifier.XMLID === "AOE") {
-                switch (modifier.OPTIONID) {
+            if (aoeModifier.XMLID === "AOE") {
+                switch (aoeModifier.OPTIONID) {
                     case "CONE":
                         levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
                         break;
@@ -2120,12 +2121,12 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     default:
-                        console.error(`Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.detailedName()}`);
+                        console.error(`Unhandled 5e AOE OPTIONID ${aoeModifier.OPTIONID} for ${this.detailedName()}`);
                         break;
                 }
 
                 // Modify major dimension (radius, length, etc). Line is different from all others.
-                const majorDimensionDoubles = (modifier?.ADDER || []).find(
+                const majorDimensionDoubles = (aoeModifier?.ADDER || []).find(
                     (adder) => adder.XMLID === "DOUBLEAREA" || adder.XMLID === "DOUBLELENGTH",
                 );
                 if (majorDimensionDoubles) {
@@ -2134,14 +2135,14 @@ export class HeroSystem6eItem extends Item {
             } else {
                 // Explosion DC falloff has different defaults based on shape. When
                 // LEVELS are provided they are the absolute value and not additive to the default.
-                if (modifier.OPTIONID === "CONE") {
+                if (aoeModifier.OPTIONID === "CONE") {
                     dcFalloff = 2;
-                } else if (modifier.OPTIONID === "LINE") {
+                } else if (aoeModifier.OPTIONID === "LINE") {
                     dcFalloff = 3;
                 } else {
                     dcFalloff = 1;
                 }
-                dcFalloff = modifier.LEVELS ? parseInt(modifier.LEVELS) : dcFalloff;
+                dcFalloff = aoeModifier.LEVELS ? parseInt(aoeModifier.LEVELS) : dcFalloff;
 
                 // The description in FRed is poorly written as it talks about AP of the power but it doesn't exclude
                 // the contribution of the explosion advantage itself although its example does. We will remove the explosion contribution to
@@ -2150,16 +2151,12 @@ export class HeroSystem6eItem extends Item {
                 levels = effectiveDc * dcFalloff;
             }
         } else {
-            levels = parseInt(modifier.LEVELS || 0);
+            levels = parseInt(aoeModifier.LEVELS || 0);
         }
 
-        // 5e has a slightly different alias for an Explosive Radius in HD.
-        // Otherwise, all other shapes seems the same.
-        // NAKEDMODIFIER has the AOE shape in MODIFIER
+        // 5e has HEX and RADIUS but they're the same template. 5e explosion radius template is called NORMAL for some reason.
         const type =
-            modifier.OPTION_ALIAS === "Normal (Radius)"
-                ? "Radius"
-                : modifier.OPTION_ALIAS || modifier.MODIFIER?.find((m) => m.XMLID === "AOE").OPTION_ALIAS;
+            aoeModifier.OPTIONID === "HEX" || aoeModifier.OPTIONID === "NORMAL" ? "RADIUS" : aoeModifier.OPTIONID;
         const newAoe = {
             type: type.toLowerCase(),
             value: levels,
@@ -2325,7 +2322,8 @@ export class HeroSystem6eItem extends Item {
 
             // 5e has a slightly different alias for an Explosive Radius in HD.
             // Otherwise, all other shapes seems the same.
-            const type = aoeModifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : aoeModifier.OPTION_ALIAS;
+            const type =
+                aoeModifier.OPTIONID === "HEX" || aoeModifier.OPTIONID === "NORMAL" ? "RADIUS" : aoeModifier.OPTIONID;
             const newAoe = {
                 type: type.toLowerCase(),
                 value: levels,
