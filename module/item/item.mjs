@@ -2967,6 +2967,7 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
+    _cacheLength = 1000;
     _modifiersCache = null;
     get modifiers() {
         // Caching for performance
@@ -2978,7 +2979,7 @@ export class HeroSystem6eItem extends Item {
             this._modifiersCache &&
             this.id &&
             this.id === this._modifiersCache.id &&
-            Date.now() - this._modifiersCache.dt < 5
+            Date.now() - this._modifiersCache.dt < this._cacheLength
         )
             return this._modifiersCache.value;
         let _modifiers = [];
@@ -3037,7 +3038,12 @@ export class HeroSystem6eItem extends Item {
     _addersCache = null;
     get adders() {
         // Caching for performance
-        if (this._addersCache && this.id && this.id === this._addersCache.id && Date.now() - this._addersCache.dt < 5)
+        if (
+            this._addersCache &&
+            this.id &&
+            this.id === this._addersCache.id &&
+            Date.now() - this._addersCache.dt < this._cacheLength
+        )
             return this._addersCache.value;
         const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
@@ -3054,7 +3060,12 @@ export class HeroSystem6eItem extends Item {
     _powersCache = null;
     get powers() {
         // Caching for performance
-        if (this._powersCache && this.id && this.id === this._powersCache.id && Date.now() - this._powersCache.dt < 5)
+        if (
+            this._powersCache &&
+            this.id &&
+            this.id === this._powersCache.id &&
+            Date.now() - this._powersCache.dt < this._cacheLength
+        )
             return this._powersCache.value;
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
@@ -4631,12 +4642,12 @@ export class HeroSystem6eItem extends Item {
         this.system.usesStrength = true;
         this.system.piercing = 0;
         this.system.penetrating = 0;
-        window.prepareData.makeAttack.init = (window.prepareData.makeAttack.init || 0) + (Date.now() - startDate);
-
         this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
+        window.prepareData.makeAttack.init = (window.prepareData.makeAttack.init || 0) + (Date.now() - startDate);
 
         // Maneuvers and martial arts may allow strength to be added or have extra effects.
         // PH: FIXME: Weapons?
+        startDate = Date.now();
         if (["maneuver", "martialart"].includes(this.type)) {
             if (this.system.ADDSTR != undefined) {
                 this.system.usesStrength = this.system.ADDSTR;
@@ -4653,8 +4664,10 @@ export class HeroSystem6eItem extends Item {
                 this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
             }
         }
+        window.prepareData.makeAttack.effect = (window.prepareData.makeAttack.effect || 0) + (Date.now() - startDate);
 
         // Specific power overrides
+        startDate = Date.now();
         if (xmlid === "ENTANGLE") {
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
@@ -4718,32 +4731,44 @@ export class HeroSystem6eItem extends Item {
         } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
             this.system.usesStrength = false;
         }
+        window.prepareData.makeAttack.overrides =
+            (window.prepareData.makeAttack.overrides || 0) + (Date.now() - startDate);
 
         // AVAD
+        startDate = Date.now();
         const avad = this.findModsByXmlid("AVAD");
         if (avad) {
             this.system.class = "avad";
         }
+        window.prepareData.makeAttack.avad = (window.prepareData.makeAttack.avad || 0) + (Date.now() - startDate);
 
         // Armor Piercing
+        startDate = Date.now();
         const armorPiercing = this.findModsByXmlid("ARMORPIERCING");
         if (armorPiercing) {
             this.system.piercing = parseInt(armorPiercing.LEVELS);
         }
+        window.prepareData.makeAttack.ap = (window.prepareData.makeAttack.ap || 0) + (Date.now() - startDate);
 
         // Penetrating
+        startDate = Date.now();
         const penetrating = this.findModsByXmlid("PENETRATING");
         if (penetrating) {
             this.system.penetrating = parseInt(penetrating.LEVELS);
         }
+        window.prepareData.makeAttack.penetrating =
+            (window.prepareData.makeAttack.penetrating || 0) + (Date.now() - startDate);
 
         // No Knockback
+        startDate = Date.now();
         const noKb = this.findModsByXmlid("NOKB");
         if (noKb) {
             this.system.knockbackMultiplier = 0;
         }
+        window.prepareData.makeAttack.noKb = (window.prepareData.makeAttack.noKb || 0) + (Date.now() - startDate);
 
         // Double Knockback
+        startDate = Date.now();
         const doubleKb = this.findModsByXmlid("DOUBLEKB");
         if (doubleKb) {
             const cost = doubleKb.cost;
@@ -4762,29 +4787,42 @@ export class HeroSystem6eItem extends Item {
                 this.system.knockbackMultiplier = multiplier;
             }
         }
+        window.prepareData.makeAttack.doubleKb =
+            (window.prepareData.makeAttack.doubleKb || 0) + (Date.now() - startDate);
 
+        startDate = Date.now();
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
             this.system.killing = true;
         } else if (xmlid === "TELEKINESIS") {
             this.system.usesStrength = false;
             this.system.usesTk = true;
         }
+        window.prepareData.makeAttack.killing = (window.prepareData.makeAttack.killing || 0) + (Date.now() - startDate);
 
         // Damage effect/type modifiers
+        startDate = Date.now();
         const noStrBonus = this.findModsByXmlid("NOSTRBONUS");
         if (noStrBonus) {
             this.system.usesStrength = false;
         }
+        window.prepareData.makeAttack.noStrBonus =
+            (window.prepareData.makeAttack.noStrBonus || 0) + (Date.now() - startDate);
 
+        startDate = Date.now();
         const stunOnly = this.findModsByXmlid("STUNONLY");
         if (stunOnly) {
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
         }
+        window.prepareData.makeAttack.stunOnly =
+            (window.prepareData.makeAttack.stunOnly || 0) + (Date.now() - startDate);
 
+        startDate = Date.now();
         const doesBody = this.findModsByXmlid("DOESBODY");
         if (doesBody) {
             this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
         }
+        window.prepareData.makeAttack.doesBody =
+            (window.prepareData.makeAttack.doesBody || 0) + (Date.now() - startDate);
     }
 
     updateRoll() {

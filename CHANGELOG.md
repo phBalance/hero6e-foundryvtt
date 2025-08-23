@@ -13,6 +13,7 @@
 - Removed support for adjustment, entangle, effect, and flash from the generic roller as the existing interface didn't support it well. Please let us know if you did use these and would like them added back.
 - Fixed PD/ED for Automations [#2709](https://github.com/dmdorman/hero6e-foundryvtt/issues/2709)
 - Initial support for stackable items. [#2716](https://github.com/dmdorman/hero6e-foundryvtt/issues/2716)
+- Improved how unlinked actors are handled. [#2723](https://github.com/dmdorman/hero6e-foundryvtt/issues/2723)
 
 ## Version 4.1.12 20250813
 
