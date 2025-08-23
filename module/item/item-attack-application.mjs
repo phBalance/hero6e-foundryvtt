@@ -11,14 +11,17 @@ import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/un
 import { HEROSYS } from "../herosystem6e.mjs";
 import { Attack } from "../utility/attack.mjs";
 
+/**
+ * 5e HEX type and NORMAL are convered to RADIUS
+ */
 const heroAoeTypeToFoundryAoeTypeConversions = {
     any: "rect",
     cone: "cone",
-    hex: "circle",
     line: "ray",
     radius: "circle",
     surface: "rect",
 };
+
 /* *
  * uses ../templates/attack/item-attack-application.hbs
  * */
