@@ -1,11 +1,12 @@
+import { HeroSystemGenericSharedCache } from "./utility/cache.mjs";
+import { createDefenseProfile } from "./utility/defense.mjs";
+import * as heroDice from "./utility/dice.mjs";
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
 import {
     getRoundedUpDistanceInSystemUnits,
     getSystemDisplayUnits,
     hexDistanceToSystemDisplayString,
 } from "./utility/units.mjs";
-import * as heroDice from "./utility/dice.mjs";
-import { createDefenseProfile } from "./utility/defense.mjs";
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import {
     characteristicValueToDiceParts,
@@ -14,7 +15,7 @@ import {
     maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
 
-export const HERO = { heroDice };
+export const HERO = { heroDice, cache: HeroSystemGenericSharedCache };
 
 HERO.folderColors = {
     // Base Category
@@ -28,18 +29,6 @@ HERO.folderColors = {
     "Powers.Perks": "#ff6666",
     "Powers.Skill": "#ff6666",
     "Powers.Talents": "#ff6666",
-};
-
-HERO.bool = {
-    true: "True",
-    false: "False",
-};
-
-HERO.extraDice = {
-    zero: "+0",
-    pip: "+1",
-    half: "+½D6",
-    "one-pip": "+1D6-1",
 };
 
 HERO.attacksWith = {
