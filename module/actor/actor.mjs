@@ -1802,7 +1802,7 @@ export class HeroSystem6eActor extends Actor {
             return;
         }
 
-        // Ask if certain values should be retained across the upload
+        // Keep track of damage & charge uses, which we will apply at end of the upload
         const retainValuesOnUpload = {
             body: parseInt(this.system.characteristics?.body?.max) - parseInt(this.system.characteristics?.body?.value),
             stun: parseInt(this.system.characteristics?.stun?.max) - parseInt(this.system.characteristics?.stun?.value),
@@ -1818,33 +1818,33 @@ export class HeroSystem6eActor extends Actor {
                 )
                 .map((o) => o.system),
         };
-        if (
-            retainValuesOnUpload.body ||
-            retainValuesOnUpload.stun ||
-            retainValuesOnUpload.end ||
-            retainValuesOnUpload.charges.length > 0
-        ) {
-            let content = `${this.name} has:<ul>`;
-            if (retainValuesOnUpload.body) content += `<li>${retainValuesOnUpload.body} BODY damage</li>`;
-            if (retainValuesOnUpload.stun) content += `<li>${retainValuesOnUpload.stun} STUN damage</li>`;
-            if (retainValuesOnUpload.end) content += `<li>${retainValuesOnUpload.end} END used</li>`;
-            for (const c of retainValuesOnUpload.charges) {
-                content += `<li>Charges: ${c.NAME || c.ALIAS}</li>`;
-            }
-            content += `</ul><p>Do you want to apply resource usage after the upload?</p>`;
-            const confirmed = await Dialog.confirm({
-                title: "Retain resource usage after upload?",
-                content: content,
-            });
-            if (confirmed === null) {
-                return ui.notifications.warn(`${this.name} upload canceled.`);
-            } else if (!confirmed) {
-                retainValuesOnUpload.body = 0;
-                retainValuesOnUpload.stun = 0;
-                retainValuesOnUpload.end = 0;
-                retainValuesOnUpload.charges = [];
-            }
-        }
+        // if (
+        //     retainValuesOnUpload.body ||
+        //     retainValuesOnUpload.stun ||
+        //     retainValuesOnUpload.end ||
+        //     retainValuesOnUpload.charges.length > 0
+        // ) {
+        //     let content = `${this.name} has:<ul>`;
+        //     if (retainValuesOnUpload.body) content += `<li>${retainValuesOnUpload.body} BODY damage</li>`;
+        //     if (retainValuesOnUpload.stun) content += `<li>${retainValuesOnUpload.stun} STUN damage</li>`;
+        //     if (retainValuesOnUpload.end) content += `<li>${retainValuesOnUpload.end} END used</li>`;
+        //     for (const c of retainValuesOnUpload.charges) {
+        //         content += `<li>Charges: ${c.NAME || c.ALIAS}</li>`;
+        //     }
+        //     content += `</ul><p>Do you want to apply resource usage after the upload?</p>`;
+        //     const confirmed = await Dialog.confirm({
+        //         title: "Retain resource usage after upload?",
+        //         content: content,
+        //     });
+        //     if (confirmed === null) {
+        //         return ui.notifications.warn(`${this.name} upload canceled.`);
+        //     } else if (!confirmed) {
+        //         retainValuesOnUpload.body = 0;
+        //         retainValuesOnUpload.stun = 0;
+        //         retainValuesOnUpload.end = 0;
+        //         retainValuesOnUpload.charges = [];
+        //     }
+        // }
 
         const uploadPerformance = {
             startTime: new Date(),
@@ -1871,7 +1871,8 @@ export class HeroSystem6eActor extends Actor {
         );
 
         // Remove all items from
-        promiseArray.push(this.deleteEmbeddedDocuments("Item", Array.from(this.items.keys())));
+        // Working on a merge instead of delete all and create all
+        //promiseArray.push(this.deleteEmbeddedDocuments("Item", Array.from(this.items.keys())));
 
         let changes = {};
 
@@ -2063,7 +2064,7 @@ export class HeroSystem6eActor extends Actor {
         // ITEMS
         uploadProgressBar.advance(`${this.name}: Evaluating items`, 0);
 
-        const itemsToCreate = [];
+        let itemsToCreate = [];
         let sortBase = 0;
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
             sortBase += 1000;
@@ -2199,7 +2200,19 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // Working on a merge to update previously existing items.
+        // Add existing item.id (if it exists), which we will use for the pending update.
+        itemsToCreate = itemsToCreate.map((m) =>
+            foundry.utils.mergeObject(m, { _id: this.items.find((i) => i.system.ID === m.system.ID)?.id }),
+        );
+        const itemsToUpdate = itemsToCreate.filter((o) => o._id);
+        itemsToCreate = itemsToCreate.filter((o) => !o._id);
+
         uploadProgressBar.advance(`${this.name}: Evaluated Items`, 0);
+
+        uploadProgressBar.advance(`${this.name}: Updating Items`, 0);
+        await this.updateEmbeddedDocuments("Item", itemsToUpdate);
+
         uploadProgressBar.advance(`${this.name}: Creating Items`, 0);
 
         uploadPerformance.itemsToCreateActual = itemsToCreate.length;
@@ -2541,6 +2554,34 @@ export class HeroSystem6eActor extends Actor {
                 whisper: whisperUserTargetsForActor(this),
             });
         }
+
+        // Delete any old items that weren't updated or added
+        const itemsToDelete = this.items.filter(
+            (item) =>
+                item.system.ID &&
+                !itemsToUpdate.find((o) => item.id === o._id) &&
+                !itemsToCreate.find((p) => item.system.ID === p.system.ID),
+        );
+        if (itemsToDelete.length > 0) {
+            const content =
+                `The following items were not included in the HDC file. Do you want to delete them?` +
+                `<div style="max-height:100px;overflow-y:scroll"><ul>` +
+                itemsToDelete.map((m) => `<li>${m.name}</li>`).join("") +
+                `</ul></div>`;
+
+            const confirmDeleteExtraItems = await Dialog.confirm({
+                title: "Delete extra items?",
+                content: content,
+            });
+
+            if (confirmDeleteExtraItems) {
+                console.log(`Deleting ${itemsToDelete.length} items because they were not present in the HDC file.`);
+                await this.deleteEmbeddedDocuments(
+                    "Item",
+                    itemsToDelete.map((o) => o.id),
+                );
+            }
+        }
     }
 
     /**
@@ -2555,6 +2596,26 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async addPerception() {
+        const perceptionItems = this.items.filter(
+            (item) => item.system.XMLID === "PERCEPTION" && item.type === "skill" && !item.system.ID,
+        );
+        if (perceptionItems.length > 0) {
+            console.debug(`PERCEPTION already exists`);
+
+            // Make sure we only have one
+            const itemsToDelete = perceptionItems.splice(1);
+
+            if (itemsToDelete.length > 0) {
+                console.error(`Deleted ${itemsToDelete.length} PERCEPTION items`);
+                await this.deleteEmbeddedDocuments(
+                    "Item",
+                    itemsToDelete.map((o) => o.id),
+                );
+            }
+
+            return;
+        }
+
         // Perception Skill
         const itemDataPerception = {
             name: "Perception",
@@ -2564,7 +2625,7 @@ export class HeroSystem6eActor extends Actor {
                 ALIAS: "Perception",
                 CHARACTERISTIC: "INT",
                 state: "trained",
-                levels: "0",
+                LEVELS: "0",
                 is5e: this.is5e,
             },
         };
@@ -2594,6 +2655,26 @@ export class HeroSystem6eActor extends Actor {
         const ADDSTR = maneuverDetails.addStr;
         const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
         const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
+
+        const perceptionItems = this.items.filter(
+            (item) => item.system.XMLID === XMLID && item.type === "maneuver" && !item.system.ID,
+        );
+        if (perceptionItems.length > 0) {
+            console.debug(`${XMLID} already exists`);
+
+            // Make sure we only have one
+            const itemsToDelete = perceptionItems.splice(1);
+
+            if (itemsToDelete.length > 0) {
+                console.error(`Deleted ${itemsToDelete.length} ${XMLID} items`);
+                await this.deleteEmbeddedDocuments(
+                    "Item",
+                    itemsToDelete.map((o) => o.id),
+                );
+            }
+
+            return;
+        }
 
         const itemData = {
             name,
