@@ -1,5 +1,5 @@
 {{#if (filterItem this @root.options.itemFilters.equipment)}}
-<tr class="item {{#if (gt this.system.value this.system.max)}} over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
+<tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (gt this.system.value this.system.max)}} over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
     data-item-id="{{this._id}}">
 
     {{#if (eq this.system.XMLID "LIST")}}

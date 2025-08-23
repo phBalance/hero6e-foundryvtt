@@ -1,6 +1,6 @@
 {{!-- {{log 'actor-sheet-partial-martialarts-item' this}} --}}
 {{#if (filterItem this @root.options.itemFilters.martial)}}
-<tr class="item {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
+<tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
     data-item-id="{{this._id}}">
     {{#if (eq this.system.XMLID "LIST")}}
             <td height="24"></td>

@@ -2967,6 +2967,18 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
+    // If this item belongs to an unlinked actor may want to know if it was
+    // inherited from the baseActor.
+    get baseActor() {
+        return this.actor?.token?.baseActor;
+    }
+
+    // You would think there would be a built in property, perhaps in token.delta
+    // to determine this, but I was unable to find one.
+    get isFromBaseActor() {
+        return this.baseActor?.items.find((o) => o.id === this.id);
+    }
+
     _cacheLength = 1000;
     _modifiersCache = null;
     get modifiers() {
