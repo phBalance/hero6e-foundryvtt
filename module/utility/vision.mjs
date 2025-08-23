@@ -8,15 +8,15 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
                 return super.isBlinded;
             }
 
-            const start = new Date();
+            const start = Date.now();
 
             const defaultBlind =
                 (this.data.radius === 0 && (this.data.lightRadius === 0 || !this.visionMode?.perceivesLight)) ||
                 Object.values(this.blinded).includes(true);
             if (!defaultBlind) {
-                const duration = new Date() - start;
+                const duration = Date.now() - start;
                 if (duration > 1) {
-                    console.debug(new Date() - start, this);
+                    console.debug(Date.now() - start, this);
                 }
                 return defaultBlind;
             }
@@ -37,15 +37,15 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
 
             if (blindVisionItem) {
                 //console.log("blindVisionItem", blindVisionItem);
-                const duration = new Date() - start;
+                const duration = Date.now() - start;
                 if (duration > 1) {
-                    console.debug(new Date() - start, this);
+                    console.debug(Date.now() - start, this);
                 }
                 return false;
             }
-            const duration = new Date() - start;
+            const duration = Date.now() - start;
             if (duration > 1) {
-                console.debug(new Date() - start, this);
+                console.debug(Date.now() - start, this);
             }
             return defaultBlind;
         } catch (e) {
@@ -123,7 +123,7 @@ export function setPerceptionModes() {
             }
 
             try {
-                const start = new Date();
+                const start = Date.now();
 
                 if (target?.document?.hidden === true) return false;
                 if (super._canDetect(visionSource, target)) return true; // handled by standard vision
@@ -136,16 +136,16 @@ export function setPerceptionModes() {
                 if (INVISIBILITY && !INVISIBILITY.findModsByXmlid("NOFRINGE")) {
                     const distance = calculateDistanceBetween(visionSource.token, target).distance;
                     if (distance < 2.1) {
-                        const duration = new Date() - start;
+                        const duration = Date.now() - start;
                         if (duration > 3) {
-                            console.debug(`VISION: _canDetect check took ${new Date() - start} ms`, this);
+                            console.debug(`VISION: _canDetect check took ${Date.now() - start} ms`, this);
                         }
                         return true;
                     }
                 }
-                const duration = new Date() - start;
+                const duration = Date.now() - start;
                 if (duration > 3) {
-                    console.debug(`VISION: _canDetect check took ${new Date() - start} ms`, this);
+                    console.debug(`VISION: _canDetect check took ${Date.now() - start} ms`, this);
                 }
             } catch (e) {
                 console.error(e);
@@ -159,7 +159,7 @@ export function setPerceptionModes() {
                 return super._testLOS(visionSource, mode, target, test);
             }
 
-            const start = new Date();
+            const start = Date.now();
 
             // Kluge to let PARTIALLYPENETRATIVE see thru walls.
             // Although DESOLIDIFICATION make you undetectable via touch group
@@ -196,9 +196,9 @@ export function setPerceptionModes() {
             if (!this.angle && visionSource.data.angle < 360) {
                 // Constrained by walls but not by vision angle
 
-                const duration = new Date() - start;
+                const duration = Date.now() - start;
                 if (duration > 3) {
-                    console.debug(`VISION: _testLOS check took ${new Date() - start} ms`, this);
+                    console.debug(`VISION: _testLOS check took ${Date.now() - start} ms`, this);
                 }
 
                 return !CONFIG.Canvas.polygonBackends[type].testCollision(
@@ -214,9 +214,9 @@ export function setPerceptionModes() {
                 test.los.set(visionSource, hasLOS);
             }
 
-            const duration = new Date() - start;
+            const duration = Date.now() - start;
             if (duration > 3) {
-                console.debug(`VISION: _testLOS check took ${new Date() - start} ms`, this);
+                console.debug(`VISION: _testLOS check took ${Date.now() - start} ms`, this);
             }
             return hasLOS;
         }

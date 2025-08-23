@@ -2197,7 +2197,7 @@ export class HeroSystem6eActor extends Actor {
                     }
 
                     uploadPerformance.items ??= [];
-                    uploadPerformance.items.push({ name: itemData.name, d: new Date() - uploadPerformance._d });
+                    uploadPerformance.items.push({ name: itemData.name, d: Date.now() - uploadPerformance._d });
                     uploadPerformance._d = new Date().getTime();
                 }
                 delete heroJson.CHARACTER[itemTag];
