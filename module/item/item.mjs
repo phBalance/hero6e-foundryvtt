@@ -19,6 +19,7 @@ import {
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
+import { HeroSystemGenericSharedCache } from "../utility/cache.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
 import {
     getModifierInfo,
@@ -2967,21 +2968,16 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
-    _cacheLength = 1000;
-    _modifiersCache = null;
+    static _modifiersCache = HeroSystemGenericSharedCache.create("modifiers");
     get modifiers() {
         // Caching for performance
-        // Aaron suspects that "new HeroSystem6eModifier" is the crux of the performance issue.
-        // The HeroSystem6eModifier class is pretty handy.
-        // Perhaps struct or prototype overrideing could be alternative solution.
-        // The core (database) uses an array of JSON values.
-        if (
-            this._modifiersCache &&
-            this.id &&
-            this.id === this._modifiersCache.id &&
-            Date.now() - this._modifiersCache.dt < this._cacheLength
-        )
-            return this._modifiersCache.value;
+        if (this.id) {
+            const cachedValue = HeroSystem6eItem._modifiersCache.getCachedValue(this.id);
+            if (cachedValue) {
+                return cachedValue;
+            }
+        }
+
         let _modifiers = [];
         for (const _mod of this.system.MODIFIER || []) {
             _modifiers.push(new HeroSystem6eModifier(_mod, { item: this, _itemUuid: this.uuid }));
@@ -3019,11 +3015,12 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-        this._modifiersCache = {
-            value: _modifiers,
-            id: this.id,
-            dt: Date.now(),
-        };
+
+        // Cache modifiers if this is a non temporary item
+        if (this.id) {
+            HeroSystem6eItem._modifiersCache.setCachedValue(this.id, _modifiers);
+        }
+
         return _modifiers;
     }
 
@@ -3035,38 +3032,39 @@ export class HeroSystem6eItem extends Item {
         return this.modifiers.filter((o) => o.cost < 0);
     }
 
-    _addersCache = null;
+    static _addersCache = HeroSystemGenericSharedCache.create("adders");
     get adders() {
         // Caching for performance
-        if (
-            this._addersCache &&
-            this.id &&
-            this.id === this._addersCache.id &&
-            Date.now() - this._addersCache.dt < this._cacheLength
-        )
-            return this._addersCache.value;
+        if (this.id) {
+            const cachedValue = HeroSystem6eItem._addersCache.getCachedValue(this.id);
+            if (cachedValue) {
+                return cachedValue;
+            }
+        }
+
         const _adders = [];
         for (const _adderJson of this.system.ADDER || []) {
             _adders.push(new HeroSystem6eAdder(_adderJson, { item: this, parent: this }));
         }
-        this._addersCache = {
-            value: _adders,
-            id: this.id,
-            dt: Date.now(),
-        };
+
+        // Cache adders if this is a non temporary item
+        if (this.id) {
+            HeroSystem6eItem._addersCache.setCachedValue(this.id, _adders);
+        }
+
         return _adders;
     }
 
-    _powersCache = null;
+    static #powersCache = HeroSystemGenericSharedCache.create("powers");
     get powers() {
         // Caching for performance
-        if (
-            this._powersCache &&
-            this.id &&
-            this.id === this._powersCache.id &&
-            Date.now() - this._powersCache.dt < this._cacheLength
-        )
-            return this._powersCache.value;
+        if (this.id) {
+            const cachedValue = HeroSystem6eItem.#powersCache.getCachedValue(this.id);
+            if (cachedValue) {
+                return cachedValue;
+            }
+        }
+
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
@@ -3089,11 +3087,12 @@ export class HeroSystem6eItem extends Item {
             for (const _powerJson of powersList) {
                 _powers.push(new HeroSystem6eConnectingPower(_powerJson, { item: this, parent: this }));
             }
-            this._powersCache = {
-                value: _powers,
-                id: this.id,
-                dt: Date.now(),
-            };
+
+            // Cache powers if this is a non temporary item
+            if (this.id) {
+                HeroSystem6eItem.#powersCache.setCachedValue(this.id, _powers);
+            }
+
             return _powers;
         } catch (e) {
             console.error(e);
@@ -6085,6 +6084,7 @@ export class HeroSystem6eItem extends Item {
             .filter((advantage) => !advantagesToIgnore.includes(advantage.XMLID));
 
         this.system.MODIFIER = (this.system.MODIFIER || []).concat(advantagesToCopy);
+        HeroSystem6eItem._modifiersCache.invalidateCache(this.id);
 
         // Stash a copy of what we've added in after the fact
         this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(advantagesToCopy);
@@ -6157,6 +6157,11 @@ export class HeroSystem6eItem extends Item {
             this.system.ADDER.push(newAdder);
         }
 
+        // Invalidate the adders cache if this is a non temporary item.
+        if (this.id) {
+            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+        }
+
         // Set/clear a 1/2d6 adder
         const halfDieAdder = this.adders.find((adder) => adder.XMLID === "PLUSONEHALFDIE");
         if (!diceParts.halfDieCount && halfDieAdder) {
@@ -6201,6 +6206,11 @@ export class HeroSystem6eItem extends Item {
             this.system.ADDER.push(newAdder);
         }
 
+        // Invalidate the adders cache if this is a non temporary item.
+        if (this.id) {
+            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+        }
+
         // Set/clear a +1 pip adder
         const onePipAdder = this.adders.find((adder) => adder.XMLID === "PLUSONEPIP");
         if (!diceParts.constant && onePipAdder) {
@@ -6243,6 +6253,11 @@ export class HeroSystem6eItem extends Item {
             const newAdder = createModifierOrAdderFromXml(xml);
             this.system.ADDER ??= [];
             this.system.ADDER.push(newAdder);
+        }
+
+        // Invalidate the adders cache if this is a non temporary item.
+        if (this.id) {
+            HeroSystem6eItem._addersCache.invalidateCache(this.id);
         }
     }
 
