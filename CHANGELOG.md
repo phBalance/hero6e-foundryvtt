@@ -13,7 +13,7 @@
 - Removed support for adjustment, entangle, effect, and flash from the generic roller as the existing interface didn't support it well. Please let us know if you did use these and would like them added back.
 - Fixed PD/ED for Automations [#2713](https://github.com/dmdorman/hero6e-foundryvtt/issues/2713)
 - Initial support for stackable items. [#2716](https://github.com/dmdorman/hero6e-foundryvtt/issues/2716)
-- Improved how unlinked actors are handled. [#2723](https://github.com/dmdorman/hero6e-foundryvtt/issues/2723)
+- Improved how unlinked actors are handled. You may see items with a blueish background, which inidicates that this unlinked actor has an item that the master/prototype actor does not have. Should not cause any problems. This color coding is primarily for devs to make further improvements. [#2723](https://github.com/dmdorman/hero6e-foundryvtt/issues/2723)
 - Uploads now always apply damage & charge uses at end of upload.
 - Uploads now prompt to keep any equipment/powers that are on the actor, but not included in the HDC during an upload.
 
