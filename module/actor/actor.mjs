@@ -2200,6 +2200,10 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        uploadProgressBar.advance(`${this.name}: Evaluated Items`, 0);
+
+        uploadProgressBar.advance(`${this.name}: Updating Items`, 0);
+
         // Working on a merge to update previously existing items.
         // Add existing item.id (if it exists), which we will use for the pending update.
         itemsToCreate = itemsToCreate.map((m) =>
@@ -2208,10 +2212,9 @@ export class HeroSystem6eActor extends Actor {
         const itemsToUpdate = itemsToCreate.filter((o) => o._id);
         itemsToCreate = itemsToCreate.filter((o) => !o._id);
 
-        uploadProgressBar.advance(`${this.name}: Evaluated Items`, 0);
-
-        uploadProgressBar.advance(`${this.name}: Updating Items`, 0);
         await this.updateEmbeddedDocuments("Item", itemsToUpdate);
+
+        uploadProgressBar.advance(`${this.name}: Updated Items`, 0);
 
         uploadProgressBar.advance(`${this.name}: Creating Items`, 0);
 
