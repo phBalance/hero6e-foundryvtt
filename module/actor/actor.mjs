@@ -2673,14 +2673,14 @@ export class HeroSystem6eActor extends Actor {
         const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
         const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
 
-        const perceptionItems = this.items.filter(
+        const maneuverItems = this.items.filter(
             (item) => item.system.XMLID === XMLID && item.type === "maneuver" && !item.system.ID,
         );
-        if (perceptionItems.length > 0) {
+        if (maneuverItems.length > 0) {
             console.debug(`${XMLID} already exists`);
 
             // Make sure we only have one
-            const itemsToDelete = perceptionItems.splice(1);
+            const itemsToDelete = maneuverItems.splice(1);
 
             if (itemsToDelete.length > 0) {
                 console.error(`Deleted ${itemsToDelete.length} ${XMLID} items`);
