@@ -292,6 +292,7 @@ export class HeroSystem6eItem extends Item {
             // The Make Attack is likely the only broken thing here when missing an Actor.
             console.error(
                 `Partial prepareData on item ${this.detailedName()} which has no actor (probably Items collection)`,
+                this,
             );
             try {
                 this.setAoeModifier();
