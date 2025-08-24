@@ -2585,7 +2585,7 @@ export class HeroSystem6eActor extends Actor {
                         "Item",
                         itemsToDelete.map((o) => o.id),
                     );
-                    await this.postUpload(); // Needed for actor CP/AP
+                    await this._postUpload(); // Needed for actor CP/AP
                 } else {
                     ChatMessage.create({
                         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
