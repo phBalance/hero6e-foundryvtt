@@ -2980,7 +2980,11 @@ export class HeroSystem6eItem extends Item {
         if (!this.baseActor) {
             return true;
         }
-        return this.baseActor?.items.find((o) => o.id === this.id && o.toXML() === this.toXML()) ? true : false;
+
+        return this.baseActor?.items.find((o) => o.id === this.id) ? true : false;
+
+        // FIXME: This doesn't quite work. QUANTITY?
+        // return this.baseActor?.items.find((o) => o.id === this.id && o.toXML() === this.toXML()) ? true : false;
     }
 
     static _modifiersCache = HeroSystemGenericSharedCache.create("modifiers");
