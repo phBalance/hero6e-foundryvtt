@@ -393,8 +393,8 @@ export class HeroSystem6eActor extends Actor {
             speaker["alias"] = game.user.name;
             const content = `<b>${tokenName}</b> ${changed.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
             const chatData = {
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
                 author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: content,
                 speaker: speaker,
             };
@@ -654,7 +654,6 @@ export class HeroSystem6eActor extends Actor {
         token = token || this.getActiveTokens()[0];
         const speaker = ChatMessage.getSpeaker({ actor: this, token });
         const tokenName = token?.name || this.name;
-        speaker["alias"] = game.user.name; //game.token?.name || this.name;
 
         // Bases don't get/need a recovery
         if (this.type === "base2") {
@@ -685,7 +684,7 @@ export class HeroSystem6eActor extends Actor {
             if (asAction) {
                 const chatData = {
                     author: game.user._id,
-                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                    style: CONST.CHAT_MESSAGE_STYLES.IC,
                     content: content,
                     speaker: speaker,
                 };
@@ -749,7 +748,7 @@ export class HeroSystem6eActor extends Actor {
 
         const chatData = {
             author: game.user._id,
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             content: content,
             speaker: speaker,
             whisper: [...ChatMessage.getWhisperRecipients(this.name), ...ChatMessage.getWhisperRecipients("GM")],
@@ -837,7 +836,7 @@ export class HeroSystem6eActor extends Actor {
 
             const chatData = {
                 author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
                 content: `${this.name} is ${badStatus.join(", ")} and cannot move. Override key was used.`,
                 whisper: whisperUserTargetsForActor(this),
                 speaker,
@@ -932,7 +931,7 @@ export class HeroSystem6eActor extends Actor {
 
             const chatData = {
                 author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
                 content: `${this.name} is ${badStatus.join(", ")} and cannot act. Override key was used.`,
                 whisper: whisperUserTargetsForActor(this),
                 speaker,
@@ -1854,10 +1853,11 @@ export class HeroSystem6eActor extends Actor {
         // Let GM know actor is being uploaded (unless it is a quench test; missing ID)
         if (this.id) {
             ChatMessage.create({
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
                 author: game.user._id,
-                content: `<b>${game.user.name}</b> is uploading <b>${this.name}</b>`,
+                speaker: ChatMessage.getSpeaker({ actor: this }),
                 whisper: whisperUserTargetsForActor(this),
+                content: `<b>${game.user.name}</b> is uploading <b>${this.name}</b>`,
             });
         }
 
@@ -2551,10 +2551,11 @@ export class HeroSystem6eActor extends Actor {
         // Let GM know actor was uploaded (unless it is a quench test; missing ID)
         if (this.id) {
             ChatMessage.create({
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
                 author: game.user._id,
-                content: `Took ${Math.ceil(uploadPerformance.totalTime / 1000)} seconds for <b>${game.user.name}</b> to upload <b>${this.name}</b>.`,
+                speaker: ChatMessage.getSpeaker({ actor: this }),
                 whisper: whisperUserTargetsForActor(this),
+                content: `Took ${Math.ceil(uploadPerformance.totalTime / 1000)} seconds for <b>${game.user.name}</b> to upload <b>${this.name}</b>.`,
             });
         }
 
@@ -2591,8 +2592,9 @@ export class HeroSystem6eActor extends Actor {
                     await this._postUpload(); // Needed for actor CP/AP
                 } else {
                     ChatMessage.create({
-                        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                        style: CONST.CHAT_MESSAGE_STYLES.IC,
                         author: game.user._id,
+                        speaker: ChatMessage.getSpeaker({ actor: this }),
                         content: `<b>${this.name}</b> kept a few items that were not in the HDC upload: ${unorderedList}`,
                         whisper: whisperUserTargetsForActor(this),
                     });
