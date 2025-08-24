@@ -2573,7 +2573,7 @@ export class HeroSystem6eActor extends Actor {
                     `</ul></div>`;
                 const content = `The following items were not included in the HDC file. Do you want to delete them? ${unorderedList}`;
                 const confirmDeleteExtraItems = await Dialog.confirm({
-                    title: "Delete extra items?",
+                    title: `${this.name}: Delete extra items?`,
                     content: content,
                 });
 
