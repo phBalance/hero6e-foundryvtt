@@ -15,7 +15,7 @@
     <section class="sheet-body">
 
         {{!-- Common --}}
-        {{> systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs }}
+        {{> (getModulePath 'item/item-partial-common.hbs') }}
 
         <!-- Adjustment Targets/Sources (possibly infinite number depending on modifiers and 5e vs 6e) -->
         {{#each reduces as |input id|}}
