@@ -154,7 +154,7 @@ export async function migrateWorld() {
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.0`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
-        "4.1.10",
+        "4.1.13",
         lastMigration,
         getAllActorsInGame(),
         "remove placeholder weapon item",
@@ -179,7 +179,7 @@ export async function migrateWorld() {
 // We no longer need __InternalManeuverPlaceholderWeapon as we now have effective attack items. Delete
 // it from all actors.
 async function removePlaceholderWeaponItem(actor) {
-    return actor?.items.find((item) => item.name === "__InternalStrengthPlaceholder")?.delete();
+    return actor?.items.find((item) => item.name === "__InternalManeuverPlaceholderWeapon")?.delete();
 }
 
 // V13 requires scopes on all flags. Scoped flags work just fine in V12.
