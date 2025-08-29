@@ -31,18 +31,10 @@
             <td>
                 {{#unless (eq characteristic.core null)}}
                 <input name="system.characteristics.{{characteristic.key}}.core" type="number"
-                    value="{{characteristic.core}}" data-dtype="Number" {{#if (eq characteristic.core
-                    null)}}disabled{{/if}}>
+                    value="{{characteristic.core}}" data-dtype="Number" 
+                    {{#if (and (eq @root/system.is5e true) (or (includes characteristic.behaviors "calculated") (includes characteristic.behaviors "figured")))}}disabled{{/if}}>
                 {{/unless}}
             </td>
-            {{!-- {{#if @root/alphaTesting}}
-                <td>
-                    {{#unless (eq characteristic.core null)}}
-                    <input name="system.characteristics.{{characteristic.key}}.ap" type="number"
-                        value="{{characteristic.ap}}" data-dtype="Number" disabled>
-                    {{/unless}}
-                </td>
-            {{/if}} --}}
             <td title="{{characteristic.name}}">
                 {{toUpperCase characteristic.key}}
                 
