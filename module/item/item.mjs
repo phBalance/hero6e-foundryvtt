@@ -50,7 +50,7 @@ import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 import { HeroSystem6eModifier } from "./modifier.mjs";
-import { HeroSystem6eConnectingPower } from "./powers.mjs";
+import { HeroSystem6eConnectingPower } from "./connectingPower.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);

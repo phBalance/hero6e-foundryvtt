@@ -183,6 +183,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 characteristic.costTitle = powerInfo.cost
                     ? `${powerInfo.cost} * (${characteristic.core} - ${characteristic.base})`
                     : null;
+                characteristic.behaviors = powerInfo.behaviors;
 
                 // Notes
                 if (powerInfo.key === "STR") {
