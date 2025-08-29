@@ -46,21 +46,28 @@ export class HeroSystem6eConnectingPower {
 
     get cost() {
         let _cost = 0;
-        // Custom costs calculations
-        if (this.baseInfo?.cost) {
-            _cost = this.baseInfo.cost(this);
-        } else {
-            // Generic cost calculations
-            _cost = parseFloat(this.BASECOST);
 
-            const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
-            const levels = parseInt(this.LEVELS) || 0;
-            _cost += levels * costPerLevel;
-        }
+        // There may be confusion between a POWER and a POWER modifier (connecting power).
+        // Errors may result in cost functions.
+        try {
+            // Custom costs calculations
+            if (this.baseInfo?.cost) {
+                _cost = this.baseInfo.cost(this);
+            } else {
+                // Generic cost calculations
+                _cost = parseFloat(this.BASECOST);
 
-        // POWER-adders do not have ADDER (that we are aware of)
-        for (const adder of this.adders) {
-            _cost += adder.cost;
+                const costPerLevel = this.baseInfo?.costPerLevel(this) || 0;
+                const levels = parseInt(this.LEVELS) || 0;
+                _cost += levels * costPerLevel;
+            }
+
+            // POWER-adders do not have ADDER (that we are aware of)
+            for (const adder of this.adders) {
+                _cost += adder.cost;
+            }
+        } catch (e) {
+            console.error(e);
         }
 
         return _cost;
