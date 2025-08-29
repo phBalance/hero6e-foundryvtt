@@ -5,6 +5,8 @@
 - Fix for when uploading 5e actors over a 6e actor where combat maneuvers got confused between 5e/6e. [#2735](https://github.com/dmdorman/hero6e-foundryvtt/issues/2735)
 - Kluge for foundryserver.com where actor sheet sidebar wasn't formatted correctly. [#2738](https://github.com/dmdorman/hero6e-foundryvtt/issues/2738)
 
+- Maneuver descriptions now include maneuvers' range and DC. [#2515](https://github.com/dmdorman/hero6e-foundryvtt/issues/2515)
+
 ## Version 4.1.13 20250823
 
 - Improved ChatMessage to show token image, name, and user. [#2608](https://github.com/dmdorman/hero6e-foundryvtt/issues/2608)
