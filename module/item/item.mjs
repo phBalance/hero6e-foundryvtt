@@ -290,10 +290,14 @@ export class HeroSystem6eItem extends Item {
             // Aaron thinks we should still run most of the prepareData.
             // Things like item description, default values and such are still valid.
             // The Make Attack is likely the only broken thing here when missing an Actor.
-            console.error(
-                `Partial prepareData on item ${this.detailedName()} which has no actor (probably Items collection)`,
-                this,
-            );
+            if (this.uuid.startsWith("Item.")) {
+                console.log(`Partial prepareData on item ${this.detailedName()} from the Item sidebar`, this);
+            } else {
+                console.error(
+                    `Partial prepareData on item ${this.detailedName()} which has no actor (probably Items collection)`,
+                    this,
+                );
+            }
             try {
                 this.setAoeModifier();
                 this.updateItemDescription();
@@ -2070,8 +2074,11 @@ export class HeroSystem6eItem extends Item {
     }
 
     get is5e() {
-        if (this.actor?.is5e !== undefined) {
-            return this.actor.is5e;
+        if (this.system.is5e !== undefined && this.actor && this.actor.system.is5e !== this.system.is5e) {
+            console.warn(
+                `${this.name} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                this,
+            );
         }
         return this.system.is5e;
     }
