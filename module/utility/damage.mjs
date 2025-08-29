@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+import { HeroSystem6eItem } from "../item/item.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 import { getSystemDisplayUnits } from "./units.mjs";
 
@@ -286,7 +287,7 @@ export function isManeuverHthCategory(item) {
 
 function isManeuverThatIsUsingAWeapon(item, options) {
     if (!item.system._active) {
-        console.error(`Missing _active`, item, options, this);
+        console.error(`Missing _active`, item, options, item);
     }
     return (
         (item.type === "martialart" || item.type === "maneuver") &&
@@ -296,7 +297,7 @@ function isManeuverThatIsUsingAWeapon(item, options) {
 
 function isManeuverThatIsUsingAnEmptyHand(item, options) {
     if (!item.system._active) {
-        console.error(`Missing _active`, item, options, this);
+        console.error(`Missing _active`, item, options, item);
     }
     return (
         (item.type === "martialart" || item.type === "maneuver") &&
@@ -304,12 +305,33 @@ function isManeuverThatIsUsingAnEmptyHand(item, options) {
     );
 }
 
+export function getManeuverEffect(item) {
+    return item.system.USEWEAPON || item.system.USEWEAPON === "Yes" ? item.system.WEAPONEFFECT : item.system.EFFECT;
+}
+
+export function isManeuverThatDoesReplaceableDamageType(item) {
+    const effect = getManeuverEffect(item);
+
+    return (
+        effect.search(/\[NORMALDC\]/) > -1 ||
+        effect.search(/\[NNDDC\]/) > -1 ||
+        effect.search(/\[FLASHDC\]/) > -1 ||
+        effect.search(/\[KILLINGDC\]/) > -1 ||
+        effect.search(/\[WEAPONDC\]/) > -1 ||
+        effect.search(/\[WEAPONNNDDC\]/) > -1 ||
+        effect.search(/\[WEAPONFLASHDC\]/) > -1 ||
+        effect.search(/\[WEAPONKILLINGDC\]/) > -1
+    );
+}
+
 // Maneuver's EFFECT indicates normal damage or is Strike/Pulling a Punch (exceptions)
 export function isManeuverThatDoesNormalDamage(item) {
+    const effect = getManeuverEffect(item);
+
     return (
         (item.type === "martialart" || item.type === "maneuver") &&
-        (item.system.EFFECT.search(/NORMALDC/) > -1 ||
-            item.system.EFFECT.search(/STRDC/) > -1 ||
+        (effect.search(/NORMALDC/) > -1 ||
+            effect.search(/STRDC/) > -1 ||
             item.system.XMLID === "STRIKE" ||
             item.system.XMLID === "PULLINGAPUNCH")
     );
@@ -319,7 +341,21 @@ function doubleDamageLimit() {
     return game.settings.get(HEROSYS.module, "DoubleDamageLimit");
 }
 
-function addExtraMartialDcsToBundle(item, dicePartsBundle) {
+/**
+ * Get the number DCs for martial maneuvers or return 0
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {number}
+ */
+export function getExtraMartialDcsOrZero(item) {
+    if (item.type !== "martialart") {
+        return 0;
+    }
+
+    return getExtraMartialDcs(item);
+}
+
+export function getExtraMartialDcs(item) {
     // PH: FIXME: It is possible to use fewer than the maximum number of EXTRADCs and RANGEDCs. Need a mechanism for this.
 
     let extraDcItems;
@@ -331,17 +367,16 @@ function addExtraMartialDcsToBundle(item, dicePartsBundle) {
         extraDcItems = extraRangedDcItems;
     } else {
         console.error(
-            `addExtraMartialDcsToBundle called for ${item.actor?.name}/${item.detailedName()} that is not a martial maneuver`,
+            `getExtraMartialDcs called for ${item.actor?.name}/${item.detailedName()} that is not a martial maneuver`,
         );
     }
 
-    // If the actor has no EXTRADCs or RANGEDDCs then we can stop here.
-    if (!extraDcItems || extraDcItems.length === 0) {
-        return;
-    }
-
-    // Consider all EXTRADCs/RANGEDDCs as one
     const numExtraDcs = extraDcItems.reduce((accum, current) => accum + parseInt(current.system.LEVELS || 0), 0);
+    return numExtraDcs;
+}
+
+function addExtraMartialDcsToBundle(item, dicePartsBundle) {
+    const numExtraDcs = getExtraMartialDcs(item);
     let extraDcLevels = numExtraDcs;
 
     const baseAttackItem = dicePartsBundle.baseAttackItem || item;

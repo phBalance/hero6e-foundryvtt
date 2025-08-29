@@ -2,6 +2,8 @@
 
 ## Version 4.1.14 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Maneuver descriptions now include maneuvers' range and DC. [#2515](https://github.com/dmdorman/hero6e-foundryvtt/issues/2515)
+
 ## Version 4.1.13 20250823
 
 - Improved ChatMessage to show token image, name, and user. [#2608](https://github.com/dmdorman/hero6e-foundryvtt/issues/2608)

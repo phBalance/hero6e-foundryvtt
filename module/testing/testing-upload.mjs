@@ -2496,7 +2496,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, 1d6+1 HKA");
+                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, 1d6+1 HKA, +2 DC");
                 });
 
                 it("realCost", function () {
@@ -6678,7 +6678,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
-                        assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
+                        assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike, +4 DC");
                     });
 
                     it("realCost", function () {
@@ -6737,7 +6737,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
-                        assert.equal(item.system.description, "1/2 Phase, -1 OCV, -1 DCV, 4d6 (Hearing)");
+                        assert.equal(item.system.description, "1/2 Phase, -1 OCV, -1 DCV, 4d6, +4 DC (Hearing)");
                     });
 
                     it("realCost", function () {
@@ -6864,7 +6864,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
-                        assert.equal(item.system.description, "1/2 Phase, -1 OCV, +1 DCV, 2d6 NND");
+                        assert.equal(item.system.description, "1/2 Phase, -1 OCV, +1 DCV, 2d6 NND, +4 DC");
                     });
 
                     it("realCost", function () {

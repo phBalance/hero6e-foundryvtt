@@ -1278,7 +1278,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("6e Killing Strike description", function () {
-                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, 1d6+1 HKA");
+                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, 1d6+1 HKA, +2 DC");
                 });
             });
 
@@ -1322,7 +1322,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("5e Killing Strike description", function () {
-                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, 1d6+1 HKA");
+                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, 1d6+1 HKA, +4 DC");
                 });
             });
 
@@ -1546,7 +1546,7 @@ export function registerDamageFunctionTests(quench) {
 
                 it("6e Martial Strike description", function () {
                     // 10 STR +2 DC from Martial Strike
-                    assert.equal(item.system.description, "1/2 Phase, +0 OCV, +2 DCV, 4d6 Strike");
+                    assert.equal(item.system.description, "1/2 Phase, +0 OCV, +2 DCV, 4d6 Strike, +2 DC");
                 });
             });
 
@@ -1587,7 +1587,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("NND Choke Hold description", function () {
-                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, Grab One Limb; 2d6 NND");
+                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, Grab One Limb; 2d6 NND, +4 DC");
                 });
             });
 

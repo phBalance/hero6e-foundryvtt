@@ -38,8 +38,12 @@ import {
     combatSkillLevelsForAttack,
     dicePartsToEffectFormula,
     getEffectFormulaFromItem,
+    getExtraMartialDcsOrZero,
     getFullyQualifiedEffectFormulaFromItem,
+    getManeuverEffect,
     isManeuverHthCategory,
+    isManeuverThatDoesReplaceableDamageType,
+    isRangedMartialManeuver,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
@@ -2367,20 +2371,10 @@ export class HeroSystem6eItem extends Item {
         // for things like a Flying Dodge. So, we make our decision based on the EFFECT/WEAPONEFFECT. This means that custom maneuvers need to have the
         // correct EFFECT or WEAPONEFFECT specified for things to work.
         // NOTE: Doesn't appear that there is a [WEAPONNNDDC] or [WEAPONFLASHDC] but we're going to add it just in case
-        const effect =
-            this.system.USEWEAPON || this.system.USEWEAPON === "Yes" ? this.system.WEAPONEFFECT : this.system.EFFECT;
+        const effect = getManeuverEffect(this);
 
         // Does it have a recognized damage type?
-        if (
-            effect.search(/\[NORMALDC\]/) > -1 ||
-            effect.search(/\[NNDDC\]/) > -1 ||
-            effect.search(/\[FLASHDC\]/) > -1 ||
-            effect.search(/\[KILLINGDC\]/) > -1 ||
-            effect.search(/\[WEAPONDC\]/) > -1 ||
-            effect.search(/\[WEAPONNNDDC\]/) > -1 ||
-            effect.search(/\[WEAPONFLASHDC\]/) > -1 ||
-            effect.search(/\[WEAPONKILLINGDC\]/) > -1
-        ) {
+        if (isManeuverThatDoesReplaceableDamageType(this)) {
             return false;
         }
 
@@ -2389,7 +2383,7 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        // Does it use Strength damage?
+        // Does it use Strength?
         else if (effect.search(/\[STRDC\]/) > -1) {
             return false;
         }
@@ -3546,34 +3540,41 @@ export class HeroSystem6eItem extends Item {
                         system.description += `, ${ocv.signedStringHero()} OCV`;
                     }
                     system.description += `, ${dcv.signedStringHero()} DCV`;
-                    if (system.EFFECT) {
-                        let effect = system.EFFECT;
+
+                    const maneuverEffect = getManeuverEffect(this);
+                    if (maneuverEffect) {
+                        let effectString = maneuverEffect;
+                        let rangeString = "";
+                        let dcsString = "";
 
                         if (this.causesDamageEffect()) {
                             const { diceParts } = calculateDicePartsForItem(this, { ignoreDeadlyBlow: true });
-                            if (system.EFFECT.search(/\[STRDC\]/) > -1) {
-                                // Cheat a bit. d6Count for strength is ~DC.
-                                const effectiveStrength = diceParts.d6Count * 5;
-                                effect = system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`);
-                            } else if (
+                            const doesDiceOfDamage =
                                 diceParts.d6Count +
                                 diceParts.d6Less1DieCount +
                                 diceParts.halfDieCount +
-                                diceParts.constant
-                            ) {
+                                diceParts.constant;
+                            if (maneuverEffect.search(/\[STRDC\]/) > -1) {
+                                // PH: FIXME: Offensive Ranged Disarm and Ranged Disarm are shown as [WEAPONDC] but are not offensive and should be caught in this.
+                                //            How to determine these martial maneuvers behave like this generically?
+                                // Cheat a bit. d6Count for strength is ~DC.
+                                const effectiveStrength = diceParts.d6Count * 5;
+                                effectString = maneuverEffect.replace("[STRDC]", `${effectiveStrength} STR`);
+                            } else if (doesDiceOfDamage) {
                                 // This does some damage.
                                 const damageFormula = dicePartsToEffectFormula(diceParts);
                                 if (damageFormula) {
                                     const nnd =
-                                        system.EFFECT.indexOf("NNDDC") > -1 ||
-                                        system.EFFECT.indexOf("WEAPONNNDDC") > -1;
+                                        maneuverEffect.indexOf("NNDDC") > -1 ||
+                                        maneuverEffect.indexOf("WEAPONNNDDC") > -1;
                                     const killing =
-                                        system.EFFECT.indexOf("KILLINGDC") > -1 ||
-                                        system.EFFECT.indexOf("WEAPONKILLINGDC") > -1;
+                                        maneuverEffect.indexOf("KILLINGDC") > -1 ||
+                                        maneuverEffect.indexOf("WEAPONKILLINGDC") > -1;
 
                                     const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (isManeuverHthCategory(this) ? " HKA" : " RKA") : ""}`;
 
-                                    effect = system.EFFECT.replace("[NORMALDC]", diceFormula)
+                                    effectString = maneuverEffect
+                                        .replace("[NORMALDC]", diceFormula)
                                         .replace("[KILLINGDC]", diceFormula)
                                         .replace("[FLASHDC]", diceFormula)
                                         .replace("[NNDDC]", diceFormula)
@@ -3583,10 +3584,22 @@ export class HeroSystem6eItem extends Item {
                                         .replace("[WEAPONNNDDC]", diceFormula);
                                 }
                             }
+
+                            const maneuverDcs = parseInt(system.DC || 0) + getExtraMartialDcsOrZero(this);
+                            dcsString =
+                                isManeuverThatDoesReplaceableDamageType(this) && maneuverDcs
+                                    ? `, ${maneuverDcs.signedStringHero()} DC`
+                                    : "";
+
+                            if (isRangedMartialManeuver(this)) {
+                                const range = parseInt(system.RANGE || 0);
+                                rangeString = `, Range ${range.signedStringHero()}`;
+                            }
                         }
 
-                        system._effect = effect;
-                        system.description += `, ${effect}`;
+                        system._effect = effectString;
+
+                        system.description += `, ${effectString}${rangeString}${dcsString}`;
                     }
                 }
                 break;
