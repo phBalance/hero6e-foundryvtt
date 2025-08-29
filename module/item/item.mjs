@@ -2074,8 +2074,11 @@ export class HeroSystem6eItem extends Item {
     }
 
     get is5e() {
-        if (this.actor?.is5e !== undefined) {
-            return this.actor.is5e;
+        if (this.system.is5e !== undefined && this.actor && this.actor.system.is5e !== this.system.is5e) {
+            console.warn(
+                `${this.name} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                this,
+            );
         }
         return this.system.is5e;
     }

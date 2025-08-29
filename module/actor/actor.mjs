@@ -1972,19 +1972,21 @@ export class HeroSystem6eActor extends Actor {
         // is5e
         if (typeof this.system.CHARACTER?.TEMPLATE == "string") {
             this.system.template = this.system.CHARACTER.TEMPLATE;
+
             if (
                 this.system.CHARACTER.TEMPLATE.includes("builtIn.") &&
-                !this.system.CHARACTER.TEMPLATE.includes("6E.") &&
-                !this.system.is5e
+                !this.system.CHARACTER.TEMPLATE.includes("6E.")
             ) {
+                // 5E
                 this.system.is5e = true;
-            }
-            if (
+            } else if (
                 this.system.CHARACTER.TEMPLATE.includes("builtIn.") &&
-                this.system.CHARACTER.TEMPLATE.includes("6E.") &&
-                this.system.is5e !== true
+                this.system.CHARACTER.TEMPLATE.includes("6E.")
             ) {
+                // 6E
                 this.system.is5e = false;
+            } else {
+                console.error(`Unrecognized template ${this.system.template}`);
             }
 
             // Update actor type
@@ -2610,6 +2612,19 @@ export class HeroSystem6eActor extends Actor {
      * @returns
      */
     async addFreeStuff() {
+        // Remove any is5e FreeStuff mis-matches (happens when you upload 5e over 6e actor, or vice versa)
+        const mismatchItems = this.items.filter(
+            (item) => (item.system.XMLID === "PERCEPTION" || item.type === "maneuver") && item.is5e !== this.is5e,
+        );
+
+        if (mismatchItems.length > 0) {
+            console.warn(`Deleting ${mismatchItems.length} item because is5e doesn't match actor`, mismatchItems);
+            await this.deleteEmbeddedDocuments(
+                "Item",
+                mismatchItems.map((m) => m.id),
+            );
+        }
+
         await this.addPerception();
         await this.addHeroSystemManeuvers();
     }
@@ -2618,6 +2633,7 @@ export class HeroSystem6eActor extends Actor {
         const perceptionItems = this.items.filter(
             (item) => item.system.XMLID === "PERCEPTION" && item.type === "skill" && !item.system.ID,
         );
+
         if (perceptionItems.length > 0) {
             console.debug(`PERCEPTION already exists`);
 
@@ -3188,6 +3204,19 @@ export class HeroSystem6eActor extends Actor {
     }
 
     get is5e() {
+        if (this.system.template) {
+            if (this.system.is5e && this.system.template.includes("6")) {
+                console.error(
+                    `${this.name} has is5e=${this.system.is5e} does not match template ${this.system.template}`,
+                );
+            }
+
+            if (!this.system.is5e && this.system.template.includes("5")) {
+                console.error(
+                    `${this.name} has is5e=${this.system.is5e} does not match template ${this.system.template}`,
+                );
+            }
+        }
         return this.system.is5e;
     }
 
