@@ -3942,11 +3942,13 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     // Does the actor have enough charges available?
     // PH: FIXME: This has changed the error format by including the item(s). Need to modify all callers once everything else in this function has been changed.
     if (useResources && resourcesRequired.totalCharges > 0) {
-        const chargeUsingItemsWithInsufficientCharges = resourcesRequired.individualResourceUsage.filter((usage) => {
-            const startingCharges = parseInt(usage.item.system.charges?.value || 0);
+        const chargeUsingItemsWithInsufficientCharges = resourcesRequired.individualResourceUsage
+            .filter((usage) => {
+                const startingCharges = parseInt(usage.item.system.charges?.value || 0);
 
-            return usage.charges > startingCharges;
-        });
+                return usage.charges > startingCharges;
+            })
+            .filter((resource) => resource.charges > 0);
         const errorItemList = chargeUsingItemsWithInsufficientCharges.reduce(
             (error, current) =>
                 error +
@@ -4287,6 +4289,10 @@ async function spendResourcesToUse(
     let resourcesUsedDescriptions = [];
     let resourcesUsedDescriptionRenderedRoll = "";
 
+    // TODO: Spending charges should be against the individual item it relates to. While it doesn't generally matter for END
+    //       as that comes from a single pool, END reserve and charges can come from different items. Right now, we assuming
+    //       only a single END reserve and system END but we do support charges being spent from multiple items.
+
     // Deduct reserve END
     if (reserveEndToSpend) {
         if (enduranceReserve) {
@@ -4346,13 +4352,19 @@ async function spendResourcesToUse(
 
     // Spend charges
     if (chargesToSpend > 0) {
-        resourcesUsedDescriptions.push(`${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`);
+        resourcesRequired.individualResourceUsage
+            .filter((usage) => usage.charges > 0)
+            .forEach(async (usage) => {
+                const chargesToSpend = usage.charges;
 
-        if (canSpendCharges) {
-            const startingCharges = parseInt(item.system.charges?.value || 0);
+                resourcesUsedDescriptions.push(`${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`);
 
-            await item.update({ "system.charges.value": startingCharges - chargesToSpend });
-        }
+                if (canSpendCharges) {
+                    const startingCharges = parseInt(usage.item.system.charges?.value || 0);
+
+                    await item.update({ "system.charges.value": startingCharges - chargesToSpend });
+                }
+            });
     }
 
     let resourcesUsedDescription = "";

@@ -1,11 +1,14 @@
 # Releases
 
-## Version 4.1.14 20250829 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.15 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Maneuver descriptions now include maneuvers' range and DC. [#2515](https://github.com/dmdorman/hero6e-foundryvtt/issues/2515)
+- Charges are now spent correctly for weapons. [#2759](https://github.com/dmdorman/hero6e-foundryvtt/issues/2759)
+
+## Version 4.1.14 20250829
 
 - Fix for when uploading 5e actors over a 6e actor where combat maneuvers got confused between 5e/6e. [#2735](https://github.com/dmdorman/hero6e-foundryvtt/issues/2735)
 - Kluge for foundryserver.com where actor sheet sidebar wasn't formatted correctly. [#2738](https://github.com/dmdorman/hero6e-foundryvtt/issues/2738)
-
-- Maneuver descriptions now include maneuvers' range and DC. [#2515](https://github.com/dmdorman/hero6e-foundryvtt/issues/2515)
 
 ## Version 4.1.13 20250823
 
