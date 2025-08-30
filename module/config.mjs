@@ -8517,7 +8517,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ALWAYSOCCURS",
             behaviors: ["modifier"],
             cost: function (heroModifier /*, item*/) {
-                const sideEffectCost = parseFloat(heroModifier._parent._original.BASECOST || 0);
+                const sideEffectCost = parseFloat(heroModifier.parent?._original.BASECOST || 0);
 
                 // Always occurs doubles the cost (so this costs the same as the parent).
                 return sideEffectCost;
@@ -8818,10 +8818,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             cost: function (modifier) {
                 // Must Concentrate throughout use of Constant Power x2
-                if (modifier._parent?.XMLID !== "CONCENTRATION") {
-                    console.warn(`Unexpected: ${modifier.XMLID} parent is ${modifier._parent.XMLID}`);
+                if (modifier.parent?.XMLID !== "CONCENTRATION") {
+                    console.warn(`Unexpected: ${modifier.XMLID} parent is ${modifier.parent?.XMLID}`);
                 }
-                return parseFloat(modifier._parent?.BASECOST || 0);
+                return parseFloat(modifier.parent?.BASECOST || 0);
             },
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="CONTINUOUSCONCENTRATION" ID="1743878031238" BASECOST="1.0" LEVELS="0" ALIAS="Must Concentrate throughout use of Constant Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
