@@ -294,7 +294,12 @@ export class HeroSystem6eItem extends Item {
             // Aaron thinks we should still run most of the prepareData.
             // Things like item description, default values and such are still valid.
             // The Make Attack is likely the only broken thing here when missing an Actor.
-            if (this.uuid.startsWith("Item.")) {
+            if (this.pack) {
+                console.log(
+                    `Partial prepareData on item ${this.detailedName()} from the ${this.pack} compendium`,
+                    this,
+                );
+            } else if (this.uuid?.startsWith("Item.")) {
                 console.log(`Partial prepareData on item ${this.detailedName()} from the Item sidebar`, this);
             } else {
                 console.error(
