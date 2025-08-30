@@ -468,8 +468,3 @@ tr.item.delta-item,
 tr.top-powers.delta-item {
     background-color: rgb(79 130 180 / 20%);
 }
-
-/* Kluge to resolve issue #2738 for @Juxtapozbliss using http://*.foundryserver.com */
-.actor-sheet section {
-    min-width: 90px;
-}
