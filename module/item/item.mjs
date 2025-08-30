@@ -294,7 +294,12 @@ export class HeroSystem6eItem extends Item {
             // Aaron thinks we should still run most of the prepareData.
             // Things like item description, default values and such are still valid.
             // The Make Attack is likely the only broken thing here when missing an Actor.
-            if (this.uuid.startsWith("Item.")) {
+            if (this.pack) {
+                console.log(
+                    `Partial prepareData on item ${this.detailedName()} from the ${this.pack} compendium`,
+                    this,
+                );
+            } else if (this.uuid?.startsWith("Item.")) {
                 console.log(`Partial prepareData on item ${this.detailedName()} from the Item sidebar`, this);
             } else {
                 console.error(
@@ -315,11 +320,13 @@ export class HeroSystem6eItem extends Item {
         if (!this.baseInfo) {
             if (this.system.XMLID) {
                 console.warn(
-                    `${this.actor?.token?.parent?.name} / ${this.actor?.token?.name}/${this.system.XMLID} doesn't have power defined`,
+                    `${this.actor?.name} / ${this.actor?.getActiveTokens()[0]?.name}/${this.detailedName()} doesn't have XMLID defined`,
+                    this,
                 );
             } else {
                 console.error(
-                    `${this.actor?.token?.parent?.name} / ${this.actor?.token?.name}/${this.system.XMLID} doesn't have power defined`,
+                    `${this.actor?.name} / ${this.actor?.getActiveTokens()[0]?.name}/${this.detailedName()} doesn't have XMLID defined`,
+                    this,
                 );
             }
         }

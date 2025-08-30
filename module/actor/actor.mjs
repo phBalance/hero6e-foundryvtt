@@ -99,7 +99,7 @@ export class HeroSystem6eActor extends Actor {
             HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
         ];
 
-        // Overley Effects
+        // Overlay Effects
         if (overlayEffects.includes(statusId)) {
             overlay = true;
         }
@@ -164,7 +164,11 @@ export class HeroSystem6eActor extends Actor {
                     await token.document.update({ alpha: 0.3, [`texture.tint`]: `ff0000` });
                     await token.layer._sendToBackOrBringToFront(false); // send to back
                 } else if (this.statuses.has("knockedOut")) {
-                    await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
+                    if (this.knockedOutOfCombat) {
+                        await token.document.update({ alpha: 1, [`texture.tint`]: "ff0000" });
+                    } else {
+                        await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
+                    }
                 } else if (this.statuses.has("stunned")) {
                     await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
                 } else {
@@ -405,32 +409,47 @@ export class HeroSystem6eActor extends Actor {
     async _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
 
-        // Only owners have permission to  perform updates
+        // Only owners have permission to perform updates
         if (!this.isOwner) {
-            //console.log(`Skipping _onUpdate because this client is not an owner of ${this.name}`);
             return;
+        }
+        //const hasSTUN = getCharacteristicInfoArrayForActor(this).find((o) => o.key === "STUN");
+
+        // Mark as undefeated in combat tracker (pc/npc)
+        if (
+            this.statuses.has("dead") &&
+            (data.system?.characteristics?.body?.value ?? this.system.characteristics.body.value) >
+                -this.system.characteristics.body.value
+        ) {
+            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                active: false,
+            });
         }
 
         // If stun was changed and running under triggering users context
-        if (data?.system?.characteristics?.stun && userId === game.user.id) {
-            if (data.system.characteristics.stun.value <= 0) {
+        if (
+            (data.system?.characteristics?.stun !== undefined || data.system?.characteristics?.body !== undefined) &&
+            userId === game.user.id
+        ) {
+            const newStun = data.system?.characteristics?.stun?.value ?? this.system.characteristics.stun.value;
+
+            if (newStun <= 0) {
                 await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
                     overlay: true,
                     active: true,
                 });
             }
 
-            const stunThreshold = this.type === "pc" ? 30 : 10;
-
             // Mark as defeated in combat tracker
             // Once an NPC is Knocked Out below the -10 STUN level,
             // he should normally remain unconscious until the fight ends.
-            if (data.system.characteristics.stun.value < -stunThreshold) {
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    overlay: true,
-                    active: true,
-                });
-            }
+            // No longer marking KO < stunThreshold as dead
+            // if (data.system.characteristics.stun.value < stunThreshold) {
+            //     await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+            //         overlay: true,
+            //         active: true,
+            //     });
+            // }
 
             // Mark as undefeated in combat tracker
             // if (data.system.characteristics.stun.value >0) {
@@ -440,7 +459,7 @@ export class HeroSystem6eActor extends Actor {
             //     });
             // }
 
-            if (data.system.characteristics.stun.value > 0) {
+            if (newStun > 0) {
                 await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
                     active: false,
                 });
@@ -480,17 +499,6 @@ export class HeroSystem6eActor extends Actor {
             await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
             await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
             await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
-        }
-
-        // Mark as undefeated in combat tracker (pc/npc)
-        if (
-            ["pc", "npc"].includes(this.type) &&
-            data.system?.characteristics?.body?.value > 0 &&
-            this.system.characteristics.stun.value >= -30
-        ) {
-            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                active: false,
-            });
         }
 
         // If STR was change check encumbrance
@@ -3381,6 +3389,16 @@ export class HeroSystem6eActor extends Actor {
                 : movementItems.find((o) => o._id === this.flags[game.system.id]?.activeMovement)?._id ||
                   movementItems[0]._id;
         return _activeMovement;
+    }
+
+    get stunThreshold() {
+        return this.type === "pc" ? -30 : -10;
+    }
+
+    get knockedOutOfCombat() {
+        if (!this.statuses.has("knockedOut")) return false;
+        if (this.system.characteristics.stun?.value >= this.stunThreshold) return false;
+        return true;
     }
 
     // HeroSystem is unique in that we only

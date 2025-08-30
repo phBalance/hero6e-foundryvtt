@@ -223,8 +223,8 @@ export class HeroSystem6eToken extends FoundryVttToken {
         let activeEffects = this.actor?.temporaryEffects || [];
         const overlayEffect = activeEffects.findLast((e) => e.img && e.getFlag("core", "overlay"));
 
-        // If dead only show overlayEffect
-        if (this.actor?.statuses.has("dead") && overlayEffect) {
+        // If dead or knockedOut of combat only show overlayEffect
+        if (this.actor?.statuses.has("dead") || this.actor?.knockedOutOfCombat) {
             activeEffects = [overlayEffect];
         }
 

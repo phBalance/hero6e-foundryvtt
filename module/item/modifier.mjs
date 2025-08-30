@@ -104,7 +104,7 @@ export class HeroSystem6eModifier {
                 }
             } else {
                 if (key === "adders") {
-                    console.console.error(
+                    console.error(
                         `${this.item?.actor?.name}/${this.item?.detailedName()}/${json.XMLID}: Unexpected "adders" modifier property (${key}). Shouldn't be a problem, re-uploading from HDC should resolve.`,
                         this,
                         json,
