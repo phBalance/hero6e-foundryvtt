@@ -2216,13 +2216,23 @@ export class HeroSystem6eActor extends Actor {
 
         // Working on a merge to update previously existing items.
         // Add existing item.id (if it exists), which we will use for the pending update.
+        // There may be an item that was converted to equipment/power
         itemsToCreate = itemsToCreate.map((m) =>
-            foundry.utils.mergeObject(m, { _id: this.items.find((i) => i.system.ID === m.system.ID)?.id }),
+            foundry.utils.mergeObject(m, {
+                _id: this.items.find((i) => i.system.ID === m.system.ID)?.id,
+            }),
         );
         const itemsToUpdate = itemsToCreate.filter((o) => o._id);
         itemsToCreate = itemsToCreate.filter((o) => !o._id);
 
-        await this.updateEmbeddedDocuments("Item", itemsToUpdate);
+        // Sanity check for item.type
+        for (const item of itemsToUpdate) {
+            if (this.items.find((o) => o.id === item._id).type !== item.type) {
+                await ui.notifications.warn(`${item.name} changed to type=${item.type}`);
+            }
+        }
+
+        await this.updateEmbeddedDocuments("Item", itemsToUpdate, { recursive: false });
 
         uploadProgressBar.advance(`${this.name}: Updated Items`, 0);
 

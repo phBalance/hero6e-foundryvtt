@@ -668,6 +668,9 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         // Also need to use force replace ==items for this to work in v13
         await this.item.update({ [`type`]: "power", [`==system`]: this.item.system }, { recursive: false });
+
+        // Recalc actor costs
+        await this.actor?._postUpload();
     }
 
     async _onConvertToEquipment(event) {
@@ -675,5 +678,8 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         // Also need to use force replace ==items for this to work in v13
         await this.item.update({ [`type`]: "equipment", [`==system`]: this.item.system }, { recursive: false });
+
+        // Recalc actor costs
+        await this.actor?._postUpload();
     }
 }
