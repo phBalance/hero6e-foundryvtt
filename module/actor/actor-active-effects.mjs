@@ -112,6 +112,34 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            // knockedOutOfCombatEffect: {
+            //     name: game.i18n.localize("EFFECT.StatusKnockedOutOfCombat"),
+            //     id: "knockedOutOfCombat",
+            //     //img: "icons/svg/stoned.svg",
+            //     img: `systems/${module}/icons/foundry/stoned.svg`,
+            //     changes: [
+            //         {
+            //             key: "system.characteristics.ocv.value",
+            //             value: 0,
+            //             mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+            //         },
+            //         {
+            //             key: "system.characteristics.omcv.value",
+            //             value: 0,
+            //             mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+            //         },
+            //         {
+            //             key: "system.characteristics.dcv.value",
+            //             value: 0,
+            //             mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+            //         },
+            //         {
+            //             key: "system.characteristics.dmcv.value",
+            //             value: 0,
+            //             mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+            //         },
+            //     ],
+            // },
             deadEffect: {
                 name: game.i18n.localize("EFFECT.StatusDead"),
                 id: "dead",

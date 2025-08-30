@@ -4,6 +4,7 @@
 
 - Maneuver descriptions now include maneuvers' range and DC. [#2515](https://github.com/dmdorman/hero6e-foundryvtt/issues/2515)
 - Charges are now spent correctly for weapons. [#2759](https://github.com/dmdorman/hero6e-foundryvtt/issues/2759)
+- Defeated tokens now show a red KnockedOut icon or a red Dead icon depending on cause. [#2751](https://github.com/dmdorman/hero6e-foundryvtt/issues/2751)
 
 ## Version 4.1.14 20250829
 
