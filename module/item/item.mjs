@@ -320,11 +320,13 @@ export class HeroSystem6eItem extends Item {
         if (!this.baseInfo) {
             if (this.system.XMLID) {
                 console.warn(
-                    `${this.actor?.token?.parent?.name} / ${this.actor?.token?.name}/${this.system.XMLID} doesn't have power defined`,
+                    `${this.actor?.name} / ${this.actor?.getActiveTokens()[0]?.name}/${this.detailedName()} doesn't have XMLID defined`,
+                    this,
                 );
             } else {
                 console.error(
-                    `${this.actor?.token?.parent?.name} / ${this.actor?.token?.name}/${this.system.XMLID} doesn't have power defined`,
+                    `${this.actor?.name} / ${this.actor?.getActiveTokens()[0]?.name}/${this.detailedName()} doesn't have XMLID defined`,
+                    this,
                 );
             }
         }
