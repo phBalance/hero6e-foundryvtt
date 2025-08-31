@@ -986,6 +986,16 @@ export class HeroSystem6eItem extends Item {
         return _heroValidation;
     }
 
+    get pslRangePenaltyOffsetItems() {
+        const psls = this.actor.items.filter(
+            (pslItem) =>
+                pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range &&
+                (pslItem.system.OPTIONID === "ALL" || pslItem.adders.find((adder) => adder.ALIAS === pslItem.name)) &&
+                pslItem.isActive != false,
+        );
+        return psls;
+    }
+
     get pslPenaltyType() {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
@@ -6356,7 +6366,10 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        return `${this.name}/${this.system.XMLID}`;
+        if (this.system.NAME === "") return this.name || this.system.XMLID;
+        return `${this.name} [${this.system.XMLID}]`;
+
+        //return `${this.name}/${this.system.XMLID}`;
     }
 
     toXML() {

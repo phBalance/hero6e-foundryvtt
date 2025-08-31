@@ -64,6 +64,7 @@ export function combatSkillLevelsForAttack(item) {
 }
 
 export function penaltySkillLevelsForAttack(item) {
+    console.error(`Deprecating penaltySkillLevelsForAttack`);
     if (!item.actor) return [];
 
     const psls = item.actor.items.filter(

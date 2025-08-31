@@ -105,7 +105,8 @@
 <div class="form-group">
     <label>PENALTY</label>
     <div class="form-fields">
-        {{ radioBoxes "system.penalty" penaltyChoices checked = system.penalty localize=true}}
+        {{item.pslPenaltyType}}
+        {{!-- {{ radioBoxes "system.penalty" penaltyChoices checked = system.penalty localize=true disabled = true}} --}}
     </div>
 </div>
 {{/if}}

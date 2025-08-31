@@ -472,7 +472,7 @@ tr.top-powers.delta-item {
 .actor-sheet .sheet-content tr.item.validation {
     background-color: rgb(255 255 0 / 50%);
     text-align: left;
-    box-shadow: 0 0 0 1px rgba(255, 0, 0, 0.5) inset;
+    box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
 
     td:first-child {
         text-align: left;
