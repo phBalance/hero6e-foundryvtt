@@ -947,15 +947,23 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
-                if (this.system.OPTION_ALIAS.match(/range/i)) {
-                    this.system.penalty ??= "range";
-                } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
-                    this.system.penalty ??= "hitLocation";
-                } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
-                    this.system.penalty ??= "encumbrance";
-                }
-            }
+            // if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
+            //     if (this.system.OPTION_ALIAS.match(/range/i)) {
+            //         this.system.penalty ??= "range";
+            //     } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+            //         this.system.penalty ??= "hitLocation";
+            //     } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+            //         this.system.penalty ??= "encumbrance";
+            //     }
+            // }
+
+            // Don't GUESS or rewrite
+            // if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.pslPenaltyType) {
+            //     this.system.OPTION_ALIAS = this.system.OPTION_ALIAS.replace(
+            //         "to offset a specific negative OCV modifier",
+            //         "to offset range penalty OCV modifier",
+            //     );
+            // }
         }
 
         window.prepareData.setCombatSkillLevels =

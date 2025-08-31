@@ -77,6 +77,9 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
             data.config = CONFIG.HERO;
             data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
 
+            // Shouldn't need this
+            HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
+
             // Easy reference to ActiveEffects with an origin of this item
             if (this.actor) {
                 data.effects = this.actor.effects.filter((o) => o.origin === item.uuid);
@@ -554,9 +557,16 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         // Turn attack toggles into adders
         if (expandedData.attacks) {
+            this.item.system.ADDER ??= [];
+
+            // Loop thru all the attacks that were checkboxes on the sheet
             for (const [attackId, checked] of Object.entries(expandedData.attacks)) {
                 const attackItem = this.actor.items.find((o) => o.id === attackId);
-                const adder = (this.item.system.ADDER || []).find(
+                if (!attackItem) {
+                    console.error(`Attack not found`);
+                    continue;
+                }
+                const adder = this.item.system.ADDER.find(
                     (adder) => adder.XMLID === "ADDER" && adder.targetId === attackItem.id,
                 );
 
@@ -574,18 +584,19 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                         BASECOST_total: 0,
                         targetId: attackItem.id,
                     };
-                    this.item.system.ADDER ??= [];
-                    this.item.system.ADDER.push(newAdder);
+
+                    await this.item.update({ [`system.ADDER`]: [...this.item.system.ADDER, newAdder] });
+                    //this.item.system.ADDER.push(newAdder);
+                    HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
                 }
 
                 // Delete custom adders that matches attack name
                 if (adder && !checked) {
-                    this.item.system.ADDER = this.item.system.ADDER.filter((o) => o.targetId != attackItem.id);
-
-                    // Invalidate the adders cache if this is a non temporary item.
-                    if (this.item.id) {
-                        HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
-                    }
+                    //this.item.system.ADDER = this.item.system.ADDER.filter((o) => o.targetId != attackItem.id);
+                    await this.item.update({
+                        [`system.ADDER`]: this.item.system.ADDER.filter((o) => o.targetId != attackItem.id),
+                    });
+                    HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
                 }
             }
         }

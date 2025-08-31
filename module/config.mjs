@@ -3297,7 +3297,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Attack specified
                 if (item.system.OPTIONID !== "ALL") {
-                    const firstValidAttack = item.adders.find(
+                    item.system.ADDER ??= [];
+                    const firstValidAttack = item.system.ADDER.find(
                         (adder) =>
                             adder.ALIAS &&
                             item.actor?.items.find(
