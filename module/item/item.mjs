@@ -22,11 +22,10 @@ import {
 import { HeroSystemGenericSharedCache } from "../utility/cache.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
 import {
-    getModifierInfo,
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
-    whisperUserTargetsForActor,
     tokenEducatedGuess,
+    whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -6319,21 +6318,21 @@ export class HeroSystem6eItem extends Item {
      * Anything that doesn't have a damage effect (e.g. Darkness)
      */
     damageLevelTweaking(diceParts) {
-        const plusOnePipAdderData = getModifierInfo({
+        const plusOnePipAdderData = getPowerInfo({
             xmlid: "PLUSONEPIP",
             actor: this.actor,
             is5e: this.is5e,
             item: this,
             xmlTag: "ADDER",
         });
-        const plusHalfDieAdderData = getModifierInfo({
+        const plusHalfDieAdderData = getPowerInfo({
             xmlid: "PLUSONEHALFDIE",
             actor: this.actor,
             is5e: this.is5e,
             item: this,
             xmlTag: "ADDER",
         });
-        const minusOnePipAdderData = getModifierInfo({
+        const minusOnePipAdderData = getPowerInfo({
             xmlid: "MINUSONEPIP",
             actor: this.actor,
             is5e: this.is5e,

@@ -110,10 +110,6 @@ export function getPowerInfo(options) {
     return powerInfo;
 }
 
-export function getModifierInfo(options) {
-    return getPowerInfo(options);
-}
-
 function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
     return (power) =>
         (power.type?.includes("characteristic") || power.type?.includes("movement")) &&
