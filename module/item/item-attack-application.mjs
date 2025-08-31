@@ -3,7 +3,6 @@ import {
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     isRangedCombatManeuver,
-    penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
 import { cloneToEffectiveAttackItem } from "../item/item.mjs";

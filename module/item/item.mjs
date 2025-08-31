@@ -73,7 +73,7 @@ function itemHeroValidationForProperty(item, property) {
     return item.heroValidation
         .filter((o) => o.property === property)
         .map((m) => `${m.message} For example: "${m.example}"`)
-        .join(", ");
+        .join(" ");
 }
 
 function itemHasDefenseActiveEffect(item) {
@@ -978,7 +978,7 @@ export class HeroSystem6eItem extends Item {
             if (this.baseInfo.heroValidation) {
                 const v = this.baseInfo.heroValidation(this);
                 if (v) {
-                    _heroValidation.push(this.baseInfo.heroValidation(this));
+                    _heroValidation.push(...this.baseInfo.heroValidation(this));
                 }
             }
         }
@@ -990,7 +990,10 @@ export class HeroSystem6eItem extends Item {
         const psls = this.actor.items.filter(
             (pslItem) =>
                 pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range &&
-                (pslItem.system.OPTIONID === "ALL" || pslItem.adders.find((adder) => adder.ALIAS === pslItem.name)) &&
+                (pslItem.system.OPTIONID === "ALL" ||
+                    pslItem.adders.find(
+                        (adder) => adder.ALIAS.toLowerCase().trim() === this.name.toLowerCase().trim(),
+                    )) &&
                 pslItem.isActive != false,
         );
         return psls;

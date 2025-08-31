@@ -3284,13 +3284,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 },
             },
             heroValidation: function (item) {
+                const validations = [];
+
+                // Penalty Type
                 if (!item.pslPenaltyType) {
-                    return {
+                    validations.push({
                         property: "OPTION_ALIAS",
                         message: `Expecting one of these values [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
                         example: `to offset range penalty OCV modifier with any single attack`,
-                    };
+                    });
                 }
+
+                // Attack specified
+                if (item.system.OPTIONID !== "ALL") {
+                    const firstValidAttack = item.adders.find(
+                        (adder) =>
+                            adder.ALIAS &&
+                            item.actor?.items.find(
+                                (item) => adder.ALIAS.toLowerCase().trim() === item.name.toLowerCase().trim(),
+                            ),
+                    );
+                    if (!firstValidAttack) {
+                        validations.push({
+                            message: `Expecting one or more custom adders with names matching specific attacks this PSL works with.`,
+                        });
+                    }
+                }
+
+                return validations;
             },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {

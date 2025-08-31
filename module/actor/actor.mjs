@@ -2232,7 +2232,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        await this.updateEmbeddedDocuments("Item", itemsToUpdate, { recursive: false });
+        await this.updateEmbeddedDocuments("Item", itemsToUpdate);
 
         uploadProgressBar.advance(`${this.name}: Updated Items`, 0);
 
