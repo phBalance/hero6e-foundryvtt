@@ -77,9 +77,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
             data.config = CONFIG.HERO;
             data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
 
-            // Shouldn't need this
-            HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
-
             // Easy reference to ActiveEffects with an origin of this item
             if (this.actor) {
                 data.effects = this.actor.effects.filter((o) => o.origin === item.uuid);
@@ -587,7 +584,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
                     await this.item.update({ [`system.ADDER`]: [...this.item.system.ADDER, newAdder] });
                     //this.item.system.ADDER.push(newAdder);
-                    HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
+                    //HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
                 }
 
                 // Delete custom adders that matches attack name
@@ -596,7 +593,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     await this.item.update({
                         [`system.ADDER`]: this.item.system.ADDER.filter((o) => o.targetId != attackItem.id),
                     });
-                    HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
+                    //HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
                 }
             }
         }
