@@ -1,5 +1,6 @@
 {{#if (filterItem this @root/options.itemFilters.power)}}
-<tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
+<tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}} {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (actorItemHeroValidation this)}}validation{{/if}}"
+    title="{{actorItemHeroValidation this}}"
     data-item-id="{{this._id}}">
     {{#if (eq item.system.XMLID "LIST")}}
             <td height="24"></td>
@@ -21,8 +22,13 @@
                 {{/if}}
             {{else}}
                 {{#unless this.isSeparator}}
-                    <div class="item-image"><img src="{{this.img}}" title="{{this.name}}" width="24"
-                        height="24" /></div>
+                    <div class="item-image">
+                        {{#if (actorItemHeroValidation this)}}
+                            <i class="fa-regular fa-circle-exclamation fa-2xl"></i>
+                        {{else}}
+                            <img src="{{this.img}}" title="{{this.name}}" width="24" height="24" />
+                        {{/if}}
+                    </div>
                 {{/unless}}
             {{/if}}
         </td>

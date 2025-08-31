@@ -503,12 +503,14 @@ export async function doAoeActionToHit(action, options) {
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
 
         // PENALTY_SKILL_LEVELS (range)
-        const pslRange = penaltySkillLevelsForAttack(item).find(
-            (o) => o.system.penalty === "range" && o.system.checked,
-        );
-        if (pslRange) {
-            const pslValue = Math.min(parseInt(pslRange.system.LEVELS), -rangePenalty);
-            attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels");
+        // const pslRange = penaltySkillLevelsForAttack(item).find(
+        //     (o) => o.system.penalty === "range" && o.system.checked,
+        // );
+        for (const pslItem of item.pslRangePenaltyOffsetItems) {
+            const pslValue = Math.min(parseInt(pslItem.system.LEVELS), -rangePenalty);
+            if (pslValue !== 0) {
+                attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels"); //pslItem.detailedName());
+            }
         }
 
         if (rangePenalty) {
@@ -837,12 +839,14 @@ async function doSingleTargetActionToHit(action, options) {
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
 
         // PENALTY_SKILL_LEVELS (range)
-        const pslRange = penaltySkillLevelsForAttack(item).find(
-            (o) => o.system.penalty === "range" && o.system.checked,
-        );
-        if (pslRange) {
-            const pslValue = Math.min(parseInt(pslRange.system.LEVELS), -rangePenalty);
-            attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels");
+        // const pslRange = penaltySkillLevelsForAttack(item).find(
+        //     (o) => o.system.penalty === "range" && o.system.checked,
+        // );
+        for (const pslItem of item.pslRangePenaltyOffsetItems) {
+            const pslValue = Math.min(parseInt(pslItem.system.LEVELS), -rangePenalty);
+            if (pslValue !== 0) {
+                attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels"); //pslItem.detailedName());
+            }
         }
 
         if (rangePenalty) {

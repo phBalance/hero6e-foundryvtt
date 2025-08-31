@@ -66,6 +66,14 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemHasActionBehavior", itemHasActionBehavior);
     Handlebars.registerHelper("itemPostHitActionString", itemPostHitActionString);
     Handlebars.registerHelper("hasDefenseActiveEffect", itemHasDefenseActiveEffect);
+    Handlebars.registerHelper("itemHeroValidationForProperty", itemHeroValidationForProperty);
+}
+
+function itemHeroValidationForProperty(item, property) {
+    return item.heroValidation
+        .filter((o) => o.property === property)
+        .map((m) => `${m.message} For example: "${m.example}"`)
+        .join(" ");
 }
 
 function itemHasDefenseActiveEffect(item) {
@@ -939,15 +947,23 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
-                if (this.system.OPTION_ALIAS.match(/range/i)) {
-                    this.system.penalty ??= "range";
-                } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
-                    this.system.penalty ??= "hitLocation";
-                } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
-                    this.system.penalty ??= "encumbrance";
-                }
-            }
+            // if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
+            //     if (this.system.OPTION_ALIAS.match(/range/i)) {
+            //         this.system.penalty ??= "range";
+            //     } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+            //         this.system.penalty ??= "hitLocation";
+            //     } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+            //         this.system.penalty ??= "encumbrance";
+            //     }
+            // }
+
+            // Don't GUESS or rewrite
+            // if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.pslPenaltyType) {
+            //     this.system.OPTION_ALIAS = this.system.OPTION_ALIAS.replace(
+            //         "to offset a specific negative OCV modifier",
+            //         "to offset range penalty OCV modifier",
+            //     );
+            // }
         }
 
         window.prepareData.setCombatSkillLevels =
@@ -961,6 +977,50 @@ export class HeroSystem6eItem extends Item {
             this.buildAoeAttackParameters(aoeModifier);
         }
         window.prepareData.setAoeModifier = (window.prepareData.setAoeModifier || 0) + (Date.now() - startDate);
+    }
+
+    get heroValidation() {
+        const _heroValidation = [];
+
+        if (this.baseInfo) {
+            if (this.baseInfo.heroValidation) {
+                const v = this.baseInfo.heroValidation(this);
+                if (v) {
+                    _heroValidation.push(...this.baseInfo.heroValidation(this));
+                }
+            }
+        }
+
+        return _heroValidation;
+    }
+
+    get pslRangePenaltyOffsetItems() {
+        const psls = this.actor.items.filter(
+            (pslItem) =>
+                pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range &&
+                (pslItem.system.OPTIONID === "ALL" ||
+                    pslItem.adders.find(
+                        (adder) => adder.ALIAS.toLowerCase().trim() === this.name.toLowerCase().trim(),
+                    )) &&
+                pslItem.isActive != false,
+        );
+        return psls;
+    }
+
+    get pslPenaltyType() {
+        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
+
+        if (this.system.OPTION_ALIAS.match(/range/i)) {
+            return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range;
+        } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+            return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.hitLocation;
+        } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+            return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.encumbrance;
+        }
+
+        console.warn(`Unknown PSL type "${this.system.OPTION_ALIAS}"`, this);
+
+        return null;
     }
 
     setAttack() {
@@ -6317,7 +6377,10 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        return `${this.name}/${this.system.XMLID}`;
+        if (this.system.NAME === "") return this.name || this.system.XMLID;
+        return `${this.name} [${this.system.XMLID}]`;
+
+        //return `${this.name}/${this.system.XMLID}`;
     }
 
     toXML() {

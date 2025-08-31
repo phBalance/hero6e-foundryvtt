@@ -468,3 +468,22 @@ tr.item.delta-item,
 tr.top-powers.delta-item {
     background-color: rgb(79 130 180 / 20%);
 }
+
+.actor-sheet .sheet-content tr.item.validation {
+    background-color: rgb(255 255 0 / 50%);
+    text-align: left;
+    box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
+
+    td:first-child {
+        text-align: left;
+        padding-left: 2px;
+    }
+
+    i.fa-regular {
+        color: red;
+    }
+}
+
+.actor-sheet a.validation {
+    outline: red solid 1px;
+}

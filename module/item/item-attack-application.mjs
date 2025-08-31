@@ -3,7 +3,6 @@ import {
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     isRangedCombatManeuver,
-    penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
 import { cloneToEffectiveAttackItem } from "../item/item.mjs";
@@ -109,9 +108,10 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // Penalty Skill Levels
             // Currently only supports range PSL
-            this.data.psls = penaltySkillLevelsForAttack(this.data.originalItem).filter(
-                (o) => o.system.penalty === "range",
-            );
+            // this.data.psls = penaltySkillLevelsForAttack(this.data.originalItem).filter(
+            //     (o) => o.system.penalty === "range",
+            // );
+            this.data.psls = this.item?.pslRangePenaltyOffsetItems;
 
             // Is there an ENTANGLE on any of the targets
             // If so assume we are targeting the entangle

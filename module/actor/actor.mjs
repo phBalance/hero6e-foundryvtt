@@ -2216,11 +2216,21 @@ export class HeroSystem6eActor extends Actor {
 
         // Working on a merge to update previously existing items.
         // Add existing item.id (if it exists), which we will use for the pending update.
+        // There may be an item that was converted to equipment/power
         itemsToCreate = itemsToCreate.map((m) =>
-            foundry.utils.mergeObject(m, { _id: this.items.find((i) => i.system.ID === m.system.ID)?.id }),
+            foundry.utils.mergeObject(m, {
+                _id: this.items.find((i) => i.system.ID === m.system.ID)?.id,
+            }),
         );
         const itemsToUpdate = itemsToCreate.filter((o) => o._id);
         itemsToCreate = itemsToCreate.filter((o) => !o._id);
+
+        // Sanity check for item.type
+        for (const item of itemsToUpdate) {
+            if (this.items.find((o) => o.id === item._id).type !== item.type) {
+                await ui.notifications.warn(`${item.name} changed to type=${item.type}`);
+            }
+        }
 
         await this.updateEmbeddedDocuments("Item", itemsToUpdate);
 
@@ -2887,6 +2897,16 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
+            // An attempt to track hierarchy of ADDERS/MODS
+            if (
+                !jsonChild.PARENTID &&
+                jsonChild.ID &&
+                child.parentNode?.getAttribute &&
+                child.parentNode?.getAttribute("ID")
+            ) {
+                jsonChild.PARENTID = child.parentNode.getAttribute("ID");
+            }
+
             if (
                 HeroSystem6eItem.ItemXmlChildTagsUpload.includes(child.tagName) &&
                 !HeroSystem6eItem.ItemXmlTags.includes(child.parentElement?.tagName)
@@ -3209,6 +3229,19 @@ export class HeroSystem6eActor extends Actor {
             this.system.points = characterPointCost;
             this.system.activePoints = activePoints;
         }
+    }
+
+    pslPentaltyItems(penaltyType) {
+        return this.items.filter((item) => item.pslPenaltyType === penaltyType);
+    }
+
+    pslPentaltyValue(penaltyType) {
+        const psls = this.pslPentaltyItems(penaltyType);
+        const valueSum = psls.reduce(
+            (accumulator, currentValue) => accumulator + parseInt(currentValue.system.LEVELS) || 0,
+            0,
+        );
+        return valueSum;
     }
 
     get is5e() {
