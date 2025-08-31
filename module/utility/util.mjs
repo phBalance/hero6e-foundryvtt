@@ -107,19 +107,6 @@ export function getPowerInfo(options) {
         }
     }
 
-    // TODO: Why are we modifying the power entries from config here?
-    if (powerInfo) {
-        powerInfo.xmlid = xmlid;
-        if (powerInfo.XMLID !== xmlid) {
-            //console.warn(`XMLID mismatch ${xmlid}`, powerInfo);  // OCV?
-            powerInfo.XMLID = xmlid;
-        }
-    }
-
-    // LowerCase
-    // TODO: Make powers correct and remove this
-    if (powerInfo?.duration) powerInfo.duration = powerInfo.duration.toLowerCase();
-
     return powerInfo;
 }
 

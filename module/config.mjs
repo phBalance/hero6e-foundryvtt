@@ -424,6 +424,10 @@ function validatePowers() {
     }
     numViolations += powersWithoutMatchingKeyAndXmlid.length;
 
+    // All powers that have a duration are lowercase
+    const powersWithDurationThatHasUppercase = this.filter((power) => power.duration?.toLowerCase() !== power.duration);
+    numViolations += powersWithDurationThatHasUppercase.length;
+
     // Has range property and is not framework/compound/adder/modifier
     const powersWithoutRangeProperty = this.filter(
         (power) =>
