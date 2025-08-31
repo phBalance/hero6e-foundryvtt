@@ -39,7 +39,7 @@ export class HeroSystemGenericSharedCache {
         return this._cachedValue[id];
     }
 
-    invalidateCache(id) {
+    invalidateCachedValue(id) {
         this._cachedValue[id] = null;
         this.#invalidated = this.#invalidated + 1;
     }

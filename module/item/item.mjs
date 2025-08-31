@@ -3244,11 +3244,11 @@ export class HeroSystem6eItem extends Item {
         return _adders;
     }
 
-    static #powersCache = HeroSystemGenericSharedCache.create("powers");
+    static _powersCache = HeroSystemGenericSharedCache.create("powers");
     get powers() {
         // Caching for performance
         if (this.id) {
-            const cachedValue = HeroSystem6eItem.#powersCache.getCachedValue(this.id);
+            const cachedValue = HeroSystem6eItem._powersCache.getCachedValue(this.id);
             if (cachedValue) {
                 return cachedValue;
             }
@@ -3279,7 +3279,7 @@ export class HeroSystem6eItem extends Item {
 
             // Cache powers if this is a non temporary item
             if (this.id) {
-                HeroSystem6eItem.#powersCache.setCachedValue(this.id, _powers);
+                HeroSystem6eItem._powersCache.setCachedValue(this.id, _powers);
             }
 
             return _powers;
@@ -6292,7 +6292,7 @@ export class HeroSystem6eItem extends Item {
             .filter((advantage) => !advantagesToIgnore.includes(advantage.XMLID));
 
         this.system.MODIFIER = (this.system.MODIFIER || []).concat(advantagesToCopy);
-        HeroSystem6eItem._modifiersCache.invalidateCache(this.id);
+        HeroSystem6eItem._modifiersCache.invalidateCachedValue(this.id);
 
         // Stash a copy of what we've added in after the fact
         this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(advantagesToCopy);
@@ -6367,7 +6367,7 @@ export class HeroSystem6eItem extends Item {
 
         // Invalidate the adders cache if this is a non temporary item.
         if (this.id) {
-            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+            HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
 
         // Set/clear a 1/2d6 adder
@@ -6416,7 +6416,7 @@ export class HeroSystem6eItem extends Item {
 
         // Invalidate the adders cache if this is a non temporary item.
         if (this.id) {
-            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+            HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
 
         // Set/clear a +1 pip adder
@@ -6465,7 +6465,7 @@ export class HeroSystem6eItem extends Item {
 
         // Invalidate the adders cache if this is a non temporary item.
         if (this.id) {
-            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+            HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
     }
 
