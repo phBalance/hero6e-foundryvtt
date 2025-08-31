@@ -1820,8 +1820,8 @@ export class HeroSystem6eActor extends Actor {
                 .filter(
                     (item) =>
                         item.system.charges &&
-                        (item.system.charges.max != item.system.charges.value ||
-                            item.system.charges.max != item.system.charges.value),
+                        (item.system.charges.max !== item.system.charges.value ||
+                            item.system.charges.clipsMax !== item.system.charges.clips),
                 )
                 .map((o) => o.system),
         };
@@ -2292,10 +2292,12 @@ export class HeroSystem6eActor extends Actor {
                 if (chargesUsed) {
                     await item.update({ "system.charges.value": Math.max(0, item.system.charges.max - chargesUsed) });
                 }
-                const clipsUsed = Math.max(0, chargeData.clips - chargeData.clipsMax);
+
+                const clipsUsed = Math.max(0, chargeData.charges.clips - chargeData.charges.clipsMax);
                 if (clipsUsed) {
-                    await item.update({ "system.clips.value": Math.max(0, item.system.clipsMax - clipsUsed) });
+                    await item.update({ "system.clips.value": Math.max(0, item.system.charges.clipsMax - clipsUsed) });
                 }
+
                 item.updateItemDescription();
                 await item.update({ "system.description": item.system.description });
             } else {

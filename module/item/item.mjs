@@ -353,7 +353,7 @@ export class HeroSystem6eItem extends Item {
         this.setInitialRange(this.baseInfo);
         this.updateRoll();
         this.determinePointCosts();
-        this.setCharges();
+        this.setCharges(this.system.charges);
         this.setShowToggle();
         this.calcEndurance();
         this.setCarried();
@@ -1239,20 +1239,20 @@ export class HeroSystem6eItem extends Item {
         window.prepareData.setShowToggle = (window.prepareData.setShowToggle || 0) + (Date.now() - startDate);
     }
 
-    setCharges() {
+    setCharges(systemCharges) {
         // CHARGES are also messed with in _postUploadDetails, should probably consolidate
         const CHARGES = this.findModsByXmlid("CHARGES");
         if (CHARGES) {
             this.system.charges = {
                 max: parseInt(CHARGES.OPTION_ALIAS),
                 value: parseInt(CHARGES.OPTION_ALIAS),
-                clipsMax: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
-                clips: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
+                clipsMax: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
+                clips: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
                 recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
                 continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
                 boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
                 fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
-                ...this.system.charges,
+                ...systemCharges,
             };
         }
     }
@@ -1375,10 +1375,12 @@ export class HeroSystem6eItem extends Item {
      * Reset an item back to its default state.
      */
     async resetToOriginal() {
-        // Set Charges to max
-        if (this.system.charges && this.system.charges.value !== this.system.charges.max) {
+        // Reset charges
+        const chargesBefore = this.system.charges;
+        this.setCharges({});
+        if (chargesBefore != null || this.system.charges != null) {
             await this.update({
-                [`system.charges.value`]: this.system.charges.max,
+                ["system.charges"]: this.system.charges,
             });
             await this._postUpload();
         }
@@ -4480,7 +4482,7 @@ export class HeroSystem6eItem extends Item {
                     result += maxCharges > 1 ? " Charges" : " Charge";
 
                     const totalClips = this.system.charges?.clipsMax;
-                    if (totalClips > 1) {
+                    if (totalClips != undefined && totalClips > 1) {
                         const currentClips = this.system.charges?.clips;
                         result += ` (${currentClips}/${totalClips} clips)`;
                     }
