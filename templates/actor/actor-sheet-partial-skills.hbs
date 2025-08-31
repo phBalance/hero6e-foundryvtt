@@ -21,10 +21,22 @@
         {{#each items as |item id|}}
             {{#if (and (or (eq item.type "skill") (eq item.system.subType "skill")) (filterItem item
             ../options.itemFilters.skill))}}
-                <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}}" data-item-id="{{item._id}}">
+                <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (actorItemHeroValidation item)}}validation{{/if}}" data-item-id="{{item._id}}"
+                title="{{actorItemHeroValidation item}}">
                     <td style="min-width: 24px">
-                        <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                height="24" /></div>
+
+
+
+
+                        <div class="item-image">
+                            {{#if (actorItemHeroValidation item)}}
+                                <i class="fa-regular fa-circle-exclamation fa-2xl"></i>
+                            {{else}}
+                            <img src="{{item.img}}" title="{{item.name}}" width="24"
+                                height="24" />
+                            {{/if}}
+                        </div>
+
                     </td>
                     <td>
                         {{#if (and (ne item.system.realCost 0) (ne item.system.XMLID "LIST"))}}

@@ -359,6 +359,12 @@ HERO.mindScanChoices = [
     },
 ];
 
+HERO.PENALTY_SKILL_LEVELS_TYPES = {
+    range: "range",
+    hitLocation: "hitLocation",
+    encumbrance: "encumbrance",
+};
+
 // TODO: This could be created from powers.
 HERO.movementPowers = Object.freeze({
     extradimensionalmovement: "Extra Dimensional Movement",
@@ -3276,6 +3282,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     range: "Range",
                     encumbrance: "Encumbrance",
                 },
+            },
+            heroValidation: function (item) {
+                if (!item.pslPenaltyType) {
+                    return {
+                        property: "OPTION_ALIAS",
+                        message: `Expecting one of these values [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
+                        example: `to offset range penalty OCV modifier with any single attack`,
+                    };
+                }
             },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {

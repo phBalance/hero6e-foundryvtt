@@ -48,8 +48,13 @@
         <input disabled type="text" value="{{system.OPTIONID}}" data-dtype="text" />
         </div>
 
-        <div class="form-group">
-            <label>OPTION_ALIAS</label>
+        <div class="form-group {{#if (itemHeroValidationForProperty this.item "OPTION_ALIAS")}}validation{{/if}}" title="{{itemHeroValidationForProperty this.item "OPTION_ALIAS"}}">
+            <label>
+                OPTION_ALIAS
+                {{#if (itemHeroValidationForProperty this.item "OPTION_ALIAS")}}
+                    <i class="fa-regular fa-circle-exclamation"></i>
+                {{/if}}
+            </label>
             <input {{#unless editOptions.editableOption_ALIAS}}disabled{{/unless}} name="system.OPTION_ALIAS" type="text" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
         </div>
 
@@ -68,7 +73,9 @@
 
         {{#if (isdefined system.OPTION_ALIAS)}}
         <div class="form-group">
-            <label>OPTION_ALIAS</label>
+            <label>
+                OPTION_ALIAS
+            </label>
             <input type="text" name="system.OPTION_ALIAS" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
         </div>
         {{/if}}

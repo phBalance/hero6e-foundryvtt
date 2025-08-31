@@ -3221,6 +3221,19 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
+    pslPentaltyItems(penaltyType) {
+        return this.items.filter((item) => item.pslPenaltyType === penaltyType);
+    }
+
+    pslPentaltyValue(penaltyType) {
+        const psls = this.pslPentaltyItems(penaltyType);
+        const valueSum = psls.reduce(
+            (accumulator, currentValue) => accumulator + parseInt(currentValue.system.LEVELS) || 0,
+            0,
+        );
+        return valueSum;
+    }
+
     get is5e() {
         if (this.system.template) {
             if (this.system.is5e && this.system.template.includes("6")) {

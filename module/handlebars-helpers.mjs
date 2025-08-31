@@ -21,6 +21,8 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("getScopedFlagValue", getScopedFlagValue);
     Handlebars.registerHelper("expandSegment", expandSegment);
     Handlebars.registerHelper("activeSegment", activeSegment);
+    Handlebars.registerHelper("actorItemHeroValidation", actorItemHeroValidation);
+    Handlebars.registerHelper("actorHeroValidationByItemType", actorHeroValidationByItemType);
 }
 
 function indexOf(str, searchTerm) {
@@ -161,4 +163,16 @@ function activeSegment(index, combat) {
     }
 
     return false;
+}
+
+function actorItemHeroValidation(item) {
+    return item.heroValidation.map((m) => m.message).join(", ");
+}
+
+function actorHeroValidationByItemType(actor, itemType) {
+    return actor.items
+        .filter((item) => item.type === itemType)
+        .reduce((accumulator, currentArray) => {
+            return accumulator.concat(currentArray.heroValidation);
+        }, []);
 }

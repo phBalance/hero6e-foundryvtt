@@ -483,6 +483,7 @@ WARNING: Read the changelog for this version before deciding to update.
   - Post segment 12 chat cards only show player recoveries to everyone. Non-player recoveries are whispered to GM.
 - Fixed issue with BASES taking a recovery. They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
 - You can now hold SHIFT to make attacks even when you get a cannot act message. [#1213](https://github.com/dmdorman/hero6e-foundryvtt/issues/1213)
+- Initial validation details for HDC upload issues. You may see some red/yellow notifications along with tooltips on how to fix the problem. Ideally you would update the HDC file and re-upload. [#2734](https://github.com/dmdorman/hero6e-foundryvtt/issues/2734)
 
 ## Version 3.0.96
 

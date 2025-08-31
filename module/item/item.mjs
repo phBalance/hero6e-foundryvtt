@@ -66,6 +66,14 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemHasActionBehavior", itemHasActionBehavior);
     Handlebars.registerHelper("itemPostHitActionString", itemPostHitActionString);
     Handlebars.registerHelper("hasDefenseActiveEffect", itemHasDefenseActiveEffect);
+    Handlebars.registerHelper("itemHeroValidationForProperty", itemHeroValidationForProperty);
+}
+
+function itemHeroValidationForProperty(item, property) {
+    return item.heroValidation
+        .filter((o) => o.property === property)
+        .map((m) => `${m.message} For example: "${m.example}"`)
+        .join(", ");
 }
 
 function itemHasDefenseActiveEffect(item) {
@@ -961,6 +969,37 @@ export class HeroSystem6eItem extends Item {
             this.buildAoeAttackParameters(aoeModifier);
         }
         window.prepareData.setAoeModifier = (window.prepareData.setAoeModifier || 0) + (Date.now() - startDate);
+    }
+
+    get heroValidation() {
+        const _heroValidation = [];
+
+        if (this.baseInfo) {
+            if (this.baseInfo.heroValidation) {
+                const v = this.baseInfo.heroValidation(this);
+                if (v) {
+                    _heroValidation.push(this.baseInfo.heroValidation(this));
+                }
+            }
+        }
+
+        return _heroValidation;
+    }
+
+    get pslPenaltyType() {
+        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
+
+        if (this.system.OPTION_ALIAS.match(/range/i)) {
+            return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range;
+        } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+            return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.hitLocation;
+        } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+            return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.encumbrance;
+        }
+
+        console.warn(`Unknown PSL type "${this.system.OPTION_ALIAS}"`, this);
+
+        return null;
     }
 
     setAttack() {

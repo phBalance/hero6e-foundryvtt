@@ -187,13 +187,13 @@
         <a class="item-nav" data-tab="defenses">Defenses</a>
         <a class="item-nav" data-tab="movement">Movement</a>
         {{#if hasMartialArts}}
-            <a class="item-nav" data-tab="martialArts">MartialArts</a>
+            <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "martialArts")}}validation{{/if}}" data-tab="martialArts">MartialArts</a>
         {{/if}}
-        <a class="item-nav" data-tab="skills">Skills</a>
-        <a class="item-nav" data-tab="maneuvers">Maneuvers</a>
-        <a class="item-nav" data-tab="powers">Powers</a>
+        <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "skill")}}validation{{/if}}" data-tab="skills">Skills</a>
+        <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "maneuver")}}validation{{/if}}" data-tab="maneuvers">Maneuvers</a>
+        <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "power")}}validation{{/if}}" data-tab="powers">Powers</a>
         {{#if hasEquipment}}
-            <a class="item-nav" data-tab="equipment">Equipment</a>
+            <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "equipment")}}validation{{/if}}" data-tab="equipment">Equipment</a>
         {{/if}}
         <a class="item-nav" data-tab="characteristics">Characteristics</a>
         <a class="item-nav" data-tab="other">Other</a>
