@@ -2897,6 +2897,16 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
+            // An attempt to track hierarchy of ADDERS/MODS
+            if (
+                !jsonChild.PARENTID &&
+                jsonChild.ID &&
+                child.parentNode?.getAttribute &&
+                child.parentNode?.getAttribute("ID")
+            ) {
+                jsonChild.PARENTID = child.parentNode.getAttribute("ID");
+            }
+
             if (
                 HeroSystem6eItem.ItemXmlChildTagsUpload.includes(child.tagName) &&
                 !HeroSystem6eItem.ItemXmlTags.includes(child.parentElement?.tagName)
