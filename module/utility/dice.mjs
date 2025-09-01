@@ -176,7 +176,7 @@ export class HeroRoller {
      * that with this dice roller.As a simple fix, just replace square brackets with .
      */
     static #sanitizeFlavorText(flavorText) {
-        const sanitizedText = flavorText.replace("[", "(").replace("]", ")");
+        const sanitizedText = flavorText?.replace("[", "(").replace("]", ")");
 
         if (sanitizedText !== flavorText) {
             console.warn(`Sanitized invalid flavor text: '${flavorText}'`);
