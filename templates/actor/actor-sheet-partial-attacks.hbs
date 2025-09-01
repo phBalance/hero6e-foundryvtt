@@ -11,8 +11,7 @@
             <th>{{localize "ActorSheet.End"}}</th>
             <th>{{localize "ActorSheet.Aoe"}}</th>
             <th>{{localize "ActorSheet.Roll"}}</th>
-            <th>
-            </th>
+            <th></th>
         </tr>
         {{#each items as |item id|}}
             {{#if (or (eq item.type "attack") (and (or (eq item.system.XMLID "STRIKE") (ne item.type "maneuver")) (itemHasActionBehavior item "to-hit") (ne item.system.XMLID "__STRENGTHDAMAGE")))}}
@@ -60,11 +59,7 @@
                         {{/if}}
                     </td>
                     <td>
-                        {{#if this.disabledOIHID}}
-                            <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
-                        {{else}}
-                            <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
-                        {{/if}}
+                        {{> (getModulePath 'item/item-action-icons-partial.hbs') item }}
                     </td>
                     <td>
                         <div class="item-controls" data-group="mode">

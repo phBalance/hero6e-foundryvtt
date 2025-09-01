@@ -1,4 +1,4 @@
-import { getModifierInfo } from "../utility/util.mjs";
+import { getPowerInfo } from "../utility/util.mjs";
 
 export class HeroSystem6eAdder {
     #baseInfo;
@@ -6,7 +6,7 @@ export class HeroSystem6eAdder {
     constructor(json, options) {
         this.item = options.item;
 
-        this.#baseInfo = getModifierInfo({
+        this.#baseInfo = getPowerInfo({
             xmlid: json.XMLID,
             actor: this.item?.actor,
             is5e: this.item?.is5e,

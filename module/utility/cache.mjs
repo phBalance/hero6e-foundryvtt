@@ -25,8 +25,11 @@ export class HeroSystemGenericSharedCache {
     #sets = 0;
     #invalidated = 0;
 
-    constructor() {
-        // nothing special to do for initialization
+    // eslint-disable-next-line no-unused-private-class-members
+    #purpose;
+
+    constructor(purpose) {
+        this.#purpose = purpose;
     }
 
     setCachedValue(id, newValue) {
@@ -39,7 +42,7 @@ export class HeroSystemGenericSharedCache {
         return this._cachedValue[id];
     }
 
-    invalidateCache(id) {
+    invalidateCachedValue(id) {
         this._cachedValue[id] = null;
         this.#invalidated = this.#invalidated + 1;
     }

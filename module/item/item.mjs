@@ -22,11 +22,10 @@ import {
 import { HeroSystemGenericSharedCache } from "../utility/cache.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
 import {
-    getModifierInfo,
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
-    whisperUserTargetsForActor,
     tokenEducatedGuess,
+    whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -212,7 +211,10 @@ function itemHasActionBehavior(item, actionBehavior) {
             return item.rollsToHit();
         } else if (actionBehavior === "activatable") {
             return item.isActivatable();
+        } else if (actionBehavior === "hasClips") {
+            return item.hasClips();
         }
+
         console.warn(`Unknown request to get action behavior ${actionBehavior}`);
         return false;
     } catch (e) {
@@ -353,7 +355,7 @@ export class HeroSystem6eItem extends Item {
         this.setInitialRange(this.baseInfo);
         this.updateRoll();
         this.determinePointCosts();
-        this.setCharges();
+        this.setCharges(this.system.charges);
         this.setShowToggle();
         this.calcEndurance();
         this.setCarried();
@@ -1239,20 +1241,20 @@ export class HeroSystem6eItem extends Item {
         window.prepareData.setShowToggle = (window.prepareData.setShowToggle || 0) + (Date.now() - startDate);
     }
 
-    setCharges() {
+    setCharges(systemCharges) {
         // CHARGES are also messed with in _postUploadDetails, should probably consolidate
         const CHARGES = this.findModsByXmlid("CHARGES");
         if (CHARGES) {
             this.system.charges = {
                 max: parseInt(CHARGES.OPTION_ALIAS),
                 value: parseInt(CHARGES.OPTION_ALIAS),
-                clipsMax: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
-                clips: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
+                clipsMax: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
+                clips: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
                 recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
                 continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
                 boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
                 fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
-                ...this.system.charges,
+                ...systemCharges,
             };
         }
     }
@@ -1375,10 +1377,12 @@ export class HeroSystem6eItem extends Item {
      * Reset an item back to its default state.
      */
     async resetToOriginal() {
-        // Set Charges to max
-        if (this.system.charges && this.system.charges.value !== this.system.charges.max) {
+        // Reset charges
+        const chargesBefore = this.system.charges;
+        this.setCharges({});
+        if (chargesBefore != null || this.system.charges != null) {
             await this.update({
-                [`system.charges.value`]: this.system.charges.max,
+                ["system.charges"]: this.system.charges,
             });
             await this._postUpload();
         }
@@ -1985,6 +1989,32 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    hasClips() {
+        return this.system.charges?.clipsMax > 1;
+    }
+
+    /**
+     *
+     * @param {Event} [event]
+     * @returns {Promise<undefined>}
+     */
+    async changeClips(/*event*/) {
+        const charges = this.system.charges;
+        if (!charges) {
+            return ui.notifications.warn(`${this.detailedName()} does not use charges. Please report.`);
+        } else if (charges.clipsMax <= 1) {
+            return ui.notifications.warn(`${this.detailedName()} does not use clips. Please report.`);
+        } else if (charges.clips === 0) {
+            return ui.notifications.error(`${this.detailedName()} does not have 1 clip remaining.`);
+        }
+
+        // Reload the clip to 1 less clip that should be at full charges.
+        return this.update({
+            [`system.charges.value`]: charges.max,
+            [`system.charges.clips`]: charges.clips - 1,
+        });
+    }
+
     isPerceivable(perceptionSuccess) {
         if (["NAKEDMODIFIER", "LIST", "COMPOUNDPOWER"].includes(this.system.XMLID)) {
             return false;
@@ -2000,7 +2030,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // FOCUS
-        const FOCUS = this.findModsByXmlid("FOCUS"); //this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
+        const FOCUS = this.findModsByXmlid("FOCUS");
         if (FOCUS) {
             if (FOCUS?.OPTIONID?.startsWith("O")) return true;
             if (FOCUS?.OPTIONID?.startsWith("I")) return perceptionSuccess;
@@ -3242,11 +3272,11 @@ export class HeroSystem6eItem extends Item {
         return _adders;
     }
 
-    static #powersCache = HeroSystemGenericSharedCache.create("powers");
+    static _powersCache = HeroSystemGenericSharedCache.create("powers");
     get powers() {
         // Caching for performance
         if (this.id) {
-            const cachedValue = HeroSystem6eItem.#powersCache.getCachedValue(this.id);
+            const cachedValue = HeroSystem6eItem._powersCache.getCachedValue(this.id);
             if (cachedValue) {
                 return cachedValue;
             }
@@ -3277,7 +3307,7 @@ export class HeroSystem6eItem extends Item {
 
             // Cache powers if this is a non temporary item
             if (this.id) {
-                HeroSystem6eItem.#powersCache.setCachedValue(this.id, _powers);
+                HeroSystem6eItem._powersCache.setCachedValue(this.id, _powers);
             }
 
             return _powers;
@@ -4480,7 +4510,7 @@ export class HeroSystem6eItem extends Item {
                     result += maxCharges > 1 ? " Charges" : " Charge";
 
                     const totalClips = this.system.charges?.clipsMax;
-                    if (totalClips > 1) {
+                    if (totalClips != undefined && totalClips > 1) {
                         const currentClips = this.system.charges?.clips;
                         result += ` (${currentClips}/${totalClips} clips)`;
                     }
@@ -6290,7 +6320,7 @@ export class HeroSystem6eItem extends Item {
             .filter((advantage) => !advantagesToIgnore.includes(advantage.XMLID));
 
         this.system.MODIFIER = (this.system.MODIFIER || []).concat(advantagesToCopy);
-        HeroSystem6eItem._modifiersCache.invalidateCache(this.id);
+        HeroSystem6eItem._modifiersCache.invalidateCachedValue(this.id);
 
         // Stash a copy of what we've added in after the fact
         this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(advantagesToCopy);
@@ -6317,21 +6347,21 @@ export class HeroSystem6eItem extends Item {
      * Anything that doesn't have a damage effect (e.g. Darkness)
      */
     damageLevelTweaking(diceParts) {
-        const plusOnePipAdderData = getModifierInfo({
+        const plusOnePipAdderData = getPowerInfo({
             xmlid: "PLUSONEPIP",
             actor: this.actor,
             is5e: this.is5e,
             item: this,
             xmlTag: "ADDER",
         });
-        const plusHalfDieAdderData = getModifierInfo({
+        const plusHalfDieAdderData = getPowerInfo({
             xmlid: "PLUSONEHALFDIE",
             actor: this.actor,
             is5e: this.is5e,
             item: this,
             xmlTag: "ADDER",
         });
-        const minusOnePipAdderData = getModifierInfo({
+        const minusOnePipAdderData = getPowerInfo({
             xmlid: "MINUSONEPIP",
             actor: this.actor,
             is5e: this.is5e,
@@ -6365,7 +6395,7 @@ export class HeroSystem6eItem extends Item {
 
         // Invalidate the adders cache if this is a non temporary item.
         if (this.id) {
-            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+            HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
 
         // Set/clear a 1/2d6 adder
@@ -6414,7 +6444,7 @@ export class HeroSystem6eItem extends Item {
 
         // Invalidate the adders cache if this is a non temporary item.
         if (this.id) {
-            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+            HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
 
         // Set/clear a +1 pip adder
@@ -6463,7 +6493,7 @@ export class HeroSystem6eItem extends Item {
 
         // Invalidate the adders cache if this is a non temporary item.
         if (this.id) {
-            HeroSystem6eItem._addersCache.invalidateCache(this.id);
+            HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
     }
 

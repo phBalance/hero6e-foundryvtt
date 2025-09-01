@@ -424,6 +424,10 @@ function validatePowers() {
     }
     numViolations += powersWithoutMatchingKeyAndXmlid.length;
 
+    // All powers that have a duration are lowercase
+    const powersWithDurationThatHasUppercase = this.filter((power) => power.duration?.toLowerCase() !== power.duration);
+    numViolations += powersWithDurationThatHasUppercase.length;
+
     // Has range property and is not framework/compound/adder/modifier
     const powersWithoutRangeProperty = this.filter(
         (power) =>
@@ -509,6 +513,10 @@ HERO.powers6e = [];
 HERO.powers6e.validate = validatePowers;
 HERO.powers5e = [];
 HERO.powers5e.validate = validatePowers;
+
+// Dictionaries XMLID -> array of power descriptions/baseInfo
+HERO.powers6eDict = new Map();
+HERO.powers5eDict = new Map();
 
 function fixedValueFunction(value) {
     return function () {
@@ -631,7 +639,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         if (!powerDescription6e.key) {
             return;
         }
-        HERO.powers6e.push(foundry.utils.deepClone(powerDescription6e));
+
+        const powerDescriptionClone = Object.freeze(foundry.utils.deepClone(powerDescription6e));
+        HERO.powers6e.push(powerDescriptionClone);
+
+        const existing = HERO.powers6eDict.get(powerDescription6e.key);
+        if (existing) {
+            existing.push(powerDescriptionClone);
+            HERO.powers6eDict.set(powerDescription6e.key, existing);
+        } else {
+            HERO.powers6eDict.set(powerDescription6e.key, [powerDescriptionClone]);
+        }
 
         // Talents can be purchased as powers (duplicate them)
         if (powerDescription6e.xmlTag === "TALENT") {
@@ -639,6 +657,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             talentPower.xmlTag = "POWER";
             talentPower.xml.replace("<TALENT", "<POWER");
             HERO.powers6e.push(talentPower);
+
+            const existing = HERO.powers6eDict.get(powerDescription6e.key);
+            if (existing) {
+                existing.push(talentPower);
+                HERO.powers6eDict.set(powerDescription6e.key, existing);
+            } else {
+                HERO.powers6eDict.set(powerDescription6e.key, [talentPower]);
+            }
         }
     }
 
@@ -661,7 +687,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             return;
         }
 
+        const powerDescriptionClone = Object.freeze(foundry.utils.deepClone(powerDescription5e));
         HERO.powers5e.push(powerDescription5e);
+
+        const existing = HERO.powers5eDict.get(powerDescription5e.key);
+        if (existing) {
+            existing.push(powerDescriptionClone);
+            HERO.powers5eDict.set(powerDescription5e.key, existing);
+        } else {
+            HERO.powers5eDict.set(powerDescription5e.key, [powerDescriptionClone]);
+        }
     }
 }
 

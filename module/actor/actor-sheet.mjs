@@ -779,6 +779,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                             o.type === "equipment" &&
                             o.system.XMLID === stackItem.system.XMLID &&
                             o.system.ALIAS === stackItem.system.ALIAS &&
+                            o.system.NAME === stackItem.system.NAME &&
                             o.findModsByXmlid("CHARGES"),
                     );
                     if (existingItem) {
@@ -806,9 +807,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
-        // Rollable items
-        html.find(".item-rollable").click(this._onItemRoll.bind(this));
-
         // Rollable characteristic
         html.find(".characteristic-roll").click(this._onCharacteristicSuccessRoll.bind(this));
 
@@ -818,8 +816,14 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         // Casual characteristic
         html.find(".characteristic-casual").click(this._onPrimaryCharacteristicCasualRoll.bind(this));
 
+        // Rollable items
+        html.find(".item-rollable").click(this._onItemRoll.bind(this));
+
         // Toggle items
         html.find(".item-toggle").click(this._onItemToggle.bind(this));
+
+        // Reload items
+        html.find(".item-change-clip").click(this._onItemChangeClips.bind(this));
 
         // Edit Items
         html.find(".item-edit").click(this._onItemEdit.bind(this));
@@ -1127,7 +1131,14 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         event.preventDefault();
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
-        item.toggle(event);
+        return item.toggle(event);
+    }
+
+    async _onItemChangeClips(event) {
+        event.preventDefault();
+        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
+        const item = this.actor.items.get(itemId);
+        return item.changeClips(event);
     }
 
     async _onItemEdit(event) {

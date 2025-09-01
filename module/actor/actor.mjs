@@ -1820,8 +1820,8 @@ export class HeroSystem6eActor extends Actor {
                 .filter(
                     (item) =>
                         item.system.charges &&
-                        (item.system.charges.max != item.system.charges.value ||
-                            item.system.charges.max != item.system.charges.value),
+                        (item.system.charges.max !== item.system.charges.value ||
+                            item.system.charges.clipsMax !== item.system.charges.clips),
                 )
                 .map((o) => o.system),
         };
@@ -2225,8 +2225,13 @@ export class HeroSystem6eActor extends Actor {
         const itemsToUpdate = itemsToCreate.filter((o) => o._id);
         itemsToCreate = itemsToCreate.filter((o) => !o._id);
 
-        // Sanity check for item.type
+        // Sanity check for item.type and
+        // invalidate the item caches for anything we're going to update
         for (const item of itemsToUpdate) {
+            HeroSystem6eItem._addersCache.invalidateCachedValue(item.id);
+            HeroSystem6eItem._modifiersCache.invalidateCachedValue(item.id);
+            HeroSystem6eItem._powersCache.invalidateCachedValue(item.id);
+
             if (this.items.find((o) => o.id === item._id).type !== item.type) {
                 await ui.notifications.warn(`${item.name} changed to type=${item.type}`);
             }
@@ -2292,10 +2297,12 @@ export class HeroSystem6eActor extends Actor {
                 if (chargesUsed) {
                     await item.update({ "system.charges.value": Math.max(0, item.system.charges.max - chargesUsed) });
                 }
-                const clipsUsed = Math.max(0, chargeData.clips - chargeData.clipsMax);
+
+                const clipsUsed = Math.max(0, chargeData.charges.clips - chargeData.charges.clipsMax);
                 if (clipsUsed) {
-                    await item.update({ "system.clips.value": Math.max(0, item.system.clipsMax - clipsUsed) });
+                    await item.update({ "system.clips.value": Math.max(0, item.system.charges.clipsMax - clipsUsed) });
                 }
+
                 item.updateItemDescription();
                 await item.update({ "system.description": item.system.description });
             } else {
