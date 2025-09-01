@@ -68,28 +68,29 @@ export function getPowerInfo(options) {
         }
     }
 
-    const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+    const powerDict = is5e ? CONFIG.HERO.powers5eDict : CONFIG.HERO.powers6eDict;
 
     // ENHANCEDPERCEPTION is a POWER and an ADDER, we can pass in xmlTag to get the right one
-    let powerInfo = powerList.filter(
-        (o) => o.key === xmlid && (!options?.xmlTag || !o.xmlTag || o.xmlTag === options?.xmlTag),
+    const fullPowerInfoList = powerDict.get(xmlid) || [];
+    const powerInfoList = fullPowerInfoList.filter(
+        (power) => !options?.xmlTag || !power.xmlTag || power.xmlTag === options?.xmlTag,
     );
 
-    if (powerInfo.length > 1) {
+    if (powerInfoList.length > 1) {
         if (!window.warnGetPowerInfo?.includes(xmlid)) {
             console.warn(
                 `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Multiple powerInfo results. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again may resolve this issue.`,
-                powerInfo,
+                powerInfoList,
                 options,
             );
             window.warnGetPowerInfo ??= [];
             window.warnGetPowerInfo.push(xmlid);
         }
     }
-    powerInfo = powerInfo?.[0];
 
+    let powerInfo = powerInfoList[0];
     if (!powerInfo) {
-        powerInfo = powerList.find((o) => o.key === xmlid);
+        powerInfo = fullPowerInfoList[0];
         if (powerInfo) {
             if (powerInfo.type.some((t) => ["movement", "skill", "characteristic"].includes(t))) {
                 // console.debug(
@@ -105,6 +106,12 @@ export function getPowerInfo(options) {
                 );
             }
         }
+        // FIXME: There are plenty of XMLIDs not yet in config.mjs
+        //  else {
+        //     console.error(
+        //         `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Unable to find power entry.`,
+        //     );
+        // }
     }
 
     return powerInfo;
