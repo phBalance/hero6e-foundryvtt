@@ -1,0 +1,31 @@
+{{!-- {{log 'item-action-icons-partial' this}} --}}
+
+{{#if this.disabledOIHID}}
+    <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
+{{else}}
+    {{#if (itemHasBehaviours this "roll" "success")}}
+        <button type="button" class="item-rollable" data-roll="{{this.system.roll}}" data-label="{{this._id}}">
+            {{numberFormat this.system.roll decimals=0 sign=false}}-
+        </button>
+    {{/if}}
+
+    {{#if (itemHasActionBehavior this "to-hit")}}
+        <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
+    {{/if}}
+
+    {{#if (itemHasActionBehavior this "activatable")}}
+        <input class="item-toggle" type="checkbox"
+            Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
+            data-action="toggle"
+        />
+    {{/if}}
+
+    {{#if (itemHasActionBehavior this "hasClips")}}
+        <a class="item-image item-change-clip"><i
+                class="fas fa-refresh"
+                title="{{item.name}}"
+                width="24"
+                height="24"
+            ></i></a>
+    {{/if}}
+{{/if}}

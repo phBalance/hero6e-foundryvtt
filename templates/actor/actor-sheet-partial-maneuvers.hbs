@@ -24,23 +24,7 @@
                     <td>{{item.system.ocvEstimated}}</td>
                     <td>{{item.system.dcvEstimated}}</td>
                     <td>
-                        {{#if (itemHasActionBehavior item "to-hit")}}
-                            <a class="item-image item-rollable"><i
-                                    class="fas fa-dice"
-                                    title="{{item.name}}"
-                                    width="24"
-                                    height="24"
-                                ></i></a>
-                        {{/if}}
-                        {{#if (itemHasActionBehavior item "activatable")}}
-                            <input
-                                class="item-toggle"
-                                type="checkbox"
-                                name="item.system.active"
-                                {{checked item.system.active}}
-                                data-dtype="Boolean"
-                            />
-                        {{/if}}
+                        {{> (getModulePath 'item/item-action-icons-partial.hbs') item }}
                     </td>
                     <td>
                         <a class="item-control item-chat" title="{{localize "ActorSheet.SendToChat"}}"><i

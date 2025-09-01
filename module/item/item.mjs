@@ -211,7 +211,10 @@ function itemHasActionBehavior(item, actionBehavior) {
             return item.rollsToHit();
         } else if (actionBehavior === "activatable") {
             return item.isActivatable();
+        } else if (actionBehavior === "hasClips") {
+            return item.hasClips();
         }
+
         console.warn(`Unknown request to get action behavior ${actionBehavior}`);
         return false;
     } catch (e) {
@@ -1986,6 +1989,32 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    hasClips() {
+        return this.system.charges?.clipsMax > 1;
+    }
+
+    /**
+     *
+     * @param {Event} [event]
+     * @returns {Promise<undefined>}
+     */
+    async changeClips(/*event*/) {
+        const charges = this.system.charges;
+        if (!charges) {
+            return ui.notifications.warn(`${this.detailedName()} does not use charges. Please report.`);
+        } else if (charges.clipsMax <= 1) {
+            return ui.notifications.warn(`${this.detailedName()} does not use clips. Please report.`);
+        } else if (charges.clips === 0) {
+            return ui.notifications.error(`${this.detailedName()} does not have 1 clip remaining.`);
+        }
+
+        // Reload the clip to 1 less clip that should be at full charges.
+        return this.update({
+            [`system.charges.value`]: charges.max,
+            [`system.charges.clips`]: charges.clips - 1,
+        });
+    }
+
     isPerceivable(perceptionSuccess) {
         if (["NAKEDMODIFIER", "LIST", "COMPOUNDPOWER"].includes(this.system.XMLID)) {
             return false;
@@ -2001,7 +2030,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // FOCUS
-        const FOCUS = this.findModsByXmlid("FOCUS"); //this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
+        const FOCUS = this.findModsByXmlid("FOCUS");
         if (FOCUS) {
             if (FOCUS?.OPTIONID?.startsWith("O")) return true;
             if (FOCUS?.OPTIONID?.startsWith("I")) return perceptionSuccess;
