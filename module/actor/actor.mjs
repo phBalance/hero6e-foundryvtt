@@ -2225,8 +2225,13 @@ export class HeroSystem6eActor extends Actor {
         const itemsToUpdate = itemsToCreate.filter((o) => o._id);
         itemsToCreate = itemsToCreate.filter((o) => !o._id);
 
-        // Sanity check for item.type
+        // Sanity check for item.type and
+        // invalidate the item caches for anything we're going to update
         for (const item of itemsToUpdate) {
+            HeroSystem6eItem._addersCache.invalidateCachedValue(item.id);
+            HeroSystem6eItem._modifiersCache.invalidateCachedValue(item.id);
+            HeroSystem6eItem._powersCache.invalidateCachedValue(item.id);
+
             if (this.items.find((o) => o.id === item._id).type !== item.type) {
                 await ui.notifications.warn(`${item.name} changed to type=${item.type}`);
             }
