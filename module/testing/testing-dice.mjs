@@ -3148,6 +3148,52 @@ export function registerDiceTests(quench) {
                         expect(roller.getEffectTotal()).to.equal(24);
                     });
                 });
+
+                describe("Flavors", async function () {
+                    function turnRollToTrueFalsePromise(roller) {
+                        // eslint-disable-next-line no-async-promise-executor
+                        return new Promise(async (resolve, reject) => {
+                            try {
+                                await roller.roll();
+                                resolve(true);
+                            } catch {
+                                reject(false);
+                            }
+                        });
+                    }
+
+                    it("should support providing a valid flavor string", async function () {
+                        const TestRollMock = Roll6Mock;
+                        const flavorStringToBeSanitized = "this is a FoundryVTT flavor string without square brackets";
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeEffectRoll()
+                            .addDice(1, flavorStringToBeSanitized)
+                            .addHalfDice(1, flavorStringToBeSanitized)
+                            .addDiceMinus1(1, flavorStringToBeSanitized)
+                            .addDieMinus1Min1(1, flavorStringToBeSanitized)
+                            .addNumber(3, flavorStringToBeSanitized);
+
+                        expect(await turnRollToTrueFalsePromise(roller)).to.be.true;
+                    });
+
+                    // For the FoundryVTT roller in the message tab, the "[" and "]" provide flavor
+                    it("should support providing a flavor string with '[' characters", async function () {
+                        const TestRollMock = Roll6Mock;
+                        const flavorStringToBeSanitized =
+                            "this is a FoundryVTT flavor string with [square brackets which are themselves flavour text]";
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeEffectRoll()
+                            .addDice(1, flavorStringToBeSanitized)
+                            .addHalfDice(1, flavorStringToBeSanitized)
+                            .addDiceMinus1(1, flavorStringToBeSanitized)
+                            .addDieMinus1Min1(1, flavorStringToBeSanitized)
+                            .addNumber(3, flavorStringToBeSanitized);
+
+                        expect(await turnRollToTrueFalsePromise(roller)).to.be.true;
+                    });
+                });
             });
         },
         { displayName: "HERO: Dice" },
