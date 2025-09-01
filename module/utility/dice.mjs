@@ -172,6 +172,20 @@ export class HeroRoller {
     }
 
     /**
+     * The underlying parser makes some assumptions about flavor text assuming their syntax. We don't allow
+     * that with this dice roller.As a simple fix, just replace square brackets with .
+     */
+    static #sanitizeFlavorText(flavorText) {
+        const sanitizedText = flavorText.replace("[", "(").replace("]", ")");
+
+        if (sanitizedText !== flavorText) {
+            console.warn(`Sanitized invalid flavor text: '${flavorText}'`);
+        }
+
+        return sanitizedText;
+    }
+
+    /**
      * @type {TermClusterEntry[]}
      */
     _termsCluster;
@@ -397,7 +411,7 @@ export class HeroRoller {
                 number: numDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE,
-                    flavor: description,
+                    flavor: HeroRoller.#sanitizeFlavorText(description),
                     _hrTag: !description
                         ? undefined
                         : {
@@ -424,7 +438,7 @@ export class HeroRoller {
                 number: numHalfDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.HALF_DIE,
-                    flavor: description,
+                    flavor: HeroRoller.#sanitizeFlavorText(description),
                     _hrTag: !description
                         ? undefined
                         : {
@@ -451,7 +465,7 @@ export class HeroRoller {
                 number: numDiceMinusOne,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE,
-                    flavor: description,
+                    flavor: HeroRoller.#sanitizeFlavorText(description),
                     _hrTag: !description
                         ? undefined
                         : {
@@ -478,7 +492,7 @@ export class HeroRoller {
                 number: numDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE,
-                    flavor: description,
+                    flavor: HeroRoller.#sanitizeFlavorText(description),
                     _hrTag: !description
                         ? undefined
                         : {
@@ -510,7 +524,7 @@ export class HeroRoller {
                 number: termValue,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
-                    flavor: description,
+                    flavor: HeroRoller.#sanitizeFlavorText(description),
                     _hrTag: !description
                         ? undefined
                         : {
