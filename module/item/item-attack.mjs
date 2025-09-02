@@ -406,11 +406,11 @@ export async function processActionToHit(item, formData) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
+    // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
     const haymakerManeuverActive = item.actor?.items.find(
         (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "HAYMAKER" && anItem.system.active,
     );
     if (haymakerManeuverActive) {
-        // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
         if (item.type === "martialart" || (item.type === "maneuver" && item.system.XMLID !== "STRIKE")) {
             return ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
                 localize: true,
@@ -429,6 +429,61 @@ export async function processActionToHit(item, formData) {
     await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
         active: false,
     });
+}
+
+function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
+    if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
+        // TODO: Should not be able to use this on anyone else. Should add a check well before here (in dialog).
+    }
+
+    // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
+    //       in case the system has calculated it incorrectly.
+
+    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
+
+    // There are no range penalties if this is a line of sight power or it has been bought with
+    // no range modifiers.
+    if (
+        !(
+            item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            noRangeModifiers ||
+            normalRange
+        )
+    ) {
+        // PH: FIXME: This is different between AoE and single target. Can we combine?
+        const baseRangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
+        let remainingRangePenalty = baseRangePenalty;
+
+        attackHeroRoller.addNumber(
+            baseRangePenalty,
+            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
+        );
+
+        // PENALTY_SKILL_LEVELS (range)
+        for (const pslItem of item.pslRangePenaltyOffsetItems) {
+            const pslOffsets = Math.min(parseInt(pslItem.system.LEVELS), -remainingRangePenalty);
+            remainingRangePenalty += pslOffsets;
+            attackHeroRoller.addNumber(pslOffsets, "Penalty Skill Levels");
+        }
+
+        // Some maneuvers have a built in RANGE value (like PSLs)
+        const maneuverRangeOffset = parseInt(item.system.RANGE || 0);
+        const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
+        remainingRangePenalty += maneuverRangeOffsets;
+        attackHeroRoller.addNumber(maneuverRangeOffsets, "Maneuver bonus");
+
+        // Brace (+2 OCV only to offset the Range Modifier)
+        const braceManeuver = item.actor.items.find(
+            (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
+        );
+        if (braceManeuver) {
+            const braceOffsets = Math.min(braceManeuver.baseInfo?.maneuverDesc?.ocv || 0, -remainingRangePenalty);
+            remainingRangePenalty += braceOffsets;
+            attackHeroRoller.addNumber(braceOffsets, "Brace modifier");
+        }
+    }
 }
 
 export async function doAoeActionToHit(action, options) {
@@ -456,17 +511,6 @@ export async function doAoeActionToHit(action, options) {
         );
     }
 
-    const aoeTemplate = getAoeTemplateForItem(item);
-    if (!aoeTemplate) {
-        return ui.notifications.error(`Attack AOE template was not found.`);
-    }
-
-    const distance = calculateDistanceBetween(aoeTemplate, token).distance;
-    let dcvTargetNumber = 0;
-    if (distance > (actor.system.is5e ? 1 : 2)) {
-        dcvTargetNumber = 3;
-    }
-
     const hitCharacteristic = actor.system.characteristics.ocv.value;
     const setManeuver = item.actor.items.find(
         (item) => item.type == "maneuver" && item.name === "Set" && item.isActive,
@@ -480,57 +524,18 @@ export async function doAoeActionToHit(action, options) {
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
 
-    if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
-        // TODO: Should not be able to use this on anyone else. Should add a check.
+    const aoeTemplate = getAoeTemplateForItem(item);
+    if (!aoeTemplate) {
+        return ui.notifications.error(`Attack AoE template was not found.`);
     }
 
-    // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
-    //       in case the system has calculated it incorrectly.
-
-    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
-    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
-
-    // There are no range penalties if this is a line of sight power or it has been bought with
-    // no range modifiers.
-    if (
-        !(
-            item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
-            item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
-            noRangeModifiers ||
-            normalRange
-        )
-    ) {
-        const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
-
-        // PENALTY_SKILL_LEVELS (range)
-        // const pslRange = penaltySkillLevelsForAttack(item).find(
-        //     (o) => o.system.penalty === "range" && o.system.checked,
-        // );
-        for (const pslItem of item.pslRangePenaltyOffsetItems) {
-            const pslValue = Math.min(parseInt(pslItem.system.LEVELS), -rangePenalty);
-            if (pslValue !== 0) {
-                attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels"); //pslItem.detailedName());
-            }
-        }
-
-        if (rangePenalty) {
-            attackHeroRoller.addNumber(
-                rangePenalty,
-                `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
-            );
-        }
-
-        // Brace (+2 OCV only to offset the Range Modifier)
-        const braceManeuver = item.actor.items.find(
-            (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
-        );
-        if (braceManeuver) {
-            const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
-            if (brace > 0) {
-                attackHeroRoller.addNumber(brace, "Brace modifier");
-            }
-        }
+    const distance = calculateDistanceBetween(aoeTemplate, token).distance;
+    let dcvTargetNumber = 0;
+    if (distance > (actor.system.is5e ? 1 : 2)) {
+        dcvTargetNumber = 3;
     }
+
+    addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
 
     let dcv = parseInt(item.system.dcv || 0);
 
@@ -616,13 +621,13 @@ export async function doAoeActionToHit(action, options) {
     const hitRollTotal = attackHeroRoller.getSuccessTotal();
     const renderedRollResult = await attackHeroRoller.render();
 
-    let hitRollText = "AOE origin successfully HITS a DCV of " + hitRollTotal;
+    let hitRollText = `AoE origin successfully HITS a DCV of ${hitRollTotal}`;
 
     if (autoSuccess !== undefined) {
         if (autoSuccess) {
-            hitRollText = "AOE origin automatically HITS any DCV";
+            hitRollText = "AoE origin automatically HITS any DCV";
         } else {
-            hitRollText = "AOE origin automatically MISSES any DCV";
+            hitRollText = "AoE origin automatically MISSES any DCV";
         }
     } else if (hitRollTotal < dcvTargetNumber) {
         const missBy = dcvTargetNumber - hitRollTotal;
@@ -632,7 +637,7 @@ export async function doAoeActionToHit(action, options) {
         const facingRollResult = facingHeroRoller.getBasicTotal();
 
         const moveDistance = RoundFavorPlayerDown(Math.min(distance / 2, item.actor.system.is5e ? missBy : missBy * 2));
-        hitRollText = `AOE origin MISSED by ${missBy}. Move AOE origin ${
+        hitRollText = `AoE origin MISSED by ${missBy}. Move AoE origin ${
             moveDistance + getSystemDisplayUnits(item.actor.is5e)
         } in the <b>${facingRollResult}</b> direction.`;
     }
@@ -792,15 +797,18 @@ async function doSingleTargetActionToHit(action, options) {
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
 
-    if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
-        // TODO: Should not be able to use this on anyone else. Should add a check.
+    const isAoE = item.getAoeModifier();
+    const aoeTemplate = isAoE ? getAoeTemplateForItem(item) : null;
+    if (isAoE && !aoeTemplate) {
+        return ui.notifications.error(`Attack AOE template was not found.`);
     }
 
-    // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
-    //       in case the system has calculated it incorrectly.
+    // Pick the appropriate target based on the attack type. For AoE it's the base of the AoE template for
+    // a single target attack it's the actual target.
+    const target = isAoE ? aoeTemplate : targets[0];
+    const distance = token ? calculateDistanceBetween(token, target).distance : 0;
 
-    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
-    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
+    addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
 
     // Mind Scan
     if (parseInt(options.mindScanMinds)) {
@@ -808,62 +816,6 @@ async function doSingleTargetActionToHit(action, options) {
     }
     if (parseInt(options.mindScanFamiliar)) {
         attackHeroRoller.addNumber(parseInt(options.mindScanFamiliar), "Mind Familiarity");
-    }
-
-    // There are no range penalties if this is a line of sight power or it has been bought with
-    // no range modifiers.
-    if (
-        targets.length > 0 &&
-        !(
-            item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
-            item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
-            noRangeModifiers ||
-            normalRange
-        )
-    ) {
-        if (!token) {
-            // We can still proceed without a token for our actor.  We just don't know the range to our potential target.
-            ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
-        }
-
-        const isAoE = item.getAoeModifier();
-        const aoeTemplate = isAoE ? getAoeTemplateForItem(item) : null;
-        if (isAoE && !aoeTemplate) {
-            return ui.notifications.error(`Attack AOE template was not found.`);
-        }
-
-        // Pick the appropriate target based on the attack type. For AoE it's the base of the AoE template for
-        // a single target attack it's the actual target.
-        const target = isAoE ? aoeTemplate : targets[0];
-        const distance = token ? calculateDistanceBetween(token, target).distance : 0;
-        const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
-
-        // PENALTY_SKILL_LEVELS (range)
-        // const pslRange = penaltySkillLevelsForAttack(item).find(
-        //     (o) => o.system.penalty === "range" && o.system.checked,
-        // );
-        for (const pslItem of item.pslRangePenaltyOffsetItems) {
-            const pslValue = Math.min(parseInt(pslItem.system.LEVELS), -rangePenalty);
-            if (pslValue !== 0) {
-                attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels"); //pslItem.detailedName());
-            }
-        }
-
-        if (rangePenalty) {
-            attackHeroRoller.addNumber(
-                rangePenalty,
-                `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
-            );
-        }
-
-        // Brace (+2 OCV only to offset the Range Modifier)
-        const braceManeuver = item.actor.items.find((o) => o.type == "maneuver" && o.name === "Brace" && o.isActive);
-        if (braceManeuver) {
-            const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
-            if (brace > 0) {
-                attackHeroRoller.addNumber(brace, braceManeuver.name);
-            }
-        }
     }
 
     let dcv = parseInt(item.system.dcv || 0);
@@ -936,6 +888,8 @@ async function doSingleTargetActionToHit(action, options) {
         );
         cvModifiers.push(cvMod);
     });
+
+    // PH: FIXME: this should be part of a generic removal/addition of DCV based on the maneuver ()
     // Haymaker -5 DCV
     const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
     if (haymakerManeuver) {
@@ -997,7 +951,6 @@ async function doSingleTargetActionToHit(action, options) {
     attackHeroRoller.addDice(-3);
 
     const aoeModifier = item.getAoeModifier();
-    const aoeTemplate = aoeModifier ? getAoeTemplateForItem(item) : null;
     const explosion = item.hasExplosionAdvantage();
     const SELECTIVETARGET = aoeModifier?.ADDER ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET") : null;
     const NONSELECTIVETARGET = aoeModifier?.ADDER
