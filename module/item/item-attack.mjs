@@ -453,32 +453,35 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
         )
     ) {
         // PH: FIXME: This is different between AoE and single target. Can we combine?
-        const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
+        const baseRangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
+        let remainingRangePenalty = baseRangePenalty;
+
+        attackHeroRoller.addNumber(
+            baseRangePenalty,
+            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
+        );
 
         // PENALTY_SKILL_LEVELS (range)
         for (const pslItem of item.pslRangePenaltyOffsetItems) {
-            const pslValue = Math.min(parseInt(pslItem.system.LEVELS), -rangePenalty);
-            if (pslValue !== 0) {
-                attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels");
-            }
+            const pslOffsets = Math.min(parseInt(pslItem.system.LEVELS), -remainingRangePenalty);
+            remainingRangePenalty += pslOffsets;
+            attackHeroRoller.addNumber(pslOffsets, "Penalty Skill Levels");
         }
 
-        if (rangePenalty) {
-            attackHeroRoller.addNumber(
-                rangePenalty,
-                `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
-            );
-        }
+        // Some maneuvers have a built in RANGE value (like PSLs)
+        const maneuverRangeOffset = parseInt(item.system.RANGE || 0);
+        const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
+        remainingRangePenalty += maneuverRangeOffsets;
+        attackHeroRoller.addNumber(maneuverRangeOffsets, "Maneuver bonus");
 
         // Brace (+2 OCV only to offset the Range Modifier)
         const braceManeuver = item.actor.items.find(
             (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
         );
         if (braceManeuver) {
-            const brace = Math.min(-rangePenalty, braceManeuver.baseInfo?.maneuverDesc?.ocv);
-            if (brace > 0) {
-                attackHeroRoller.addNumber(brace, "Brace modifier");
-            }
+            const braceOffsets = Math.min(braceManeuver.baseInfo?.maneuverDesc?.ocv || 0, -remainingRangePenalty);
+            remainingRangePenalty += braceOffsets;
+            attackHeroRoller.addNumber(braceOffsets, "Brace modifier");
         }
     }
 }
