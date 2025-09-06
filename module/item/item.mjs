@@ -1126,7 +1126,7 @@ export class HeroSystem6eItem extends Item {
         // }
 
         if (!_pslPenaltyType) {
-            console.warn(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
+            console.log(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
         }
 
         return _pslPenaltyType;
@@ -3303,15 +3303,17 @@ export class HeroSystem6eItem extends Item {
         // ENDURANCERESERVE uses a POWER "modifier"
         // This can get confusing with COMPOUNDPOWERS that have POWERs.
         // uploadFromXml has been improved to remove these duplciate POWER entries as of 1/18/1025.
-        // A quick sanity check warns of this issue and removes the offending POWER from the array.
+        // A quick sanity check warns of this issue
         // There was an issue where findModsByXmlid(, "STRMINIMUM") would return the COMPOUNDPOWER instead of the RKA (Oceana Silverheart.HDC)
+        // Looks like HeroDesigner will sometimes reuse ID when you copy/paste a power.  Consider remapping dup ID's during upload.
         let powersList = this.system.POWER || [];
         try {
-            for (let p of powersList) {
-                const childDuplicate = this.childItems.find((c) => c.system.ID === p.ID);
-                if (childDuplicate) {
+            for (let power2 of powersList) {
+                const childDuplicateItem = this.childItems.find((c) => c.system.ID === power2.ID);
+                if (childDuplicateItem) {
                     console.warn(
-                        `${this.actor.name}:${p.ALIAS} is an ITEM (${this.name}). It also has a POWER modifier entry that shouldn't be there. The offending POWER modifier has been temporarily removed and should not cause any issues. Re-uploading the HDC file should resolve this issue.`,
+                        `${this.actor.name}/${power2.XMLID}/${power2.ALIAS} has ID (${power2.ID}) ` +
+                            `which may conflict with ${childDuplicateItem.system.XMLID}/${childDuplicateItem.name}`,
                     );
                     this.system.POWER = powersList.filter((p) => !this.childItems.find((c) => c.system.ID === p.ID));
                 }
@@ -4506,7 +4508,7 @@ export class HeroSystem6eItem extends Item {
 
                     const maxCharges = parseInt(modifier.OPTION_ALIAS);
                     if (maxCharges !== parseInt(system.charges?.max)) {
-                        console.warn(
+                        console.log(
                             `CHARGES mismatch ${item.actor?.name}:${item.name} is it ${maxCharges} or ${parseInt(system.charges?.max)}. Check parent ${item.parentItem?.name}.`,
                             item,
                         );
