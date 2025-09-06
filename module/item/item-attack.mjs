@@ -4319,7 +4319,7 @@ async function spendResourcesToUse(
                 if (canSpendCharges) {
                     const startingCharges = parseInt(usage.item.system.charges?.value || 0);
 
-                    await item.update({ "system.charges.value": startingCharges - chargesToSpend });
+                    await usage.item.update({ "system.charges.value": startingCharges - chargesToSpend });
                 }
             });
     }
