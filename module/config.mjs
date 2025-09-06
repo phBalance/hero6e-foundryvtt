@@ -14,6 +14,7 @@ import {
     maneuverBaseEffectDicePartsBundle,
     maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
+import { HeroSystem6eItem } from "./item/item.mjs";
 
 export const HERO = { heroDice, cache: HeroSystemGenericSharedCache };
 
@@ -5418,8 +5419,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["to-hit"],
             perceivability: "obvious",
             costPerLevel: function (item) {
+                if (!(item instanceof HeroSystem6eItem)) {
+                    console.error(`${item.name} is not a HeroSystem6eItem`, item);
+                }
                 const is5e = item.is5e;
-                switch (item.system.OPTIONID) {
+                switch (item.system?.OPTIONID) {
                     case "SIGHTGROUP":
                         return is5e ? 10 : 5; // Targeting sense gruop
                     case "HEARINGGROUP":
@@ -5429,7 +5433,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     case "TOUCHGROUP":
                         return is5e ? 5 : 3; // Non-targeting sense group
                     default:
-                        console.error(`DARKNESS OPTIONID ${item.system.OPTIONID} is not handled`);
+                        console.error(`DARKNESS OPTIONID ${item.system?.OPTIONID} is not handled`);
                 }
                 return is5e ? 10 : 5;
             },

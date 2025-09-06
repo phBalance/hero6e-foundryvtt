@@ -1111,13 +1111,13 @@ export class HeroSystem6eItem extends Item {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
         //5e uses INPUT.  6e uses OPTION_ALIAS (free text)
-        if (this.system.OPTION_ALIAS.match(/range/i) || this.system.INPUT.match(/range/i)) {
+        if (this.system.OPTION_ALIAS?.match(/range/i) || this.system.INPUT?.match(/range/i)) {
             return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range;
-        } else if (this.system.OPTION_ALIAS.match(/location/i) || this.system.INPUT.match(/location/i)) {
+        } else if (this.system.OPTION_ALIAS?.match(/location/i) || this.system.INPUT?.match(/location/i)) {
             return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.hitLocation;
-        } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+        } else if (this.system.OPTION_ALIAS?.match(/encumbrance/i) && this.system.OPTIONID?.includes("DCV")) {
             return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.encumbrance;
-        } else if (this.system.OPTION_ALIAS.match(/throwing/i) || this.system.INPUT.match(/throwing/i)) {
+        } else if (this.system.OPTION_ALIAS?.match(/throwing/i) || this.system.INPUT?.match(/throwing/i)) {
             return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.throwing;
         }
 
