@@ -1111,9 +1111,9 @@ export class HeroSystem6eItem extends Item {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
         //5e uses INPUT.  6e uses OPTION_ALIAS (free text)
-        const _pslPenaltyType = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES).find((o) =>
-            (this.system.OPTION_ALIAS + this.system.INPUT).toLocaleLowerCase().includes(o),
-        );
+        const _pslPenaltyType = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
+            .map((psl) => psl.toLowerCase())
+            .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
 
         // if (this.system.OPTION_ALIAS?.match(/range/i) || this.system.INPUT?.match(/range/i)) {
         //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range;
