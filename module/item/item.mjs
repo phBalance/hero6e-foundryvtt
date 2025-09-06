@@ -4330,16 +4330,28 @@ export class HeroSystem6eItem extends Item {
                     }
                     break;
 
-                default:
-                    if (adder.ALIAS.trim()) {
-                        _adderArray.push(adder.ALIAS);
+                case "OTHER": {
+                    // ANIMAL_HANDLER
+                    _adderArray.push(`${adder.ALIAS} ${adder.INPUT}`);
+                    break;
+                }
+
+                default: {
+                    const _adder = adder.ALIAS.trim();
+                    if (_adder) {
+                        _adderArray.push(_adder);
                     }
                     break;
+                }
             }
         }
 
         if (_adderArray.length > 0) {
             switch (powerXmlId) {
+                case "ANIMAL_HANDLER":
+                    system.description += ` (${_adderArray.sort().join(", ")})`;
+                    break;
+
                 case "TRANSPORT_FAMILIARITY":
                     system.description += _adderArray.sort().join(", ");
                     break;
@@ -6046,11 +6058,15 @@ export class HeroSystem6eItem extends Item {
 
         let _cost = 0;
 
-        for (const adder of this.adders) {
-            if (this.baseInfo?.categorized && this.system.FAMILIARITY) {
-                _cost += Math.max(1, adder.cost - 1);
-            } else {
-                _cost += adder.cost;
+        if (this.baseInfo?.addersCost) {
+            _cost = this.baseInfo.addersCost(this);
+        } else {
+            for (const adder of this.adders) {
+                if (this.baseInfo?.categorized && this.system.FAMILIARITY) {
+                    _cost += Math.max(1, adder.cost - 1);
+                } else {
+                    _cost += adder.cost;
+                }
             }
         }
 

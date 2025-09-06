@@ -7,6 +7,7 @@
 - Charges are now spent correctly for weapons. [#2759](https://github.com/dmdorman/hero6e-foundryvtt/issues/2759) [#2788](https://github.com/dmdorman/hero6e-foundryvtt/issues/2788)
 - Defeated tokens now show a red KnockedOut icon or a red Dead icon depending on cause. [#2751](https://github.com/dmdorman/hero6e-foundryvtt/issues/2751)
 - Charge clips now supported. [#2758](https://github.com/dmdorman/hero6e-foundryvtt/issues/2758) [#2008](https://github.com/dmdorman/hero6e-foundryvtt/issues/2008)
+- Fix Animal Handler cost. [#2792](https://github.com/dmdorman/hero6e-foundryvtt/issues/2792)
 
 ## Version 4.1.14 20250829
 
