@@ -1,11 +1,11 @@
 # Releases
 
-## Version 4.1.15 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.15 20250906 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Defeated tokens now show a red KnockedOut icon or a red Dead icon depending on cause. [#2751](https://github.com/dmdorman/hero6e-foundryvtt/issues/2751)
 - Maneuver RANGE bonuses now supported. [#2515](https://github.com/dmdorman/hero6e-foundryvtt/issues/2515)
 - Maneuver descriptions now include maneuvers' range and DC. [#2515](https://github.com/dmdorman/hero6e-foundryvtt/issues/2515)
 - Charges are now spent correctly for weapons. [#2759](https://github.com/dmdorman/hero6e-foundryvtt/issues/2759) [#2788](https://github.com/dmdorman/hero6e-foundryvtt/issues/2788)
-- Defeated tokens now show a red KnockedOut icon or a red Dead icon depending on cause. [#2751](https://github.com/dmdorman/hero6e-foundryvtt/issues/2751)
 - Charge clips now supported. [#2758](https://github.com/dmdorman/hero6e-foundryvtt/issues/2758) [#2008](https://github.com/dmdorman/hero6e-foundryvtt/issues/2008)
 - Fix Animal Handler cost. [#2792](https://github.com/dmdorman/hero6e-foundryvtt/issues/2792)
 

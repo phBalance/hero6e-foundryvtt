@@ -360,15 +360,15 @@ HERO.mindScanChoices = [
     },
 ];
 
-HERO.PENALTY_SKILL_LEVELS_TYPES = {
+HERO.PENALTY_SKILL_LEVELS_TYPES = Object.freeze({
     // Range Skill Levels (RSLs), which off set the
-    // Range Modifi er (they have no value at pointblank
+    // Range Modifier (they have no value at pointblank
     // range)
     range: "range",
 
     // Targeting Skill Levels, which off set the penalty
     // for targeting any and all Hit Locations
-    hitLocation: "hitLocation",
+    location: "hitLocation",
 
     // Encumbrance
     encumbrance: "encumbrance",
@@ -382,7 +382,7 @@ HERO.PENALTY_SKILL_LEVELS_TYPES = {
 
     // armor penalties to DCV
     armor: "armor",
-};
+});
 
 // TODO: This could be created from powers.
 HERO.movementPowers = Object.freeze({
