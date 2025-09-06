@@ -360,9 +360,27 @@ HERO.mindScanChoices = [
 ];
 
 HERO.PENALTY_SKILL_LEVELS_TYPES = {
+    // Range Skill Levels (RSLs), which off set the
+    // Range Modifi er (they have no value at pointblank
+    // range)
     range: "range",
+
+    // Targeting Skill Levels, which off set the penalty
+    // for targeting any and all Hit Locations
     hitLocation: "hitLocation",
+
+    // Encumbrance
     encumbrance: "encumbrance",
+
+    // fighting underwater
+    underwater: "underwater",
+
+    // Targeting Skill Levels, which off set the penalty
+    // for targeting any and all Hit Locations
+    throwing: "throwing",
+
+    // armor penalties to DCV
+    armor: "armor",
 };
 
 // TODO: This could be created from powers.
@@ -3324,16 +3342,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Penalty Type
                 if (!item.pslPenaltyType) {
                     validations.push({
-                        property: "OPTION_ALIAS",
-                        message: `Expecting one of these values [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
+                        property: item.is5e ? "INPUT" : "OPTION_ALIAS",
+                        message: `Expecting one of these words [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
                         example: `to offset range penalty OCV modifier with any single attack`,
                     });
                 }
 
                 // Attack specified
                 if (item.system.OPTIONID !== "ALL") {
-                    item.system.ADDER ??= [];
-                    const firstValidAttack = item.system.ADDER.find(
+                    //item.system.ADDER ??= [];
+                    const firstValidAttack = item.adders.find(
                         (adder) =>
                             adder.ALIAS &&
                             item.actor?.items.find(
@@ -3342,6 +3360,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     );
                     if (!firstValidAttack) {
                         validations.push({
+                            property: "AttacksIncluded",
                             message: `Expecting one or more custom adders with names matching specific attacks this PSL works with.`,
                         });
                     }
