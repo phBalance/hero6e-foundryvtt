@@ -366,7 +366,7 @@ export class HeroSystem6eItem extends Item {
         this.setAttack();
         this.buildRangeParameters();
         this.setAoeModifier();
-        this.setCombatSkillLevels();
+        //this.setCombatSkillLevels();
         this.updateItemDescription();
 
         // Preparing for HeroSystem6eItemTypeDataModel
@@ -806,9 +806,7 @@ export class HeroSystem6eItem extends Item {
         window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
     }
 
-    setCombatSkillLevels() {
-        const startDate = Date.now();
-
+    async setCombatSkillLevels() {
         if (this.system.XMLID == "COMBAT_LEVELS") {
             // Make sure CSLs are defined; but don't override them if they are already present
             this.system.csl ??= {};
@@ -1026,6 +1024,10 @@ export class HeroSystem6eItem extends Item {
                         this.system.ADDER ??= [];
                         this.system.ADDER.push(newAdder);
                         count++;
+
+                        if (this.id) {
+                            await this.update({ [`system.ADDER`]: this.system.ADDER });
+                        }
                     }
                 }
             } else {
@@ -1066,9 +1068,6 @@ export class HeroSystem6eItem extends Item {
             //     );
             // }
         }
-
-        window.prepareData.setCombatSkillLevels =
-            (window.prepareData.setCombatSkillLevels || 0) + (Date.now() - startDate);
     }
 
     setAoeModifier() {
@@ -1111,15 +1110,18 @@ export class HeroSystem6eItem extends Item {
     get pslPenaltyType() {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
-        if (this.system.OPTION_ALIAS.match(/range/i)) {
+        //5e uses INPUT.  6e uses OPTION_ALIAS (free text)
+        if (this.system.OPTION_ALIAS.match(/range/i) || this.system.INPUT.match(/range/i)) {
             return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range;
-        } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+        } else if (this.system.OPTION_ALIAS.match(/location/i) || this.system.INPUT.match(/location/i)) {
             return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.hitLocation;
         } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
             return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.encumbrance;
+        } else if (this.system.OPTION_ALIAS.match(/throwing/i) || this.system.INPUT.match(/throwing/i)) {
+            return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.throwing;
         }
 
-        console.warn(`Unknown PSL type "${this.system.OPTION_ALIAS}"`, this);
+        console.warn(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
 
         return null;
     }
@@ -1370,6 +1372,16 @@ export class HeroSystem6eItem extends Item {
                     token.renderFlags.set({ refreshVisibility: true });
                 }
             }
+        }
+
+        if (changed.system.ADDER) {
+            HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
+        }
+        if (changed.system.MODIFIER) {
+            HeroSystem6eItem._modifiersCache.invalidateCachedValue(this.id);
+        }
+        if (changed.system.POWER) {
+            HeroSystem6eItem._powersCache.invalidateCachedValue(this.id);
         }
     }
 
@@ -2957,7 +2969,7 @@ export class HeroSystem6eItem extends Item {
             // Adding this back in (was only called in prepareData).
             // Needed for when we add/remove attacks as we need to update CSLs.
             // TODO: move this into Actor addEmbeddedItems or similar
-            this.setCombatSkillLevels();
+            await this.setCombatSkillLevels();
 
             // Progress Bar (plan to deprecate)
             if (options?.uploadProgressBar) {

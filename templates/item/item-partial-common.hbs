@@ -28,8 +28,15 @@
 {{/unless}}
 
 {{#if (isdefined system.INPUT)}}
-<div class="form-group">
-    <label>INPUT</label>
+<div class="form-group {{#if (itemHeroValidationForProperty this.item "INPUT")}}validation{{/if}}" 
+    title="{{itemHeroValidationForProperty this.item "INPUT"}}"
+    >
+    <label>
+        INPUT
+        {{#if (itemHeroValidationForProperty this.item "INPUT")}}
+            <i class="fa-regular fa-circle-exclamation"></i>
+        {{/if}}
+</label>
     <input type="text" name="system.INPUT" value="{{system.INPUT}}" data-dtype="text" />
 </div>
 {{/if}}
@@ -48,7 +55,9 @@
         <input disabled type="text" value="{{system.OPTIONID}}" data-dtype="text" />
         </div>
 
-        <div class="form-group {{#if (itemHeroValidationForProperty this.item "OPTION_ALIAS")}}validation{{/if}}" title="{{itemHeroValidationForProperty this.item "OPTION_ALIAS"}}">
+        <div class="form-group {{#if (itemHeroValidationForProperty this.item "OPTION_ALIAS")}}validation{{/if}}" 
+            title="{{itemHeroValidationForProperty this.item "OPTION_ALIAS"}}"
+            >
             <label>
                 OPTION_ALIAS
                 {{#if (itemHeroValidationForProperty this.item "OPTION_ALIAS")}}
@@ -85,8 +94,14 @@
 
 {{! editOptions.showAttacks}}
 {{#if (and attacks (ne system.OPTIONID "ALL"))}}
-<div class="form-group">
-    <label>Attacks Included:</label>
+<div class="form-group {{#if (itemHeroValidationForProperty this.item "AttacksIncluded")}}validation{{/if}}"
+    title="{{itemHeroValidationForProperty this.item "AttacksIncluded"}}">
+    <label>
+        Attacks Included:
+        {{#if (itemHeroValidationForProperty this.item "AttacksIncluded")}}
+            <i class="fa-regular fa-circle-exclamation"></i>
+        {{/if}}
+    </label>
     <div class="form-fields csl-attack-list">
         <ul>
             {{#each attacks }}
