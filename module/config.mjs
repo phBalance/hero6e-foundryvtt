@@ -2466,10 +2466,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             cost: function (skill) {
-                if (!skill?.system?.ADDER || skill.system.ADDER.length === 0) {
-                    return 3;
+                // 6e Cost: 2 Character Points for a category,
+                // +1 point for each additional category;
+                // +1 to roll with all categories per +2 points
+                const categories = skill.adders.filter((a) => a.XMLID !== "ADDER");
+                const levels = parseInt(skill.system.LEVELS);
+                if (categories.length === 0) {
+                    return 3 + this.costPerLevel() * levels;
                 }
-                return 2 + skill.system.ADDER.length - 1;
+                return this.costPerLevel() * levels;
+            },
+            addersCost: function (skill) {
+                const categories = skill.adders.filter((a) => a.XMLID !== "ADDER");
+                const customAdders = skill.adders.filter((a) => a.XMLID === "ADDER");
+                if (categories.length === 0) {
+                    return 0;
+                }
+                let _cost = categories.length + 1;
+                for (const adder of customAdders) {
+                    _cost += adder.cost;
+                }
+                return _cost;
             },
             xml: `<SKILL XMLID="ANIMAL_HANDLER" ID="1709161473096" BASECOST="0.0" LEVELS="0" ALIAS="Animal Handler" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" />`,
         },
