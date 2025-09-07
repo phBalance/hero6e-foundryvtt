@@ -1380,13 +1380,13 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (changed.system.ADDER) {
+        if (changed.system?.ADDER) {
             HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
-        if (changed.system.MODIFIER) {
+        if (changed.system?.MODIFIER) {
             HeroSystem6eItem._modifiersCache.invalidateCachedValue(this.id);
         }
-        if (changed.system.POWER) {
+        if (changed.system?.POWER) {
             HeroSystem6eItem._powersCache.invalidateCachedValue(this.id);
         }
     }
