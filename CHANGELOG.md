@@ -2,7 +2,7 @@
 
 ## Version 4.1.16 So far...
 
-- Fix for power fail to toggle. [#2805](https://github.com/dmdorman/hero6e-foundryvtt/issues/2805)
+- Fix for powers fail to toggle. [#2805](https://github.com/dmdorman/hero6e-foundryvtt/issues/2805)
 - Fix for improper NaN- roll for characteristics purchased as a power [#2777](https://github.com/dmdorman/hero6e-foundryvtt/issues/2777)
 
 ## Version 4.1.15 20250906 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
