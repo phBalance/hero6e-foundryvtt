@@ -2080,6 +2080,7 @@ export class HeroSystem6eActor extends Actor {
             sortBase += 1000;
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
+                    system.is5e === this.is5e;
                     if (system.XMLID === "COMPOUNDPOWER") {
                         for (const _modifier of system.MODIFIER || []) {
                             console.warn(
@@ -2099,7 +2100,7 @@ export class HeroSystem6eActor extends Actor {
                     const itemData = {
                         name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                         type: itemTag.toLowerCase().replace(/s$/, ""),
-                        system: { ...system, is5e: this.is5e },
+                        system,
                         sort: sortBase + parseInt(system.POSITION || 0),
                     };
 
