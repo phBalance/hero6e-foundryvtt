@@ -54,16 +54,6 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 import { HeroSystem6eModifier } from "./modifier.mjs";
 import { HeroSystem6eConnectingPower } from "./connectingPower.mjs";
-import {
-    HeroSystem6eItemPower,
-    HeroSystem6eItemEquipment,
-    HeroSystem6eItemPerk,
-    HeroSystem6eItemSkill,
-    HeroSystem6eItemManeuver,
-    HeroSystem6eItemTalent,
-    HeroSystem6eItemMartialArt,
-    HeroSystem6eItemDisadvantage,
-} from "./HeroSystem6eItemTypeDataModel.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -368,95 +358,6 @@ export class HeroSystem6eItem extends Item {
         this.setAoeModifier();
         //this.setCombatSkillLevels();
         this.updateItemDescription();
-
-        // Preparing for HeroSystem6eItemTypeDataModel
-        for (const key of Object.keys(this.system).filter((o) => o.match(/^[A-Z]+$/))) {
-            switch (this.type) {
-                case "power":
-                    if (!HeroSystem6eItemPower.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemPower ??= new Set();
-                        window.prepareData.HeroSystem6eItemPower.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-                case "equipment":
-                    if (!HeroSystem6eItemEquipment.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemEquipment ??= new Set();
-                        window.prepareData.HeroSystem6eItemEquipment.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-                case "skill":
-                    if (!HeroSystem6eItemSkill.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemSkill ??= new Set();
-                        window.prepareData.HeroSystem6eItemSkill.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-                case "perk":
-                    if (!HeroSystem6eItemPerk.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemPerk ??= new Set();
-                        window.prepareData.HeroSystem6eItemPerk.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-                case "maneuver":
-                    if (!HeroSystem6eItemManeuver.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemManeuver ??= new Set();
-                        window.prepareData.HeroSystem6eItemManeuver.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-
-                case "talent":
-                    if (!HeroSystem6eItemTalent.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemTalant ??= new Set();
-                        window.prepareData.HeroSystem6eItemTalant.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-                case "martialart":
-                    if (!HeroSystem6eItemMartialArt.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemMartialArt ??= new Set();
-                        window.prepareData.HeroSystem6eItemMartialArt.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-                case "disadvantage":
-                    if (!HeroSystem6eItemDisadvantage.schema.fields[key]) {
-                        window.prepareData.HeroSystem6eItemDisadvantage ??= new Set();
-                        window.prepareData.HeroSystem6eItemDisadvantage.add(key);
-                        console.error(`Need to add ${key} to ${this.type} data model`);
-                    }
-                    break;
-
-                case "complication":
-                case "attack":
-                    // These types are no longer supported
-                    break;
-
-                default:
-                    console.error(`Unknown item type ${this.type}`);
-            }
-        }
-
-        window.prepareData.HeroSystem6eItemCommon = function () {
-            const common = [];
-            for (const key of window.prepareData.HeroSystem6eItemPower) {
-                if (
-                    window.prepareData.HeroSystem6eItemPower.has(key) &&
-                    window.prepareData.HeroSystem6eItemEquipment.has(key) &&
-                    window.prepareData.HeroSystem6eItemSkill.has(key) &&
-                    window.prepareData.HeroSystem6eItemPerk.has(key) &&
-                    window.prepareData.HeroSystem6eItemTalant.has(key) &&
-                    window.prepareData.HeroSystem6eItemMartialArt.has(key) &&
-                    window.prepareData.HeroSystem6eItemDisadvantage.has(key)
-                ) {
-                    common.push(key);
-                }
-            }
-            return common;
-        };
     }
 
     async setActiveEffects() {
@@ -1380,13 +1281,13 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (changed.system.ADDER) {
+        if (changed.system?.ADDER) {
             HeroSystem6eItem._addersCache.invalidateCachedValue(this.id);
         }
-        if (changed.system.MODIFIER) {
+        if (changed.system?.MODIFIER) {
             HeroSystem6eItem._modifiersCache.invalidateCachedValue(this.id);
         }
-        if (changed.system.POWER) {
+        if (changed.system?.POWER) {
             HeroSystem6eItem._powersCache.invalidateCachedValue(this.id);
         }
     }
