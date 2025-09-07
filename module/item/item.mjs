@@ -54,16 +54,6 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroSystem6eAdder } from "./adder.mjs";
 import { HeroSystem6eModifier } from "./modifier.mjs";
 import { HeroSystem6eConnectingPower } from "./connectingPower.mjs";
-import {
-    HeroSystem6eItemPower,
-    HeroSystem6eItemEquipment,
-    HeroSystem6eItemPerk,
-    HeroSystem6eItemSkill,
-    HeroSystem6eItemManeuver,
-    HeroSystem6eItemTalent,
-    HeroSystem6eItemMartialArt,
-    HeroSystem6eItemDisadvantage,
-} from "./HeroSystem6eItemTypeDataModel.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
