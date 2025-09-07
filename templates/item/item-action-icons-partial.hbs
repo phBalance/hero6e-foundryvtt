@@ -4,9 +4,14 @@
     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
 {{else}}
     {{#if (itemHasBehaviours this "roll" "success")}}
-        <button type="button" class="item-rollable" data-roll="{{this.system.roll}}" data-label="{{this._id}}">
-            {{numberFormat this.system.roll decimals=0 sign=false}}-
-        </button>
+        {{#if this.system.roll}}
+            <button type="button" class="item-rollable" data-roll="{{this.system.roll}}" data-label="{{this._id}}">
+                {{numberFormat this.system.roll decimals=0 sign=false}}-
+            </button>
+        {{else}}
+            {{log 'missing roll' this}}
+        {{/if}}
+        
     {{/if}}
 
     {{#if (itemHasActionBehavior this "to-hit")}}
