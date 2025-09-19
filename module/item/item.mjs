@@ -356,11 +356,16 @@ export class HeroSystem6eItem extends Item {
         this.setAttack();
         this.buildRangeParameters();
         this.setAoeModifier();
-        this.setCombatSkillLevels();
+        //this.setCombatSkillLevels(); // part of postUpload (Aaron plans to change this)
         this.updateItemDescription();
     }
 
     async setActiveEffects() {
+        if (!game.actors.get(this.actor.id)) {
+            console.error(`${this.actor.name} is not in the actors collection. Skipped setActiveEffects`);
+            return;
+        }
+
         // ACTIVE EFFECTS
         if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
@@ -707,7 +712,7 @@ export class HeroSystem6eItem extends Item {
         window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
     }
 
-    setCombatSkillLevels() {
+    async setCombatSkillLevels() {
         if (this.system.XMLID == "COMBAT_LEVELS") {
             // Make sure CSLs are defined; but don't override them if they are already present
             this.system.csl ??= {};
@@ -928,9 +933,9 @@ export class HeroSystem6eItem extends Item {
 
                         // Aaron is reworking this to avoid database stuff in dataModel branch 9/18/2025 #2830
                         // Aaron also plans to remove this function and remove need to call in prepareData
-                        // if (this.id) {
-                        //     await this.update({ [`system.ADDER`]: this.system.ADDER });
-                        // }
+                        if (this.id) {
+                            await this.update({ [`system.ADDER`]: this.system.ADDER });
+                        }
                     }
                 }
             } else {
@@ -2878,7 +2883,11 @@ export class HeroSystem6eItem extends Item {
             // Adding this back in (was only called in prepareData).
             // Needed for when we add/remove attacks as we need to update CSLs.
             // TODO: move this into Actor addEmbeddedItems or similar
-            await this.setCombatSkillLevels();
+            try {
+                await this.setCombatSkillLevels();
+            } catch (e) {
+                console.error(e);
+            }
 
             // Progress Bar (plan to deprecate)
             if (options?.uploadProgressBar) {
@@ -2888,9 +2897,19 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            await this.setActiveEffects();
+            try {
+                await this.setActiveEffects();
+            } catch (e) {
+                console.error(e);
+                debugger;
+                await this.setActiveEffects();
+            }
 
-            this._postUploadDetails(options);
+            try {
+                this._postUploadDetails(options);
+            } catch (e) {
+                console.error(e);
+            }
 
             return true;
         } catch (error) {
