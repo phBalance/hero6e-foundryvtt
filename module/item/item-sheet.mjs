@@ -183,39 +183,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 data.reduces = reduces ? reduces.split(",").map((target) => target.toUpperCase().trim()) : [];
             }
 
-            // Combat Skill Levels & Mental Combat Levels
-            if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
-                let _ocv = "ocv";
-                let _dcv = "dcv";
-                if (this.item.system.XMLID === "MENTAL_COMBAT_LEVELS") {
-                    _ocv = "omcv";
-                    _dcv = "dmcv";
-                }
-                data.cslChoices = { [_ocv]: _ocv };
-                if (this.item.system.OPTION != "SINGLE") {
-                    data.cslChoices[_dcv] = _dcv;
-                    data.cslChoices.dc = "dc";
-                }
-
-                // Make sure CSL's are defined
-                if (!item.system.csl) {
-                    item.system.csl = {};
-                    for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
-                        item.system.csl[c] = _ocv;
-                    }
-                    item.update({ "system.csl": item.system.csl });
-                }
-
-                // CSL radioBoxes names
-                data.csl = [];
-                for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
-                    data.csl.push({
-                        name: `system.csl.${c}`,
-                        value: item.system.csl[c],
-                    });
-                }
-            }
-
             if (configPowerInfo?.editOptions?.showAttacks) {
                 // Enumerate attacks
                 data.attacks = [];
