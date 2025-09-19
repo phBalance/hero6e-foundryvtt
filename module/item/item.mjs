@@ -6082,8 +6082,15 @@ export class HeroSystem6eItem extends Item {
         let _cost = 0;
 
         for (const advantage of this.advantages) {
-            if (!advantage.baseInfo?.dcAffecting) {
-                console.warn(
+            if (!advantage.baseInfo) {
+                console.log(
+                    `${this.actor?.name}/${this.detailedName()}/${advantage.ALIAS}/${advantage.XMLID} is missing baseinfo`,
+                );
+                continue;
+            }
+
+            if (!advantage.baseInfo.dcAffecting) {
+                console.error(
                     `${this.actor?.name}/${this.detailedName()}/${advantage.ALIAS}/${advantage.XMLID} is missing dcAffecting function`,
                 );
                 continue;
