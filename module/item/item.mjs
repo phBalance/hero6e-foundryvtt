@@ -6081,8 +6081,17 @@ export class HeroSystem6eItem extends Item {
     get _advantagesAffectingDc() {
         let _cost = 0;
 
-        for (const advantage of this.advantages.filter((a) => a.baseInfo?.dcAffecting(a, this))) {
-            _cost += advantage.cost;
+        for (const advantage of this.advantages) {
+            if (!advantage.baseInfo?.dcAffecting) {
+                console.warn(
+                    `${this.actor?.name}/${this.detailedName()}/${advantage.ALIAS}/${advantage.XMLID} is missing dcAffecting function`,
+                );
+                continue;
+            }
+
+            if (advantage.baseInfo.dcAffecting(advantage, this)) {
+                _cost += advantage.cost;
+            }
         }
 
         return _cost;
