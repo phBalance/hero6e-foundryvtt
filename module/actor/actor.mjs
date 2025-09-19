@@ -2429,7 +2429,8 @@ export class HeroSystem6eActor extends Actor {
             // No image provided. Make sure we're using the default token.
             // Note we are overwriting any image that may have been there previously.
             // If they really want the image to stay, they should put it in the HDC file.
-            changes["img"] = CONST.DEFAULT_TOKEN;
+            // Don't overwrite token image #2831
+            //changes["img"] = CONST.DEFAULT_TOKEN;
         }
         uploadPerformance.image = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
