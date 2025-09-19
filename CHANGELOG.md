@@ -4,6 +4,7 @@
 
 - Fixed missing Combat Skill Level initialization and issues with OPTIONID=ALL. [#2830](https://github.com/dmdorman/hero6e-foundryvtt/issues/2830)
 - Token image is no longer overwritten during HDC upload when HDC has no image. [#2831](https://github.com/dmdorman/hero6e-foundryvtt/issues/2831)
+- Fixed issue that prevented uploading of CHANGE ENVIRONMENT with SELECTIVE TARGET. [#2828](https://github.com/dmdorman/hero6e-foundryvtt/issues/2828)
 
 ## Version 4.1.16 20250906
 
