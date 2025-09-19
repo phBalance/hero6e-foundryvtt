@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.1.16 20250906 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.17 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed missing Combat Skill Level initialization [#2830](https://github.com/dmdorman/hero6e-foundryvtt/issues/2830)
+
+## Version 4.1.16 20250906
 
 - Fix for powers fail to toggle. [#2805](https://github.com/dmdorman/hero6e-foundryvtt/issues/2805)
 - Fix for improper NaN- roll for characteristics purchased as a power [#2777](https://github.com/dmdorman/hero6e-foundryvtt/issues/2777)

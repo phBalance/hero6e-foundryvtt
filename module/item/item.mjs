@@ -356,7 +356,7 @@ export class HeroSystem6eItem extends Item {
         this.setAttack();
         this.buildRangeParameters();
         this.setAoeModifier();
-        //this.setCombatSkillLevels();
+        this.setCombatSkillLevels();
         this.updateItemDescription();
     }
 
@@ -707,7 +707,7 @@ export class HeroSystem6eItem extends Item {
         window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
     }
 
-    async setCombatSkillLevels() {
+    setCombatSkillLevels() {
         if (this.system.XMLID == "COMBAT_LEVELS") {
             // Make sure CSLs are defined; but don't override them if they are already present
             this.system.csl ??= {};
@@ -926,9 +926,11 @@ export class HeroSystem6eItem extends Item {
                         this.system.ADDER.push(newAdder);
                         count++;
 
-                        if (this.id) {
-                            await this.update({ [`system.ADDER`]: this.system.ADDER });
-                        }
+                        // Aaron is reworking this to avoid database stuff in dataModel branch 9/18/2025 #2830
+                        // Aaron also plans to remove this function and remove need to call in prepareData
+                        // if (this.id) {
+                        //     await this.update({ [`system.ADDER`]: this.system.ADDER });
+                        // }
                     }
                 }
             } else {
