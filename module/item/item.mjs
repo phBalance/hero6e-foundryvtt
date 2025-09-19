@@ -361,11 +361,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     async setActiveEffects() {
-        if (!game.actors.get(this.actor.id)) {
-            console.error(`${this.actor.name} is not in the actors collection. Skipped setActiveEffects`);
-            return;
-        }
-
         // ACTIVE EFFECTS
         if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
@@ -409,7 +404,7 @@ export class HeroSystem6eItem extends Item {
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
-            if (this.actor) {
+            if (this.actor && game.actors.get(this.actor.id)) {
                 for (const change of activeEffect.changes) {
                     await this.actor.update({
                         [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
@@ -439,11 +434,13 @@ export class HeroSystem6eItem extends Item {
                     name: activeEffect.name,
                     changes: activeEffect.changes,
                 });
-                const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
-                await this.actor.update({
-                    [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax,
-                });
+                if (this.actor && game.actors.get(this.actor.id)) {
+                    const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
+                    await this.actor.update({
+                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
+                            this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax,
+                    });
+                }
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
