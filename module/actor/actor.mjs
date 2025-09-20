@@ -2080,7 +2080,7 @@ export class HeroSystem6eActor extends Actor {
             sortBase += 1000;
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
-                    system.is5e === this.is5e;
+                    system.is5e = this.is5e;
                     if (system.XMLID === "COMPOUNDPOWER") {
                         for (const _modifier of system.MODIFIER || []) {
                             console.warn(
