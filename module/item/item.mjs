@@ -2892,12 +2892,11 @@ export class HeroSystem6eItem extends Item {
             // Adding this back in (was only called in prepareData).
             // Needed for when we add/remove attacks as we need to update CSLs.
             // TODO: move this into Actor addEmbeddedItems or similar
-            // try {
-            //     // Was await
-            //     this.setCombatSkillLevels();
-            // } catch (e) {
-            //     console.error(e);
-            // }
+            try {
+                await this.setCombatSkillLevels();
+            } catch (e) {
+                console.error(e);
+            }
 
             // Progress Bar (plan to deprecate)
             if (options?.uploadProgressBar) {
