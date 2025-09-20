@@ -729,7 +729,8 @@ export class HeroSystem6eItem extends Item {
         // Attempt default weapon selection if showAttacks is defined and there are no custom adders
         // Or the OPTIONID=ALL is specified
         if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
-            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER") || this.system.OPTIONID === "ALL") {
+            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
+                //|| this.system.OPTIONID === "ALL") {
                 let count = 0;
                 for (const attackItem of this.actor._cslItems) {
                     let addMe = false;
@@ -930,8 +931,11 @@ export class HeroSystem6eItem extends Item {
 
                         // Aaron is reworking this to avoid database stuff in dataModel branch 9/18/2025 #2830
                         // Aaron also plans to remove this function and remove need to call in prepareData
+                        // Kluge, we no longer async, call during prepareData, only need to WRITE when we edit,
+                        //  which is handled elsewhwere (item.onUpadte).
+                        // Used to be await
                         if (this.id) {
-                            await this.update({ [`system.ADDER`]: this.system.ADDER });
+                            this.update({ [`system.ADDER`]: this.system.ADDER });
                         }
                     }
                 }
@@ -950,7 +954,7 @@ export class HeroSystem6eItem extends Item {
                     }
                     if (addersChanged) {
                         // AARON: The update causes error and it seems to work without it
-                        //await this.update({ [`system.ADDER`]: this.system.ADDER });
+                        await this.update({ [`system.ADDER`]: this.system.ADDER });
                     }
                 }
             }
@@ -2199,9 +2203,17 @@ export class HeroSystem6eItem extends Item {
     get is5e() {
         if (this.system.is5e !== undefined && this.actor && this.actor.system.is5e !== this.system.is5e) {
             console.warn(
-                `${this.name} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
                 this,
             );
+        }
+
+        if (this.system.is5e === undefined) {
+            // console.warn(
+            //     `${this.name} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+            //     this,
+            // );
+            return this.actor?.is5e;
         }
         return this.system.is5e;
     }
@@ -2880,11 +2892,12 @@ export class HeroSystem6eItem extends Item {
             // Adding this back in (was only called in prepareData).
             // Needed for when we add/remove attacks as we need to update CSLs.
             // TODO: move this into Actor addEmbeddedItems or similar
-            try {
-                await this.setCombatSkillLevels();
-            } catch (e) {
-                console.error(e);
-            }
+            // try {
+            //     // Was await
+            //     this.setCombatSkillLevels();
+            // } catch (e) {
+            //     console.error(e);
+            // }
 
             // Progress Bar (plan to deprecate)
             if (options?.uploadProgressBar) {

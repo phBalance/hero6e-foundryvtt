@@ -2268,7 +2268,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("6e", async function () {
+                describe("6e SINGLE", async function () {
                     const contents = `
                         <SKILL XMLID="COMBAT_LEVELS" ID="1688944834273" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                             <NOTES />
@@ -2304,6 +2304,49 @@ export function registerUploadTests(quench) {
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 2);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "0");
+                    });
+                });
+
+                describe("6e ALL", async function () {
+                    const contents = `
+                        <SKILL XMLID="COMBAT_LEVELS" ID="1758408561924" BASECOST="0.0" LEVELS="5" ALIAS="Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <NOTES />
+                        </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Combat Skill Levels: +5 with All Attacks");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 50);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 50);
                     });
 
                     it("end", function () {
