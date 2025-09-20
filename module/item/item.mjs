@@ -2911,7 +2911,6 @@ export class HeroSystem6eItem extends Item {
                 await this.setActiveEffects();
             } catch (e) {
                 console.error(e);
-                debugger;
                 await this.setActiveEffects();
             }
 
