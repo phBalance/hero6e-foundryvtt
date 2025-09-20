@@ -356,7 +356,7 @@ export class HeroSystem6eItem extends Item {
         this.setAttack();
         this.buildRangeParameters();
         this.setAoeModifier();
-        this.setCombatSkillLevels();
+        //this.setCombatSkillLevels(); // part of postUpload (Aaron plans to change this)
         this.updateItemDescription();
     }
 
@@ -404,7 +404,7 @@ export class HeroSystem6eItem extends Item {
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
-            if (this.actor) {
+            if (this.actor && game.actors.get(this.actor.id)) {
                 for (const change of activeEffect.changes) {
                     await this.actor.update({
                         [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
@@ -434,11 +434,13 @@ export class HeroSystem6eItem extends Item {
                     name: activeEffect.name,
                     changes: activeEffect.changes,
                 });
-                const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
-                await this.actor.update({
-                    [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax,
-                });
+                if (this.actor && game.actors.get(this.actor.id)) {
+                    const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
+                    await this.actor.update({
+                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
+                            this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax,
+                    });
+                }
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
@@ -707,7 +709,7 @@ export class HeroSystem6eItem extends Item {
         window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
     }
 
-    setCombatSkillLevels() {
+    async setCombatSkillLevels() {
         if (this.system.XMLID == "COMBAT_LEVELS") {
             // Make sure CSLs are defined; but don't override them if they are already present
             this.system.csl ??= {};
@@ -727,7 +729,8 @@ export class HeroSystem6eItem extends Item {
         // Attempt default weapon selection if showAttacks is defined and there are no custom adders
         // Or the OPTIONID=ALL is specified
         if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
-            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER") || this.system.OPTIONID === "ALL") {
+            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
+                //|| this.system.OPTIONID === "ALL") {
                 let count = 0;
                 for (const attackItem of this.actor._cslItems) {
                     let addMe = false;
@@ -928,9 +931,12 @@ export class HeroSystem6eItem extends Item {
 
                         // Aaron is reworking this to avoid database stuff in dataModel branch 9/18/2025 #2830
                         // Aaron also plans to remove this function and remove need to call in prepareData
-                        // if (this.id) {
-                        //     await this.update({ [`system.ADDER`]: this.system.ADDER });
-                        // }
+                        // Kluge, we no longer async, call during prepareData, only need to WRITE when we edit,
+                        //  which is handled elsewhwere (item.onUpadte).
+                        // Used to be await
+                        if (this.id) {
+                            this.update({ [`system.ADDER`]: this.system.ADDER });
+                        }
                     }
                 }
             } else {
@@ -948,7 +954,7 @@ export class HeroSystem6eItem extends Item {
                     }
                     if (addersChanged) {
                         // AARON: The update causes error and it seems to work without it
-                        //await this.update({ [`system.ADDER`]: this.system.ADDER });
+                        await this.update({ [`system.ADDER`]: this.system.ADDER });
                     }
                 }
             }
@@ -2197,9 +2203,17 @@ export class HeroSystem6eItem extends Item {
     get is5e() {
         if (this.system.is5e !== undefined && this.actor && this.actor.system.is5e !== this.system.is5e) {
             console.warn(
-                `${this.name} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
                 this,
             );
+        }
+
+        if (this.system.is5e === undefined) {
+            // console.warn(
+            //     `${this.name} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+            //     this,
+            // );
+            return this.actor?.is5e;
         }
         return this.system.is5e;
     }
@@ -2878,7 +2892,11 @@ export class HeroSystem6eItem extends Item {
             // Adding this back in (was only called in prepareData).
             // Needed for when we add/remove attacks as we need to update CSLs.
             // TODO: move this into Actor addEmbeddedItems or similar
-            await this.setCombatSkillLevels();
+            try {
+                await this.setCombatSkillLevels();
+            } catch (e) {
+                console.error(e);
+            }
 
             // Progress Bar (plan to deprecate)
             if (options?.uploadProgressBar) {
@@ -2888,9 +2906,18 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            await this.setActiveEffects();
+            try {
+                await this.setActiveEffects();
+            } catch (e) {
+                console.error(e);
+                await this.setActiveEffects();
+            }
 
-            this._postUploadDetails(options);
+            try {
+                this._postUploadDetails(options);
+            } catch (e) {
+                console.error(e);
+            }
 
             return true;
         } catch (error) {

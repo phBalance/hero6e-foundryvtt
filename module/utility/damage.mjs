@@ -24,12 +24,11 @@ export function combatSkillLevelsForAttack(item) {
     const cslSkills = item.actor.items.filter(
         (o) =>
             ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) &&
-            (o.system.OPTIONID === "ALL" ||
-                o.adders.find((adder) =>
-                    adder.targetId
-                        ? adder.targetId === originalItemId // originalItem?.id
-                        : adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name,
-                )) &&
+            o.adders.find((adder) =>
+                adder.targetId
+                    ? adder.targetId === originalItemId // originalItem?.id
+                    : adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name,
+            ) &&
             o.isActive != false,
     );
     window.prepareData.combatSkillLevelsForAttackFilter =
