@@ -6244,7 +6244,7 @@ export function registerFullTests(quench) {
                 });
             });
 
-            describe.only("Strike with Combat Skill Levels All 6e", function () {
+            describe("Strike with Combat Skill Levels All 6e", function () {
                 const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
