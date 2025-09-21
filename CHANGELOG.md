@@ -1,8 +1,8 @@
 # Releases
 
-## Version 4.1.17 20250918 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.1.17 20250921 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Fixed missing Combat Skill Level initialization and issues with OPTIONID=ALL. [#2830](https://github.com/dmdorman/hero6e-foundryvtt/issues/2830)
+- Fixed missing Combat Skill Level settings. [#2830](https://github.com/dmdorman/hero6e-foundryvtt/issues/2830)
 - You are prompted before clearing an existing token image during HDC uploads that have no image in the HDC file. [#2831](https://github.com/dmdorman/hero6e-foundryvtt/issues/2831)
 - Fixed issue that prevented uploading of CHANGE ENVIRONMENT with SELECTIVE TARGET. [#2828](https://github.com/dmdorman/hero6e-foundryvtt/issues/2828)
 - Improved support for dragging actors from compendium into scene or actor sidebaar. [#2573](https://github.com/dmdorman/hero6e-foundryvtt/issues/2573)
