@@ -2624,7 +2624,6 @@ export class HeroSystem6eActor extends Actor {
         if (this.id) {
             const itemsToDelete = this.items.filter(
                 (item) =>
-                    item.system.ID &&
                     !itemsToUpdate.find((o) => item.id === o._id) &&
                     !itemsToCreate.find((p) => item.system.ID === p.system.ID),
             );
