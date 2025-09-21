@@ -2080,7 +2080,7 @@ export class HeroSystem6eActor extends Actor {
             sortBase += 1000;
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
-                    system.is5e === this.is5e;
+                    system.is5e = this.is5e;
                     if (system.XMLID === "COMPOUNDPOWER") {
                         for (const _modifier of system.MODIFIER || []) {
                             console.warn(
@@ -2407,16 +2407,16 @@ export class HeroSystem6eActor extends Actor {
                         const forgeUser = (await ForgeAPI.status()).user;
                         relativePathName = `https://assets.forge-vtt.com/${forgeUser}/${relativePathName}`;
                     }
-
-                    // Update any tokens images that might exist
-                    for (const token of this.getActiveTokens()) {
-                        await token.document.update({
-                            "texture.src": relativePathName,
-                        });
-                    }
                 }
 
                 changes["img"] = relativePathName;
+
+                // Update any tokens images that might exist
+                for (const token of this.getActiveTokens()) {
+                    await token.document.update({
+                        "texture.src": relativePathName,
+                    });
+                }
             } catch (e) {
                 console.error(e);
                 ui.notifications.warn(
@@ -2429,9 +2429,41 @@ export class HeroSystem6eActor extends Actor {
             // No image provided. Make sure we're using the default token.
             // Note we are overwriting any image that may have been there previously.
             // If they really want the image to stay, they should put it in the HDC file.
-            // Don't overwrite token image #2831
-            //changes["img"] = CONST.DEFAULT_TOKEN;
+            // Prompt before overwriting token image #2831
+
+            if (this.img !== CONST.DEFAULT_TOKEN) {
+                new foundry.applications.api.DialogV2({
+                    window: { title: "Choose token image" },
+                    content: `
+                    <p>This HDC file does not include an image.</p>
+                    <p>Do you want to keep the existing token image or clear the image (${CONST.DEFAULT_TOKEN})?</p>`,
+                    buttons: [
+                        {
+                            action: "keepImage",
+                            label: "Keep Existing Image",
+                            default: true,
+                        },
+                        {
+                            action: "defaultImage",
+                            label: "Clear",
+                            callback: async () => {
+                                await this.update({ ["img"]: CONST.DEFAULT_TOKEN });
+                                // Update any tokens images that might exist
+                                for (const token of this.getActiveTokens()) {
+                                    await token.document.update({
+                                        "texture.src": CONST.DEFAULT_TOKEN,
+                                    });
+                                }
+                            },
+                        },
+                    ],
+                    submit: (result) => {
+                        console.log(`User picked option: ${result}`);
+                    },
+                }).render({ force: true });
+            }
         }
+
         uploadPerformance.image = new Date().getTime() - uploadPerformance._d;
         uploadPerformance._d = new Date().getTime();
 
