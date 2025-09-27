@@ -1176,6 +1176,10 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
         return null;
     }
 
+    get description() {
+        return `${this.LEVELS} ${this.baseInfo?.name}`;
+    }
+
     debugModelProps() {
         try {
             if (this._hdcXml) {
