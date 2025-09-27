@@ -63,8 +63,8 @@
                         {{#if (and (eq @root/system.is5e true) (includes characteristic.baseInfo.behaviors "figured"))}}
                             {{ figured5eCharacteristic actor characteristic}}
                         {{else}}
-                            {{#if characteristic.baseInfo.base}}
-                                {{characteristic.baseInfo.base}}
+                            {{#if characteristic.baseInfo}}
+                                {{characteristic.base}}
                             {{/if}}
                         {{/if}}
                     {{/if}}

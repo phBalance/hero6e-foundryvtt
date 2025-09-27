@@ -194,10 +194,13 @@ Hooks.once("init", async function () {
     });
 
     Object.assign(CONFIG.Actor.dataModels, {
+        ai: HeroActorModel,
         automaton: HeroActorModel,
+        base2: HeroActorModel,
         computer: HeroActorModel,
         pc: HeroActorModel,
         npc: HeroActorModel,
+        vehicle: HeroActorModel,
     });
 
     Object.assign(CONFIG.Item.dataModels, {

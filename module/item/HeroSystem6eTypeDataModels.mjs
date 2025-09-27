@@ -1222,34 +1222,23 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
                     );
                 }
             }
-            return parseInt(this.item?.LEVELS || 0) + this.baseInfo?.base || 0;
+            return parseInt(this.item?.LEVELS || 0) + this.base;
         } catch (e) {
             console.error(e);
         }
         return 0;
     }
-    // set core(value) {
-    //     console.warn(`setter is not awaitable, consider updating LEVELS instead`);
-    //     this.item.LEVELS = value - (this.item?.baseInfo?.base || 0);
 
-    //     // Update Database, prefer to update LEVELS directly
-    //     // the lack of async/await is concerning.
-    //     if (this.item._id) {
-    //         this.item.update({ [`system.LEVELS`]: this.item.LEVELS });
-    //     }
-    // }
+    get base() {
+        // KLUGE OVERRIDEs
+        if (this.actor.type === "base2") {
+            if (this.key === "body") {
+                return 2;
+            }
+        }
 
-    // get max() {
-    //     const key = this.schema.name?.toUpperCase();
-    //     if (!key) {
-    //         console.error(`key is undefined`);
-    //     }
-    //     return parseInt(this.parent.parent[key]?.LEVELS);
-    // }
-    // set max(value) {
-    //     //if (this.parent.)
-    //     //debugger;
-    // }
+        return this.baseInfo?.base || 0;
+    }
 
     get realCost() {
         const cost = Math.round(this.levels * (this.baseInfo?.costPerLevel(this.item) || 0));
@@ -1391,6 +1380,9 @@ export class HeroCharacteristicsModel extends foundry.abstract.DataModel {
             gliding: new EmbeddedDataField(HeroActorCharacteristic),
             teleportation: new EmbeddedDataField(HeroActorCharacteristic),
             tunneling: new EmbeddedDataField(HeroActorCharacteristic),
+
+            basesize: new EmbeddedDataField(HeroActorCharacteristic),
+            size: new EmbeddedDataField(HeroActorCharacteristic), // Vehicle
         };
     }
 }
@@ -1432,6 +1424,8 @@ export class HeroActorModel extends foundry.abstract.DataModel {
             RUNNING: new EmbeddedDataField(HeroItemCharacteristic),
             SWIMMING: new EmbeddedDataField(HeroItemCharacteristic),
             LEAPING: new EmbeddedDataField(HeroItemCharacteristic),
+            BASESIZE: new EmbeddedDataField(HeroItemCharacteristic),
+            SIZE: new EmbeddedDataField(HeroItemCharacteristic), // vehicle
             hap: new SchemaField({
                 value: new NumberField({ integer: true, nullable: true }),
             }),
