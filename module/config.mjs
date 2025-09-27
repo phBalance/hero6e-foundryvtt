@@ -4367,6 +4367,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "GROUNDS",
+            type: ["perk"],
+            behaviors: [],
+            costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costEnd: false,
+            xml: `<PERK XMLID="GROUNDS" ID="1759002590086" BASECOST="0.0" LEVELS="0" ALIAS="Grounds (x1 Base Size)" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""/>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "LOCATION",
             type: ["perk"],
             behaviors: [],
@@ -4374,7 +4387,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            xml: `<PERK XMLID="LOCATION" ID="1721191237520" BASECOST="10.0" LEVELS="0" ALIAS="Location" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DISTANT" OPTIONID="DISTANT" OPTION_ALIAS="Distant" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Away From the City"/>`,
+            xml: `<PERK XMLID="LOCATION" ID="1759002587083" BASECOST="0.0" LEVELS="0" ALIAS="Location" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CITY" OPTIONID="CITY" OPTION_ALIAS="City" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""/>`,
         },
         {},
     );
