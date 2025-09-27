@@ -14,6 +14,30 @@
         { "name": "Aaron Auseth" },
         { "name": "Peter Hunnisett" }
     ],
+    "documentTypes": {
+        "Actor": {
+            "pc": {},
+            "npc": {},
+            "vehicle": {},
+            "base2": {},
+            "computer": {},
+            "automaton": {},
+            "ai": {}
+        },
+        "Item": {
+            "skill": {},
+            "perk": {},
+            "talent": {},
+            "martialart": {},
+            "power": {},
+            "complication": {},
+            "disadvantage": {},
+            "equipment": {},
+            "defense": {},
+            "maneuver": {},
+            "characteristic": {}
+        }
+    },
     "esmodules": ["module/herosystem6e.mjs"],
     "styles": ["css/herosystem6e.css", "css/actor-sheet.css"],
     "scripts": [],

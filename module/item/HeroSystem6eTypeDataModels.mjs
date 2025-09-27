@@ -1399,7 +1399,18 @@ export class HeroCharacteristicsModel extends foundry.abstract.DataModel {
 //     }
 // }
 
-export class HeroActorModel extends foundry.abstract.DataModel {
+var SubtypeModelMixin = (base) => {
+    return class HeroSystem6eSystemModel extends base {
+        /** @type {SubtypeMetadata} */
+        static get metadata() {
+            return {
+                embedded: {},
+            };
+        }
+    };
+};
+
+export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel) {
     static defineSchema() {
         //const { ObjectField, StringField, ArrayField, EmbeddedDataField } = foundry.data.fields;
         // Note that the return is just a simple object
@@ -1455,6 +1466,16 @@ export class HeroActorModel extends foundry.abstract.DataModel {
         return this.parent;
     }
 
+    // migrateData(source) {
+    //     console.log(source);
+    //     debugger;
+    // }
+
+    // migrateDataSafe(source) {
+    //     console.log(source);
+    //     debugger;
+    // }
+
     debugModelProps() {
         try {
             // Not sure what to do here as we don't follow the XML -> JSON -> DataModel exacly the same
@@ -1473,5 +1494,21 @@ export class HeroActorModel extends foundry.abstract.DataModel {
         } catch (e) {
             console.error(e);
         }
+    }
+}
+
+export class PcModel extends HeroActorModel {
+    static get metadata() {
+        return foundry.utils.mergeObject(super.metadata, {
+            type: "pc",
+        });
+    }
+}
+
+export class NpcModel extends HeroActorModel {
+    static get metadata() {
+        return foundry.utils.mergeObject(super.metadata, {
+            type: "npc",
+        });
     }
 }

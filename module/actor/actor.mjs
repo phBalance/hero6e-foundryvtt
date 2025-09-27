@@ -2005,26 +2005,6 @@ export class HeroSystem6eActor extends Actor {
 
             //let itemsToCreate = [];
 
-            // CHARACTERISTICS
-            if (heroJson.CHARACTER?.CHARACTERISTICS) {
-                uploadProgressBar.advance(`${this.name}: CHARACTERISTICS`, 0);
-                // Make each native characteristic an item (perhaps in the future)
-                // for (const key of Object.keys(heroJson.CHARACTER.CHARACTERISTICS)) {
-                //     itemsToCreate.push({
-                //         type: "characteristic",
-                //         name: key,
-                //         system: heroJson.CHARACTER.CHARACTERISTICS[key],
-                //     });
-                // }
-
-                // Legacy (well current)
-                for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
-                    this.system[key] = new HeroItemCharacteristic(value, { parent: this });
-                    changes[`system.${key}`] = this.system[key];
-                }
-                delete heroJson.CHARACTER.CHARACTERISTICS;
-            }
-
             // is5e
 
             // keep track indepentantly of item.system.is5e as targetType can reload it
@@ -2080,8 +2060,40 @@ export class HeroSystem6eActor extends Actor {
                 }
 
                 changes = {};
-                await this._resetCharacteristicsFromHdc();
             }
+
+            // CHARACTERISTICS
+            if (heroJson.CHARACTER?.CHARACTERISTICS) {
+                uploadProgressBar.advance(`${this.name}: CHARACTERISTICS`, 0);
+                // Make each core characteristic an item
+                // const characteristicsArray = [];
+                // for (const key of Object.keys(heroJson.CHARACTER.CHARACTERISTICS)) {
+                //     characteristicsArray.push({
+                //         type: "characteristic",
+                //         name: key,
+                //         system: heroJson.CHARACTER.CHARACTERISTICS[key],
+                //     });
+                // }
+
+                // for (const newItem of characteristicsArray) {
+                //     const existingItem = this.items.find(
+                //         (i) => i.type === "characteristic" && i.XMLID === newItem.XMLID,
+                //     );
+                //     if (existingItem) {
+                //         await existingItem.update({ name: newItem.name, system: newItem.system });
+                //     } else {
+                //         await this.createEmbeddedDocuments("Item", [newItem]);
+                //     }
+                // }
+
+                // Legacy (well current)
+                for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
+                    this.system[key] = new HeroItemCharacteristic(value, { parent: this });
+                    changes[`system.${key}`] = this.system[key];
+                }
+                delete heroJson.CHARACTER.CHARACTERISTICS;
+            }
+            await this._resetCharacteristicsFromHdc();
 
             // Quench test may need CHARACTERISTICS, which are set in postUpload
             await this._postUpload({ render: false });
