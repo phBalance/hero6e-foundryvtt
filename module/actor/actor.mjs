@@ -1866,6 +1866,37 @@ export class HeroSystem6eActor extends Actor {
                 _d: new Date(),
             };
 
+            // Convert XML into JSON
+            const heroJson = {};
+            HeroSystem6eActor._xmlToJsonNode(heroJson, xml.children);
+
+            // Need count of maneuvers for progress bar
+            const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+            const freeStuffFilter = (power) =>
+                (!(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
+                    power.type.includes("maneuver")) ||
+                power.key === "PERCEPTION" || // Perception
+                power.key === "__STRENGTHDAMAGE"; // Weapon placeholder (this is a dirty hack to count it so we can filter on it later)
+            const freeStuffCount = powerList.filter(freeStuffFilter).length;
+
+            const xmlItemsToProcess =
+                1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
+                heroJson.CHARACTER.DISADVANTAGES.length +
+                heroJson.CHARACTER.EQUIPMENT.length +
+                heroJson.CHARACTER.MARTIALARTS.length +
+                heroJson.CHARACTER.PERKS.length +
+                heroJson.CHARACTER.POWERS.length +
+                heroJson.CHARACTER.SKILLS.length +
+                heroJson.CHARACTER.TALENTS.length +
+                (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
+                1 + // Validating adjustment and powers
+                1 + // Images
+                1 + // Final save
+                1 + // Restore retained damage
+                1; // Not really sure why we need an extra +1
+            uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess);
+            uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
+
             // Let GM know actor is being uploaded (unless it is a quench test; missing ID)
             if (this.id) {
                 ChatMessage.create({
@@ -1878,6 +1909,7 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // Remove all existing effects
+            uploadProgressBar.advance(`${this.name}: Removing existing effects`, 0);
             let promiseArray = [];
             promiseArray.push(
                 this.deleteEmbeddedDocuments(
@@ -1888,16 +1920,13 @@ export class HeroSystem6eActor extends Actor {
 
             let changes = {};
 
-            // Convert XML into JSON
-            const heroJson = {};
-            HeroSystem6eActor._xmlToJsonNode(heroJson, xml.children);
-
             // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
             const characterName = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
             this.name = characterName;
             if (this._id) {
+                uploadProgressBar.advance(`${this.name}: Name, fileInfo`, 0);
                 await this.update({ ["name"]: this.name });
 
                 // remove stray flags
@@ -1928,6 +1957,7 @@ export class HeroSystem6eActor extends Actor {
             const _system = _actor.system;
 
             // remove any system properties that are not part of system.json
+            uploadProgressBar.advance(`${this.name}: Remove unnecessary system fields`, 0);
             const schemaKeys = Object.keys(_system);
             for (const key of Object.keys(this.system)) {
                 if (!schemaKeys.includes(key)) {
@@ -1950,6 +1980,7 @@ export class HeroSystem6eActor extends Actor {
             /// NOW LOAD THE HDC STUFF
 
             // Need to get the base64 image before we delete IMAGE, deepClone doesn't work as expected.
+            uploadProgressBar.advance(`${this.name}: Preprocess image`, 0);
             const filename = heroJson.CHARACTER.IMAGE?.FileName;
             const extension = filename?.split(".").pop();
             const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName("IMAGE")?.[0]?.textContent;
@@ -1976,6 +2007,7 @@ export class HeroSystem6eActor extends Actor {
 
             // CHARACTERISTICS
             if (heroJson.CHARACTER?.CHARACTERISTICS) {
+                uploadProgressBar.advance(`${this.name}: CHARACTERISTICS`, 0);
                 // Make each native characteristic an item (perhaps in the future)
                 // for (const key of Object.keys(heroJson.CHARACTER.CHARACTERISTICS)) {
                 //     itemsToCreate.push({
@@ -1997,6 +2029,7 @@ export class HeroSystem6eActor extends Actor {
 
             // keep track indepentantly of item.system.is5e as targetType can reload it
             // Assume true for those super old HDC files
+            uploadProgressBar.advance(`${this.name}: is5e`, 0);
             let _is5e = true;
 
             const template = heroJson.CHARACTER?.TEMPLATE || heroJson.CHARACTER?.BASIC_CONFIGURATION?.TEMPLATE;
@@ -2052,33 +2085,6 @@ export class HeroSystem6eActor extends Actor {
 
             // Quench test may need CHARACTERISTICS, which are set in postUpload
             await this._postUpload({ render: false });
-
-            // Need count of maneuvers for progress bar
-            const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-            const freeStuffFilter = (power) =>
-                (!(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
-                    power.type.includes("maneuver")) ||
-                power.key === "PERCEPTION" || // Perception
-                power.key === "__STRENGTHDAMAGE"; // Weapon placeholder (this is a dirty hack to count it so we can filter on it later)
-            const freeStuffCount = powerList.filter(freeStuffFilter).length;
-
-            const xmlItemsToProcess =
-                1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
-                heroJson.CHARACTER.DISADVANTAGES.length +
-                heroJson.CHARACTER.EQUIPMENT.length +
-                heroJson.CHARACTER.MARTIALARTS.length +
-                heroJson.CHARACTER.PERKS.length +
-                heroJson.CHARACTER.POWERS.length +
-                heroJson.CHARACTER.SKILLS.length +
-                heroJson.CHARACTER.TALENTS.length +
-                (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
-                1 + // Validating adjustment and powers
-                1 + // Images
-                1 + // Final save
-                1 + // Restore retained damage
-                1; // Not really sure why we need an extra +1
-            uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess);
-            uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
 
             // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
             // if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
@@ -2262,7 +2268,7 @@ export class HeroSystem6eActor extends Actor {
 
             await this.updateEmbeddedDocuments("Item", itemsToUpdate, { diff: false });
 
-            uploadProgressBar.advance(`${this.name}: Updated Items`, 0);
+            uploadProgressBar.advance(`${this.name}: Updated Items`, itemsToUpdate.length);
 
             uploadProgressBar.advance(`${this.name}: Creating Items`, 0);
 
@@ -2274,7 +2280,7 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance.createItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
 
-            uploadProgressBar.advance(`${this.name}: Created Items`, 0);
+            uploadProgressBar.advance(`${this.name}: Created Items`, itemsToCreate.length);
             uploadProgressBar.advance(`${this.name}: Processing characteristics`, 0);
 
             // Do CSLs last so we can property select the attacks
@@ -2619,14 +2625,28 @@ export class HeroSystem6eActor extends Actor {
 
             // Apply retained damage
             if (this.id && (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end)) {
-                this.system.characteristics.body.value -= retainValuesOnUpload.body;
-                this.system.characteristics.stun.value -= retainValuesOnUpload.stun;
-                this.system.characteristics.end.value -= retainValuesOnUpload.end;
-                if (this.id) {
+                if (this.system.characteristics.body) {
+                    this.system.characteristics.body.value -= retainValuesOnUpload.body;
                     await this.update(
                         {
                             "system.characteristics.body.value": this.system.characteristics.body.value,
+                        },
+                        { render: false },
+                    );
+                }
+                if (this.system.characteristics.stun) {
+                    this.system.characteristics.stun.value -= retainValuesOnUpload.stun;
+                    await this.update(
+                        {
                             "system.characteristics.stun.value": this.system.characteristics.stun.value,
+                        },
+                        { render: false },
+                    );
+                }
+                if (this.system.characteristics.end) {
+                    this.system.characteristics.end.value -= retainValuesOnUpload.end;
+                    await this.update(
+                        {
                             "system.characteristics.end.value": this.system.characteristics.end.value,
                         },
                         { render: false },

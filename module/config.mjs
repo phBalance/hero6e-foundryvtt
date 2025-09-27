@@ -4365,6 +4365,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            key: "LOCATION",
+            type: ["perk"],
+            behaviors: [],
+            costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costEnd: false,
+            xml: `<PERK XMLID="LOCATION" ID="1721191237520" BASECOST="10.0" LEVELS="0" ALIAS="Location" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DISTANT" OPTIONID="DISTANT" OPTION_ALIAS="Distant" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Away From the City"/>`,
+        },
+        {},
+    );
 
     addPower(
         {

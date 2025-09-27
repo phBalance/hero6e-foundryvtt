@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 import { getSystemDisplayUnits } from "./units.mjs";
+import { squelch } from "./util.mjs";
 
 export function combatSkillLevelsForAttack(item) {
     const results = [];
@@ -824,10 +825,12 @@ export function calculateDicePartsFromDcForItem(item, dc) {
 
         halfDieValue = 1.5 / 3;
     } else {
-        console.error(
-            `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.detailedName()}`,
-            item,
-        );
+        if (!squelch(item.id)) {
+            console.error(
+                `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.detailedName()}`,
+                item,
+            );
+        }
 
         // Don't know how to process this. Just return the base diceParts.
         const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
