@@ -214,7 +214,6 @@ Hooks.once("init", async function () {
         martialart: HeroSystem6eItemMartialArt,
         disadvantage: HeroSystem6eItemDisadvantage,
         complication: HeroSystem6eItemComplication,
-        misc: HeroSystem6eItemTypeDataModelMisc,
         characteristic: HeroItemCharacteristic,
     });
 
