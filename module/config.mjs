@@ -8032,11 +8032,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ENRAGED related
+            key: "CHANCETORECOVER",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            optionIDFix: function (json) {
+                return json.OPTION.match(/\d+-/)?.[0] || json.OPTION;
+            },
+            xml: `<ADDER XMLID="CHANCETORECOVER" ID="1704506825140" BASECOST="0.0" LEVELS="0" ALIAS="Chance To Recover" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14-" OPTIONID="14-" OPTION_ALIAS="recover 14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TRANSPORT_FAMILIARITY related
             key: "CHARIOTS",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="CHARIOTS" ID="1756738529554" BASECOST="1.0" LEVELS="0" ALIAS="Chariots" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ENRAGED related
+            key: "CIRCUMSTANCES",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="CIRCUMSTANCES" ID="1704506825128" BASECOST="5.0" LEVELS="0" ALIAS="Circumstance is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UNCOMMON" OPTIONID="UNCOMMON" OPTION_ALIAS="(Uncommon)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9177,6 +9200,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "AFFECTSPHYSICALWORLD",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="AFFECTSPHYSICALWORLD" ID="1759029285770" BASECOST="2.0" LEVELS="0" ALIAS="Affects Physical World" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // Typically part of SIDEEFFECTS
             key: "ALWAYSOCCURS",
             behaviors: ["modifier"],
@@ -9916,7 +9949,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
+    addPower(
+        {
+            key: "MEGASCALE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(1 / 4),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="MEGASCALE" ID="1759093947856" BASECOST="0.0" LEVELS="5" ALIAS="MegaScale" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" SCALE="1&quot; = 10,000 km"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(
         {
             key: "MOBILE",
