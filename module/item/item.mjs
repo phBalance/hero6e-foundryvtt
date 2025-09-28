@@ -6371,7 +6371,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     static migrateDataSafe(source) {
-        if (["misc", "attack"].includes(source.type)) {
+        if (["misc", "attack", "movement"].includes(source.type)) {
             console.warn(`${source.name} type changed from "${source.type}" to "power"`, source);
             source.type = "power";
         }

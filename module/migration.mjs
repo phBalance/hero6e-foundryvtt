@@ -1,5 +1,6 @@
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
+import { getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 
 function getAllActorsInGame() {
     return [
@@ -189,8 +190,17 @@ async function migrateTo4_2_0(actor) {
     try {
         await coerceIs5eToBoolean(actor);
         await addPerceptionXmlTag(actor);
+        await convertCharacteristicsToItem(actor);
     } catch (e) {
         console.error(e);
+    }
+}
+
+async function convertCharacteristicsToItem(actor) {
+    for (const key of getCharacteristicInfoArrayForActor(actor).map((bi) => bi.key)) {
+        if (actor.system[key]) {
+            //debugger;
+        }
     }
 }
 
