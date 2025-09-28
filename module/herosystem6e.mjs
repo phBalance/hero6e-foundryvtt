@@ -29,7 +29,6 @@ import {
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
-import { HeroSystem6eItemTypeDataModelMisc } from "./item/HeroSystem6eItemTypeDataModelMisc.mjs";
 import {
     HeroActorModel,
     HeroSystem6eItemPower,

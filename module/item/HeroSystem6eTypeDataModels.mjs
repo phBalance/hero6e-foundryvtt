@@ -1466,9 +1466,10 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
         return this.parent;
     }
 
-    // migrateData(source) {
+    // static migrateData(source) {
+    //     if (source.)
     //     console.log(source);
-    //     debugger;
+    //     return super.migrateData(source);
     // }
 
     // migrateDataSafe(source) {

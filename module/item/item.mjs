@@ -6369,6 +6369,14 @@ export class HeroSystem6eItem extends Item {
         const xml = `<${this.system.xmlTag}` + primaryXML + secondaryXML + `></${this.system.xmlTag}>`;
         return xml;
     }
+
+    static migrateDataSafe(source) {
+        if (["misc", "attack"].includes(source.type)) {
+            console.warn(`${source.name} type changed from "${source.type}" to "power"`, source);
+            source.type = "power";
+        }
+        return super.migrateData(source);
+    }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
