@@ -3606,4 +3606,14 @@ export class HeroSystem6eActor extends Actor {
         // }
         // return this.currentInit;
     }
+
+    static migrateData(source) {
+        // World fails to load #2853
+        for (const key of Object.keys(source.flags).filter((o) => o.includes("-"))) {
+            console.error(`${source.name} has invalid flag "${key}" and it was deleted to avoid problems`, source);
+            delete source.flags[key];
+        }
+
+        super.migrateData(source);
+    }
 }
