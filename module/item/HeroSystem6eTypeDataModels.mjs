@@ -1198,12 +1198,9 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
 export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     static defineSchema() {
         return {
-            //core: new NumberField({ integer: true }),
             max: new NumberField({ integer: true }),
-            //realCost: new NumberField({ integer: true }),
-            //roll: new NumberField({ integer: true }),
             value: new NumberField({ integer: true }),
-            characteristicMax: new NumberField({ integer: true }),
+            characteristicMax: new NumberField({ integer: true, nullable: true }),
         };
     }
 

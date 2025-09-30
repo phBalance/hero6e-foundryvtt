@@ -72,13 +72,23 @@ export class HeroSystem6eActor extends Actor {
             },
         });
 
+        // Characteristic defaults
+        for (const charBaseInfo of getCharacteristicInfoArrayForActor(this)) {
+            const base = charBaseInfo.base || 0;
+            this.updateSource({
+                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: base,
+                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: base,
+            });
+        }
+
         if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
             await this.addFreeStuff();
         }
 
-        for (const item of this.items) {
-            await item._postUpload();
-        }
+        // for (const item of this.items) {
+        //     await item._postUpload();
+        // }
+
         // REF: https://foundryvtt.wiki/en/development/api/document _preCreate
         // Careful: toObject only returns system props that are part of schema
         // so we merge in the entire system
@@ -2638,7 +2648,7 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: Restoring retained damage`, 0);
 
             // Apply retained damage
-            if (this.id) {
+            if (false && this.id) {
                 for (const key of ["body", "stun", "end"]) {
                     if (!getCharacteristicInfoArrayForActor(this).find((o) => o.key === key.toUpperCase())) continue;
                     if (retainValuesOnUpload[key] == undefined) continue;
