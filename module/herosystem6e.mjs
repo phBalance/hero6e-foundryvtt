@@ -609,21 +609,26 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
         console.log(err);
     }
 
-    // Change Type
-    if (game.user.isGM) {
-        const element = document.createElement("a");
-        element.classList = "header-button control";
-        element.setAttribute(`data-id`, data.actor.id);
-        element.title = data.actor.type.toUpperCase().replace("2", "");
-        element.addEventListener("click", (event) => {
-            const actor = game.actors.get(event.target.dataset.id);
-            actor.changeType();
-        });
+    // // Change Type
+    // if (game.user.isGM) {
+    //     const element = document.createElement("a");
+    //     element.classList = "header-button control";
+    //     element.setAttribute(`data-id`, data.actor.uuid);
+    //     element.title = data.actor.type.toUpperCase().replace("2", "");
+    //     element.addEventListener("click", async (event) => {
+    //         event.preventDefault();
+    //         const actor = fromUuidSync(event.target.dataset.id);
+    //         if (!actor) {
+    //             ui.notifications.error(`Actor ${event.target.dataset.id} was not found`);
+    //             return;
+    //         }
+    //         //await actor.changeType();
+    //     });
 
-        element.innerHTML = `<i class="fal fa-user-robot"></i>${data.actor?.template?.replace("builtIn.", "").replace(".hdt", "") || "Type"} `;
+    //     element.innerHTML = `<i class="fal fa-user-robot"></i>${data.actor?.template?.replace("builtIn.", "").replace(".hdt", "") || "Type"} `;
 
-        html.find("header h4").after(element);
-    }
+    //     html.find("header h4").after(element);
+    // }
 });
 
 Hooks.on("renderItemSheet", (dialog, html) => {

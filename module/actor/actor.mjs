@@ -264,32 +264,30 @@ export class HeroSystem6eActor extends Actor {
             ), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         };
-        const html = await foundryVttRenderTemplate(template, cardData);
-        return new Promise((resolve) => {
-            const data = {
-                title: `Change ${this.name} Type`,
-                content: html,
-                buttons: {
-                    normal: {
-                        label: "Apply",
-                        callback: (html) => resolve(_processChangeType(html)),
-                    },
-                },
-                default: "normal",
-                close: () => resolve({ cancelled: true }),
-            };
-            new Dialog(data, null).render(true);
+        const content = await foundryVttRenderTemplate(template, cardData);
 
-            async function _processChangeType(html) {
-                await actor.update(
-                    {
-                        type: html.find("input:checked")[0].value,
-                        [`==system`]: actor.system,
-                    },
-                    { recursive: false },
-                );
-            }
+        await foundry.applications.api.DialogV2.prompt({
+            window: { title: `Change ${this.name} Type` },
+            content,
+            ok: {
+                label: "Apply",
+                callback: (event, button) => button.form.elements.actorType.value,
+            },
+            submit: async (result) => {
+                if (result) await this._changeType(result);
+                else console.error(`User picked option: ${result}`);
+            },
         });
+    }
+
+    async _changeType(newType) {
+        await this.update(
+            {
+                type: newType,
+                [`==system`]: this.system,
+            },
+            { recursive: false },
+        );
     }
 
     /* -------------------------------------------- */
@@ -2312,13 +2310,17 @@ export class HeroSystem6eActor extends Actor {
             const nonCharacteristicItemsThatAreNotFreeItems = this.items.filter(
                 (item) => !doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
             );
+            uploadProgressBar.advance(
+                `${this.name}: Processing ${nonCharacteristicItemsThatAreNotFreeItems.length} nonCharacteristicItemsThatAreNotFreeItems`,
+                0,
+            );
             await Promise.all(
                 nonCharacteristicItemsThatAreNotFreeItems.map((item) =>
                     item._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false }),
                 ),
             );
             await this.applySizeEffect();
-
+            uploadProgressBar.advance(`${this.name}: Processing ${doLastXmlids.length} doLastXmlids`, 0);
             await Promise.all(
                 this.items
                     .filter(
@@ -2636,35 +2638,22 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: Restoring retained damage`, 0);
 
             // Apply retained damage
-            if (this.id && (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end)) {
-                if (this.system.characteristics.body) {
-                    this.system.characteristics.body.value -= retainValuesOnUpload.body;
+            if (this.id) {
+                for (const key of ["body", "stun", "end"]) {
+                    if (!getCharacteristicInfoArrayForActor(this).find((o) => o.key === key.toUpperCase())) continue;
+                    if (retainValuesOnUpload[key] == undefined) continue;
+                    if (this.system.characteristics[key] == undefined) continue;
+
+                    this.system.characteristics[key].value -= retainValuesOnUpload[key];
                     await this.update(
                         {
-                            "system.characteristics.body.value": this.system.characteristics.body.value,
-                        },
-                        { render: false },
-                    );
-                }
-                if (this.system.characteristics.stun) {
-                    this.system.characteristics.stun.value -= retainValuesOnUpload.stun;
-                    await this.update(
-                        {
-                            "system.characteristics.stun.value": this.system.characteristics.stun.value,
-                        },
-                        { render: false },
-                    );
-                }
-                if (this.system.characteristics.end) {
-                    this.system.characteristics.end.value -= retainValuesOnUpload.end;
-                    await this.update(
-                        {
-                            "system.characteristics.end.value": this.system.characteristics.end.value,
+                            [`system.characteristics.${key}.value`]: this.system.characteristics[key].value,
                         },
                         { render: false },
                     );
                 }
             }
+            uploadProgressBar.advance(`${this.name}: Restored retained damage`, 0);
 
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);
@@ -2672,8 +2661,6 @@ export class HeroSystem6eActor extends Actor {
             }
             uploadPerformance.retainedDamage = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
-
-            uploadProgressBar.advance(`${this.name}: Restored retained damage`);
 
             // If we have control of this token, reacquire to update movement types
             const myToken = this.getActiveTokens()?.[0];

@@ -1011,6 +1011,25 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         return item.toggle(event);
     }
 
+    _getHeaderButtons() {
+        const buttons = super._getHeaderButtons();
+
+        const myButton = {
+            label: this.actor.type, // Raw text or path to text in language file
+            title: "test",
+            class: "my-button", // CSS class for your own use
+            icon: "fal fa-user-robot", // Font awesome icon
+
+            onclick: this.#changeType.bind(this),
+        };
+
+        return [myButton, ...buttons];
+    }
+
+    #changeType() {
+        this.actor.changeType();
+    }
+
     async _onItemChangeClips(event) {
         event.preventDefault();
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;

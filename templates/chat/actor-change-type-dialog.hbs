@@ -1,25 +1,10 @@
 {{ log 'HEROSYS actor-change-type-dialog' this }}
 <div class="hero chat-card default-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}">
-
-    {{!-- <form>
-        <p>Select Actor Type:</p>
-        <div>
-            <fieldset name="type">
-                <input type="radio" id="pc" name="fav_language" value="pc" {{#if (eq actor.type "pc" )}}checked{{/if}}>
-                <label for="pc">PC</label><br>
-
-                <input type="radio" id="npc" name="fav_language" value="npc" {{#if (eq actor.type "npc"
-                    )}}checked{{/if}}>
-                <label for="npc">NPC</label><br>
-            </fieldset>
+    <div class="form-group">
+        <label>Select Actor Type</label>
+        <div class="form-fields">
+            {{radioBoxes "actorType" choices checked=chosen localize=true}}
         </div>
-        <p />
-    </form> --}}
-        <div class="form-group">
-            <label>Select Actor Type</label>
-            <div class="form-fields">
-                {{radioBoxes "actor.type" choices checked=chosen localize=true}}
-            </div>
-        </div>
+    </div>
     <p></p>
 </div>
