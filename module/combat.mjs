@@ -724,7 +724,9 @@ export class HeroSystem6eCombat extends Combat {
 
         // Stop dodges and other maneuvers' active effects that expire automatically
         const maneuverNextPhaseAes = combatant.actor.effects.filter(
-            (ae) => ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect",
+            (ae) =>
+                ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect" &&
+                ae.duration.startTime !== game.time.worldTime,
         );
         const maneuverNextPhaseTogglePromises = maneuverNextPhaseAes
             .filter((ae) => ae.flags[game.system.id]?.toggle)

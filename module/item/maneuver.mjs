@@ -200,6 +200,8 @@ export async function activateManeuver(item) {
         dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         dodgeStatusEffect.flags = buildManeuverNextPhaseFlags(item);
         dodgeStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        dodgeStatusEffect.duration ??= {};
+        dodgeStatusEffect.duration.startTime = game.time.worldTime;
         newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
@@ -209,6 +211,8 @@ export async function activateManeuver(item) {
         blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         blockStatusEffect.flags = buildManeuverNextPhaseFlags(item);
         blockStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        blockStatusEffect.duration ??= {};
+        blockStatusEffect.duration.startTime = game.time.worldTime;
         newActiveEffects.push(item.actor.addActiveEffect(blockStatusEffect));
     }
 
@@ -236,6 +240,8 @@ export async function activateManeuver(item) {
         maneuverEffect.flags = buildManeuverNextPhaseFlags(item);
         maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         maneuverEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        maneuverEffect.duration ??= {};
+        maneuverEffect.duration.startTime = game.time.worldTime;
 
         if (item.actor.effects.find((ae) => ae.name === maneuverEffect.name)) {
             // Unclear why we are creating this effect a second time.
