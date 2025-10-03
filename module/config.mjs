@@ -3348,7 +3348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MIF",
             type: ["skill"],
-            behaviors: [],
+            behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
             name: "Musical Instrument Familiarity",
             duration: "constant",
