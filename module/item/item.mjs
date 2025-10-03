@@ -3033,7 +3033,7 @@ export class HeroSystem6eItem extends Item {
                         _modifiers.push(pMod);
                     } else {
                         // Keeping child modifier
-                        console.debug("Keeping child modifier instead of parent", pMod, mod);
+                        //console.debug("Keeping child modifier instead of parent", pMod, mod);
                     }
                 }
             }
