@@ -10,9 +10,15 @@ import {
     combatSkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { maneuverHasFlashTrait, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
-const { NumberField, StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } =
-    foundry.data.fields;
+const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
+
+class HeroNumberField extends foundry.data.fields.NumberField {
+    _applyChangeMultiply(value, delta) {
+        return RoundFavorPlayerUp(value * delta);
+    }
+}
 
 class HeroItemModCommonModel extends foundry.abstract.DataModel {
     // constructor(data, context) {
@@ -26,10 +32,10 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             XMLID: new StringField(),
             xmlid: new StringField(),
             ID: new StringField(),
-            BASECOST: new NumberField({ integer: false }),
-            LEVELS: new NumberField({ integer: true }),
+            BASECOST: new HeroNumberField({ integer: false }),
+            LEVELS: new HeroNumberField({ integer: true }),
             ALIAS: new StringField(),
-            POSITION: new NumberField({ integer: true }),
+            POSITION: new HeroNumberField({ integer: true }),
             MULTIPLIER: new StringField(),
             GRAPHIC: new StringField(),
             COLOR: new StringField(),
@@ -53,7 +59,7 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             FORCEALLOW: new BooleanField({ initial: null, nullable: true }),
             COMMENTS: new StringField(),
             LVLVAL: new StringField(),
-            QUANTITY: new NumberField({ integer: true }),
+            QUANTITY: new HeroNumberField({ integer: true }),
             AFFECTS_TOTAL: new StringField(),
             PARENTID: new StringField(),
             INPUT: new StringField(),
@@ -63,7 +69,7 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             TYPE: new StringField(),
             DISPLAY: new StringField(),
             SCALE: new StringField(),
-            CLIPS_COST: new NumberField({ integer: false }),
+            CLIPS_COST: new HeroNumberField({ integer: false }),
         };
     }
     get hdcHTMLCollection() {
@@ -332,8 +338,8 @@ export class HeroSystem6eItemCharges extends foundry.abstract.DataModel {
     static defineSchema() {
         // Note that the return is just a simple object
         return {
-            value: new NumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-            clips: new NumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+            value: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+            clips: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
         };
     }
 
@@ -807,13 +813,13 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             GRAPHIC: new StringField(),
             ID: new StringField(),
             INPUT: new StringField(),
-            LEVELS: new NumberField({ integer: true }),
+            LEVELS: new HeroNumberField({ integer: true }),
             MODIFIER: new ArrayField(new EmbeddedDataField(HeroModifierModel)),
             MULTIPLIER: new StringField(),
             NAME: new StringField(),
             NOTES: new StringField(),
             PARENTID: new StringField(),
-            POSITION: new NumberField({ integer: true }),
+            POSITION: new HeroNumberField({ integer: true }),
             POWER: new ArrayField(new EmbeddedDataField(HeroPowerModel)),
             SFX: new StringField(),
             XMLID: new StringField(),
@@ -825,9 +831,9 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             is5e: new BooleanField({ initial: null, nullable: true }),
             xmlTag: new StringField(),
             USE_END_RESERVE: new BooleanField({ initial: null, nullable: true }),
-            FREE_POINTS: new NumberField({ integer: true }),
-            value: new NumberField({ integer: true }), // ENEDURANCERESERVE
-            //max: new NumberField({ integer: true }), // ENEDURANCERESERVE (use LEVELS instead)
+            FREE_POINTS: new HeroNumberField({ integer: true }),
+            value: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE
+            //max: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE (use LEVELS instead)
             active: new BooleanField({ initial: null, nullable: true }), // is power,skill,equipment active (consider renaming)
             charges: new EmbeddedDataField(HeroSystem6eItemCharges),
         };
@@ -851,7 +857,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             DOESKNOCKBACK: new StringField(),
             DURATION: new StringField(),
             ED: new StringField(),
-            EDLEVELS: new NumberField({ integer: true }),
+            EDLEVELS: new HeroNumberField({ integer: true }),
             END: new StringField(),
             ENDCOLUMNOUTPUT: new StringField(),
             FDLEVELS: new StringField(),
@@ -860,16 +866,16 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             INT: new StringField(),
             KILLING: new StringField(),
             LENGTHLEVELS: new StringField(),
-            MDLEVELS: new NumberField({ integer: true }),
+            MDLEVELS: new HeroNumberField({ integer: true }),
             NUMBER: new StringField(),
             OCV: new StringField(),
             OPTION: new StringField(),
             OPTIONID: new StringField(),
             OPTION_ALIAS: new StringField(),
             PD: new StringField(),
-            PDLEVELS: new NumberField({ integer: true }),
+            PDLEVELS: new HeroNumberField({ integer: true }),
             POINTS: new StringField(),
-            POWDLEVELS: new NumberField({ integer: true }),
+            POWDLEVELS: new HeroNumberField({ integer: true }),
             PRE: new StringField(),
             QUANTITY: new StringField(),
             RANGE: new StringField(),
@@ -1114,11 +1120,11 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
         return {
             XMLID: new StringField(),
             ID: new StringField(),
-            BASECOST: new NumberField({ integer: false }),
-            LEVELS: new NumberField({ integer: true }),
+            BASECOST: new HeroNumberField({ integer: false }),
+            LEVELS: new HeroNumberField({ integer: true }),
             ALIAS: new StringField(),
-            POSITION: new NumberField({ integer: true }),
-            MULTIPLIER: new NumberField({ integer: false }),
+            POSITION: new HeroNumberField({ integer: true }),
+            MULTIPLIER: new HeroNumberField({ integer: false }),
             GRAPHIC: new StringField(),
             COLOR: new StringField(),
             SFX: new StringField(),
@@ -1130,9 +1136,9 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
             _hdcXml: new StringField(),
             is5e: new BooleanField({ initial: null, nullable: true }),
             xmlTag: new StringField(),
-            // value: new NumberField({ integer: true }),
-            // core: new NumberField({ integer: true }),
-            // max: new NumberField({ integer: true }),
+            // value: new HeroNumberField({ integer: true }),
+            // core: new HeroNumberField({ integer: true }),
+            // max: new HeroNumberField({ integer: true }),
         };
     }
 
@@ -1198,9 +1204,9 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
 export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     static defineSchema() {
         return {
-            max: new NumberField({ integer: true }),
-            value: new NumberField({ integer: true }),
-            characteristicMax: new NumberField({ integer: true, nullable: true }),
+            max: new HeroNumberField({ integer: true }),
+            value: new HeroNumberField({ integer: true }),
+            characteristicMax: new HeroNumberField({ integer: true, nullable: true }),
         };
     }
 
@@ -1392,7 +1398,7 @@ export class HeroCharacteristicsModel extends foundry.abstract.DataModel {
 // class HeroActorCharacteristicSpd extends HeroCharacteristicsModel {
 //     static defineSchema() {
 //         return {
-//             value: new NumberField({ integer: false }),
+//             value: new HeroNumberField({ integer: false }),
 //         };
 //     }
 // }
@@ -1440,7 +1446,7 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
             BASESIZE: new EmbeddedDataField(HeroItemCharacteristic),
             SIZE: new EmbeddedDataField(HeroItemCharacteristic), // vehicle
             hap: new SchemaField({
-                value: new NumberField({ integer: true, nullable: true }),
+                value: new HeroNumberField({ integer: true, nullable: true }),
             }),
 
             characteristics: new EmbeddedDataField(HeroCharacteristicsModel),

@@ -1471,11 +1471,11 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Remove Maneuver/Martial effects
-        // for (const ae of this.appliedEffects.filter(
-        //     (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
-        // )) {
-        //     await ae.delete();
-        // }
+        for (const ae of this.appliedEffects.filter(
+            (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
+        )) {
+            await ae.delete();
+        }
 
         // Remove all active effects with ACTOR as the parent
         // Shouldn't need this and sometimes causes duplicate delete
