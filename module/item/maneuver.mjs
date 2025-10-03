@@ -1,5 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { dehydrateAttackItem } from "./item-attack.mjs";
+import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
+import { RoundFavorPlayerDown } from "../utility/round.mjs";
 
 /**
  * Maneuvers have some rules of their own that should be considered.
@@ -171,7 +173,22 @@ export async function activateManeuver(item) {
 
     // FIXME: These are supposed to be for HTH or ranged combat only except for dodge.
     const dcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
-    const ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
+    let ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
+
+    // Velocity calc?
+    if (isNaN(ocvTrait) && item.system.OCV.includes("v/")) {
+        const match = item.system.OCV.match(/([-+]*)v\/(\d+)/);
+        const v = calculateVelocityInSystemUnits(item.actor, null, null);
+        const sign = match[1];
+        const divisor = parseInt(match[2]);
+        ocvTrait = RoundFavorPlayerDown(v / divisor) * (sign === "-" ? -1 : 1);
+    }
+
+    // Catch All
+    if (isNaN(ocvTrait)) {
+        console.error(`unhandled item.system.OCV`, item.system.OCV);
+        ocvTrait = 0;
+    }
 
     // Types of effects for this maneuver?
     const hasDodgeTrait = maneuverHasDodgeTrait(item);
