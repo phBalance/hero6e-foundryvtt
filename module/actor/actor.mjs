@@ -574,7 +574,7 @@ export class HeroSystem6eActor extends Actor {
         // }
 
         // 5e figured & calculated characteristics
-        if (this.is5e) {
+        if (this.is5e && data.system) {
             let _getCharacteristicInfoArrayForActor; // a bit of caching
             for (const changeKey of Object.keys(data.system)) {
                 if (data.system?.[changeKey]?.LEVELS !== undefined) {
