@@ -1546,7 +1546,6 @@ async function createTemporaryKnockbackItem(actor, knockbackDice) {
     const knockbackAttackItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(knockbackAttackXml, actor), {
         parent: actor,
     });
-    await knockbackAttackItem._postUpload();
     knockbackAttackItem.name ??= "KNOCKBACK";
 
     return knockbackAttackItem;

@@ -2206,8 +2206,11 @@ export class HeroSystem6eActor extends Actor {
                                 // These are expected to be POWERS, SKILLS, etc that make up the COMPOUNDPOWER
                                 // Instead of COMPOUNDPOWER attributes, they should be separate items, with PARENT/CHILD
                                 if (value && typeof value === "object") {
-                                    if (value.constructor !== Array) {
-                                        console.error(`${this.name}/${system.name}/${key} is not an array`, value);
+                                    if (value.constructor !== Array && value.constructor !== Object) {
+                                        console.error(
+                                            `${this.name}/${system.name}/${key} is not an Array or Object`,
+                                            value,
+                                        );
                                         continue;
                                     }
                                     const values = value.length ? value : [value];

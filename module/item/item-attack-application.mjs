@@ -577,10 +577,6 @@ export class ItemAttackFormApplication extends FormApplication {
             );
         }
 
-        await strengthItem?._postUpload();
-
-        await effectiveItem._postUpload();
-
         return effectiveItem;
     }
 
