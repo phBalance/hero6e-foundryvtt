@@ -556,28 +556,50 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // 5e calculated characteristics
-        if (this.is5e && data.system?.characteristics?.dex?.value) {
-            const dex = parseInt(data.system.characteristics.dex.value);
-            if (dex) {
-                const cv = RoundFavorPlayerUp(dex / 3);
-                await this.update({
-                    "system.characteristics.ocv.max": cv,
-                    "system.characteristics.ocv.value": cv,
-                    "system.characteristics.dcv.max": cv,
-                    "system.characteristics.dcv.value": cv,
-                });
-            }
-        }
-        if (this.is5e && data.system?.characteristics?.ego?.value) {
-            const ego = parseInt(data.system.characteristics.ego.value);
-            if (ego) {
-                const cv = RoundFavorPlayerUp(ego / 3);
-                await this.update({
-                    "system.characteristics.omcv.max": cv,
-                    "system.characteristics.omcv.value": cv,
-                    "system.characteristics.dmcv.max": cv,
-                    "system.characteristics.dmcv.value": cv,
-                });
+        // if (this.is5e && data.system?.characteristics?.dex?.value) {
+        //     await this.update({
+        //         "system.characteristics.ocv.max": this.characteristics.ocv.core,
+        //         "system.characteristics.ocv.value": this.characteristics.ocv.core,
+        //         "system.characteristics.dcv.max": this.characteristics.dcv.core,
+        //         "system.characteristics.dcv.value": this.characteristics.dcv.core,
+        //     });
+        // }
+        // if (this.is5e && data.system?.characteristics?.ego?.value) {
+        //     await this.update({
+        //         "system.characteristics.omcv.max": this.characteristics.omcv.core,
+        //         "system.characteristics.omcv.value": this.characteristics.omcv.core,
+        //         "system.characteristics.dmcv.max": this.characteristics.dmcv.core,
+        //         "system.characteristics.dmcv.value": this.characteristics.dmcv.core,
+        //     });
+        // }
+
+        // 5e figured & calculated characteristics
+        if (this.is5e) {
+            let _getCharacteristicInfoArrayForActor; // a bit of caching
+            for (const changeKey of Object.keys(data.system)) {
+                if (data.system?.[changeKey]?.LEVELS !== undefined) {
+                    _getCharacteristicInfoArrayForActor ??= getCharacteristicInfoArrayForActor(this);
+
+                    for (const char of _getCharacteristicInfoArrayForActor.filter(
+                        (o) =>
+                            o.behaviors.includes(`figured${changeKey}`) ||
+                            o.behaviors.includes(`calculated${changeKey}`) ||
+                            o.key == changeKey,
+                    )) {
+                        const key = char.key.toLocaleLowerCase();
+                        const core = this.system.characteristics[key].coreInt;
+
+                        await this.update({
+                            [`system.characteristics.${key}.max`]: core,
+                        });
+
+                        this.applyActiveEffects();
+
+                        await this.update({
+                            [`system.characteristics.${key}.value`]: this.system.characteristics[key].max,
+                        });
+                    }
+                }
             }
         }
 
@@ -1716,68 +1738,6 @@ export class HeroSystem6eActor extends Actor {
         }
 
         return base;
-    }
-
-    async calcCharacteristicsCost() {
-        console.error("Depricated calcCharacteristicsCost");
-        return;
-        // const powers = getCharacteristicInfoArrayForActor(this);
-
-        // //const changes = {};
-        // const results = {};
-        // for (const powerInfo of powers) {
-        //     const key = powerInfo.key.toLowerCase();
-        //     const characteristic = this.system.characteristics[key];
-        //     const core = parseInt(characteristic?.core) || 0;
-        //     results[key] ??= {};
-
-        //     const base = this.getCharacteristicBase(key);
-        //     const levels = core - base;
-        //     let cost = Math.round(levels * (powerInfo.costPerLevel(this) || 0));
-
-        //     // CHARACTERISTIC MAXIMA
-        //     if (this.system.CHARACTER?.RULES) {
-        //         if (!this.is5e) {
-        //             const characteristicMax = parseInt(this.system.CHARACTER.RULES[key.toUpperCase() + "_MAX"] || 0);
-        //             if (characteristicMax && core > characteristicMax) {
-        //                 // Pay double for characteristics over CHARACTERISTIC MAXIMA
-        //                 cost += Math.ceil((core - characteristicMax) * (powerInfo.costPerLevel(this) || 1));
-        //             }
-
-        //             // if (this.system.characteristics[key].characteristicMax !== characteristicMax) {
-        //             //     changes[`system.characteristics.${key}.characteristicMax`] = characteristicMax;
-        //             // }
-        //             results[key].characteristicMax = characteristicMax;
-        //         } else {
-        //             // 5e doesn't use characteristicMaximums
-        //             // if (this.system.characteristics[key].characteristicMax) {
-        //             //     changes[`system.characteristics.${key}.-=characteristicMax`] = null;
-        //             // }
-        //             results[key].characteristicMax = null;
-        //         }
-        //     }
-
-        //     // 5e hack for fractional speed
-        //     if (key === "spd" && cost < 0) {
-        //         cost = Math.ceil(cost / 10);
-        //     }
-
-        //     // if (characteristic.realCost !== cost) {
-        //     //     changes[`system.characteristics.${key}.realCost`] = cost;
-        //     //     this.system.characteristics[key].realCost = cost;
-        //     // }
-        //     results[key].realCost = cost;
-
-        //     // if (characteristic.core !== core) {
-        //     //     changes[`system.characteristics.${key}.core`] = core;
-        //     //     this.system.characteristics[key].core = core;
-        //     // }
-        //     results[key].core = core;
-        // }
-        // // if (Object.keys(changes).length > 0 && this.id) {
-        // //     await this.update(changes);
-        // // }
-        // return results;
     }
 
     hasCharacteristic(characteristic) {

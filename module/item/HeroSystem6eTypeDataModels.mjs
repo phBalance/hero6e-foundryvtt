@@ -1237,6 +1237,10 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return 0;
     }
 
+    get coreInt() {
+        return Math.floor(this.core);
+    }
+
     get base() {
         // KLUGE OVERRIDEs
         if (this.actor.type === "base2") {
@@ -1249,6 +1253,9 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     }
 
     get realCost() {
+        if (this.baseInfo?.cost) {
+            return this.baseInfo.cost(this);
+        }
         const cost = Math.round(this.levels * (this.baseInfo?.costPerLevel(this.item) || 0));
         return cost;
     }

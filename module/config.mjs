@@ -1,4 +1,3 @@
-import { HeroSystemGenericSharedCache } from "./utility/cache.mjs";
 import { createDefenseProfile } from "./utility/defense.mjs";
 import * as heroDice from "./utility/dice.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
@@ -16,8 +15,9 @@ import {
 } from "./utility/damage.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import { squelch } from "./utility/util.mjs";
+import { HeroActorCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 
-export const HERO = { heroDice, cache: HeroSystemGenericSharedCache };
+export const HERO = { heroDice };
 
 HERO.folderColors = {
     // Base Category
@@ -868,7 +868,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 3,
             costPerLevel: fixedValueFunction(5),
             type: ["characteristic"],
-            behaviors: ["calculated"],
+            behaviors: ["calculated", "calculatedDEX"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -898,7 +898,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 3,
             costPerLevel: fixedValueFunction(5),
             type: ["characteristic"],
-            behaviors: ["defense", "calculated"],
+            behaviors: ["defense", "calculated", "calculatedDEX"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -928,7 +928,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 3,
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
-            behaviors: ["calculated"],
+            behaviors: ["calculated", "calculatedEGO"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -959,7 +959,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 3,
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
-            behaviors: ["defense", "calculated"],
+            behaviors: ["defense", "calculated", "calculatedEGO"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -989,8 +989,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Speed",
             base: 2,
             costPerLevel: fixedValueFunction(10),
+            cost: function (characteristic) {
+                if (!(characteristic instanceof HeroActorCharacteristic)) {
+                    console.error(`unexpected datatype`, characteristic);
+                    return 0;
+                }
+
+                // 5e gets partial refund
+                const refund = characteristic.levels > 0 ? parseInt((characteristic.core % 1) * 10) : 0;
+
+                return characteristic.levels * this.costPerLevel() - refund;
+            },
             type: ["characteristic"],
-            behaviors: ["figured"],
+            behaviors: ["figured", "figuredDEX"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1020,7 +1031,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 2,
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
-            behaviors: ["defense", "figured"],
+            behaviors: ["defense", "figured", "figuredSTR"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1061,7 +1072,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 2,
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
-            behaviors: ["defense", "figured"],
+            behaviors: ["defense", "figured", "figuredCON"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1102,7 +1113,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 4,
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
-            behaviors: ["figured"],
+            behaviors: ["figured", "figuredSTR", "figuredCON"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1135,7 +1146,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 20,
             costPerLevel: fixedValueFunction(1 / 5),
             type: ["characteristic"],
-            behaviors: ["figured"],
+            behaviors: ["figured", "recalcCON"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
