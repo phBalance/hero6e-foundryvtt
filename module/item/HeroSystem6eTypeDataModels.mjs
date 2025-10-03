@@ -1219,7 +1219,8 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
                     }
                 } else if (this.baseInfo?.behaviors.includes("figured")) {
                     return (
-                        this.actor.system[this.KEY].LEVELS + this.baseInfo.figured5eCharacteristic(this.actor, "core")
+                        (this.actor.system[this.KEY].LEVELS || 0) +
+                        this.baseInfo.figured5eCharacteristic(this.actor, "core")
                     );
                 }
             }

@@ -72,11 +72,11 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         data.system = data.actor.system;
 
         // YUCK: New dataModel branch does not require this
-        for (const cslItem of this.actor.items.filter((i) =>
-            ["COMBAT_LEVELS", "MENTAL_SKILL_LEVELS"].includes(i.system.XMLID),
-        )) {
-            await cslItem.setCombatSkillLevels();
-        }
+        // for (const cslItem of this.actor.items.filter((i) =>
+        //     ["COMBAT_LEVELS", "MENTAL_SKILL_LEVELS"].includes(i.system.XMLID),
+        // )) {
+        //     await cslItem.setCombatSkillLevels();
+        // }
 
         // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
         // This should NEVER happen, but checking to make sure.

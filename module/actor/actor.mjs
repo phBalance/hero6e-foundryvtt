@@ -74,10 +74,11 @@ export class HeroSystem6eActor extends Actor {
 
         // Characteristic defaults
         for (const charBaseInfo of getCharacteristicInfoArrayForActor(this)) {
-            const base = charBaseInfo.base || 0;
+            // Using core to account for 5e calculated/figured characteristics
+            const core = this.system.characteristics[charBaseInfo.key.toLowerCase()]?.core || 0;
             this.updateSource({
-                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: base,
-                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: base,
+                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: core,
+                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: core,
             });
         }
 
@@ -1440,24 +1441,41 @@ export class HeroSystem6eActor extends Actor {
 
     async FullHealth() {
         // Remove all status effects
-        for (const status of this.statuses) {
-            const ae = Array.from(this.effects).find((effect) => effect.statuses.has(status));
-            for (const status of ae.statuses) {
-                await this.toggleStatusEffect(status, { active: false });
-            }
-        }
+        // for (const status of this.statuses) {
+        //     // don't remove any tracked statuses as a STUN 0 might cause an infinite loop as it is re-added
+        //     // during onUpdate.  Also we are missing with STUN BODY below.
+        //     if (
+        //         [
+        //             HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id,
+        //             HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
+        //         ].includes(status)
+        //     )
+        //         continue;
+
+        //     const ae = Array.from(this.effects).find((effect) => effect.statuses.has(status));
+        //     for (const status of ae.statuses) {
+        //         await this.toggleStatusEffect(status, { active: false });
+        //     }
+        // }
+        await this.statuses.clear();
 
         // Remove temporary effects
         for (const ae of this.temporaryEffects) {
+            if (
+                ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
+                ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
+            )
+                continue;
+
             await ae.delete();
         }
 
         // Remove Maneuver/Martial effects
-        for (const ae of this.appliedEffects.filter(
-            (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
-        )) {
-            await ae.delete();
-        }
+        // for (const ae of this.appliedEffects.filter(
+        //     (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
+        // )) {
+        //     await ae.delete();
+        // }
 
         // Remove all active effects with ACTOR as the parent
         // Shouldn't need this and sometimes causes duplicate delete
@@ -1470,30 +1488,22 @@ export class HeroSystem6eActor extends Actor {
         // Set Characteristics MAX to CORE
         const characteristicChangesMax = {};
         for (const char of Object.keys(this.system.characteristics)) {
-            // if (char === "leaping") {
-            //     debugger;
-            // }
             const core = parseInt(this.system.characteristics[char].core);
-            const max = parseInt(this.system.characteristics[char].max) || core;
-            if (max !== core || this.system.characteristics[char].max === undefined) {
+            if (this.system.characteristics[char].max !== core) {
                 this.system.characteristics[char].max = core;
                 characteristicChangesMax[`system.characteristics.${char}.max`] = this.system.characteristics[char].max;
             }
         }
         if (this._id && Object.keys(characteristicChangesMax).length > 0) {
             await this.update(characteristicChangesMax);
-            this.applyActiveEffects();
         }
+        this.applyActiveEffects();
 
         // Set Characteristics VALUE to MAX
         const characteristicChangesValue = {};
         for (const char of Object.keys(this.system.characteristics)) {
-            // if (char === "leaping") {
-            //     debugger;
-            // }
             const max = parseInt(this.system.characteristics[char].max);
-            const value = parseInt(this.system.characteristics[char].value);
-            if (value !== max || this.system.characteristics[char].value === undefined) {
+            if (this.system.characteristics[char].value !== max) {
                 this.system.characteristics[char].value = max;
                 characteristicChangesValue[`system.characteristics.${char}.value`] =
                     this.system.characteristics[char].value;
@@ -1519,22 +1529,15 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
-        if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
-            for (const flight of this.items.filter((i) => i.system.XMLID === "FLIGHT")) {
-                flight.system.active = false;
-                await flight.toggle();
-            }
-        }
+        // if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
+        //     for (const flight of this.items.filter((i) => i.system.XMLID === "FLIGHT")) {
+        //         flight.system.active = false;
+        //         await flight.toggle();
+        //     }
+        // }
 
         // We just cleared encumbrance, check if it applies again
-        await this.applyEncumbrancePenalty();
-
-        // Mini-Migration
-        for (const item of this.items) {
-            await item._postUpload();
-        }
-
-        await this._postUpload();
+        //await this.applyEncumbrancePenalty();
     }
 
     // Raw base is insufficient for 5e characters
@@ -1938,8 +1941,7 @@ export class HeroSystem6eActor extends Actor {
                 await this.update({ ["name"]: this.name });
 
                 // remove stray flags
-                //await this.update({ [`flags.-=${game.system.id}`]: null });
-                await this.setFlag(game.system.id, "uploading", true);
+                //await this.setFlag(game.system.id, "uploading", true);
                 await this.setFlag(game.system.id, "file", {
                     lastModifiedDate: options?.file?.lastModifiedDate,
                     name: options?.file?.name,
@@ -2072,6 +2074,8 @@ export class HeroSystem6eActor extends Actor {
 
             // CHARACTERISTICS
             if (heroJson.CHARACTER?.CHARACTERISTICS) {
+                const changesNormal = {};
+                const changesFiguredOrCalculated = {};
                 uploadProgressBar.advance(`${this.name}: CHARACTERISTICS`, 0);
                 // Make each core characteristic an item
                 // const characteristicsArray = [];
@@ -2096,15 +2100,24 @@ export class HeroSystem6eActor extends Actor {
 
                 // Legacy (well current)
                 for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
+                    const _baseInfo = getPowerInfo({ XMLID: key, actor: this, xmlTag: key });
+
                     this.system[key] = new HeroItemCharacteristic(value, { parent: this });
-                    changes[`system.${key}`] = this.system[key];
+
+                    if (_baseInfo?.behaviors.includes("calculated") || _baseInfo?.behaviors.includes("figured")) {
+                        changesFiguredOrCalculated[`system.${key}`] = this.system[key];
+                    } else {
+                        changesNormal[`system.${key}`] = this.system[key];
+                    }
                 }
                 delete heroJson.CHARACTER.CHARACTERISTICS;
+                await this.update(changesNormal);
+                await this.update(changesFiguredOrCalculated);
+                await this.FullHealth();
             }
-            await this._resetCharacteristicsFromHdc();
 
             // Quench test may need CHARACTERISTICS, which are set in postUpload
-            await this._postUpload({ render: false });
+            //await this._postUpload({ render: false });
 
             // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
             // if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
@@ -2170,6 +2183,14 @@ export class HeroSystem6eActor extends Actor {
                                     itemData.name = system?.ALIAS + " " + system?.INPUT;
                                 }
                                 break;
+                        }
+
+                        // most items default to active
+                        itemData.system.active = true;
+
+                        // unless they use charges, in which case active = false
+                        if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
+                            itemData.system.active = false;
                         }
 
                         // Note that we create COMPOUNDPOWER subitems before creating the parent
@@ -2307,44 +2328,47 @@ export class HeroSystem6eActor extends Actor {
             // TODO: infinite loop of _postUpload until no changes?
             // Do CHARACTERISTICS first (mostly for applyEncumbrance)
 
-            const characteristicItems = this.items.filter((item) => item.baseInfo?.type.includes("characteristic"));
-            await Promise.all(
-                characteristicItems.map((item) => item._postUpload({ render: false, uploadProgressBar })),
-            );
-            await this._postUpload({ render: false });
+            // const characteristicItems = this.items.filter((item) => item.baseInfo?.type.includes("characteristic"));
+            // await Promise.all(
+            //     characteristicItems.map((item) => item._postUpload({ render: false, uploadProgressBar })),
+            // );
+            //await this._postUpload({ render: false });
 
             uploadProgressBar.advance(`${this.name}: Processed characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processing non characteristics`, 0);
 
             const doLastXmlids = ["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "MENTALDEFENSE"];
-            const nonCharacteristicItemsThatAreNotFreeItems = this.items.filter(
-                (item) => !doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
-            );
-            uploadProgressBar.advance(
-                `${this.name}: Processing ${nonCharacteristicItemsThatAreNotFreeItems.length} nonCharacteristicItemsThatAreNotFreeItems`,
-                0,
-            );
-            await Promise.all(
-                nonCharacteristicItemsThatAreNotFreeItems.map((item) =>
-                    item._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false }),
-                ),
-            );
+            // const nonCharacteristicItemsThatAreNotFreeItems = this.items.filter(
+            //     (item) => !doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
+            // );
+            // uploadProgressBar.advance(
+            //     `${this.name}: Processing ${nonCharacteristicItemsThatAreNotFreeItems.length} nonCharacteristicItemsThatAreNotFreeItems`,
+            //     0,
+            // );
+            // await Promise.all(
+            //     nonCharacteristicItemsThatAreNotFreeItems.map((item) =>
+            //         item._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false }),
+            //     ),
+            // );
+            uploadProgressBar.advance(`${this.name}: applySizeEffect`, 0);
             await this.applySizeEffect();
+
             uploadProgressBar.advance(`${this.name}: Processing ${doLastXmlids.length} doLastXmlids`, 0);
             await Promise.all(
-                this.items
-                    .filter(
-                        (item) =>
-                            doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
-                    )
-                    .map((item) => item._postUpload({ render: false, uploadProgressBar })),
+                this.items.filter(
+                    (item) =>
+                        doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
+                ),
             );
 
             // Make sure any powers with characteristic properties
             // reflect in current VALUE
+            uploadProgressBar.advance(`${this.name}: FullHealth`, 0);
             await this.FullHealth();
+            uploadProgressBar.advance(`${this.name}: FullHealth complete`, 0);
 
             // retainValuesOnUpload Charges
+            uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges`, 0);
             for (const chargeData of retainValuesOnUpload.charges) {
                 const item = this.items.find((i) => i.system.ID === chargeData.ID);
                 if (item) {
@@ -2551,7 +2575,7 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance._d = new Date().getTime();
 
             // Set base values to HDC LEVELs and calculate costs of things.
-            await this._postUpload({ render: false });
+            //await this._postUpload({ render: false });
 
             // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
             if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
@@ -2629,18 +2653,18 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
-            this.items
-                .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
-                .forEach(async (item) => {
-                    await item._postUpload({ render: false, applyEncumbrance: false });
-                });
+            // this.items
+            //     .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
+            //     .forEach(async (item) => {
+            //         await item._postUpload({ render: false, applyEncumbrance: false });
+            //     });
 
             // Re-run _postUpload for SKILLS
-            this.items
-                .filter((item) => item.type === "skill")
-                .forEach(async (item) => {
-                    await item._postUpload({ render: false, applyEncumbrance: false });
-                });
+            // this.items
+            //     .filter((item) => item.type === "skill")
+            //     .forEach(async (item) => {
+            //         await item._postUpload({ render: false, applyEncumbrance: false });
+            //     });
             uploadPerformance.postUpload2 = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
 
@@ -2648,7 +2672,7 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: Restoring retained damage`, 0);
 
             // Apply retained damage
-            if (false && this.id) {
+            if (this.id) {
                 for (const key of ["body", "stun", "end"]) {
                     if (!getCharacteristicInfoArrayForActor(this).find((o) => o.key === key.toUpperCase())) continue;
                     if (retainValuesOnUpload[key] == undefined) continue;
@@ -2835,6 +2859,7 @@ export class HeroSystem6eActor extends Actor {
                 LEVELS: "0",
                 is5e: this.is5e,
                 xmlTag: "SKILL",
+                active: true,
             },
         };
         const perceptionItem = this.id
@@ -3103,6 +3128,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async _postUpload() {
+        debugger;
         //overrideValues) {
         // const changes = {};
         // let changed = false;

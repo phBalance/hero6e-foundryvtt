@@ -1097,9 +1097,6 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     let actorStrengthItem = item.system._active.effectiveStrItem;
     if (!actorStrengthItem) {
         actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor, `STR used with ${item.name}`);
-
-        // PH: FIXME: This is a problem but we shouldn't be saving to the database.
-        actorStrengthItem._postUpload();
     }
 
     let str = baseEffectiveStrength;

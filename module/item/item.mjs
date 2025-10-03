@@ -1062,23 +1062,23 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    setCharges(systemCharges) {
-        // CHARGES are also messed with in _postUploadDetails, should probably consolidate
-        const CHARGES = this.findModsByXmlid("CHARGES");
-        if (CHARGES) {
-            this.system.charges = {
-                //max: parseInt(CHARGES.OPTION_ALIAS),
-                value: parseInt(CHARGES.OPTION_ALIAS),
-                //clipsMax: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
-                clips: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
-                recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
-                continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
-                boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
-                fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
-                ...systemCharges,
-            };
-        }
-    }
+    // setCharges(systemCharges) {
+    //     // CHARGES are also messed with in _postUploadDetails, should probably consolidate
+    //     const CHARGES = this.findModsByXmlid("CHARGES");
+    //     if (CHARGES) {
+    //         this.system.charges = {
+    //             //max: parseInt(CHARGES.OPTION_ALIAS),
+    //             value: parseInt(CHARGES.OPTION_ALIAS),
+    //             //clipsMax: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
+    //             clips: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
+    //             recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
+    //             continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
+    //             boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
+    //             fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
+    //             ...systemCharges,
+    //         };
+    //     }
+    // }
 
     async update(...args) {
         if (!this.id) {
@@ -1187,13 +1187,12 @@ export class HeroSystem6eItem extends Item {
      */
     async resetToOriginal() {
         // Reset charges
-        const chargesBefore = this.system.charges;
-        this.setCharges({});
-        if (chargesBefore != null || this.system.charges != null) {
+        //this.setCharges({});
+        if (this.system.charges?.CHARGES) {
             await this.update({
-                ["system.charges"]: this.system.charges,
+                ["system.charges.value"]: this.system.charges.max,
+                ["system.charges.clips"]: this.system.charges.clipsMax,
             });
-            //await this._postUpload();
         }
 
         // turn off items that use END, Charges, MP, etc
@@ -2814,6 +2813,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     async _postUpload() {
+        debugger;
         return false;
         // try {
         //     // Compendium?
