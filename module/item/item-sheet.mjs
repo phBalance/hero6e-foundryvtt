@@ -84,14 +84,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 data.effects = this.document.effects;
             }
 
-            // Signed OCV and DCV
-            // if (data.system.ocv != undefined) {
-            //     data.system.ocv = ("+" + parseInt(data.system.ocv)).replace("+-", "-");
-            // }
-            // if (data.system.dcv != undefined) {
-            //     data.system.dcv = ("+" + parseInt(data.system.dcv)).replace("+-", "-");
-            // }
-
             const configPowerInfo = item.baseInfo;
             data.sheet = { ...(configPowerInfo?.sheet || {}) };
             data.editOptions = configPowerInfo?.editOptions;

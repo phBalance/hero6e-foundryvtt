@@ -621,13 +621,6 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         return this.item.end;
     }
 
-    // get aoeShortDescription() {
-    //     if (!this.item.system.areaOfEffect || this.item.system.areaOfEffect.type === "none") {
-    //         return "-";
-    //     }
-    //     return `${this.item.system.areaOfEffect.type}`;
-    // }
-
     get ocvEstimated() {
         console.error("depricated ocvEstimated");
         return 0;
@@ -743,6 +736,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get damage() {
+        // Potential performance improvment, move to prepareData?
         return getFullyQualifiedEffectFormulaFromItem(this.item, {});
     }
 
@@ -1049,6 +1043,7 @@ export class HeroSystem6eItemMartialArt extends HeroSystem6eItemTypeDataModelPro
     }
 
     get stunBodyDamage() {
+        console.warn("can we use inherited stunBodyDamage?");
         return this.parent.getMakeAttack().stunBodyDamage;
     }
 

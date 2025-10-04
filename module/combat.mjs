@@ -1309,7 +1309,6 @@ export class HeroSystem6eCombat extends Combat {
                 await this.PostSegment12();
                 segmentNumberNext = 1;
                 updateData.round = this.round + 1;
-                //this.system.heroTurn = (this.system.heroTurn || 0) + 1;
             }
             await this.setFlag(game.system.id, "segment", segmentNumberNext);
 
