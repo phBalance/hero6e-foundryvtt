@@ -76,11 +76,14 @@ export class HeroSystem6eAdder {
             _cost += adder.cost;
         }
 
-        // TRANSPORT_FAMILIARITY (possibly others) may have a maximum cost per category
+        // TRANSPORT_FAMILIARITY, WEAPON_FAMILIARITY, and possibly others, may have a maximum cost per category
         if (this.SELECTED === false && this.item?.type === "skill") {
             const maxCost = parseFloat(this.BASECOST) || 0;
             if (maxCost > 0 && _cost > maxCost) {
-                if (this.item?.system.XMLID !== "TRANSPORT_FAMILIARITY") {
+                if (
+                    this.item?.system.XMLID !== "TRANSPORT_FAMILIARITY" &&
+                    this.item?.system.XMLID !== "WEAPON_FAMILIARITY"
+                ) {
                     console.warn(
                         `We found another example of a skill with category limitations ${this.item.system.XMLID}`,
                     );

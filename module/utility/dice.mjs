@@ -173,7 +173,7 @@ export class HeroRoller {
 
     /**
      * The underlying parser makes some assumptions about flavor text assuming their syntax. We don't allow
-     * that with this dice roller.As a simple fix, just replace square brackets with .
+     * that with this dice roller. As a simple fix, just replace square brackets with a parenthesis.
      */
     static #sanitizeFlavorText(flavorText) {
         const sanitizedText = flavorText?.replace("[", "(").replace("]", ")");

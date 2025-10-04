@@ -9094,6 +9094,229 @@ export function registerUploadTests(quench) {
                     );
                 });
             });
+
+            describe("WEAPON_FAMILIARITY", function () {
+                describe("Weapon Familiarity w/ partial subadder not exceeding group cost", async function () {
+                    const contents = `
+                        <SKILL XMLID="WEAPON_FAMILIARITY" ID="1759596099236" BASECOST="0.0" LEVELS="0" ALIAS="WF" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1732469522885" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <NOTES />
+                            <ADDER XMLID="UNCOMMONMELEE" ID="1759597889817" BASECOST="0.0" LEVELS="0" ALIAS="Uncommon Melee Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                                <NOTES />
+                                <ADDER XMLID="FLAILS" ID="1759597889816" BASECOST="1.0" LEVELS="0" ALIAS="Flails" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </ADDER>
+                        </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "WF: Flails");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 1);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 1);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 0);
+                    });
+                });
+
+                describe("Weapon Familiarity w/ multiple individual weapons", async function () {
+                    const contents = `
+                        <SKILL XMLID="WEAPON_FAMILIARITY" ID="1759093334836" BASECOST="0.0" LEVELS="0" ALIAS="WF" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <NOTES />
+                            <ADDER XMLID="UNCOMMONMELEE" ID="1759094938545" BASECOST="0.0" LEVELS="0" ALIAS="Uncommon Melee Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                                <NOTES />
+                                <ADDER XMLID="FLAILS" ID="1759094931202" BASECOST="1.0" LEVELS="0" ALIAS="Flails" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="GARROTE" ID="1759094931724" BASECOST="1.0" LEVELS="0" ALIAS="Garrote" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="NETS" ID="1759094932672" BASECOST="1.0" LEVELS="0" ALIAS="Nets" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </ADDER>
+                        </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "WF: Flails, Garrote, Nets");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 3);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 3);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 0);
+                    });
+                });
+
+                describe("Weapon Familiarity w/ full group adder", async function () {
+                    const contents = `
+                        <SKILL XMLID="WEAPON_FAMILIARITY" ID="1759093417899" BASECOST="0.0" LEVELS="0" ALIAS="WF" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                <ADDER XMLID="COMMONMELEE" ID="1759095012783" BASECOST="2.0" LEVELS="0" ALIAS="Common Melee Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "WF: Common Melee Weapons");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 2);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 0);
+                    });
+                });
+
+                describe("Weapon Familiarity w/ multiple groups and individual weapons", async function () {
+                    const contents = `
+                        <SKILL XMLID="WEAPON_FAMILIARITY" ID="1759093417900" BASECOST="0.0" LEVELS="0" ALIAS="WF" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                <ADDER XMLID="COMMONMELEE" ID="1759095012783" BASECOST="2.0" LEVELS="0" ALIAS="Common Melee Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="COMMONMISSILE" ID="1759095017178" BASECOST="2.0" LEVELS="0" ALIAS="Common Missile Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="OFFHAND" ID="1759095016818" BASECOST="1.0" LEVELS="0" ALIAS="Off Hand" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "WF: Common Melee Weapons, Common Missile Weapons, Off Hand",
+                        );
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 5);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 5);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 0);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
