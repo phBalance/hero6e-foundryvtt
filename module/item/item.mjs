@@ -3586,8 +3586,9 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "TRANSPORT_FAMILIARITY":
-                //TF:  Custom Adder, Small Motorized Ground Vehicles
-                //TF:  Equines, Small Motorized Ground Vehicles
+            case "WEAPON_FAMILIARITY":
+                // TF:  Custom Adder, Small Motorized Ground Vehicles
+                // WF:  Flails
                 system.description = `${system.ALIAS}: `;
                 break;
 
@@ -4213,9 +4214,22 @@ export class HeroSystem6eItem extends Item {
                     // Don't show the +1, 1/2d6, 1d6-1 modifier as it's already included in the description's dice formula
                     break;
 
+                case "BEAMWEAPONS":
+                case "COMMONMARTIAL":
+                case "COMMONMELEE":
+                case "COMMONMISSILE":
                 case "COMMONMOTORIZED":
+                case "EARLYFIREARMS":
+                case "EMPLACEDWEAPONS":
+                case "ENERGYWEAPONS":
                 case "RIDINGANIMALS":
-                    // Both of these Transport Familiarity adders may contain subadders. If they do, then use the subadders
+                case "SIEGEENGINES":
+                case "SMALLARMS":
+                case "UNCOMMONMARTIAL":
+                case "UNCOMMONMELEE":
+                case "UNCOMMONMISSILEWEAPONS":
+                case "UNCOMMONMODERNWEAPONS":
+                    // These Transport Familiarity & Weapon Familiarity adders may contain subadders. If they do, then use the subadders
                     // otherwise use the adder.
                     if (adder.SELECTED) {
                         _adderArray.push(adder.ALIAS);
@@ -4284,6 +4298,7 @@ export class HeroSystem6eItem extends Item {
                     system.description += ` (${_adderArray.sort().join(", ")})`;
                     break;
 
+                case "WEAPON_FAMILIARITY":
                 case "TRANSPORT_FAMILIARITY":
                     system.description += _adderArray.sort().join(", ");
                     break;
