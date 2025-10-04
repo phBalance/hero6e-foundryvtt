@@ -2319,8 +2319,8 @@ export function registerFullTests(quench) {
                     nerveStrikeItem = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
                     killingStrikeItem = actor.items.find((item) => item.system.ALIAS === "Killing Strike");
                     martialStrikeItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
-                    (martialFlashItem = actor.items.find((item) => item.system.ALIAS === "Martial Flash")),
-                        (sacrificeStrikeItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"));
+                    martialFlashItem = actor.items.find((item) => item.system.ALIAS === "Martial Flash");
+                    sacrificeStrikeItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
                 });
 
                 afterEach(async () => {
