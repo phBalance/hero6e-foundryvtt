@@ -16,11 +16,9 @@ export async function CreateHeroCompendiums() {
 
 async function createItem(itemDataArray, packId) {
     try {
-        const item = await Item.createDocuments(itemDataArray, {
+        await Item.createDocuments(itemDataArray, {
             pack: packId,
         });
-
-        await item[0]._postUpload();
     } catch (e) {
         console.error(e);
     }
