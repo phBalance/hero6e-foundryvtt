@@ -3039,7 +3039,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 }
 
 async function _performAbsorptionForToken(token, absorptionItems, damageDetail, damageItem) {
-    const attackType = damageItem.system.class; // TODO: avad?
+    const attackType = damageItem.attackDefenseVs; // TODO: avad?
 
     // Match attack against absorption type. If we match we can do some absorption.
     for (const absorptionItem of absorptionItems) {
