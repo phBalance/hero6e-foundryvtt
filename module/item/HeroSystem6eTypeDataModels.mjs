@@ -1519,3 +1519,16 @@ export class NpcModel extends HeroActorModel {
         });
     }
 }
+
+export class HeroSystem6eItemDepricated extends HeroItemModCommonModel {
+    static get metadata() {
+        return foundry.utils.mergeObject(super.metadata, {
+            type: "depricated",
+        });
+    }
+    static defineSchema() {
+        return {
+            ...super.defineSchema(),
+        };
+    }
+}

@@ -41,6 +41,7 @@ import {
     HeroSystem6eItemDisadvantage,
     HeroSystem6eItemComplication,
     HeroItemCharacteristic,
+    HeroSystem6eItemDepricated,
 } from "./item/HeroSystem6eTypeDataModels.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 
@@ -214,6 +215,8 @@ Hooks.once("init", async function () {
         disadvantage: HeroSystem6eItemDisadvantage,
         complication: HeroSystem6eItemComplication,
         characteristic: HeroItemCharacteristic,
+        attack: HeroSystem6eItemDepricated,
+        movement: HeroSystem6eItemDepricated,
     });
 
     HeroRuler.initialize();
@@ -581,6 +584,8 @@ Hooks.on("renderDialog", (dialog, html) => {
     if (miscOption) miscOption.remove();
     const movementOption = html[0].querySelector("option[value*='movement']");
     if (movementOption) movementOption.remove();
+    const characteristicOption = html[0].querySelector("option[value*='characteristic']");
+    if (characteristicOption) characteristicOption.remove();
 
     // rename base2 to base (v11)
     let base2 = html[0].querySelector("option[value*='base2']");

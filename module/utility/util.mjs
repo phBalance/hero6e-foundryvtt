@@ -25,7 +25,7 @@ export function getPowerInfo(options) {
     }
 
     if (!options.xmlTag && options.item?.type !== "maneuver") {
-        console.warn(`${options.item?.detailedName()}/${options.xmlid} is missing xmlTag`);
+        console.warn(`${options.item?.actor.name}/${options.item?.detailedName()}/${options.xmlid} is missing xmlTag`);
     }
 
     // Legacy init of an item (we now include xmlTag during upload process)
