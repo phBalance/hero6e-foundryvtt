@@ -2827,12 +2827,12 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
             entangleDefense.rMD,
             parseInt(prevEntangle.flags[game.system.id]?.entangleDefense?.rMD) || 0,
         );
-        (entangleDefense.string = `${
+        entangleDefense.string = `${
             entangleDefense.mentalEntangle
                 ? `${entangleDefense.rMD} rMD`
                 : `${entangleDefense.rPD} rPD/${entangleDefense.rED} rED`
-        }`),
-            (body = Math.max(body, prevBody) + 1);
+        }`;
+        body = Math.max(body, prevBody) + 1;
     }
     const effectData = {
         id: "entangled",

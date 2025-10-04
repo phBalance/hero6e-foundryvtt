@@ -3146,9 +3146,10 @@ export function registerUploadTests(quench) {
                     it("levels", function () {
                         assert.equal(item.system.LEVELS, 11);
                     });
-                }),
-                    describe("1 level", async function () {
-                        const contents = `
+                });
+
+                describe("1 level", async function () {
+                    const contents = `
                     <POWER XMLID="FLASHDEFENSE" ID="1700628009410" BASECOST="0.0" LEVELS="1" ALIAS="Flash Defense" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES/>
                         <MODIFIER XMLID="HARDENED" ID="1700628130373" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
@@ -3156,71 +3157,6 @@ export function registerUploadTests(quench) {
                         </MODIFIER>
                     </POWER>
                     `;
-                        let item;
-
-                        before(async () => {
-                            const actor = new HeroSystem6eActor(
-                                {
-                                    name: "Quench Actor",
-                                    type: "pc",
-                                },
-                                {},
-                            );
-                            actor.system.is5e = false;
-                            await actor._postUpload();
-
-                            item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                                parent: actor,
-                            });
-                            await item._postUpload();
-                            actor.items.set(item.system.XMLID, item);
-                        });
-
-                        it("description", function () {
-                            assert.equal(
-                                item.system.description,
-                                "Hearing Group Flash Defense (1 points), Hardened (+1/4)", // Intentionally plural for simpler translation
-                            );
-                        });
-
-                        it("realCost", function () {
-                            assert.equal(item.system.realCost, 1);
-                        });
-
-                        it("activePoints", function () {
-                            assert.equal(item.activePoints, 1);
-                        });
-
-                        it("end", function () {
-                            assert.equal(item.end, 0);
-                        });
-
-                        it("levels", function () {
-                            assert.equal(item.system.LEVELS, 1);
-                        });
-                    });
-            }),
-                describe("MENTALDEFENSE", async function () {
-                    const contents = `
-                    <POWER XMLID="MENTALDEFENSE" ID="1576395326670" BASECOST="0.0" LEVELS="39" ALIAS="Mental Defense" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES>Telepathy must overcome.</NOTES>
-                        <MODIFIER XMLID="ABLATIVE" ID="1578308761240" BASECOST="-1.0" LEVELS="0" ALIAS="Ablative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BODYORSTUN" OPTIONID="BODYORSTUN" OPTION_ALIAS="BODY or STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES />
-                        </MODIFIER>
-                        <MODIFIER XMLID="ALWAYSON" ID="1578308761242" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES />
-                        </MODIFIER>
-                        <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1578308761277" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="CON" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES />
-                        </MODIFIER>
-                        <MODIFIER XMLID="EXTRATIME" ID="1578308761317" BASECOST="-2.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="20MINUTES" OPTIONID="20MINUTES" OPTION_ALIAS="20 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES />
-                        </MODIFIER>
-                        <MODIFIER XMLID="INHERENT" ID="1578308761319" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES />
-                        </MODIFIER>
-                    </POWER>
-                `;
                     let item;
 
                     before(async () => {
@@ -3244,16 +3180,16 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Mental Defense 39 points, Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)",
+                            "Hearing Group Flash Defense (1 points), Hardened (+1/4)", // Intentionally plural for simpler translation
                         );
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 9);
+                        assert.equal(item.system.realCost, 1);
                     });
 
                     it("activePoints", function () {
-                        assert.equal(item.activePoints, 49);
+                        assert.equal(item.activePoints, 1);
                     });
 
                     it("end", function () {
@@ -3261,11 +3197,78 @@ export function registerUploadTests(quench) {
                     });
 
                     it("levels", function () {
-                        assert.equal(item.system.LEVELS, 39);
+                        assert.equal(item.system.LEVELS, 1);
                     });
-                }),
-                describe("MINDSCAN", async function () {
-                    const contents = `
+                });
+            });
+
+            describe("MENTALDEFENSE", async function () {
+                const contents = `
+                    <POWER XMLID="MENTALDEFENSE" ID="1576395326670" BASECOST="0.0" LEVELS="39" ALIAS="Mental Defense" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES>Telepathy must overcome.</NOTES>
+                        <MODIFIER XMLID="ABLATIVE" ID="1578308761240" BASECOST="-1.0" LEVELS="0" ALIAS="Ablative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BODYORSTUN" OPTIONID="BODYORSTUN" OPTION_ALIAS="BODY or STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="ALWAYSON" ID="1578308761242" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1578308761277" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="CON" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="EXTRATIME" ID="1578308761317" BASECOST="-2.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="20MINUTES" OPTIONID="20MINUTES" OPTION_ALIAS="20 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="INHERENT" ID="1578308761319" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Mental Defense 39 points, Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 9);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.activePoints, 49);
+                });
+
+                it("end", function () {
+                    assert.equal(item.end, 0);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS, 39);
+                });
+            });
+
+            describe("MINDSCAN", async function () {
+                const contents = `
                         <POWER XMLID="MINDSCAN" ID="1700619562891" BASECOST="0.0" LEVELS="1" ALIAS="Mind Scan" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="MIND SCAN" INPUT="Animal" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES/>
                             <ADDER XMLID="PLUSONEPIP" ID="1700708893537" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
@@ -3291,49 +3294,49 @@ export function registerUploadTests(quench) {
                             </MODIFIER>
                         </POWER>
                     `;
-                    let item;
+                let item;
 
-                    before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
 
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                            parent: actor,
-                        });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
                     });
-
-                    it("description", function () {
-                        assert.equal(
-                            item.system.description,
-                            "1d6+1 Mind Scan (Animal; +9 OMCV; Additional Class Of Minds; Additional Class Of Minds; Additional Class Of Minds), Cumulative (+1/2) (60 Active Points); Cannot Attack Through Link (neither the character nor his target can use the link to attack each other mentally, but they can communicate; -1/2)",
-                        );
-                    });
-
-                    it("realCost", function () {
-                        assert.equal(item.system.realCost, 40);
-                    });
-
-                    it("activePoints", function () {
-                        assert.equal(item.activePoints, 60);
-                    });
-
-                    it("end", function () {
-                        assert.equal(item.end, 6);
-                    });
-
-                    it("levels", function () {
-                        assert.equal(item.system.LEVELS, 1);
-                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
                 });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "1d6+1 Mind Scan (Animal; +9 OMCV; Additional Class Of Minds; Additional Class Of Minds; Additional Class Of Minds), Cumulative (+1/2) (60 Active Points); Cannot Attack Through Link (neither the character nor his target can use the link to attack each other mentally, but they can communicate; -1/2)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 40);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.activePoints, 60);
+                });
+
+                it("end", function () {
+                    assert.equal(item.end, 6);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS, 1);
+                });
+            });
 
             describe("Skill Rolls", () => {
                 describe("KS: GENERAL with no Levels", () => {

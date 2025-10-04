@@ -110,13 +110,18 @@ export function setPerceptionModes() {
                 type: FoundryVttDetectionMode.DETECTION_TYPES.SIGHT,
             });
         }
+
         static getDetectionFilter() {
-            const filter2 = (this._detectionFilter ??= OutlineOverlayFilter.create({
+            FoundryVttDetectionMode._detectionFilter ??= OutlineOverlayFilter.create({
                 wave: true,
                 knockout: false,
-            }));
-            return (filter2.thickness = 1), filter2;
+            });
+            const filter2 = FoundryVttDetectionMode._detectionFilter;
+            filter2.thickness = 1;
+
+            return filter2;
         }
+
         _canDetect(visionSource, target) {
             if (this.id !== "heroDetectSight") {
                 return super._canDetect(visionSource, target);
