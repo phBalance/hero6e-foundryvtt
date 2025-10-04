@@ -173,15 +173,15 @@ export async function migrateWorld() {
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.18`, "background: #1111FF; color: #FFFFFF");
 
     // Always rebuild the database for all actors by recreating actors and all their items (description, cost, etc)
-    _start = Date.now();
-    await migrateToVersion(
-        game.system.version,
-        undefined,
-        getAllActorsInGame(),
-        "rebuilding actors and their items",
-        async (actor) => await rebuildActors(actor),
-    );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to latest version`, "background: #1111FF; color: #FFFFFF");
+    // _start = Date.now();
+    // await migrateToVersion(
+    //     game.system.version,
+    //     undefined,
+    //     getAllActorsInGame(),
+    //     "rebuilding actors and their items",
+    //     async (actor) => await rebuildActors(actor),
+    // );
+    // console.log(`%c Took ${Date.now() - _start}ms to migrate to latest version`, "background: #1111FF; color: #FFFFFF");
 
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 }
@@ -400,21 +400,21 @@ async function addOtherAttacksManeuversForAutomatonPcNpc(actor) {
     }
 }
 
-async function rebuildActors(actor) {
-    try {
-        if (!actor) return false;
+// async function rebuildActors(actor) {
+//     try {
+//         if (!actor) return false;
 
-        // Rebuild all item data
-        for (const item of actor.items) {
-            await item._postUpload();
-        }
+//         // Rebuild all item data
+//         for (const item of actor.items) {
+//             await item._postUpload();
+//         }
 
-        await actor._postUpload();
-    } catch (e) {
-        const msg = `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`;
-        console.error(msg, e);
-        if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
-            await ui.notifications.warn(msg);
-        }
-    }
-}
+//         await actor._postUpload();
+//     } catch (e) {
+//         const msg = `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`;
+//         console.error(msg, e);
+//         if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
+//             await ui.notifications.warn(msg);
+//         }
+//     }
+// }
