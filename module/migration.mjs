@@ -1,6 +1,6 @@
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
-import { getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
+//import { getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 
 function getAllActorsInGame() {
     return [
@@ -87,6 +87,36 @@ export async function migrateWorld() {
 
     if (await willNotMigrate(lastMigration)) return;
 
+    // Delete invalidItems from unlinked tokens without actors.
+    // Mostly to avoid future errors, not sure why we keep any "delta" from unlinked tokens without actors.
+    const tokensWithInvalidItems = [
+        ...game.scenes.contents
+            .map((scene) => [...scene.tokens.filter((t) => !t.actor && t.delta?.items?.invalidDocumentIds.size > 0)])
+            .flat(),
+    ];
+    if (tokensWithInvalidItems) {
+        const migrationProgressBar = new HeroProgressBar(
+            `Deleting invlaid items from unlinked tokens`,
+            tokensWithInvalidItems + 1,
+        );
+        for (const token of tokensWithInvalidItems) {
+            console.debug(`Deleting ${token.delta.items.invalidDocumentIds.size} invalid items from ${token.name}`);
+            for (const id of token.delta.items.invalidDocumentIds) {
+                try {
+                    const item = token.delta.items.getInvalid(id);
+                    console.log(item);
+                    await item.delete();
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+            migrationProgressBar.advance(
+                `Deleted invalid items from ${token.name} (${tokensWithInvalidItems.length} left)`,
+            );
+        }
+        migrationProgressBar.close(`Done deleting invalid items from unlinked tokens`);
+    }
+
     // Chat Card for GM about new version
     const content = `Version ${
         game.system.version
@@ -172,37 +202,26 @@ export async function migrateWorld() {
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.18`, "background: #1111FF; color: #FFFFFF");
 
-    // Always rebuild the database for all actors by recreating actors and all their items (description, cost, etc)
-    // _start = Date.now();
-    // await migrateToVersion(
-    //     game.system.version,
-    //     undefined,
-    //     getAllActorsInGame(),
-    //     "rebuilding actors and their items",
-    //     async (actor) => await rebuildActors(actor),
-    // );
-    // console.log(`%c Took ${Date.now() - _start}ms to migrate to latest version`, "background: #1111FF; color: #FFFFFF");
-
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 }
 
 async function migrateTo4_2_0(actor) {
     try {
-        await coerceIs5eToBoolean(actor);
         await addPerceptionXmlTag(actor);
-        await convertCharacteristicsToItem(actor);
+        await coerceIs5eToBoolean(actor);
+        //await convertCharacteristicsToItem(actor);
     } catch (e) {
         console.error(e);
     }
 }
 
-async function convertCharacteristicsToItem(actor) {
-    for (const key of getCharacteristicInfoArrayForActor(actor).map((bi) => bi.key)) {
-        if (actor.system[key]) {
-            //debugger;
-        }
-    }
-}
+// async function convertCharacteristicsToItem(actor) {
+//     for (const key of getCharacteristicInfoArrayForActor(actor).map((bi) => bi.key)) {
+//         if (actor.system[key]) {
+//             //debugger;
+//         }
+//     }
+// }
 
 async function addPerceptionXmlTag(actor) {
     const perception = actor.items.find((i) => i.system.XMLID === "PERCEPTION" && i.system.xmlTag !== "SKILL");

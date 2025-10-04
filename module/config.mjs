@@ -990,7 +990,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 2,
             costPerLevel: fixedValueFunction(10),
             cost: function (characteristic) {
-                if (!(characteristic instanceof HeroActorCharacteristic)) {
+                if (
+                    !(characteristic instanceof HeroActorCharacteristic) &&
+                    !(characteristic instanceof HeroSystem6eItem)
+                ) {
                     console.error(`unexpected datatype`, characteristic);
                     return 0;
                 }
