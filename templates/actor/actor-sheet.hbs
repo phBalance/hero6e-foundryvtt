@@ -204,6 +204,9 @@
         {{/if}}
         <a class="item-nav" data-tab="characteristics">Characteristics</a>
         <a class="item-nav" data-tab="other">Other</a>
+        {{#if actor.invalidIds}}
+            <a class="item-nav" data-tab="invalid">Invalid</a>
+        {{/if}}
         {{!-- <a class="item-nav" data-tab="description">Description</a> --}}
     </nav>
 

@@ -3184,7 +3184,7 @@ export class HeroSystem6eItem extends Item {
             case "WEAPON_FAMILIARITY":
                 // TF:  Custom Adder, Small Motorized Ground Vehicles
                 // WF:  Flails
-                system.description = `${system.ALIAS}: `;
+                description = `${system.ALIAS}: `;
                 break;
 
             case "PENALTY_SKILL_LEVELS":
