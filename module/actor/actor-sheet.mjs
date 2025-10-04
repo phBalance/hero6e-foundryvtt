@@ -530,10 +530,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 }
             }
 
-            // Recalculate costs
-            await item._postUpload();
-            await this.actor._postUpload();
-
             return super._onDropItem(event, data);
         }
 
@@ -673,10 +669,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         }
 
         const newItems = await this.actor.createEmbeddedDocuments("Item", itemDataArray);
-        for (const newItem of newItems) {
-            await newItem._postUpload();
-        }
-
         return newItems;
     }
 
@@ -905,15 +897,15 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         }
 
         // Create a temporary strike attack linked to a strength item.
-        const { effectiveItem: effectiveAttackItem, strengthItem: effectiveStrengthItem } = cloneToEffectiveAttackItem({
+        const { effectiveItem: effectiveAttackItem } = cloneToEffectiveAttackItem({
             originalItem: originalStrikeItem,
             effectiveRealCost: originalStrikeItem._realCost,
             pushedRealPoints: originalStrikeItem._realCost,
             effectiveStr: characteristicValue,
             effectiveStrPushedRealPoints: 0,
         });
-        effectiveAttackItem._postUpload();
-        effectiveStrengthItem._postUpload();
+        // effectiveAttackItem._postUpload();
+        // effectiveStrengthItem._postUpload();
 
         // Strength use consumes resources. No other characteristic roll does.
         const {
@@ -1204,10 +1196,9 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                         itemData.system.ID = new Date().getTime().toString();
 
                         // Finally, create the item!
-                        const newItem = await HeroSystem6eItem.create(itemData, {
+                        await HeroSystem6eItem.create(itemData, {
                             parent: actor,
                         });
-                        await newItem._postUpload();
                         return;
                     },
                 },
