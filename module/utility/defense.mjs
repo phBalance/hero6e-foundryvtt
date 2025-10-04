@@ -420,14 +420,15 @@ export async function getConditionalDefenses(token, item, avad) {
     if (avad) {
         const pd = parseInt(token.actor.system.characteristics.pd.value);
         if (pd > 0 && item.system.INPUT === "PD") {
-            const pdXml = getPowerInfo({ xmlid: "PD", actor: token.actor });
-            const pdItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdXml.xml, token.actor), {
-                parent: token.actor,
-            });
-            pdItem.system.LEVELS = pd;
-            pdItem._postUpload();
-            pdItem.system.description = `${pd} PD from characteristics`;
-            conditionalDefenses.push(pdItem);
+            const pdItem = new HeroSystem6eItem(
+                { name: "core PD", type: "characteristic", system: token.actor.system.PD._source },
+                {
+                    parent: token.actor,
+                },
+            );
+            if (pdItem && pdItem.system.LEVELS > 0) {
+                conditionalDefenses.push(pdItem);
+            }
         }
 
         const ed = parseInt(token.actor.system.characteristics.pd.value);

@@ -383,7 +383,7 @@ export class ItemAttackFormApplication extends FormApplication {
      * If they can't place a shot the only options should be "none"
      */
     #setAoeAndHitLocationDataForEffectiveItem() {
-        const aoe = this.data.effectiveItem.aoeAttackParameters();
+        const aoe = this.data.effectiveItem.aoeAttackParameters;
         this.data.hitLocationsEnabled = game.settings.get(HEROSYS.module, "hit locations");
         this.data.hitLocationSideEnabled =
             this.data.hitLocationsEnabled && game.settings.get(HEROSYS.module, "hitLocTracking") === "all";
@@ -577,10 +577,6 @@ export class ItemAttackFormApplication extends FormApplication {
             );
         }
 
-        await strengthItem?._postUpload();
-
-        await effectiveItem._postUpload();
-
         return effectiveItem;
     }
 
@@ -764,7 +760,7 @@ export class ItemAttackFormApplication extends FormApplication {
             // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
             this.data.effectiveActivePoints = Math.min(
                 desiredEffectiveActivePoints,
-                this.data.originalItem.system.activePoints + Math.min(10, this.data.originalItem.system.activePoints),
+                this.data.originalItem.activePoints + Math.min(10, this.data.originalItem.activePoints),
             );
 
             if (this.data.effectiveActivePoints < desiredEffectiveActivePoints) {
@@ -818,7 +814,7 @@ export class ItemAttackFormApplication extends FormApplication {
     async _spawnAreaOfEffect() {
         const item = this.data.effectiveItem;
 
-        const areaOfEffect = item.aoeAttackParameters();
+        const areaOfEffect = item.aoeAttackParameters;
         if (!areaOfEffect) return;
 
         const aoeType = areaOfEffect.type;

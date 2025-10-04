@@ -1,4 +1,5 @@
 import { HEROSYS } from "./herosystem6e.mjs";
+import { getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 
 export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("abs", abs);
@@ -23,6 +24,10 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("activeSegment", activeSegment);
     Handlebars.registerHelper("actorItemHeroValidation", actorItemHeroValidation);
     Handlebars.registerHelper("actorHeroValidationByItemType", actorHeroValidationByItemType);
+    Handlebars.registerHelper("hasCharacteristic", hasCharacteristic);
+    Handlebars.registerHelper("signedString", signedString);
+    Handlebars.registerHelper("calculated5eCharacteristic", calculated5eCharacteristic);
+    Handlebars.registerHelper("figured5eCharacteristic", figured5eCharacteristic);
 }
 
 function indexOf(str, searchTerm) {
@@ -175,4 +180,35 @@ function actorHeroValidationByItemType(actor, itemType) {
         .reduce((accumulator, currentArray) => {
             return accumulator.concat(currentArray.heroValidation);
         }, []);
+}
+
+function hasCharacteristic(actor, characteristic) {
+    return getCharacteristicInfoArrayForActor(actor).find((o) => o.key === characteristic);
+}
+
+function signedString(value) {
+    try {
+        return Number(value).signedStringHero() || value;
+    } catch (e) {
+        console.error(e);
+    }
+    return value;
+}
+
+function calculated5eCharacteristic(actor, characteristic) {
+    try {
+        return characteristic.baseInfo.calculated5eCharacteristic(actor, "core");
+    } catch (e) {
+        console.error(e);
+    }
+    return "?";
+}
+
+function figured5eCharacteristic(actor, characteristic) {
+    try {
+        return characteristic.baseInfo.figured5eCharacteristic(actor, "core");
+    } catch (e) {
+        console.error(e);
+    }
+    return "?";
 }

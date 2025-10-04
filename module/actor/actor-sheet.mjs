@@ -10,7 +10,7 @@ import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
-import { getSystemDisplayUnits } from "../utility/units.mjs";
+//import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 // v13 has namespaced these. When we remove this backwards compatibility then the eslint exception can be cleaned up.
@@ -21,7 +21,8 @@ const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplat
 export class HeroSystemActorSheet extends FoundryVttActorSheet {
     /** @override */
     static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
+        const _defaultOptions = super.defaultOptions;
+        return foundry.utils.mergeObject(_defaultOptions, {
             classes: ["actor-sheet"],
             template: `systems/${HEROSYS.module}/templates/actor/actor-sheet.hbs`,
             tabs: [
@@ -44,7 +45,22 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     async getData(options = {}) {
         window.actor = this.actor;
 
-        const data = super.getData(options);
+        let _data = {};
+        try {
+            _data = super.getData(options);
+        } catch (e) {
+            console.error(e);
+        }
+        const data = _data;
+
+        try {
+            if (this.actor.system.debugModelProps) {
+                this.actor.system.debugModelProps();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
         data.token = options?.token;
         data.isOwner = this.object.isOwner;
         data.gameSystemId = game.system.id;
@@ -52,14 +68,15 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         if (data.actor.flags[game.system.id].uploading) {
             return data;
         }
+
         data.system = data.actor.system;
 
         // YUCK: New dataModel branch does not require this
-        for (const cslItem of this.actor.items.filter((i) =>
-            ["COMBAT_LEVELS", "MENTAL_SKILL_LEVELS"].includes(i.system.XMLID),
-        )) {
-            await cslItem.setCombatSkillLevels();
-        }
+        // for (const cslItem of this.actor.items.filter((i) =>
+        //     ["COMBAT_LEVELS", "MENTAL_SKILL_LEVELS"].includes(i.system.XMLID),
+        // )) {
+        //     await cslItem.setCombatSkillLevels();
+        // }
 
         // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
         // This should NEVER happen, but checking to make sure.
@@ -110,8 +127,8 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
 
             // Equipment & MartialArts are uncommon.  If there isn't any, then don't show the navigation tab.
-            data.hasEquipment = false;
-            data.hasMartialArts = false;
+            data.hasEquipment = !!data.actor.items.find((o) => o.type === "equipment");
+            data.hasMartialArts = !!data.actor.items.find((o) => o.type === "martialart");
 
             // NPC or PC dropdown
             data.isGM = game.user.isGM;
@@ -134,171 +151,23 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
             data.pointsTitle = "";
             data.activePointsTitle = "";
-            if (data.actor.system.pointsDetail) {
-                for (const [key, value] of Object.entries(data.actor.system.pointsDetail)) {
+            if (data.actor.pointsDetail) {
+                for (const [key, value] of Object.entries(data.actor.pointsDetail)) {
                     data.pointsTitle += `${key.replace("equipment", "[equipment]")}: ${value}\n`;
                 }
             }
-            if (data.actor.system.activePointsDetail) {
-                for (const [key, value] of Object.entries(data.actor.system.activePointsDetail)) {
+            if (data.actor.activePointsDetail) {
+                for (const [key, value] of Object.entries(data.actor.activePointsDetail)) {
                     data.activePointsTitle += `${key}: ${value}\n`;
                 }
             } else {
                 data.activePointsTitle = "Total Active Points (estimate)";
             }
 
-            // FIXME: This is the cost of a major amount of rework done that should be calculated once when either the HDC or the system changes.
-            // override actor.items (which is a map) to an array with some custom properties
-            for (let item of data.actor.items) {
-                // Update Attack Details (estimateOCV, DCV, Damage)
-                item._postUploadDetails();
-
-                if (item.type === "martialart") {
-                    data.hasMartialArts = true;
-                } else if (item.type === "equipment") {
-                    data.hasEquipment = true;
-                }
-            }
-
-            if (data.hasEquipment) {
-                data.weightTotal = `${this.actor.encumbrance} kg`;
-                data.priceTotal = `$${this.actor.netWorth}`;
-            }
-
             // Characteristics
-            const characteristicSet = [];
-
-            const powers = getCharacteristicInfoArrayForActor(this.actor);
-            const isAutomatonWithNoStun = !!this.actor.items.find(
-                (power) =>
-                    power.system.XMLID === "AUTOMATON" &&
-                    (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+            data.characteristics = getCharacteristicInfoArrayForActor(this.actor).map(
+                (o) => this.actor.system.characteristics[o.key.toLowerCase()],
             );
-
-            for (const powerInfo of powers) {
-                const characteristic = {
-                    ...data.actor.system.characteristics[powerInfo.key.toLowerCase()],
-                };
-
-                characteristic.key = powerInfo.key.toLowerCase();
-                characteristic.value = parseInt(characteristic.value) || 0;
-                characteristic.max = parseInt(characteristic.max) || 0;
-
-                characteristic.base = this.actor.getCharacteristicBase(powerInfo.key.toUpperCase());
-
-                characteristic.name = powerInfo.name || powerInfo.key.toUpperCase();
-                characteristic.costTitle = powerInfo.cost
-                    ? `${powerInfo.cost} * (${characteristic.core} - ${characteristic.base})`
-                    : null;
-                characteristic.behaviors = powerInfo.behaviors;
-
-                // Notes
-                if (powerInfo.key === "STR") {
-                    const strDetails = this.actor.strDetails();
-                    characteristic.notes = `lift ${strDetails.strLiftText}, running throw ${
-                        strDetails.strThrow
-                    }${getSystemDisplayUnits(data.actor.is5e)}`;
-                }
-
-                if (powerInfo.key === "LEAPING") {
-                    characteristic.notes = `${Math.max(0, characteristic.value)}${getSystemDisplayUnits(
-                        data.actor.system.is5e,
-                    )} forward, ${Math.max(0, Math.round(characteristic.value / 2))}${getSystemDisplayUnits(
-                        data.actor.system.is5e,
-                    )} upward`;
-                }
-
-                if (["SIZE", "BASESIZE"].includes(powerInfo.key)) {
-                    const sizeDetails = this.actor.sizeDetails();
-                    characteristic.notes = sizeDetails.description;
-                }
-
-                characteristic.delta = characteristic.max - characteristic.core;
-                if (data.actor.system.is5e) {
-                    if (powerInfo.key.toLowerCase() === "pd") {
-                        characteristic.notes = `5e figured STR/5${isAutomatonWithNoStun ? " and /3 again" : ""}`;
-                    }
-
-                    if (powerInfo.key.toLowerCase() === "ed") {
-                        characteristic.notes = `5e figured CON/5${isAutomatonWithNoStun ? " and /3 again" : ""}`;
-                    }
-
-                    if (powerInfo.key.toLowerCase() === "spd") {
-                        characteristic.notes = "5e figured 1 + DEX/10";
-                    }
-
-                    if (powerInfo.key.toLowerCase() === "rec") {
-                        characteristic.notes = "5e figured STR/5 + CON/5";
-                    }
-
-                    if (powerInfo.key.toLowerCase() === "end") {
-                        characteristic.notes = "5e figured 2 x CON";
-                    }
-
-                    if (powerInfo.key.toLowerCase() === "stun") {
-                        characteristic.notes = "5e figured BODY+STR/2+CON/2";
-                    }
-
-                    if (["ocv", "dcv"].includes(powerInfo.key.toLowerCase())) {
-                        characteristic.notes = "5e calculated DEX/3";
-                        characteristic.delta = characteristic.max - characteristic.base;
-                    }
-
-                    if (["omcv", "dmcv"].includes(powerInfo.key.toLowerCase())) {
-                        characteristic.notes = "5e calculated EGO/3";
-                    }
-                }
-
-                // Active Effects may be blocking updates
-                let ary = [];
-                let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(
-                    (ae) =>
-                        ae.changes.find(
-                            (p) => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.value`,
-                        ) && !ae.disabled,
-                );
-                for (const ae of activeEffects) {
-                    ary.push(`<li>${ae.name}</li>`);
-                }
-                if (ary.length > 0) {
-                    characteristic.valueTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
-                    characteristic.valueTitle += ary.join("\n ");
-                    characteristic.valueTitle += "</ul>";
-                    characteristic.valueTitle += "<small><i>Click to unblock</i></small>";
-                }
-
-                ary = [];
-                activeEffects = Array.from(this.actor.allApplicableEffects()).filter(
-                    (ae) =>
-                        ae.changes.find((p) => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.max`) &&
-                        !ae.disabled,
-                );
-
-                for (const ae of activeEffects) {
-                    ary.push(`<li>${ae.name}</li>`);
-                    if (ae._prepareDuration().duration) {
-                        const change = ae.changes.find(
-                            (o) => o.key === `system.characteristics.${powerInfo.key.toLowerCase()}.max`,
-                        );
-                        if (change.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
-                            characteristic.delta += parseInt(change.value);
-                        }
-                        if (change.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY) {
-                            characteristic.delta +=
-                                parseInt(characteristic.max) * parseInt(change.value) - parseInt(characteristic.max);
-                        }
-                    }
-                }
-                if (ary.length > 0) {
-                    characteristic.maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
-                    characteristic.maxTitle += ary.join("\n ");
-                    characteristic.maxTitle += "</ul>";
-                    characteristic.maxTitle += "<small><i>Click to unblock</i></small>";
-                }
-
-                characteristicSet.push(characteristic);
-            }
-            data.characteristicSet = characteristicSet;
 
             // Defense (create fake attacks and get defense results)
             let defense = {};
@@ -438,7 +307,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             // This provides a nice way to see ALL powers that are effecting
             // the actor regardless of how they are implemented.
             const defensePowers = data.actor.items.filter(
-                (o) => (o.system.subType || o.type) === "defense" && !o.effects.size,
+                (o) => o.baseInfo?.type.includes("defense") && !o.effects.size,
             );
             for (const d of defensePowers) {
                 d.disabled = !d.isActive;
@@ -511,7 +380,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                     continue;
                 }
 
-                const activePoints = item.system.activePoints;
+                const activePoints = item.activePoints;
                 if (activePoints > 0) {
                     let name = item.name;
                     if (item.name.toUpperCase().indexOf(item.system.XMLID) == -1) {
@@ -535,8 +404,8 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             data.useHAP = game.settings.get(game.system.id, "HAP");
 
             // Not all actor types have END & STUN
-            data.hasEND = powers.find((o) => o.key === "END");
-            data.hasSTUN = powers.find((o) => o.key === "STUN");
+            // data.hasEND = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "END");
+            // data.hasSTUN = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "STUN");
 
             // Endurance Reserve
             data.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
@@ -778,6 +647,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         if (itemDataArray.length === 1) {
             const stackItem = itemDataArray[0];
             if (stackItem.type === "equipment") {
+                stackItem.system.MODIFIER ??= [];
                 const charges = stackItem.system.MODIFIER.find((o) => o.XMLID === "CHARGES");
                 const levels = parseInt(charges?.OPTION_ALIAS);
                 if (levels > 0) {
@@ -1139,6 +1009,25 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
         return item.toggle(event);
+    }
+
+    _getHeaderButtons() {
+        const buttons = super._getHeaderButtons();
+
+        const myButton = {
+            label: this.actor.type, // Raw text or path to text in language file
+            title: "test",
+            class: "my-button", // CSS class for your own use
+            icon: "fal fa-user-robot", // Font awesome icon
+
+            onclick: this.#changeType.bind(this),
+        };
+
+        return [myButton, ...buttons];
+    }
+
+    #changeType() {
+        this.actor.changeType();
     }
 
     async _onItemChangeClips(event) {
@@ -1525,17 +1414,18 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
         // This typically happens during upload.  Don't save anything in static.
         if (is5e === undefined) {
-            const defenseCalculationActor = new HeroSystem6eActor({
-                name: "Defense Calculation Actor",
-                type: "pc",
-                system: { is5e },
-            });
-            const attack = (HeroSystemActorSheet.sampleAttacks[attackKey] = new HeroSystem6eItem(
-                HeroSystem6eItem.itemDataFromXml(xml, defenseCalculationActor),
-                { parent: defenseCalculationActor },
-            ));
-            await attack._postUpload();
-            console.debug(`${attackKey}: Undefined is5e`);
+            return;
+            // const defenseCalculationActor = new HeroSystem6eActor({
+            //     name: "Defense Calculation Actor",
+            //     type: "pc",
+            //     system: { is5e },
+            // });
+            // const attack = (HeroSystemActorSheet.sampleAttacks[attackKey] = new HeroSystem6eItem(
+            //     HeroSystem6eItem.itemDataFromXml(xml, defenseCalculationActor),
+            //     { parent: defenseCalculationActor },
+            // ));
+            // await attack._postUpload();
+            // console.debug(`${attackKey}: Undefined is5e`);
         }
 
         HeroSystemActorSheet.sampleAttacks[defenseCalculationActorKey] ??= new HeroSystem6eActor(
@@ -1553,7 +1443,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 HeroSystem6eItem.itemDataFromXml(xml, defenseCalculationActor),
                 { parent: defenseCalculationActor },
             );
-            await HeroSystemActorSheet.sampleAttacks[attackKey]._postUpload();
+            //await HeroSystemActorSheet.sampleAttacks[attackKey]._postUpload();
             //console.debug(`${attackKey}: Created`);
         } else {
             //console.debug(`${attackKey}: used cache`);

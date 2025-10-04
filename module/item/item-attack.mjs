@@ -1546,7 +1546,6 @@ async function createTemporaryKnockbackItem(actor, knockbackDice) {
     const knockbackAttackItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(knockbackAttackXml, actor), {
         parent: actor,
     });
-    await knockbackAttackItem._postUpload();
     knockbackAttackItem.name ??= "KNOCKBACK";
 
     return knockbackAttackItem;
@@ -3040,7 +3039,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 }
 
 async function _performAbsorptionForToken(token, absorptionItems, damageDetail, damageItem) {
-    const attackType = damageItem.system.class; // TODO: avad?
+    const attackType = damageItem.attackDefenseVs; // TODO: avad?
 
     // Match attack against absorption type. If we match we can do some absorption.
     for (const absorptionItem of absorptionItems) {
@@ -4098,7 +4097,7 @@ function calculateRequiredEnd(item) {
         }
 
         // Pushing uses 1 END per pushed CP
-        const endPerShot = (item.system.end || 0) + (item.system._active.pushedRealPoints || 0);
+        const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
         // How many applications?
         const autofire = item.findModsByXmlid("AUTOFIRE");
@@ -4123,7 +4122,7 @@ function calculateRequiredReserveEndurance(item) {
         // TODO: Lack of support for ENDRESERVEOREND is coded in calculateRequiredEnd
 
         // Pushing uses 1 END per pushed CP
-        const endPerShot = (item.system.end || 0) + (item.system._active.pushedRealPoints || 0);
+        const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
         // How many applications?
         const autofire = item.findModsByXmlid("AUTOFIRE");

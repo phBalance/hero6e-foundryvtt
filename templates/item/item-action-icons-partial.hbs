@@ -3,16 +3,16 @@
 {{#if this.disabledOIHID}}
     <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
 {{else}}
-    {{#if (itemHasBehaviours this "roll" "success")}}
-        {{#if this.system.roll}}
-            <button type="button" class="item-rollable" data-roll="{{this.system.roll}}" data-label="{{this._id}}">
-                {{numberFormat this.system.roll decimals=0 sign=false}}-
-            </button>
-        {{else}}
-            {{log 'missing roll' this}}
-        {{/if}}
-        
+{{#if (itemHasBehaviours this "roll" "success")}}
+    {{#if this.system.roll}}
+        <button type="button" class="item-rollable" data-roll="{{this.system.roll}}" data-label="{{this._id}}">
+            {{numberFormat this.system.roll decimals=0 sign=false}}-
+        </button>
+    {{else}}
+        {{log 'missing roll for ' this}}
     {{/if}}
+    
+{{/if}}
 
     {{#if (itemHasActionBehavior this "to-hit")}}
         <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>

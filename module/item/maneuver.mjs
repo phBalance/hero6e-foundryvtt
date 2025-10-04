@@ -1,5 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { dehydrateAttackItem } from "./item-attack.mjs";
+import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
+import { RoundFavorPlayerDown } from "../utility/round.mjs";
 
 /**
  * Maneuvers have some rules of their own that should be considered.
@@ -11,22 +13,6 @@ export async function enforceManeuverLimits(actor, item) {
     // const maneuverItems = actor.items.filter((e) => ["maneuver", "martialart"].includes(e.type));
 
     await item.update({ "system.active": !item.system.active });
-
-    // PH: FIXME: Not sure this is correct
-    //     if (item.system.active) {
-    //         if (item.name === "Block") {
-    //             for (const maneuver of maneuverItems) {
-    //                 if (maneuver.system.active && maneuver.name !== "Block") {
-    //                     await maneuver.update({ "system.active": false });
-    //                 }
-    //             }
-    //         } else {
-    //             const block = maneuverItems.find((maneuver) => maneuver.name === "Block");
-    //             if (block && block?.system?.active) {
-    //                 await block.update({ "system.active": false });
-    //             }
-    //         }
-    //     }
 }
 
 // FIXME: DCV should only be effective against HTH attacks unless it's a Dodge
@@ -171,7 +157,22 @@ export async function activateManeuver(item) {
 
     // FIXME: These are supposed to be for HTH or ranged combat only except for dodge.
     const dcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
-    const ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
+    let ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
+
+    // Velocity calc?
+    if (isNaN(ocvTrait) && item.system.OCV.includes("v/")) {
+        const match = item.system.OCV.match(/([-+]*)v\/(\d+)/);
+        const v = calculateVelocityInSystemUnits(item.actor, null, null);
+        const sign = match[1];
+        const divisor = parseInt(match[2]);
+        ocvTrait = RoundFavorPlayerDown(v / divisor) * (sign === "-" ? -1 : 1);
+    }
+
+    // Catch All
+    if (isNaN(ocvTrait)) {
+        console.error(`unhandled item.system.OCV`, item.system.OCV);
+        ocvTrait = 0;
+    }
 
     // Types of effects for this maneuver?
     const hasDodgeTrait = maneuverHasDodgeTrait(item);
@@ -183,6 +184,8 @@ export async function activateManeuver(item) {
         dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         dodgeStatusEffect.flags = buildManeuverNextPhaseFlags(item);
         dodgeStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        dodgeStatusEffect.duration ??= {};
+        dodgeStatusEffect.duration.startTime = game.time.worldTime;
         newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
@@ -192,6 +195,8 @@ export async function activateManeuver(item) {
         blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         blockStatusEffect.flags = buildManeuverNextPhaseFlags(item);
         blockStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        blockStatusEffect.duration ??= {};
+        blockStatusEffect.duration.startTime = game.time.worldTime;
         newActiveEffects.push(item.actor.addActiveEffect(blockStatusEffect));
     }
 
@@ -219,6 +224,8 @@ export async function activateManeuver(item) {
         maneuverEffect.flags = buildManeuverNextPhaseFlags(item);
         maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         maneuverEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        maneuverEffect.duration ??= {};
+        maneuverEffect.duration.startTime = game.time.worldTime;
 
         if (item.actor.effects.find((ae) => ae.name === maneuverEffect.name)) {
             // Unclear why we are creating this effect a second time.

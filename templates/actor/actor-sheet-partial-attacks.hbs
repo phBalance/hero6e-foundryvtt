@@ -28,35 +28,38 @@
                         {{/if}}
                         {{{itemName item}}}
                     </td>
-                    <td title="{{{getScopedFlagValue item @root/gameSystemId "tags" "ocv"}}}">
-                        {{item.system.ocvEstimated}}
+                    <td data-tooltip="{{{item.system.ocvDetails.tooltip}}}">
+                        {{item.system.ocvDetails.value}}
                     </td>
-                    <td title="{{{getScopedFlagValue item @root/gameSystemId "tags" "dcv"}}}">
-                        {{item.system.dcvEstimated}}
+                    <td data-tooltip="{{{item.system.dcvDetails.tooltip}}}">
+                        {{item.system.dcvDetails.value}}
                     </td>
                     <td>
-                        {{item.system.uses}} vs {{item.system.targets}}
+                    {{item.system.uses}} vs {{item.system.targets}}
                     </td>
-                        <td title="{{{getScopedFlagValue item @root/gameSystemId "tags" "dc"}}}">
+                    <td>
                         {{item.system.damage}}
                     </td>
                     <td>
-                        {{item.system.class}}
+                        {{item.attackDefenseVs}}
                     </td>
                     <td>
                         {{item.system.endEstimate}}
                     </td>
                     <td>
-                        {{#if (eq item.system.areaOfEffect.type "none")}}
-                            -
+                        {{#if item.aoeAttackParameters}}
+                            {{item.aoeAttackParameters.shortDesc}}
                         {{else}}
+                            -
+                        {{/if}}
+                        {{!-- {{else}}
                             {{#if (ne item.system.areaOfEffect.type "none")}}
                                 {{item.system.areaOfEffect.type}}
                                 {{#if (or item.system.areaOfEffect.isExplosion (gt item.system.areaOfEffect.value 0))}}
                                     ({{#if (gt item.system.areaOfEffect.value 0)}}{{item.system.areaOfEffect.value}}{{/if}}{{#if item.system.areaOfEffect.isExplosion}}e{{/if}})
                                 {{/if}}
                             {{/if}}
-                        {{/if}}
+                        {{/if}} --}}
                     </td>
                     <td>
                         {{> (getModulePath 'item/item-action-icons-partial.hbs') item }}

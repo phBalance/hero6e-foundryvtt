@@ -724,7 +724,9 @@ export class HeroSystem6eCombat extends Combat {
 
         // Stop dodges and other maneuvers' active effects that expire automatically
         const maneuverNextPhaseAes = combatant.actor.effects.filter(
-            (ae) => ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect",
+            (ae) =>
+                ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect" &&
+                ae.duration.startTime !== game.time.worldTime,
         );
         const maneuverNextPhaseTogglePromises = maneuverNextPhaseAes
             .filter((ae) => ae.flags[game.system.id]?.toggle)
@@ -803,7 +805,7 @@ export class HeroSystem6eCombat extends Combat {
                     item.isActive === true && // Is the power active?
                     item.baseInfo && // Do we have baseInfo for this power
                     item.baseInfo.duration !== "instant" && // Is the power non instant
-                    ((parseInt(item.system.end || 0) > 0 && // Does the power use END?
+                    ((parseInt(item.end || 0) > 0 && // Does the power use END?
                         !item.system.MODIFIER?.find(
                             (o) =>
                                 (o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE") ||
@@ -1307,7 +1309,6 @@ export class HeroSystem6eCombat extends Combat {
                 await this.PostSegment12();
                 segmentNumberNext = 1;
                 updateData.round = this.round + 1;
-                //this.system.heroTurn = (this.system.heroTurn || 0) + 1;
             }
             await this.setFlag(game.system.id, "segment", segmentNumberNext);
 

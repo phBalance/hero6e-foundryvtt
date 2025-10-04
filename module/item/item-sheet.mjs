@@ -84,14 +84,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 data.effects = this.document.effects;
             }
 
-            // Signed OCV and DCV
-            if (data.system.ocv != undefined) {
-                data.system.ocv = ("+" + parseInt(data.system.ocv)).replace("+-", "-");
-            }
-            if (data.system.dcv != undefined) {
-                data.system.dcv = ("+" + parseInt(data.system.dcv)).replace("+-", "-");
-            }
-
             const configPowerInfo = item.baseInfo;
             data.sheet = { ...(configPowerInfo?.sheet || {}) };
             data.editOptions = configPowerInfo?.editOptions;
@@ -550,8 +542,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     };
 
                     await this.item.update({ [`system.ADDER`]: [...this.item.system.ADDER, newAdder] });
-                    //this.item.system.ADDER.push(newAdder);
-                    //HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
                 }
 
                 // Delete custom adders that matches attack name
@@ -560,7 +550,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     await this.item.update({
                         [`system.ADDER`]: this.item.system.ADDER.filter((o) => o.targetId != attackItem.id),
                     });
-                    //HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
                 }
             }
         }
@@ -571,11 +560,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
             this.item.system.ADDER = (this.item.system.ADDER || []).filter(
                 (o) => o.XMLID != "ADDER" || !parseFloat(o.BASECOST) == 0,
             );
-
-            // Invalidate the adders cache if this is a non temporary item.
-            if (this.item.id) {
-                HeroSystem6eItem._addersCache.invalidateCache(this.item.id);
-            }
         }
 
         // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
@@ -586,10 +570,10 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         // HD lite (currently only SKILL) uses generic _postUpload
         // TODO: Much of the above is likely not necessary as _postUpload does alot
-        await this.item._postUpload();
-        if (this.item.actor) {
-            await this.item.actor.CalcActorRealAndActivePoints();
-        }
+        // await this.item._postUpload();
+        // if (this.item.actor) {
+        //     await this.item.actor.CalcActorRealAndActivePoints();
+        // }
     }
 
     async _onEffectCreate(event) {

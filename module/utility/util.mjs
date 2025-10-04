@@ -7,20 +7,31 @@ import { performAdjustment, renderAdjustmentChatCards } from "./adjustment.mjs";
 export function getPowerInfo(options) {
     const xmlid =
         options.xmlid ||
+        options.XMLID ||
         options.item?.XMLID ||
         options.item?.system?.XMLID ||
         options.item?.system?.xmlid ||
         options.item?.system?.id;
 
+    if (xmlid === "DEX") {
+        //debugger;
+    }
+
     const actor = options?.actor || options?.item?.actor;
+
+    // Excellent we have a positive source for xmlTag!
+    if (!options.xmlTag && options?.item?.system?.xmlTag) {
+        options.xmlTag = options.item.system.xmlTag;
+    }
+
+    if (!options.xmlTag && options.item?.type !== "maneuver") {
+        console.warn(`${options.item?.detailedName()}/${options.xmlid} is missing xmlTag`);
+    }
 
     // Legacy init of an item (we now include xmlTag during upload process)
     try {
         if (!options?.xmlTag && !options?.xmlid) {
-            if (options?.item?.system?.xmlTag) {
-                // Excellent we have a positive source for xmlTag!
-                options.xmlTag = options.item.system.xmlTag;
-            } else if (options?.item?.xmlTag) {
+            if (options?.item?.xmlTag) {
                 // Excellent we have a positive source for xmlTag!
                 options.xmlTag = options.item.xmlTag;
             } else if (options?.item?.system?.XMLID === "FOCUS") {
@@ -57,7 +68,7 @@ export function getPowerInfo(options) {
     }
     if (is5e == undefined) {
         console.warn(
-            `DefaultEdition was used to determine is5e for ${actor?.name || options.item?.pack || (Item.get(options.item?.id) ? "Item" : undefined)}:${options.item?.name}`,
+            `DefaultEdition was used to determine is5e for ${actor?.name || options.item?.pack || (Item.get(options.item?.id) ? "Item" : undefined)}:${options.item?.name || xmlid}`,
         );
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
         const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
@@ -130,11 +141,13 @@ export function getCharacteristicInfoArrayForActor(actor) {
     const powerList = actor?.system?.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
 
     let powers = powerList.filter(isCharOrMovePowerForActor);
-    const AUTOMATON = !!actor.items.find(
-        (power) =>
-            power.system.XMLID === "AUTOMATON" &&
-            (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
-    );
+    const AUTOMATON =
+        actor.type === "automaton" ||
+        !!actor.items.find(
+            (power) =>
+                power.system.XMLID === "AUTOMATON" &&
+                (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+        );
     if (AUTOMATON && powers.find((o) => o.key === "STUN")) {
         if (["pc", "npc"].includes(actor.type)) {
             console.debug(`${actor.name} has the wrong actor type ${actor.type}`, actor);
@@ -502,4 +515,17 @@ export function tokenEducatedGuess(options = {}) {
 
 export function gmActive() {
     return !!game.users.filter((u) => u.active && u.isGM).length;
+}
+
+export function squelch(id) {
+    const _id = id ? id.toString() : "undefined";
+    window[game.system.id] ??= {};
+    window[game.system.id].squelch ??= {};
+    if (window[game.system.id].squelch[_id]) {
+        if (Date.now() - window[game.system.id].squelch[_id] < 100) {
+            return true;
+        }
+    }
+    window[game.system.id].squelch[_id] = Date.now();
+    return false;
 }

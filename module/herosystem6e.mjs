@@ -29,7 +29,19 @@ import {
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
-import { HeroSystem6eItemTypeDataModelMisc } from "./item/HeroSystem6eItemTypeDataModelMisc.mjs";
+import {
+    HeroActorModel,
+    HeroSystem6eItemPower,
+    HeroSystem6eItemEquipment,
+    HeroSystem6eItemSkill,
+    HeroSystem6eItemManeuver,
+    HeroSystem6eItemTalent,
+    HeroSystem6eItemPerk,
+    HeroSystem6eItemMartialArt,
+    HeroSystem6eItemDisadvantage,
+    HeroSystem6eItemComplication,
+    HeroItemCharacteristic,
+} from "./item/HeroSystem6eTypeDataModels.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 
 //import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
@@ -132,7 +144,6 @@ Hooks.once("init", async function () {
             HeroSystem6eToken,
         },
         rollItemMacro: rollItemMacro,
-        CreateCustomAttack: CreateCustomAttack,
         config: HERO,
     };
 
@@ -181,9 +192,28 @@ Hooks.once("init", async function () {
         base: HeroSystem6eActorActiveEffectsSystemData,
     });
 
+    Object.assign(CONFIG.Actor.dataModels, {
+        ai: HeroActorModel,
+        automaton: HeroActorModel,
+        base2: HeroActorModel,
+        computer: HeroActorModel,
+        pc: HeroActorModel,
+        npc: HeroActorModel,
+        vehicle: HeroActorModel,
+    });
+
     Object.assign(CONFIG.Item.dataModels, {
         // The keys are the types defined in our template.json
-        misc: HeroSystem6eItemTypeDataModelMisc,
+        power: HeroSystem6eItemPower,
+        equipment: HeroSystem6eItemEquipment,
+        skill: HeroSystem6eItemSkill,
+        maneuver: HeroSystem6eItemManeuver,
+        talent: HeroSystem6eItemTalent,
+        perk: HeroSystem6eItemPerk,
+        martialart: HeroSystem6eItemMartialArt,
+        disadvantage: HeroSystem6eItemDisadvantage,
+        complication: HeroSystem6eItemComplication,
+        characteristic: HeroItemCharacteristic,
     });
 
     HeroRuler.initialize();
@@ -439,63 +469,6 @@ async function handleMacroCreation(bar, data, slot, item) {
     game.user.assignHotbarMacro(macro, slot);
 }
 
-async function CreateCustomAttack(actor) {
-    if (!actor) return ui.notifications.error("You must select token or actor");
-    await Dialog.prompt({
-        content: `<h1>${actor.name}</h1><label>Enter Item Data</label><textarea rows="20" cols="200">
-{
-    "name": "Custom Attack",
-    "system": {
-    "modifiers": [],
-    "end": 1,
-    "adders": [],
-    "XMLID": "ENERGYBLAST",
-    "ALIAS": "Blast",
-    "LEVELS": {
-        "value": "1",
-        "max": "1"
-    },
-    "MULTIPLIER": "1.0",
-    "basePointsPlusAdders": 5,
-    "activePoints": 5,
-    "realCost": 2,
-    "subType": "attack",
-    "class": "energy",
-    "killing": false,
-    "knockbackMultiplier": 1,
-    "targets": "dcv",
-    "uses": "ocv",
-    "usesStrength": true,
-    "areaOfEffect": {
-        "type": "none",
-        "value": 0
-    },
-    "piercing": 0,
-    "penetrating": 0,
-    "ocv": "+0",
-    "dcv": "+0",
-    "stunBodyDamage": "Stun and Body"
-    }
-}
-
-</textarea>`,
-        callback: async function (html) {
-            let value = html.find("textarea").val();
-            try {
-                let json = JSON.parse(value);
-                console.log(json);
-                json.type = "attack";
-
-                let item = await Item.create(json, { parent: actor });
-                item.updateItemDescription();
-                return ui.notifications.info(`Added ${item.name} to ${actor.name}`);
-            } catch (e) {
-                return ui.notifications.error(e);
-            }
-        },
-    });
-}
-
 /**
  * Create a Macro from an Item drop.
  * Get an existing item macro if one exists, otherwise create a new one.
@@ -507,11 +480,7 @@ function rollItemMacro(itemName, itemType) {
     let actor;
     if (speaker.token) actor = game.actors.tokens[speaker.token];
     if (!actor) actor = game.actors.get(speaker.actor);
-    let item = actor
-        ? actor.items.find(
-              (i) => i.name === itemName && (!itemType || i.type == itemType || i.system.subType === itemType),
-          )
-        : null;
+    let item = actor ? actor.items.find((i) => i.name === itemName && (!itemType || i.type == itemType)) : null;
 
     // The selected actor does not have an item with this name.
     if (!item) {
@@ -519,9 +488,7 @@ function rollItemMacro(itemName, itemType) {
         // Search all owned tokens for this item
         for (let token of canvas.tokens.ownedTokens) {
             actor = token.actor;
-            item = actor.items.find(
-                (i) => i.name === itemName && (!itemType || i.type == itemType || i.system.subType === itemType),
-            );
+            item = actor.items.find((i) => i.name === itemName && (!itemType || i.type == itemType));
             if (item) {
                 break;
             }
@@ -642,20 +609,26 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
         console.log(err);
     }
 
-    // Change Type
-    if (game.user.isGM) {
-        let element = document.createElement("a");
-        element.setAttribute(`data-id`, data.actor.id);
-        element.title = data.actor.type.toUpperCase().replace("2", "");
-        element.addEventListener("click", (event) => {
-            const actor = game.actors.get(event.target.dataset.id);
-            actor.changeType();
-        });
+    // // Change Type
+    // if (game.user.isGM) {
+    //     const element = document.createElement("a");
+    //     element.classList = "header-button control";
+    //     element.setAttribute(`data-id`, data.actor.uuid);
+    //     element.title = data.actor.type.toUpperCase().replace("2", "");
+    //     element.addEventListener("click", async (event) => {
+    //         event.preventDefault();
+    //         const actor = fromUuidSync(event.target.dataset.id);
+    //         if (!actor) {
+    //             ui.notifications.error(`Actor ${event.target.dataset.id} was not found`);
+    //             return;
+    //         }
+    //         //await actor.changeType();
+    //     });
 
-        element.innerHTML = `<i class="fal fa-user-robot"></i>Type`;
+    //     element.innerHTML = `<i class="fal fa-user-robot"></i>${data.actor?.template?.replace("builtIn.", "").replace(".hdt", "") || "Type"} `;
 
-        html.find("header h4").after(element);
-    }
+    //     html.find("header h4").after(element);
+    // }
 });
 
 Hooks.on("renderItemSheet", (dialog, html) => {
@@ -732,7 +705,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 !naturalBodyHealing &&
                 parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)
             ) {
-                const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
+                const bodyPerMonth = Math.max(1, parseInt(actor.system.characteristics.rec.value));
                 const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
                 const activeEffect = {
                     name: `Natural Body Healing (${bodyPerMonth}/month)`,

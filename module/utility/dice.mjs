@@ -1495,7 +1495,10 @@ export class HeroRoller {
             (this._alreadyHitLocation === "none" || CONFIG.HERO.isSpecialHitLocation(this._alreadyHitLocation))
         ) {
             const isSpecialHitLocation = CONFIG.HERO.isSpecialHitLocation(this._alreadyHitLocation);
-            const hitLocationRollHeader = `${this._hitLocationRoller.getFormula()} ${
+            if (!this._hitLocationRoller) {
+                console.error(`this._hitLocationRoller is undefined`, this);
+            }
+            const hitLocationRollHeader = `${this._hitLocationRoller ? this._hitLocationRoller.getFormula() : "error"} ${
                 isSpecialHitLocation ? "Special Hit Location" : "Random Hit Location"
             }`;
 
