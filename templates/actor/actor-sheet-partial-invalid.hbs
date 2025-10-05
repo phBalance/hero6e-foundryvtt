@@ -1,0 +1,30 @@
+<div class="tab tab-body" data-group="primary" data-tab="invalid">
+    <p>
+        The following items are no longer valid. Recommend re-uploading the HDC file.
+    </p>
+    <table>
+        <tr class="sticky">
+            <th class="left">Type</th>
+            <th class="left">{{localize "ActorSheet.Name"}}</th>
+            <th class="left">XMLID</th>
+            <th class="left">{{localize "ActorSheet.Description"}}</th>
+        </tr>
+        {{#each actor.invalidItems}}
+            <tr class="item"
+                data-item-id="{{this.id}}">
+                <td class="left">
+                    {{this.type}}
+                </td>
+                <td class="left">
+                    {{this.name}}
+                </td>
+                <td class="left">
+                    {{this.system.XMLID}}
+                </td>
+                <td class="left">
+                    {{this.system.description}}
+                </td>
+            </tr>
+        {{/each}}
+    </table>
+</div>

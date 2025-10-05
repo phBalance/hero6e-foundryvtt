@@ -4987,6 +4987,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get attackDefenseVs() {
+        if (!this.baseInfo) {
+            console.error(`${this?.actor.name}/${this.detailedName()}.baseInfo is missing`);
+            return "-";
+        }
         // What are we effectively using for attack?
         const baseAttackItem = this.baseInfo.baseEffectDicePartsBundle(this, {}).baseAttackItem;
 
@@ -5981,13 +5985,13 @@ export class HeroSystem6eItem extends Item {
         return xml;
     }
 
-    static migrateDataSafe(source) {
-        if (["misc", "attack", "movement"].includes(source.type)) {
-            console.warn(`${source.name} type changed from "${source.type}" to "power"`, source);
-            source.type = "power";
-        }
-        return super.migrateData(source);
-    }
+    // static migrateDataSafe(source) {
+    //     if (["misc", "attack", "movement"].includes(source.type)) {
+    //         console.warn(`${source.name} type changed from "${source.type}" to "power"`, source);
+    //         source.type = "power";
+    //     }
+    //     return super.migrateData(source);
+    // }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER

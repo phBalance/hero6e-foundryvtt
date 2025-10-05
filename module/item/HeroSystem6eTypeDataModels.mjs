@@ -319,21 +319,21 @@ class HeroPowerModel extends HeroItemModCommonModel {
 }
 
 export class HeroSystem6eItemCharges extends foundry.abstract.DataModel {
-    constructor(data, context) {
-        super(data, context);
+    // constructor(data, context) {
+    //     super(data, context);
 
-        // set initial value
-        const CHARGES = this.parent.MODIFIER.find((m) => m.XMLID === "CHARGES");
-        if (!CHARGES && data.value !== undefined) {
-            this.value = undefined;
-        }
-        if (data.value === undefined) {
-            if (CHARGES) {
-                this.value = parseInt(CHARGES.OPTION_ALIAS);
-                this.clips = Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0));
-            }
-        }
-    }
+    //     // set initial value
+    //     const CHARGES = this.parent.MODIFIER.find((m) => m.XMLID === "CHARGES");
+    //     if (!CHARGES && data.value !== undefined) {
+    //         this.value = undefined;
+    //     }
+    //     if (data.value === undefined) {
+    //         if (CHARGES) {
+    //             this.value = parseInt(CHARGES.OPTION_ALIAS);
+    //             this.clips = Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0));
+    //         }
+    //     }
+    // }
 
     static defineSchema() {
         // Note that the return is just a simple object
