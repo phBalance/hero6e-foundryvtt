@@ -1832,10 +1832,12 @@ export class HeroSystem6eItem extends Item {
     async changeClips(/*event*/) {
         const charges = this.system.charges;
         if (!charges) {
-            return ui.notifications.warn(`${this.detailedName()} does not use charges. Please report.`);
+            return ui.notifications.error(
+                `${this.detailedName()} does not use charges so does not have clips. Please report.`,
+            );
         } else if (charges.clipsMax <= 1) {
             return ui.notifications.warn(`${this.detailedName()} does not use clips. Please report.`);
-        } else if (charges.clips === 0) {
+        } else if (charges.clips <= 1) {
             return ui.notifications.error(`${this.detailedName()} does not have 1 clip remaining.`);
         }
 

@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.1.17 20250921 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.0 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Items with charge clips no longer get an extra clip. [#2898](https://github.com/dmdorman/hero6e-foundryvtt/issues/2898)
+
+## Version 4.1.17 20250921
 
 - Fixed missing Combat Skill Level settings. [#2830](https://github.com/dmdorman/hero6e-foundryvtt/issues/2830)
 - You are prompted before clearing an existing token image during HDC uploads that have no image in the HDC file. [#2831](https://github.com/dmdorman/hero6e-foundryvtt/issues/2831)
