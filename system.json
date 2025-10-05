@@ -35,9 +35,7 @@
             "equipment": {},
             "defense": {},
             "maneuver": {},
-            "characteristic": {},
-            "attack": {},
-            "movement": {}
+            "characteristic": {}
         }
     },
     "esmodules": ["module/herosystem6e.mjs"],

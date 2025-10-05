@@ -487,3 +487,12 @@ tr.top-powers.delta-item {
 .actor-sheet a.validation {
     outline: red solid 1px;
 }
+
+a.item-nav.invalid,
+a.item-nav.invalid.active {
+    color: red;
+}
+
+.actor-sheet div[data-tab="invalid"] {
+    color: red;
+}

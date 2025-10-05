@@ -3587,6 +3587,10 @@ export class HeroSystem6eActor extends Actor {
         // return this.currentInit;
     }
 
+    get invalidItems() {
+        return Array.from(this.items.invalidDocumentIds).map((id) => this.items.getInvalid(id));
+    }
+
     // static migrateData(source) {
     //     console.log(source);
     //     debugger;
