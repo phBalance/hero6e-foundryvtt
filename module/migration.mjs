@@ -203,6 +203,25 @@ export async function migrateWorld() {
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.18`, "background: #1111FF; color: #FFFFFF");
 
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
+
+    // Invalid sidebar Items
+    try {
+        for (const id of game.items.invalidDocumentIds) {
+            const item = game.items.getInvalid(id);
+            if (["misc", "attack", "movement"].includes(item.type)) {
+                console.log(item);
+                console.warn(`changing ${item.name} type from "${item.type}" to "power"`, item);
+                await item.update({ type: "power", name: `[INVALID] ${item.name}`, "==system": item.system });
+            } else {
+                console.error("unexpected item.type", item);
+            }
+            ui.notifications.error(
+                `There were ${game.items.invalidDocumentIds.size} items that are no longer supported in the sidebar. These items were re-typed to be POWERs and prefixed with [INVALID]. These items probably won't work.`,
+            );
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function migrateTo4_2_0(actor) {

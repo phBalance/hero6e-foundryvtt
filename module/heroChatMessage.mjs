@@ -100,7 +100,7 @@ export class HeroSystem6eChatMessage extends ChatMessage {
 
                     if (messageSender && this.author) {
                         if (messageSender.textContent === this.author.name) {
-                            console.warn(`speaker.alias === author.name. Verify CONST.CHAT_MESSAGE_STYLES.IC`);
+                            //console.warn(`speaker.alias === author.name. Verify CONST.CHAT_MESSAGE_STYLES.IC`);
                         } else {
                             const authorElement = document.createElement("span");
                             authorElement.classList.add("user");
