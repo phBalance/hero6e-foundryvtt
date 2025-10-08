@@ -3527,7 +3527,7 @@ export class HeroSystem6eItem extends Item {
                         const damageFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
                         if (damageFormula !== "0") {
                             if (description.indexOf(damageFormula) === -1) {
-                                description = ` ${damageFormula} ${system.class || ""}`;
+                                description = ` ${damageFormula} ${this.attackDefenseVs || ""}`;
                             }
                         }
                     }
