@@ -564,7 +564,7 @@ export class HeroSystem6eItem extends Item {
 
         // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
         if (
-            this.system.showToggle &&
+            this.isActivatable() &&
             this.system.active === undefined &&
             this.system.charges === undefined &&
             !this.end &&
@@ -952,66 +952,11 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    setShowToggleActiveDefault() {
-        // ShowToggles & Activatable & default active
-        if (
-            this.baseInfo?.type.includes("defense") ||
-            this.baseInfo?.behaviors?.includes("defense") ||
-            this.baseInfo?.type?.includes("characteristic") ||
-            (["power", "equipment"].includes(this.type) && this.baseInfo?.type?.includes("sense"))
-        ) {
-            if (this.baseInfo?.behaviors.includes("activatable")) {
-                this.system.showToggle = true;
-            }
-
-            // Default toggles to ON unless they are instant, have charges, part of a MULTIPOWER, etc
-            if (
-                this.system.charges?.value > 0 ||
-                this.system.AFFECTS_TOTAL === false ||
-                this.baseInfo?.duration === "instant" ||
-                this.parentItem?.system.XMLID === "MULTIPOWER" ||
-                this.baseInfo?.behaviors.includes("defaultoff")
-            ) {
-                this.system.active ??= false;
-            } else {
-                if (this.system.active === undefined) {
-                    this.system.active ??= true;
-                }
-            }
-        }
-    }
-
     setCarried() {
         if (this.system.CARRIED && this.system.active === undefined && this.end === 0) {
             this.system.active ??= true;
         }
     }
-
-    setShowToggle() {
-        if (this.baseInfo?.behaviors.includes("activatable")) {
-            if (!this.system.showToggle) {
-                this.system.showToggle = true;
-            }
-        }
-    }
-
-    // setCharges(systemCharges) {
-    //     // CHARGES are also messed with in _postUploadDetails, should probably consolidate
-    //     const CHARGES = this.findModsByXmlid("CHARGES");
-    //     if (CHARGES) {
-    //         this.system.charges = {
-    //             //max: parseInt(CHARGES.OPTION_ALIAS),
-    //             value: parseInt(CHARGES.OPTION_ALIAS),
-    //             //clipsMax: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
-    //             clips: Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0)),
-    //             recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
-    //             continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
-    //             boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
-    //             fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
-    //             ...systemCharges,
-    //         };
-    //     }
-    // }
 
     async update(...args) {
         if (!this.id) {
@@ -1124,8 +1069,10 @@ export class HeroSystem6eItem extends Item {
                 console.error("item.system.charges === undefined");
             }
             if (this.end > 0 || (this.system.charges?.max > 0 && !this.parentItem?.system.XMLID === "MULTIPOWER")) {
-                if (this.isActive) {
-                    await this.toggle();
+                if (this.isActivatable()) {
+                    if (this.isActive) {
+                        await this.toggle();
+                    }
                 }
             } else {
                 // if (!this.isActive) {
@@ -2250,9 +2197,6 @@ export class HeroSystem6eItem extends Item {
         if (!item.actor) {
             return;
         }
-
-        // showToggle
-        item.system.showToggle = this.isActivatable();
 
         const itemEffects = item.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
         if (itemEffects) {

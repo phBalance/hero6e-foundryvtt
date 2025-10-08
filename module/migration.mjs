@@ -208,7 +208,7 @@ export async function migrateWorld() {
     try {
         for (const id of game.items.invalidDocumentIds) {
             const item = game.items.getInvalid(id);
-            if (["misc", "attack", "movement"].includes(item.type)) {
+            if (["misc", "attack", "movement", "defense"].includes(item.type)) {
                 console.log(item);
                 console.warn(`changing ${item.name} type from "${item.type}" to "power"`, item);
                 await item.update({ type: "power", name: `[INVALID] ${item.name}`, "==system": item.system });

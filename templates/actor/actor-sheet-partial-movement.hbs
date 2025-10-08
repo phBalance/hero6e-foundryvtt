@@ -25,7 +25,7 @@
                     <td>{{item.system.value}}</td>
                     <td>{{item.system.velValue}}</td>
                     <td>
-                        {{#if this.system.showToggle}}
+                        {{#if (itemHasActionBehavior this "activatable")}}
                             {{#if this.disabledOIHID}}
                                 <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                             {{else}}
