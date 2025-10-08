@@ -25,7 +25,12 @@ export function getPowerInfo(options) {
     }
 
     if (!options.xmlTag && options.item?.type !== "maneuver") {
-        console.warn(`${options.item?.actor.name}/${options.item?.detailedName()}/${options.xmlid} is missing xmlTag`);
+        if (!squelch(options.item || xmlid)) {
+            console.warn(
+                `${options.item?.actor.name}/${options.item?.detailedName()}/${xmlid} is missing xmlTag`,
+                options.item,
+            );
+        }
     }
 
     // Legacy init of an item (we now include xmlTag during upload process)
@@ -88,14 +93,12 @@ export function getPowerInfo(options) {
     );
 
     if (powerInfoList.length > 1) {
-        if (!window.warnGetPowerInfo?.includes(xmlid)) {
+        if (!squelch(xmlid)) {
             console.warn(
                 `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Multiple powerInfo results. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again may resolve this issue.`,
                 powerInfoList,
                 options,
             );
-            window.warnGetPowerInfo ??= [];
-            window.warnGetPowerInfo.push(xmlid);
         }
     }
 
@@ -519,13 +522,13 @@ export function gmActive() {
 
 export function squelch(id) {
     const _id = id ? id.toString() : "undefined";
-    window[game.system.id] ??= {};
-    window[game.system.id].squelch ??= {};
-    if (window[game.system.id].squelch[_id]) {
-        if (Date.now() - window[game.system.id].squelch[_id] < 100) {
+    globalThis[game.system.id] ??= {};
+    globalThis[game.system.id].squelch ??= {};
+    if (globalThis[game.system.id].squelch[_id]) {
+        if (Date.now() - globalThis[game.system.id].squelch[_id] < 100) {
             return true;
         }
     }
-    window[game.system.id].squelch[_id] = Date.now();
+    globalThis[game.system.id].squelch[_id] = Date.now();
     return false;
 }
