@@ -1178,6 +1178,7 @@ export class HeroSystem6eItem extends Item {
             await this.update({
                 ["system.charges.value"]: this.system.charges.max,
                 ["system.charges.clips"]: this.system.charges.clipsMax,
+                ["system.active"]: false,
             });
         }
 
@@ -1187,10 +1188,7 @@ export class HeroSystem6eItem extends Item {
             if (this.system.charges === undefined) {
                 console.error("item.system.charges === undefined");
             }
-            if (
-                this.system.end > 0 ||
-                (this.system.charges?.max > 0 && !this.parentItem?.system.XMLID === "MULTIPOWER")
-            ) {
+            if (this.end > 0 || (this.system.charges?.max > 0 && !this.parentItem?.system.XMLID === "MULTIPOWER")) {
                 if (this.system.active || this.system.active === null) {
                     this.system.active = false;
                     if (this.id) {

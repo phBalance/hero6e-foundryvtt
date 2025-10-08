@@ -347,7 +347,7 @@ export class HeroSystem6eItemCharges extends foundry.abstract.DataModel {
     }
 
     get CHARGES() {
-        return this.parent.MODIFIER.find((o) => o.XMLID === "CHARGES");
+        return this.item.modifiers.find((m) => m.XMLID === "CHARGES");
     }
 
     get item() {
