@@ -6297,6 +6297,65 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return result;
             },
+            activeEffect: function (item) {
+                const ae = {
+                    transfer: true,
+                };
+                ae.name = `${item.system.ALIAS || item.system.XMLID || item.name}: ${item.system.XMLID} ${item.is5e ? item.system.LEVELS : item.system.OPTIONID}`;
+                ae.img = "icons/svg/upgrade.svg";
+                const details = this.details(item);
+                ae.changes = [
+                    {
+                        key: "system.characteristics.str.max",
+                        value: details.str,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.body.max",
+                        value: details.body,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.stun.max",
+                        value: details.stun,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
+                        // should technicaly add to OCV of attacker.
+                        // However 5e use the -DCV concept and we will implement 6e in kind for now.
+                        key: "system.characteristics.dcv.max",
+                        value: -details.dcv,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.con.max",
+                        value: details.con,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.pre.max",
+                        value: details.pre,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.pd.max",
+                        value: details.pd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.ed.max",
+                        value: details.ed,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.running.max",
+                        value: details.running,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ];
+                return ae;
+            },
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
@@ -6336,6 +6395,40 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     wide: Math.pow(2, Math.floor(item.system.LEVELS / 3)),
                 };
                 return result;
+            },
+            activeEffect: function (item) {
+                const ae = {
+                    transfer: true,
+                };
+                ae.name = `${item.system.ALIAS || item.system.XMLID || item.name}: ${item.system.XMLID} ${item.is5e ? item.system.LEVELS : item.system.OPTIONID}`;
+                ae.img = "icons/svg/upgrade.svg";
+                const details = this.details(item);
+                ae.changes = [
+                    {
+                        key: "system.characteristics.str.max",
+                        value: details.str,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.body.max",
+                        value: details.body,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.stun.max",
+                        value: details.stun,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
+                        // should technicaly add to OCV of attacker.
+                        // However 5e use the -DCV concept and we will implement 6e in kind for now.
+                        key: "system.characteristics.dcv.max",
+                        value: -details.dcv,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ];
+                return ae;
             },
         },
     );
