@@ -30,12 +30,10 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     rkaItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(rkaContent, actor), {
                         parent: actor,
                     });
-                    await rkaItem._postUpload();
                     actor.items.set(rkaItem.system.XMLID, rkaItem);
                 });
 
@@ -435,12 +433,10 @@ export function registerDamageFunctionTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         killingItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(rkaContent, actor), {
                             parent: actor,
                         });
-                        await killingItem._postUpload();
                         actor.items.set(killingItem.system.XMLID, killingItem);
 
                         egoAttackItem = new HeroSystem6eItem(
@@ -449,13 +445,11 @@ export function registerDamageFunctionTests(quench) {
                                 parent: actor,
                             },
                         );
-                        await egoAttackItem._postUpload();
                         actor.items.set(egoAttackItem.system.XMLID, egoAttackItem);
 
                         normalItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(normalContent, actor), {
                             parent: actor,
                         });
-                        await normalItem._postUpload();
                         actor.items.set(normalItem.system.XMLID, normalItem);
 
                         threePointFlashItem = new HeroSystem6eItem(
@@ -464,7 +458,6 @@ export function registerDamageFunctionTests(quench) {
                                 parent: actor,
                             },
                         );
-                        await threePointFlashItem._postUpload();
                         actor.items.set(threePointFlashItem.system.XMLID, threePointFlashItem);
                     });
 
@@ -1262,7 +1255,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -1302,7 +1294,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -1342,7 +1333,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -1388,7 +1378,6 @@ export function registerDamageFunctionTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -1433,7 +1422,6 @@ export function registerDamageFunctionTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -1481,7 +1469,6 @@ export function registerDamageFunctionTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -1524,7 +1511,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(
                         {
@@ -1566,7 +1552,6 @@ export function registerDamageFunctionTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(
                         {
@@ -1614,7 +1599,6 @@ export function registerDamageFunctionTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         threePointFlashItem = new HeroSystem6eItem(
                             HeroSystem6eItem.itemDataFromXml(threePointFlashContent, actor),
@@ -1622,7 +1606,6 @@ export function registerDamageFunctionTests(quench) {
                                 parent: actor,
                             },
                         );
-                        await threePointFlashItem._postUpload();
                         actor.items.set(threePointFlashItem.system.XMLID, threePointFlashItem);
                     });
 
@@ -1655,8 +1638,6 @@ export function registerDamageFunctionTests(quench) {
                             // Reduce or Push the item
                             pushedItem.changePowerLevel(38);
                             pushedItem.system._active.pushedRealPoints = 3;
-
-                            pushedItem._postUpload();
                         });
 
                         it("realCost", function () {
@@ -1692,8 +1673,6 @@ export function registerDamageFunctionTests(quench) {
                             // Reduce or Push the item
                             pushedItem.changePowerLevel(43.5);
                             pushedItem.system._active.pushedRealPoints = 9;
-
-                            pushedItem._postUpload();
                         });
 
                         it("realCost", function () {
@@ -1743,12 +1722,10 @@ export function registerDamageFunctionTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         ebWithAdvAndLimItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(ebContent, actor), {
                             parent: actor,
                         });
-                        await ebWithAdvAndLimItem._postUpload();
                         actor.items.set(ebWithAdvAndLimItem.system.XMLID, ebWithAdvAndLimItem);
                     });
 
@@ -1781,8 +1758,6 @@ export function registerDamageFunctionTests(quench) {
                             // Reduce or Push the item
                             pushedItem.changePowerLevel(55);
                             pushedItem.system._active.pushedRealPoints = 5;
-
-                            pushedItem._postUpload();
                         });
 
                         it("realCost", function () {
@@ -1819,8 +1794,6 @@ export function registerDamageFunctionTests(quench) {
                             // Reduce or Push the item
                             pushedItem.changePowerLevel(58);
                             pushedItem.system._active.pushedRealPoints = 8;
-
-                            pushedItem._postUpload();
                         });
 
                         it("realCost", function () {
@@ -1870,12 +1843,10 @@ export function registerDamageFunctionTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         drainWithLimItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(drainContent, actor), {
                             parent: actor,
                         });
-                        await drainWithLimItem._postUpload();
                         actor.items.set(drainWithLimItem.system.XMLID, drainWithLimItem);
                     });
 
@@ -1908,8 +1879,6 @@ export function registerDamageFunctionTests(quench) {
                             // Reduce or Push the item
                             pushedItem.changePowerLevel(34);
                             pushedItem.system._active.pushedRealPoints = 3;
-
-                            pushedItem._postUpload();
                         });
 
                         it("realCost", function () {
@@ -1944,8 +1913,6 @@ export function registerDamageFunctionTests(quench) {
                             // Reduce or Push the item
                             pushedItem.changePowerLevel(37);
                             pushedItem.system._active.pushedRealPoints = 6;
-
-                            pushedItem._postUpload();
                         });
 
                         it("realCost", function () {

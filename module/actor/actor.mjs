@@ -1814,6 +1814,11 @@ export class HeroSystem6eActor extends Actor {
         if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
             itemData.system.active = false;
         }
+
+        // Kluge for TK as we are trying to avoid getInfo overhead
+        if (["TELEKINESIS"].includes(itemData.system.XMLID)) {
+            itemData.system.active = false;
+        }
     }
 
     async uploadFromXml(xml, options) {
@@ -2100,8 +2105,11 @@ export class HeroSystem6eActor extends Actor {
                     }
                 }
                 delete heroJson.CHARACTER.CHARACTERISTICS;
-                await this.update(changesNormal);
-                await this.update(changesFiguredOrCalculated);
+
+                if (this.id) {
+                    await this.update(changesNormal);
+                    await this.update(changesFiguredOrCalculated);
+                }
                 await this.FullHealth();
             }
 
@@ -2725,8 +2733,14 @@ export class HeroSystem6eActor extends Actor {
         } catch (e) {
             console.error(e);
             ui.notifications.error(`${this.name} had errors during upload.`);
-            await this.setFlag(game.system.id, "uploadingError", e.stack.replace(/http(s)?:[/[a-z0-9_.-:()]+\//gi, ""));
-            uploadProgressBar.close(`Upload Failed ${this.name}`);
+            //uploadProgressBar.close(`Upload Failed ${this.name}`);
+            if (this.id) {
+                await this.setFlag(
+                    game.system.id,
+                    "uploadingError",
+                    e.stack.replace(/http(s)?:[/[a-z0-9_.-:()]+\//gi, ""),
+                );
+            }
         }
     }
 

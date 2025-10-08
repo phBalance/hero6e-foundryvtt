@@ -306,202 +306,44 @@ export class HeroSystem6eItem extends Item {
     // }
 
     async setActiveEffects() {
-        // ACTIVE EFFECTS
-        if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
-            const activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.LEVELS}`;
-            activeEffect.img = "icons/svg/upgrade.svg";
-            activeEffect.description = this.system.description;
-            activeEffect.changes = [
-                {
-                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
-                    value: parseInt(this.system.LEVELS),
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-            ];
-            for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
-                let foundMatch = false;
-                for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
-                    if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
-                        activeEffect.changes.push({
-                            key: `system.characteristics.${movementKey.toLowerCase()}.max`,
-                            value: parseInt(this.system.LEVELS),
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        });
-                        foundMatch = true;
-                    }
-                }
-                if (!foundMatch) {
-                    ui.notifications.warn(
-                        `${this.name} has unknown USABLE AS "${usableas.ALIAS}. Expected format is "Usable as Swimming"`,
-                    );
-                    console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
-                }
-            }
-            activeEffect.transfer = true;
-            activeEffect.disabled = !this.system.active;
-
-            if (activeEffect.update) {
-                await activeEffect.update({
-                    name: activeEffect.name,
-                    changes: activeEffect.changes,
-                });
-            } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-            }
-            if (this.actor && game.actors.get(this.actor.id)) {
-                for (const change of activeEffect.changes) {
-                    await this.actor.update({
-                        [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
-                    });
-                }
-            }
-        }
-
-        if (this.id && this.type !== "characteristic" && this.baseInfo?.type?.includes("characteristic")) {
-            const activeEffect = Array.from(this.effects)?.[0] || {};
-            const value = this.system.LEVELS;
-            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${value}`;
-            activeEffect.img = "icons/svg/upgrade.svg";
-            activeEffect.description = this.system.description;
-            activeEffect.changes = [
-                {
-                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
-                    value: value,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-            ];
-            activeEffect.transfer = true;
-            activeEffect.disabled = !this.system.active;
-
-            if (activeEffect.update) {
-                const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
-                await activeEffect.update({
-                    name: activeEffect.name,
-                    changes: activeEffect.changes,
-                });
-                const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
-                const newValue = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax;
-                await this.actor.update({
-                    [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: newValue,
-                });
-            } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-            }
-        }
-
-        if (this.id && this.system.XMLID === "DENSITYINCREASE") {
-            const noStrIncrease = this.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
-            const strAdd = noStrIncrease ? 0 : Math.floor(this.system.LEVELS) * 5;
-            const pdAdd = Math.floor(this.system.LEVELS);
-            const edAdd = Math.floor(this.system.LEVELS);
-
-            let activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.LEVELS}`;
-            activeEffect.img = "icons/svg/upgrade.svg";
-            activeEffect.changes = [
-                {
-                    key: "system.characteristics.str.max",
-                    value: strAdd,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-                {
-                    key: "system.characteristics.pd.max",
-                    value: pdAdd,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-                {
-                    key: "system.characteristics.ed.max",
-                    value: edAdd,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-            ];
-            activeEffect.transfer = true;
-            activeEffect.disabled = !this.system.active;
-
-            if (activeEffect.update) {
-                await activeEffect.update({
-                    name: activeEffect.name,
-                    changes: activeEffect.changes,
-                });
-                await this.actor.update({
-                    [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
-                });
-                await this.actor.update({
-                    [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
-                });
-                await this.actor.update({
-                    [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
-                });
-            } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-            }
-        }
-
-        // Generic activeEffect (preferred; so far just GROWTH)
-        if (this.baseInfo?.activeEffect) {
-            const activeEffect = this.baseInfo?.activeEffect(this);
-            const currentAE = Array.from(this.effects)?.[0];
-            if (currentAE) {
-                await currentAE.update({
-                    name: activeEffect.name,
-                    changes: activeEffect.changes,
-                });
-            } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        try {
+            if (!this.id) {
+                console.warn(`Skipping setActiveEffects because there is no item.id`, this);
+                return;
             }
 
-            // Consider a "return" here; would we ever have 2 active effects on an item? Likely not.
-        }
-
-        // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
-        // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
-        if (this.id && this.system.XMLID === "SHRINKING") {
-            const dcvAdd = Math.floor(this.system.LEVELS) * 2;
-
-            let activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
-            activeEffect.img = "icons/svg/upgrade.svg";
-            activeEffect.changes = [
-                {
-                    key: "system.characteristics.dcv.max",
-                    value: dcvAdd,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-            ];
-            activeEffect.transfer = true;
-
-            if (activeEffect.update) {
-                await activeEffect.update({
-                    name: activeEffect.name,
-                    changes: activeEffect.changes,
-                });
-                await this.actor.update({
-                    [`system.characteristics.dcv.value`]: this.actor.system.characteristics.dcv.max,
-                });
-            } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-            }
-        }
-
-        const hasDCV = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "DCV");
-        const MOBILITY = this.findModsByXmlid("MOBILITY");
-        if (this.id && MOBILITY && hasDCV) {
-            const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
-
-            const activeEffect = Array.from(this.effects)?.[0] || {};
-            if (dcvValue !== null) {
-                activeEffect.name =
-                    (this.name ? `${this.name}/${MOBILITY.parent.name || MOBILITY.parent.ALIAS}: ` : "") +
-                    `${MOBILITY.OPTIONID} ${dcvValue}`;
-                activeEffect.img = "icons/svg/downgrade.svg";
+            // ACTIVE EFFECTS
+            if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
+                const activeEffect = Array.from(this.effects)?.[0] || {};
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.LEVELS}`;
+                activeEffect.img = "icons/svg/upgrade.svg";
+                activeEffect.description = this.system.description;
                 activeEffect.changes = [
                     {
-                        key: "system.characteristics.dcv.value",
-                        value: dcvValue,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                        value: parseInt(this.system.LEVELS),
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                     },
                 ];
+                for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
+                    let foundMatch = false;
+                    for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
+                        if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
+                            activeEffect.changes.push({
+                                key: `system.characteristics.${movementKey.toLowerCase()}.max`,
+                                value: parseInt(this.system.LEVELS),
+                                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                            });
+                            foundMatch = true;
+                        }
+                    }
+                    if (!foundMatch) {
+                        ui.notifications.warn(
+                            `${this.name} has unknown USABLE AS "${usableas.ALIAS}. Expected format is "Usable as Swimming"`,
+                        );
+                        console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
+                    }
+                }
                 activeEffect.transfer = true;
                 activeEffect.disabled = !this.system.active;
 
@@ -513,71 +355,245 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
-            } else {
-                if (activeEffect.delete) {
-                    await activeEffect.delete();
+                if (this.actor && game.actors.get(this.actor.id)) {
+                    for (const change of activeEffect.changes) {
+                        await this.actor.update({
+                            [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
+                        });
+                    }
                 }
             }
-        }
 
-        // CUSTOMPOWER LIGHT
-        if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
-            if (!game.modules.get("ATL")?.active) {
-                ui.notifications.warn(
-                    `You must install the <b>Active Token Effects</b> module for carried lights to work`,
-                );
-            }
-            let activeEffect = Array.from(this.effects)?.[0] || {};
-            if (this.system.active || !activeEffect.update) {
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
-                activeEffect.img = "icons/svg/light.svg";
+            if (this.id && this.type !== "characteristic" && this.baseInfo?.type?.includes("characteristic")) {
+                const activeEffect = Array.from(this.effects)?.[0] || {};
+                const value = this.system.LEVELS;
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${value}`;
+                activeEffect.img = "icons/svg/upgrade.svg";
+                activeEffect.description = this.system.description;
                 activeEffect.changes = [
                     {
-                        key: "ATL.light.bright",
-                        value: parseFloat(this.system.QUANTITY),
+                        key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                        value: value,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                     },
                 ];
-                if (!activeEffect.update) {
-                    activeEffect.disabled = true;
+                activeEffect.transfer = true;
+                activeEffect.disabled = !this.system.active;
+
+                if (activeEffect.update) {
+                    const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
+                    await activeEffect.update({
+                        name: activeEffect.name,
+                        changes: activeEffect.changes,
+                    });
+                    const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
+                    const newValue =
+                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax;
+                    await this.actor.update({
+                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: newValue,
+                    });
+                } else {
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
+            }
+
+            if (this.id && this.system.XMLID === "DENSITYINCREASE") {
+                const noStrIncrease = this.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
+                const strAdd = noStrIncrease ? 0 : Math.floor(this.system.LEVELS) * 5;
+                const pdAdd = Math.floor(this.system.LEVELS);
+                const edAdd = Math.floor(this.system.LEVELS);
+
+                let activeEffect = Array.from(this.effects)?.[0] || {};
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.LEVELS}`;
+                activeEffect.img = "icons/svg/upgrade.svg";
+                activeEffect.changes = [
+                    {
+                        key: "system.characteristics.str.max",
+                        value: strAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.pd.max",
+                        value: pdAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.ed.max",
+                        value: edAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ];
+                activeEffect.transfer = true;
+                activeEffect.disabled = !this.system.active;
 
                 if (activeEffect.update) {
                     await activeEffect.update({
                         name: activeEffect.name,
                         changes: activeEffect.changes,
-                        disabled: false,
+                    });
+                    await this.actor.update({
+                        [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
+                    });
+                    await this.actor.update({
+                        [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
+                    });
+                    await this.actor.update({
+                        [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
                     });
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
-            } else {
-                // Light was turned off?
-                if (activeEffect?.update) {
+            }
+
+            // Generic activeEffect (preferred; so far just GROWTH)
+            if (this.baseInfo?.activeEffect) {
+                const activeEffect = this.baseInfo?.activeEffect(this);
+                const currentAE = Array.from(this.effects)?.[0];
+                if (currentAE) {
+                    if (this.id) {
+                        await currentAE.update({
+                            name: activeEffect.name,
+                            changes: activeEffect.changes,
+                        });
+                    } else {
+                        currentAE.name = activeEffect.name;
+                        currentAE.changes = activeEffect.changes;
+                    }
+                } else {
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                }
+
+                // Consider a "return" here; would we ever have 2 active effects on an item? Likely not.
+            }
+
+            // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+            // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
+            if (this.id && this.system.XMLID === "SHRINKING") {
+                const dcvAdd = Math.floor(this.system.LEVELS) * 2;
+
+                let activeEffect = Array.from(this.effects)?.[0] || {};
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
+                activeEffect.img = "icons/svg/upgrade.svg";
+                activeEffect.changes = [
+                    {
+                        key: "system.characteristics.dcv.max",
+                        value: dcvAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ];
+                activeEffect.transfer = true;
+
+                if (activeEffect.update) {
                     await activeEffect.update({
                         name: activeEffect.name,
-                        disabled: true,
+                        changes: activeEffect.changes,
                     });
+                    await this.actor.update({
+                        [`system.characteristics.dcv.value`]: this.actor.system.characteristics.dcv.max,
+                    });
+                } else {
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
             }
-        }
 
-        // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
-        if (
-            this.isActivatable() &&
-            this.system.active === undefined &&
-            this.system.charges === undefined &&
-            !this.end &&
-            this.parentItem?.system.XMLID === "MULTIPOWER"
-        ) {
-            this.system.active ??= true;
-        }
+            const hasDCV = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "DCV");
+            const MOBILITY = this.findModsByXmlid("MOBILITY");
+            if (this.id && MOBILITY && hasDCV) {
+                const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
 
-        if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
-            // Invisibility status effect for SIGHTGROUP?
-            if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
+                const activeEffect = Array.from(this.effects)?.[0] || {};
+                if (dcvValue !== null) {
+                    activeEffect.name =
+                        (this.name ? `${this.name}/${MOBILITY.parent.name || MOBILITY.parent.ALIAS}: ` : "") +
+                        `${MOBILITY.OPTIONID} ${dcvValue}`;
+                    activeEffect.img = "icons/svg/downgrade.svg";
+                    activeEffect.changes = [
+                        {
+                            key: "system.characteristics.dcv.value",
+                            value: dcvValue,
+                            mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        },
+                    ];
+                    activeEffect.transfer = true;
+                    activeEffect.disabled = !this.system.active;
+
+                    if (activeEffect.update) {
+                        await activeEffect.update({
+                            name: activeEffect.name,
+                            changes: activeEffect.changes,
+                        });
+                    } else {
+                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                    }
+                } else {
+                    if (activeEffect.delete) {
+                        await activeEffect.delete();
+                    }
+                }
             }
+
+            // CUSTOMPOWER LIGHT
+            if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
+                if (!game.modules.get("ATL")?.active) {
+                    ui.notifications.warn(
+                        `You must install the <b>Active Token Effects</b> module for carried lights to work`,
+                    );
+                }
+                let activeEffect = Array.from(this.effects)?.[0] || {};
+                if (this.system.active || !activeEffect.update) {
+                    activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
+                    activeEffect.img = "icons/svg/light.svg";
+                    activeEffect.changes = [
+                        {
+                            key: "ATL.light.bright",
+                            value: parseFloat(this.system.QUANTITY),
+                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        },
+                    ];
+                    if (!activeEffect.update) {
+                        activeEffect.disabled = true;
+                    }
+
+                    if (activeEffect.update) {
+                        await activeEffect.update({
+                            name: activeEffect.name,
+                            changes: activeEffect.changes,
+                            disabled: false,
+                        });
+                    } else {
+                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                    }
+                } else {
+                    // Light was turned off?
+                    if (activeEffect?.update) {
+                        await activeEffect.update({
+                            name: activeEffect.name,
+                            disabled: true,
+                        });
+                    }
+                }
+            }
+
+            // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
+            if (
+                this.isActivatable() &&
+                this.system.active === undefined &&
+                this.system.charges === undefined &&
+                !this.end &&
+                this.parentItem?.system.XMLID === "MULTIPOWER"
+            ) {
+                this.system.active ??= true;
+            }
+
+            if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
+                // Invisibility status effect for SIGHTGROUP?
+                if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
+                    this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
+                }
+            }
+        } catch (e) {
+            console.error(e, this);
+            throw e;
         }
     }
 

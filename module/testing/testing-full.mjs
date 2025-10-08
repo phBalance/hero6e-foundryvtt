@@ -1562,11 +1562,23 @@ export function registerFullTests(quench) {
                 });
 
                 it("Killing Strike OCV", async function () {
-                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.ocvEstimated, "1");
+                    assert.equal(
+                        actor.items
+                            .find((o) => o.system.ALIAS === "Killing Strike")
+                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.ocvDetails
+                            .value,
+                        "1",
+                    );
                 });
 
                 it("Killing Strike DCV", async function () {
-                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.dcvEstimated, "3");
+                    assert.equal(
+                        actor.items
+                            .find((o) => o.system.ALIAS === "Killing Strike")
+                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.dcvDetails
+                            .value,
+                        "3",
+                    );
                 });
 
                 it("Martial Strike damage", async function () {
@@ -1575,11 +1587,23 @@ export function registerFullTests(quench) {
                 });
 
                 it("Martial Strike OCV", async function () {
-                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.ocvEstimated, "3");
+                    assert.equal(
+                        actor.items
+                            .find((o) => o.system.ALIAS === "Martial Strike")
+                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.ocvDetails
+                            .value,
+                        "3",
+                    );
                 });
 
                 it("Martial Strike DCV", async function () {
-                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.dcvEstimated, "5");
+                    assert.equal(
+                        actor.items
+                            .find((o) => o.system.ALIAS === "Martial Strike")
+                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.dcvDetails
+                            .value,
+                        "5",
+                    );
                 });
 
                 it("HKA damage", async function () {
