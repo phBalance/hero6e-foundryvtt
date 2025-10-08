@@ -1787,6 +1787,35 @@ export class HeroSystem6eActor extends Actor {
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
+    itemDataDefaults(itemData) {
+        // Hack in some basic information with names.
+        // TODO: This should be turned into some kind of short version of the description
+        //       and it should probably be done when building the description
+        switch (itemData.system.XMLID) {
+            case "FOLLOWER":
+                itemData.name = "Followers";
+                break;
+            case "ABSORPTION":
+            case "AID":
+            case "DISPEL":
+            case "DRAIN":
+            case "HEALING":
+            case "TRANSFER":
+            case "SUCCOR":
+            case "SUPPRESS":
+                if (!itemData.system.NAME) {
+                    itemData.name = itemData.system?.ALIAS + " " + itemData.system?.INPUT;
+                }
+                break;
+        }
+
+        // Most items default to active unless they have charges or use END
+        itemData.system.active = true;
+        if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
+            itemData.system.active = false;
+        }
+    }
+
     async uploadFromXml(xml, options) {
         // Is this a linked actor?  If so upload into parent.
         // if (this.uuid.includes("Scene")) {
@@ -2125,37 +2154,8 @@ export class HeroSystem6eActor extends Actor {
                                 sort: sortBase + parseInt(system.POSITION || 0),
                             };
 
-                            // Hack in some basic information with names.
-                            // TODO: This should be turned into some kind of short version of the description
-                            //       and it should probably be done when building the description
-                            switch (system.XMLID) {
-                                case "FOLLOWER":
-                                    itemData.name = "Followers";
-                                    break;
-                                case "ABSORPTION":
-                                case "AID":
-                                case "DISPEL":
-                                case "DRAIN":
-                                case "HEALING":
-                                case "TRANSFER":
-                                case "SUCCOR":
-                                case "SUPPRESS":
-                                    if (!system.NAME) {
-                                        itemData.name = system?.ALIAS + " " + system?.INPUT;
-                                    }
-                                    break;
-                            }
-
-                            // most items default to active
-                            itemData.system.active = true;
-
-                            // unless they use charges, in which case active = false
-                            // Note that this doesn't check for parent item giving charges.
-                            // A proper check will be done later (FullHealth)
-                            // The goal here is to minimize DB updates, so making a good initial guess
-                            if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
-                                itemData.system.active = false;
-                            }
+                            // Guess for some default values to reduce need for DB updates later
+                            this.itemDataDefaults(itemData);
 
                             // Note that we create COMPOUNDPOWER subitems before creating the parent
                             // so that we can remove the subitems from the parent COMPOUNDPOWER attributes
@@ -2226,6 +2226,9 @@ export class HeroSystem6eActor extends Actor {
                                         },
                                     };
 
+                                    // Guess for some default values to reduce need for DB updates later
+                                    this.itemDataDefaults(itemData2);
+
                                     if (this.id) {
                                         itemsToCreate.push(itemData2);
                                     } else {
@@ -2292,38 +2295,19 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance.preItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
             await this.createEmbeddedDocuments("Item", itemsToCreate, { render: false, renderSheet: false });
+
             uploadPerformance.createItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
-
             uploadProgressBar.advance(`${this.name}: Created Items`, itemsToCreate.length);
-            uploadProgressBar.advance(`${this.name}: Processing characteristics`, 0);
 
-            // Do CSLs last so we can property select the attacks
-            // TODO: infinite loop of _postUpload until no changes?
-            // Do CHARACTERISTICS first (mostly for applyEncumbrance)
-
-            // const characteristicItems = this.items.filter((item) => item.baseInfo?.type.includes("characteristic"));
-            // await Promise.all(
-            //     characteristicItems.map((item) => item._postUpload({ render: false, uploadProgressBar })),
-            // );
-            //await this._postUpload({ render: false });
-
-            uploadProgressBar.advance(`${this.name}: Processed characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processing non characteristics`, 0);
-
             const doLastXmlids = ["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "MENTALDEFENSE"];
-            // const nonCharacteristicItemsThatAreNotFreeItems = this.items.filter(
-            //     (item) => !doLastXmlids.includes(item.system.XMLID) && !item.baseInfo?.type.includes("characteristic"),
-            // );
-            // uploadProgressBar.advance(
-            //     `${this.name}: Processing ${nonCharacteristicItemsThatAreNotFreeItems.length} nonCharacteristicItemsThatAreNotFreeItems`,
-            //     0,
-            // );
-            // await Promise.all(
-            //     nonCharacteristicItemsThatAreNotFreeItems.map((item) =>
-            //         item._postUpload({ render: false, uploadProgressBar, applyEncumbrance: false }),
-            //     ),
-            // );
+
+            uploadProgressBar.advance(`${this.name}: applyActiveEffects`, 0);
+            for (const item of this.items) {
+                await item.setActiveEffects();
+            }
+
             uploadProgressBar.advance(`${this.name}: applySizeEffect`, 0);
             await this.applySizeEffect();
 

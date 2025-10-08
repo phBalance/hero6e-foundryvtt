@@ -438,87 +438,20 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // 5e GROWTH
-        // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
-        // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
-        // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
-        if (this.id && this.system.XMLID === "GROWTH") {
-            const details = this.baseInfo?.details(this) || {};
-            let activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
-            activeEffect.name += `${this.system.XMLID} ${this.is5e ? this.system.LEVELS : this.system.OPTIONID}`;
-            activeEffect.img = "icons/svg/upgrade.svg";
-            activeEffect.changes = [
-                {
-                    key: "system.characteristics.str.max",
-                    value: details.str,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-                {
-                    key: "system.characteristics.body.max",
-                    value: details.body,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-                {
-                    key: "system.characteristics.stun.max",
-                    value: details.stun,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-                {
-                    // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
-                    // should technicaly add to OCV of attacker.
-                    // However 5e use the -DCV concept and we will implement 6e in kind for now.
-                    key: "system.characteristics.dcv.max",
-                    value: -details.dcv,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                },
-            ];
-            if (!this.is5e) {
-                activeEffect.changes.push({
-                    key: "system.characteristics.con.max",
-                    value: details.con,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                });
-                activeEffect.changes.push({
-                    key: "system.characteristics.pre.max",
-                    value: details.pre,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                });
-                activeEffect.changes.push({
-                    key: "system.characteristics.pd.max",
-                    value: details.pd,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                });
-                activeEffect.changes.push({
-                    key: "system.characteristics.ed.max",
-                    value: details.ed,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                });
-                activeEffect.changes.push({
-                    key: "system.characteristics.running.max",
-                    value: details.running,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                });
-            }
-            activeEffect.transfer = true;
-
-            if (activeEffect.update) {
-                await activeEffect.update({
+        // Generic activeEffect (preferred; so far just GROWTH)
+        if (this.baseInfo?.activeEffect) {
+            const activeEffect = this.baseInfo?.activeEffect(this);
+            const currentAE = Array.from(this.effects)?.[0];
+            if (currentAE) {
+                await currentAE.update({
                     name: activeEffect.name,
                     changes: activeEffect.changes,
-                });
-                await this.actor.update({
-                    [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
-                });
-                await this.actor.update({
-                    [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
-                });
-                await this.actor.update({
-                    [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
                 });
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
+
+            // Consider a "return" here; would we ever have 2 active effects on an item? Likely not.
         }
 
         // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
@@ -1178,8 +1111,10 @@ export class HeroSystem6eItem extends Item {
             await this.update({
                 ["system.charges.value"]: this.system.charges.max,
                 ["system.charges.clips"]: this.system.charges.clipsMax,
-                ["system.active"]: false,
             });
+            if (this.isActive) {
+                await this.toggle();
+            }
         }
 
         // turn off items that use END, Charges, MP, etc
@@ -1189,19 +1124,13 @@ export class HeroSystem6eItem extends Item {
                 console.error("item.system.charges === undefined");
             }
             if (this.end > 0 || (this.system.charges?.max > 0 && !this.parentItem?.system.XMLID === "MULTIPOWER")) {
-                if (this.system.active || this.system.active === null) {
-                    this.system.active = false;
-                    if (this.id) {
-                        await this.update({ [`system.active`]: this.system.active });
-                    }
+                if (this.isActive) {
+                    await this.toggle();
                 }
             } else {
-                if (this.system.active === null) {
-                    this.system.active = true;
-                    if (this.id) {
-                        await this.update({ [`system.active`]: this.system.active });
-                    }
-                }
+                // if (!this.isActive) {
+                //     await this.toggle();
+                // }
             }
         }
 
@@ -1779,10 +1708,10 @@ export class HeroSystem6eItem extends Item {
                     // Check if there is an ActiveEffect associated with this item
                     if (firstAE) {
                         const newActiveState = firstAE.disabled;
-                        const effects = item.effects
-                            .filter((ae) => ae.disabled === newValue)
-                            .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
-                        for (const activeEffect of effects) {
+                        // const effects = item.effects
+                        //     .filter((ae) => ae.disabled === newValue)
+                        //     .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
+                        for (const activeEffect of item.effects) {
                             await onActiveEffectToggle(activeEffect, newActiveState);
                         }
                     } else {
@@ -5196,15 +5125,17 @@ export class HeroSystem6eItem extends Item {
             console.error(e);
         }
 
-        if (this.effect?.disabled === true && this.system.active === true) {
-            console.error(`active mismatch`, this);
-        }
-
-        if (this.effect?.disabled === false && this.system.active === false) {
-            console.error(`active mismatch`, this);
+        const ae = this.effects.contents?.[0];
+        if (ae && ae.disabled === this.system.active) {
+            // console.log(
+            //     `${this.name} has "active" mismatch between item and AE. Using AE as autorative. This is expeteced when toggling as V12/13 doesn't allow updating Item & AE in one operation.`,
+            // );
+            return !ae.disabled;
         }
 
         if (this.system.active === undefined) {
+            console.warn(`${this.name} system.active === undefined, assuming true`);
+
             return true;
         }
 

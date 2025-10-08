@@ -94,11 +94,15 @@ export async function onActiveEffectToggle(effect, newActiveState) {
     // guard (we turned off an AID/DRAIN active effect, don't toggle the base item)
     if (effect.flags[game.system.id]?.type === "adjustment") return;
 
+    // Group the AE and Item changes into a single await
+    const promises = [];
+
     if (newActiveState == undefined) {
-        await effect.update({ disabled: !effect.disabled });
+        console.warn("newActiveState == undefined");
+        promises.push(effect.update({ disabled: !effect.disabled }));
         newActiveState = !effect.disabled;
     } else {
-        await effect.update({ disabled: !newActiveState });
+        promises.push(effect.update({ disabled: !newActiveState }));
     }
 
     // If this is an item update active state
@@ -106,11 +110,16 @@ export async function onActiveEffectToggle(effect, newActiveState) {
     const item = origin instanceof HeroSystem6eItem ? origin : effect.parent;
     const actor = item?.actor || (item instanceof HeroSystem6eActor ? item : null);
     if (item) {
-        await item.update({ "system.active": newActiveState });
+        promises.push(item.update({ "system.active": newActiveState }));
     }
+
+    // This is to prevent the item.isActive from getting confused between
+    // system.active and the AE.disabled
+    await Promise.all(promises);
 
     // Characteristic VALUE should change when toggled on
     for (const change of effect.changes) {
+        console.warn("aaron to review toggle");
         // match something like system.characteristics.stun.max
         const charMatch = change.key.match(/characteristics\.(.+)\.max$/);
         if (charMatch) {
