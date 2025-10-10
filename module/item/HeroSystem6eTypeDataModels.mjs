@@ -624,13 +624,18 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         return this.item.end;
     }
 
+    get end() {
+        console.warn(`${this.item.name} system.end property is deprecated`);
+        return this.item.end;
+    }
+
     get ocvEstimated() {
-        console.error("depricated ocvEstimated");
+        console.error("deprecated ocvEstimated");
         return 0;
     }
 
     get dcvEstimated() {
-        console.error("depricated dcvEstimated");
+        console.error("deprecated dcvEstimated");
         return 0;
     }
 
@@ -831,7 +836,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             FREE_POINTS: new HeroNumberField({ integer: true }),
             value: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE
             //max: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE (use LEVELS instead)
-            active: new BooleanField({ initial: null, nullable: true }), // is power,skill,equipment active (consider renaming)
+            active: new BooleanField({ initial: true, nullable: true }), // is power,skill,equipment active (consider renaming)
             charges: new EmbeddedDataField(HeroSystem6eItemCharges),
         };
     }
@@ -941,7 +946,7 @@ export class HeroSystem6eItemSkill extends HeroSystem6eItemTypeDataModelProps {
             TYPE: new StringField(),
             NATIVE_TONGUE: new BooleanField({ initial: null, nullable: true }),
             //charges: new EmbeddedDataField(HeroSystem6eItemCharges), // unusual, but possible
-            active: new BooleanField({ initial: null, nullable: true }), // should be part of  HeroSystem6eItemTypeDataModelProps and not needed here
+            active: new BooleanField({ initial: true, nullable: true }), // should be part of  HeroSystem6eItemTypeDataModelProps and not needed here
         };
     }
 }

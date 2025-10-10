@@ -206,21 +206,21 @@ export function calculateStrengthMinimumForItem(itemWithStrengthMinimum, strengt
             );
         }
 
-        if (limitationBaseCost === "-0.25") {
+        if (limitationBaseCost == -0.25) {
             // -1/4 limitation is str min 1-5.
             strMinimumValue = 5;
-        } else if (limitationBaseCost === "-0.5") {
+        } else if (limitationBaseCost == -0.5) {
             // -2/4 limitation is str min 6-14.
             strMinimumValue = 14;
-        } else if (limitationBaseCost === "-0.75") {
+        } else if (limitationBaseCost == -0.75) {
             // -3/4 limitation is str min 15-17.
             strMinimumValue = 17;
-        } else if (limitationBaseCost === "-1.0") {
+        } else if (limitationBaseCost == -1) {
             // -1 limitation is str min 18+.
             strMinimumValue = 20;
         } else {
             console.error(
-                `${itemWithStrengthMinimum.detailedName()} has ${strengthMinimumModifier.system.XMLID} with unrecognized limitation of ${limitationBaseCost} levels`,
+                `${itemWithStrengthMinimum.detailedName()} has ${strengthMinimumModifier.XMLID} with unrecognized limitation of ${limitationBaseCost} levels`,
             );
         }
     }

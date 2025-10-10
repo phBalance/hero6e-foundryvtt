@@ -62,7 +62,12 @@ export class HeroSystem6eActor extends Actor {
             };
         }
 
-        const is5e = game.settings.get(HEROSYS.module, "DefaultEdition") === "five" ? true : false;
+        const is5e =
+            options.is5e != undefined
+                ? options.is5e
+                : game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
+                  ? true
+                  : false;
 
         this.updateSource({
             prototypeToken: prototypeToken,
@@ -1886,13 +1891,13 @@ export class HeroSystem6eActor extends Actor {
 
             const xmlItemsToProcess =
                 1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
-                heroJson.CHARACTER.DISADVANTAGES.length +
-                heroJson.CHARACTER.EQUIPMENT.length +
-                heroJson.CHARACTER.MARTIALARTS.length +
-                heroJson.CHARACTER.PERKS.length +
-                heroJson.CHARACTER.POWERS.length +
-                heroJson.CHARACTER.SKILLS.length +
-                heroJson.CHARACTER.TALENTS.length +
+                (heroJson.CHARACTER.DISADVANTAGES?.length || 0) +
+                (heroJson.CHARACTER.EQUIPMENT?.length || 0) +
+                (heroJson.CHARACTER.MARTIALARTS?.length || 0) +
+                (heroJson.CHARACTER.PERKS?.length || 0) +
+                (heroJson.CHARACTER.POWERS?.length || 0) +
+                (heroJson.CHARACTER.SKILLS?.length || 0) +
+                (heroJson.CHARACTER.TALENTS?.length || 0) +
                 (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
                 1 + // Validating adjustment and powers
                 1 + // Images
@@ -1929,20 +1934,22 @@ export class HeroSystem6eActor extends Actor {
             const characterName = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
+            this.name = characterName;
+            if (this._id) {
+                uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
+                await this.update({ ["name"]: characterName });
 
-            uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
-            await this.update({ ["name"]: characterName });
-
-            // remove stray flags
-            //await this.setFlag(game.system.id, "uploading", true);
-            await this.setFlag(game.system.id, "file", {
-                lastModifiedDate: options?.file?.lastModifiedDate,
-                name: options?.file?.name,
-                size: options?.file?.size,
-                type: options?.file?.type,
-                webkitRelativePath: options?.file?.webkitRelativePath,
-                uploadedBy: game.user.name,
-            });
+                // remove stray flags
+                //await this.setFlag(game.system.id, "uploading", true);
+                await this.setFlag(game.system.id, "file", {
+                    lastModifiedDate: options?.file?.lastModifiedDate,
+                    name: options?.file?.name,
+                    size: options?.file?.size,
+                    type: options?.file?.type,
+                    webkitRelativePath: options?.file?.webkitRelativePath,
+                    uploadedBy: game.user.name,
+                });
+            }
 
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /// Reset system properties to defaults
