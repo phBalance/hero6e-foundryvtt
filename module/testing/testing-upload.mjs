@@ -4233,7 +4233,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("multipower realCost", function () {
-                        assert.equal(mpitem.realCost, 20);
+                        assert.equal(mpItem.realCost, 20);
                     });
 
                     it("multipower activePoints", function () {
@@ -4321,7 +4321,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecitem.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4329,7 +4329,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecitem.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
                     });
 
@@ -4409,7 +4409,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecitem.realCost, 24);
+                            assert.equal(ecItem.realCost, 24);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4498,7 +4498,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecitem.realCost, 24);
+                            assert.equal(ecItem.realCost, 24);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4575,7 +4575,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecitem.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4652,7 +4652,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecitem.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -5373,7 +5373,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("skill enhancer realCost", function () {
-                    assert.equal(skillEnhanceritem.realCost, 3);
+                    assert.equal(skillEnhancerItem.realCost, 3);
                 });
 
                 it("skill enhancer activePoints", function () {
@@ -5389,7 +5389,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("skill realCost", function () {
-                    assert.equal(skillitem.realCost, 2);
+                    assert.equal(skillItem.realCost, 2);
                 });
 
                 it("skill activePoints", function () {
@@ -7446,7 +7446,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("PD realCost", function () {
-                        assert.equal(pditem.realCost, 9);
+                        assert.equal(pdItem.realCost, 9);
                     });
 
                     it("PD activePoints", function () {
@@ -7466,7 +7466,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("ED realCost", function () {
-                        assert.equal(editem.realCost, 15);
+                        assert.equal(edItem.realCost, 15);
                     });
 
                     it("ED activePoints", function () {
@@ -7535,7 +7535,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("PD realCost", function () {
-                        assert.equal(pditem.realCost, 3);
+                        assert.equal(pdItem.realCost, 3);
                     });
 
                     it("PD activePoints", function () {
@@ -7555,7 +7555,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("ED realCost", function () {
-                        assert.equal(editem.realCost, 5);
+                        assert.equal(edItem.realCost, 5);
                     });
 
                     it("ED activePoints", function () {
