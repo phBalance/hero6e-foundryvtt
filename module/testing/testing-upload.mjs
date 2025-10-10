@@ -54,7 +54,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, "20");
+                        assert.equal(item.realCost, "20");
                     });
 
                     it("activePoints", function () {
@@ -120,7 +120,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, "10");
+                        assert.equal(item.realCost, "10");
                     });
 
                     it("activePoints", function () {
@@ -165,7 +165,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 6);
+                    assert.equal(item.realCost, 6);
                 });
 
                 it("activePoints", function () {
@@ -212,7 +212,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 3);
+                    assert.equal(item.realCost, 3);
                 });
 
                 it("activePoints", function () {
@@ -264,7 +264,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 5);
+                            assert.equal(item.realCost, 5);
                         });
 
                         it("activePoints", function () {
@@ -317,7 +317,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 9);
+                            assert.equal(item.realCost, 9);
                         });
 
                         it("activePoints", function () {
@@ -372,7 +372,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 6);
+                            assert.equal(item.realCost, 6);
                         });
 
                         it("activePoints", function () {
@@ -421,7 +421,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 9);
+                            assert.equal(item.realCost, 9);
                         });
 
                         it("activePoints", function () {
@@ -479,7 +479,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 9);
+                            assert.equal(item.realCost, 9);
                         });
 
                         it("activePoints", function () {
@@ -531,7 +531,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 6);
+                            assert.equal(item.realCost, 6);
                         });
 
                         it("activePoints", function () {
@@ -589,7 +589,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 14);
+                            assert.equal(item.realCost, 14);
                         });
 
                         it("activePoints", function () {
@@ -641,7 +641,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 11);
+                            assert.equal(item.realCost, 11);
                         });
 
                         it("activePoints", function () {
@@ -704,7 +704,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 110);
+                            assert.equal(item.realCost, 110);
                         });
 
                         it("activePoints", function () {
@@ -768,7 +768,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 128);
+                            assert.equal(item.realCost, 128);
                         });
 
                         it("activePoints", function () {
@@ -823,7 +823,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 17);
+                            assert.equal(item.realCost, 17);
                         });
 
                         it("activePoints", function () {
@@ -878,7 +878,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 11);
+                            assert.equal(item.realCost, 11);
                         });
 
                         it("activePoints", function () {
@@ -939,7 +939,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 14);
+                            assert.equal(item.realCost, 14);
                         });
 
                         it("activePoints", function () {
@@ -994,7 +994,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 34);
+                            assert.equal(item.realCost, 34);
                         });
 
                         it("activePoints", function () {
@@ -1047,7 +1047,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 17);
+                        assert.equal(item.realCost, 17);
                     });
 
                     it("activePoints", function () {
@@ -1096,7 +1096,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -1148,7 +1148,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 9);
+                        assert.equal(item.realCost, 9);
                     });
 
                     it("activePoints", function () {
@@ -1196,7 +1196,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 3);
+                    assert.equal(item.realCost, 3);
                 });
 
                 it("activePoints", function () {
@@ -1263,7 +1263,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 46);
+                    assert.equal(item.realCost, 46);
                 });
 
                 it("activePoints", function () {
@@ -1302,7 +1302,7 @@ export function registerUploadTests(quench) {
 
                 let actor;
                 before(async () => {
-                    ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
@@ -1321,7 +1321,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 16);
+                    assert.equal(item.realCost, 16);
                 });
 
                 it("activePoints", function () {
@@ -1357,7 +1357,7 @@ export function registerUploadTests(quench) {
                 let item;
                 let actor;
                 before(async () => {
-                    ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
@@ -1373,7 +1373,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 25);
+                    assert.equal(item.realCost, 25);
                 });
 
                 it("activePoints", function () {
@@ -1424,7 +1424,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 75);
+                    assert.equal(item.realCost, 75);
                 });
 
                 it("activePoints", function () {
@@ -1489,7 +1489,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 137);
+                    assert.equal(item.realCost, 137);
                 });
 
                 it("activePoints", function () {
@@ -1536,7 +1536,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 6);
+                            assert.equal(item.realCost, 6);
                         });
 
                         it("activePoints", function () {
@@ -1582,7 +1582,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 12);
+                            assert.equal(item.realCost, 12);
                         });
 
                         it("activePoints", function () {
@@ -1628,7 +1628,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 18);
+                            assert.equal(item.realCost, 18);
                         });
 
                         it("activePoints", function () {
@@ -1653,7 +1653,7 @@ export function registerUploadTests(quench) {
                         let item;
                         let actor;
                         before(async () => {
-                            ({ actor } = await createQuenchActor({ quench: this, actor, is5e: true }));
+                            actor = await createQuenchActor({ quench: this, actor, is5e: true });
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
@@ -1686,7 +1686,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 18);
+                            assert.equal(item.realCost, 18);
                         });
 
                         it("activePoints", function () {
@@ -1732,7 +1732,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 18);
+                            assert.equal(item.realCost, 18);
                         });
 
                         it("activePoints", function () {
@@ -1781,7 +1781,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -1830,7 +1830,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -1879,7 +1879,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -1925,7 +1925,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 30);
+                            assert.equal(item.realCost, 30);
                         });
 
                         it("activePoints", function () {
@@ -1971,7 +1971,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 30);
+                            assert.equal(item.realCost, 30);
                         });
 
                         it("activePoints", function () {
@@ -2020,7 +2020,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -2069,7 +2069,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -2115,7 +2115,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 36);
+                            assert.equal(item.realCost, 36);
                         });
 
                         it("activePoints", function () {
@@ -2161,7 +2161,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 36);
+                            assert.equal(item.realCost, 36);
                         });
 
                         it("activePoints", function () {
@@ -2210,7 +2210,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 36);
+                            assert.equal(item.realCost, 36);
                         });
 
                         it("activePoints", function () {
@@ -2257,7 +2257,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -2279,7 +2279,7 @@ export function registerUploadTests(quench) {
 
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -2295,7 +2295,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 50);
+                        assert.equal(item.realCost, 50);
                     });
 
                     it("activePoints", function () {
@@ -2339,7 +2339,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -2384,7 +2384,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 15);
+                        assert.equal(item.realCost, 15);
                     });
 
                     it("activePoints", function () {
@@ -2442,7 +2442,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 33);
+                        assert.equal(item.realCost, 33);
                     });
 
                     it("activePoints", function () {
@@ -2492,7 +2492,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 4);
+                    assert.equal(item.realCost, 4);
                 });
 
                 it("activePoints", function () {
@@ -2548,7 +2548,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 18);
+                    assert.equal(item.realCost, 18);
                 });
 
                 it("activePoints", function () {
@@ -2614,7 +2614,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 45);
+                    assert.equal(item.realCost, 45);
                 });
 
                 it("activePoints", function () {
@@ -2665,7 +2665,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 9);
+                        assert.equal(item.realCost, 9);
                     });
 
                     it("activePoints", function () {
@@ -2712,7 +2712,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 7);
+                        assert.equal(item.realCost, 7);
                     });
 
                     it("activePoints", function () {
@@ -2759,7 +2759,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 4);
+                    assert.equal(item.realCost, 4);
                 });
 
                 it("activePoints", function () {
@@ -2801,7 +2801,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 20);
+                    assert.equal(item.realCost, 20);
                 });
 
                 it("activePoints", function () {
@@ -2851,7 +2851,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 34.5);
+                        assert.equal(item.realCost, 34.5);
                     });
 
                     it("activePoints", function () {
@@ -2900,7 +2900,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 58);
+                        assert.equal(item.realCost, 58);
                     });
 
                     it("activePoints", function () {
@@ -2967,7 +2967,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 49);
+                        assert.equal(item.realCost, 49);
                     });
 
                     it("activePoints", function () {
@@ -3016,7 +3016,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 17);
+                        assert.equal(item.realCost, 17);
                     });
 
                     it("activePoints", function () {
@@ -3070,7 +3070,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 14);
+                        assert.equal(item.realCost, 14);
                     });
 
                     it("activePoints", function () {
@@ -3122,7 +3122,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
@@ -3187,7 +3187,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 9);
+                    assert.equal(item.realCost, 9);
                 });
 
                 it("activePoints", function () {
@@ -3257,7 +3257,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 40);
+                    assert.equal(item.realCost, 40);
                 });
 
                 it("activePoints", function () {
@@ -3316,7 +3316,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -3376,7 +3376,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -3434,7 +3434,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
@@ -3493,7 +3493,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 6);
+                        assert.equal(item.realCost, 6);
                     });
 
                     it("activePoints", function () {
@@ -3548,7 +3548,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
@@ -3603,7 +3603,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 0);
+                        assert.equal(item.realCost, 0);
                     });
 
                     it("activePoints", function () {
@@ -3650,7 +3650,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", async function () {
-                        assert.equal(item.system.realCost, 13);
+                        assert.equal(item.realCost, 13);
                     });
 
                     it("activePoints", async function () {
@@ -3696,7 +3696,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", async function () {
-                        assert.equal(item.system.realCost, 9);
+                        assert.equal(item.realCost, 9);
                     });
 
                     it("activePoints", async function () {
@@ -3747,7 +3747,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 11);
+                        assert.equal(item.realCost, 11);
                     });
 
                     it("activePoints", function () {
@@ -3796,7 +3796,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 56);
+                        assert.equal(item.realCost, 56);
                     });
 
                     it("activePoints", function () {
@@ -3857,7 +3857,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 56);
+                        assert.equal(item.realCost, 56);
                     });
 
                     it("activePoints", function () {
@@ -3904,7 +3904,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 37);
+                        assert.equal(item.realCost, 37);
                     });
 
                     it("activePoints", function () {
@@ -3955,7 +3955,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 21);
+                        assert.equal(item.realCost, 21);
                     });
 
                     it("activePoints", function () {
@@ -4007,7 +4007,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 22);
+                        assert.equal(item.realCost, 22);
                     });
 
                     it("activePoints", function () {
@@ -4066,7 +4066,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 110);
+                    assert.equal(item.realCost, 110);
                 });
 
                 it("activePoints", function () {
@@ -4127,7 +4127,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("power realCost", function () {
-                        assert.equal(item.system.realCost, "10");
+                        assert.equal(item.realCost, "10");
                     });
 
                     it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4154,7 +4154,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("multipower realCost", function () {
-                        assert.equal(mpItem.system.realCost, 12);
+                        assert.equal(mpitem.realCost, 12);
                     });
 
                     it("multipower activePoints", function () {
@@ -4209,7 +4209,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("power realCost", function () {
-                        assert.equal(item.system.realCost, "13");
+                        assert.equal(item.realCost, "13");
                     });
 
                     it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4233,7 +4233,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("multipower realCost", function () {
-                        assert.equal(mpItem.system.realCost, 20);
+                        assert.equal(mpitem.realCost, 20);
                     });
 
                     it("multipower activePoints", function () {
@@ -4294,7 +4294,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 15);
+                            assert.equal(item.realCost, 15);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4321,7 +4321,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecitem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4329,7 +4329,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecitem.realCost, 5);
                         });
                     });
 
@@ -4389,7 +4389,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 14);
+                            assert.equal(item.realCost, 14);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4409,7 +4409,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 24);
+                            assert.equal(ecitem.realCost, 24);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4482,7 +4482,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 20);
+                            assert.equal(item.realCost, 20);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4498,7 +4498,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 24);
+                            assert.equal(ecitem.realCost, 24);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4556,7 +4556,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 5);
+                            assert.equal(item.realCost, 5);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4575,7 +4575,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecitem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4633,7 +4633,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 8);
+                            assert.equal(item.realCost, 8);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4652,7 +4652,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecitem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4680,7 +4680,7 @@ export function registerUploadTests(quench) {
                 let item;
                 let actor;
                 before(async () => {
-                    ({ actor } = await createQuenchActor({ quench: this, actor, is5e: true }));
+                    actor = await createQuenchActor({ quench: this, actor, is5e: true });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
@@ -4699,7 +4699,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 34);
+                    assert.equal(item.realCost, 34);
                 });
 
                 it("activePoints", function () {
@@ -4760,7 +4760,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 59);
+                    assert.equal(item.realCost, 59);
                 });
 
                 it("activePoints", function () {
@@ -4809,7 +4809,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 28);
+                    assert.equal(item.realCost, 28);
                 });
 
                 it("activePoints", function () {
@@ -4879,7 +4879,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 8);
+                    assert.equal(item.realCost, 8);
                 });
 
                 it("activePoints", function () {
@@ -4910,7 +4910,7 @@ export function registerUploadTests(quench) {
                 let item;
                 let actor;
                 before(async () => {
-                    ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
@@ -4930,7 +4930,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 1);
+                    assert.equal(item.realCost, 1);
                 });
 
                 it("activePoints", function () {
@@ -4987,7 +4987,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
+                    assert.equal(item.realCost, 2);
                 });
 
                 it("activePoints", function () {
@@ -5032,7 +5032,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
+                    assert.equal(item.realCost, 2);
                 });
 
                 it("activePoints", function () {
@@ -5049,7 +5049,7 @@ export function registerUploadTests(quench) {
                 let item;
                 let actor;
                 before(async () => {
-                    ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
@@ -5065,7 +5065,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 16);
+                    assert.equal(item.realCost, 16);
                 });
 
                 it("activePoints", function () {
@@ -5109,7 +5109,7 @@ export function registerUploadTests(quench) {
 
                     // TODO: Doesn't work yet.
                     // it("realCost", function () {
-                    //     assert.equal(item.system.realCost, 5);
+                    //     assert.equal(item.realCost, 5);
                     // });
 
                     // it("activePoints", function () {
@@ -5155,7 +5155,7 @@ export function registerUploadTests(quench) {
 
                     // TODO: Doesn't work yet.
                     // it("realCost", function () {
-                    //     assert.equal(item.system.realCost, 85);
+                    //     assert.equal(item.realCost, 85);
                     // });
 
                     // it("activePoints", function () {
@@ -5214,7 +5214,7 @@ export function registerUploadTests(quench) {
 
                     // TODO: Doesn't work yet.
                     // it("realCost", function () {
-                    //     assert.equal(item.system.realCost, 118);
+                    //     assert.equal(item.realCost, 118);
                     // });
 
                     // it("activePoints", function () {
@@ -5258,7 +5258,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
@@ -5300,7 +5300,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -5351,7 +5351,7 @@ export function registerUploadTests(quench) {
 
                 let actor;
                 before(async () => {
-                    ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
                     skillEnhancerItem = await HeroSystem6eItem.create(
                         HeroSystem6eItem.itemDataFromXml(skillEnhancerContents, actor),
                         {
@@ -5373,7 +5373,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("skill enhancer realCost", function () {
-                    assert.equal(skillEnhancerItem.system.realCost, 3);
+                    assert.equal(skillEnhanceritem.realCost, 3);
                 });
 
                 it("skill enhancer activePoints", function () {
@@ -5389,7 +5389,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("skill realCost", function () {
-                    assert.equal(skillItem.system.realCost, 2);
+                    assert.equal(skillitem.realCost, 2);
                 });
 
                 it("skill activePoints", function () {
@@ -5441,7 +5441,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 140);
+                        assert.equal(item.realCost, 140);
                     });
 
                     it("activePoints", function () {
@@ -5496,7 +5496,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 180);
+                        assert.equal(item.realCost, 180);
                     });
 
                     it("activePoints", function () {
@@ -5549,7 +5549,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 96);
+                    assert.equal(item.realCost, 96);
                 });
 
                 it("activePoints", function () {
@@ -5596,7 +5596,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -5649,7 +5649,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -5708,7 +5708,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
@@ -5770,7 +5770,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -5820,7 +5820,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -5873,7 +5873,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 90);
+                        assert.equal(item.realCost, 90);
                     });
 
                     it("activePoints", function () {
@@ -5932,7 +5932,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 20);
+                        assert.equal(item.realCost, 20);
                     });
 
                     it("activePoints", function () {
@@ -5985,7 +5985,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 75);
+                        assert.equal(item.realCost, 75);
                     });
 
                     it("activePoints", function () {
@@ -6041,7 +6041,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 37);
+                        assert.equal(item.realCost, 37);
                     });
 
                     it("activePoints", function () {
@@ -6073,7 +6073,7 @@ export function registerUploadTests(quench) {
                     let item;
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -6092,7 +6092,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6142,7 +6142,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -6195,7 +6195,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 7);
+                        assert.equal(item.realCost, 7);
                     });
 
                     it("activePoints", function () {
@@ -6248,7 +6248,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -6280,7 +6280,7 @@ export function registerUploadTests(quench) {
                     let item;
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -6299,7 +6299,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -6355,7 +6355,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 20);
+                        assert.equal(item.realCost, 20);
                     });
 
                     it("activePoints", function () {
@@ -6415,7 +6415,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 5);
+                    assert.equal(item.realCost, 5);
                 });
 
                 it("activePoints", function () {
@@ -6521,7 +6521,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 116);
+                    assert.equal(item.realCost, 116);
                 });
 
                 it("activePoints", function () {
@@ -6582,7 +6582,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -6640,7 +6640,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6669,7 +6669,7 @@ export function registerUploadTests(quench) {
                     let item;
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -6714,7 +6714,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6777,7 +6777,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6806,7 +6806,7 @@ export function registerUploadTests(quench) {
                         previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
 
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         await actor.update({ "system.characteristics.dex.max ": 15 });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -6824,7 +6824,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
@@ -6871,7 +6871,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 25);
+                    assert.equal(item.realCost, 25);
                 });
 
                 it("activePoints", function () {
@@ -6950,7 +6950,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 35);
+                    assert.equal(item.realCost, 35);
                 });
 
                 it("activePoints", function () {
@@ -7004,7 +7004,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 30);
+                        assert.equal(item.realCost, 30);
                     });
 
                     it("activePoints", function () {
@@ -7068,7 +7068,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 60);
+                        assert.equal(item.realCost, 60);
                     });
 
                     it("activePoints", function () {
@@ -7120,7 +7120,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 30);
+                        assert.equal(item.realCost, 30);
                     });
 
                     it("activePoints", function () {
@@ -7172,7 +7172,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 25);
+                        assert.equal(item.realCost, 25);
                     });
 
                     it("activePoints", function () {
@@ -7236,7 +7236,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 41);
+                        assert.equal(item.realCost, 41);
                     });
 
                     it("activePoints", function () {
@@ -7293,7 +7293,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 20);
+                        assert.equal(item.realCost, 20);
                     });
 
                     it("activePoints", function () {
@@ -7351,7 +7351,7 @@ export function registerUploadTests(quench) {
                     let item;
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -7370,7 +7370,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -7446,7 +7446,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("PD realCost", function () {
-                        assert.equal(pdItem.system.realCost, 9);
+                        assert.equal(pditem.realCost, 9);
                     });
 
                     it("PD activePoints", function () {
@@ -7466,7 +7466,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("ED realCost", function () {
-                        assert.equal(edItem.system.realCost, 15);
+                        assert.equal(editem.realCost, 15);
                     });
 
                     it("ED activePoints", function () {
@@ -7535,7 +7535,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("PD realCost", function () {
-                        assert.equal(pdItem.system.realCost, 3);
+                        assert.equal(pditem.realCost, 3);
                     });
 
                     it("PD activePoints", function () {
@@ -7555,7 +7555,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("ED realCost", function () {
-                        assert.equal(edItem.system.realCost, 5);
+                        assert.equal(editem.realCost, 5);
                     });
 
                     it("ED activePoints", function () {
@@ -7614,7 +7614,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 49);
+                    assert.equal(item.realCost, 49);
                 });
 
                 it("activePoints", function () {
@@ -7661,7 +7661,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 15);
+                        assert.equal(item.realCost, 15);
                     });
 
                     it("activePoints", function () {
@@ -7707,7 +7707,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 6);
+                        assert.equal(item.realCost, 6);
                     });
 
                     it("activePoints", function () {
@@ -7759,7 +7759,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 35);
+                    assert.equal(item.realCost, 35);
                 });
 
                 it("activePoints", function () {
@@ -7790,7 +7790,7 @@ export function registerUploadTests(quench) {
                     let item;
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         await actor.update({ "system.characteristics.ego.max": 38 });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -7810,7 +7810,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 6);
+                        assert.equal(item.realCost, 6);
                     });
 
                     it("activePoints", function () {
@@ -7869,7 +7869,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -7928,7 +7928,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -7988,7 +7988,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -8047,7 +8047,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -8103,7 +8103,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 0);
+                    assert.equal(item.realCost, 0);
                 });
 
                 it("activePoints", function () {
@@ -8154,7 +8154,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 75);
+                    assert.equal(item.realCost, 75);
                 });
 
                 it("activePoints", function () {
@@ -8195,7 +8195,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
+                    assert.equal(item.realCost, 2);
                 });
 
                 it("activePoints", function () {
@@ -8246,7 +8246,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 8);
+                    assert.equal(item.realCost, 8);
                 });
 
                 it("activePoints", function () {
@@ -8297,7 +8297,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 10);
+                    assert.equal(item.realCost, 10);
                 });
 
                 it("activePoints", function () {
@@ -8347,7 +8347,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 10);
+                    assert.equal(item.realCost, 10);
                 });
 
                 it("activePoints", function () {
@@ -8394,7 +8394,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 26);
+                    assert.equal(item.realCost, 26);
                 });
 
                 it("activePoints", function () {
@@ -8439,7 +8439,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 17);
+                        assert.equal(item.realCost, 17);
                     });
 
                     it("activePoints", function () {
@@ -8480,7 +8480,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 28);
+                        assert.equal(item.realCost, 28);
                     });
 
                     it("activePoints", function () {
@@ -8542,7 +8542,7 @@ export function registerUploadTests(quench) {
                 let item;
                 let actor;
                 before(async () => {
-                    ({ actor } = await createQuenchActor({ quench: this, actor, contents, is5e: true }));
+                    actor = await createQuenchActor({ quench: this, actor, contents, is5e: true });
                     // item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                     //     parent: actor,
                     // });
@@ -8680,7 +8680,7 @@ export function registerUploadTests(quench) {
 
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -8723,7 +8723,7 @@ export function registerUploadTests(quench) {
 
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -8765,7 +8765,7 @@ export function registerUploadTests(quench) {
                     let item;
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -8912,7 +8912,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
@@ -8942,7 +8942,7 @@ export function registerUploadTests(quench) {
 
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -8962,7 +8962,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
@@ -8983,7 +8983,7 @@ export function registerUploadTests(quench) {
 
                     let actor;
                     before(async () => {
-                        ({ actor } = await createQuenchActor({ quench: this, actor, is5e: false }));
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
@@ -9003,7 +9003,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -9057,7 +9057,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {

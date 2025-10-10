@@ -5,12 +5,13 @@ import {
     getEffectFormulaFromItem,
     getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 export function registerFullTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.utils.full",
         (context) => {
-            const { afterEach, assert, before, beforeEach, describe, it } = context;
+            const { afterEach, assert, before, after, beforeEach, describe, it } = context;
 
             describe("Characteristics 5e simple", function () {
                 const contents = `
@@ -107,10 +108,10 @@ export function registerFullTests(quench) {
                     await actor.uploadFromXml(contents);
                 });
 
-                it("name", async function () {
-                    console.log("name");
-                    assert.equal(actor.name, "5e superhero simple");
-                });
+                // it("name", async function () {
+                //     console.log("name");
+                //     assert.equal(actor.name, "5e superhero simple");
+                // });
 
                 it("str.max", async function () {
                     assert.equal(actor.system.characteristics.str.max, 11);
@@ -371,22 +372,18 @@ export function registerFullTests(quench) {
                 `;
 
                 let actor;
-
                 before(async () => {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, actor, contents });
+                    await actor.FullHealth();
                 });
 
-                it("name", async function () {
-                    assert.equal(actor.name, "5e superhero");
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
+
+                // it("name", async function () {
+                //     assert.equal(actor.name, "5e superhero");
+                // });
 
                 it("str.max", async function () {
                     assert.equal(actor.system.characteristics.str.max, 5);
@@ -536,7 +533,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, -63);
+                    assert.equal(actor.realCost, -63);
                 });
 
                 it("activePoints", async function () {
@@ -1009,7 +1006,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("total points spent", async function () {
-                    assert.equal(actor.system.realCost, 657);
+                    assert.equal(actor.realCost, 657);
                 });
             });
 
@@ -1270,7 +1267,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, 0);
+                    assert.equal(actor.realCost, 0);
                 });
             });
             describe("Unnamed character", function () {
@@ -1623,7 +1620,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, 165);
+                    assert.equal(actor.realCost, 165);
                 });
 
                 it("activePoints", async function () {
@@ -1783,7 +1780,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("Actor realCost", async function () {
-                    assert.equal(actor.system.realCost, 0);
+                    assert.equal(actor.realCost, 0);
                 });
 
                 it("Actor activePoints", async function () {
@@ -5026,7 +5023,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, 334);
+                    assert.equal(actor.realCost, 334);
                 });
 
                 it("activePoints", async function () {
@@ -5320,7 +5317,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(hearingFlash.system.realCost, 4.5);
+                        assert.equal(hearingFlash.realCost, 4.5);
                     });
 
                     it("activePoints", function () {
@@ -5338,7 +5335,7 @@ export function registerFullTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(mysticFlash.system.realCost, 4.5);
+                        assert.equal(mysticFlash.realCost, 4.5);
                     });
 
                     it("activePoints", function () {

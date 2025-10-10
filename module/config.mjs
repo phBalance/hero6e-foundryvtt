@@ -2433,7 +2433,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 4,
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["movement"],
-            behaviors: ["activatable"],
+            behaviors: ["activatable", "figured", "figuredSTR"],
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -2445,6 +2445,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 )} forward, ${Math.max(0, Math.round(char.value / 2))}${getSystemDisplayUnits(
                     char.actor.system.is5e,
                 )} upward`;
+            },
+            figured5eCharacteristic: function (actor, subKey) {
+                // STR/2.5 = free meters of leaping
+                // Div by 2 again to get inches to match HD
+                return Math.floor(actor.system.characteristics.str[subKey] / 2.5 / 2);
             },
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },

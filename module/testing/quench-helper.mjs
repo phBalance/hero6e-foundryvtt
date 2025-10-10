@@ -29,7 +29,7 @@ export async function createQuenchActor({ quench, actor, contents, is5e }) {
 
     actor.FullHealth();
 
-    return { actor, quenchName };
+    return actor;
 }
 
 export async function deleteQuenchActor({ quench, actor }) {
