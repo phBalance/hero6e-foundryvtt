@@ -4097,7 +4097,6 @@ export function registerUploadTests(quench) {
                             <NOTES/>
                         </POWER>
                     `;
-                    let mpItem;
                     let item;
 
                     before(async () => {
@@ -4110,10 +4109,10 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = true;
 
-                        mpItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
                             parent: actor,
                         });
-                        actor.items.set(mpItem.system.XMLID, mpItem);
+                        actor.items.set(item.system.XMLID, item);
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -4148,7 +4147,7 @@ export function registerUploadTests(quench) {
 
                     it("multipower description", function () {
                         assert.equal(
-                            mpItem.system.description,
+                            item.system.description,
                             "Multipower, 10-point reserve, all slots Personal Immunity (+1/4)",
                         );
                     });
@@ -4158,7 +4157,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("multipower activePoints", function () {
-                        assert.equal(mpItem.activePoints, 12);
+                        assert.equal(item.activePoints, 12);
                     });
                 });
 
