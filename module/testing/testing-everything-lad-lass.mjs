@@ -1,4 +1,4 @@
-import { HeroSystem6eActor } from "../actor/actor.mjs";
+//import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 export function registerEverythingLadLass(quench) {
     quench.registerBatch(
@@ -949,22 +949,24 @@ export function registerEverythingLadLass(quench) {
                 `;
 
                 let actor;
-
+                const CHARACTER_NAME = contents.match(/CHARACTER_NAME=".*?"/)[0];
+                const name = CHARACTER_NAME.match(/CHARACTER_NAME="(.*?)"/)[1];
+                const quenchName = `_Quench ${this?.title} ${name}  ${Date.now().toString()}`;
                 before(async () => {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    actor = actor = await Actor.create({
+                        name: quenchName,
+                        type: "pc",
+                    });
+                    await actor.uploadFromXml(contents.replace(CHARACTER_NAME, `CHARACTER_NAME="${quenchName}"`));
+                });
 
-                    await actor.uploadFromXml(contents);
+                after(async () => {
+                    await actor.delete();
                 });
 
                 it("name", async function () {
                     console.log("name");
-                    assert.equal(actor.name, "Everything Lad (5e)");
+                    assert.equal(actor.name, quenchName);
                 });
             });
 
@@ -1935,21 +1937,23 @@ export function registerEverythingLadLass(quench) {
                 `;
 
                 let actor;
-
+                const CHARACTER_NAME = contents.match(/CHARACTER_NAME=".*?"/)[0];
+                const name = CHARACTER_NAME.match(/CHARACTER_NAME="(.*?)"/)[1];
+                const quenchName = `_Quench ${this?.title} ${name}  ${Date.now().toString()}`;
                 before(async () => {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    actor = actor = await Actor.create({
+                        name: quenchName,
+                        type: "pc",
+                    });
+                    await actor.uploadFromXml(contents.replace(CHARACTER_NAME, `CHARACTER_NAME="${quenchName}"`));
+                });
 
-                    await actor.uploadFromXml(contents);
+                after(async () => {
+                    await actor.delete();
                 });
 
                 it("name", async function () {
-                    assert.equal(actor.name, "Everything Lass (6e)");
+                    assert.equal(actor.name, quenchName);
                 });
 
                 it("Absorption", async function () {

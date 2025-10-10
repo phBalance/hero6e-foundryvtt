@@ -1929,22 +1929,20 @@ export class HeroSystem6eActor extends Actor {
             const characterName = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
-            this.name = characterName;
-            if (this._id) {
-                uploadProgressBar.advance(`${this.name}: Name, fileInfo`, 0);
-                await this.update({ ["name"]: this.name });
 
-                // remove stray flags
-                //await this.setFlag(game.system.id, "uploading", true);
-                await this.setFlag(game.system.id, "file", {
-                    lastModifiedDate: options?.file?.lastModifiedDate,
-                    name: options?.file?.name,
-                    size: options?.file?.size,
-                    type: options?.file?.type,
-                    webkitRelativePath: options?.file?.webkitRelativePath,
-                    uploadedBy: game.user.name,
-                });
-            }
+            uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
+            await this.update({ ["name"]: characterName });
+
+            // remove stray flags
+            //await this.setFlag(game.system.id, "uploading", true);
+            await this.setFlag(game.system.id, "file", {
+                lastModifiedDate: options?.file?.lastModifiedDate,
+                name: options?.file?.name,
+                size: options?.file?.size,
+                type: options?.file?.type,
+                webkitRelativePath: options?.file?.webkitRelativePath,
+                uploadedBy: game.user.name,
+            });
 
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /// Reset system properties to defaults
