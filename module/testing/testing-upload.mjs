@@ -4097,6 +4097,7 @@ export function registerUploadTests(quench) {
                             <NOTES/>
                         </POWER>
                     `;
+                    let mpitem;
                     let item;
 
                     before(async () => {
@@ -4109,7 +4110,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = true;
 
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
+                        mpitem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
                             parent: actor,
                         });
                         actor.items.set(item.system.XMLID, item);
