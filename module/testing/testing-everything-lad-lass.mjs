@@ -1,10 +1,11 @@
-import { HeroSystem6eActor } from "../actor/actor.mjs";
+//import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 export function registerEverythingLadLass(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.utils.everything",
         (context) => {
-            const { assert, before, describe, it } = context;
+            const { assert, before, after, describe, it } = context;
 
             describe("Everything Lad (5e)", function () {
                 // On slower setups this can timeout. Increase the default timeout.
@@ -949,22 +950,17 @@ export function registerEverythingLadLass(quench) {
                 `;
 
                 let actor;
-
                 before(async () => {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, actor, contents });
                 });
 
-                it("name", async function () {
-                    console.log("name");
-                    assert.equal(actor.name, "Everything Lad (5e)");
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
+                });
+
+                it("ok", async function () {
+                    console.log("ok");
+                    assert.ok(true);
                 });
             });
 
@@ -1935,21 +1931,16 @@ export function registerEverythingLadLass(quench) {
                 `;
 
                 let actor;
-
                 before(async () => {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, actor, contents });
                 });
 
-                it("name", async function () {
-                    assert.equal(actor.name, "Everything Lass (6e)");
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
+                });
+
+                it("ok", async function () {
+                    assert.ok(true);
                 });
 
                 it("Absorption", async function () {

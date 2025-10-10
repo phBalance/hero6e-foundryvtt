@@ -20,12 +20,12 @@
                         {{#if item.parentItem}}{{{item.parentItem.name}}}: {{/if}}
                         {{{itemFullDescription item}}}
                         {{#if item.system.NOTES}}
-                            <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+                            <div class="item-notes-editable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
                         {{/if}}
                     </td>
                     <td>{{item.end}}</td>
                     <td>
-                        {{#if this.system.showToggle}}
+                        {{#if (itemHasActionBehavior this "activatable")}}
                             {{#if this.disabledOIHID}}
                                 <i class="fal fa-minus-square fa-xl item-oihid" title="{{localize "ActorSheet.OnlyInHeroicID"}}" width="24" height="24"></i>
                             {{else}}

@@ -2,12 +2,13 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { calculateStrengthMinimumForItem } from "../utility/damage.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.utils.upload",
         (context) => {
-            const { assert, before, describe, expect, it } = context;
+            const { assert, before, after, describe, expect, it } = context;
 
             describe("NAKEDMODIFIER", function () {
                 describe("NAKEDMODIFIER Kaden", function () {
@@ -39,12 +40,10 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
                     });
 
                     it("description", function () {
@@ -55,7 +54,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, "20");
+                        assert.equal(item.realCost, "20");
                     });
 
                     it("activePoints", function () {
@@ -107,12 +106,10 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
                     });
 
                     it("description", function () {
@@ -123,7 +120,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, "10");
+                        assert.equal(item.realCost, "10");
                     });
 
                     it("activePoints", function () {
@@ -154,12 +151,10 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
                 });
 
                 it("description", function () {
@@ -170,7 +165,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 6);
+                    assert.equal(item.realCost, 6);
                 });
 
                 it("activePoints", function () {
@@ -204,12 +199,11 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.dex.value = 15;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -218,7 +212,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 3);
+                    assert.equal(item.realCost, 3);
                 });
 
                 it("activePoints", function () {
@@ -257,12 +251,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -271,7 +264,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 5);
+                            assert.equal(item.realCost, 5);
                         });
 
                         it("activePoints", function () {
@@ -311,12 +304,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -325,7 +317,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 9);
+                            assert.equal(item.realCost, 9);
                         });
 
                         it("activePoints", function () {
@@ -364,12 +356,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -381,7 +372,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 6);
+                            assert.equal(item.realCost, 6);
                         });
 
                         it("activePoints", function () {
@@ -417,12 +408,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -431,7 +421,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 9);
+                            assert.equal(item.realCost, 9);
                         });
 
                         it("activePoints", function () {
@@ -473,12 +463,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -490,7 +479,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 9);
+                            assert.equal(item.realCost, 9);
                         });
 
                         it("activePoints", function () {
@@ -526,12 +515,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -543,7 +531,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 6);
+                            assert.equal(item.realCost, 6);
                         });
 
                         it("activePoints", function () {
@@ -585,12 +573,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -602,7 +589,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 14);
+                            assert.equal(item.realCost, 14);
                         });
 
                         it("activePoints", function () {
@@ -638,12 +625,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = false;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -655,7 +641,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 11);
+                            assert.equal(item.realCost, 11);
                         });
 
                         it("activePoints", function () {
@@ -702,12 +688,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -719,7 +704,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 110);
+                            assert.equal(item.realCost, 110);
                         });
 
                         it("activePoints", function () {
@@ -767,12 +752,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -784,7 +768,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 128);
+                            assert.equal(item.realCost, 128);
                         });
 
                         it("activePoints", function () {
@@ -823,12 +807,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -840,7 +823,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 17);
+                            assert.equal(item.realCost, 17);
                         });
 
                         it("activePoints", function () {
@@ -879,12 +862,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -896,7 +878,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 11);
+                            assert.equal(item.realCost, 11);
                         });
 
                         it("activePoints", function () {
@@ -941,12 +923,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -958,7 +939,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 14);
+                            assert.equal(item.realCost, 14);
                         });
 
                         it("activePoints", function () {
@@ -997,12 +978,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1014,7 +994,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 34);
+                            assert.equal(item.realCost, 34);
                         });
 
                         it("activePoints", function () {
@@ -1051,12 +1031,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -1068,7 +1047,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 17);
+                        assert.equal(item.realCost, 17);
                     });
 
                     it("activePoints", function () {
@@ -1104,12 +1083,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -1118,7 +1096,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -1154,12 +1132,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -1171,7 +1148,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 9);
+                        assert.equal(item.realCost, 9);
                     });
 
                     it("activePoints", function () {
@@ -1206,12 +1183,11 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.dex.value = 15;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -1220,7 +1196,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 3);
+                    assert.equal(item.realCost, 3);
                 });
 
                 it("activePoints", function () {
@@ -1270,12 +1246,11 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.ego.value = 38;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -1288,7 +1263,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 46);
+                    assert.equal(item.realCost, 46);
                 });
 
                 it("activePoints", function () {
@@ -1325,22 +1300,17 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
+                let actor;
                 before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    await actor._postUpload();
-
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                    item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
+                    await actor.FullHealth();
+                });
+
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("description", function () {
@@ -1351,7 +1321,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 16);
+                    assert.equal(item.realCost, 16);
                 });
 
                 it("activePoints", function () {
@@ -1385,23 +1355,17 @@ export function registerUploadTests(quench) {
                     </POWER>
                 `;
                 let item;
-
+                let actor;
                 before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    await actor._postUpload();
-
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                    item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
+                    await actor.FullHealth();
+                });
+
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("description", function () {
@@ -1409,7 +1373,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 25);
+                    assert.equal(item.realCost, 25);
                 });
 
                 it("activePoints", function () {
@@ -1421,7 +1385,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("charges", function () {
-                    assert.equal(item.system.charges?.value, undefined);
+                    assert.equal(item.system.charges?.value, 0);
                 });
 
                 it("doesn't use strength", function () {
@@ -1447,12 +1411,11 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.ego.value = 38;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -1461,7 +1424,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 75);
+                    assert.equal(item.realCost, 75);
                 });
 
                 it("activePoints", function () {
@@ -1510,12 +1473,11 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.ego.value = 38;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -1527,7 +1489,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 137);
+                    assert.equal(item.realCost, 137);
                 });
 
                 it("activePoints", function () {
@@ -1558,12 +1520,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1575,7 +1536,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 6);
+                            assert.equal(item.realCost, 6);
                         });
 
                         it("activePoints", function () {
@@ -1608,12 +1569,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1622,7 +1582,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 12);
+                            assert.equal(item.realCost, 12);
                         });
 
                         it("activePoints", function () {
@@ -1655,12 +1615,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1669,7 +1628,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 18);
+                            assert.equal(item.realCost, 18);
                         });
 
                         it("activePoints", function () {
@@ -1692,31 +1651,42 @@ export function registerUploadTests(quench) {
                             </SKILL>
                         `;
                         let item;
-
+                        let actor;
                         before(async () => {
-                            const actor = new HeroSystem6eActor(
-                                {
-                                    name: "Quench Actor",
-                                    type: "pc",
-                                },
-                                {},
-                            );
-                            actor.system.is5e = true;
-                            await actor._postUpload();
-
-                            item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            actor = await createQuenchActor({ quench: this, actor, is5e: true });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
-                            actor.items.set(item.system.XMLID, item);
+                            await actor.FullHealth();
                         });
+
+                        after(async () => {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        // before(async () => {
+                        //     const actor = new HeroSystem6eActor(
+                        //         {
+                        //             name: "Quench Actor",
+                        //             type: "pc",
+                        //         },
+                        //         {},
+                        //     );
+                        //     actor.system.is5e = true;
+
+                        //     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        //         parent: actor,
+                        //     });
+
+                        //     actor.items.set(item.system.XMLID, item);
+                        // });
 
                         it("description", function () {
                             assert.equal(item.system.description, "Combat Skill Levels: +6 with Martial Maneuvers");
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 18);
+                            assert.equal(item.realCost, 18);
                         });
 
                         it("activePoints", function () {
@@ -1749,12 +1719,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1763,7 +1732,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 18);
+                            assert.equal(item.realCost, 18);
                         });
 
                         it("activePoints", function () {
@@ -1796,12 +1765,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1813,7 +1781,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -1846,12 +1814,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1863,7 +1830,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -1896,12 +1863,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1913,7 +1879,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -1946,12 +1912,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1960,7 +1925,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 30);
+                            assert.equal(item.realCost, 30);
                         });
 
                         it("activePoints", function () {
@@ -1993,12 +1958,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -2007,7 +1971,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 30);
+                            assert.equal(item.realCost, 30);
                         });
 
                         it("activePoints", function () {
@@ -2040,12 +2004,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -2057,7 +2020,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -2090,12 +2053,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -2107,7 +2069,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 24);
+                            assert.equal(item.realCost, 24);
                         });
 
                         it("activePoints", function () {
@@ -2140,12 +2102,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -2154,7 +2115,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 36);
+                            assert.equal(item.realCost, 36);
                         });
 
                         it("activePoints", function () {
@@ -2187,12 +2148,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -2201,7 +2161,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 36);
+                            assert.equal(item.realCost, 36);
                         });
 
                         it("activePoints", function () {
@@ -2234,12 +2194,11 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -2251,7 +2210,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("realCost", function () {
-                            assert.equal(item.system.realCost, 36);
+                            assert.equal(item.realCost, 36);
                         });
 
                         it("activePoints", function () {
@@ -2285,12 +2244,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -2299,7 +2257,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -2319,22 +2277,17 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -2342,7 +2295,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 50);
+                        assert.equal(item.realCost, 50);
                     });
 
                     it("activePoints", function () {
@@ -2373,12 +2326,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -2387,7 +2339,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -2419,12 +2371,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -2433,7 +2384,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 15);
+                        assert.equal(item.realCost, 15);
                     });
 
                     it("activePoints", function () {
@@ -2474,12 +2425,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -2492,7 +2442,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 33);
+                        assert.equal(item.realCost, 33);
                     });
 
                     it("activePoints", function () {
@@ -2523,7 +2473,6 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.str.value = 10;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(
                         {
@@ -2534,7 +2483,7 @@ export function registerUploadTests(quench) {
                             parent: actor,
                         },
                     );
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -2543,7 +2492,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 4);
+                    assert.equal(item.realCost, 4);
                 });
 
                 it("activePoints", function () {
@@ -2583,12 +2532,11 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.str.value = 15;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -2600,7 +2548,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 18);
+                    assert.equal(item.realCost, 18);
                 });
 
                 it("activePoints", function () {
@@ -2650,12 +2598,11 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = false;
                     actor.system.characteristics.str.value = 15;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -2667,7 +2614,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 45);
+                    assert.equal(item.realCost, 45);
                 });
 
                 it("activePoints", function () {
@@ -2704,12 +2651,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         await item.resetToOriginal();
                         actor.items.set(item.system.XMLID, item);
                     });
@@ -2719,7 +2665,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 9);
+                        assert.equal(item.realCost, 9);
                     });
 
                     it("activePoints", function () {
@@ -2752,12 +2698,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         await item.resetToOriginal();
                         actor.items.set(item.system.XMLID, item);
                     });
@@ -2767,7 +2712,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 7);
+                        assert.equal(item.realCost, 7);
                     });
 
                     it("activePoints", function () {
@@ -2797,13 +2742,12 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                         type: "martialart",
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -2815,7 +2759,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 4);
+                    assert.equal(item.realCost, 4);
                 });
 
                 it("activePoints", function () {
@@ -2844,12 +2788,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -2858,7 +2801,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 20);
+                    assert.equal(item.realCost, 20);
                 });
 
                 it("activePoints", function () {
@@ -2895,12 +2838,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -2909,7 +2851,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 34.5);
+                        assert.equal(item.realCost, 34.5);
                     });
 
                     it("activePoints", function () {
@@ -2945,12 +2887,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -2959,7 +2900,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 58);
+                        assert.equal(item.realCost, 58);
                     });
 
                     it("activePoints", function () {
@@ -3010,12 +2951,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3027,7 +2967,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 49);
+                        assert.equal(item.realCost, 49);
                     });
 
                     it("activePoints", function () {
@@ -3063,12 +3003,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3077,7 +3016,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 17);
+                        assert.equal(item.realCost, 17);
                     });
 
                     it("activePoints", function () {
@@ -3115,12 +3054,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3132,7 +3070,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 14);
+                        assert.equal(item.realCost, 14);
                     });
 
                     it("activePoints", function () {
@@ -3168,12 +3106,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3185,7 +3122,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
@@ -3234,12 +3171,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -3251,7 +3187,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 9);
+                    assert.equal(item.realCost, 9);
                 });
 
                 it("activePoints", function () {
@@ -3305,12 +3241,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -3322,7 +3257,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 40);
+                    assert.equal(item.realCost, 40);
                 });
 
                 it("activePoints", function () {
@@ -3356,12 +3291,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3382,7 +3316,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -3411,12 +3345,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3443,7 +3376,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -3473,12 +3406,11 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.int.value = 25;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3502,7 +3434,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
@@ -3532,12 +3464,11 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.int.value = 13;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3562,7 +3493,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 6);
+                        assert.equal(item.realCost, 6);
                     });
 
                     it("activePoints", function () {
@@ -3592,12 +3523,11 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.int.value = 13;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3618,7 +3548,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
@@ -3648,12 +3578,11 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.int.value = 13;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3674,7 +3603,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 0);
+                        assert.equal(item.realCost, 0);
                     });
 
                     it("activePoints", function () {
@@ -3708,12 +3637,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3722,7 +3650,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", async function () {
-                        assert.equal(item.system.realCost, 13);
+                        assert.equal(item.realCost, 13);
                     });
 
                     it("activePoints", async function () {
@@ -3755,12 +3683,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3769,7 +3696,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", async function () {
-                        assert.equal(item.system.realCost, 9);
+                        assert.equal(item.realCost, 9);
                     });
 
                     it("activePoints", async function () {
@@ -3807,12 +3734,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3821,7 +3747,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 11);
+                        assert.equal(item.realCost, 11);
                     });
 
                     it("activePoints", function () {
@@ -3857,12 +3783,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3871,7 +3796,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 56);
+                        assert.equal(item.realCost, 56);
                     });
 
                     it("activePoints", function () {
@@ -3916,12 +3841,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3933,7 +3857,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 56);
+                        assert.equal(item.realCost, 56);
                     });
 
                     it("activePoints", function () {
@@ -3964,12 +3888,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -3981,7 +3904,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 37);
+                        assert.equal(item.realCost, 37);
                     });
 
                     it("activePoints", function () {
@@ -4019,12 +3942,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -4033,7 +3955,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 21);
+                        assert.equal(item.realCost, 21);
                     });
 
                     it("activePoints", function () {
@@ -4069,12 +3991,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -4086,7 +4007,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 22);
+                        assert.equal(item.realCost, 22);
                     });
 
                     it("activePoints", function () {
@@ -4129,12 +4050,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -4146,7 +4066,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 110);
+                    assert.equal(item.realCost, 110);
                 });
 
                 it("activePoints", function () {
@@ -4177,7 +4097,7 @@ export function registerUploadTests(quench) {
                             <NOTES/>
                         </POWER>
                     `;
-                    let mpItem;
+                    let mpitem;
                     let item;
 
                     before(async () => {
@@ -4189,18 +4109,16 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
-                        mpItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
+                        mpitem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
                             parent: actor,
                         });
-                        await mpItem._postUpload();
-                        actor.items.set(mpItem.system.XMLID, mpItem);
+                        actor.items.set(item.system.XMLID, item);
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -4209,7 +4127,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("power realCost", function () {
-                        assert.equal(item.system.realCost, "10");
+                        assert.equal(item.realCost, "10");
                     });
 
                     it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4230,17 +4148,17 @@ export function registerUploadTests(quench) {
 
                     it("multipower description", function () {
                         assert.equal(
-                            mpItem.system.description,
+                            item.system.description,
                             "Multipower, 10-point reserve, all slots Personal Immunity (+1/4)",
                         );
                     });
 
                     it("multipower realCost", function () {
-                        assert.equal(mpItem.system.realCost, 12);
+                        assert.equal(mpitem.realCost, 12);
                     });
 
                     it("multipower activePoints", function () {
-                        assert.equal(mpItem.activePoints, 12);
+                        assert.equal(item.activePoints, 12);
                     });
                 });
 
@@ -4270,18 +4188,16 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         mpItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
                             parent: actor,
                         });
-                        await mpItem._postUpload();
                         actor.items.set(mpItem.system.XMLID, mpItem);
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -4293,7 +4209,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("power realCost", function () {
-                        assert.equal(item.system.realCost, "13");
+                        assert.equal(item.realCost, "13");
                     });
 
                     it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4317,7 +4233,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("multipower realCost", function () {
-                        assert.equal(mpItem.system.realCost, 20);
+                        assert.equal(mpItem.realCost, 20);
                     });
 
                     it("multipower activePoints", function () {
@@ -4355,20 +4271,18 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             // Elemental Control
                             ecItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(ecContents, actor), {
                                 parent: actor,
                             });
-                            await ecItem._postUpload();
                             actor.items.set(ecItem.system.XMLID, ecItem);
 
                             // Power in Elemental Control
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -4380,7 +4294,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 15);
+                            assert.equal(item.realCost, 15);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4407,7 +4321,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4415,7 +4329,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
                     });
 
@@ -4448,20 +4362,18 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             // Elemental Control
                             ecItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(ecContents, actor), {
                                 parent: actor,
                             });
-                            await ecItem._postUpload();
                             actor.items.set(ecItem.system.XMLID, ecItem);
 
                             // Power in Elemental Control
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -4477,7 +4389,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 14);
+                            assert.equal(item.realCost, 14);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4497,7 +4409,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 24);
+                            assert.equal(ecItem.realCost, 24);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4546,20 +4458,18 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             // Elemental Control
                             ecItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(ecContents, actor), {
                                 parent: actor,
                             });
-                            await ecItem._postUpload();
                             actor.items.set(ecItem.system.XMLID, ecItem);
 
                             // Power in Elemental Control
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -4572,7 +4482,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 20);
+                            assert.equal(item.realCost, 20);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4588,7 +4498,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 24);
+                            assert.equal(ecItem.realCost, 24);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4622,20 +4532,18 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             // Elemental Control
                             ecItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(ecContents, actor), {
                                 parent: actor,
                             });
-                            await ecItem._postUpload();
                             actor.items.set(ecItem.system.XMLID, ecItem);
 
                             // Power in Elemental Control
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -4648,7 +4556,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 5);
+                            assert.equal(item.realCost, 5);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4667,7 +4575,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4701,20 +4609,18 @@ export function registerUploadTests(quench) {
                                 {},
                             );
                             actor.system.is5e = true;
-                            await actor._postUpload();
 
                             // Elemental Control
                             ecItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(ecContents, actor), {
                                 parent: actor,
                             });
-                            await ecItem._postUpload();
                             actor.items.set(ecItem.system.XMLID, ecItem);
 
                             // Power in Elemental Control
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await item._postUpload();
+
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -4727,7 +4633,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("power realCost", function () {
-                            assert.equal(item.system.realCost, 8);
+                            assert.equal(item.realCost, 8);
                         });
 
                         it("power characterPointCostForDisplayPlusSuffix", function () {
@@ -4746,7 +4652,7 @@ export function registerUploadTests(quench) {
                         });
 
                         it("elemental control realCost", function () {
-                            assert.equal(ecItem.system.realCost, 5);
+                            assert.equal(ecItem.realCost, 5);
                         });
 
                         it("elemental control activePoints", function () {
@@ -4772,23 +4678,17 @@ export function registerUploadTests(quench) {
                     </POWER>
                 `;
                 let item;
-
+                let actor;
                 before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = true;
-                    await actor._postUpload();
-
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    actor = await createQuenchActor({ quench: this, actor, is5e: true });
+                    item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
+                    await actor.FullHealth();
+                });
+
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("description", function () {
@@ -4799,7 +4699,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 34);
+                    assert.equal(item.realCost, 34);
                 });
 
                 it("activePoints", function () {
@@ -4844,12 +4744,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -4861,7 +4760,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 59);
+                    assert.equal(item.realCost, 59);
                 });
 
                 it("activePoints", function () {
@@ -4897,12 +4796,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -4911,7 +4809,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 28);
+                    assert.equal(item.realCost, 28);
                 });
 
                 it("activePoints", function () {
@@ -4965,12 +4863,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -4982,7 +4879,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 8);
+                    assert.equal(item.realCost, 8);
                 });
 
                 it("activePoints", function () {
@@ -5011,23 +4908,17 @@ export function registerUploadTests(quench) {
                     </SKILL>
                 `;
                 let item;
-
+                let actor;
                 before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    await actor._postUpload();
-
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                    item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
+                    await actor.FullHealth();
+                });
+
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("description", function () {
@@ -5039,15 +4930,11 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 1);
+                    assert.equal(item.realCost, 1);
                 });
 
                 it("activePoints", function () {
                     assert.equal(item.activePoints, 1);
-                });
-
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS, 0);
                 });
             });
 
@@ -5083,12 +4970,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -5101,15 +4987,11 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
+                    assert.equal(item.realCost, 2);
                 });
 
                 it("activePoints", function () {
                     assert.equal(item.activePoints, 2);
-                });
-
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS, 0);
                 });
             });
 
@@ -5133,12 +5015,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -5151,15 +5032,11 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
+                    assert.equal(item.realCost, 2);
                 });
 
                 it("activePoints", function () {
                     assert.equal(item.activePoints, 2);
-                });
-
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS, 0);
                 });
             });
 
@@ -5170,23 +5047,17 @@ export function registerUploadTests(quench) {
                     </POWER>
                 `;
                 let item;
-
+                let actor;
                 before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    await actor._postUpload();
-
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                    item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
+                    await actor.FullHealth();
+                });
+
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("description", function () {
@@ -5194,7 +5065,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 16);
+                    assert.equal(item.realCost, 16);
                 });
 
                 it("activePoints", function () {
@@ -5224,12 +5095,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5239,7 +5109,7 @@ export function registerUploadTests(quench) {
 
                     // TODO: Doesn't work yet.
                     // it("realCost", function () {
-                    //     assert.equal(item.system.realCost, 5);
+                    //     assert.equal(item.realCost, 5);
                     // });
 
                     // it("activePoints", function () {
@@ -5271,12 +5141,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5286,7 +5155,7 @@ export function registerUploadTests(quench) {
 
                     // TODO: Doesn't work yet.
                     // it("realCost", function () {
-                    //     assert.equal(item.system.realCost, 85);
+                    //     assert.equal(item.realCost, 85);
                     // });
 
                     // it("activePoints", function () {
@@ -5327,12 +5196,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5346,7 +5214,7 @@ export function registerUploadTests(quench) {
 
                     // TODO: Doesn't work yet.
                     // it("realCost", function () {
-                    //     assert.equal(item.system.realCost, 118);
+                    //     assert.equal(item.realCost, 118);
                     // });
 
                     // it("activePoints", function () {
@@ -5377,12 +5245,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5391,7 +5258,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
@@ -5420,12 +5287,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5434,7 +5300,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -5461,29 +5327,45 @@ export function registerUploadTests(quench) {
                 let skillItem;
                 let skillEnhancerItem;
 
+                // before(async () => {
+                //     const actor = new HeroSystem6eActor(
+                //         {
+                //             name: "Quench Actor",
+                //             type: "pc",
+                //         },
+                //         {},
+                //     );
+                //     actor.system.is5e = false;
+
+                //     skillEnhancerItem = new HeroSystem6eItem(
+                //         HeroSystem6eItem.itemDataFromXml(skillEnhancerContents, actor),
+                //         { parent: actor },
+                //     );
+                //     actor.items.set(skillEnhancerItem.system.XMLID, skillEnhancerItem);
+
+                //     skillItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                //         parent: actor,
+                //     });
+                //     actor.items.set(skillItem.system.XMLID, skillItem);
+                // });
+
+                let actor;
                 before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
-                    await actor._postUpload();
-
-                    skillEnhancerItem = new HeroSystem6eItem(
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                    skillEnhancerItem = await HeroSystem6eItem.create(
                         HeroSystem6eItem.itemDataFromXml(skillEnhancerContents, actor),
-                        { parent: actor },
+                        {
+                            parent: actor,
+                        },
                     );
-                    await skillEnhancerItem._postUpload();
-                    actor.items.set(skillEnhancerItem.system.XMLID, skillEnhancerItem);
-
-                    skillItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    skillItem = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await skillItem._postUpload();
-                    actor.items.set(skillItem.system.XMLID, skillItem);
+                    await actor.FullHealth();
+                });
+
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("skill enhancer description", function () {
@@ -5491,7 +5373,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("skill enhancer realCost", function () {
-                    assert.equal(skillEnhancerItem.system.realCost, 3);
+                    assert.equal(skillEnhancerItem.realCost, 3);
                 });
 
                 it("skill enhancer activePoints", function () {
@@ -5507,7 +5389,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("skill realCost", function () {
-                    assert.equal(skillItem.system.realCost, 2);
+                    assert.equal(skillItem.realCost, 2);
                 });
 
                 it("skill activePoints", function () {
@@ -5543,12 +5425,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5560,7 +5441,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 140);
+                        assert.equal(item.realCost, 140);
                     });
 
                     it("activePoints", function () {
@@ -5599,12 +5480,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5616,7 +5496,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 180);
+                        assert.equal(item.realCost, 180);
                     });
 
                     it("activePoints", function () {
@@ -5653,12 +5533,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -5670,7 +5549,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 96);
+                    assert.equal(item.realCost, 96);
                 });
 
                 it("activePoints", function () {
@@ -5704,12 +5583,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5718,7 +5596,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -5758,12 +5636,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5772,7 +5649,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
@@ -5815,12 +5692,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5832,7 +5708,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
@@ -5878,12 +5754,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5895,7 +5770,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -5932,12 +5807,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -5946,7 +5820,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -5986,12 +5860,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6000,7 +5873,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 90);
+                        assert.equal(item.realCost, 90);
                     });
 
                     it("activePoints", function () {
@@ -6043,12 +5916,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6060,7 +5932,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 20);
+                        assert.equal(item.realCost, 20);
                     });
 
                     it("activePoints", function () {
@@ -6100,12 +5972,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6114,7 +5985,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 75);
+                        assert.equal(item.realCost, 75);
                     });
 
                     it("activePoints", function () {
@@ -6154,12 +6025,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6171,7 +6041,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 37);
+                        assert.equal(item.realCost, 37);
                     });
 
                     it("activePoints", function () {
@@ -6201,23 +6071,17 @@ export function registerUploadTests(quench) {
                         </POWER>
                     `;
                     let item;
-
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -6228,7 +6092,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6265,12 +6129,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6279,7 +6142,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 10);
+                        assert.equal(item.realCost, 10);
                     });
 
                     it("activePoints", function () {
@@ -6319,12 +6182,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6333,7 +6195,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 7);
+                        assert.equal(item.realCost, 7);
                     });
 
                     it("activePoints", function () {
@@ -6373,12 +6235,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6387,7 +6248,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -6417,23 +6278,17 @@ export function registerUploadTests(quench) {
                         </POWER>
                     `;
                     let item;
-
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -6444,7 +6299,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -6484,12 +6339,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -6501,7 +6355,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 20);
+                        assert.equal(item.realCost, 20);
                     });
 
                     it("activePoints", function () {
@@ -6548,12 +6402,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -6562,7 +6415,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 5);
+                    assert.equal(item.realCost, 5);
                 });
 
                 it("activePoints", function () {
@@ -6652,12 +6505,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -6669,7 +6521,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 116);
+                    assert.equal(item.realCost, 116);
                 });
 
                 it("activePoints", function () {
@@ -6710,7 +6562,6 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.dex.value = 15;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(
                             {
@@ -6719,10 +6570,11 @@ export function registerUploadTests(quench) {
                             },
                             { parent: actor },
                         );
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
 
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                        await actor.FullHealth();
                     });
 
                     it("description", function () {
@@ -6730,7 +6582,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -6769,7 +6621,6 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(
                             {
@@ -6778,7 +6629,7 @@ export function registerUploadTests(quench) {
                             },
                             { parent: actor },
                         );
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
 
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
@@ -6789,7 +6640,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6816,43 +6667,54 @@ export function registerUploadTests(quench) {
                         </MANEUVER>
                     `;
                     let item;
-
+                    let actor;
                     before(async () => {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
-
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = true;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(
-                            {
-                                ...HeroSystem6eItem.itemDataFromXml(contents, actor),
-                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
-                            },
-                            { parent: actor },
-                        );
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
-
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
                     });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    // before(async () => {
+                    //     const previousDoubleDamageLimitSetting = await game.settings.set(
+                    //         HEROSYS.module,
+                    //         "DoubleDamageLimit",
+                    //     );
+                    //     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+
+                    //     const actor = new HeroSystem6eActor(
+                    //         {
+                    //             name: "Quench Actor",
+                    //             type: "pc",
+                    //         },
+                    //         {},
+                    //     );
+                    //     actor.system.is5e = true;
+
+                    //     item = new HeroSystem6eItem(
+                    //         {
+                    //             ...HeroSystem6eItem.itemDataFromXml(contents, actor),
+                    //             type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                    //         },
+                    //         { parent: actor },
+                    //     );
+
+                    //     actor.items.set(item.system.XMLID, item);
+
+                    //     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    // });
 
                     it("description", function () {
                         assert.equal(item.system.description, "1/2 Phase, -1 OCV, +1 DCV, Disarm; 20 STR to Disarm");
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6896,7 +6758,6 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.dex.value = 15;
-                        await actor._postUpload();
 
                         item = await new HeroSystem6eItem(
                             {
@@ -6905,7 +6766,7 @@ export function registerUploadTests(quench) {
                             },
                             { parent: actor },
                         );
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
 
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
@@ -6916,7 +6777,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 4);
+                        assert.equal(item.realCost, 4);
                     });
 
                     it("activePoints", function () {
@@ -6939,36 +6800,23 @@ export function registerUploadTests(quench) {
                         </MANEUVER>
                     `;
                     let item;
-
+                    let actor;
+                    let previousDoubleDamageLimitSetting;
                     before(async () => {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
+                        previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
 
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        actor.system.characteristics.dex.value = 15;
-                        await actor._postUpload();
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        await actor.update({ "system.characteristics.dex.max ": 15 });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
 
-                        item = await new HeroSystem6eItem(
-                            {
-                                ...HeroSystem6eItem.itemDataFromXml(contents, actor),
-                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
-                            },
-                            { parent: actor },
-                        );
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
-
+                    after(async () => {
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -6976,7 +6824,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
@@ -7010,12 +6858,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -7024,7 +6871,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 25);
+                    assert.equal(item.realCost, 25);
                 });
 
                 it("activePoints", function () {
@@ -7082,18 +6929,16 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.is5e = true;
                     actor.system.characteristics.int.value = 15;
-                    await actor._postUpload();
 
                     const perceptionItem = new HeroSystem6eItem(itemDataPerception, {
                         parent: actor,
                     });
-                    await perceptionItem._postUpload();
                     actor.items.set(perceptionItem.system.XMLID, perceptionItem);
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -7105,7 +6950,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 35);
+                    assert.equal(item.realCost, 35);
                 });
 
                 it("activePoints", function () {
@@ -7146,12 +6991,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7160,7 +7004,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 30);
+                        assert.equal(item.realCost, 30);
                     });
 
                     it("activePoints", function () {
@@ -7208,12 +7052,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7225,7 +7068,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 60);
+                        assert.equal(item.realCost, 60);
                     });
 
                     it("activePoints", function () {
@@ -7264,12 +7107,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7278,7 +7120,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 30);
+                        assert.equal(item.realCost, 30);
                     });
 
                     it("activePoints", function () {
@@ -7317,12 +7159,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7331,7 +7172,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 25);
+                        assert.equal(item.realCost, 25);
                     });
 
                     it("activePoints", function () {
@@ -7379,12 +7220,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7396,7 +7236,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 41);
+                        assert.equal(item.realCost, 41);
                     });
 
                     it("activePoints", function () {
@@ -7437,12 +7277,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7454,7 +7293,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 20);
+                        assert.equal(item.realCost, 20);
                     });
 
                     it("activePoints", function () {
@@ -7510,23 +7349,17 @@ export function registerUploadTests(quench) {
                         </POWER>
                     `;
                     let item;
-
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -7537,7 +7370,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 8);
+                        assert.equal(item.realCost, 8);
                     });
 
                     it("activePoints", function () {
@@ -7588,7 +7421,6 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         const automatonItem = new HeroSystem6eItem(
                             HeroSystem6eItem.itemDataFromXml(automatonContent, actor),
@@ -7596,19 +7428,16 @@ export function registerUploadTests(quench) {
                                 parent: actor,
                             },
                         );
-                        await automatonItem._postUpload();
                         actor.items.set(automatonItem.system.XMLID, automatonItem);
 
                         pdItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContent, actor), {
                             parent: actor,
                         });
-                        await pdItem._postUpload();
                         actor.items.set(pdItem.system.XMLID, pdItem);
 
                         edItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edContent, actor), {
                             parent: actor,
                         });
-                        await edItem._postUpload();
                         actor.items.set(edItem.system.XMLID, edItem);
                     });
 
@@ -7617,7 +7446,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("PD realCost", function () {
-                        assert.equal(pdItem.system.realCost, 9);
+                        assert.equal(pdItem.realCost, 9);
                     });
 
                     it("PD activePoints", function () {
@@ -7637,7 +7466,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("ED realCost", function () {
-                        assert.equal(edItem.system.realCost, 15);
+                        assert.equal(edItem.realCost, 15);
                     });
 
                     it("ED activePoints", function () {
@@ -7681,7 +7510,6 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         const automatonItem = new HeroSystem6eItem(
                             HeroSystem6eItem.itemDataFromXml(automatonContent, actor),
@@ -7689,19 +7517,16 @@ export function registerUploadTests(quench) {
                                 parent: actor,
                             },
                         );
-                        await automatonItem._postUpload();
                         actor.items.set(automatonItem.system.XMLID, automatonItem);
 
                         pdItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContent, actor), {
                             parent: actor,
                         });
-                        await pdItem._postUpload();
                         actor.items.set(pdItem.system.XMLID, pdItem);
 
                         edItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edContent, actor), {
                             parent: actor,
                         });
-                        await edItem._postUpload();
                         actor.items.set(edItem.system.XMLID, edItem);
                     });
 
@@ -7710,7 +7535,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("PD realCost", function () {
-                        assert.equal(pdItem.system.realCost, 3);
+                        assert.equal(pdItem.realCost, 3);
                     });
 
                     it("PD activePoints", function () {
@@ -7730,7 +7555,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("ED realCost", function () {
-                        assert.equal(edItem.system.realCost, 5);
+                        assert.equal(edItem.realCost, 5);
                     });
 
                     it("ED activePoints", function () {
@@ -7770,12 +7595,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -7790,7 +7614,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 49);
+                    assert.equal(item.realCost, 49);
                 });
 
                 it("activePoints", function () {
@@ -7820,12 +7644,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7838,7 +7661,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 15);
+                        assert.equal(item.realCost, 15);
                     });
 
                     it("activePoints", function () {
@@ -7867,12 +7690,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -7885,7 +7707,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 6);
+                        assert.equal(item.realCost, 6);
                     });
 
                     it("activePoints", function () {
@@ -7918,12 +7740,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -7938,7 +7759,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 35);
+                    assert.equal(item.realCost, 35);
                 });
 
                 it("activePoints", function () {
@@ -7967,24 +7788,18 @@ export function registerUploadTests(quench) {
                         </POWER>
                     `;
                     let item;
-
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        actor.system.characteristics.ego.value = 38;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        await actor.update({ "system.characteristics.ego.max": 38 });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -7995,7 +7810,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 6);
+                        assert.equal(item.realCost, 6);
                     });
 
                     it("activePoints", function () {
@@ -8038,12 +7853,11 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.ego.value = 38;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -8055,7 +7869,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -8098,12 +7912,11 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.ego.value = 38;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -8115,7 +7928,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -8158,13 +7971,13 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.ego.value = 38;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
                     });
 
                     it("description", function () {
@@ -8175,7 +7988,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -8218,12 +8031,11 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         actor.system.characteristics.ego.value = 38;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -8235,7 +8047,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
@@ -8275,12 +8087,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -8292,7 +8103,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 0);
+                    assert.equal(item.realCost, 0);
                 });
 
                 it("activePoints", function () {
@@ -8327,12 +8138,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -8344,7 +8154,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 75);
+                    assert.equal(item.realCost, 75);
                 });
 
                 it("activePoints", function () {
@@ -8372,12 +8182,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -8386,7 +8195,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
+                    assert.equal(item.realCost, 2);
                 });
 
                 it("activePoints", function () {
@@ -8420,12 +8229,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -8438,7 +8246,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 8);
+                    assert.equal(item.realCost, 8);
                 });
 
                 it("activePoints", function () {
@@ -8472,12 +8280,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -8490,7 +8297,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 10);
+                    assert.equal(item.realCost, 10);
                 });
 
                 it("activePoints", function () {
@@ -8524,12 +8331,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -8541,7 +8347,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 10);
+                    assert.equal(item.realCost, 10);
                 });
 
                 it("activePoints", function () {
@@ -8572,12 +8378,11 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = true;
-                    await actor._postUpload();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    await item._postUpload();
+
                     actor.items.set(item.system.XMLID, item);
                 });
 
@@ -8589,7 +8394,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("realCost", function () {
-                    assert.equal(item.system.realCost, 26);
+                    assert.equal(item.realCost, 26);
                 });
 
                 it("activePoints", function () {
@@ -8618,12 +8423,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = true;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -8635,7 +8439,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 17);
+                        assert.equal(item.realCost, 17);
                     });
 
                     it("activePoints", function () {
@@ -8660,12 +8464,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -8677,7 +8480,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 28);
+                        assert.equal(item.realCost, 28);
                     });
 
                     it("activePoints", function () {
@@ -8688,80 +8491,78 @@ export function registerUploadTests(quench) {
 
             // See issue #2421. Compound powers are not correctly calculating costs.
             describe.skip("compound power 5e FORCEWALL", function () {
-                const contentsCompoundPower = `
-                    <POWER XMLID="COMPOUNDPOWER" ID="1752119161972" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="64" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <POWER XMLID="FORCEWALL" ID="1752119357777" BASECOST="0.0" LEVELS="10" ALIAS="Force Wall" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="10" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0">
+                const contents = `
+
+                <?xml version="1.0" encoding="UTF-16"?>
+                <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                    <CHARACTER_INFO CHARACTER_NAME="5e superhero simple" />
+                    <POWERS>
+                        <POWER XMLID="COMPOUNDPOWER" ID="1752119161972" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="64" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
-                            <MODIFIER XMLID="TRANSPARENT" ID="1752119370102" BASECOST="0.0" LEVELS="0" ALIAS="Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <POWER XMLID="FORCEWALL" ID="1752119357777" BASECOST="0.0" LEVELS="10" ALIAS="Force Wall" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="10" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0">
                                 <NOTES />
-                                <ADDER XMLID="PD" ID="1752119371843" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <MODIFIER XMLID="TRANSPARENT" ID="1752119370102" BASECOST="0.0" LEVELS="0" ALIAS="Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
-                                </ADDER>
-                            </MODIFIER>
-                            <MODIFIER XMLID="REDUCEDEND" ID="1752119378292" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                <NOTES />
-                            </MODIFIER>
-                        </POWER>
-                        <POWER XMLID="RKA" ID="1752119423505" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="CONTINUOUS" ID="1752119432989" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                <NOTES />
-                            </MODIFIER>
-                            <MODIFIER XMLID="DAMAGESHIELD" ID="1752119437515" BASECOST="0.5" LEVELS="0" ALIAS="Damage Shield" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                <NOTES />
-                                <ADDER XMLID="OFFENSIVE" ID="1752119442232" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <ADDER XMLID="PD" ID="1752119371843" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                <MODIFIER XMLID="REDUCEDEND" ID="1752119378292" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
-                                </ADDER>
-                            </MODIFIER>
-                            <MODIFIER XMLID="REDUCEDEND" ID="1752119451612" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="RKA" ID="1752119423505" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                            </MODIFIER>
-                            <MODIFIER XMLID="NOKB" ID="1752119463052" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                <NOTES />
-                            </MODIFIER>
-                            <MODIFIER XMLID="LINKED" ID="1752119471190" BASECOST="-0.25" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FORCEWALL" OPTIONID="FORCEWALL" OPTION_ALIAS="Force Wall" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1752119357777">
-                                <NOTES />
-                                <ADDER XMLID="ONLYWHENGREATERATFULL" ID="1752119501255" BASECOST="-0.25" LEVELS="0" ALIAS="Lesser Power can only be used when character uses greater Power at full value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <MODIFIER XMLID="CONTINUOUS" ID="1752119432989" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                </MODIFIER>
+                                <MODIFIER XMLID="DAMAGESHIELD" ID="1752119437515" BASECOST="0.5" LEVELS="0" ALIAS="Damage Shield" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="OFFENSIVE" ID="1752119442232" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                <MODIFIER XMLID="REDUCEDEND" ID="1752119451612" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="NOKB" ID="1752119463052" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="LINKED" ID="1752119471190" BASECOST="-0.25" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FORCEWALL" OPTIONID="FORCEWALL" OPTION_ALIAS="Force Wall" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1752119357777">
+                                    <NOTES />
+                                    <ADDER XMLID="ONLYWHENGREATERATFULL" ID="1752119501255" BASECOST="-0.25" LEVELS="0" ALIAS="Lesser Power can only be used when character uses greater Power at full value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
                         </POWER>
-                        </POWER>
+                    </POWERS>
+                </CHARACTER>
                 `;
-                let itemCompoundPower;
-
+                let item;
+                let actor;
                 before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = true;
-                    await actor._postUpload();
+                    actor = await createQuenchActor({ quench: this, actor, contents, is5e: true });
+                    // item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    //     parent: actor,
+                    // });
+                    await actor.FullHealth();
+                });
 
-                    itemCompoundPower = new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contentsCompoundPower, actor),
-                        {
-                            parent: actor,
-                        },
-                    );
-                    await itemCompoundPower._postUpload();
-                    actor.items.set(itemCompoundPower.system.XMLID, itemCompoundPower);
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("compound power active points", function () {
-                    assert.equal(itemCompoundPower._activePoints, 88);
+                    assert.equal(item._activePoints, 88);
                 });
 
                 it("compound power realCost", function () {
-                    assert.equal(itemCompoundPower._realCost, 70);
+                    assert.equal(item._realCost, 70);
                 });
 
                 it("compound power characterPoints", function () {
-                    assert.equal(itemCompoundPower.system._characterPointCost, 70);
+                    assert.equal(item.system._characterPointCost, 70);
                 });
             });
 
@@ -8794,7 +8595,6 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     itemVppPower = new HeroSystem6eItem(
                         { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
@@ -8802,7 +8602,6 @@ export function registerUploadTests(quench) {
                             parent: actor,
                         },
                     );
-                    await itemVppPower._postUpload();
                     actor.items.set(itemVppPower.system.XMLID, itemVppPower);
                 });
 
@@ -8838,7 +8637,6 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
 
                     itemVppPower = new HeroSystem6eItem(
                         { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
@@ -8846,7 +8644,6 @@ export function registerUploadTests(quench) {
                             parent: actor,
                         },
                     );
-                    await itemVppPower._postUpload();
                     actor.items.set(itemVppPower.system.XMLID, itemVppPower);
                 });
 
@@ -8879,40 +8676,32 @@ export function registerUploadTests(quench) {
                             </MODIFIER>
                         </POWER>
                     `;
-                    let itemWithSideEffect;
+                    let item;
 
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
 
-                        itemWithSideEffect = new HeroSystem6eItem(
-                            { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
-                            {
-                                parent: actor,
-                            },
-                        );
-                        await itemWithSideEffect._postUpload();
-                        actor.items.set(itemWithSideEffect.system.XMLID, itemWithSideEffect);
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("active points", function () {
-                        assert.equal(itemWithSideEffect._activePoints, 15);
+                        assert.equal(item._activePoints, 15);
                     });
 
                     it("realCost", function () {
-                        assert.equal(itemWithSideEffect._realCost, 10);
+                        assert.equal(item._realCost, 10);
                     });
 
                     it("description", function () {
                         assert.equal(
-                            itemWithSideEffect.system.description,
+                            item.system.description,
                             "Killing Attack - Hand-To-Hand 1½d6 (PD) (15 Active Points); Side Effects -1DCV (Minor Side Effect; Side Effect occurs automatically whenever Power is used, -1/2)",
                         );
                     });
@@ -8930,40 +8719,32 @@ export function registerUploadTests(quench) {
                             </MODIFIER>
                         </POWER>
                     `;
-                    let itemWithSideEffect;
+                    let item;
 
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
 
-                        itemWithSideEffect = new HeroSystem6eItem(
-                            { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
-                            {
-                                parent: actor,
-                            },
-                        );
-                        await itemWithSideEffect._postUpload();
-                        actor.items.set(itemWithSideEffect.system.XMLID, itemWithSideEffect);
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("active points", function () {
-                        assert.equal(itemWithSideEffect._activePoints, 15);
+                        assert.equal(item._activePoints, 15);
                     });
 
                     it("realCost", function () {
-                        assert.equal(itemWithSideEffect._realCost, 7);
+                        assert.equal(item._realCost, 7);
                     });
 
                     it("description", function () {
                         assert.equal(
-                            itemWithSideEffect.system.description,
+                            item.system.description,
                             "Killing Attack - Hand-To-Hand 1½d6 (PD) (15 Active Points); Side Effects -1DCV (Major Side Effect; Side Effect occurs automatically whenever Power is used, -1)",
                         );
                     });
@@ -8981,40 +8762,31 @@ export function registerUploadTests(quench) {
                             </MODIFIER>
                         </POWER>
                     `;
-                    let itemWithSideEffect;
-
+                    let item;
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
 
-                        itemWithSideEffect = new HeroSystem6eItem(
-                            { ...HeroSystem6eItem.itemDataFromXml(contents, actor), type: "power" },
-                            {
-                                parent: actor,
-                            },
-                        );
-                        await itemWithSideEffect._postUpload();
-                        actor.items.set(itemWithSideEffect.system.XMLID, itemWithSideEffect);
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("active points", function () {
-                        assert.equal(itemWithSideEffect._activePoints, 15);
+                        assert.equal(item._activePoints, 15);
                     });
 
                     it("realCost", function () {
-                        assert.equal(itemWithSideEffect._realCost, 5);
+                        assert.equal(item._realCost, 5);
                     });
 
                     it("description", function () {
                         assert.equal(
-                            itemWithSideEffect.system.description,
+                            item.system.description,
                             "Killing Attack - Hand-To-Hand 1½d6 (PD) (15 Active Points); Side Effects -1DCV (Extreme Side Effect; Side Effect occurs automatically whenever Power is used, -2)",
                         );
                     });
@@ -9071,7 +8843,7 @@ export function registerUploadTests(quench) {
                         {},
                     );
                     actor.system.is5e = false;
-                    await actor._postUpload();
+
                     actor.system.characteristics.pre.value = 18;
 
                     skill = new HeroSystem6eItem(
@@ -9080,7 +8852,6 @@ export function registerUploadTests(quench) {
                             parent: actor,
                         },
                     );
-                    await skill._postUpload();
                     actor.items.set(skill.system.XMLID, skill);
                 });
 
@@ -9124,12 +8895,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -9142,15 +8912,11 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 1);
+                        assert.equal(item.realCost, 1);
                     });
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 1);
-                    });
-
-                    it("levels", function () {
-                        assert.equal(item.system.value, 0);
                     });
                 });
 
@@ -9174,22 +8940,17 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -9201,15 +8962,11 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 3);
+                        assert.equal(item.realCost, 3);
                     });
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 3);
-                    });
-
-                    it("levels", function () {
-                        assert.equal(item.system.value, 0);
                     });
                 });
 
@@ -9224,22 +8981,17 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-                        await actor._postUpload();
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -9251,15 +9003,11 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 2);
+                        assert.equal(item.realCost, 2);
                     });
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 2);
-                    });
-
-                    it("levels", function () {
-                        assert.equal(item.system.value, 0);
                     });
                 });
 
@@ -9289,12 +9037,11 @@ export function registerUploadTests(quench) {
                             {},
                         );
                         actor.system.is5e = false;
-                        await actor._postUpload();
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await item._postUpload();
+
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -9310,15 +9057,11 @@ export function registerUploadTests(quench) {
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 5);
+                        assert.equal(item.realCost, 5);
                     });
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 5);
-                    });
-
-                    it("levels", function () {
-                        assert.equal(item.system.value, 0);
                     });
                 });
             });

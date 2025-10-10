@@ -62,7 +62,12 @@ export class HeroSystem6eActor extends Actor {
             };
         }
 
-        const is5e = game.settings.get(HEROSYS.module, "DefaultEdition") === "five" ? true : false;
+        const is5e =
+            options.is5e != undefined
+                ? options.is5e
+                : game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
+                  ? true
+                  : false;
 
         this.updateSource({
             prototypeToken: prototypeToken,
@@ -1814,6 +1819,11 @@ export class HeroSystem6eActor extends Actor {
         if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
             itemData.system.active = false;
         }
+
+        // Kluge for TK as we are trying to avoid getInfo overhead
+        if (["TELEKINESIS"].includes(itemData.system.XMLID)) {
+            itemData.system.active = false;
+        }
     }
 
     async uploadFromXml(xml, options) {
@@ -1881,13 +1891,13 @@ export class HeroSystem6eActor extends Actor {
 
             const xmlItemsToProcess =
                 1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
-                heroJson.CHARACTER.DISADVANTAGES.length +
-                heroJson.CHARACTER.EQUIPMENT.length +
-                heroJson.CHARACTER.MARTIALARTS.length +
-                heroJson.CHARACTER.PERKS.length +
-                heroJson.CHARACTER.POWERS.length +
-                heroJson.CHARACTER.SKILLS.length +
-                heroJson.CHARACTER.TALENTS.length +
+                (heroJson.CHARACTER.DISADVANTAGES?.length || 0) +
+                (heroJson.CHARACTER.EQUIPMENT?.length || 0) +
+                (heroJson.CHARACTER.MARTIALARTS?.length || 0) +
+                (heroJson.CHARACTER.PERKS?.length || 0) +
+                (heroJson.CHARACTER.POWERS?.length || 0) +
+                (heroJson.CHARACTER.SKILLS?.length || 0) +
+                (heroJson.CHARACTER.TALENTS?.length || 0) +
                 (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
                 1 + // Validating adjustment and powers
                 1 + // Images
@@ -1926,8 +1936,8 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance._d = new Date().getTime();
             this.name = characterName;
             if (this._id) {
-                uploadProgressBar.advance(`${this.name}: Name, fileInfo`, 0);
-                await this.update({ ["name"]: this.name });
+                uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
+                await this.update({ ["name"]: characterName });
 
                 // remove stray flags
                 //await this.setFlag(game.system.id, "uploading", true);
@@ -2100,8 +2110,11 @@ export class HeroSystem6eActor extends Actor {
                     }
                 }
                 delete heroJson.CHARACTER.CHARACTERISTICS;
-                await this.update(changesNormal);
-                await this.update(changesFiguredOrCalculated);
+
+                if (this.id) {
+                    await this.update(changesNormal);
+                    await this.update(changesFiguredOrCalculated);
+                }
                 await this.FullHealth();
             }
 
@@ -2711,7 +2724,6 @@ export class HeroSystem6eActor extends Actor {
                             "Item",
                             itemsToDelete.map((o) => o.id),
                         );
-                        await this._postUpload(); // Needed for actor CP/AP
                     } else {
                         ChatMessage.create({
                             style: CONST.CHAT_MESSAGE_STYLES.IC,
@@ -2726,8 +2738,14 @@ export class HeroSystem6eActor extends Actor {
         } catch (e) {
             console.error(e);
             ui.notifications.error(`${this.name} had errors during upload.`);
-            await this.setFlag(game.system.id, "uploadingError", e.stack.replace(/http(s)?:[/[a-z0-9_.-:()]+\//gi, ""));
-            uploadProgressBar.close(`Upload Failed ${this.name}`);
+            //uploadProgressBar.close(`Upload Failed ${this.name}`);
+            if (this.id) {
+                await this.setFlag(
+                    game.system.id,
+                    "uploadingError",
+                    e.stack.replace(/http(s)?:[/[a-z0-9_.-:()]+\//gi, ""),
+                );
+            }
         }
     }
 

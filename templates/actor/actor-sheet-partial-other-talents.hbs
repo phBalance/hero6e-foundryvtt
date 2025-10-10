@@ -20,7 +20,7 @@
                 <td class="left">
                     {{{itemFullDescription item}}}
                     {{#if item.system.NOTES}}
-                        <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+                        <div class="item-notes-editable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
                     {{/if}}
                 </td>
                 <td>
@@ -29,7 +29,7 @@
                             data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
                             sign=false}}-</button>
                     {{/if}}
-                    {{#if item.system.showToggle}}
+                    {{#if (itemHasActionBehavior item "activatable")}}
                         <input class="item-toggle" type="checkbox"  {{checked item.system.active}}
                             data-dtype="Boolean" />
                     {{/if}}
