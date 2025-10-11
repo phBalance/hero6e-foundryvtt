@@ -5660,6 +5660,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            unusualDicePerDc: true,
             optionIDFix: function (json) {
                 if (["SIGHT", "HEARING", "MENTAL", "RADIO", "SMELL", "TOUCH"].includes(json.OPTION)) {
                     return json.OPTION + "GROUP";
@@ -5941,7 +5942,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 };
             },
             costPerLevel: fixedValueFunction(10),
-            unusualDicePerDc: true,
             baseEffectDicePartsBundle: (item) => {
                 const baseBodyDice = parseInt(item.system?.LEVELS || 0);
                 let baseHalfDice = 0;

@@ -19,12 +19,7 @@ export function combatSkillLevelsForAttack(item) {
         console.error(`Missing _active`, item, this);
     }
 
-    // fromUuidSync is a DB call can be slow
-    //const originalItem = fromUuidSync(item.system._active?.__originalUuid) || item;
-    // const originalItemId = item.system._active?.__originalUuid
-    //     ? foundry.utils.parseUuid(item.system._active.__originalUuid).id
-    //     : item.id;
-
+    // PH: FIXME: As per PSL usage, do CSLs stack for base item and effective attack item?
     for (const cslSkill of item.csls) {
         const detail = {
             ocv: 0,

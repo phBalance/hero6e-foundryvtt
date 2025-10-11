@@ -873,15 +873,6 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    // setAoeModifier() {
-    //     const startDate = Date.now();
-    //     const aoeModifier = this.getAoeModifier();
-    //     if (aoeModifier) {
-    //         this.buildAoeAttackParameters(aoeModifier);
-    //     }
-    //     window.prepareData.setAoeModifier = (window.prepareData.setAoeModifier || 0) + (Date.now() - startDate);
-    // }
-
     get heroValidation() {
         const _heroValidation = [];
 
@@ -913,38 +904,16 @@ export class HeroSystem6eItem extends Item {
     get pslPenaltyType() {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
-        //5e uses INPUT.  6e uses OPTION_ALIAS (free text)
+        // 5e uses INPUT.  6e uses OPTION_ALIAS (free text)
         const _pslPenaltyType = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
             .map((psl) => psl.toLowerCase())
             .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
-
-        // if (this.system.OPTION_ALIAS?.match(/range/i) || this.system.INPUT?.match(/range/i)) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range;
-        // } else if (this.system.OPTION_ALIAS?.match(/location/i) || this.system.INPUT?.match(/location/i)) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.hitLocation;
-        // } else if (this.system.OPTION_ALIAS?.match(/encumbrance/i) && this.system.OPTIONID?.includes("DCV")) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.encumbrance;
-        // } else if (this.system.OPTION_ALIAS?.match(/throwing/i) || this.system.INPUT?.match(/throwing/i)) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.throwing;
-        // }
 
         if (!_pslPenaltyType) {
             console.log(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
         }
 
         return _pslPenaltyType;
-    }
-
-    setAttack() {
-        console.error("depreciated setAttack");
-        return;
-        // ATTACK
-        // if (this.causesDamageEffect()) {
-        //     this.makeAttack();
-
-        //     // text description of damage
-        //     this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, {});
-        // }
     }
 
     setToHit() {
@@ -2015,7 +1984,6 @@ export class HeroSystem6eItem extends Item {
         return this.system.is5e;
     }
 
-    // FIXME: Take this function out back and kill it. It's too similar to buildAoeAttackParameters
     get aoeAttackParameters() {
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
@@ -5638,6 +5606,29 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
+     * Given an autofire modifier, calculate the number of shots allowed.
+     *
+     * @param {HeroSystem6eModifier} autofireMod
+     * @returns
+     */
+    calcAutofireShots(autofireMod) {
+        const baseAutoFireShots = parseInt(autofireMod.OPTION_ALIAS.match(/\d+/)) || 1;
+        const doubleAdder = autofireMod.adder.find("DOUBLE");
+        const numDoubles = doubleAdder ? doubleAdder.system.LEVELS : 0;
+
+        return baseAutoFireShots * Math.pow(2, numDoubles);
+    }
+
+    /**
+     * Return the effect attack item for this item.
+     * If the item is using a martial arts weapon, then that's the effective attack item.
+     * Anything else?
+     */
+    get effectiveAttackItem() {
+        return this.system._active.maWeaponItem || this;
+    }
+
+    /**
      * Add advantages from itemFrom to this item but postUpload is not run
      * FIXME: this does not handle the merging of any advantages (e.g. AP being added when already have AP)
      * NOTE: This assumes that all changes have been made and that copying item advantage is the last thing that's
@@ -5679,10 +5670,19 @@ export class HeroSystem6eItem extends Item {
      * Most damage powers have a standard way of describing, in XML, how they do damage. This works for those.
      *
      * PH: FIXME: This doesn't work for at least the following powers:
-     * TK
      * Anything that doesn't have a damage effect (e.g. Darkness)
      */
     damageLevelTweaking(diceParts) {
+        // Some powers really shouldn't be calling this function, but our system doesn't handle them yet. Until then
+        // just do nothing for these powers.
+        if (
+            this.system.XMLID === "DARKNESS" ||
+            this.system.XMLID === "CHANGEENVIRONMENT" ||
+            this.system.XMLID === "POSSESSION"
+        ) {
+            return;
+        }
+
         const plusOnePipAdderData = getPowerInfo({
             xmlid: "PLUSONEPIP",
             actor: this.actor,
@@ -6122,7 +6122,7 @@ export async function requiresASkillRollCheck(item, options = {}) {
                             const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
 
                             const chatData = {
-                                style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+                                style: CONST.CHAT_MESSAGE_STYLES.IC,
                                 author: game.user._id,
                                 content:
                                     `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
@@ -6155,7 +6155,6 @@ export async function requiresASkillRollCheck(item, options = {}) {
                     } else {
                         ui.notifications.warn(
                             `${item.actor.name} has a power ${item.name}. Expecting 'CHAR roll', where CHAR is the name of a characteristic.`,
-                            // { console: true, permanent: true },
                         );
                     }
                 }
