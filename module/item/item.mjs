@@ -22,7 +22,6 @@ import { onActiveEffectToggle } from "../utility/effects.mjs";
 import {
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
-    tokenEducatedGuess,
     whisperUserTargetsForActor,
     getCharacteristicInfoArrayForActor,
 } from "../utility/util.mjs";
