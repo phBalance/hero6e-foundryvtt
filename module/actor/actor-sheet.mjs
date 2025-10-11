@@ -88,7 +88,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 );
                 if (item2) {
                     if (item2.link.includes("Scene.")) {
-                        console.warn(`Duplciate item ${item2.detailedName()}`, item2);
+                        console.warn(`Duplicate item ${item2.detailedName()}`, item2);
                         kludgeDuplicateItemNames.push(item2.detailedName());
                     }
                 }

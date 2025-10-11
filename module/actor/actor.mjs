@@ -514,18 +514,8 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Ensure natural healing effect is removed when returned to full BODY
-        if (
-            data?.system?.characteristics?.body?.value &&
-            data?.system?.characteristics?.body?.value >= parseInt(this.system.characteristics.body.max)
-        ) {
-            const naturalHealingTempEffect = this.temporaryEffects.find(
-                (o) => o.flags[game.system.id]?.XMLID === "naturalBodyHealing",
-            );
-
-            // Fire and forget
-            if (naturalHealingTempEffect) {
-                naturalHealingTempEffect.delete();
-            }
+        if (data?.system?.characteristics?.body || data?.system?.characteristics?.rec) {
+            await this.setNaturalHealing();
         }
 
         if (data?.system?.characteristics) {
@@ -3603,6 +3593,51 @@ export class HeroSystem6eActor extends Actor {
 
     get invalidItems() {
         return Array.from(this.items.invalidDocumentIds).map((id) => this.items.getInvalid(id));
+    }
+
+    async setNaturalHealing() {
+        const naturalBodyHealing = this.temporaryEffects.find(
+            (o) => o.flags[game.system.id]?.XMLID === "naturalBodyHealing",
+        );
+        if (
+            this.type === "pc" &&
+            parseInt(this.system.characteristics.body.value) < parseInt(this.system.characteristics.body.max)
+        ) {
+            const bodyPerMonth = Math.max(1, parseInt(this.system.characteristics.rec.value));
+            const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
+            const daysForOneBody = RoundFavorPlayerUp(30 / bodyPerMonth);
+            const activeEffect = {
+                name: `Natural Body Healing (${bodyPerMonth}/month; ${daysForOneBody} days to get 1 body)`,
+                id: "naturalBodyHealing",
+                img: `systems/${HEROSYS.module}/icons/heartbeat.svg`,
+                duration: {
+                    seconds: secondsPerBody,
+                },
+                flags: {
+                    [`${game.system.id}`]: {
+                        XMLID: "naturalBodyHealing",
+                        expiresOn: "segmentStart",
+                    },
+                },
+            };
+            if (naturalBodyHealing) {
+                await naturalBodyHealing.update({
+                    name: activeEffect.name,
+                    "duration.seconds": activeEffect.duration.seconds,
+                });
+            } else {
+                await this.addActiveEffect(activeEffect);
+            }
+        }
+
+        // Get rid of naturalHealing
+        if (
+            naturalBodyHealing &&
+            this.system?.characteristics?.body?.value &&
+            this?.system?.characteristics?.body?.value >= parseInt(this.system.characteristics.body.max)
+        ) {
+            await naturalBodyHealing.delete();
+        }
     }
 
     // static migrateData(source) {
