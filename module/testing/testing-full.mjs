@@ -1394,7 +1394,7 @@ export function registerFullTests(quench) {
                 });
             });
 
-            describe("Martial DCs and Enhanced Perception", function () {
+            describe.only("Martial DCs and Enhanced Perception", function () {
                 const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                 <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic6E.hdt">
@@ -1532,25 +1532,17 @@ export function registerFullTests(quench) {
                 `;
 
                 let actor;
-
+                let previousDoubleDamageLimitSetting;
                 before(async () => {
-                    const previousDoubleDamageLimitSetting = await game.settings.set(
-                        HEROSYS.module,
-                        "DoubleDamageLimit",
-                    );
+                    previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                    actor = await createQuenchActor({ quench: this, actor, contents });
+                    await actor.FullHealth();
+                });
 
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
-
+                after(async () => {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("Killing Strike damage", async function () {

@@ -33,7 +33,7 @@ export async function createQuenchActor({ quench, actor, contents, is5e }) {
 }
 
 export async function deleteQuenchActor({ quench, actor }) {
-    if (quench.tests.find((t) => t?.state != "passed")) {
+    if (quench.tests.find((t) => t?.state !== "passed") || quench.suites[0].tests.find((t) => t.state != "passed")) {
         return;
     }
     await actor.delete();
