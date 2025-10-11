@@ -703,32 +703,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     for (const actor of actors) {
         try {
             // Create a natural body healing if needed (requires permissions)
-            const naturalBodyHealing = actor.temporaryEffects.find(
-                (o) => o.flags[game.system.id]?.XMLID === "naturalBodyHealing",
-            );
-            if (
-                actor.type === "pc" &&
-                !naturalBodyHealing &&
-                parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)
-            ) {
-                const bodyPerMonth = Math.max(1, parseInt(actor.system.characteristics.rec.value));
-                const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
-                const activeEffect = {
-                    name: `Natural Body Healing (${bodyPerMonth}/month)`,
-                    id: "naturalBodyHealing",
-                    img: `systems/${HEROSYS.module}/icons/heartbeat.svg`,
-                    duration: {
-                        seconds: secondsPerBody,
-                    },
-                    flags: {
-                        [`${game.system.id}`]: {
-                            XMLID: "naturalBodyHealing",
-                            expiresOn: "segmentStart",
-                        },
-                    },
-                };
-                await actor.addActiveEffect(activeEffect);
-            }
+            await actor.setNaturalHealing();
 
             // Active Effects
             // When in combat we expire effects on onStartTurn, but for some async reason gameTime cause issues if they are first in the segment.
