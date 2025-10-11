@@ -1190,7 +1190,6 @@ export class HeroSystem6eCombat extends Combat {
                 ui.notifications.warn(`Could not perform this operation because there is no GM connected.`);
             } else {
                 // Request GM perform this operation
-                console.log(`emit nextTurn`);
                 game.socket.emit(`system.${game.system.id}`, {
                     operation: "nextTurn",
                     userId: game.user.id,
