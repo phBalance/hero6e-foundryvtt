@@ -11,7 +11,7 @@ import {
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { HeroSystem6eItem, requiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
+import { HeroSystem6eItem, rollRequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
@@ -765,12 +765,31 @@ async function doSingleTargetActionToHit(action, options) {
         return ui.notifications.warn(`${item.name} ${resourceWarning}`);
     }
 
-    // Requires A Roll
-    if (!(await requiresASkillRollCheck(item, { showUI: true, resourcesRequired, resourcesUsedDescription }))) {
+    // Does base item Requires A Rolls
+    const attackItemRSR = await rollRequiresASkillRollCheck(item, {
+        showUI: true,
+        resourcesRequired,
+        resourcesUsedDescription,
+    });
+    if (!attackItemRSR) {
         return;
     }
 
-    const itemData = item.system;
+    // Requires A Roll (base and effective attack items might both require rolls)
+    const attackItemAndEffectiveItemAreSame =
+        item.system._active?.__originalUuid === item.effectiveAttackItem.system._active?.__originalUuid;
+    const effectiveAttackItemRSR =
+        !attackItemAndEffectiveItemAreSame &&
+        (await rollRequiresASkillRollCheck(item.effectiveAttackItem, {
+            showUI: true,
+            resourcesRequired,
+            resourcesUsedDescription,
+        }));
+    if (!attackItemAndEffectiveItemAreSame && !effectiveAttackItemRSR) {
+        return;
+    }
+
+    const itemData = item.effectiveAttackItem.system;
 
     const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.uses]?.value);
     if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.uses.toUpperCase())) {
@@ -831,7 +850,7 @@ async function doSingleTargetActionToHit(action, options) {
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item).details) {
         // Requires A Roll?
-        if (!(await requiresASkillRollCheck(csl.item))) {
+        if (!(await rollRequiresASkillRollCheck(csl.item))) {
             continue;
         }
 
@@ -2458,7 +2477,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     for (const defense of defenseEveryPhase) {
         if (!ignoreDefenseIds.includes(defense.id)) {
             if (getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null) {
-                const success = await requiresASkillRollCheck(defense);
+                const success = await rollRequiresASkillRollCheck(defense);
                 if (!success) {
                     ignoreDefenseIds.push(defense.id);
                 }
