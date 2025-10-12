@@ -5,6 +5,7 @@ import { registerDefenseTests } from "./testing-defense.mjs";
 import { registerFullTests } from "./testing-full.mjs";
 import { registerDiceTests } from "./testing-dice.mjs";
 import { registerEverythingLadLass } from "./testing-everything-lad-lass.mjs";
+import { registerGlobalSetup, registerGlobalTeardown } from "./quench-helper.mjs";
 
 Hooks.once("ready", async function () {
     if (!game.modules.get("_dev-mode")?.active) {
@@ -20,7 +21,8 @@ Hooks.once("ready", async function () {
     }
 });
 
-Hooks.on("quenchReady", (quench) => {
+Hooks.on("quenchReady", async (quench) => {
+    registerGlobalSetup(quench);
     registerDamageFunctionTests(quench);
     registerTagTests(quench);
     registerDefenseTests(quench);
@@ -29,6 +31,7 @@ Hooks.on("quenchReady", (quench) => {
     registerEverythingLadLass(quench);
     registerDiceTests(quench);
     registerMainTests(quench);
+    registerGlobalTeardown(quench);
 });
 
 // Helper function to run all tests from browser console.

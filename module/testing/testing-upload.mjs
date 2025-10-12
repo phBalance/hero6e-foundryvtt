@@ -4097,29 +4097,22 @@ export function registerUploadTests(quench) {
                             <NOTES/>
                         </POWER>
                     `;
-                    let mpitem;
+                    let mpItem;
                     let item;
-
+                    let actor;
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = true;
-
-                        mpitem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: true });
+                        mpItem = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
                             parent: actor,
                         });
-                        actor.items.set(item.system.XMLID, item);
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
+                        await actor.FullHealth();
+                    });
 
-                        actor.items.set(item.system.XMLID, item);
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("power description", function () {
@@ -4148,17 +4141,17 @@ export function registerUploadTests(quench) {
 
                     it("multipower description", function () {
                         assert.equal(
-                            item.system.description,
+                            mpItem.system.description,
                             "Multipower, 10-point reserve, all slots Personal Immunity (+1/4)",
                         );
                     });
 
                     it("multipower realCost", function () {
-                        assert.equal(mpitem.realCost, 12);
+                        assert.equal(mpItem.realCost, 12);
                     });
 
                     it("multipower activePoints", function () {
-                        assert.equal(item.activePoints, 12);
+                        assert.equal(mpItem.activePoints, 12);
                     });
                 });
 

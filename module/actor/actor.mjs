@@ -3640,6 +3640,37 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
+    get activeCslSkills() {
+        return this.items.filter((item) => item.isCsl) || [];
+    }
+
+    get preferredAttacksForCsls() {
+        let results = [];
+
+        // Martial Arts
+        results = [...results, ...this.items.filter((item) => item.type === "martialart")];
+
+        // Equipment
+        results = [
+            ...results,
+            ...this.items.filter((item) => item.type === "equipment" && item.baseInfo?.behaviors.includes("to-hit")),
+        ];
+
+        // Powers
+        results = [
+            ...results,
+            ...this.items.filter((item) => item.type === "power" && item.baseInfo?.behaviors.includes("to-hit")),
+        ];
+
+        // Strike
+        results = [
+            ...results,
+            ...this.items.filter((item) => item.type === "maneuver" && item.system.XMLID === "STRIKE"),
+        ];
+
+        return results;
+    }
+
     // static migrateData(source) {
     //     console.log(source);
     //     debugger;

@@ -314,6 +314,33 @@ HERO.RANGE_TYPES = {
     STANDARD: "Standard",
 };
 
+HERO.martialArtsDamageTypeChoices = [
+    {
+        label: "None/Non-Damaging",
+        key: 0,
+    },
+    {
+        label: "STR/Exert",
+        key: 1,
+    },
+    {
+        label: "Normal Damage",
+        key: 2,
+    },
+    {
+        label: "Killing Damage",
+        key: 3,
+    },
+    {
+        label: "NND",
+        key: 4,
+    },
+    {
+        label: "Flash",
+        key: 5,
+    },
+];
+
 HERO.mindScanChoices = [
     {
         label: `1 mind; -0 OMCV`,

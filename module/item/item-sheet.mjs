@@ -204,6 +204,10 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 data.rec = parseInt(power?.LEVELS) || 0;
             }
 
+            if (item.type === "martialart") {
+                data.martialArtsDamageTypeChoices = CONFIG.HERO.martialArtsDamageTypeChoices;
+            }
+
             // Debugging
             window.item = item;
         } catch (e) {

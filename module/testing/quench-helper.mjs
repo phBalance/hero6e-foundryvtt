@@ -33,8 +33,53 @@ export async function createQuenchActor({ quench, actor, contents, is5e }) {
 }
 
 export async function deleteQuenchActor({ quench, actor }) {
-    if (quench.tests.find((t) => t?.state != "passed")) {
+    if (
+        quench.tests.find((t) => t?.state !== "passed") ||
+        quench.suites.find((s) => s.tests.find((t) => t.state != "passed"))
+    ) {
         return;
     }
     await actor.delete();
+}
+
+export async function registerGlobalSetup(quench) {
+    quench.registerBatch(
+        "your-module.global-setup", // Use a unique key for your module.
+        (context) => {
+            const { describe, it } = context;
+
+            describe("Global Module Setup", function () {
+                it("Delete '_Quench' actors", async () => {
+                    await Actor.deleteDocuments(
+                        game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
+                    );
+                });
+            });
+        },
+        {
+            // Display name for the batch in the Quench UI.
+            displayName: "Global Setup",
+        },
+    );
+}
+
+export async function registerGlobalTeardown(quench) {
+    quench.registerBatch(
+        "your-module.global-setup", // Use a unique key for your module.
+        (context) => {
+            const { describe, it } = context;
+
+            describe("Global Teardown", function () {
+                it("Delete '_Quench' actors", async () => {
+                    await Actor.deleteDocuments(
+                        game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
+                    );
+                });
+            });
+        },
+        {
+            // Display name for the batch in the Quench UI.
+            displayName: "Global Teardown",
+        },
+    );
 }

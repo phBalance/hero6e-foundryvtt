@@ -1532,25 +1532,17 @@ export function registerFullTests(quench) {
                 `;
 
                 let actor;
-
+                let previousDoubleDamageLimitSetting;
                 before(async () => {
-                    const previousDoubleDamageLimitSetting = await game.settings.set(
-                        HEROSYS.module,
-                        "DoubleDamageLimit",
-                    );
+                    previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                    actor = await createQuenchActor({ quench: this, actor, contents });
+                    await actor.FullHealth();
+                });
 
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
-
+                after(async () => {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("Killing Strike damage", async function () {
@@ -1585,20 +1577,14 @@ export function registerFullTests(quench) {
 
                 it("Martial Strike OCV", async function () {
                     assert.equal(
-                        actor.items
-                            .find((o) => o.system.ALIAS === "Martial Strike")
-                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.ocvDetails
-                            .value,
+                        actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.ocvDetails.value,
                         "3",
                     );
                 });
 
                 it("Martial Strike DCV", async function () {
                     assert.equal(
-                        actor.items
-                            .find((o) => o.system.ALIAS === "Martial Strike")
-                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.dcvDetails
-                            .value,
+                        actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.dcvDetails.value,
                         "5",
                     );
                 });
@@ -1609,10 +1595,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("HKA CSL", async function () {
-                    assert.equal(
-                        combatSkillLevelsForAttack(actor.items.find((o) => o.system.XMLID === "HKA"))[0].ocv,
-                        2,
-                    );
+                    assert.equal(combatSkillLevelsForAttack(actor.items.find((o) => o.system.XMLID === "HKA")).ocv, 2);
                 });
 
                 it("Enhanced Perception", async function () {
@@ -1925,20 +1908,13 @@ export function registerFullTests(quench) {
                 beforeEach(async () => {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
-
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, actor, contents });
+                    await actor.FullHealth();
                 });
 
                 afterEach(async () => {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 // Verify the cost of powers
@@ -2059,28 +2035,30 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe("Maneuvers with CSLs", function () {
+                describe.only("Maneuvers with CSLs", function () {
                     let cslItem;
                     let cslPreviousActiveState;
                     let cslPreviousAllocation;
 
-                    beforeEach(function () {
+                    beforeEach(async function () {
                         // Turn on the CSLs
                         cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
-                        cslPreviousActiveState = cslItem.system.active;
-                        cslItem.system.active = true;
 
-                        // Set the CSLs for DCs
+                        // Turn on the CSLs & Set the CSLs for DCs
+                        cslPreviousActiveState = cslItem.system.active;
                         cslPreviousAllocation = cslItem.system.csl;
-                        cslItem.system.csl = Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc");
+                        await cslItem.update({
+                            "system.active": true,
+                            "system.csl": Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc"),
+                        });
                     });
 
-                    afterEach(function () {
-                        // Turn off the CSLs
-                        cslItem.system.active = cslPreviousActiveState;
-
-                        // Set the CSLs to previous
-                        cslItem.system.csl = cslPreviousAllocation;
+                    afterEach(async function () {
+                        // Turn off the CSLs & Set the CSLs to previous
+                        await cslItem.update({
+                            "system.active": cslPreviousActiveState,
+                            "system.csl": cslPreviousAllocation,
+                        });
                     });
 
                     it("should have the correct damage for Nerve Strike", function () {
@@ -6378,13 +6356,13 @@ export function registerFullTests(quench) {
                 });
 
                 it("should have +5 OCV", async function () {
-                    assert.equal(csls[0].skill.name, "Combat Skill Levels");
-                    assert.equal(csls.length, 1);
-                    assert.equal(csls[0].ocv, 5);
-                    assert.equal(csls[0].dcv, 0);
-                    assert.equal(csls[0].omcv, 0);
-                    assert.equal(csls[0].dmcv, 0);
-                    assert.equal(csls[0].dc, 0);
+                    assert.equal(csls.details[0].skill.name, "Combat Skill Levels");
+                    assert.equal(csls.details.length, 1);
+                    assert.equal(csls.ocv, 5);
+                    assert.equal(csls.dcv, 0);
+                    assert.equal(csls.omcv, 0);
+                    assert.equal(csls.dmcv, 0);
+                    assert.equal(csls.dc, 0);
                 });
             });
         },
