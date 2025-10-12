@@ -1,0 +1,12 @@
+{{#unless (or this.isSeparator this.isContainer)}}
+    <a class="item-control item-chat" title="{{localize "ActorSheet.SendToChat"}}"><i
+        class="fas fa-comment-alt"></i></a>
+{{/unless}}
+
+{{#unless this.isSeparator}}
+    <a class="item-control item-edit" title="{{localize "ActorSheet.EditItem"}}"><i class="fas fa-edit"></i></a>
+{{/unless}}
+
+<a class="item-control item-delete" title="{{localize "ActorSheet.DeleteItem"}}" >
+    <i class="fas fa-trash"></i>
+</a>

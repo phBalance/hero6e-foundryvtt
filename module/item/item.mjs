@@ -86,7 +86,7 @@ function itemHasDefenseActiveEffect(item) {
     return false;
 }
 
-// Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
+// Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
 function itemFullDescription(item) {
     let desc = item.system.description;
     if (item.system.NAME) {
@@ -96,7 +96,7 @@ function itemFullDescription(item) {
     return desc;
 }
 
-// Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
+// Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
 function itemName(item) {
     try {
         if (item.system.NAME) {

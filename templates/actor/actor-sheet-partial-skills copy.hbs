@@ -40,8 +40,9 @@
                     </td>
                     <td>
                         {{#if (and (ne item.system.realCost 0) (ne item.system.XMLID "LIST"))}}
-                            {{item.system.realCost}}</td>
+                            {{item.system.realCost}}
                         {{/if}}
+                    </td>
                     <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{#if item.parentItem.parentItem}}2{{/if}}{{/if}}">
                         {{#if item.system.childIdx}}
                             {{#if (eq item.parentItem.type "skill")}}

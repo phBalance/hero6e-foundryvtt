@@ -279,6 +279,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/item/item-action-icons-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-information-modification-icons-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-sheet-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-partial-active-points.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-partial-adders-modifiers.hbs`,
