@@ -5,7 +5,14 @@ import { getSystemDisplayUnits } from "./units.mjs";
 import { squelch } from "./util.mjs";
 
 export function combatSkillLevelsForAttack(item) {
-    const results = [];
+    const results = {
+        ocv: 0,
+        dcv: 0,
+        dmcv: 0,
+        omcv: 0,
+        dc: 0,
+        details: [],
+    };
 
     if (!item.actor) return results;
     if (!item.system._active) {
@@ -14,41 +21,40 @@ export function combatSkillLevelsForAttack(item) {
 
     // fromUuidSync is a DB call can be slow
     //const originalItem = fromUuidSync(item.system._active?.__originalUuid) || item;
-    const originalItemId = item.system._active?.__originalUuid
-        ? foundry.utils.parseUuid(item.system._active.__originalUuid).id
-        : item.id;
+    // const originalItemId = item.system._active?.__originalUuid
+    //     ? foundry.utils.parseUuid(item.system._active.__originalUuid).id
+    //     : item.id;
 
-    const cslSkills = item.actor.items.filter(
-        (o) =>
-            ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) &&
-            o.adders.find((adder) =>
-                adder.targetId
-                    ? adder.targetId === originalItemId // originalItem?.id
-                    : adder.ALIAS === item.system.ALIAS || adder.ALIAS === item.name,
-            ) &&
-            o.isActive != false,
-    );
-
-    for (const cslSkill of cslSkills) {
-        const result = {
+    for (const cslSkill of item.csls) {
+        const detail = {
             ocv: 0,
             dcv: 0,
             dmcv: 0,
             omcv: 0,
             dc: 0,
-            skill: cslSkill,
+            item: cslSkill,
         };
 
-        if (result.skill && result.skill.system.csl) {
-            for (let i = 0; i < parseInt(result.skill.system.LEVELS || 0); i++) {
-                result[result.skill.system.csl[i]] = (result[result.skill.system.csl[i]] || 0) + 1;
+        for (let i = 0; i < parseInt(cslSkill.system.LEVELS || 0); i++) {
+            if (detail[cslSkill.system.csl[i]] !== undefined) {
+                detail[cslSkill.system.csl[i]]++;
+            } else {
+                if (cslSkill.system.csl[i] === undefined) {
+                    console.log(`undefined csl specification, assuming +ocv`);
+                } else {
+                    console.warn(`Unhandled csl specification, assuming +ocv`, cslSkill.system.csl);
+                }
+                detail.ocv++;
             }
-            result.item = result.skill;
+        }
 
-            // Takes 2 CLS for +1 DC
-            result.dc = Math.floor(result.dc / 2);
+        // Takes 2 CLS for +1 DC
+        detail.dc = Math.floor(detail.dc / 2);
 
-            results.push(result);
+        // Add to result summary
+        results.details.push(detail);
+        for (const key of ["ocv", "dcv", "omcv", "dmcv", "dc"]) {
+            results[key] += detail[key];
         }
     }
     return results;
@@ -529,17 +535,17 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     // PH: TODO: 5E Superheroic: Each 2 CSLs modify the killing attack BODY roll by +1 (cannot exceed the max possible roll). Obviously no +1/2 DC.
     // PH: TODO: 5E Superheroic: Each 2 CSLs modify the normal attack STUN roll by +3 (cannot exceed the max possible roll). Obviously no +1/2 DC.
     // PH: TODO: THE ABOVE 2 NEED NEW HERO ROLLER FUNCTIONALITY.
-    for (const csl of combatSkillLevelsForAttack(item)) {
-        if (csl.dc > 0) {
+    for (const cslDetail of combatSkillLevelsForAttack(item).details) {
+        if (cslDetail.dc > 0) {
             // CSLs in 5e ignore advantages. In 6e they care about it.
-            const alteredCslDc = item.is5e ? csl.dc * (1 + item._advantagesAffectingDc) : csl.dc;
+            const alteredCslDc = item.is5e ? cslDetail.dc * (1 + item._advantagesAffectingDc) : cslDetail.dc;
             const cslDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredCslDc);
             const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, cslDiceParts);
             addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, cslDiceParts);
             addedDamageBundle.tags.push({
                 value: `+${formula}`,
-                name: csl.item.name,
-                title: `${csl.dc.signedStringHero()}DC -> ${formula}`,
+                name: cslDetail.item.name,
+                title: `${cslDetail.dc.signedStringHero()}DC -> ${formula}`,
             });
         }
     }

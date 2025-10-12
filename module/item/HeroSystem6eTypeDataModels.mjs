@@ -722,10 +722,9 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             }
         }
 
-        const csls = combatSkillLevelsForAttack(this.item);
-        for (const csl of csls) {
-            if (csl[propLower]) {
-                _details.tags.push({ name: csl.item.name, value: parseInt(csl[propLower]) });
+        for (const cslDetail of combatSkillLevelsForAttack(this.item).details) {
+            if (cslDetail[propLower]) {
+                _details.tags.push({ name: cslDetail.item.name, value: parseInt(cslDetail[propLower]) });
             }
         }
 
@@ -839,6 +838,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             active: new BooleanField({ initial: true, nullable: true }), // is power,skill,equipment active (consider renaming)
             charges: new EmbeddedDataField(HeroSystem6eItemCharges),
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
+            csl: new ArrayField(new StringField()), // Combat Skill levels
         };
     }
 }

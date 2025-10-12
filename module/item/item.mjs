@@ -603,6 +603,7 @@ export class HeroSystem6eItem extends Item {
     // }
 
     async setCombatSkillLevels() {
+        console.error("setCombatSkillLevels is deprecated");
         if (this.system.XMLID == "COMBAT_LEVELS") {
             // Make sure CSLs are defined; but don't override them if they are already present
             this.system.csl ??= {};
@@ -666,7 +667,7 @@ export class HeroSystem6eItem extends Item {
                             }
 
                             switch (this.system.OPTIONID) {
-                                case "SINGLESINGLE": // Depricated ?
+                                case "SINGLESINGLE": // Deprecated ?
                                 case "SINGLE":
                                     if (count === 0) {
                                         // Is this part of a framework/compound power/list?
@@ -703,7 +704,7 @@ export class HeroSystem6eItem extends Item {
                                 /// 5e only: +1 DCV against all attacks (HTH and Ranged)
                                 // — no matter how many opponents attack a
                                 // character in a given Segment, or with how many
-                                // diff erent attacks, a 5-point DCV CSL provides +1
+                                // different attacks, a 5-point DCV CSL provides +1
                                 // DCV versus all of them.
                                 case "DCV":
                                     addMe = true;
@@ -2297,7 +2298,7 @@ export class HeroSystem6eItem extends Item {
         this.flags[game.system.id].tags = {};
 
         // Combat Skill Levels
-        const csls = combatSkillLevelsForAttack(this);
+        const csls = combatSkillLevelsForAttack(this).details;
         let cslSummary = {};
 
         for (const csl of csls) {
@@ -5869,6 +5870,92 @@ export class HeroSystem6eItem extends Item {
         }
         const xml = `<${this.system.xmlTag}` + primaryXML + secondaryXML + `></${this.system.xmlTag}>`;
         return xml;
+    }
+
+    get isCsl() {
+        return ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.system.XMLID);
+    }
+
+    get csls() {
+        const _csls = [];
+        for (const csl of this.actor?.activeCslSkills || []) {
+            if (csl.cslAppliesTo(this)) {
+                _csls.push(csl);
+            }
+        }
+        return _csls;
+    }
+
+    cslAppliesTo(attackItem) {
+        if (!this.isCsl) {
+            console.error("This is not a CSL", this, attackItem);
+            return [];
+        }
+
+        // CSL associated with same compound power
+        // Note that we don't bother verifying Mental/Physical, nor ADDER that may associate wth a different attackItem
+        if (this.parentItem?.system.XMLID === "COMPOUNDPOWER" && this.parentItem?.id === attackItem.parentItem?.id) {
+            return true;
+        }
+
+        // With All Attacks
+        if (this.system.OPTIONID === "ALL") {
+            return true;
+        }
+
+        // 5e with HTH and Mental Combat (treated as ALL)
+        if (this.system.OPTIONID === "HTHMENTAL") {
+            return true;
+        }
+
+        // Mental vs Physical
+        if (
+            ["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) &&
+            attackItem.baseInfo.type.includes("mental")
+        ) {
+            return false;
+        }
+        if (["MENTAL_COMBAT_LEVELS"].includes(this.system.XMLID) && !attackItem.baseInfo.type.includes("mental")) {
+            return false;
+        }
+
+        // HTH
+        if (this.system.OPTIONID === "HTH" && attackItem.system.range === "No Range") {
+            return true;
+        }
+
+        // RANGED
+        if (this.system.OPTIONID === "RANGED" && attackItem.system.range === "Standard") {
+            return true;
+        }
+
+        // 5e only: +1 DCV against all attacks (HTH and Ranged)
+        // — no matter how many opponents attack a
+        // character in a given Segment, or with how many
+        // diff erent attacks, a 5-point DCV CSL provides +1
+        // DCV versus all of them.
+        if (this.system.OPTIONID === "DCV") {
+            return true;
+        }
+
+        // Custom ADDER
+        if (this.adders) {
+            if (
+                this.adders
+                    .filter((adder) => adder.XMLID === "ADDER")
+                    .filter((adder) => attackItem.system.ALIAS === adder.ALIAS)
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    get combatSkillLevelsForAttack() {
+        return combatSkillLevelsForAttack(this);
     }
 
     // static migrateDataSafe(source) {

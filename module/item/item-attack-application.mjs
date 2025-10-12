@@ -184,7 +184,7 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // Combat Skill Levels
-            const csls = combatSkillLevelsForAttack(this.data.originalItem);
+            const csls = combatSkillLevelsForAttack(this.data.originalItem).details;
             this.data.csls = undefined;
             for (const csl of csls) {
                 let entry = {};
@@ -789,7 +789,7 @@ export class ItemAttackFormApplication extends FormApplication {
     async _updateCsl(event, formData) {
         const item = this.data.effectiveItem;
         // Combat Skill Levels (update SKILL if changed)
-        const csls = combatSkillLevelsForAttack(item);
+        const csls = combatSkillLevelsForAttack(item).details;
         for (const key of Object.keys(formData).filter((o) => o.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/))) {
             const value = formData[key];
             const itemId = key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[1];
