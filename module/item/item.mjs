@@ -873,15 +873,6 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    // setAoeModifier() {
-    //     const startDate = Date.now();
-    //     const aoeModifier = this.getAoeModifier();
-    //     if (aoeModifier) {
-    //         this.buildAoeAttackParameters(aoeModifier);
-    //     }
-    //     window.prepareData.setAoeModifier = (window.prepareData.setAoeModifier || 0) + (Date.now() - startDate);
-    // }
-
     get heroValidation() {
         const _heroValidation = [];
 
@@ -913,38 +904,16 @@ export class HeroSystem6eItem extends Item {
     get pslPenaltyType() {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
-        //5e uses INPUT.  6e uses OPTION_ALIAS (free text)
+        // 5e uses INPUT.  6e uses OPTION_ALIAS (free text)
         const _pslPenaltyType = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
             .map((psl) => psl.toLowerCase())
             .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
-
-        // if (this.system.OPTION_ALIAS?.match(/range/i) || this.system.INPUT?.match(/range/i)) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range;
-        // } else if (this.system.OPTION_ALIAS?.match(/location/i) || this.system.INPUT?.match(/location/i)) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.hitLocation;
-        // } else if (this.system.OPTION_ALIAS?.match(/encumbrance/i) && this.system.OPTIONID?.includes("DCV")) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.encumbrance;
-        // } else if (this.system.OPTION_ALIAS?.match(/throwing/i) || this.system.INPUT?.match(/throwing/i)) {
-        //     return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.throwing;
-        // }
 
         if (!_pslPenaltyType) {
             console.log(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
         }
 
         return _pslPenaltyType;
-    }
-
-    setAttack() {
-        console.error("depreciated setAttack");
-        return;
-        // ATTACK
-        // if (this.causesDamageEffect()) {
-        //     this.makeAttack();
-
-        //     // text description of damage
-        //     this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, {});
-        // }
     }
 
     setToHit() {
@@ -1269,8 +1238,10 @@ export class HeroSystem6eItem extends Item {
             const isSkill = powerInfo?.type.includes("skill");
 
             if (hasSuccessRoll && isSkill) {
-                //this.updateRoll();
-                if (!(await requiresASkillRollCheck(this))) return;
+                if (!(await rollRequiresASkillRollCheck(this))) {
+                    return;
+                }
+
                 return createSkillPopOutFromItem(this, this.actor);
             } else if (hasSuccessRoll) {
                 // Handle any type of non skill based success roll with a basic roll
@@ -1530,7 +1501,7 @@ export class HeroSystem6eItem extends Item {
                 // }
             }
 
-            const success = await requiresASkillRollCheck(this, event);
+            const success = await rollRequiresASkillRollCheck(this, event);
             if (!success) {
                 const speaker = ChatMessage.getSpeaker({ actor: item.actor });
                 speaker["alias"] = item.actor.name;
@@ -2015,7 +1986,6 @@ export class HeroSystem6eItem extends Item {
         return this.system.is5e;
     }
 
-    // FIXME: Take this function out back and kill it. It's too similar to buildAoeAttackParameters
     get aoeAttackParameters() {
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
@@ -5638,6 +5608,29 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
+     * Given an autofire modifier, calculate the number of shots allowed.
+     *
+     * @param {HeroSystem6eModifier} autofireMod
+     * @returns
+     */
+    calcAutofireShots(autofireMod) {
+        const baseAutoFireShots = parseInt(autofireMod.OPTION_ALIAS.match(/\d+/)) || 1;
+        const doubleAdder = autofireMod.adder.find("DOUBLE");
+        const numDoubles = doubleAdder ? doubleAdder.system.LEVELS : 0;
+
+        return baseAutoFireShots * Math.pow(2, numDoubles);
+    }
+
+    /**
+     * Return the effect attack item for this item.
+     * If the item is using a martial arts weapon, then that's the effective attack item.
+     * Anything else?
+     */
+    get effectiveAttackItem() {
+        return this.system._active.maWeaponItem || this;
+    }
+
+    /**
      * Add advantages from itemFrom to this item but postUpload is not run
      * FIXME: this does not handle the merging of any advantages (e.g. AP being added when already have AP)
      * NOTE: This assumes that all changes have been made and that copying item advantage is the last thing that's
@@ -5679,10 +5672,19 @@ export class HeroSystem6eItem extends Item {
      * Most damage powers have a standard way of describing, in XML, how they do damage. This works for those.
      *
      * PH: FIXME: This doesn't work for at least the following powers:
-     * TK
      * Anything that doesn't have a damage effect (e.g. Darkness)
      */
     damageLevelTweaking(diceParts) {
+        // Some powers really shouldn't be calling this function, but our system doesn't handle them yet. Until then
+        // just do nothing for these powers.
+        if (
+            this.system.XMLID === "DARKNESS" ||
+            this.system.XMLID === "CHANGEENVIRONMENT" ||
+            this.system.XMLID === "POSSESSION"
+        ) {
+            return;
+        }
+
         const plusOnePipAdderData = getPowerInfo({
             xmlid: "PLUSONEPIP",
             actor: this.actor,
@@ -6054,170 +6056,171 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     return succeeded;
 }
 
-export async function requiresASkillRollCheck(item, options = {}) {
-    // Toggles don't need a roll to turn off
-    //if (item.system?.active === true) return true;
+/**
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {Object} options
+ * @returns {Boolean} - success
+ */
+export async function rollRequiresASkillRollCheck(item, options = {}) {
+    const rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
+    if (!rar) {
+        return true;
+    }
 
-    let rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
-    if (rar) {
-        let OPTION_ALIAS = rar.OPTION_ALIAS;
+    let OPTION_ALIAS = rar.OPTION_ALIAS;
 
-        // Requires A Roll (generic) default to 11
-        let value = parseInt(rar.OPTIONID);
+    // Requires A Roll (generic) default to 11
+    let value = parseInt(rar.OPTIONID);
 
-        switch (rar.OPTIONID) {
-            case "SKILL":
-            case "SKILL1PER5":
-            case "SKILL1PER20":
-                {
-                    OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
-                    let skill = item.actor.items.find(
+    switch (rar.OPTIONID) {
+        case "SKILL":
+        case "SKILL1PER5":
+        case "SKILL1PER20":
+            {
+                OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
+                let skill = item.actor.items.find(
+                    (o) =>
+                        o.baseInfo?.type.includes("skill") &&
+                        (o.system.XMLID === OPTION_ALIAS.toUpperCase() ||
+                            o.name.toUpperCase() === OPTION_ALIAS.toUpperCase()),
+                );
+                if (!skill && rar.COMMENTS) {
+                    skill = item.actor.items.find(
                         (o) =>
                             o.baseInfo?.type.includes("skill") &&
-                            (o.system.XMLID === OPTION_ALIAS.toUpperCase() ||
-                                o.name.toUpperCase() === OPTION_ALIAS.toUpperCase()),
+                            (o.system.XMLID === rar.COMMENTS.toUpperCase() ||
+                                o.name.toUpperCase() === rar.COMMENTS.toUpperCase() ||
+                                o.system.INPUT?.toUpperCase() === rar.COMMENTS.toUpperCase()),
                     );
-                    if (!skill && rar.COMMENTS) {
-                        skill = item.actor.items.find(
-                            (o) =>
-                                o.baseInfo?.type.includes("skill") &&
-                                (o.system.XMLID === rar.COMMENTS.toUpperCase() ||
-                                    o.name.toUpperCase() === rar.COMMENTS.toUpperCase() ||
-                                    o.system.INPUT?.toUpperCase() === rar.COMMENTS.toUpperCase()),
-                        );
-                        if (skill) {
-                            OPTION_ALIAS = rar.COMMENTS;
-                        }
-                    }
-                    if (!skill && rar.COMMENTS) {
-                        let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
-                        if (char) {
-                            ui.notifications.warn(
-                                `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`,
-                                // { console: true, permanent: true },
-                            );
-
-                            // Lets try anyway
-                            value = char?.roll;
-                        }
-                    }
                     if (skill) {
-                        value = parseInt(skill.system.roll);
-                        if (rar.OPTIONID === "SKILL1PER5")
-                            value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 5));
-                        if (rar.OPTIONID === "SKILL1PER20")
-                            value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 20));
-
-                        OPTION_ALIAS += ` ${value}-`;
-                    } else {
-                        ui.notifications.warn(
-                            `${item.actor.name} has a power ${item.name}. Expecting 'SKILL roll', where SKILL is the name of an owned skill.`,
-                        );
-
-                        if (!overrideCanAct) {
-                            const actor = item.actor;
-                            const token = actor.token;
-                            const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-                            speaker.alias = actor.name;
-                            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-
-                            const chatData = {
-                                style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
-                                author: game.user._id,
-                                content:
-                                    `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
-                                    `\nPress <b>${overrideKeyText}</b> to override.`,
-                                speaker: speaker,
-                            };
-
-                            await ChatMessage.create(chatData);
-
-                            return false;
-                        }
+                        OPTION_ALIAS = rar.COMMENTS;
                     }
                 }
-                break;
-
-            case "CHAR":
-                {
-                    OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
-                    let char = item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
-                    if (!char && rar.COMMENTS) {
-                        char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
-                        if (char) {
-                            OPTION_ALIAS = rar.COMMENTS;
-                        }
-                    }
+                if (!skill && rar.COMMENTS) {
+                    let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
                     if (char) {
-                        item.actor.updateRollable(OPTION_ALIAS.toLowerCase());
-                        value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
-                        OPTION_ALIAS += ` ${value}-`;
-                    } else {
                         ui.notifications.warn(
-                            `${item.actor.name} has a power ${item.name}. Expecting 'CHAR roll', where CHAR is the name of a characteristic.`,
-                            // { console: true, permanent: true },
+                            `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`,
                         );
+
+                        // Lets try anyway
+                        value = char?.roll;
                     }
                 }
-                break;
+                if (skill) {
+                    value = parseInt(skill.system.roll);
+                    if (rar.OPTIONID === "SKILL1PER5")
+                        value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 5));
+                    if (rar.OPTIONID === "SKILL1PER20")
+                        value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 20));
 
-            default:
-                if (!value) {
+                    OPTION_ALIAS += ` ${value}-`;
+                } else {
                     ui.notifications.warn(
-                        `${item.actor.name} has a power ${item.name}. ${OPTION_ALIAS} is not supported.`,
-                        // { console: true, permanent: true },
+                        `${item.actor.name} has a power ${item.name}. Expecting 'SKILL roll', where SKILL is the name of an owned skill.`,
                     );
-                    // Try to continue
-                    value = 11;
+
+                    if (!overrideCanAct) {
+                        const actor = item.actor;
+                        const token = actor.token;
+                        const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+                        speaker.alias = actor.name;
+                        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+
+                        const chatData = {
+                            style: CONST.CHAT_MESSAGE_STYLES.IC,
+                            author: game.user._id,
+                            content:
+                                `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
+                                `\nPress <b>${overrideKeyText}</b> to override.`,
+                            speaker: speaker,
+                        };
+
+                        await ChatMessage.create(chatData);
+
+                        return false;
+                    }
                 }
-        }
+            }
+            break;
 
-        const successValue = parseInt(value);
-        const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
-        await activationRoller.roll();
-        let succeeded = activationRoller.getSuccess();
-        const autoSuccess = activationRoller.getAutoSuccess();
-        const total = activationRoller.getSuccessTotal();
-        const margin = successValue - total;
+        case "CHAR":
+            {
+                OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
+                let char = item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
+                if (!char && rar.COMMENTS) {
+                    char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                    if (char) {
+                        OPTION_ALIAS = rar.COMMENTS;
+                    }
+                }
+                if (char) {
+                    item.actor.updateRollable(OPTION_ALIAS.toLowerCase());
+                    value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
+                    OPTION_ALIAS += ` ${value}-`;
+                } else {
+                    ui.notifications.warn(
+                        `${item.actor.name} has a power ${item.name}. Expecting 'CHAR roll', where CHAR is the name of a characteristic.`,
+                    );
+                }
+            }
+            break;
 
-        const flavor = `${item.name.toUpperCase()} (${OPTION_ALIAS}) activation ${
-            succeeded ? "succeeded" : "failed"
-        } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
-        let cardHtml = await activationRoller.render(flavor);
+        default:
+            if (!value) {
+                ui.notifications.warn(`${item.actor.name} has a power ${item.name}. ${OPTION_ALIAS} is not supported.`);
 
-        // FORCE success
-        if (!succeeded && overrideCanAct) {
-            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-            ui.notifications.info(`${item.actor.name} succeeded roll because override key.`);
-            succeeded = true;
-            cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
-        }
-
-        const actor = item.actor;
-        const token = actor.token;
-        const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-        //speaker.alias = actor.name;
-        if (!succeeded && options.resourcesUsedDescription) {
-            cardHtml += `Spent ${options.resourcesUsedDescription}.`;
-        }
-
-        const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
-            rolls: activationRoller.rawRolls(),
-            author: game.user._id,
-            content: cardHtml,
-            speaker: speaker,
-        };
-
-        await ChatMessage.create(chatData);
-
-        if (!succeeded && options.showUi) {
-            ui.notifications.warn(cardHtml);
-        }
-
-        return succeeded;
+                // Try to continue
+                value = 11;
+            }
+            break;
     }
-    return true;
+
+    const successValue = parseInt(value);
+    const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
+    await activationRoller.roll();
+    let succeeded = activationRoller.getSuccess();
+    const autoSuccess = activationRoller.getAutoSuccess();
+    const total = activationRoller.getSuccessTotal();
+    const margin = successValue - total;
+
+    const flavor = `${item.name.toUpperCase()} (${OPTION_ALIAS}) activation ${
+        succeeded ? "succeeded" : "failed"
+    } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+    let cardHtml = await activationRoller.render(flavor);
+
+    // FORCE success
+    if (!succeeded && overrideCanAct) {
+        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+        ui.notifications.info(`${item.actor.name} succeeded roll because override key.`);
+        succeeded = true;
+        cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
+    }
+
+    const actor = item.actor;
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+
+    if (!succeeded && options.resourcesUsedDescription) {
+        cardHtml += `Spent ${options.resourcesUsedDescription}.`;
+    }
+
+    const chatData = {
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        rolls: activationRoller.rawRolls(),
+        author: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
+
+    if (!succeeded && options.showUi) {
+        ui.notifications.warn(cardHtml);
+    }
+
+    return succeeded;
 }
 
 async function _startIfIsAContinuingCharge(item) {

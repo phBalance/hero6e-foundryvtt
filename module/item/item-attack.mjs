@@ -11,8 +11,8 @@ import {
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { HeroSystem6eItem, requiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
-import { ItemAttackFormApplication, getAoeTemplateForItem } from "../item/item-attack-application.mjs";
+import { HeroSystem6eItem, rollRequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
+import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
@@ -419,7 +419,9 @@ export async function processActionToHit(item, formData) {
     }
 
     // PH: FIXME: Need to not pass in formData and move the interesting stuff into action
-    if (item.getAoeModifier()) {
+
+    // Does the effective attack item have an AoE?
+    if (item.effectiveAttackItem.getAoeModifier()) {
         await doAoeActionToHit(action, formData);
     } else {
         await doSingleTargetActionToHit(action, formData);
@@ -432,22 +434,22 @@ export async function processActionToHit(item, formData) {
 }
 
 function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
-    if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
+    if (item.effectiveAttackItem.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
         // TODO: Should not be able to use this on anyone else. Should add a check well before here (in dialog).
     }
 
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
     //       in case the system has calculated it incorrectly.
 
-    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
-    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
+    const noRangeModifiers = !!item.effectiveAttackItem.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!item.effectiveAttackItem.findModsByXmlid("NORMALRANGE");
 
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
         !(
-            item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
-            item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            item.effectiveAttackItem.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            item.effectiveAttackItem.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
             noRangeModifiers ||
             normalRange
         )
@@ -462,14 +464,15 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
         );
 
         // PENALTY_SKILL_LEVELS (range)
-        for (const pslItem of item.pslRangePenaltyOffsetItems) {
+        // PH: FIXME: PSLs for maneuver and PSLs for a weapon. What kind of stacking is possible?
+        for (const pslItem of item.effectiveAttackItem.pslRangePenaltyOffsetItems) {
             const pslOffsets = Math.min(parseInt(pslItem.system.LEVELS), -remainingRangePenalty);
             remainingRangePenalty += pslOffsets;
             attackHeroRoller.addNumber(pslOffsets, "Penalty Skill Levels");
         }
 
         // Some maneuvers have a built in RANGE value (like PSLs)
-        const maneuverRangeOffset = parseInt(item.system.RANGE || 0);
+        const maneuverRangeOffset = parseInt(item.effectiveAttackItem.system.RANGE || 0);
         const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
         remainingRangePenalty += maneuverRangeOffsets;
         attackHeroRoller.addNumber(maneuverRangeOffsets, "Maneuver bonus");
@@ -524,7 +527,7 @@ export async function doAoeActionToHit(action, options) {
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
 
-    const aoeTemplate = getAoeTemplateForItem(item);
+    const aoeTemplate = getAoeTemplateForBaseItem(item);
     if (!aoeTemplate) {
         return ui.notifications.error(`Attack AoE template was not found.`);
     }
@@ -719,7 +722,9 @@ async function doSingleTargetActionToHit(action, options) {
                     `Actions that use STR or GESTURES require STR roll when at 0 STR`,
                 ))
             ) {
-                await ui.notifications.warn(`${actor.name} failed STR 0 roll. Action with ${item.name} failed.`);
+                await ui.notifications.warn(
+                    `${actor.name} failed STR 0 roll. Action with ${item.detailedName()} failed.`,
+                );
                 return;
             }
         }
@@ -760,12 +765,31 @@ async function doSingleTargetActionToHit(action, options) {
         return ui.notifications.warn(`${item.name} ${resourceWarning}`);
     }
 
-    // Requires A Roll
-    if (!(await requiresASkillRollCheck(item, { showUI: true, resourcesRequired, resourcesUsedDescription }))) {
+    // Does base item Requires A Rolls
+    const attackItemRSR = await rollRequiresASkillRollCheck(item, {
+        showUI: true,
+        resourcesRequired,
+        resourcesUsedDescription,
+    });
+    if (!attackItemRSR) {
         return;
     }
 
-    const itemData = item.system;
+    // Requires A Roll (base and effective attack items might both require rolls)
+    const attackItemAndEffectiveItemAreSame =
+        item.system._active?.__originalUuid === item.effectiveAttackItem.system._active?.__originalUuid;
+    const effectiveAttackItemRSR =
+        !attackItemAndEffectiveItemAreSame &&
+        (await rollRequiresASkillRollCheck(item.effectiveAttackItem, {
+            showUI: true,
+            resourcesRequired,
+            resourcesUsedDescription,
+        }));
+    if (!attackItemAndEffectiveItemAreSame && !effectiveAttackItemRSR) {
+        return;
+    }
+
+    const itemData = item.effectiveAttackItem.system;
 
     const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.uses]?.value);
     if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.uses.toUpperCase())) {
@@ -777,9 +801,9 @@ async function doSingleTargetActionToHit(action, options) {
     const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
     const adjustment = getPowerInfo({
-        item: item,
+        item: item.effectiveAttackItem,
     })?.type?.includes("adjustment");
-    const senseAffecting = item.isSenseAffecting();
+    const senseAffecting = item.effectiveAttackItem.isSenseAffecting();
 
     // TODO: Much of this looks similar to the AOE stuff above. Any way to combine?
     // -------------------------------------------------
@@ -797,8 +821,8 @@ async function doSingleTargetActionToHit(action, options) {
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
 
-    const isAoE = item.getAoeModifier();
-    const aoeTemplate = isAoE ? getAoeTemplateForItem(item) : null;
+    const isAoE = item.effectiveAttackItem.getAoeModifier();
+    const aoeTemplate = isAoE ? getAoeTemplateForBaseItem(item) : null;
     if (isAoE && !aoeTemplate) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
@@ -825,10 +849,11 @@ async function doSingleTargetActionToHit(action, options) {
     // Combat Skill Levels
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item).details) {
-        // Requires A Roll
-        if (!(await requiresASkillRollCheck(csl.item))) {
+        // Requires A Roll?
+        if (!(await rollRequiresASkillRollCheck(csl.item))) {
             continue;
         }
+
         const id = csl.skill.id;
         skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
@@ -837,19 +862,19 @@ async function doSingleTargetActionToHit(action, options) {
         cvMod.dc += csl.dc;
         if (csl.ocv || csl.omcv > 0) {
             cvMod.ocv += csl.ocv || csl.omcv;
-            //heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
         }
         dcv += csl.dcv;
         cvMod.dcv += csl.dcv;
     }
 
-    const dmcv = parseInt(item.system.dmcv || 0);
-    if (dmcv != 0) {
+    const dmcv = parseInt(item.effectiveAttackItem.system.dmcv || 0);
+    if (dmcv !== 0) {
         // Make sure we don't already have this activeEffect
+        // PH: FIXME: how can we have a uuid given this is an effective attack item?
         let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
         if (!prevActiveEffect) {
             // Estimate of how many seconds the DCV penalty lasts (until next phase).
-            // In combat.js#_onStartTurn we remove this AE for exact timing.
+            // In combat.mjs#_onStartTurn we remove this AE for exact timing.
             let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
             let _dcvText = "DMCV";
             let _dcvValue = dmcv;
@@ -864,12 +889,13 @@ async function doSingleTargetActionToHit(action, options) {
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                     },
                 ],
-                origin: item.uuid,
+                origin: item.uuid, // PH: FIXME: how can we have a uuid given this is an effective attack item?
                 duration: {
                     seconds: seconds,
                 },
                 flags: {
                     [game.system.id]: {
+                        // PH: FIXME: how can we have a uuid given this is an effective attack item?
                         nextPhase: true,
                     },
                 },
@@ -897,24 +923,24 @@ async function doSingleTargetActionToHit(action, options) {
     }
 
     // STRMINIMUM
-    const strMinimumModifier = item.findModsByXmlid("STRMINIMUM");
+    // PH: FIXME: Need to consider all the STR minima for both the item and the effectiveAttackItem.
+    const strMinimumModifier = item.effectiveAttackItem.findModsByXmlid("STRMINIMUM");
     if (strMinimumModifier) {
-        const strMinimumValue = calculateStrengthMinimumForItem(item, strMinimumModifier);
+        const strMinimumValue = calculateStrengthMinimumForItem(item.effectiveAttackItem, strMinimumModifier);
         const extraStr = Math.max(0, parseInt(actor.system.characteristics.str.value)) - strMinimumValue;
         if (extraStr < 0) {
             attackHeroRoller.addNumber(Math.floor(extraStr / 5), strMinimumModifier.ALIAS);
         }
     }
 
-    cvModifiers.forEach((cvModifier) => {
-        if (cvModifier.cvMod.ocv) {
-            attackHeroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
-        }
-    });
+    cvModifiers
+        .filter((cvModifier) => cvModifier.cvMod.ocv)
+        .forEach((cvModifier) => attackHeroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name));
+
     Attack.makeActionActiveEffects(action);
 
-    // [x Stun, x N Stun, x Body, OCV modifier]
-    const noHitLocationsPower = !!item.system.noHitLocations;
+    // Called shot penalties
+    const noHitLocationsPower = !!item.effectiveAttackItem.system.noHitLocations;
     if (
         game.settings.get(HEROSYS.module, "hit locations") &&
         options.aim &&
@@ -933,6 +959,7 @@ async function doSingleTargetActionToHit(action, options) {
         }
 
         // Penalty Skill Levels
+        // PH: FIXME: need to consider both the item and the effectiveAttackItem
         if (options.usePsl) {
             const pslHit = penaltySkillLevelsForAttack(item).find(
                 (o) => o.system.penalty === "hitLocation" && o.system.checked,
@@ -950,8 +977,8 @@ async function doSingleTargetActionToHit(action, options) {
     // (so we can be sneaky and not tell the target's DCV out loud).
     attackHeroRoller.addDice(-3);
 
-    const aoeModifier = item.getAoeModifier();
-    const explosion = item.hasExplosionAdvantage();
+    const aoeModifier = item.effectiveAttackItem.getAoeModifier();
+    const explosion = item.effectiveAttackItem.hasExplosionAdvantage();
     const SELECTIVETARGET = aoeModifier?.ADDER ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET") : null;
     const NONSELECTIVETARGET = aoeModifier?.ADDER
         ? aoeModifier.ADDER.find((o) => o.XMLID === "NONSELECTIVETARGET")
@@ -1079,9 +1106,10 @@ async function doSingleTargetActionToHit(action, options) {
     }
 
     // AUTOFIRE
-    const autofire = item.findModsByXmlid("AUTOFIRE");
+    // PH: FIXME: Consider autofire on both base and effective attack items. Are they multiplicitive?
+    const autofire = item.effectiveAttackItem.findModsByXmlid("AUTOFIRE");
     if (autofire) {
-        const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+        const autoFireShots = item.effectiveAttackItem.calcAutofireShots(autofire);
 
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
@@ -1137,6 +1165,7 @@ async function doSingleTargetActionToHit(action, options) {
         }
     }
 
+    // PH: FIXME: Is this even possible? If not remove it.
     if (!item) {
         const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
         speaker["alias"] = item.actor.name;
@@ -1187,7 +1216,7 @@ async function doSingleTargetActionToHit(action, options) {
 
         item,
         itemJsonStr: dehydrateAttackItem(item), // PH: FIXME: Can remove some things like item etc because they're in the actionData.
-        originalUuid: item.id || fromUuidSync(item.system._active.__originalUuid).id,
+        originalUuid: item.id || foundry.utils.parseUuid(item.system._active.__originalUuid).id,
 
         adjustment,
         senseAffecting,
@@ -1217,10 +1246,9 @@ async function doSingleTargetActionToHit(action, options) {
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()
@@ -1249,6 +1277,7 @@ function getAttackTags(item) {
     }
 
     // Use the effective item to figure out what this attack really is.
+    // PH: FIXME: simplify this to effectAttackItem ... probably also used elsewhere
     const baseAttackItem = item.baseInfo.baseEffectDicePartsBundle(item, {}).baseAttackItem;
 
     // Provide the name of the actual attack item in the tag if it is different from the original item. However,
@@ -1412,6 +1441,7 @@ function getAttackTags(item) {
                         title: `${adder.ALIAS || ""}`,
                     });
                     break;
+
                 default:
                     attackTags.push({
                         name: `${adder.ALIAS || adder.XMLID}`,
@@ -1422,6 +1452,7 @@ function getAttackTags(item) {
     }
 
     // MartialArts NND
+    // PH: FIXME: need to consider WEAPONEFFECT too.
     if (baseAttackItem.system.EFFECT?.includes("NNDDC")) {
         attackTags.push({
             name: `NND`,
@@ -1430,6 +1461,7 @@ function getAttackTags(item) {
     }
 
     // Martial FLASH
+    // PH: FIXME: need to consider WEAPONEFFECT too.
     if (baseAttackItem.system.EFFECT?.includes("FLASHDC")) {
         attackTags.push({
             name: `Flash`,
@@ -1729,10 +1761,9 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: damageRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -1747,20 +1778,21 @@ async function _rollApplyKnockback(token, knockbackDice) {
     // all: "PCs and NPCs (end, stun, body)"
     const automation = game.settings.get(HEROSYS.module, "automation");
     if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
-        let changes = {};
-        if (damageDetail.stun != 0) {
+        const changes = {};
+
+        if (damageDetail.stun !== 0) {
             changes["system.characteristics.stun.value"] =
                 token.actor.system.characteristics.stun.value - damageDetail.stun;
         }
-        if (damageDetail.body != 0) {
+        if (damageDetail.body !== 0) {
             changes["system.characteristics.body.value"] =
                 token.actor.system.characteristics.body.value - damageDetail.body;
         }
+
         await token.actor.update(changes);
     }
 
     // Token falls prone
-    //token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
     await token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
         active: true,
     });
@@ -1782,7 +1814,7 @@ export async function rollEffect(item) {
 
     const speaker = ChatMessage.getSpeaker();
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: effectRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -1815,11 +1847,11 @@ export async function _onRollDamage(event) {
     if (!action?.current.attackerTokenId) {
         console.warn("expecting action.current.attackerTokenId");
     }
-    const token = getTokenEducatedGuess({ action, actor: item.actor });
+    const token = getTokenEducatedGuess({ action, actor });
     const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
-    const haymakerManeuverActiveItem = item.actor?.items.find(
+    const haymakerManeuverActiveItem = actor.items.find(
         (item) =>
             item.type === "maneuver" &&
             item.system.XMLID === "HAYMAKER" &&
@@ -1831,20 +1863,24 @@ export async function _onRollDamage(event) {
         toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
 
     const isAdjustment = !!getPowerInfo({
-        item: item,
+        item: item.effectiveAttackItem,
     })?.type?.includes("adjustment");
-    // Sense affecting power or maneuver with FLASHDC
-    const isSenseAffecting = item.isSenseAffecting();
-    const isKilling = item.doesKillingDamage;
-    const isEntangle = item.system.XMLID === "ENTANGLE";
+    const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting();
+    const isKilling = item.effectiveAttackItem.doesKillingDamage;
+    const isEntangle = item.effectiveAttackItem.system.XMLID === "ENTANGLE";
     const isNormalAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isKilling;
     const isKillingAttack = !isEntangle && !isSenseAffecting && !isAdjustment && isKilling;
-    const isEffectBasedAttack = isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item);
+    const isEffectBasedAttack =
+        isBodyBasedEffectRoll(item.effectiveAttackItem) || isStunBasedEffectRoll(item.effectiveAttackItem);
 
-    const increasedMultiplierLevels = parseInt(item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0);
-    const decreasedMultiplierLevels = parseInt(item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0);
+    const increasedMultiplierLevels = parseInt(
+        item.effectiveAttackItem.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0,
+    );
+    const decreasedMultiplierLevels = parseInt(
+        item.effectiveAttackItem.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0,
+    );
 
-    const useStandardEffect = item.system.USESTANDARDEFFECT || false;
+    const useStandardEffect = !!item.effectiveAttackItem.system.USESTANDARDEFFECT;
 
     const { diceParts, tags } = calculateDicePartsForItem(item, {
         isAction: true,
@@ -1852,7 +1888,8 @@ export async function _onRollDamage(event) {
         ...{ haymakerManeuverActiveItem },
     });
 
-    const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations;
+    const includeHitLocation =
+        game.settings.get(HEROSYS.module, "hit locations") && !item.effectiveAttackItem.system.noHitLocations;
 
     const customStunMultiplierSetting = game.settings.get(
         game.system.id,
@@ -1883,8 +1920,8 @@ export async function _onRollDamage(event) {
         .modifyToStandardEffect(useStandardEffect)
         .modifyToNoBody(
             isNormalAttack &&
-                (item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
-                    item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly),
+                (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
+                    item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly),
         )
         .addToHitLocation(
             includeHitLocation,
@@ -1918,19 +1955,12 @@ export async function _onRollDamage(event) {
     }
 
     // Kludge for SIMPLIFIED HEALING
-    const isSimpleHealing = item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i);
+    const isSimpleHealing =
+        item.effectiveAttackItem.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i);
 
     const damageRenderedResult = isSimpleHealing
         ? await (await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).render()
         : await damageRoller.render();
-
-    // // PERSONALIMMUNITY
-    // // NOTE: We may want to reintroduce this code (CHANGE ENVIRONMENT or large scale MENTAL) at some point.
-    // // However at the moment AOE is the primary mechanism to target multiple tokens.
-    // // const PERSONALIMMUNITY = item.findModsByXmlid("PERSONALIMMUNITY");
-    // // if (PERSONALIMMUNITY && targetTokens) {
-    // //     targetTokens = targetTokens.filter((o) => o.token.actor.id !== actor.id);
-    // // }
 
     const cardData = {
         user: game.user,
@@ -1939,8 +1969,7 @@ export async function _onRollDamage(event) {
         itemJsonStr: toHitData.itemJsonStr, // PH: FIXME: Would be nice to just have this in action data that is always passed through
         actor: item.actor,
 
-        nonDmgEffect:
-            isAdjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item) || item.baseInfo?.nonDmgEffect,
+        nonDmgEffect: isAdjustment || isEffectBasedAttack || item.baseInfo?.nonDmgEffect,
         isSenseAffecting,
 
         // dice rolls
@@ -1964,10 +1993,9 @@ export async function _onRollDamage(event) {
     const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
-    //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: damageRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2006,7 +2034,7 @@ export async function _onRollMindScan(event) {
         toHitData.target = canvas.tokens.controlled[0].id;
     }
 
-    // Look thru all the scenes to find this token
+    // Look through all the scenes to find this token
     const token = game.scenes
         .find((s) => s.tokens.find((t) => t.id === toHitData.target))
         ?.tokens.find((t) => t.id === toHitData.target);
@@ -2030,8 +2058,8 @@ export async function _onRollMindScan(event) {
         actor: item.actor,
     };
 
-    const template2 = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
-    const content = await foundryVttRenderTemplate(template2, data);
+    const template = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
+    const content = await foundryVttRenderTemplate(template, data);
     const chatData = {
         author: game.user._id,
         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
@@ -2067,10 +2095,10 @@ export async function _onRollMindScanEffectRoll(event) {
     const egoAdder = parseInt(button.innerHTML.match(/\d+/)) || 0;
     const targetEgo = targetsEgo + egoAdder;
 
-    const adjustment = item.baseInfo?.type?.includes("adjustment");
-    const senseAffecting = item.isSenseAffecting();
+    const adjustment = item.effectiveAttackItem.baseInfo?.type?.includes("adjustment"); // PH: FIXME: use accessor
+    const senseAffecting = item.effectiveAttackItem.isSenseAffecting();
 
-    const useStandardEffect = item.system.USESTANDARDEFFECT || false;
+    const useStandardEffect = item.effectiveAttackItem.system.USESTANDARDEFFECT || false;
 
     const { diceParts, tags } = calculateDicePartsForItem(item, {
         isAction: true,
@@ -2105,7 +2133,7 @@ export async function _onRollMindScanEffectRoll(event) {
         damageNegationValue,
         knockbackResistanceValue,
         defenseTags,
-    } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
+    } = getActorDefensesVsAttack(token.actor, item.effectiveAttackItem, { ignoreDefenseIds });
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }
@@ -2168,10 +2196,9 @@ export async function _onRollMindScanEffectRoll(event) {
     const template = `systems/${HEROSYS.module}/templates/attack/item-mindscan-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
-    //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: mindScanRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2299,9 +2326,9 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     const damageRoller = HeroRoller.fromJSON(damageData.roller);
 
-    const explosion = item.hasExplosionAdvantage();
+    const explosion = item.effectiveAttackItem.hasExplosionAdvantage();
     if (explosion) {
-        const aoeTemplate = getAoeTemplateForItem(item);
+        const aoeTemplate = getAoeTemplateForBaseItem(item.effectiveAttackItem);
 
         if (aoeTemplate) {
             // Distance from center
@@ -2364,11 +2391,11 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         await doManeuverEffects(item, action);
     }
 
-    if (item.system.XMLID === "ENTANGLE") {
+    if (item.effectiveAttackItem.system.XMLID === "ENTANGLE") {
         return _onApplyEntangleToSpecificToken(item, token, damageRoller, action);
     }
 
-    // Target ENTANGLE
+    // Target an ENTANGLE?
     const entangleAE = token.actor.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
     if (entangleAE) {
         // Targeting ENTANGLE based on attack-application checkbox
@@ -2407,9 +2434,9 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     // Attack Verses Alternate Defense (6e) or NND (5e)
-    let avad = item.findModsByXmlid("AVAD") || item.findModsByXmlid("NND");
+    let avad = item.effectiveAttackItem.findModsByXmlid("AVAD") || item.effectiveAttackItem.findModsByXmlid("NND");
 
-    // Martial Arts also have NND's which are special AVAD and always/usually PD
+    // Martial Arts also have NNDs which are special AVAD and always/usually PD
     if (!avad && item.system.EFFECT?.includes("NND")) {
         const pdXml = getPowerInfo({ xmlid: "PD", actor: token.actor });
         avad = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdXml.xml, token.actor), {
@@ -2423,12 +2450,16 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     // Try to make sure we have a PD/ED/MD type for AVAD
-    if (avad && !avad.INPUT && item.system.INPUT) {
-        avad.INPUT = item.system.INPUT;
+    if (avad && !avad.INPUT && item.effectiveAttackItem.system.INPUT) {
+        avad.INPUT = item.effectiveAttackItem.system.INPUT;
     }
 
     // Check for conditional defenses
-    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(token, item, avad);
+    const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(
+        token,
+        item.effectiveAttackItem,
+        avad,
+    );
 
     // If we had conditional defenses and showed the UI to select them, but canceled, getConditionalDefenses returns null values
     if (ignoreDefenseIds === null) {
@@ -2446,7 +2477,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     for (const defense of defenseEveryPhase) {
         if (!ignoreDefenseIds.includes(defense.id)) {
             if (getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null) {
-                const success = await requiresASkillRollCheck(defense);
+                const success = await rollRequiresASkillRollCheck(defense);
                 if (!success) {
                     ignoreDefenseIds.push(defense.id);
                 }
@@ -2557,12 +2588,12 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     const isTransform =
         getPowerInfo({
-            item: item,
+            item: item.effectiveAttackItem,
         })?.XMLID === "TRANSFORM";
     const isAdjustment = !!getPowerInfo({
-        item: item,
+        item: item.effectiveAttackItem,
     })?.type?.includes("adjustment");
-    const isSenseAffecting = item.isSenseAffecting();
+    const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting();
 
     if (isTransform) {
         return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
@@ -2573,7 +2604,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     // AUTOMATION immune to mental powers
-    if (item.system.class === "mental" && token?.actor?.type === "automaton") {
+    if (item.effectiveAttackItem.system.class === "mental" && token?.actor?.type === "automaton") {
         defenseTags.push({
             name: "AUTOMATON",
             value: "immune",
@@ -2639,8 +2670,8 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Attack may have additional effects, such as those from martial arts
     let effectsFinal = foundry.utils.deepClone(damageDetail.effects);
-    if (item.system.effect) {
-        for (const effect of item.system.effect.split(",")) {
+    if (item.effectiveAttackItem.system.effect) {
+        for (const effect of item.effectiveAttackItem.system.effect.split(",")) {
             // Do not include [NORMALDC] strike and similar
             if (effect.indexOf("[") == -1 && !effect.match(/strike/i)) {
                 effectsFinal += effect;
@@ -2650,7 +2681,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     effectsFinal = effectsFinal.replace(/; $/, "");
 
     // Mind Control
-    if (item.system.XMLID === "MINDCONTROL") {
+    if (item.effectiveAttackItem.system.XMLID === "MINDCONTROL") {
         const targetActorEgo = token.actor?.system.characteristics?.ego?.value;
         if (targetActorEgo !== undefined) {
             if (damageDetail.stunDamage >= targetActorEgo + 30) {
@@ -2725,10 +2756,9 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
-    //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: damageDetail.knockbackRoller?.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -2757,7 +2787,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     const damageChatMessage = ChatMessage.create(chatData);
 
-    // Absorption happens after damage is taken unless the GM allows it.
+    // Absorption happens after damage is taken unless the GM allows it. This system doesn't allow that.
     const absorptionItems = token.actor.items.filter((item) => item.system.XMLID === "ABSORPTION");
     if (absorptionItems) {
         await _performAbsorptionForToken(token, absorptionItems, damageDetail, item);
@@ -2767,7 +2797,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 }
 
 export async function _onApplyEntangleToSpecificToken(item, token, originalRoll) {
-    const entangleDefense = item.baseInfo.defense(item);
+    const entangleDefense = item.effectiveAttackItem.baseInfo.defense(item);
     let body = originalRoll.getEntangleTotal();
 
     if (body <= 0) {
@@ -2793,10 +2823,9 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
         const cardHtml = await foundryVttRenderTemplate(template, cardData);
         const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
-        //speaker.alias = item.actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             author: game.user._id,
             content: cardHtml,
             speaker: speaker,
@@ -2849,8 +2878,9 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
                 dehydratedEntangleActorUuid: item.actor.uuid,
             },
         },
-        origin: item.uuid,
+        origin: item.effectiveAttackItem.uuid, // PH: FIXME: effective items don't have uuids.
     };
+
     const changeBody = effectData.changes?.find((o) => o.key === "body");
     if (changeBody) {
         changeBody.value === body;
@@ -2881,7 +2911,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         roller: originalRoll,
 
         // damage info
-        effects: `${token.name} is entangled.  The entangle has ${body} BODY ${entangleDefense.string}. ${
+        effects: `${token.name} is entangled. The entangle has ${body} BODY ${entangleDefense.string}. ${
             prevEntangle ? `This entangle augmented a previous ${prevBody} body entangle.` : ""
         }`,
 
@@ -2894,10 +2924,9 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
-    //speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -3026,10 +3055,9 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: attackItem.actor, token });
-    //speaker.alias = attackItem.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -3064,17 +3092,16 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                     maxAbsorption = 0;
                 }
 
-                // `Presen`t the roll.
+                // Present the roll.
                 const cardHtml = await absorptionRoller.render(`${attackType} attack vs ${absorptionItem.name}`);
 
                 const speaker = ChatMessage.getSpeaker({
                     actor: actor,
                     token,
                 });
-                //speaker.alias = actor.name;
 
                 const chatData = {
-                    style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+                    style: CONST.CHAT_MESSAGE_STYLES.IC,
                     rolls: absorptionRoller.rawRolls(),
                     author: game.user._id,
                     content: cardHtml,
@@ -3111,16 +3138,16 @@ async function _onApplyTransformationToSpecificToken(transformationItem, token, 
 
 async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDetail, defense, defenseTags, action) {
     if (
-        adjustmentItem.actor.id === token.actor.id &&
-        ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(adjustmentItem.system.XMLID)
+        adjustmentItem.effectiveAttackItem.actor.id === token.actor.id &&
+        ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(adjustmentItem.effectiveAttackItem.system.XMLID)
     ) {
         await ui.notifications.warn(
-            `${adjustmentItem.system.XMLID} attacker/source (${adjustmentItem.actor.name}) and defender/target (${token.actor.name}) are the same.`,
+            `${adjustmentItem.effectiveAttackItem.detailedName()} attacker/source (${adjustmentItem.effectiveAttackItem.actor.name}) and defender/target (${token.actor.name}) are the same.`,
         );
     }
 
     // Where is the adjustment taking from/giving to?
-    const { valid, reducesArray, enhancesArray } = adjustmentItem.splitAdjustmentSourceAndTarget();
+    const { valid, reducesArray, enhancesArray } = adjustmentItem.effectiveAttackItem.splitAdjustmentSourceAndTarget();
     if (!valid && token.actor.items.filter((o) => o.type === "power").length > 0) {
         // Show a list of powers from target token
         if (game.settings.get(game.system.id, "alphaTesting")) {
@@ -3150,12 +3177,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
             };
 
             const checked = await Dialog.wait(data);
-            // while (reducesArray?.length > 0) {
-            //     reducesArray.pop();
-            // }
-            // while (enhancesArray?.length > 0) {
-            //     enhancesArray.pop();
-            // }
+
             for (const checkedElement of checked) {
                 const checkedItem = token.actor.items.find((o) => o.id === checkedElement.id);
                 if (reducesArray.length > 0) {
@@ -3166,8 +3188,8 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
             }
             if ((reducesArray?.length || 0) + (enhancesArray?.length || 0) === 0) {
                 return ui.notifications.error(
-                    `${adjustmentItem.actor.name} has an invalid adjustment sources/targets provided for ${
-                        adjustmentItem.system.ALIAS || adjustmentItem.name
+                    `${adjustmentItem.effectiveAttackItem.actor.name} has an invalid adjustment sources/targets provided for ${
+                        adjustmentItem.effectiveAttackItem.system.ALIAS || adjustmentItem.effectiveAttackItem.name
                     }. Compute effects manually.`,
                     { permanent: true },
                 );
@@ -3176,26 +3198,25 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
             }
         } else {
             return ui.notifications.error(
-                `${adjustmentItem.actor.name} has an invalid adjustment sources/targets provided for ${
-                    adjustmentItem.system.ALIAS || adjustmentItem.name
+                `${adjustmentItem.effectiveAttackItem.actor.name} has an invalid adjustment sources/targets provided for ${
+                    adjustmentItem.effectiveAttackItem.system.ALIAS || adjustmentItem.effectiveAttackItem.name
                 }. Compute effects manually.`,
                 { permanent: true },
             );
         }
     }
 
-    const adjustmentItemTags = getAttackTags(adjustmentItem);
+    const adjustmentItemTags = getAttackTags(adjustmentItem.effectiveAttackItem);
 
     const rawActivePointsEffectBeforeDefense = damageDetail.stunDamage;
     const activePointsEffectAfterDefense = damageDetail.stun;
 
     // DRAIN
     const reductionChatMessages = [];
-    //const reductionTargetActor = token.actor;
     for (const reduce of reducesArray) {
         reductionChatMessages.push(
             await performAdjustment(
-                adjustmentItem,
+                adjustmentItem.effectiveAttackItem,
                 reduce,
                 -activePointsEffectAfterDefense,
                 defense,
@@ -3212,16 +3233,16 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     // AID
     const enhancementChatMessages = [];
-    //const enhancementTargetActor = adjustmentItem.system.XMLID === "TRANSFER" ? adjustmentItem.actor : token.actor;
     for (const enhance of enhancesArray) {
-        const simplifiedHealing = adjustmentItem.system.XMLID === "HEALING" && enhance.match(/simplified/i);
+        const simplifiedHealing =
+            adjustmentItem.effectiveAttackItem.system.XMLID === "HEALING" && enhance.match(/simplified/i);
 
         if (simplifiedHealing) {
             // STUN
             enhancementChatMessages.push(
                 await performAdjustment(
-                    adjustmentItem,
-                    "STUN", //enhance,
+                    adjustmentItem.effectiveAttackItem,
+                    "STUN",
                     rawActivePointsEffectBeforeDefense,
                     "None - Beneficial",
                     "",
@@ -3233,8 +3254,8 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
             // BODY
             enhancementChatMessages.push(
                 await performAdjustment(
-                    adjustmentItem,
-                    "BODY", //enhance,
+                    adjustmentItem.effectiveAttackItem,
+                    "BODY",
                     damageDetail.bodyDamage,
                     "None - Beneficial",
                     "",
@@ -3250,9 +3271,9 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
         } else {
             enhancementChatMessages.push(
                 await performAdjustment(
-                    adjustmentItem,
+                    adjustmentItem.effectiveAttackItem,
                     enhance,
-                    adjustmentItem.system.XMLID === "TRANSFER"
+                    adjustmentItem.effectiveAttackItem.system.XMLID === "TRANSFER"
                         ? activePointsEffectAfterDefense
                         : simplifiedHealing && enhance === "BODY"
                           ? damageDetail.bodyDamage
@@ -3260,12 +3281,12 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     "None - Beneficial",
                     "",
                     false,
-                    adjustmentItem.system.XMLID !== "TRANSFER"
+                    adjustmentItem.effectiveAttackItem.system.XMLID !== "TRANSFER"
                         ? token
-                        : adjustmentItem.actor
+                        : adjustmentItem.effectiveAttackItem.actor
                               .getActiveTokens()
                               ?.find((t) => t.id === action?.current?.attackerTokenId) ||
-                              adjustmentItem.actor.getActiveTokens?.[0],
+                              adjustmentItem.effectiveAttackItem.actor.getActiveTokens?.[0],
                     action,
                 ),
             );
@@ -3304,16 +3325,19 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     ];
 
     // Target groups are we attacking
-    const targetGroups = [senseAffectingItem.system.OPTIONID || senseAffectingItem.system.INPUT];
+    const targetGroups = [
+        senseAffectingItem.effectiveAttackItem.system.OPTIONID || senseAffectingItem.effectiveAttackItem.system.INPUT,
+    ];
     targetGroups.push(...senseAffectingItem.adders.map((a) => a.XMLID));
     for (const adder of targetGroups) {
         let adder2 = adder;
 
         // Martial Flash MANEUVER is for the entire GROUP
-        if (senseAffectingItem.system.XMLID === "MANEUVER") {
+        if (senseAffectingItem.effectiveAttackItem.system.XMLID === "MANEUVER") {
             adder2 =
-                senseGroups.find((o) => o.XMLID.match(new RegExp(senseAffectingItem.system.INPUT, "i")))?.XMLID ||
-                adder2;
+                senseGroups.find((o) =>
+                    o.XMLID.match(new RegExp(senseAffectingItem.effectiveAttackItem.system.INPUT, "i")),
+                )?.XMLID || adder2;
         }
 
         // Single sense kluge
@@ -3335,8 +3359,8 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     // FLASHDEFENSE
     for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.isActive)) {
         if (
-            senseAffectingItem.system.OPTIONID === flashDefense.system.OPTIONID ||
-            flashDefense.system.OPTIONID.includes(senseAffectingItem.system.INPUT?.toUpperCase())
+            senseAffectingItem.effectiveAttackItem.system.OPTIONID === flashDefense.system.OPTIONID ||
+            flashDefense.system.OPTIONID.includes(senseAffectingItem.effectiveAttackItem.system.INPUT?.toUpperCase())
         ) {
             const value = parseInt(flashDefense.system.LEVELS || 0);
             const senseGroup = senseGroups.find((sg) => sg.XMLID === flashDefense.system.OPTIONID);
@@ -3363,7 +3387,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
         if (senseGroup.bodyDamage > 0) {
             token.actor.addActiveEffect({
                 ...senseGroup.statusEffect,
-                name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseGroup.XMLID} ${
+                name: `${senseAffectingItem.effectiveAttackItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseGroup.XMLID} ${
                     senseGroup.bodyDamage
                 } segments remaining [${senseAffectingItem.actor.name}]`,
                 duration: {
@@ -3419,15 +3443,16 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
  */
 async function _calcDamage(damageRoller, item, options) {
     let damageDetail = {};
-    const itemData = item.system;
+    const itemData = item.effectiveAttackItem.system;
 
     const isAdjustment = !!getPowerInfo({
-        item: item,
+        item: item.effectiveAttackItem,
     })?.type?.includes("adjustment");
-    const isSenseAffectingPower = item.isSenseAffecting();
-    const isEntangle = item.system.XMLID === "ENTANGLE";
-    const isBodyBasedEffectRollItem = isBodyBasedEffectRoll(item);
-    const isStunBasedEffectRollItem = isStunBasedEffectRoll(item);
+    const isSenseAffectingPower = item.effectiveAttackItem.isSenseAffecting();
+    const isEntangle = item.effectiveAttackItem.system.XMLID === "ENTANGLE";
+    const isBodyBasedEffectRollItem = isBodyBasedEffectRoll(item.effectiveAttackItem);
+    const isStunBasedEffectRollItem = isStunBasedEffectRoll(item.effectiveAttackItem);
+    const isKillingAttack = item.effectiveAttackItem.doesKillingDamage;
 
     let body;
     let stun;
@@ -3437,7 +3462,7 @@ async function _calcDamage(damageRoller, item, options) {
 
     if (isAdjustment) {
         // kludge for SIMPLIFIED HEALING
-        if (item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
+        if (item.effectiveAttackItem.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
             // PH: FIXME: Didn't we already do this in the damage roll?
             const shr = await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
             body = shr.getBodyTotal();
@@ -3470,7 +3495,7 @@ async function _calcDamage(damageRoller, item, options) {
         stun = damageRoller.getStunTotal();
 
         // TODO: Doesn't handle a 1 point killing attack which is explicitly called out as doing 1 penetrating BODY.
-        if (item.doesKillingDamage) {
+        if (isKillingAttack) {
             bodyForPenetrating = (
                 await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)
             ).getBodyTotal();
@@ -3487,9 +3512,9 @@ async function _calcDamage(damageRoller, item, options) {
         }
     }
 
-    const noHitLocationsPower = !!item.system.noHitLocations;
+    const noHitLocationsPower = !!item.effectiveAttackItem.system.noHitLocations;
     const useHitLocations = game.settings.get(HEROSYS.module, "hit locations") && !noHitLocationsPower;
-    const hasStunMultiplierRoll = item.doesKillingDamage && !useHitLocations;
+    const hasStunMultiplierRoll = isKillingAttack && !useHitLocations;
 
     const stunMultiplier = hasStunMultiplierRoll ? damageRoller.getStunMultiplier() : 1;
 
@@ -3497,7 +3522,7 @@ async function _calcDamage(damageRoller, item, options) {
     //       multiple levels of penetrating vs hardened/impenetrable
     //       or the fact that there is no impenetrable in 5e which uses hardened instead.
     // Penetrating
-    const penetratingBody = item.system.penetrating
+    const penetratingBody = item.effectiveAttackItem.system.penetrating
         ? Math.max(0, bodyForPenetrating - (options.impenetrableValue || 0))
         : 0;
 
@@ -3515,8 +3540,8 @@ async function _calcDamage(damageRoller, item, options) {
         }
     }
 
-    if (item.system.EFFECT) {
-        effects += `${item.system._effect || item.system.EFFECT}; `;
+    if (item.effectiveAttackItem.system.EFFECT) {
+        effects += `${item.effectiveAttackItem.system._effect || item.effectiveAttackItem.system.EFFECT}; `;
     }
 
     // VULNERABILITY
@@ -3543,9 +3568,9 @@ async function _calcDamage(damageRoller, item, options) {
     // treated as a single attack).
     // This is super awkward with the current system.
     // kludge: Apply body defense twice.
-    let REDUCEDPENETRATION = item.findModsByXmlid("REDUCEDPENETRATION");
+    let REDUCEDPENETRATION = item.effectiveAttackItem.findModsByXmlid("REDUCEDPENETRATION");
     if (REDUCEDPENETRATION) {
-        if (item.doesKillingDamage) {
+        if (isKillingAttack) {
             body = Math.max(0, body - (options.resistantValue || 0));
         }
         body = Math.max(0, body - (options.defenseValue || 0));
@@ -3565,7 +3590,7 @@ async function _calcDamage(damageRoller, item, options) {
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
-    if (item.doesKillingDamage) {
+    if (isKillingAttack) {
         stun = stun - (options.defenseValue || 0) - (options.resistantValue || 0);
         body = body - (options.resistantValue || 0);
     } else {
@@ -3581,7 +3606,7 @@ async function _calcDamage(damageRoller, item, options) {
         const hitLocationBodyMultiplier = damageRoller.getHitLocation().bodyMultiplier;
         const hitLocationStunMultiplier = damageRoller.getHitLocation().stunMultiplier;
 
-        if (item.doesKillingDamage) {
+        if (isKillingAttack) {
             // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
             // Location : [x Stun, x N Stun, x Body, OCV modifier]
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
@@ -3604,10 +3629,10 @@ async function _calcDamage(damageRoller, item, options) {
     }
 
     // Penetrating attack minimum damage
-    if (item.doesKillingDamage && penetratingBody > body) {
+    if (isKillingAttack && penetratingBody > body) {
         body = penetratingBody;
         effects += "penetrating damage; ";
-    } else if (!item.doesKillingDamage && penetratingBody > stun) {
+    } else if (!isKillingAttack && penetratingBody > stun) {
         stun = penetratingBody;
         effects += "penetrating damage; ";
     }
@@ -3624,11 +3649,11 @@ async function _calcDamage(damageRoller, item, options) {
     }
 
     // Special effects that change damage?
-    if (item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly) {
+    if (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly) {
         body = 0;
-    } else if (item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.bodyonly) {
+    } else if (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.bodyonly) {
         stun = 0;
-    } else if (item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly) {
+    } else if (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly) {
         if (isBodyBasedEffectRollItem) {
             effect = body;
             stun = 0;
@@ -3747,7 +3772,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         }
 
         // Attack did Killing Damage +1d6
-        if (item.doesKillingDamage) {
+        if (item.effectiveAttackItem.doesKillingDamage) {
             knockbackDice += 1;
             knockbackTags.push({
                 value: "+1d6KB",
@@ -4067,7 +4092,7 @@ function calculateRequiredCharges(item, boostableChargesToUse) {
 
     // How many applications?
     const autofire = item.findModsByXmlid("AUTOFIRE");
-    const multipleApplications = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 1;
+    const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 1;
     chargesToUse *= multipleApplications || 1;
 
     return chargesToUse;
@@ -4101,7 +4126,7 @@ function calculateRequiredEnd(item) {
 
         // How many applications?
         const autofire = item.findModsByXmlid("AUTOFIRE");
-        const multipleApplications = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 0;
         endToUse = endPerShot * (multipleApplications || 1);
     }
 
@@ -4126,7 +4151,7 @@ function calculateRequiredReserveEndurance(item) {
 
         // How many applications?
         const autofire = item.findModsByXmlid("AUTOFIRE");
-        const multipleApplications = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 0;
         reserveEndToUse = endPerShot * (multipleApplications || 1);
     }
 

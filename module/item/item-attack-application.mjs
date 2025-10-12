@@ -147,8 +147,7 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // But an ENTANGLE attack doesn't target an ENTANGLE, adjustment attacks, etc - anything that doesn't have hit locations
-            // PH: FIXME: consider AoE since it doesn't have hit locations
-            if (this.data.originalItem.system.noHitLocations) {
+            if (this.data.originalItem.effectiveAttackItem.system.noHitLocations) {
                 this.data.entangleExists = false;
                 this.data.targetEntangle = false;
             }
@@ -383,7 +382,7 @@ export class ItemAttackFormApplication extends FormApplication {
      * If they can't place a shot the only options should be "none"
      */
     #setAoeAndHitLocationDataForEffectiveItem() {
-        const aoe = this.data.effectiveItem.aoeAttackParameters;
+        const aoe = this.data.effectiveItem.effectiveAttackItem.aoeAttackParameters;
         this.data.hitLocationsEnabled = game.settings.get(HEROSYS.module, "hit locations");
         this.data.hitLocationSideEnabled =
             this.data.hitLocationsEnabled && game.settings.get(HEROSYS.module, "hitLocTracking") === "all";
@@ -395,7 +394,7 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.hitLoc = [];
             this.data.hitLocSide = [];
 
-            if (!this.data.effectiveItem.system.noHitLocations && !aoe) {
+            if (!this.data.effectiveItem.effectiveAttackItem.system.noHitLocations && !aoe) {
                 for (const [key, obj] of Object.entries(CONFIG.HERO.hitLocations)) {
                     this.data.hitLoc.push({ key: key, label: `${obj.label} (${obj.ocvMod})` });
                 }
@@ -407,7 +406,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 }
             }
 
-            const noneReason = this.data.effectiveItem.system.noHitLocations
+            const noneReason = this.data.effectiveItem.effectiveAttackItem.system.noHitLocations
                 ? `does not allow hit locations`
                 : aoe
                   ? `has an area of effect`
@@ -814,7 +813,7 @@ export class ItemAttackFormApplication extends FormApplication {
     async _spawnAreaOfEffect() {
         const item = this.data.effectiveItem;
 
-        const areaOfEffect = item.aoeAttackParameters;
+        const areaOfEffect = item.effectiveAttackItem.aoeAttackParameters;
         if (!areaOfEffect) return;
 
         const aoeType = areaOfEffect.type;
@@ -847,6 +846,7 @@ export class ItemAttackFormApplication extends FormApplication {
         //       for distance we need to subtract 0.5"/1m.
         const distance = aoeValue * sizeConversionToMeters - (HexTemplates && hexGrid ? 1 : 0);
 
+        const effectiveAttackItemOriginalItemId = getEffectiveItemOriginalItemId(item.effectiveAttackItem);
         const templateData = {
             t: templateType,
             author: game.user.id,
@@ -856,7 +856,7 @@ export class ItemAttackFormApplication extends FormApplication {
             flags: {
                 [game.system.id]: {
                     purpose: "AoE",
-                    itemId: this.data.originalItem.id,
+                    itemId: effectiveAttackItemOriginalItemId,
                     item,
                     actor,
                     aoeType,
@@ -931,29 +931,71 @@ export class ItemAttackFormApplication extends FormApplication {
         });
     }
 
+    /**
+     * Find the first matching template for the effective attack item.
+     *
+     * @returns
+     */
     getAoeTemplate() {
+        const effectiveAttackItemOriginalItemId = getEffectiveItemOriginalItemId(this.data.effectiveItem);
+
         return Array.from(canvas.templates.getDocuments()).find(
             (template) =>
                 template.author.id === game.user.id &&
                 template.flags[game.system.id]?.purpose === "AoE" &&
-                template.flags[game.system.id]?.itemId === this.data.originalItem.id,
+                template.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
         );
     }
 }
 
-export function getAoeTemplateForItem(item) {
-    let aoeTemplate = game.scenes.current.templates.find(
-        (o) => o.flags[game.system.id]?.itemId === fromUuidSync(item.system._active?.__originalUuid)?.id,
+/**
+ * From an item, find the original item id for its effectiveAttackItem.
+ *
+ * @param {*} item
+ * @returns
+ */
+function getEffectiveItemOriginalItemId(item) {
+    const effectiveAttackItem = item.effectiveAttackItem;
+    const effectiveAttackItemUuid = effectiveAttackItem.system._active.__originalUuid;
+
+    // Is the effective attack item an temporary effective item?
+    if (effectiveAttackItemUuid) {
+        return foundry.utils.parseUuid(effectiveAttackItemUuid).id;
+    }
+
+    // Is the effective attack item an actual original item?
+    if (effectiveAttackItem.id) {
+        return effectiveAttackItem.id;
+    }
+
+    console.error(
+        `${item.detailedName()} | ${effectiveAttackItem.detailedName()} doesn't have an originating UUID stored and the effective item doesn't have an id`,
+    );
+
+    return null;
+}
+
+/**
+ *
+ * @param {HeroSystem6eItem} item - base attack item
+ * @returns
+ */
+export function getAoeTemplateForBaseItem(item) {
+    const effectiveAttackItemOriginalItemId = getEffectiveItemOriginalItemId(item);
+
+    const aoeTemplate = game.scenes.current.templates.find(
+        (o) => o.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
     );
     if (aoeTemplate) return aoeTemplate;
-    console.warn(`Unable to match aoeTemplate with item.  Why are you looking for a template?`);
 
-    aoeTemplate = game.scenes.current.templates.find((o) => o.author.id === game.user.id);
-    if (aoeTemplate) {
+    console.warn(`Unable to match aoeTemplate with item. Why are you looking for a template?`);
+
+    const anyAoeTemplate = game.scenes.current.templates.find((o) => o.author.id === game.user.id);
+    if (anyAoeTemplate) {
         console.warn(`Found a template user owns, so using that as a fallback`);
     }
 
-    return aoeTemplate;
+    return anyAoeTemplate;
 }
 
 window.ItemAttackFormApplication = ItemAttackFormApplication;
