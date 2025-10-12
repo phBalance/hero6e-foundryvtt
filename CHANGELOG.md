@@ -5,6 +5,7 @@
 - Items with charge clips no longer get an extra clip. [#2898](https://github.com/dmdorman/hero6e-foundryvtt/issues/2898)
 - Weapon familiarity skill now displays correctly. [#2856](https://github.com/dmdorman/hero6e-foundryvtt/issues/2856)
 - Martial Arts with weapons that are not damage related (e.g. entangle, adjustment) should now work correctly. [#2814](https://github.com/dmdorman/hero6e-foundryvtt/issues/2814)
+- Show dice icon again for items that have no to-hit but have damage/effects. [#2926](https://github.com/dmdorman/hero6e-foundryvtt/issues/2926)
 
 ## Version 4.1.17 20250921
 
