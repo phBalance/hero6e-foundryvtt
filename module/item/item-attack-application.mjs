@@ -971,7 +971,6 @@ function getEffectiveItemOriginalItemId(item) {
     console.error(
         `${item.detailedName()} | ${effectiveAttackItem.detailedName()} doesn't have an originating UUID stored and the effective item doesn't have an id`,
     );
-    debugger;
 
     return null;
 }
