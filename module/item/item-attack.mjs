@@ -547,10 +547,10 @@ export async function doAoeActionToHit(action, options) {
     // Combat Skill Levels
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item).details) {
-        const id = csl.skill.id;
+        const id = csl.item.id;
         skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
-        action.system.item[id] = csl.skill;
+        action.system.item[id] = csl.item;
 
         cvMod.dc += csl.dc;
         if (csl.ocv || csl.omcv > 0) {
@@ -854,10 +854,10 @@ async function doSingleTargetActionToHit(action, options) {
             continue;
         }
 
-        const id = csl.skill.id;
+        const id = csl.item.id;
         skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
-        action.system.item[id] = csl.skill;
+        action.system.item[id] = csl.item;
 
         cvMod.dc += csl.dc;
         if (csl.ocv || csl.omcv > 0) {

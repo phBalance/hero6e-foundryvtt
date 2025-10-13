@@ -1919,7 +1919,7 @@ export function registerFullTests(quench) {
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.system.points, 303);
+                    assert.equal(actor.characterPointCost, 303);
                 });
                 it("should match the cost breakdown of HD", function () {
                     assert.deepEqual(actor.pointsDetail, {
@@ -2035,7 +2035,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe.only("Maneuvers with CSLs", function () {
+                describe("Maneuvers with CSLs", function () {
                     let cslItem;
                     let cslPreviousActiveState;
                     let cslPreviousAllocation;
@@ -2328,7 +2328,7 @@ export function registerFullTests(quench) {
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.system.points, 260);
+                    assert.equal(actor.characterPointCost, 260);
                 });
 
                 it("should match the cost breakdown of HD", function () {
@@ -2884,7 +2884,7 @@ export function registerFullTests(quench) {
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.system.points, 125);
+                    assert.equal(actor.characterPointCost, 125);
                 });
 
                 it("should match the cost breakdown of HD", function () {
@@ -5278,7 +5278,7 @@ export function registerFullTests(quench) {
 
                 describe("total costs", function () {
                     it("should match the overall cost of HD", function () {
-                        assert.equal(actor.system.points, 9);
+                        assert.equal(actor.characterPointCost, 9);
                     });
 
                     it("should match the cost breakdown of HD", function () {
@@ -5548,7 +5548,7 @@ export function registerFullTests(quench) {
                     });
 
                     it.skip("should be the correct number of points", function () {
-                        assert.equal(actor.system.points, 299);
+                        assert.equal(actor.characterPointCost, 299);
                     });
 
                     it("should have the correct template type", function () {
@@ -6026,7 +6026,7 @@ export function registerFullTests(quench) {
 
                     // This is broken because of #2115
                     it.skip("should be the correct number of points", function () {
-                        assert.equal(actor.system.points, 401);
+                        assert.equal(actor.characterPointCost, 401);
                     });
 
                     it("should have the correct template type", function () {
@@ -6355,13 +6355,31 @@ export function registerFullTests(quench) {
                     csls = combatSkillLevelsForAttack(strikeItem);
                 });
 
-                it("should have +5 OCV", async function () {
-                    assert.equal(csls.details[0].skill.name, "Combat Skill Levels");
+                it("should have the correct name", async function () {
+                    assert.equal(csls.details[0].item.name, "Combat Skill Levels");
+                });
+
+                it("should have only 1 CSL", async function () {
                     assert.equal(csls.details.length, 1);
+                });
+
+                it("should have +5 OCV", async function () {
                     assert.equal(csls.ocv, 5);
+                });
+
+                it("should have +0 DCV", async function () {
                     assert.equal(csls.dcv, 0);
+                });
+
+                it("should have +0 OMCV", async function () {
                     assert.equal(csls.omcv, 0);
+                });
+
+                it("should have +0 DMCV", async function () {
                     assert.equal(csls.dmcv, 0);
+                });
+
+                it("should have +0 DC", async function () {
                     assert.equal(csls.dc, 0);
                 });
             });

@@ -187,23 +187,23 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.csls = undefined;
             for (const csl of csls) {
                 let entry = {};
-                if (csl && csl.skill) {
-                    entry.cslSkill = csl.skill;
-                    let mental = csl.skill.system.XMLID === "MENTAL_COMBAT_LEVELS";
+                if (csl && csl.item) {
+                    entry.cslSkill = csl.item;
+                    let mental = csl.item.system.XMLID === "MENTAL_COMBAT_LEVELS";
                     let _ocv = mental ? "omcv" : "ocv";
                     let _dcv = mental ? "dmcv" : "dcv";
                     entry.cslChoices = { [_ocv]: _ocv };
-                    if (csl.skill.system.OPTION != "SINGLE") {
+                    if (csl.item.system.OPTION != "SINGLE") {
                         entry.cslChoices[_dcv] = _dcv;
                         entry.cslChoices.dc = "dc";
                     }
 
                     // CSL radioBoxes names
                     entry.csl = [];
-                    for (let c = 0; c < parseInt(csl.skill.system.LEVELS || 0); c++) {
+                    for (let c = 0; c < parseInt(csl.item.system.LEVELS || 0); c++) {
                         entry.csl.push({
-                            name: `${csl.skill.id}.system.csl.${c}`,
-                            value: csl.skill.system.csl ? csl.skill.system.csl[c] : "undefined",
+                            name: `${csl.item.id}.system.csl.${c}`,
+                            value: csl.item.system.csl ? csl.item.system.csl[c] : "undefined",
                         });
                     }
 
@@ -794,10 +794,10 @@ export class ItemAttackFormApplication extends FormApplication {
             const itemId = key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[1];
             const idx = parseInt(key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[2]);
             for (const csl of csls) {
-                if (csl.skill.id === itemId && csl.skill.system.csl[idx] != value) {
-                    csl.skill.system.csl[idx] = value;
-                    await csl.skill.update({
-                        "system.csl": csl.skill.system.csl,
+                if (csl.item.id === itemId && csl.item.system.csl[idx] != value) {
+                    csl.item.system.csl[idx] = value;
+                    await csl.item.update({
+                        "system.csl": csl.item.system.csl,
                     });
                 }
             }
