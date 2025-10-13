@@ -2035,7 +2035,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe.only("Maneuvers with CSLs", function () {
+                describe("Maneuvers with CSLs", function () {
                     let cslItem;
                     let cslPreviousActiveState;
                     let cslPreviousAllocation;
@@ -6355,13 +6355,31 @@ export function registerFullTests(quench) {
                     csls = combatSkillLevelsForAttack(strikeItem);
                 });
 
-                it("should have +5 OCV", async function () {
-                    assert.equal(csls.details[0].skill.name, "Combat Skill Levels");
+                it("should have the correct name", async function () {
+                    assert.equal(csls.details[0].item.name, "Combat Skill Levels");
+                });
+
+                it("should have only 1 CSL", async function () {
                     assert.equal(csls.details.length, 1);
+                });
+
+                it("should have +5 OCV", async function () {
                     assert.equal(csls.ocv, 5);
+                });
+
+                it("should have +0 DCV", async function () {
                     assert.equal(csls.dcv, 0);
+                });
+
+                it("should have +0 OMCV", async function () {
                     assert.equal(csls.omcv, 0);
+                });
+
+                it("should have +0 DMCV", async function () {
                     assert.equal(csls.dmcv, 0);
+                });
+
+                it("should have +0 DC", async function () {
                     assert.equal(csls.dc, 0);
                 });
             });
