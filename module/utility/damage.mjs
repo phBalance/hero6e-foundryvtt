@@ -383,9 +383,9 @@ export function isManeuverThatDoesNormalDamage(item) {
     return (
         (item.type === "martialart" || item.type === "maneuver") &&
         (effect.search(/NORMALDC/) > -1 ||
+            effect.search(/WEAPONDC/) > -1 ||
             effect.search(/STRDC/) > -1 ||
-            item.system.XMLID === "STRIKE" ||
-            item.system.XMLID === "PULLINGAPUNCH")
+            item.system.XMLID === "STRIKE")
     );
 }
 
