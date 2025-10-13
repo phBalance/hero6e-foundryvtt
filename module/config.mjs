@@ -9581,13 +9581,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             // MEGASCALE related
-            key: "NOOTHERACTIONS",
+            key: "NOSCALE",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="NOSCALE" ID="1760248248530" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot alter scale" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
-        {},
+        undefined,
     );
 
     addPower(
@@ -9881,6 +9881,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        // MEGASCALE related
+        key: "SCALEDOWN",
+        behaviors: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="SCALEDOWN" ID="1760373299835" BASECOST="0.25" LEVELS="0" ALIAS="Can Be Scaled Down" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="1&quot; = 1km" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // AOE/EXPLOSION related
