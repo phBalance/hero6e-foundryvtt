@@ -2287,7 +2287,8 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
-            await this.updateEmbeddedDocuments("Item", itemsToUpdate, { diff: false });
+            // update existing document, overwriting any MODIFIERS, etc
+            await this.updateEmbeddedDocuments("Item", itemsToUpdate, { diff: false, recursive: false });
 
             uploadProgressBar.advance(`${this.name}: Updated Items`, itemsToUpdate.length);
 

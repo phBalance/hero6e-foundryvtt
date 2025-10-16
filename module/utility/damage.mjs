@@ -34,10 +34,8 @@ export function combatSkillLevelsForAttack(item) {
             if (detail[cslSkill.system.csl[i]] !== undefined) {
                 detail[cslSkill.system.csl[i]]++;
             } else {
-                if (cslSkill.system.csl[i] === undefined) {
-                    console.log(`undefined csl specification, assuming +ocv`);
-                } else {
-                    console.warn(`Unhandled csl specification, assuming +ocv`, cslSkill.system.csl);
+                if (cslSkill.system.csl[i] !== undefined) {
+                    console.warn(`Unhandled csl specification, retargeting to +ocv`, cslSkill.system.csl);
                 }
                 detail.ocv++;
             }
