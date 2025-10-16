@@ -734,7 +734,27 @@ export class HeroSystem6eItem extends Item {
         return results;
     }
 
+    // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
+    // which requested the operation.
+    async _preUpdate(changes, options, user) {
+        if (this.system.XMLID === "COMBAT_LEVELS") {
+            const LEVELS = changes.system?.LEVELS || this.system.LEVELS;
+            if (this.system.csl.length !== LEVELS) {
+                const csl = new Array(LEVELS);
+                for (let idx = 0; idx < csl.length; idx++) {
+                    csl[idx] = this.system.csl?.[idx] || Object.keys(this.cslChoices)[0];
+                }
+                // Tacking onto "changed" to avoid extra _onUpdate calls
+                changes.system ??= {};
+                changes.system.csl = csl;
+            }
+        }
+        await super._preUpdate(changes, options, user);
+    }
+
     async _onUpdate(changed, options, userId) {
+        // CSL
+
         super._onUpdate(changed, options, userId);
 
         if (!this.isOwner) {
@@ -5610,6 +5630,13 @@ export class HeroSystem6eItem extends Item {
 
     get isCsl() {
         return ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.system.XMLID);
+    }
+
+    get cslChoices() {
+        if (this.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+            return { omcv: "omcv", dmcv: "dmcv", dc: "dc" };
+        }
+        return { ocv: "ocv", dcv: "dcv", dc: "dc" };
     }
 
     get csls() {
