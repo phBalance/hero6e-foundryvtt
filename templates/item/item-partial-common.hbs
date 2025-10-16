@@ -1,4 +1,4 @@
-{{!-- HDC xml partial --}}
+{{ log 'item-partial-common' this }}
 <div class="description">
     {{item.system.description}}
     {{#if item.system.NOTES}}
@@ -127,14 +127,20 @@
 {{/if}}
 
 {{! COMBAT SKILL LEVELS}}
-{{#if csl}}
+{{#if item.system.csl}}
  <div class="form-group">
     <label>SKILL LEVELS</label>
     <div class="form-fields">
         <ol>
-            {{#each csl}}
+            {{#each item.system.csl}}
             <li>
-                {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+                {{!-- {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}} --}}
+                {{!-- <input type="text" name="system.csl.{{@index}}" value="{{this}}"> --}}
+
+                <select name="system.csl.{{@index}}">
+                    {{selectOptions @root/item.cslChoices selected=this}}
+                </select>
+                
             </li>
             {{/each}}
         </ol>

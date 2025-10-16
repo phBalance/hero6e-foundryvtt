@@ -602,277 +602,6 @@ export class HeroSystem6eItem extends Item {
     //     window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
     // }
 
-    async setCombatSkillLevels() {
-        console.error("setCombatSkillLevels is deprecated");
-        if (this.system.XMLID == "COMBAT_LEVELS") {
-            // Make sure CSLs are defined; but don't override them if they are already present
-            this.system.csl ??= {};
-            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] ??= "ocv";
-            }
-        }
-
-        if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
-            // Make sure CSLs are defined; but don't override them if they are already present
-            this.system.csl ??= {};
-            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] ??= "omcv";
-            }
-        }
-
-        // Attempt default weapon selection if showAttacks is defined and there are no custom adders
-        // Or the OPTIONID=ALL is specified
-        if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
-            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
-                //|| this.system.OPTIONID === "ALL") {
-                let count = 0;
-                for (const attackItem of this.actor._cslItems) {
-                    let addMe = false;
-
-                    switch (this.system.XMLID) {
-                        case "WEAPON_MASTER":
-                            // Skip mental powers
-                            if (attackItem.baseInfo.type.includes("mental")) {
-                                continue;
-                            }
-                            switch (this.system.OPTIONID) {
-                                case "VERYLIMITED":
-                                    if (count === 0) {
-                                        addMe = true;
-                                    }
-                                    break;
-                                case "LIMITED":
-                                    if (count < 3) {
-                                        addMe = true;
-                                    }
-                                    break;
-                                case "ANYHTH":
-                                    if (attackItem.baseInfo.range === "No Range") {
-                                        addMe = true;
-                                    }
-                                    break;
-                                case "ANYRANGED":
-                                    if (attackItem.baseInfo.range === "Standard") {
-                                        addMe = true;
-                                    }
-                                    break;
-                                default:
-                                    console.warn("Unhandled attack automatic selection", this);
-                            }
-                            break;
-                        case "COMBAT_LEVELS":
-                            // Skip mental powers for 6e as they have a different XMLID
-                            if (!this.is5e && attackItem.baseInfo.type.includes("mental")) {
-                                continue;
-                            }
-
-                            switch (this.system.OPTIONID) {
-                                case "SINGLESINGLE": // Deprecated ?
-                                case "SINGLE":
-                                    if (count === 0) {
-                                        // Is this part of a framework/compound power/list?
-                                        if (this.parentItem) {
-                                            if (this.parentItem.id === attackItem.parentItem?.id) {
-                                                addMe = true;
-                                            }
-                                        } else {
-                                            addMe = true;
-                                        }
-                                    }
-                                    break;
-                                case "TIGHT":
-                                    if (count < 3) {
-                                        addMe = true;
-                                    }
-                                    break;
-                                case "BROAD":
-                                    if (count < 6) {
-                                        addMe = true;
-                                    }
-                                    break;
-                                case "HTH":
-                                    if (attackItem.baseInfo.range === "No Range") {
-                                        addMe = true;
-                                    }
-                                    break;
-
-                                case "RANGED":
-                                    if (attackItem.baseInfo.range === "Standard") {
-                                        addMe = true;
-                                    }
-                                    break;
-                                /// 5e only: +1 DCV against all attacks (HTH and Ranged)
-                                // — no matter how many opponents attack a
-                                // character in a given Segment, or with how many
-                                // different attacks, a 5-point DCV CSL provides +1
-                                // DCV versus all of them.
-                                case "DCV":
-                                    addMe = true;
-                                    break;
-                                case "ALL":
-                                case "HTHMENTAL": // 5e with HTH and Mental Combat
-                                    addMe = true;
-                                    break;
-                                default:
-                                    console.error(
-                                        `Unknown OPTIONID ${this.actor?.name}:${this.name}:${this.system.OPTIONID}`,
-                                        this,
-                                    );
-                                    addMe = false;
-                                    break;
-                            }
-                            break;
-                        case "PENALTY_SKILL_LEVELS":
-                            // Skip mental powers
-                            if (attackItem.baseInfo.type.includes("mental")) {
-                                continue;
-                            }
-                            switch (this.system.OPTIONID) {
-                                case "SINGLE":
-                                    if (count === 0) {
-                                        // Is this part of a framework/compound power/list?
-                                        if (this.parentItem) {
-                                            if (this.parentItem.id === attackItem.parentItem?.id) {
-                                                addMe = true;
-                                            }
-                                        } else {
-                                            addMe = true;
-                                        }
-
-                                        // Assumed penalty type
-                                        if (
-                                            addMe &&
-                                            ["limited range", "standard", "range based on str"].includes(
-                                                attackItem.system.range,
-                                            )
-                                        ) {
-                                            this.system.penalty ??= "range";
-                                        }
-                                    }
-                                    break;
-                                case "THREE":
-                                    if (count < 3) {
-                                        addMe = true;
-
-                                        // Assumed penalty type
-                                        if (
-                                            addMe &&
-                                            ["limited range", "standard", "range based on str"].includes(
-                                                attackItem.system.range,
-                                            )
-                                        ) {
-                                            this.system.penalty ??= "range";
-                                        }
-                                    }
-                                    break;
-                                case "ALL":
-                                    addMe = true;
-
-                                    // Assumed penalty type
-                                    if (
-                                        addMe &&
-                                        ["limited range", "standard", "range based on str"].includes(
-                                            attackItem.system.range,
-                                        )
-                                    ) {
-                                        this.system.penalty ??= "range";
-                                    }
-                                    break;
-                            }
-                            break;
-                        case "MENTAL_COMBAT_LEVELS":
-                            // Skip non-mental powers
-                            if (!attackItem.baseInfo.type.includes("mental")) {
-                                continue;
-                            }
-                            switch (this.system.OPTIONID) {
-                                case "SINGLE":
-                                    if (count === 0) {
-                                        addMe = true;
-                                    }
-                                    break;
-                                case "TIGHT":
-                                    if (count < 3) {
-                                        addMe = true;
-                                    }
-                                    break;
-                                case "BROAD":
-                                case "ALL":
-                                    addMe = true;
-                                    break;
-                            }
-                            break;
-                        default:
-                            console.warn("Unhandled attack automatic selection", this);
-                    }
-
-                    if (addMe && !this.adders.find((adder) => adder.ALIAS === attackItem.name)) {
-                        const newAdder = {
-                            XMLID: "ADDER",
-                            ID: new Date().getTime().toString(),
-                            ALIAS: attackItem.name,
-                            BASECOST: "0.0",
-                            LEVELS: "0",
-                            NAME: "",
-                            PRIVATE: false,
-                            SELECTED: true,
-                            BASECOST_total: 0,
-                            targetId: attackItem.id,
-                        };
-                        this.system.ADDER ??= [];
-                        this.system.ADDER.push(new HeroAdderModel(newAdder, { parent: this }));
-                        count++;
-
-                        // Aaron is reworking this to avoid database stuff in dataModel branch 9/18/2025 #2830
-                        // Aaron also plans to remove this function and remove need to call in prepareData
-                        // Kluge, we no longer async, call during prepareData, only need to WRITE when we edit,
-                        //  which is handled elsewhwere (item.onUpadte).
-                        // Used to be await
-                        if (this.id) {
-                            this.update({ [`system.ADDER`]: this.system.ADDER });
-                        }
-                    }
-                }
-            } else {
-                // Try to associate CSL adders with specific attack
-                if (this.baseInfo?.editOptions?.showAttacks) {
-                    let addersChanged = false;
-                    for (const adder of (this.system.ADDER || []).filter((a) => !a.targetId)) {
-                        const item = this.actor._cslItems.find(
-                            (o) => o.name === adder.ALIAS || o.system.ALIAS === adder.ALIAS,
-                        );
-                        if (item) {
-                            adder.targetId = item.id;
-                            addersChanged = true;
-                        }
-                    }
-                    if (addersChanged) {
-                        // AARON: The update causes error and it seems to work without it
-                        await this.update({ [`system.ADDER`]: this.system.ADDER });
-                    }
-                }
-            }
-
-            // if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
-            //     if (this.system.OPTION_ALIAS.match(/range/i)) {
-            //         this.system.penalty ??= "range";
-            //     } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
-            //         this.system.penalty ??= "hitLocation";
-            //     } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
-            //         this.system.penalty ??= "encumbrance";
-            //     }
-            // }
-
-            // Don't GUESS or rewrite
-            // if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.pslPenaltyType) {
-            //     this.system.OPTION_ALIAS = this.system.OPTION_ALIAS.replace(
-            //         "to offset a specific negative OCV modifier",
-            //         "to offset range penalty OCV modifier",
-            //     );
-            // }
-        }
-    }
-
     get heroValidation() {
         const _heroValidation = [];
 
@@ -1005,7 +734,27 @@ export class HeroSystem6eItem extends Item {
         return results;
     }
 
+    // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
+    // which requested the operation.
+    async _preUpdate(changes, options, user) {
+        if (this.system.XMLID === "COMBAT_LEVELS") {
+            const LEVELS = changes.system?.LEVELS || this.system.LEVELS;
+            if (this.system.csl.length !== LEVELS) {
+                const csl = new Array(LEVELS);
+                for (let idx = 0; idx < csl.length; idx++) {
+                    csl[idx] = this.system.csl?.[idx] || Object.keys(this.cslChoices)[0];
+                }
+                // Tacking onto "changed" to avoid extra _onUpdate calls
+                changes.system ??= {};
+                changes.system.csl = csl;
+            }
+        }
+        await super._preUpdate(changes, options, user);
+    }
+
     async _onUpdate(changed, options, userId) {
+        // CSL
+
         super._onUpdate(changed, options, userId);
 
         if (!this.isOwner) {
@@ -1658,6 +1407,10 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "talent": // COMBAT_LUCK
+                await item.update({ [attr]: newValue });
+                break;
+
+            case "skill": // COMBAT_LEVELS
                 await item.update({ [attr]: newValue });
                 break;
 
@@ -5877,6 +5630,13 @@ export class HeroSystem6eItem extends Item {
 
     get isCsl() {
         return ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.system.XMLID);
+    }
+
+    get cslChoices() {
+        if (this.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+            return { omcv: "omcv", dmcv: "dmcv", dc: "dc" };
+        }
+        return { ocv: "ocv", dcv: "dcv", dc: "dc" };
     }
 
     get csls() {
