@@ -93,7 +93,7 @@
 {{/if}}
 
 {{! editOptions.showAttacks}}
-{{!-- {{#if (and attacks (ne system.OPTIONID "ALL"))}}
+{{#if (and attacks (ne system.OPTIONID "ALL"))}}
 <div class="form-group {{#if (itemHeroValidationForProperty this.item "AttacksIncluded")}}validation{{/if}}"
     title="{{itemHeroValidationForProperty this.item "AttacksIncluded"}}">
     <label>
@@ -114,7 +114,7 @@
         </ul>
     </div>
 </div>
-{{/if}} --}}
+{{/if}}
 
 {{#if penaltyChoices}}
 <div class="form-group">
