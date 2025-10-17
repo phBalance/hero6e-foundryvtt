@@ -639,7 +639,7 @@ export class HeroSystem6eItem extends Item {
             .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
 
         if (!_pslPenaltyType) {
-            console.log(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
+            console.warn(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
         }
 
         return _pslPenaltyType;

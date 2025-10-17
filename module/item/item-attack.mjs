@@ -962,7 +962,7 @@ async function doSingleTargetActionToHit(action, options) {
         // PH: FIXME: need to consider both the item and the effectiveAttackItem
         if (options.usePsl) {
             const pslHit = penaltySkillLevelsForAttack(item).find(
-                (o) => o.system.penalty === "hitLocation" && o.system.checked,
+                (o) => o.pslPenaltyType === HERO.PENALTY_SKILL_LEVELS_TYPES.location && o.system.checked,
             );
             if (pslHit) {
                 let pslValue = Math.min(pslHit.system.LEVELS, Math.abs(aimOcvPenalty));
