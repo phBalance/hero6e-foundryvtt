@@ -16,7 +16,7 @@
         {{#each items as |item id|}}
             {{#if (or (eq item.type "attack") (and (or (eq item.system.XMLID "STRIKE") (ne item.type "maneuver")) (itemHasActionBehavior item "to-hit") (ne item.system.XMLID "__STRENGTHDAMAGE")))}}
                 {{#unless (and (eq item.type "equipment") (eq item.system.active false))}}
-                <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (gt item.system.value item.system.max)}}over-max{{/if}}{{#if (lt item.system.value item.system.max)}} under-max{{/if}}"
+                <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}}"
                     data-item-id="{{item._id}}" >
                     <td>
                         <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"

@@ -796,6 +796,12 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        if (this.system.XMLID === "ENDURANCERESERVE" && this.system.value !== this.system.max) {
+            await this.update({
+                ["system.value"]: this.system.max,
+            });
+        }
+
         // turn off items that use END, Charges, MP, etc
 
         if (this.type !== "maneuver") {
