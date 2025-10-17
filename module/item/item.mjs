@@ -2593,8 +2593,8 @@ export class HeroSystem6eItem extends Item {
                 description = (system.NAME || system.ALIAS) + ": +" + system.LEVELS + " " + system.OPTION_ALIAS;
 
                 // Penalty details
-                switch (system.penalty) {
-                    case "range":
+                switch (this.pslPenaltyType) {
+                    case HERO.PENALTY_SKILL_LEVELS_TYPES.range:
                         description = description.replace("a specific negative OCV modifier", "range OCV penalties");
                         break;
                 }
