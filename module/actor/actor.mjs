@@ -1930,8 +1930,8 @@ export class HeroSystem6eActor extends Actor {
                 await this.update({ ["name"]: characterName });
 
                 // remove stray flags
-                //await this.setFlag(game.system.id, "uploading", true);
-                await this.setFlag(game.system.id, "file", {
+                await this.setFlag(game.system.id, "uploading", true);
+                await this.setFlag(game.system.id, game.system.id, "uploading", true, "file", {
                     lastModifiedDate: options?.file?.lastModifiedDate,
                     name: options?.file?.name,
                     size: options?.file?.size,
@@ -2006,7 +2006,7 @@ export class HeroSystem6eActor extends Actor {
 
             // is5e
 
-            // keep track indepentantly of item.system.is5e as targetType can reload it
+            // keep track independently of item.system.is5e as targetType can reload it
             // Assume true for those super old HDC files
             uploadProgressBar.advance(`${this.name}: is5e`, 0);
             let _is5e = true;
@@ -2066,26 +2066,6 @@ export class HeroSystem6eActor extends Actor {
                 const changesNormal = {};
                 const changesFiguredOrCalculated = {};
                 uploadProgressBar.advance(`${this.name}: CHARACTERISTICS`, 0);
-                // Make each core characteristic an item
-                // const characteristicsArray = [];
-                // for (const key of Object.keys(heroJson.CHARACTER.CHARACTERISTICS)) {
-                //     characteristicsArray.push({
-                //         type: "characteristic",
-                //         name: key,
-                //         system: heroJson.CHARACTER.CHARACTERISTICS[key],
-                //     });
-                // }
-
-                // for (const newItem of characteristicsArray) {
-                //     const existingItem = this.items.find(
-                //         (i) => i.type === "characteristic" && i.XMLID === newItem.XMLID,
-                //     );
-                //     if (existingItem) {
-                //         await existingItem.update({ name: newItem.name, system: newItem.system });
-                //     } else {
-                //         await this.createEmbeddedDocuments("Item", [newItem]);
-                //     }
-                // }
 
                 // Legacy (well current)
                 for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
@@ -2105,7 +2085,6 @@ export class HeroSystem6eActor extends Actor {
                     await this.update(changesNormal);
                     await this.update(changesFiguredOrCalculated);
                 }
-                await this.FullHealth();
             }
 
             // Quench test may need CHARACTERISTICS, which are set in postUpload
@@ -2412,6 +2391,9 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: Processed non characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processed all items`, 0);
 
+            // Full Health
+            await this.FullHealth();
+
             uploadPerformance.invalidTargets = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
 
@@ -2568,22 +2550,6 @@ export class HeroSystem6eActor extends Actor {
                 core: 3,
             };
 
-            // For some unknown reason SPD with AE not working during upload.
-            // This kludge is a quick fix
-            // https://github.com/dmdorman/hero6e-foundryvtt/issues/1439
-            // All characteristics?
-            // https://github.com/dmdorman/hero6e-foundryvtt/issues/1746
-            // if (this.id) {
-            //     for (const char of Object.keys(this.system.characteristics)) {
-            //         await this.update({
-            //             [`system.characteristics.${char}.max`]: this.system.characteristics[char].core,
-            //         });
-            //         await this.update({
-            //             [`system.characteristics.${char}.value`]: this.system.characteristics[char].max,
-            //         });
-            //     }
-            // }
-
             // duplicate ID can be a problem
             for (const item of this.items) {
                 if (item.system.ID) {
@@ -2614,19 +2580,6 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
-            // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
-            // this.items
-            //     .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
-            //     .forEach(async (item) => {
-            //         await item._postUpload({ render: false, applyEncumbrance: false });
-            //     });
-
-            // Re-run _postUpload for SKILLS
-            // this.items
-            //     .filter((item) => item.type === "skill")
-            //     .forEach(async (item) => {
-            //         await item._postUpload({ render: false, applyEncumbrance: false });
-            //     });
             uploadPerformance.postUpload2 = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
 
