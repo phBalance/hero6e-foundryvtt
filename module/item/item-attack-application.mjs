@@ -107,10 +107,6 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.pushedRealPoints ??= 0;
 
             // Penalty Skill Levels
-            // Currently only supports range PSL
-            // this.data.psls = penaltySkillLevelsForAttack(this.data.originalItem).filter(
-            //     (o) => o.system.penalty === "range",
-            // );
             this.data.psls = this.item?.pslRangePenaltyOffsetItems;
 
             // Is there an ENTANGLE on any of the targets

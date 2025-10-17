@@ -1243,10 +1243,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Penalty Skill Levels for encumbrance
         for (const pslEncumbrance of this.items.filter(
-            (item) =>
-                item.system.XMLID === "PENALTY_SKILL_LEVELS" &&
-                item.system.penalty === "encumbrance" &&
-                (item.type === "skill" || item.isActive),
+            (item) => item.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.encumbrance && item.isActive,
         )) {
             dcvDex = Math.min(0, dcvDex + parseInt(pslEncumbrance.system.LEVELS));
         }
@@ -2559,19 +2556,17 @@ export class HeroSystem6eActor extends Actor {
                         for (const dupItem of dups.splice(1)) {
                             if (dupItem.childItems.length === 0) {
                                 await dupItem.update({
-                                    [`system.idDuplicate`]: dupItem.system.ID,
+                                    // [`system.idDuplicate`]: dupItem.system.ID,
                                     [`system.ID`]: new Date().getTime().toString(),
                                     [`system.error`]: [
                                         ...(dupItem.system.error || []),
                                         "Duplicate ID, created new one",
                                     ],
                                 });
-                                ui.notifications.warn(
-                                    `Created new internal ID reference for <b>${item.name}</b>. Recommend deleting item from HDC file and re-creating it.`,
-                                );
+                                ui.notifications.warn(`Created new internal ID reference for <b>${item.name}</b>.`);
                             } else {
                                 ui.notifications.warn(
-                                    `Duplicate ID reference for <b>${item.name}</b> may cause problems. Recommend deleting item from HDC file and re-creating it.`,
+                                    `Duplicate ID reference for <b>${item.name}</b> may cause problems.`,
                                     { permanent: true },
                                 );
                             }

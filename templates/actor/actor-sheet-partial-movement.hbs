@@ -4,8 +4,7 @@
             <th></th>
             <th class="left">{{localize "ActorSheet.Name"}}</th>
             <th class="left">{{localize "ActorSheet.Description"}}</th>
-            <th>{{localize "ActorSheet.Value"}}</th>
-            <th>{{localize "ActorSheet.Velocity"}}</th>
+            <th>{{localize "ActorSheet.LEVELS"}}</th>
             <th>{{localize "ActorSheet.Active"}}</th>
             <th class="right">
                 {{!-- <a class="item-control item-create" title="Create movement" data-type="movement">
@@ -22,8 +21,7 @@
                     </td>
                     <td class="left">{{{itemName item}}}</td>
                     <td class="left">{{item.system.description}}</td>
-                    <td>{{item.system.value}}</td>
-                    <td>{{item.system.velValue}}</td>
+                    <td>{{item.system.LEVELS}}</td>
                     <td>
                         {{#if (itemHasActionBehavior this "activatable")}}
                             {{#if this.disabledOIHID}}

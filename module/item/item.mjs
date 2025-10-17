@@ -30,21 +30,17 @@ import {
     buildStrengthItem,
     calculateApPerDieForItem,
     calculateDicePartsFromDcForItem,
-    calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
     getEffectFormulaFromItem,
     getExtraMartialDcsOrZero,
-    getFullyQualifiedEffectFormulaFromItem,
     getManeuverEffect,
     getManueverEffectWithPlaceholdersReplaced,
     isManeuverThatDoesReplaceableDamageType,
     isRangedMartialManeuver,
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
-import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
-import { Attack } from "../utility/attack.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
@@ -639,7 +635,7 @@ export class HeroSystem6eItem extends Item {
             .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
 
         if (!_pslPenaltyType) {
-            console.log(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
+            console.warn(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
         }
 
         return _pslPenaltyType;
@@ -2011,217 +2007,6 @@ export class HeroSystem6eItem extends Item {
         // }
     }
 
-    configureAttackParameters() {
-        console.error("depricated configureAttackParameters");
-
-        const maneuver = ["maneuver", "martialart"].includes(this.type);
-
-        // PH: FIXME: Kludge to stick in ocv & dcv
-        if (maneuver) {
-            this.system.uses = "ocv";
-            this.system.ocv = parseInt(this.system.OCV) || 0;
-            this.system.dcv = parseInt(this.system.DCV) || 0;
-        }
-
-        this.flags[game.system.id] ??= {};
-        this.flags[game.system.id].tags = {};
-
-        // Combat Skill Levels
-        const csls = combatSkillLevelsForAttack(this).details;
-        let cslSummary = {};
-
-        for (const csl of csls) {
-            for (const prop of ["ocv", "omcv", "dcv", "dmcv", "dc"]) {
-                cslSummary[prop] = csl[prop] + parseInt(cslSummary[prop] || 0);
-
-                if (csl[prop] != 0) {
-                    if (this.flags[game.system.id].tags[prop]) {
-                        this.flags[game.system.id].tags[prop] += "\n";
-                    } else {
-                        this.flags[game.system.id].tags[prop] = "";
-                    }
-                    this.flags[game.system.id].tags[prop] =
-                        `${this.flags[game.system.id].tags[prop]}${csl[prop].signedStringHero()} ${prop === "dc" ? "DC " : ""}${csl.item.name}`;
-                }
-            }
-        }
-
-        // text description of damage
-        if (this.causesDamageEffect()) {
-            this.system.damage = getFullyQualifiedEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
-        }
-
-        if (this.system.cvModifiers === undefined) {
-            this.system.cvModifiers = Attack.parseCvModifiers(this.system.OCV, this.system.DCV, this.system.DC);
-        }
-
-        // Signed OCV and DCV
-        if (this.system.ocv != undefined && this.system.uses === "ocv") {
-            const ocv = parseInt(this.actor?.system.characteristics.ocv?.value || 0);
-            if (parseInt(ocv) != 0) {
-                if (this.flags[game.system.id].tags.ocv) {
-                    this.flags[game.system.id].tags.ocv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.ocv = "";
-                }
-                this.flags[game.system.id].tags.ocv =
-                    `${this.flags[game.system.id].tags.ocv}${ocv.signedStringHero()} OCV`;
-            }
-            switch (this.system.ocv) {
-                case "--":
-                    this.system.ocvEstimated = "";
-                    break;
-
-                case "-v/10":
-                    {
-                        this.system.ocv = ("+" + parseInt(this.system.ocv)).replace("+-", "-");
-
-                        // Educated guess for token
-                        const token =
-                            this.actor
-                                .getActiveTokens()
-                                .find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-                            this.actor.getActiveTokens()[0];
-                        const velocity = calculateVelocityInSystemUnits(this.actor, token);
-
-                        this.system.ocvEstimated = `${ocv + parseInt(cslSummary.ocv) + parseInt(velocity / 10)}`;
-
-                        if (parseInt(velocity / 10) != 0) {
-                            if (this.flags[game.system.id].tags.ocv) {
-                                this.flags[game.system.id].tags.ocv += "\n";
-                            } else {
-                                this.flags[game.system.id].tags.ocv = "";
-                            }
-                            this.flags[game.system.id].tags.ocv = `${this.flags[game.system.id].tags.ocv}${parseInt(
-                                velocity / 10,
-                            ).signedStringHero()} Velocity`;
-                        }
-                    }
-                    break;
-
-                default:
-                    this.system.ocv = parseInt(this.system.ocv).signedStringHero();
-
-                    this.system.ocvEstimated = `${ocv + parseInt(this.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)}`;
-
-                    if (parseInt(this.system.ocv) != 0) {
-                        if (this.flags[game.system.id].tags.ocv) {
-                            this.flags[game.system.id].tags.ocv += "\n";
-                        } else {
-                            this.flags[game.system.id].tags.ocv = "";
-                        }
-                        this.flags[game.system.id].tags.ocv += `${this.system.ocv} ${this.name}`;
-                    }
-            }
-        }
-
-        if (this.system.dcv != undefined && this.system.uses === "ocv") {
-            const dcv = parseInt(this.actor?.system.characteristics.dcv?.value || 0);
-            if (parseInt(dcv) !== 0) {
-                if (this.flags[game.system.id].tags.dcv) {
-                    this.flags[game.system.id].tags.dcv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.dcv = "";
-                }
-                this.flags[game.system.id].tags.dcv =
-                    `${this.flags[game.system.id].tags.dcv}${dcv.signedStringHero()} DCV`;
-            }
-            this.system.dcv = parseInt(this.system.dcv).signedStringHero();
-            this.system.dcvEstimated = `${dcv + parseInt(this.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)}`;
-
-            if (parseInt(this.system.dcv) != 0) {
-                if (this.flags[game.system.id].tags.dcv) {
-                    this.flags[game.system.id].tags.dcv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.dcv = "";
-                }
-                this.flags[game.system.id].tags.dcv =
-                    `${this.flags[game.system.id].tags.dcv}${this.system.dcv} ${this.name}`;
-            }
-        }
-
-        if (this.system.uses === "omcv") {
-            const omcv = parseInt(this.actor?.system.characteristics.omcv?.value || 0);
-            this.system.ocvEstimated = `${omcv + parseInt(cslSummary.omcv || 0)}`;
-            if (omcv !== 0) {
-                if (this.flags[game.system.id].tags.omcv) {
-                    this.flags[game.system.id].tags.omcv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.omcv = "";
-                }
-                this.flags[game.system.id].tags.omcv =
-                    `${this.flags[game.system.id].tags.omcv}${omcv.signedStringHero()} OMCV`;
-            }
-
-            const dmcv = parseInt(this.actor?.system.characteristics.dmcv?.value || 0);
-            this.system.dcvEstimated = `${dmcv + parseInt(cslSummary.dmcv || 0)}`;
-            if (dmcv !== 0) {
-                if (this.flags[game.system.id].tags.dmcv) {
-                    this.flags[game.system.id].tags.dmcv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.dmcv = "";
-                }
-                this.flags[game.system.id].tags.dmcv =
-                    `${this.flags[game.system.id].tags.dmcv}${dmcv.signedStringHero()} DMCV`;
-            }
-        }
-
-        // Set +1 OCV
-        const setManeuver = this.actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
-        if (setManeuver) {
-            // Some items do not have OCV (like set itself)
-            if (this.system.ocvEstimated !== undefined) {
-                this.system.ocvEstimated = `${parseInt(this.system.ocvEstimated) + 1}`;
-
-                if (this.flags[game.system.id].tags.ocv) {
-                    this.flags[game.system.id].tags.ocv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.ocv = "";
-                }
-                this.flags[game.system.id].tags.ocv += `+1 Set`;
-            }
-        }
-
-        // Haymaker -5 DCV
-        const haymakerManeuver = this.actor.items.find(
-            (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
-        );
-        if (haymakerManeuver) {
-            // Some items do not have DCV (like haymaker itself)
-            if (this.system.dcvEstimated !== undefined) {
-                this.system.dcvEstimated = `${parseInt(this.system.dcvEstimated) - 5}`;
-
-                if (this.flags[game.system.id].tags.dcv) {
-                    this.flags[game.system.id].tags.dcv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.dcv = "";
-                }
-                this.flags[game.system.id].tags.dcv += `-5 Haymaker`;
-            }
-        }
-
-        // STRMINIMUM
-        const strengthMinimumModifier = this.findModsByXmlid("STRMINIMUM");
-        if (strengthMinimumModifier) {
-            const strMinimumValue = calculateStrengthMinimumForItem(this, strengthMinimumModifier);
-            const extraStr = Math.max(0, parseInt(this.actor?.system.characteristics.str.value || 0)) - strMinimumValue;
-            if (extraStr < 0) {
-                const adjustment = Math.floor(extraStr / 5);
-                this.system.ocvEstimated = `${parseInt(this.system.ocvEstimated) + adjustment}`;
-
-                if (this.flags[game.system.id].tags.ocv) {
-                    this.flags[game.system.id].tags.ocv += "\n";
-                } else {
-                    this.flags[game.system.id].tags.ocv = "";
-                }
-                this.flags[game.system.id].tags.ocv +=
-                    `${adjustment.signedStringHero()} ${strengthMinimumModifier.ALIAS}`;
-            }
-        }
-
-        this.system.phase = this.system.PHASE;
-    }
-
     rollsToHit() {
         try {
             return (
@@ -2245,14 +2030,13 @@ export class HeroSystem6eItem extends Item {
         console.error(`_postUpload is deprecated and should not be called`);
     }
 
-    getAttacksWith() {
-        const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo?.type.includes("mental")) return "omcv";
+    get attacksWith() {
+        if (this.baseInfo.type.includes("mental")) return "omcv";
         return "ocv";
     }
-    getDefendsWith() {
-        const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo?.type.includes("mental")) return "dmcv";
+
+    get defendsWith() {
+        if (this.baseInfo.type.includes("mental")) return "dmcv";
         return "dcv";
     }
 
@@ -2807,8 +2591,8 @@ export class HeroSystem6eItem extends Item {
                 description = (system.NAME || system.ALIAS) + ": +" + system.LEVELS + " " + system.OPTION_ALIAS;
 
                 // Penalty details
-                switch (system.penalty) {
-                    case "range":
+                switch (this.pslPenaltyType) {
+                    case CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range:
                         description = description.replace("a specific negative OCV modifier", "range OCV penalties");
                         break;
                 }

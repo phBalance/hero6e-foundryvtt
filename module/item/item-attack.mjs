@@ -337,7 +337,7 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
 
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
-    if ((item.system.EFFECT || "").match(/v\/\d+/)) {
+    if ((item.system.effect || "").match(/v\/\d+/)) {
         // Educated guess for token
         const token2 =
             actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
@@ -522,7 +522,7 @@ export async function doAoeActionToHit(action, options) {
     const attackHeroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
-        .addNumber(hitCharacteristic, item.system.uses)
+        .addNumber(hitCharacteristic, item.getAttacksWith)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
@@ -962,7 +962,7 @@ async function doSingleTargetActionToHit(action, options) {
         // PH: FIXME: need to consider both the item and the effectiveAttackItem
         if (options.usePsl) {
             const pslHit = penaltySkillLevelsForAttack(item).find(
-                (o) => o.system.penalty === "hitLocation" && o.system.checked,
+                (o) => o.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.location && o.system.checked,
             );
             if (pslHit) {
                 let pslValue = Math.min(pslHit.system.LEVELS, Math.abs(aimOcvPenalty));
@@ -3541,7 +3541,7 @@ async function _calcDamage(damageRoller, item, options) {
     }
 
     if (item.effectiveAttackItem.system.EFFECT) {
-        effects += `${item.effectiveAttackItem.system._effect || item.effectiveAttackItem.system.EFFECT}; `;
+        effects += `${item.effectiveAttackItem.system._effect || item.effectiveAttackItem.system.effect}; `;
     }
 
     // VULNERABILITY

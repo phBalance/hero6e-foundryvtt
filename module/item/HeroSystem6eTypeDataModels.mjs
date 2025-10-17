@@ -417,7 +417,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             if (!_range) {
                 // This should never happen, missing something from CONFIG.mjs?  Perhaps with super old actors?
                 console.error(`Missing range`, this);
-                this.system.range = CONFIG.HERO.RANGE_TYPES.SELF;
+                return CONFIG.HERO.RANGE_TYPES.SELF;
             }
 
             // Short circuit if there are no modifiers
@@ -603,6 +603,10 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
 
     get usesStrength() {
         return this.parent.getMakeAttack().usesStrength;
+    }
+
+    get usesTk() {
+        return this.parent.getMakeAttack().usesTk;
     }
 
     get piercing() {
@@ -839,6 +843,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             charges: new EmbeddedDataField(HeroSystem6eItemCharges),
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
             csl: new ArrayField(new StringField()), // Combat Skill levels
+            checked: new BooleanField({ initial: false }), // DEADLYBLOW
         };
     }
 }
