@@ -337,7 +337,7 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
 
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
-    if ((item.system.EFFECT || "").match(/v\/\d+/)) {
+    if ((item.system.effect || "").match(/v\/\d+/)) {
         // Educated guess for token
         const token2 =
             actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
@@ -3541,7 +3541,7 @@ async function _calcDamage(damageRoller, item, options) {
     }
 
     if (item.effectiveAttackItem.system.EFFECT) {
-        effects += `${item.effectiveAttackItem.system._effect || item.effectiveAttackItem.system.EFFECT}; `;
+        effects += `${item.effectiveAttackItem.system._effect || item.effectiveAttackItem.system.effect}; `;
     }
 
     // VULNERABILITY
