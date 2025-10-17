@@ -843,6 +843,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             charges: new EmbeddedDataField(HeroSystem6eItemCharges),
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
             csl: new ArrayField(new StringField()), // Combat Skill levels
+            checked: new BooleanField({ initial: false }), // DEADLYBLOW
         };
     }
 }
