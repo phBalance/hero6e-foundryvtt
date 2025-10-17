@@ -605,6 +605,10 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         return this.parent.getMakeAttack().usesStrength;
     }
 
+    get usesTk() {
+        return this.parent.getMakeAttack().usesTk;
+    }
+
     get piercing() {
         return this.parent.getMakeAttack().piercing;
     }
