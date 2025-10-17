@@ -2031,14 +2031,12 @@ export class HeroSystem6eItem extends Item {
     }
 
     get attacksWith() {
-        const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo?.type.includes("mental")) return "omcv";
+        if (this.baseInfo.type.includes("mental")) return "omcv";
         return "ocv";
     }
 
-    getDefendsWith() {
-        const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo?.type.includes("mental")) return "dmcv";
+    get defendsWith() {
+        if (this.baseInfo.type.includes("mental")) return "dmcv";
         return "dcv";
     }
 
@@ -2594,7 +2592,7 @@ export class HeroSystem6eItem extends Item {
 
                 // Penalty details
                 switch (this.pslPenaltyType) {
-                    case HERO.PENALTY_SKILL_LEVELS_TYPES.range:
+                    case CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range:
                         description = description.replace("a specific negative OCV modifier", "range OCV penalties");
                         break;
                 }
