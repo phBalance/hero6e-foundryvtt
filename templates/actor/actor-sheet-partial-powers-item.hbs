@@ -1,5 +1,5 @@
 {{#if (filterItem this @root/options.itemFilters.power)}}
-    <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}} {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{#if (actorItemHeroValidation this)}}validation{{/if}}"
+    <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}}"
         title="{{actorItemHeroValidation this}}"
         data-item-id="{{this._id}}">
         {{#if (eq item.system.XMLID "LIST")}}
