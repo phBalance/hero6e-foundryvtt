@@ -96,6 +96,7 @@
         "Talent": "Talent",
         "Type": "Type",
         "Value": "Current",
+        "LEVELS": "LEVELS",
         "ValueTitle": "Current total value including all powers, effects and damage.",
         "Velocity": "Velocity",
         "Weight": "Weight"
