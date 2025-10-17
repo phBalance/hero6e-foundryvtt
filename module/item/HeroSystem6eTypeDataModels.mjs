@@ -417,7 +417,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             if (!_range) {
                 // This should never happen, missing something from CONFIG.mjs?  Perhaps with super old actors?
                 console.error(`Missing range`, this);
-                this.system.range = CONFIG.HERO.RANGE_TYPES.SELF;
+                return CONFIG.HERO.RANGE_TYPES.SELF;
             }
 
             // Short circuit if there are no modifiers
