@@ -1039,13 +1039,12 @@ export class HeroSystem6eItem extends Item {
 
         // Powers have one of four Ranges: Self; No Range; Standard
         // Range; and Line of Sight (LOS).
-        const configPowerInfo = getPowerInfo({ item: this });
         if (typeof this.baseInfo?.rangeText === "function") {
             content += ` ${this.baseInfo.rangeText(this)}${getSystemDisplayUnits(this.is5e)}.`;
         } else {
             switch (this.system.range) {
                 case CONFIG.HERO.RANGE_TYPES.SELF: {
-                    if (!configPowerInfo?.type.includes("skill")) {
+                    if (!this.baseInfo?.type.includes("skill")) {
                         content += " Self.";
                     }
 
@@ -1096,9 +1095,9 @@ export class HeroSystem6eItem extends Item {
                     if (["MULTIPOWER", "COMPOUNDPOWER", "LIST"].includes(this.system.XMLID)) {
                         break;
                     }
-                    console.error("Unhandled range", configPowerInfo);
-                    if (configPowerInfo?.range?.toLowerCase()) {
-                        content += ` ${configPowerInfo?.range?.toLowerCase()}`;
+                    console.error("Unhandled range", this.baseInfo);
+                    if (this.baseInfo?.range?.toLowerCase()) {
+                        content += ` ${this.baseInfo?.range?.toLowerCase()}`;
                     }
                     break;
             }
@@ -1107,6 +1106,11 @@ export class HeroSystem6eItem extends Item {
         // Perceivability
         if (this.baseInfo.perceivability) {
             content += ` Perceivability: ${this.baseInfo.perceivability}.`;
+        }
+
+        // Duration
+        if (this.baseInfo.duration) {
+            content += ` Duration: ${this.baseInfo.duration}.`;
         }
 
         if (this.end) {
