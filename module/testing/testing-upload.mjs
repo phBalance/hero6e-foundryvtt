@@ -2640,24 +2640,19 @@ export function registerUploadTests(quench) {
                         </POWER>
                     </POWER>
                 `;
+                    let actor;
                     let item;
 
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
+                        await actor.FullHealth();
+                    });
 
-                        await item.resetToOriginal();
-                        actor.items.set(item.system.XMLID, item);
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
@@ -2687,24 +2682,17 @@ export function registerUploadTests(quench) {
                         </POWER>
                     </POWER>
                 `;
+                    let actor;
                     let item;
-
                     before(async () => {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = true;
-
-                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        actor = await createQuenchActor({ quench: this, actor, is5e: true });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-
-                        await item.resetToOriginal();
-                        actor.items.set(item.system.XMLID, item);
+                        await actor.FullHealth();
+                    });
+                    after(async () => {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {
