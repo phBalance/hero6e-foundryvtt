@@ -1312,25 +1312,3 @@ export function maneuverDoesKillingDamage(item) {
 
     return false;
 }
-
-/**
- * Calculate the number of character points this item should use. If no option to override full power is the default.
- *
- * @param {*} item
- * @param {Object} options
- * @param {number} option.effectiveCharacterPoints - the number of character points this item should use
- * @returns {number} - Number of DC
- */
-export function computeReducedOrPushedDc(item, options) {
-    const baseCharacterPoints = item.system.effectiveCharacterPoints;
-    const effectiveCharacterPoints = options.effectiveRealCost ?? baseCharacterPoints;
-
-    // When reducing character points, we just scale. However, when pushing we don't consider
-    // advantages (which was clearly an "it's too complicated to calculate" simplification that we'll keep)
-    const effectiveBaseRawDc =
-        effectiveCharacterPoints <= baseCharacterPoints
-            ? item.dcRaw * (effectiveCharacterPoints / baseCharacterPoints)
-            : item.dcRaw + ((effectiveCharacterPoints - baseCharacterPoints) * (1 + item.system._advantagesDc)) / 5;
-
-    return effectiveBaseRawDc;
-}
