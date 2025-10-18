@@ -2,7 +2,7 @@
 
 ## Version 4.2.0 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Significantly refactored how data is stored and/or calculated. Expecting performance improvements for worlds with 500+ actors.
+- Significantly refactored how data is stored and/or calculated. Expecting performance improvements for worlds with 500+ actors. Some older item types are no longer supported and will show in the "Invalid" tab on the actor sheet (re-upload the HDC file).
 - Items with charge clips no longer get an extra clip. [#2898](https://github.com/dmdorman/hero6e-foundryvtt/issues/2898)
 - Weapon familiarity skill now displays correctly. [#2856](https://github.com/dmdorman/hero6e-foundryvtt/issues/2856)
 - Martial Arts with weapons that are not damage related (e.g. entangle, adjustment) should now work correctly. [#2814](https://github.com/dmdorman/hero6e-foundryvtt/issues/2814)

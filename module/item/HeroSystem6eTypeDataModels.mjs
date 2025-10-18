@@ -112,7 +112,15 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
 
     get baseInfo() {
         // cache getPowerInfo
-        this.#baseInfo ??= getPowerInfo({ XMLID: this.XMLID, item: this.item, xmlTag: this.xmlTag });
+        // Notice we are trying to infer xmlTag for legacy support (EXPLOSION on Viperia)
+        this.#baseInfo ??= getPowerInfo({
+            XMLID: this.XMLID,
+            item: this.item,
+            xmlTag:
+                this.xmlTag ??
+                (this.constructor.name.match(/MODIFIER/i) ? "MODIFIER" : undefined) ??
+                (this.constructor.name.match(/ADDER/i) ? "ADDER" : undefined),
+        });
         // if (!this.#baseInfo) {
         //     debugger;
         // }

@@ -13,9 +13,9 @@ export function getPowerInfo(options) {
         options.item?.system?.xmlid ||
         options.item?.system?.id;
 
-    if (xmlid === "DEX") {
-        //debugger;
-    }
+    // if (xmlid === "EXPLOSION") {
+    //     debugger;
+    // }
 
     const actor = options?.actor || options?.item?.actor;
 
