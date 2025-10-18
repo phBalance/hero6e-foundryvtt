@@ -271,11 +271,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         const is5e =
-            options.is5e != undefined
-                ? options.is5e
-                : game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
-                  ? true
-                  : false;
+            (options.is5e ?? this.actor?.is5e ?? game.settings.get(HEROSYS.module, "DefaultEdition") === "five")
+                ? true
+                : false;
 
         this.updateSource({
             system: {
