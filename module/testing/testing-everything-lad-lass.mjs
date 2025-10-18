@@ -949,8 +949,9 @@ export function registerEverythingLadLass(quench) {
                 </CHARACTER>
                 `;
 
+                let actor;
                 before(async () => {
-                    await createQuenchActor({ quench: this, contents, is5e: true });
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
                 });
 
                 after(async () => {
