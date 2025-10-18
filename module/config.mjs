@@ -10910,6 +10910,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "DELAYEDRETURNRATE2",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(false),
+        xml: `<MODIFIER XMLID="DELAYEDRETURNRATE2" ID="1758854747958" BASECOST="0.5" LEVELS="0" ALIAS="Delayed Return Rate (Points Gained)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FIVEMINUTES" OPTIONID="FIVEMINUTES" OPTION_ALIAS="points return at the rate of 5 per 5 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
     addPower(
         {
             key: "DECREASEDSTUNMULTIPLIER",
