@@ -2617,6 +2617,14 @@ export class HeroSystem6eActor extends Actor {
 
             uploadProgressBar.close(`Uploaded ${this.name}`);
 
+            // report performance concerns
+            const performanceConcerns = uploadProgressBar._performance
+                .filter((o) => o.delta > 100)
+                .sort((a, b) => b.delta - a.delta);
+            for (const concern of performanceConcerns) {
+                console.warn({ delta: concern.delta, message: concern.message });
+            }
+
             uploadPerformance.totalTime = new Date().getTime() - uploadPerformance.startTime;
 
             //console.log("Upload Performance", uploadPerformance);
