@@ -810,6 +810,16 @@ export class HeroSystem6eItem extends Item {
             });
         }
 
+        if (this.system.XMLID === "COMBAT_LEVELS") {
+            if (this.system.csl.length !== this.system.LEVELS) {
+                const csl = new Array(this.system.LEVELS);
+                for (let idx = 0; idx < csl.length; idx++) {
+                    csl[idx] = this.system.csl?.[idx] || Object.keys(this.cslChoices)[0];
+                }
+                await this.update({ "system.csl": csl });
+            }
+        }
+
         // turn off items that use END, Charges, MP, etc
 
         if (this.type !== "maneuver") {
