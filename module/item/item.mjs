@@ -1456,10 +1456,19 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Reload the clip to 1 less clip that should be at full charges.
-        return this.update({
+        await this.update({
             [`system.charges.value`]: charges.max,
             [`system.charges.clips`]: charges.clips - 1,
         });
+
+        const chatData = {
+            author: game.user._id,
+            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            content: `Change clips on ${this.name}. Full charges. ${charges.clips} remain.`,
+            whisper: whisperUserTargetsForActor(this.actor),
+        };
+        await ChatMessage.create(chatData);
     }
 
     isPerceivable(perceptionSuccess) {
