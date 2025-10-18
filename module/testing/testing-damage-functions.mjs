@@ -21,7 +21,7 @@ export function registerDamageFunctionTests(quench) {
                 `;
                 let rkaItem;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -424,7 +424,7 @@ export function registerDamageFunctionTests(quench) {
                     let normalItem;
                     let threePointFlashItem;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1246,7 +1246,7 @@ export function registerDamageFunctionTests(quench) {
                     </MANEUVER>
                 `;
                 let item;
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1282,7 +1282,7 @@ export function registerDamageFunctionTests(quench) {
                 `;
                 let previousDoubleDamageLimitSetting;
                 let item;
-                before(async () => {
+                before(async function () {
                     previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
@@ -1303,7 +1303,7 @@ export function registerDamageFunctionTests(quench) {
                     actor.items.set(item.system.XMLID, item);
                 });
 
-                after(async () => {
+                after(async function () {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                 });
 
@@ -1324,7 +1324,7 @@ export function registerDamageFunctionTests(quench) {
                     </POWER>
                 `;
                 let item;
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1369,7 +1369,7 @@ export function registerDamageFunctionTests(quench) {
                     </POWER>
                     `;
                     let item;
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1413,7 +1413,7 @@ export function registerDamageFunctionTests(quench) {
                     </POWER>
                     `;
                     let item;
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1460,7 +1460,7 @@ export function registerDamageFunctionTests(quench) {
                     </POWER>
                     `;
                     let item;
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1502,7 +1502,7 @@ export function registerDamageFunctionTests(quench) {
                     </MANEUVER>
                 `;
                 let item;
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1543,7 +1543,7 @@ export function registerDamageFunctionTests(quench) {
                     </MANEUVER>
                 `;
                 let item;
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1590,7 +1590,7 @@ export function registerDamageFunctionTests(quench) {
                     let actor;
                     let threePointFlashItem;
 
-                    before(async () => {
+                    before(async function () {
                         actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1713,7 +1713,7 @@ export function registerDamageFunctionTests(quench) {
                     let actor;
                     let ebWithAdvAndLimItem;
 
-                    before(async () => {
+                    before(async function () {
                         actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1834,7 +1834,7 @@ export function registerDamageFunctionTests(quench) {
                     let actor;
                     let drainWithLimItem;
 
-                    before(async () => {
+                    before(async function () {
                         actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",

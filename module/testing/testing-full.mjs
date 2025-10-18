@@ -96,7 +96,7 @@ export function registerFullTests(quench) {
 
                 let actor;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -372,12 +372,12 @@ export function registerFullTests(quench) {
                 `;
 
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -842,7 +842,7 @@ export function registerFullTests(quench) {
 
                 let actor;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1103,7 +1103,7 @@ export function registerFullTests(quench) {
 
                 let actor;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1377,7 +1377,7 @@ export function registerFullTests(quench) {
                 const defaultActorName = "Quench Actor";
                 let actor;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: defaultActorName,
@@ -1533,14 +1533,14 @@ export function registerFullTests(quench) {
 
                 let actor;
                 let previousDoubleDamageLimitSetting;
-                before(async () => {
+                before(async function () {
                     previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
                     actor = await createQuenchActor({ quench: this, contents, is5e: false });
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     await deleteQuenchActor({ quench: this, actor });
                 });
@@ -1724,7 +1724,7 @@ export function registerFullTests(quench) {
                 let actor;
                 let parentItem;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1905,14 +1905,14 @@ export function registerFullTests(quench) {
                 let actor;
                 let previousSetting;
 
-                beforeEach(async () => {
+                beforeEach(async function () {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
                     await actor.FullHealth();
                 });
 
-                afterEach(async () => {
+                afterEach(async function () {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
                     await deleteQuenchActor({ quench: this, actor });
                 });
@@ -2293,7 +2293,7 @@ export function registerFullTests(quench) {
                 let martialFlashItem;
                 let sacrificeStrikeItem;
 
-                beforeEach(async () => {
+                beforeEach(async function () {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
@@ -2322,7 +2322,7 @@ export function registerFullTests(quench) {
                     sacrificeStrikeItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
                 });
 
-                afterEach(async () => {
+                afterEach(async function () {
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
                 });
 
@@ -2844,7 +2844,7 @@ export function registerFullTests(quench) {
                 let threeDcTransform;
                 let eightDcTransform;
 
-                beforeEach(async () => {
+                beforeEach(async function () {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
@@ -3174,7 +3174,7 @@ export function registerFullTests(quench) {
                 let martialStrikeManeuverItem;
                 let customMartialFourDcManeuverItem;
 
-                beforeEach(async () => {
+                beforeEach(async function () {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
@@ -3438,7 +3438,7 @@ export function registerFullTests(quench) {
                 let basicShotManeuverItem;
                 let snapShotManeuverItem;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -3456,7 +3456,7 @@ export function registerFullTests(quench) {
                     snapShotManeuverItem = actor.items.find((item) => item.system.XMLID === "SNAPSHOT");
                 });
 
-                beforeEach(async () => {
+                beforeEach(async function () {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
 
@@ -3687,7 +3687,7 @@ export function registerFullTests(quench) {
                 let entangleItem;
                 let flightItem;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -3877,7 +3877,7 @@ export function registerFullTests(quench) {
                 let hkaPlusHalfItem;
                 let rkaPlusHalfItem;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4257,7 +4257,7 @@ export function registerFullTests(quench) {
                 let hkaPlusHalfItem;
                 let rkaPlusHalfItem;
 
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: false });
                     ebPlusOneItem = actor.items.find(
                         (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
@@ -4275,7 +4275,7 @@ export function registerFullTests(quench) {
                     rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -4616,7 +4616,7 @@ export function registerFullTests(quench) {
                 let bigSwordItem;
                 let littleSwordItem;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4667,12 +4667,12 @@ export function registerFullTests(quench) {
                 describe("Big and Little Sword Killing Attacks with damage doubling rules", function () {
                     let previousSetting;
 
-                    beforeEach(async () => {
+                    beforeEach(async function () {
                         previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
                     });
 
-                    afterEach(async () => {
+                    afterEach(async function () {
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
                     });
 
@@ -4968,7 +4968,7 @@ export function registerFullTests(quench) {
 
                 let actor;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -5101,7 +5101,7 @@ export function registerFullTests(quench) {
                 let nakedStrAoE;
                 // let nakedStrAp;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -5252,7 +5252,7 @@ export function registerFullTests(quench) {
                 let hearingFlash;
                 let mysticFlash;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -5532,7 +5532,7 @@ export function registerFullTests(quench) {
 
                     let actor;
 
-                    before(async () => {
+                    before(async function () {
                         actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6009,7 +6009,7 @@ export function registerFullTests(quench) {
 
                     let actor;
 
-                    before(async () => {
+                    before(async function () {
                         actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6212,7 +6212,7 @@ export function registerFullTests(quench) {
                 let lifeSupportItem;
                 let infraredPerceptionItem;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -6337,7 +6337,7 @@ export function registerFullTests(quench) {
                 let strikeItem;
                 let csls;
 
-                before(async () => {
+                before(async function () {
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",

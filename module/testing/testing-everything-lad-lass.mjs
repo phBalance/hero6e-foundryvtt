@@ -950,11 +950,11 @@ export function registerEverythingLadLass(quench) {
                 `;
 
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -1931,11 +1931,11 @@ export function registerEverythingLadLass(quench) {
                 `;
 
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: false });
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
