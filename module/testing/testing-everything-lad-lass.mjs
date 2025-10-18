@@ -954,7 +954,7 @@ export function registerEverythingLadLass(quench) {
                 });
 
                 after(async () => {
-                    //await deleteQuenchActor({ quench: this, actor });
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("ok", async function () {
