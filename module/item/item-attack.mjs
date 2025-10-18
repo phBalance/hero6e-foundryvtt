@@ -4124,10 +4124,10 @@ function calculateRequiredEnd(item) {
         // Pushing uses 1 END per pushed CP
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
-        // How many applications?
+        // How many shots? 1 or more as defined by autofire.
         const autofire = item.findModsByXmlid("AUTOFIRE");
-        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 0;
-        endToUse = endPerShot * (multipleApplications || 1);
+        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 1;
+        endToUse = endPerShot * multipleApplications;
     }
 
     return endToUse;
@@ -4149,10 +4149,10 @@ function calculateRequiredReserveEndurance(item) {
         // Pushing uses 1 END per pushed CP
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
-        // How many applications?
+        // How many shots? 1 or more as defined by autofire.
         const autofire = item.findModsByXmlid("AUTOFIRE");
-        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 0;
-        reserveEndToUse = endPerShot * (multipleApplications || 1);
+        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 1;
+        reserveEndToUse = endPerShot * multipleApplications;
     }
 
     return reserveEndToUse;
