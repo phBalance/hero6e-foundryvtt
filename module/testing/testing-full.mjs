@@ -4258,15 +4258,7 @@ export function registerFullTests(quench) {
                 let rkaPlusHalfItem;
 
                 before(async () => {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, actor, contents, is5e: false });
                     ebPlusOneItem = actor.items.find(
                         (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
                     );
@@ -4281,6 +4273,10 @@ export function registerFullTests(quench) {
                     );
                     hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
                     rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                });
+
+                after(async () => {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 describe("Energy Blast", function () {
