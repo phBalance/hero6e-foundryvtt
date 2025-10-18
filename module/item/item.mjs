@@ -5454,7 +5454,23 @@ export class HeroSystem6eItem extends Item {
 
         // With All Attacks
         if (this.system.OPTIONID === "ALL") {
-            return true;
+            // only 6e has MENTAL_COMBAT_LEVELS
+
+            switch (this.system.XMLID) {
+                case "COMBAT_LEVELS":
+                    if (attackItem.baseInfo.type.includes("mental") && !this.is5e) {
+                        return false;
+                    }
+                    return true;
+
+                case "MENTAL_COMBAT_LEVELS":
+                    if (attackItem.baseInfo.type.includes("mental")) {
+                        return true;
+                    }
+                    return false;
+            }
+            console.error("unhandled CSL XMLID", this.system.XMLID);
+            return false;
         }
 
         // 5e with HTH and Mental Combat (treated as ALL)
