@@ -11,11 +11,11 @@ export function registerDefenseTests(quench) {
 
             describe("Resistant Protection", function () {
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: false });
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
