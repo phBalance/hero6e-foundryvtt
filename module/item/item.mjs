@@ -804,7 +804,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (this.system.XMLID === "ENDURANCERESERVE" && this.system.value !== this.system.max) {
+        if (this.system.XMLID === "ENDURANCERESERVE" && this.system.value !== this.system.LEVELS) {
             await this.update({
                 ["system.value"]: this.system.LEVELS,
             });
@@ -5471,8 +5471,8 @@ export class HeroSystem6eItem extends Item {
 
         // CSL associated with same compound power
         // Note that we don't bother verifying Mental/Physical, nor ADDER that may associate wth a different attackItem
-        if (this.parentItem?.system.XMLID === "COMPOUNDPOWER" && this.parentItem?.id === attackItem.parentItem?.id) {
-            return true;
+        if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
+            return this.parentItem?.id === attackItem.parentItem?.id;
         }
 
         // With All Attacks
