@@ -27,7 +27,7 @@ export function getPowerInfo(options) {
     if (!options.xmlTag && options.item?.type !== "maneuver") {
         if (!squelch(options.item || xmlid)) {
             console.warn(
-                `${options.item?.actor.name}/${options.item?.detailedName()}/${xmlid} is missing xmlTag`,
+                `${options.item?.actor?.name}/${options.item?.detailedName()}/${xmlid} is missing xmlTag`,
                 options.item,
             );
         }

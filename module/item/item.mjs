@@ -269,6 +269,20 @@ export class HeroSystem6eItem extends Item {
                 this.updateSource({ img: itemTypeToIcon[this.type] });
             }
         }
+
+        const is5e =
+            options.is5e != undefined
+                ? options.is5e
+                : game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
+                  ? true
+                  : false;
+
+        this.updateSource({
+            system: {
+                versionHeroSystem6eCreated: game.system.version,
+                is5e,
+            },
+        });
     }
 
     async _onCreate(data, options, userId) {
@@ -690,7 +704,7 @@ export class HeroSystem6eItem extends Item {
         //super.prepareDerivedData();
 
         if (this.is5e === undefined) {
-            console.warn(`${this.actor.name}/${this.name}: is5e === undefined`);
+            console.warn(`${this.actor?.name}/${this.name}: is5e === undefined`);
         }
 
         // Base points plus adders
@@ -1735,17 +1749,17 @@ export class HeroSystem6eItem extends Item {
 
     get is5e() {
         // If item has undefined is5e use actor.is5e
-        if (!this.system.is5e && this.system.is5e !== false) {
+        if (this.actor && !this.system.is5e && this.system.is5e !== false) {
             console.warn(
-                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}`,
                 this,
             );
             return this.actor?.is5e;
         }
 
-        if (this.actor?.is5e !== this.system.is5e) {
+        if (this.actor && this.actor?.is5e !== this.system.is5e) {
             console.error(
-                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}`,
                 this,
             );
         }
