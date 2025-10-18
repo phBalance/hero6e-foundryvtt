@@ -1,4 +1,4 @@
-export async function createQuenchActor({ quench, actor, contents, is5e }) {
+export async function createQuenchActor({ quench, contents, is5e }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
     const name = CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";
     const quenchName = `_Quench ${quench?.title} ${name} ${Date.now().toString()}`;
@@ -7,8 +7,12 @@ export async function createQuenchActor({ quench, actor, contents, is5e }) {
     const oldQuenchActors = game.actors.filter((a) => a.name.includes(quench.title));
     await Actor.deleteDocuments(oldQuenchActors.map((m) => m.id));
 
+    if (is5e === undefined) {
+        throw "missing is5e";
+    }
+
     // Create new actor for this test
-    actor = await Actor.create(
+    const actor = await Actor.create(
         {
             name: quenchName,
             type: "pc",
