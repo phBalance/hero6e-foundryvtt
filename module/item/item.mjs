@@ -655,13 +655,6 @@ export class HeroSystem6eItem extends Item {
         return _pslPenaltyType;
     }
 
-    setToHit() {
-        // TO HIT
-        if (this.rollsToHit()) {
-            this.makeToHit();
-        }
-    }
-
     setMovement() {
         // MOVEMENT
         if (this.baseInfo?.type.includes("movement")) {
@@ -3659,13 +3652,6 @@ export class HeroSystem6eItem extends Item {
         result = result.replace("Inobvious Power, Invisible ", "Invisible ");
 
         return result;
-    }
-
-    /**
-     * Add the bits that are responsible for hitting
-     */
-    makeToHit() {
-        console.error("depricated makeToHit");
     }
 
     getMakeAttack() {
