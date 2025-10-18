@@ -1464,8 +1464,8 @@ export class HeroSystem6eItem extends Item {
         const chatData = {
             author: game.user._id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
-            content: `Change clips on ${this.name}. Full charges. ${charges.clips} remain.`,
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            content: `Change clips on <b>${this.name}</b>. Full ${this.system.charges.value} charges. ${this.system.charges.clips} clips remain.`,
             whisper: whisperUserTargetsForActor(this.actor),
         };
         await ChatMessage.create(chatData);
