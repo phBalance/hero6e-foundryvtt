@@ -185,8 +185,6 @@ async function skillRoll(item, actor, target) {
         }
     }
 
-    //item.updateRoll();
-
     let tags = foundry.utils.deepClone(item.system.tags);
 
     // Build success requirement from the base tags
@@ -278,7 +276,7 @@ async function skillRoll(item, actor, target) {
             break;
     }
 
-    const flavor = `${item.name.toUpperCase()} (${successValue}-) roll ${succeeded ? "succeeded" : "failed"} by ${
+    const flavor = `${item.name.toUpperCase()}${item.system.INPUT ? `:${item.system.INPUT}` : ``} (${successValue}-) roll ${succeeded ? "succeeded" : "failed"} by ${
         autoSuccess === undefined ? `${Math.abs(margin)}. ` : `rolling ${total}. `
     } ${disadFlavor}`;
     const rollHtml = await skillRoller.render(flavor);
