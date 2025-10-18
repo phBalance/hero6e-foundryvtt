@@ -31,7 +31,7 @@ export function registerUploadTests(quench) {
                 `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -97,7 +97,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -142,7 +142,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -189,7 +189,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -242,7 +242,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -295,7 +295,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -347,7 +347,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -399,7 +399,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -454,7 +454,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -506,7 +506,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -564,7 +564,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -616,7 +616,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -679,7 +679,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -743,7 +743,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -798,7 +798,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -853,7 +853,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -914,7 +914,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -969,7 +969,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1022,7 +1022,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1074,7 +1074,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1123,7 +1123,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -1173,7 +1173,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1236,7 +1236,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1301,7 +1301,7 @@ export function registerUploadTests(quench) {
                 let item;
 
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -1309,7 +1309,7 @@ export function registerUploadTests(quench) {
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -1356,7 +1356,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -1364,7 +1364,7 @@ export function registerUploadTests(quench) {
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -1401,7 +1401,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1463,7 +1463,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -1511,7 +1511,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1560,7 +1560,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1606,7 +1606,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1652,7 +1652,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
                         let actor;
-                        before(async () => {
+                        before(async function () {
                             actor = await createQuenchActor({ quench: this, is5e: true });
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
@@ -1660,11 +1660,11 @@ export function registerUploadTests(quench) {
                             await actor.FullHealth();
                         });
 
-                        after(async () => {
+                        after(async function () {
                             await deleteQuenchActor({ quench: this, actor });
                         });
 
-                        // before(async () => {
+                        // before(async function() {
                         //     const actor = new HeroSystem6eActor(
                         //         {
                         //             name: "Quench Actor",
@@ -1710,7 +1710,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1756,7 +1756,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1805,7 +1805,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1854,7 +1854,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1903,7 +1903,7 @@ export function registerUploadTests(quench) {
                     `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1949,7 +1949,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -1995,7 +1995,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -2044,7 +2044,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -2093,7 +2093,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -2139,7 +2139,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -2185,7 +2185,7 @@ export function registerUploadTests(quench) {
                         `;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -2235,7 +2235,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -2278,7 +2278,7 @@ export function registerUploadTests(quench) {
                     let item;
 
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -2286,7 +2286,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -2317,7 +2317,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -2362,7 +2362,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -2416,7 +2416,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -2463,7 +2463,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -2522,7 +2522,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -2588,7 +2588,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -2643,7 +2643,7 @@ export function registerUploadTests(quench) {
                     let actor;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -2651,7 +2651,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -2684,14 +2684,14 @@ export function registerUploadTests(quench) {
                 `;
                     let actor;
                     let item;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: true });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
                         await actor.FullHealth();
                     });
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -2721,7 +2721,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -2767,7 +2767,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -2817,7 +2817,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -2866,7 +2866,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -2930,7 +2930,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -2982,7 +2982,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3033,7 +3033,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3085,7 +3085,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3150,7 +3150,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -3220,7 +3220,7 @@ export function registerUploadTests(quench) {
                     `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -3261,8 +3261,8 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("Skill Rolls", () => {
-                describe("KS: GENERAL with no Levels", () => {
+            describe("Skill Rolls", function () {
+                describe("KS: GENERAL with no Levels", function () {
                     const contents = `
                         <SKILL XMLID="KNOWLEDGE_SKILL" ID="1701473559272" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Broken General? Should show 11- on the dice" INPUT="How to Code General Skills" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
                             <NOTES/>
@@ -3270,7 +3270,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3316,7 +3316,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("KS: GENERAL with some Levels", () => {
+                describe("KS: GENERAL with some Levels", function () {
                     const contents = `
                         <SKILL XMLID="KNOWLEDGE_SKILL" ID="1701473559272" BASECOST="2.0" LEVELS="2" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Broken General? Should show 13- on the dice" INPUT="How to Code General Skills" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
                             <NOTES/>
@@ -3324,7 +3324,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3376,7 +3376,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("SS: INT with 0 Levels", () => {
+                describe("SS: INT with 0 Levels", function () {
                     const contents = `
                         <SKILL XMLID="SCIENCE_SKILL" ID="1042169893315" BASECOST="3.0" LEVELS="0" ALIAS="SS" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1236046710927" NAME="" INPUT="Astronomy" CHARACTERISTIC="INT" FAMILIARITY="No" LEVELSONLY="No">
                             <NOTES />
@@ -3384,7 +3384,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3434,7 +3434,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("SS: INT with 3 Levels", () => {
+                describe("SS: INT with 3 Levels", function () {
                     const contents = `
                         <SKILL XMLID="SCIENCE_SKILL" ID="1042169958518" BASECOST="3.0" LEVELS="3" ALIAS="SS" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1236046710927" NAME="" INPUT="Robotics" CHARACTERISTIC="INT" FAMILIARITY="No" LEVELSONLY="No">
                             <NOTES />
@@ -3442,7 +3442,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3493,7 +3493,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("PS: Familiarity", () => {
+                describe("PS: Familiarity", function () {
                     const contents = `
                         <SKILL XMLID="PROFESSIONAL_SKILL" ID="1709961543498" BASECOST="1.0" LEVELS="0" ALIAS="PS" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Appraise" CHARACTERISTIC="GENERAL" FAMILIARITY="Yes" PROFICIENCY="No" LEVELSONLY="No" EVERYMAN="No">
                             <NOTES />
@@ -3501,7 +3501,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3548,7 +3548,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("PS: Everyman", () => {
+                describe("PS: Everyman", function () {
                     const contents = `
                         <SKILL XMLID="PROFESSIONAL_SKILL" ID="1709961556501" BASECOST="0.0" LEVELS="0" ALIAS="PS" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Bailiff" CHARACTERISTIC="GENERAL" FAMILIARITY="Yes" PROFICIENCY="No" LEVELSONLY="No" EVERYMAN="Yes">
                             <NOTES />
@@ -3556,7 +3556,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3604,8 +3604,8 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("ABSORPTION", () => {
-                describe("5e", () => {
+            describe("ABSORPTION", function () {
+                describe("5e", function () {
                     const contents = `
                         <POWER XMLID="ABSORPTION" ID="1701632911260" BASECOST="0.0" LEVELS="2" ALIAS="Absorption" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ENERGY" OPTIONID="ENERGY" OPTION_ALIAS="energy" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Absorption missing INPUT" INPUT="STUN" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES/>
@@ -3616,7 +3616,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3654,7 +3654,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("6e", () => {
+                describe("6e", function () {
                     const contents = `
                         <POWER XMLID="ABSORPTION" ID="1701641804953" BASECOST="0.0" LEVELS="9" ALIAS="Absorption" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PHYSICAL" OPTIONID="PHYSICAL" OPTION_ALIAS="physical" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="DEX" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES/>
@@ -3662,7 +3662,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3713,7 +3713,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3762,7 +3762,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3817,10 +3817,10 @@ export function registerUploadTests(quench) {
                     </POWER>
                 `;
 
-                describe("5e", () => {
+                describe("5e", function () {
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3864,10 +3864,10 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("6e", () => {
+                describe("6e", function () {
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3913,7 +3913,7 @@ export function registerUploadTests(quench) {
             });
 
             describe("FORCEFIELD", async function () {
-                describe("5e", () => {
+                describe("5e", function () {
                     const contents = `
                         <POWER XMLID="FORCEFIELD" ID="1702155860391" BASECOST="0.0" LEVELS="21" ALIAS="Force Field" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="10" EDLEVELS="11" MDLEVELS="0" POWDLEVELS="0">
                             <NOTES/>
@@ -3921,7 +3921,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3959,7 +3959,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("6e", () => {
+                describe("6e", function () {
                     const contents = `
                         <POWER XMLID="FORCEFIELD" ID="1702155895918" BASECOST="0.0" LEVELS="21" ALIAS="Resistant Protection" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="11" EDLEVELS="10" MDLEVELS="0" POWDLEVELS="0">
                             <NOTES/>
@@ -3970,7 +3970,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -4029,7 +4029,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4071,7 +4071,7 @@ export function registerUploadTests(quench) {
             });
 
             describe("Power Frameworks", async function () {
-                describe("MULTIPOWER 5e", () => {
+                describe("MULTIPOWER 5e", async function () {
                     const mpContents = `
                         <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1702694147866" BASECOST="10.0" LEVELS="0" ALIAS="Multipower" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="MP Ego Powers" QUANTITY="1">
                             <NOTES/>
@@ -4088,7 +4088,7 @@ export function registerUploadTests(quench) {
                     let mpItem;
                     let item;
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: true });
                         mpItem = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
                             parent: actor,
@@ -4099,7 +4099,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -4143,7 +4143,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("MULTIPOWER 6e", () => {
+                describe("MULTIPOWER 6e", async function () {
                     const mpContents = `
                         <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1702775579792" BASECOST="20.0" LEVELS="0" ALIAS="Multipower" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1">
                             <NOTES/>
@@ -4160,7 +4160,7 @@ export function registerUploadTests(quench) {
                     let mpItem;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -4222,7 +4222,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("ELEMENTAL_CONTROL 5e", () => {
+                describe("ELEMENTAL_CONTROL 5e", async function () {
                     describe("EC with focus", function () {
                         const ecContents = `
                             <ELEMENTAL_CONTROL XMLID="GENERIC_OBJECT" ID="1702694260215" BASECOST="10.0" LEVELS="0" ALIAS="Elemental Control" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EC Ego Powers" QUANTITY="1">
@@ -4243,7 +4243,7 @@ export function registerUploadTests(quench) {
                         let ecItem;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -4334,7 +4334,7 @@ export function registerUploadTests(quench) {
                         let ecItem;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -4430,7 +4430,7 @@ export function registerUploadTests(quench) {
                         let ecItem;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -4504,7 +4504,7 @@ export function registerUploadTests(quench) {
                         let ecItem;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -4581,7 +4581,7 @@ export function registerUploadTests(quench) {
                         let ecItem;
                         let item;
 
-                        before(async () => {
+                        before(async function () {
                             const actor = new HeroSystem6eActor(
                                 {
                                     name: "Quench Actor",
@@ -4660,7 +4660,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: true });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -4668,7 +4668,7 @@ export function registerUploadTests(quench) {
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -4716,7 +4716,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4768,7 +4768,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4835,7 +4835,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4890,7 +4890,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -4898,7 +4898,7 @@ export function registerUploadTests(quench) {
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -4942,7 +4942,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4987,7 +4987,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -5029,7 +5029,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: false });
                     item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -5037,7 +5037,7 @@ export function registerUploadTests(quench) {
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -5067,7 +5067,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5113,7 +5113,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5168,7 +5168,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5217,7 +5217,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5259,7 +5259,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5308,7 +5308,7 @@ export function registerUploadTests(quench) {
                 let skillItem;
                 let skillEnhancerItem;
 
-                // before(async () => {
+                // before(async function() {
                 //     const actor = new HeroSystem6eActor(
                 //         {
                 //             name: "Quench Actor",
@@ -5331,7 +5331,7 @@ export function registerUploadTests(quench) {
                 // });
 
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: false });
                     skillEnhancerItem = await HeroSystem6eItem.create(
                         HeroSystem6eItem.itemDataFromXml(skillEnhancerContents, actor),
@@ -5345,7 +5345,7 @@ export function registerUploadTests(quench) {
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -5397,7 +5397,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5452,7 +5452,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5505,7 +5505,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -5555,7 +5555,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5608,7 +5608,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5664,7 +5664,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5726,7 +5726,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5779,7 +5779,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5832,7 +5832,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5888,7 +5888,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5944,7 +5944,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -5997,7 +5997,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6053,7 +6053,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -6061,7 +6061,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -6101,7 +6101,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6154,7 +6154,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6207,7 +6207,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6260,7 +6260,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -6268,7 +6268,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -6311,7 +6311,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -6374,7 +6374,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -6477,7 +6477,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -6527,7 +6527,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const previousDoubleDamageLimitSetting = await game.settings.set(
                             HEROSYS.module,
                             "DoubleDamageLimit",
@@ -6587,7 +6587,7 @@ export function registerUploadTests(quench) {
                 `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const previousDoubleDamageLimitSetting = await game.settings.set(
                             HEROSYS.module,
                             "DoubleDamageLimit",
@@ -6649,7 +6649,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -6657,11 +6657,11 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
-                    // before(async () => {
+                    // before(async function() {
                     //     const previousDoubleDamageLimitSetting = await game.settings.set(
                     //         HEROSYS.module,
                     //         "DoubleDamageLimit",
@@ -6723,7 +6723,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const previousDoubleDamageLimitSetting = await game.settings.set(
                             HEROSYS.module,
                             "DoubleDamageLimit",
@@ -6783,7 +6783,7 @@ export function registerUploadTests(quench) {
                     let item;
                     let actor;
                     let previousDoubleDamageLimitSetting;
-                    before(async () => {
+                    before(async function () {
                         previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
 
@@ -6795,7 +6795,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                         await deleteQuenchActor({ quench: this, actor });
                     });
@@ -6830,7 +6830,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -6900,7 +6900,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -6963,7 +6963,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7024,7 +7024,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7079,7 +7079,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7131,7 +7131,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7192,7 +7192,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7249,7 +7249,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7331,7 +7331,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -7339,7 +7339,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -7393,7 +7393,7 @@ export function registerUploadTests(quench) {
                     let pdItem;
                     let edItem;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7482,7 +7482,7 @@ export function registerUploadTests(quench) {
                     let pdItem;
                     let edItem;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7553,7 +7553,7 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("Drain w/Expanded Effect", () => {
+            describe("Drain w/Expanded Effect", function () {
                 const contents = `
                     <POWER XMLID="DRAIN" ID="1732212766144" BASECOST="0.0" LEVELS="3" ALIAS="Drain" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1732212668097" ULTRA_SLOT="Yes" NAME="Siphon Life" INPUT="BODY, OCV" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                     <NOTES />
@@ -7567,7 +7567,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -7607,8 +7607,8 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("STRIKING_APPEARANCE", () => {
-                describe("vs all", () => {
+            describe("STRIKING_APPEARANCE", function () {
+                describe("vs all", function () {
                     const contents = `
                         <TALENT XMLID="STRIKING_APPEARANCE" ID="1732405107921" BASECOST="0.0" LEVELS="5" ALIAS="Striking Appearance" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="vs. all characters" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                             <NOTES />
@@ -7616,7 +7616,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7654,7 +7654,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("vs some characters (iguanas)", () => {
+                describe("vs some characters (iguanas)", function () {
                     const contents = `
                         <TALENT XMLID="STRIKING_APPEARANCE" ID="1732405128954" BASECOST="0.0" LEVELS="3" ALIAS="Striking Appearance" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="GROUP" OPTIONID="GROUP" OPTION_ALIAS="vs. iguanas" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                             <NOTES />
@@ -7662,7 +7662,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7701,7 +7701,7 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("EB with AVLD advantage", () => {
+            describe("EB with AVLD advantage", function () {
                 const contents = `
                     <POWER XMLID="ENERGYBLAST" ID="1735535975123" BASECOST="0.0" LEVELS="4" ALIAS="Energy Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         <NOTES />
@@ -7712,7 +7712,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -7770,7 +7770,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         await actor.update({ "system.characteristics.ego.max": 38 });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
@@ -7779,7 +7779,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -7824,7 +7824,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7883,7 +7883,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -7942,7 +7942,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -8002,7 +8002,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -8059,7 +8059,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8110,7 +8110,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8154,7 +8154,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8201,7 +8201,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8252,7 +8252,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8303,7 +8303,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8350,7 +8350,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8395,7 +8395,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -8436,7 +8436,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -8522,7 +8522,7 @@ export function registerUploadTests(quench) {
                 `;
                 let item;
                 let actor;
-                before(async () => {
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
                     // item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                     //     parent: actor,
@@ -8530,7 +8530,7 @@ export function registerUploadTests(quench) {
                     await actor.FullHealth();
                 });
 
-                after(async () => {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -8567,7 +8567,7 @@ export function registerUploadTests(quench) {
                 `;
                 let itemVppPower;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8609,7 +8609,7 @@ export function registerUploadTests(quench) {
                 `;
                 let itemVppPower;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8660,7 +8660,7 @@ export function registerUploadTests(quench) {
                     let item;
 
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -8668,7 +8668,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -8703,7 +8703,7 @@ export function registerUploadTests(quench) {
                     let item;
 
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -8711,7 +8711,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -8745,7 +8745,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -8753,7 +8753,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -8815,7 +8815,7 @@ export function registerUploadTests(quench) {
                 `;
                 let skill;
 
-                before(async () => {
+                before(async function () {
                     const actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -8867,7 +8867,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -8922,7 +8922,7 @@ export function registerUploadTests(quench) {
                     let item;
 
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -8930,7 +8930,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -8963,7 +8963,7 @@ export function registerUploadTests(quench) {
                     let item;
 
                     let actor;
-                    before(async () => {
+                    before(async function () {
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
@@ -8971,7 +8971,7 @@ export function registerUploadTests(quench) {
                         await actor.FullHealth();
                     });
 
-                    after(async () => {
+                    after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
@@ -9009,7 +9009,7 @@ export function registerUploadTests(quench) {
                     `;
                     let item;
 
-                    before(async () => {
+                    before(async function () {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",

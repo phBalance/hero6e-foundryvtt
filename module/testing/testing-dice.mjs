@@ -587,49 +587,49 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(() => {
+                        expect(function () {
                             return roller.getStunTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getStunTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplierDiceParts();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getBodyTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getBodyTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTotal();
                         }).to.throw();
                     });
@@ -795,43 +795,43 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplierDiceParts();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTotal();
                         }).to.throw();
                     });
@@ -1426,34 +1426,34 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTotal();
                         }).to.throw();
                     });
@@ -2246,7 +2246,9 @@ export function registerDiceTests(quench) {
                         ]);
                         expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
 
-                        expect(() => roller.getStunMultiplier()).to.throw();
+                        expect(function () {
+                            return roller.getStunMultiplier();
+                        }).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             1 * TestRollMock.fixedRollResult,
@@ -2284,7 +2286,9 @@ export function registerDiceTests(quench) {
                         ]);
                         expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
 
-                        expect(() => roller.getStunMultiplier()).to.throw();
+                        expect(function () {
+                            return roller.getStunMultiplier();
+                        }).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             (1 + increasedStunMultiplier) * TestRollMock.fixedRollResult,
@@ -2322,7 +2326,9 @@ export function registerDiceTests(quench) {
                         ]);
                         expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
 
-                        expect(() => roller.getStunMultiplier()).to.throw();
+                        expect(function () {
+                            return roller.getStunMultiplier();
+                        }).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             1 * TestRollMock.fixedRollResult,
@@ -2653,46 +2659,46 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplierDiceParts();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTotal();
                         }).to.throw();
                     });
@@ -2790,46 +2796,46 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplierDiceParts();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTotal();
                         }).to.throw();
                     });
@@ -2957,46 +2963,46 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplierDiceParts();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEffectTotal();
                         }).to.throw();
                     });
@@ -3074,46 +3080,46 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             return roller.getSuccessTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getBodyTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplier();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getStunMultiplierDiceParts();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getAdjustmentTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getEntangleTotal();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTerms();
                         }).to.throw();
-                        expect(() => {
+                        expect(function () {
                             roller.getFlashTotal();
                         }).to.throw();
                     });
