@@ -5637,6 +5637,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         case "SKILL":
         case "SKILL1PER5":
         case "SKILL1PER20":
+        case "BASICRSR":
             {
                 OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
                 let skill = item.actor.items.find(
