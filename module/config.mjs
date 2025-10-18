@@ -472,8 +472,8 @@ function validatePowers() {
     numViolations += powersWithoutMatchingKeyAndXmlid.length;
 
     // All powers that have a duration are lowercase
-    const powersWithDurationThatHasUppercase = this.filter((power) => power.duration?.toLowerCase() !== power.duration);
-    numViolations += powersWithDurationThatHasUppercase.length;
+    const powersWithDurationThatIsUppercase = this.filter((power) => power.duration?.toLowerCase() !== power.duration);
+    numViolations += powersWithDurationThatIsUppercase.length;
 
     // Has range property and is not framework/compound/adder/modifier
     const powersWithoutRangeProperty = this.filter(
@@ -507,6 +507,18 @@ function validatePowers() {
         console.log(`Powers without duration property: `, powersWithoutDurationProperty);
     }
     numViolations += powersWithoutDurationProperty.length;
+
+    // Any to-hit or dice powers that are not martial arts or maneuvers without usesStrength property?
+    const attackPowersWithoutUsesStrengthProperty = this.filter(
+        (power) =>
+            (power.behaviors.includes("dice") || power.behaviors.includes("to-hit")) &&
+            !power.type.includes("maneuver") &&
+            power.usesStrength == null,
+    );
+    if (attackPowersWithoutUsesStrengthProperty.length > 0) {
+        console.log(`Powers without usesStrength property: `, attackPowersWithoutUsesStrengthProperty);
+    }
+    numViolations += attackPowersWithoutUsesStrengthProperty.length;
 
     // All powers have a costPerLevel function
     const powersWithoutCostPerLevelFunction = this.filter(
@@ -2423,6 +2435,38 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             costPerLevel: fixedValueFunction(2),
         },
+    );
+    addPower(
+        {
+            key: "FIXEDLOCATION",
+            type: ["movement"],
+            behaviors: ["activatable"],
+            costPerLevel: fixedValueFunction(0),
+            perceivability: "obvious",
+            duration: "instant",
+            target: "Target’s DCV",
+            range: HERO.RANGE_TYPES.STANDARD,
+            costEnd: true,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            xml: `<POWER XMLID="FIXEDLOCATION" ID="1709334034085" BASECOST="0.0" LEVELS="1" ALIAS="Teleportation: Fixed Location" POSITION="82" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FLOATINGLOCATION",
+            type: ["movement"],
+            behaviors: ["activatable"],
+            costPerLevel: fixedValueFunction(0),
+            perceivability: "obvious",
+            duration: "instant",
+            target: "Target’s DCV",
+            range: HERO.RANGE_TYPES.STANDARD,
+            costEnd: true,
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            xml: `<POWER XMLID="FLOATINGLOCATION" ID="1709334037026" BASECOST="0.0" LEVELS="1" ALIAS="Teleportation: Floating Fixed Location" POSITION="83" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
     );
     addPower(
         {
@@ -5307,6 +5351,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(1),
             unusualDicePerDc: true,
             baseEffectDicePartsBundle: (item) => {
@@ -5343,6 +5388,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target’s DCV",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,
+            usesStrength: false,
             hasNoDefense: true,
             costPerLevel: fixedValueFunction(6),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
@@ -5659,6 +5705,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "constant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             unusualDicePerDc: true,
             optionIDFix: function (json) {
@@ -5741,6 +5788,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(3),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -5773,6 +5821,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(10),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -5912,6 +5961,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             nonDmgEffect: true,
             defense: function (item) {
                 const baseDef = parseInt(item.adjustedLevels || 0);
@@ -5999,38 +6049,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     });
     addPower(
         {
-            key: "FIXEDLOCATION",
-            type: ["attack", "sense-affecting", "standard"],
-            behaviors: ["activatable"],
-            costPerLevel: fixedValueFunction(0),
-            perceivability: "obvious",
-            duration: "instant",
-            target: "Target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
-            costEnd: true,
-            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
-            xml: `<POWER XMLID="FIXEDLOCATION" ID="1709334034085" BASECOST="0.0" LEVELS="1" ALIAS="Teleportation: Fixed Location" POSITION="82" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
-        },
-        {},
-    );
-    addPower(
-        {
-            key: "FLOATINGLOCATION",
-            type: ["attack", "sense-affecting", "standard"],
-            behaviors: ["activatable"],
-            costPerLevel: fixedValueFunction(0),
-            perceivability: "obvious",
-            duration: "instant",
-            target: "Target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
-            costEnd: true,
-            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
-            xml: `<POWER XMLID="FLOATINGLOCATION" ID="1709334037026" BASECOST="0.0" LEVELS="1" ALIAS="Teleportation: Floating Fixed Location" POSITION="83" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
-        },
-        {},
-    );
-    addPower(
-        {
             key: "FLASH",
             type: ["attack", "sense-affecting", "standard"],
             behaviors: ["to-hit", "dice"],
@@ -6039,6 +6057,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "Target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: function (item) {
                 // FLASH (target group cost 5 per level, non-targeting costs 3 per level)
                 if (item?.system?.OPTIONID === "SIGHTGROUP") {
@@ -6174,12 +6193,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "FORCEWALL", //BARRIER
+            key: "FORCEWALL", // BARRIER
             type: ["defense", "standard"],
             behaviors: ["to-hit", "defense", "activatable"],
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(3 / 2), // LEVELS are the sum of rPD and rED
             cost: function (item) {
                 let _cost = parseFloat(item.system.BASECOST);
@@ -6467,13 +6487,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "HANDTOHANDATTACK",
+            key: "HANDTOHANDATTACK", // NOTE: Added to STR and not an attack of its own.
             type: ["attack"],
-            behaviors: [], // NOTE: Added to STR and not an attack of its own.
+            behaviors: [],
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,
-            usesStrength: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -6496,6 +6516,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target's dcv",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,
+            usesStrength: false,
             hasNoDefense: true,
             costPerLevel: fixedValueFunction(10),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
@@ -6532,6 +6553,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "area (see text)",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="IMAGES" ID="1711934509070" BASECOST="10.0" LEVELS="0" ALIAS="Images" POSITION="50" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -6691,6 +6713,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "dmcv",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -6708,6 +6731,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "dmcv",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -6725,6 +6749,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "dmcv",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="MINDLINK" ID="1709333964463" BASECOST="5.0" LEVELS="0" ALIAS="Mind Link" POSITION="62" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="One Specific Mind" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -6741,6 +6766,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "dmcv",
             range: HERO.RANGE_TYPES.SPECIAL,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -6759,6 +6785,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "target’s OCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
+            usesStrength: false,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="MISSILEDEFLECTION" ID="1709333871556" BASECOST="20.0" LEVELS="0" ALIAS="Deflection" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -6883,6 +6910,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "DMCV",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(0),
             unusualDicePerDc: true,
             baseEffectDicePartsBundle: (item) => {
@@ -6949,6 +6977,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(2 / 3),
             cost: function (item) {
                 // 2 CP per 3 Active Points
@@ -7003,7 +7032,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
-            usesStrength: true,
+            usesStrength: false,
             sheet: {
                 INPUT: {
                     label: "Vs.",
@@ -7085,15 +7114,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         { costPerLevel: fixedValueFunction(5) },
     );
     addPower(
-        undefined, //BOOST is not a valid 6e XMLID (it is now AID)
+        undefined, // SUCCOR is BOOST in 6e. BOOST is a variant of AID.
         {
             key: "SUCCOR",
-            type: ["adjustment"],
+            type: ["adjustment", "attack"],
             behaviors: ["to-hit", "dice"],
             duration: "constant",
             target: "target's DCV",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -7123,6 +7153,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "target’s DCV",
         range: HERO.RANGE_TYPES.STANDARD,
         costEnd: true,
+        usesStrength: false,
         costPerLevel: fixedValueFunction(5),
         baseEffectDicePartsBundle: standardBaseEffectDiceParts,
         doesKillingDamage: fixedValueFunction(false),
@@ -7167,6 +7198,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "dmcv",
             range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
             costEnd: true,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -7183,6 +7215,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "target's DCV",
         range: HERO.RANGE_TYPES.NO_RANGE,
         costEnd: true,
+        usesStrength: false,
         costPerLevel: fixedValueFunction(15),
         baseEffectDicePartsBundle: standardBaseEffectDiceParts,
         doesKillingDamage: fixedValueFunction(false),
@@ -7236,6 +7269,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
+            usesStrength: false, // Doesn't stack with itself.
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -7266,6 +7300,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
+            usesStrength: false, // TODO: Not all of these are attacks
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
             doesKillingDamage: maneuverDoesKillingDamage,
         },
@@ -7799,6 +7834,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEPENDENCE",
             type: ["disadvantage"],
             behaviors: ["activatable", "dice"],
+            costEnd: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5), // NOTE: Doesn't use LEVELS but this helps our DC calculations
             unusualDicePerDc: true,
             target: "self only",
@@ -8067,6 +8104,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Susceptibility",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            costEnd: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5), // NOTE: Doesn't use LEVELS but this helps our DC calculations
             unusualDicePerDc: true,
             baseEffectDicePartsBundle: (item) => {
@@ -8115,6 +8154,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Unluck",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            costEnd: false,
+            usesStrength: false,
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),

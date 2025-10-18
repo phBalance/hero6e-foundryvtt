@@ -653,13 +653,6 @@ export class HeroSystem6eItem extends Item {
         return _pslPenaltyType;
     }
 
-    setToHit() {
-        // TO HIT
-        if (this.rollsToHit()) {
-            this.makeToHit();
-        }
-    }
-
     setMovement() {
         // MOVEMENT
         if (this.baseInfo?.type.includes("movement")) {
@@ -3659,23 +3652,24 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
-    /**
-     * Add the bits that are responsible for hitting
-     */
-    makeToHit() {
-        console.error("depricated makeToHit");
-    }
-
     getMakeAttack() {
         // AARON: Do we really need makeAttack?
         // Many of these properties can converted into get properties on the item and calculated on the fly.
 
         const xmlid = this.system.XMLID;
+        let usesStrength = this.baseInfo.usesStrength;
+
+        if (usesStrength == null) {
+            if (!["maneuver", "martialart"].includes(this.type)) {
+                console.warn(`getMakeAttack called on ${this.detailedName()} `);
+            }
+            usesStrength = false;
+        }
 
         const results = {
             killing: false,
             knockbackMultiplier: 1,
-            usesStrength: true,
+            usesStrength: usesStrength,
             piercing: 0,
             penetrating: 0,
             stunBodyDamage: CONFIG.HERO.stunBodyDamages.stunbody,
@@ -3703,33 +3697,15 @@ export class HeroSystem6eItem extends Item {
         // Specific power overrides
         if (xmlid === "ENTANGLE") {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "DARKNESS") {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "IMAGES") {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-        } else if (xmlid === "ABSORPTION") {
-            results.usesStrength = false;
-        } else if (xmlid === "AID" || xmlid === "SUCCOR") {
-            results.usesStrength = false;
-        } else if (xmlid === "DISPEL") {
-            results.usesStrength = false;
-        } else if (xmlid === "DRAIN") {
-            results.usesStrength = false;
-        } else if (xmlid === "HEALING") {
-            results.usesStrength = false;
-        } else if (xmlid === "SUPPRESS") {
-            results.usesStrength = false;
-        } else if (xmlid === "TRANSFER") {
-            results.usesStrength = false;
         } else if (xmlid === "EGOATTACK") {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
         } else if (
             xmlid === "MINDCONTROL" ||
@@ -3739,30 +3715,18 @@ export class HeroSystem6eItem extends Item {
             xmlid === "POSSESSION"
         ) {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "CHANGEENVIRONMENT") {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         } else if (xmlid === "FLASH") {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-        } else if (xmlid === "ENERGYBLAST") {
-            results.usesStrength = false;
         } else if (xmlid === "RKA") {
             results.killing = true;
-            results.usesStrength = false;
         } else if (xmlid === "TRANSFORM") {
             results.knockbackMultiplier = 0;
-            results.usesStrength = false;
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-        } else if (xmlid === "__STRENGTHDAMAGE") {
-            // This is strength damage so it doesn't double up and add itself.
-            results.usesStrength = false;
-        } else if (xmlid === "LUCK" || xmlid === "UNLUCK") {
-            results.usesStrength = false;
         }
 
         // AVAD
@@ -3812,7 +3776,6 @@ export class HeroSystem6eItem extends Item {
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
             results.killing = true;
         } else if (xmlid === "TELEKINESIS") {
-            results.usesStrength = false;
             results.usesTk = true;
         }
 
@@ -4479,6 +4442,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (baseAttackItem.system.XMLID === "HANDTOHANDATTACK") {
+            // PH: FIXME: This should no longer be possible to reach now that Hand-to-hand attacks are not independent attacks.
+            ui.notifications.error(
+                `${this.detailedName()} has baseItem ${baseAttackItem.detailedName()}. Please report.`,
+            );
             return "PD";
         }
 
