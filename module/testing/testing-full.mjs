@@ -373,7 +373,7 @@ export function registerFullTests(quench) {
 
                 let actor;
                 before(async () => {
-                    actor = await createQuenchActor({ quench: this, actor, contents });
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
                     await actor.FullHealth();
                 });
 
@@ -1536,7 +1536,7 @@ export function registerFullTests(quench) {
                 before(async () => {
                     previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
-                    actor = await createQuenchActor({ quench: this, actor, contents });
+                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
                     await actor.FullHealth();
                 });
 
@@ -1908,7 +1908,7 @@ export function registerFullTests(quench) {
                 beforeEach(async () => {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
-                    actor = await createQuenchActor({ quench: this, actor, contents });
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
                     await actor.FullHealth();
                 });
 
@@ -4258,7 +4258,7 @@ export function registerFullTests(quench) {
                 let rkaPlusHalfItem;
 
                 before(async () => {
-                    actor = await createQuenchActor({ quench: this, actor, contents, is5e: false });
+                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
                     ebPlusOneItem = actor.items.find(
                         (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
                     );
