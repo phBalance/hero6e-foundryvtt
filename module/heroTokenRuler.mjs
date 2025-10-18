@@ -119,7 +119,7 @@ export class HeroTokenRuler extends FoundryTokenRuler {
         // a single movement type.  But does not work well for a mix of movement types.
 
         // Noncombat (blue)
-        if (movementCost <= maxCombatDistanceMeters * gridSize) {
+        if (movementCost <= maxCombatDistanceMeters / 2) {
             index = gridSize;
         }
 
