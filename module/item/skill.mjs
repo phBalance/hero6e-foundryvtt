@@ -276,7 +276,7 @@ async function skillRoll(item, actor, target) {
             break;
     }
 
-    const flavor = `${item.name.toUpperCase()}${item.system.INPUT ? `:${item.system.INPUT}` : ``} (${successValue}-) roll ${succeeded ? "succeeded" : "failed"} by ${
+    const flavor = `${item.name.toUpperCase()}${item.system.INPUT && !item.name.match(new RegExp(item.system.INPUT, "i")) ? `:${item.system.INPUT}` : ``} (${successValue}-) roll ${succeeded ? "succeeded" : "failed"} by ${
         autoSuccess === undefined ? `${Math.abs(margin)}. ` : `rolling ${total}. `
     } ${disadFlavor}`;
     const rollHtml = await skillRoller.render(flavor);
