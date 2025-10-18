@@ -808,7 +808,7 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.XMLID === "ENDURANCERESERVE" && this.system.value !== this.system.max) {
             await this.update({
-                ["system.value"]: this.system.max,
+                ["system.value"]: this.system.LEVELS,
             });
         }
 
