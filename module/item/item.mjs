@@ -997,7 +997,6 @@ export class HeroSystem6eItem extends Item {
             } else if (hasSuccessRoll) {
                 // Handle any type of non skill based success roll with a basic roll
                 // TODO: Basic roll.
-                this.updateRoll();
                 return createSkillPopOutFromItem(this, this.actor);
             } else {
                 ui.notifications.warn(
