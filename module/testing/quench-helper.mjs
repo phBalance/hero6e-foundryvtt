@@ -37,12 +37,18 @@ export async function createQuenchActor({ quench, contents, is5e }) {
 }
 
 export async function deleteQuenchActor({ quench, actor }) {
+    if (actor === undefined) {
+        throw "missing actor";
+    }
+
     if (
         quench.tests.find((t) => t?.state !== "passed") ||
         quench.suites.find((s) => s.tests.find((t) => t.state != "passed"))
     ) {
+        console.error("skipping deletion of actor because tests failed");
         return;
     }
+
     await actor.delete();
 }
 

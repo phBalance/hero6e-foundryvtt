@@ -16,7 +16,7 @@ export function registerDefenseTests(quench) {
                 });
 
                 after(async () => {
-                    await deleteQuenchActor({ quench: this });
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("rPD 1", async function () {
