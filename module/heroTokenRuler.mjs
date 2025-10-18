@@ -96,6 +96,11 @@ export class HeroTokenRuler extends FoundryTokenRuler {
         // however in square grids the diagonals can make it hard to move so
         // using Math.floor to provide a larger margin of rounding
         const movementCost = RoundFavorPlayerDown(waypoint.measurement.cost);
+        if (movementCost > 0) {
+            console.debug(waypoint);
+        }
+
+        const gridSize = Math.floor(game.canvas.grid.distance || 1);
 
         if (movementCost === 0) {
             style.color = 0xffffff;
@@ -103,19 +108,19 @@ export class HeroTokenRuler extends FoundryTokenRuler {
         }
         let maxCombatDistanceMeters = waypoint.actionConfig.maxCombatDistanceMeters?.(this.token) ?? Infinity;
 
-        if (maxCombatDistanceMeters % 2 !== 0) {
-            maxCombatDistanceMeters += 1;
+        if (maxCombatDistanceMeters % gridSize !== 0) {
+            maxCombatDistanceMeters += gridSize - (maxCombatDistanceMeters % gridSize);
         }
 
         // Exceeds non-combat (red)
         let index = 3;
 
         // NOTE: Comparing movementCost vs Speed works fine when there is
-        // a single movement type.  But dones't work well for a mix of movement types.
+        // a single movement type.  But does not work well for a mix of movement types.
 
         // Noncombat (blue)
-        if (movementCost <= maxCombatDistanceMeters * 2) {
-            index = 2;
+        if (movementCost <= maxCombatDistanceMeters / 2) {
+            index = gridSize;
         }
 
         // Full Move (yellow)
@@ -125,7 +130,7 @@ export class HeroTokenRuler extends FoundryTokenRuler {
         }
 
         // Half Move (green)
-        if (movementCost <= maxCombatDistanceMeters / 2) {
+        if (movementCost <= maxCombatDistanceMeters / gridSize) {
             index = 0;
         }
 

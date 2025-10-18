@@ -997,7 +997,6 @@ export class HeroSystem6eItem extends Item {
             } else if (hasSuccessRoll) {
                 // Handle any type of non skill based success roll with a basic roll
                 // TODO: Basic roll.
-                this.updateRoll();
                 return createSkillPopOutFromItem(this, this.actor);
             } else {
                 ui.notifications.warn(
@@ -1039,13 +1038,12 @@ export class HeroSystem6eItem extends Item {
 
         // Powers have one of four Ranges: Self; No Range; Standard
         // Range; and Line of Sight (LOS).
-        const configPowerInfo = getPowerInfo({ item: this });
         if (typeof this.baseInfo?.rangeText === "function") {
             content += ` ${this.baseInfo.rangeText(this)}${getSystemDisplayUnits(this.is5e)}.`;
         } else {
             switch (this.system.range) {
                 case CONFIG.HERO.RANGE_TYPES.SELF: {
-                    if (!configPowerInfo?.type.includes("skill")) {
+                    if (!this.baseInfo?.type.includes("skill")) {
                         content += " Self.";
                     }
 
@@ -1096,9 +1094,9 @@ export class HeroSystem6eItem extends Item {
                     if (["MULTIPOWER", "COMPOUNDPOWER", "LIST"].includes(this.system.XMLID)) {
                         break;
                     }
-                    console.error("Unhandled range", configPowerInfo);
-                    if (configPowerInfo?.range?.toLowerCase()) {
-                        content += ` ${configPowerInfo?.range?.toLowerCase()}`;
+                    console.error("Unhandled range", this.baseInfo);
+                    if (this.baseInfo?.range?.toLowerCase()) {
+                        content += ` ${this.baseInfo?.range?.toLowerCase()}`;
                     }
                     break;
             }
@@ -1107,6 +1105,11 @@ export class HeroSystem6eItem extends Item {
         // Perceivability
         if (this.baseInfo.perceivability) {
             content += ` Perceivability: ${this.baseInfo.perceivability}.`;
+        }
+
+        // Duration
+        if (this.baseInfo.duration) {
+            content += ` Duration: ${this.baseInfo.duration}.`;
         }
 
         if (this.end) {
@@ -1456,10 +1459,19 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Reload the clip to 1 less clip that should be at full charges.
-        return this.update({
+        await this.update({
             [`system.charges.value`]: charges.max,
             [`system.charges.clips`]: charges.clips - 1,
         });
+
+        const chatData = {
+            author: game.user._id,
+            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            content: `Change clips on <b>${this.name}</b>. You drop the clip with ${charges.value} charges. Reloading with a new clip with ${this.system.charges.value} charges. ${this.system.charges.clips} clip(s) remain.`,
+            whisper: whisperUserTargetsForActor(this.actor),
+        };
+        await ChatMessage.create(chatData);
     }
 
     isPerceivable(perceptionSuccess) {
@@ -5628,6 +5640,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         case "SKILL":
         case "SKILL1PER5":
         case "SKILL1PER20":
+        case "BASICRSR":
             {
                 OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
                 let skill = item.actor.items.find(
