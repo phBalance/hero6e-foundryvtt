@@ -433,13 +433,12 @@ export class HeroSystem6eActor extends Actor {
         if (!this.isOwner) {
             return;
         }
-        const hasSTUN = getCharacteristicInfoArrayForActor(this).find((o) => o.key === "STUN");
 
         // Mark as undefeated in combat tracker (pc/npc)
         if (
-            this.statuses.has("dead") &&
             (data.system?.characteristics?.body?.value ?? this.system.characteristics.body.value) >
-                -this.system.characteristics.body.value
+                -this.system.characteristics.body.value &&
+            this.statuses.has("dead")
         ) {
             await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
                 active: false,
@@ -448,9 +447,9 @@ export class HeroSystem6eActor extends Actor {
 
         // If stun was changed and running under triggering users context
         if (
-            hasSTUN &&
             (data.system?.characteristics?.stun !== undefined || data.system?.characteristics?.body !== undefined) &&
-            userId === game.user.id
+            userId === game.user.id &&
+            this.hasCharacteristic("STUN")
         ) {
             const newStun = data.system?.characteristics?.stun?.value ?? this.system.characteristics.stun.value;
 
@@ -518,17 +517,17 @@ export class HeroSystem6eActor extends Actor {
             await this.setNaturalHealing();
         }
 
-        if (data?.system?.characteristics) {
-            const changes = {};
+        // if (data?.system?.characteristics) {
+        //     const changes = {};
 
-            for (const charName of Object.keys(data.system.characteristics)) {
-                const charChanges = this.updateRollable(charName);
+        //     for (const charName of Object.keys(data.system.characteristics)) {
+        //         const charChanges = this.updateRollable(charName);
 
-                foundry.utils.mergeObject(changes, charChanges);
-            }
+        //         foundry.utils.mergeObject(changes, charChanges);
+        //     }
 
-            await this.update(changes);
-        }
+        //     await this.update(changes);
+        // }
 
         // Heroic ID
         if (data.system?.heroicIdentity !== undefined) {
@@ -1454,26 +1453,16 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async FullHealth() {
-        // Remove all status effects
-        // for (const status of this.statuses) {
-        //     // don't remove any tracked statuses as a STUN 0 might cause an infinite loop as it is re-added
-        //     // during onUpdate.  Also we are missing with STUN BODY below.
-        //     if (
-        //         [
-        //             HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id,
-        //             HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
-        //         ].includes(status)
-        //     )
-        //         continue;
-
-        //     const ae = Array.from(this.effects).find((effect) => effect.statuses.has(status));
-        //     for (const status of ae.statuses) {
-        //         await this.toggleStatusEffect(status, { active: false });
-        //     }
-        // }
+        const tDelta = 100;
+        let start = Date.now();
         await this.statuses.clear();
+        let end = Date.now();
+        if (end - start > tDelta) {
+            console.warn("FullHealth performance concern: this.statuses.clear", end - start);
+        }
 
         // Remove temporary effects
+        start = Date.now();
         for (const ae of this.temporaryEffects) {
             if (
                 ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
@@ -1483,23 +1472,25 @@ export class HeroSystem6eActor extends Actor {
 
             await ae.delete();
         }
+        end = Date.now();
+        if (end - start > tDelta) {
+            console.warn("FullHealth performance concern: Remove temporary effects", end - start);
+        }
 
         // Remove Maneuver/Martial effects
+        start = Date.now();
         for (const ae of this.appliedEffects.filter(
             (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
         )) {
             await ae.delete();
         }
-
-        // Remove all active effects with ACTOR as the parent
-        // Shouldn't need this and sometimes causes duplicate delete
-        // for (const ae of this.effects) {
-        //     if (ae.parent instanceof HeroSystem6eActor) {
-        //         await ae.delete();
-        //     }
-        // }
+        end = Date.now();
+        if (end - start > tDelta) {
+            console.warn("FullHealth performance concern: Remove Maneuver/Martial effects", end - start);
+        }
 
         // Set Characteristics MAX to CORE
+        start = Date.now();
         const characteristicChangesMax = {};
         for (const char of Object.keys(this.system.characteristics)) {
             const core = parseInt(this.system.characteristics[char].core);
@@ -1511,9 +1502,20 @@ export class HeroSystem6eActor extends Actor {
         if (this._id && Object.keys(characteristicChangesMax).length > 0) {
             await this.update(characteristicChangesMax);
         }
+        end = Date.now();
+        if (end - start > tDelta) {
+            console.warn("FullHealth performance concern: Set Characteristics MAX to CORE", end - start);
+        }
+
+        start = Date.now();
         this.applyActiveEffects();
+        end = Date.now();
+        if (end - start > tDelta) {
+            console.warn("FullHealth performance concern: applyActiveEffects", end - start);
+        }
 
         // Set Characteristics VALUE to MAX
+        start = Date.now();
         const characteristicChangesValue = {};
         for (const char of Object.keys(this.system.characteristics)) {
             const max = parseInt(this.system.characteristics[char].max);
@@ -1523,23 +1525,40 @@ export class HeroSystem6eActor extends Actor {
                     this.system.characteristics[char].value;
             }
         }
-
-        // 5e calculated LEVELS (shouldn't be necessary, just making sure)
-        if (this.is5e) {
-            for (const char of ["OCV", "DCV", "OMCV", "DMCV"]) {
-                if (this.system[char] && this.system[char].LEVELS !== 0) {
-                    characteristicChangesValue[`system.${char}.LEVELS`] = 0;
-                }
-            }
-        }
-
         if (this._id && Object.keys(characteristicChangesValue).length > 0) {
             await this.update(characteristicChangesValue);
+        }
+        end = Date.now();
+        if (end - start > tDelta) {
+            console.warn("FullHealth performance concern: Set Characteristics VALUE to MAX", end - start);
+        }
+
+        // 5e calculated LEVELS (shouldn't be necessary, just making sure)
+        start = Date.now();
+        if (this.is5e) {
+            const characteristic5eChangesValue = {};
+            for (const char of ["OCV", "DCV", "OMCV", "DMCV"]) {
+                if (this.system[char] && this.system[char].LEVELS !== 0) {
+                    characteristic5eChangesValue[`system.${char}.LEVELS`] = 0;
+                }
+            }
+            if (this._id && Object.keys(characteristic5eChangesValue).length > 0) {
+                await this.update(characteristic5eChangesValue);
+            }
+        }
+        end = Date.now();
+        if (end - start > tDelta) {
+            console.warn("FullHealth performance concern: 5e calculated LEVELS", end - start);
         }
 
         // Reset all items
         for (const item of this.items) {
+            start = Date.now();
             await item.resetToOriginal();
+            end = Date.now();
+            if (end - start > tDelta) {
+                console.warn(`FullHealth performance concern: ${item.name} resetToOriginal`, end - start);
+            }
         }
 
         // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
@@ -2617,6 +2636,14 @@ export class HeroSystem6eActor extends Actor {
 
             uploadProgressBar.close(`Uploaded ${this.name}`);
 
+            // report performance concerns
+            const performanceConcerns = uploadProgressBar._performance
+                .filter((o) => o.delta > 100)
+                .sort((a, b) => b.delta - a.delta);
+            for (const concern of performanceConcerns) {
+                console.warn({ delta: concern.delta, message: concern.message });
+            }
+
             uploadPerformance.totalTime = new Date().getTime() - uploadPerformance.startTime;
 
             //console.log("Upload Performance", uploadPerformance);
@@ -3048,6 +3075,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     updateRollable(key) {
+        console.error("Depricated updateRollable");
         const characteristic = this.system.characteristics[key];
         const charPowerEntry = getPowerInfo({
             xmlid: key.toUpperCase(),

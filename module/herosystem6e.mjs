@@ -594,6 +594,21 @@ Hooks.on("renderDialog", (dialog, html) => {
     if (base2) base2.text = base2.text.replace("2", "");
 });
 
+Hooks.on("renderDialogV2", (dialog, html) => {
+    const attackOption = html.querySelector("option[value*='attack']");
+    if (attackOption) attackOption.remove();
+    const defenseOption = html.querySelector("option[value*='defense']");
+    if (defenseOption) defenseOption.remove();
+    const maneuverOption = html.querySelector("option[value*='maneuver']");
+    if (maneuverOption) maneuverOption.remove();
+    const miscOption = html.querySelector("option[value*='misc']");
+    if (miscOption) miscOption.remove();
+    const movementOption = html.querySelector("option[value*='movement']");
+    if (movementOption) movementOption.remove();
+    const characteristicOption = html.querySelector("option[value*='characteristic']");
+    if (characteristicOption) characteristicOption.remove();
+});
+
 Hooks.on("renderActorSheet", (dialog, html, data) => {
     // Show versions
     html.find("header h4").append(`<span>${game.system.version}</span>`);

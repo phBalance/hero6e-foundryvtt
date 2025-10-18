@@ -269,6 +269,20 @@ export class HeroSystem6eItem extends Item {
                 this.updateSource({ img: itemTypeToIcon[this.type] });
             }
         }
+
+        const is5e =
+            options.is5e != undefined
+                ? options.is5e
+                : game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
+                  ? true
+                  : false;
+
+        this.updateSource({
+            system: {
+                versionHeroSystem6eCreated: game.system.version,
+                is5e,
+            },
+        });
     }
 
     async _onCreate(data, options, userId) {
@@ -690,7 +704,7 @@ export class HeroSystem6eItem extends Item {
         //super.prepareDerivedData();
 
         if (this.is5e === undefined) {
-            console.warn(`${this.actor.name}/${this.name}: is5e === undefined`);
+            console.warn(`${this.actor?.name}/${this.name}: is5e === undefined`);
         }
 
         // Base points plus adders
@@ -794,7 +808,7 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.XMLID === "ENDURANCERESERVE" && this.system.value !== this.system.max) {
             await this.update({
-                ["system.value"]: this.system.max,
+                ["system.value"]: this.system.LEVELS,
             });
         }
 
@@ -807,7 +821,11 @@ export class HeroSystem6eItem extends Item {
             if (this.end > 0 || (this.system.charges?.max > 0 && !this.parentItem?.system.XMLID === "MULTIPOWER")) {
                 if (this.isActivatable()) {
                     if (this.isActive) {
-                        await this.toggle();
+                        // Was calling this.toggle(), but was slow and showed extra chatMessages during upload
+                        await this.update({ "system.active": false });
+                        for (const ae of this.effects) {
+                            await ae.update({ disabled: true });
+                        }
                     }
                 }
             } else {
@@ -818,45 +836,41 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Turn off all maneuvers
-        if (this.type === "maneuver") {
-            if (this.system.active) {
-                this.system.active = false;
-                if (this.id) {
-                    await this.update({ [`system.active`]: this.system.active });
-                }
-            }
-        }
-
-        // if (this.baseInfo?.resetToOriginalChanges) {
-        //     await this.update(this.baseInfo.resetToOriginalChanges(this));
+        // if (this.type === "maneuver") {
+        //     if (this.system.active) {
+        //         this.system.active = false;
+        //         if (this.id) {
+        //             await this.update({ [`system.active`]: this.system.active });
+        //         }
+        //     }
         // }
 
         // Remove temporary effects that have an origin.
         // Actor items with built in effects should have no origin and we want to keep those (POWER STR +30 for example)
-        this.effects.map(async (effect) => {
-            if (effect.origin) {
-                await effect.delete();
-            } else {
-                // Some effects like purchasing characteristics, should remain
-                // unless they are part of a multipower
-                if (effect.parent?.parentItem?.system?.XMLID === "MULIPOWER") {
-                    await effect.update({ disabled: true });
-                } else {
-                    // Otherwise turn it on if it has no charges and uses no endurance
-                    if (!effect.parent?.end && effect.parent?.system.charges === undefined) {
-                        await effect.update({ disabled: false });
-                    }
-                }
-            }
-        });
+        // this.effects.map(async (effect) => {
+        //     if (effect.origin) {
+        //         await effect.delete();
+        //     } else {
+        //         // Some effects like purchasing characteristics, should remain
+        //         // unless they are part of a multipower
+        //         if (effect.parent?.parentItem?.system?.XMLID === "MULIPOWER") {
+        //             await effect.update({ disabled: true });
+        //         } else {
+        //             // Otherwise turn it on if it has no charges and uses no endurance
+        //             if (!effect.parent?.end && effect.parent?.system.charges === undefined) {
+        //                 await effect.update({ disabled: false });
+        //             }
+        //         }
+        //     }
+        // });
 
-        if (["ENDURANCERESERVE"].includes(this.system.XMLID)) {
-            if (this.id) {
-                await this.update({ ["system.value"]: this.system.LEVELS });
-            } else {
-                this.system.value = this.system.LEVELS;
-            }
-        }
+        // if (["ENDURANCERESERVE"].includes(this.system.XMLID)) {
+        //     if (this.id) {
+        //         await this.update({ ["system.value"]: this.system.LEVELS });
+        //     } else {
+        //         this.system.value = this.system.LEVELS;
+        //     }
+        // }
 
         if (this.type === "maneuver" && this.system.active) {
             await this.update({ ["system.active"]: false });
@@ -1735,17 +1749,17 @@ export class HeroSystem6eItem extends Item {
 
     get is5e() {
         // If item has undefined is5e use actor.is5e
-        if (!this.system.is5e && this.system.is5e !== false) {
+        if (this.actor && !this.system.is5e && this.system.is5e !== false) {
             console.warn(
-                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}`,
                 this,
             );
             return this.actor?.is5e;
         }
 
-        if (this.actor?.is5e !== this.system.is5e) {
+        if (this.actor && this.actor?.is5e !== this.system.is5e) {
             console.error(
-                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor.system.is5e}`,
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}`,
                 this,
             );
         }

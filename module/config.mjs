@@ -5635,7 +5635,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DARKNESS",
             type: ["sense-affecting", "attack", "standard"],
-            behaviors: ["to-hit"],
+            behaviors: ["to-hit", "activatable"],
             perceivability: "obvious",
             costPerLevel: function (item) {
                 if (!(item instanceof HeroSystem6eItem)) {
@@ -6176,7 +6176,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FORCEWALL", //BARRIER
             type: ["defense", "standard"],
-            behaviors: ["to-hit", "defense"],
+            behaviors: ["to-hit", "defense", "activatable"],
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,

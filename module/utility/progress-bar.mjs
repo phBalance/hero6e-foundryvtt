@@ -15,6 +15,8 @@ class HeroProgressBarV13 {
         this._count = startCount;
         this._inProgress = true;
         this._progressBar = ui.notifications.info(label, { progress: true });
+        this._performance = [];
+        this._performance.push({ timestamp: Date.now(), message: "constructor", pct: 0 });
 
         if (++HeroProgressBarV13.#concurrentProgressBarCount > 1) {
             ui.notifications.warn(
@@ -55,6 +57,8 @@ class HeroProgressBarV13 {
         const percentage = this._count / this._max;
 
         this._progressBar.update({ pct: percentage, message: message });
+        this._performance.at(-1).delta = Date.now() - this._performance.at(-1).timestamp;
+        this._performance.push({ timestamp: Date.now(), message: message, pct: percentage });
 
         if (CONFIG.debug.HERO?.ui?.progress) {
             console.debug(`${Date.now()} ${this}: ${percentage * 100}% (${this._count}/${this._max}) ${message}`);
@@ -72,6 +76,7 @@ class HeroProgressBarV13 {
 
             // Set to 100% which will cause foundry to fade out the progress bar.
             this._progressBar.update({ pct: 1, message: message });
+            this._performance.push({ timestamp: Date.now(), message: "close", pct: 1 });
 
             --HeroProgressBarV13.#concurrentProgressBarCount;
 
