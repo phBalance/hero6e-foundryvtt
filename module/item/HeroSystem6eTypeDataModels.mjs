@@ -719,16 +719,17 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             _details.tags.push({ name: this.item.name, value: parseInt(this[propUpper]) });
         }
 
-        // if (this[propUpper] === "-v/10") {
-        //     // Educated guess for token
-        //     const token =
-        //         this.actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-        //         this.actor.getActiveTokens()[0];
-        //     const velocity = calculateVelocityInSystemUnits(this.actor, token);
-        //     if (velocity !== 0) {
-        //         _details.tags.push({ name: "Velocity", value: -parseInt(velocity / 10) });
-        //     }
-        // }
+        // Unclear when this would get used (maneuver?)
+        if (this[propLower] === "-v/10") {
+            // Educated guess for token
+            const token =
+                this.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
+                this.actor?.getActiveTokens()[0];
+            const velocity = calculateVelocityInSystemUnits(this.actor, token);
+            if (velocity !== 0) {
+                _details.tags.push({ name: "Velocity", value: -parseInt(velocity / 10) });
+            }
+        }
 
         for (const cslDetail of combatSkillLevelsForAttack(this.item).details) {
             if (cslDetail[propLower]) {
