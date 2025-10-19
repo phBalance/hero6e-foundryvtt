@@ -121,9 +121,6 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
                 (this.constructor.name.match(/MODIFIER/i) ? "MODIFIER" : undefined) ??
                 (this.constructor.name.match(/ADDER/i) ? "ADDER" : undefined),
         });
-        // if (!this.#baseInfo) {
-        //     debugger;
-        // }
         return this.#baseInfo;
     }
 
@@ -1044,6 +1041,7 @@ export class HeroSystem6eItemMartialArt extends HeroSystem6eItemTypeDataModelPro
             PHASE: new StringField(),
             RANGE: new StringField(),
             STRMULT: new StringField(),
+            TEXT: new StringField(),
             USEWEAPON: new BooleanField({ initial: null, nullable: true }),
             WEAPONEFFECT: new StringField(),
         };
