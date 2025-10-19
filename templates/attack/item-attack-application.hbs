@@ -274,6 +274,13 @@
         </div>
       {{/if}}
 
+      {{#if (gt autofireShotsAvailable 1)}}
+        <div class="form-group">
+          <label>Autofire (max {{autofireShotsAvailable}})</label>
+          {{numberInput autofireShotsToUse name="autofireShotsToUse" step=1 min=1 max=999}}
+        </div>
+      {{/if}}
+
       {{#if mindScanChoices}}
         <div class="form-group">
           <label>Number of Minds</label>
