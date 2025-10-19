@@ -2436,9 +2436,15 @@ export class HeroSystem6eItem extends Item {
                     if (parseInt(system.BODYLEVELS)) aryFW.push(system.BODYLEVELS + " BODY");
 
                     description += aryFW.join("/");
-                    description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${
-                        parseInt(system.HEIGHTLEVELS) + 1
-                    }m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`;
+                    if (this.is5e) {
+                        description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}" long and ${
+                            parseInt(system.HEIGHTLEVELS) + 1
+                        }" tall)`;
+                    } else {
+                        description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${
+                            parseInt(system.HEIGHTLEVELS) + 1
+                        }m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`;
+                    }
                 }
                 break;
 
