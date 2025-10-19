@@ -6873,17 +6873,6 @@ export function registerUploadTests(quench) {
             });
 
             describe("DANGER_SENSE (5e)", async function () {
-                const itemDataPerception = {
-                    name: "Perception",
-                    type: "skill",
-                    system: {
-                        XMLID: "PERCEPTION",
-                        ALIAS: "Perception",
-                        CHARACTERISTIC: "INT",
-                        state: "trained",
-                        levels: "0",
-                    },
-                };
                 const contents = `
                     <TALENT XMLID="DANGER_SENSE" ID="1698995887314" BASECOST="15.0" LEVELS="8" ALIAS="Danger Sense" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                         <NOTES />
@@ -6911,10 +6900,7 @@ export function registerUploadTests(quench) {
                     actor.system.is5e = true;
                     actor.system.characteristics.int.value = 15;
 
-                    const perceptionItem = new HeroSystem6eItem(itemDataPerception, {
-                        parent: actor,
-                    });
-                    actor.items.set(perceptionItem.system.XMLID, perceptionItem);
+                    await actor.addPerception();
 
                     item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
