@@ -7255,7 +7255,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Force Wall 6 rPD/6 rED(up to 5m long, and 5m tall, and 0.5m thick) (Alterable Size) (51 Active Points); Increased Endurance Cost (x4 END; -1 1/2)",
+                            'Force Wall 6 rPD/6 rED(up to 5" long and 5" tall) (Alterable Size) (51 Active Points); Increased Endurance Cost (x4 END; -1 1/2)',
                         );
                     });
 
