@@ -1917,7 +1917,7 @@ export async function _onRollDamage(event) {
         .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
         .addNumber(diceParts.constant)
         .modifyToStandardEffect(useStandardEffect)
-        .modifyToNoBody(
+        .modifyToDoNoBody(
             isNormalAttack &&
                 (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
                     item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly),

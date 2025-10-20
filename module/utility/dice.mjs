@@ -320,12 +320,23 @@ export class HeroRoller {
         return this;
     }
 
-    modifyToNoBody(apply = true) {
+    modifyToDoNoBody(apply = true) {
         if (apply) {
             if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
                 this._noBody = true;
             } else {
                 console.error(`Doesn't make sense to make non normal attack STUN only`, this);
+            }
+        }
+        return this;
+    }
+
+    modifyToDoBody(apply = true) {
+        if (apply) {
+            if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
+                this._noBody = false;
+            } else {
+                console.error(`Doesn't make sense to make non normal attack BODY/STUN`, this);
             }
         }
         return this;
