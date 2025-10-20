@@ -155,6 +155,13 @@ export class ItemAttackFormApplication extends FormApplication {
                     : 0;
             this.data.boostableChargesToUse ??= 0;
 
+            // Autofire
+            const autofire = this.data.originalItem.effectiveAttackItem.findModsByXmlid("AUTOFIRE");
+            this.data.autofireShotsAvailable = autofire
+                ? this.data.originalItem.effectiveAttackItem.calcMaxAutofireShots(autofire)
+                : 1;
+            this.data.autofireShotsToUse ??= this.data.autofireShotsAvailable;
+
             // MINDSCAN
             if (this.data.originalItem.system.XMLID === "MINDSCAN") {
                 this.data.mindScanChoices = CONFIG.HERO.mindScanChoices;
@@ -442,6 +449,13 @@ export class ItemAttackFormApplication extends FormApplication {
             effectiveStrPushedRealPoints: this.data.effectiveStrPushedRealPoints,
         });
 
+        // How many shots for this attack (aka autofire)
+        effectiveItem.system._active.autofire = {
+            shots: this.data.autofireShotsToUse,
+            maxShots: this.data.autofireShotsAvailable,
+        };
+
+        // Martial Arts weapon being used?
         if (this.data.maSelectedWeaponId) {
             effectiveItem.system._active.maWeaponItem = this.data.originalItem.actor.items.find(
                 (item) => item.id === this.data.maSelectedWeaponId,
@@ -748,6 +762,12 @@ export class ItemAttackFormApplication extends FormApplication {
                 Math.min(formData.boostableChargesToUse, 4),
             );
         }
+
+        // A minimum of 1 shot and a maximum of max autofire charges can be used.
+        this.data.autofireShotsToUse = formData.autofireShotsToUse = Math.max(
+            1,
+            Math.min(formData.autofireShotsToUse, this.data.autofireShotsAvailable),
+        );
 
         // Can only push so much
         if (formData.effectiveActivePoints) {

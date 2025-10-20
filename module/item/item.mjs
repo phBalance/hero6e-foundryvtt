@@ -5159,15 +5159,15 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
-     * Given an autofire modifier, calculate the number of shots allowed.
+     * Given an autofire modifier, calculate the maximum number of shots allowed.
      *
      * @param {HeroSystem6eModifier} autofireMod
      * @returns
      */
-    calcAutofireShots(autofireMod) {
+    calcMaxAutofireShots(autofireMod) {
         const baseAutoFireShots = parseInt(autofireMod.OPTION_ALIAS.match(/\d+/)) || 1;
-        const doubleAdder = autofireMod.adder.find("DOUBLE");
-        const numDoubles = doubleAdder ? doubleAdder.system.LEVELS : 0;
+        const doubleAdder = autofireMod.adders.find((adder) => adder.XMLID === "DOUBLE");
+        const numDoubles = doubleAdder ? doubleAdder.LEVELS : 0;
 
         return baseAutoFireShots * Math.pow(2, numDoubles);
     }

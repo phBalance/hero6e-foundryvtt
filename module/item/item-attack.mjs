@@ -1107,9 +1107,8 @@ async function doSingleTargetActionToHit(action, options) {
 
     // AUTOFIRE
     // PH: FIXME: Consider autofire on both base and effective attack items. Are they multiplicitive?
-    const autofire = item.effectiveAttackItem.findModsByXmlid("AUTOFIRE");
-    if (autofire) {
-        const autoFireShots = item.effectiveAttackItem.calcAutofireShots(autofire);
+    if (item.effectiveAttackItem.system._active.autofire.shots > 1) {
+        const autoFireShots = item.effectiveAttackItem.system._active.autofire.shots;
 
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
@@ -1129,7 +1128,7 @@ async function doSingleTargetActionToHit(action, options) {
 
                 const hitRollText = `Autofire ${
                     shot + 1
-                }/${autofire.OPTION_ALIAS.toLowerCase()}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
+                }/${autoFireShots}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
 
                 const value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value;
                 let hit = "Miss";
@@ -4091,9 +4090,7 @@ function calculateRequiredCharges(item, boostableChargesToUse) {
     }
 
     // How many applications?
-    const autofire = item.findModsByXmlid("AUTOFIRE");
-    const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 1;
-    chargesToUse *= multipleApplications || 1;
+    chargesToUse *= item.system._active.autofire.shots;
 
     return chargesToUse;
 }
@@ -4124,10 +4121,8 @@ function calculateRequiredEnd(item) {
         // Pushing uses 1 END per pushed CP
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
-        // How many shots? 1 or more as defined by autofire.
-        const autofire = item.findModsByXmlid("AUTOFIRE");
-        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 1;
-        endToUse = endPerShot * multipleApplications;
+        // How many shots?
+        endToUse = endPerShot * item.system._active.autofire.shots;
     }
 
     return endToUse;
@@ -4149,10 +4144,8 @@ function calculateRequiredReserveEndurance(item) {
         // Pushing uses 1 END per pushed CP
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
-        // How many shots? 1 or more as defined by autofire.
-        const autofire = item.findModsByXmlid("AUTOFIRE");
-        const multipleApplications = autofire ? item.calcAutofireShots(autofire) : 1;
-        reserveEndToUse = endPerShot * multipleApplications;
+        // How many shots?
+        reserveEndToUse = endPerShot * item.system._active.autofire.shots;
     }
 
     return reserveEndToUse;
