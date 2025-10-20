@@ -4123,7 +4123,7 @@ function calculateRequiredCharges(item, boostableChargesToUse) {
     }
 
     // How many applications?
-    chargesToUse *= item.system._active.autofire.shots;
+    chargesToUse *= item.system._active.autofire?.shots || 1;
 
     return chargesToUse;
 }
@@ -4155,7 +4155,7 @@ function calculateRequiredEnd(item) {
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
         // How many shots?
-        endToUse = endPerShot * item.system._active.autofire.shots;
+        endToUse = endPerShot * (item.system._active.autofire?.shots || 1);
     }
 
     return endToUse;
@@ -4178,7 +4178,7 @@ function calculateRequiredReserveEndurance(item) {
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
         // How many shots?
-        reserveEndToUse = endPerShot * item.system._active.autofire.shots;
+        reserveEndToUse = endPerShot * (item.system._active.autofire?.shots || 1);
     }
 
     return reserveEndToUse;

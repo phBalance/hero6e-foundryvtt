@@ -1656,7 +1656,6 @@ export function registerDamageFunctionTests(quench) {
                             assert.equal(pushedItem.end, 3);
                         });
 
-                        // PH: FIXME: pushed endurance usage
                         it("total END usage", function () {
                             assert.equal(calculateRequiredResourcesToUse([pushedItem], {}).totalEnd, 6);
                         });
@@ -1691,7 +1690,6 @@ export function registerDamageFunctionTests(quench) {
                             assert.equal(pushedItem.end, 3);
                         });
 
-                        // PH: FIXME: pushed endurance usage
                         it("total END usage", function () {
                             assert.equal(calculateRequiredResourcesToUse([pushedItem], {}).totalEnd, 12);
                         });
@@ -1776,7 +1774,6 @@ export function registerDamageFunctionTests(quench) {
                             assert.equal(pushedItem.end, 14);
                         });
 
-                        // PH: FIXME: pushed endurance usage
                         it("total END usage", function () {
                             assert.equal(calculateRequiredResourcesToUse([pushedItem], {}).totalEnd, 19);
                         });
@@ -1812,7 +1809,6 @@ export function registerDamageFunctionTests(quench) {
                             assert.equal(pushedItem.end, 14);
                         });
 
-                        // PH: FIXME: pushed endurance usage
                         it("total END usage", function () {
                             assert.equal(calculateRequiredResourcesToUse([pushedItem], {}).totalEnd, 22);
                         });
@@ -1931,7 +1927,6 @@ export function registerDamageFunctionTests(quench) {
                             assert.equal(pushedItem.end, 7);
                         });
 
-                        // PH: FIXME: pushed endurance usage
                         it("total END usage", function () {
                             assert.equal(calculateRequiredResourcesToUse([pushedItem], {}).totalEnd, 13);
                         });
