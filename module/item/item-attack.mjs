@@ -1917,7 +1917,7 @@ export async function _onRollDamage(event) {
         .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
         .addNumber(diceParts.constant)
         .modifyToStandardEffect(useStandardEffect)
-        .modifyToNoBody(
+        .modifyToDoNoBody(
             isNormalAttack &&
                 (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
                     item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly),
@@ -3575,6 +3575,18 @@ async function _calcDamage(damageRoller, item, options) {
         body = Math.max(0, body - (options.defenseValue || 0));
     }
 
+    // Should we figure out the effective BODY for knockback calculations (i.e. was there DOESKB?)
+    const doesKB = item.effectiveAttackItem.findModsByXmlid("DOESKB");
+    let bodyForKbCalculations = body;
+    if (doesKB) {
+        // BODY for KB purposes is calculated based on a normal attack type.
+        const clonedNormalizedRoller = await damageRoller
+            .clone()
+            .modifyToDoBody()
+            .cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
+        bodyForKbCalculations = clonedNormalizedRoller.modifyToDoNoBody(false).getBodyTotal();
+    }
+
     // determine knockback
     const {
         useKnockback,
@@ -3584,7 +3596,7 @@ async function _calcDamage(damageRoller, item, options) {
         knockbackRoller,
         knockbackResultTotal,
         shrinkingKB,
-    } = await _calcKnockback(body, item, options, itemData.knockbackMultiplier);
+    } = await _calcKnockback(bodyForKbCalculations, item, options, itemData.knockbackMultiplier);
 
     // -------------------------------------------------
     // determine effective damage
@@ -3691,7 +3703,7 @@ async function _calcDamage(damageRoller, item, options) {
     return damageDetail;
 }
 
-async function _calcKnockback(body, item, options, knockbackMultiplier) {
+async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMultiplier) {
     let useKnockback = false;
     let knockbackMessage = "";
     let knockbackRenderedResult = null;
@@ -3717,7 +3729,16 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         }
     }
 
-    if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier && !isBase) {
+    // Should we actually roll for knockback?
+    // - Is knockback enabled in the system?
+    // - Bases don't take knockback - is the target a base?
+    // - Does this attack do knockback and was there effective knockback BODY?
+    if (
+        game.settings.get(HEROSYS.module, "knockback") &&
+        !isBase &&
+        knockbackMultiplier > 0 &&
+        bodyForKbCalculations > 0
+    ) {
         useKnockback = true;
 
         let knockbackDice = 2;
@@ -3746,7 +3767,19 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             }
         }
 
-        // TODO: Target Rolled With A Punch -1d6
+        // Target Roll With A Punch -1d6
+        const targetRolledWithAPunch = options.targetToken?.actor?.items.find(
+            (o) => o.system.XMLID === "ROLLWITHAPUNCH",
+        );
+        if (targetRolledWithAPunch && targetRolledWithAPunch.isActive) {
+            knockbackDice -= 1;
+            knockbackTags.push({
+                value: "-1d6KB",
+                name: "Roll With A Punch",
+                title: `Knockback Modifier\nRoll With A Punch`,
+            });
+        }
+
         // TODO: Target is in zero gravity -1d6
 
         // Target is underwater +1d6
@@ -3796,8 +3829,8 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
             .addNumber(
-                RoundFavorPlayerUp(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1)),
-                "Max potential knockback",
+                RoundFavorPlayerUp(bodyForKbCalculations * knockbackMultiplier),
+                `Max potential knockback (${bodyForKbCalculations} BODY x ${knockbackMultiplier})`,
             )
             .addNumber(-parseInt(knockbackResistanceValue), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));

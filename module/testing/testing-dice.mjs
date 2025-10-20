@@ -1398,7 +1398,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
-                            .modifyToNoBody()
+                            .modifyToDoNoBody()
                             .addHalfDice(1)
                             .addDice(2)
                             .addNumber(1);
