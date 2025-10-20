@@ -8,6 +8,8 @@
 - Martial Arts with weapons that are not damage related (e.g. entangle, adjustment) should now work correctly. [#2814](https://github.com/dmdorman/hero6e-foundryvtt/issues/2814)
 - Show dice icon again for items that have no to-hit but have damage/effects. [#2926](https://github.com/dmdorman/hero6e-foundryvtt/issues/2926)
 - NND does no BODY. [#2924](https://github.com/dmdorman/hero6e-foundryvtt/issues/2924)
+- Support the Does Knockback advantage. [#2469](https://github.com/dmdorman/hero6e-foundryvtt/issues/2469)
+- Hide knockback rolls for more attacks that do no BODY. [#1680](https://github.com/dmdorman/hero6e-foundryvtt/issues/1680)
 
 ## Version 4.1.17 20250921
 

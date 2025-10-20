@@ -3745,6 +3745,19 @@ export class HeroSystem6eItem extends Item {
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
         }
 
+        const stunOnly = this.findModsByXmlid("STUNONLY");
+        const nnd = this.findModsByXmlid("NND");
+        if (stunOnly || nnd) {
+            results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
+        }
+
+        const doesBody = this.findModsByXmlid("DOESBODY");
+        if (doesBody) {
+            // NOTE: Does BODY also includes DOES KB
+            results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
+            results.knockbackMultiplier = 1;
+        }
+
         // AVAD
         const avad = this.findModsByXmlid("AVAD");
         if (avad) {
@@ -3767,6 +3780,12 @@ export class HeroSystem6eItem extends Item {
         const noKb = this.findModsByXmlid("NOKB");
         if (noKb) {
             results.knockbackMultiplier = 0;
+        }
+
+        // Does Knockback
+        const doesKb = this.findModsByXmlid("DOESKB");
+        if (doesKb) {
+            results.knockbackMultiplier = 1;
         }
 
         // Double Knockback
@@ -3801,16 +3820,6 @@ export class HeroSystem6eItem extends Item {
             results.usesStrength = false;
         }
 
-        const stunOnly = this.findModsByXmlid("STUNONLY");
-        const nnd = this.findModsByXmlid("NND");
-        if (stunOnly || nnd) {
-            results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
-        }
-
-        const doesBody = this.findModsByXmlid("DOESBODY");
-        if (doesBody) {
-            results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
-        }
         return results;
     }
 
