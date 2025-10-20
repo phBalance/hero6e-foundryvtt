@@ -488,7 +488,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
             maneuverDC = Math.floor(rawManeuverDc / 2);
         }
 
-        // Martial Maneuvers in 5e ignore advantages. Everything else care about them.
+        // Martial Maneuvers in 5e ignore advantages (FRed pg 407). Everything else cares about them.
         const alteredManeuverDc =
             item.is5e && item.type === "martialart"
                 ? maneuverDC * (1 + baseAttackItem._advantagesAffectingDc)
@@ -530,7 +530,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     // PH: TODO: THE ABOVE 2 NEED NEW HERO ROLLER FUNCTIONALITY.
     for (const cslDetail of combatSkillLevelsForAttack(item).details) {
         if (cslDetail.dc > 0) {
-            // CSLs in 5e ignore advantages. In 6e they care about it.
+            // CSLs in 5e ignore advantages (FRed pg 407). In 6e they care about it.
             const alteredCslDc = item.is5e ? cslDetail.dc * (1 + item._advantagesAffectingDc) : cslDetail.dc;
             const cslDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredCslDc);
             const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, cslDiceParts);
@@ -603,7 +603,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
                 haymakerDC = Math.floor(rawHaymakerDc / 2);
             }
 
-            // 5e does not consider advantages so we have to compensate and as a consequence we may have a fractional DC (yes, the rules are not self consistent).
+            // Haymakers in 5e ignore advantages (FRed pg 407) so we have to compensate.
             // 6e is sensible in this regard.
             const alteredHaymakerDc = item.is5e ? haymakerDC * (1 + item._advantagesAffectingDc) : haymakerDC;
             const haymakerDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredHaymakerDc);
