@@ -35,6 +35,7 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             BASECOST: new HeroNumberField({ integer: false }),
             LEVELS: new HeroNumberField({ integer: true }),
             ALIAS: new StringField(),
+            TEXT: new StringField(),
             POSITION: new HeroNumberField({ integer: true }),
             MULTIPLIER: new StringField(),
             GRAPHIC: new StringField(),
@@ -823,6 +824,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             OPTION_ALIAS: new StringField(),
             ADDER: new ArrayField(new EmbeddedDataField(HeroAdderModel)),
             ALIAS: new StringField(),
+            TEXT: new StringField(),
             BASECOST: new StringField(),
             COLOR: new StringField(),
             GRAPHIC: new StringField(),
@@ -913,7 +915,6 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             LEVELSONLY: new BooleanField({ initial: null, nullable: true }),
             PROFICIENCY: new BooleanField({ initial: null, nullable: true }),
             ROLL: new StringField(),
-            TEXT: new StringField(),
             TYPE: new StringField(),
 
             // Perk
