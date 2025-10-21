@@ -218,7 +218,7 @@ async function skillRoll(item, actor, target) {
             continue;
         }
 
-        // ENHANCEDPERCEPTION is already included in item.updateRoll()
+        // ENHANCEDPERCEPTION is already included elsewhere
         // and we just backed them out above  (skillLevelInputsNotChecked)
         if (skillModItem.system.XMLID === "ENHANCEDPERCEPTION") {
             continue;
