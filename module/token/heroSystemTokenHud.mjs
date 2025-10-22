@@ -62,7 +62,7 @@ export class HeroSystemTokenHud extends TokenHUD {
             EXTRADIMENSIONALMOVEMENT: {
                 label: "Dimensional Travel",
                 icon: "fa-solid fa-transporter",
-                img: `systems/${module}/icons/start-gate.svg`,
+                img: `systems/${module}/icons/movement/star-gate.svg`,
                 isActive: false,
                 order: 3,
                 canSelect: generateMovementCanSelectFunction("extradimensionalmovement"),
@@ -89,7 +89,7 @@ export class HeroSystemTokenHud extends TokenHUD {
             GLIDING: {
                 label: "Gliding",
                 icon: "fa-solid fa-person-from-portal",
-                img: `systems/${module}/icons/hang-glider.svg`,
+                img: `systems/${module}/icons/movement/hang-glider.svg`,
                 isActive: false,
                 order: 6,
                 canSelect: generateMovementCanSelectFunction("gliding"),
@@ -98,7 +98,7 @@ export class HeroSystemTokenHud extends TokenHUD {
             SWINGING: {
                 label: "Swinging",
                 icon: "fa-solid fa-lasso",
-                img: `systems/${module}/icons/grapple-hook.svg`,
+                img: `systems/${module}/icons/movement/grapple-hook.svg`,
                 isActive: false,
                 order: 7,
                 canSelect: generateMovementCanSelectFunction("swinging"),
