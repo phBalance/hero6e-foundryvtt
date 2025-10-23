@@ -2483,6 +2483,39 @@ export class HeroSystem6eItem extends Item {
                     )} through ${pd} PD materials`;
                 }
                 break;
+            case "FTL":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    let lightYearsPerTimePeriod = ftlLevelsToLightYearsPerYear(levels);
+                    let timePeriod;
+                    if (lightYearsPerTimePeriod < 12) {
+                        timePeriod = "year";
+                    } else if (lightYearsPerTimePeriod < 52) {
+                        lightYearsPerTimePeriod /= 12;
+                        timePeriod = "month";
+                    } else if (lightYearsPerTimePeriod < 365) {
+                        lightYearsPerTimePeriod /= 52;
+                        timePeriod = "week";
+                    } else if (lightYearsPerTimePeriod < 365 * 24) {
+                        lightYearsPerTimePeriod /= 365;
+                        timePeriod = "day";
+                    } else if (lightYearsPerTimePeriod < 365 * 24 * 60) {
+                        lightYearsPerTimePeriod /= 365 * 24;
+                        timePeriod = "hour";
+                    } else if (lightYearsPerTimePeriod < 365 * 24 * 60 * 60) {
+                        lightYearsPerTimePeriod /= 365 * 24 * 60;
+                        timePeriod = "minute";
+                    } else {
+                        lightYearsPerTimePeriod /= 365 * 24 * 60 * 60;
+                        timePeriod = "segment";
+                    }
+
+                    // Since it's only an approximation, just show whole numbers.
+                    lightYearsPerTimePeriod = RoundFavorPlayerUp(lightYearsPerTimePeriod);
+
+                    description = `${system.ALIAS} (${lightYearsPerTimePeriod} Light Year(s)/${timePeriod})`;
+                }
+                break;
 
             case "NAKEDMODIFIER":
                 // Area Of Effect (8m Radius; +1/2) for up to 53 Active Points of STR
@@ -5807,6 +5840,15 @@ export function cloneToEffectiveAttackItem({
         effectiveItem,
         strengthItem,
     };
+}
+
+/**
+ * FTL levels start at 0 (1 LY/Y) but don't behave quite right.
+ * @param {Number} levels
+ * @returns
+ */
+export function ftlLevelsToLightYearsPerYear(levels) {
+    return levels < 7 ? Math.pow(2, levels) : 125 * Math.pow(2, levels - 7);
 }
 
 // for testing and pack-load-from-config macro
