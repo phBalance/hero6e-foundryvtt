@@ -1,6 +1,9 @@
 import { convertSystemUnitsToMetres } from "../utility/units.mjs";
+import { ftlLevelsToLightYearsPerYear } from "../item/item.mjs";
 
 // PH: FIXME: Check if this exists in v12. I suspect it does, but some of the initialization/overriding probably shouldn't
+// check this and if the hero ruler still works calculateReduceOrPushRealCost
+// PH: FIXME: Need to get FTL and extra dimensional appearing. We have icons now
 const TokenHUD = foundry.applications.hud.TokenHUD;
 
 /**
@@ -21,6 +24,25 @@ function generateMovementMaxCombatDistanceMeters(characteristic) {
             parseInt(token.actor?.system.characteristics[characteristic]?.value || 0) || 0,
             token.actor,
         );
+}
+
+// PH: FIXME: Base FTL is 0 LEVELS. Probably this is not expected elsewhere
+function ftlCanSelect(token) {
+    return parseInt(token.actor?.system.characteristics.ftl?.value || -1) > -1;
+}
+
+function ftlMaxNonCombatDistanceMeters(token) {
+    const levels = parseInt(token.actor?.system.characteristics.ftl?.value || -1);
+    if (levels <= -1) {
+        return 0;
+    }
+
+    // FTL is given movement per year - not per phase. Convert to per phase based on speed.
+    const lightYearsPerYear = ftlLevelsToLightYearsPerYear(levels);
+    const metresPerTurnPerLightYearPerYear = 2.998e8 * lightYearsPerYear;
+    const speed = parseInt(token.actor?.system.characteristics.spd?.value || 0);
+
+    return metresPerTurnPerLightYearPerYear / speed;
 }
 
 export class HeroSystemTokenHud extends TokenHUD {
@@ -80,11 +102,12 @@ export class HeroSystemTokenHud extends TokenHUD {
             FTL: {
                 label: "Faster Than Light",
                 icon: "fa-solid fa-lightbulb",
-                img: "icons/svg/teleport.svg",
+                img: `systems/${module}/icons/movement/rocket.svg`,
                 isActive: false,
                 order: 5,
-                canSelect: generateMovementCanSelectFunction("ftl"),
-                maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("ftl"),
+                canSelect: ftlCanSelect,
+                maxCombatDistanceMeters: () => 0, // FTL does not support combat - only non combat
+                maxNonCombatDistanceMetres: ftlMaxNonCombatDistanceMeters,
             },
             GLIDING: {
                 label: "Gliding",
