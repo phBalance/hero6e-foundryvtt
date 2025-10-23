@@ -1,6 +1,7 @@
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 //import { getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
+import { HeroItemCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 
 function getAllActorsInGame() {
     return [
@@ -228,6 +229,7 @@ async function migrateTo4_2_0(actor) {
     try {
         await addPerceptionXmlTag(actor);
         await coerceIs5eToBoolean(actor);
+        await addXmlidToCharacteristics(actor);
         //await convertCharacteristicsToItem(actor);
     } catch (e) {
         console.error(e);
@@ -241,6 +243,20 @@ async function migrateTo4_2_0(actor) {
 //         }
 //     }
 // }
+
+async function addXmlidToCharacteristics(actor) {
+    const changes = {};
+    for (const key of Object.keys(actor.system).filter((o) => o.match(/[A-Z]/))) {
+        const char = actor.system[key];
+        if (char instanceof HeroItemCharacteristic && !char.XMLID) {
+            changes[`system.${key}.XMLID`] = key;
+            changes[`system.${key}.xmlTag`] = key;
+        }
+    }
+    if (Object.keys(changes).length > 0) {
+        await actor.update(changes);
+    }
+}
 
 async function addPerceptionXmlTag(actor) {
     const perception = actor.items.find((i) => i.system.XMLID === "PERCEPTION" && i.system.xmlTag !== "SKILL");

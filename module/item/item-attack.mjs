@@ -2437,7 +2437,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Martial Arts also have NNDs which are special AVAD and always/usually PD
     if (!avad && item.system.EFFECT?.includes("NND")) {
-        const pdXml = getPowerInfo({ xmlid: "PD", actor: token.actor });
+        const pdXml = getPowerInfo({ xmlid: "PD", xmlTag: "PD", actor: token.actor });
         avad = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdXml.xml, token.actor), {
             parent: token.actor,
         });

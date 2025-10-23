@@ -1203,8 +1203,18 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
         return null;
     }
 
+    get name() {
+        return `Natural ${this.XMLID}`;
+    }
+
     get description() {
-        return `${this.LEVELS} ${this.baseInfo?.name}`;
+        return `${this.LEVELS + this.#baseInfo.base} ${this.baseInfo?.name}`;
+    }
+
+    // Allows HeroItemCharacteristic to be accessed like an item.
+    // Used with conditionalDefenses
+    get system() {
+        return this;
     }
 
     debugModelProps() {
