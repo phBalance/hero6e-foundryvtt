@@ -418,29 +418,19 @@ export async function getConditionalDefenses(token, item, avad) {
 
     // AVAD characteristic defenses (PD/ED)
     if (avad) {
-        const pd = parseInt(token.actor.system.characteristics.pd.value);
-        if (pd > 0 && item.system.INPUT === "PD") {
-            const pdItem = new HeroSystem6eItem(
-                { name: "core PD", type: "characteristic", system: token.actor.system.PD._source },
-                {
-                    parent: token.actor,
-                },
-            );
-            if (pdItem && pdItem.system.LEVELS > 0) {
-                conditionalDefenses.push(pdItem);
+        for (const char of ["PD", "ED"]) {
+            const value = parseInt(token.actor.system.characteristics[char.toLocaleLowerCase()].value);
+            if (value > 0 && item.system.INPUT === char) {
+                const charItem = new HeroSystem6eItem(
+                    { name: `core ${char}`, type: "characteristic", system: token.actor.system[char]._source },
+                    {
+                        parent: token.actor,
+                    },
+                );
+                if (charItem && charItem.system.LEVELS > 0) {
+                    conditionalDefenses.push(charItem);
+                }
             }
-        }
-
-        const ed = parseInt(token.actor.system.characteristics.pd.value);
-        if (ed > 0 && item.system.INPUT === "ED") {
-            const edXml = getPowerInfo({ xmlid: "ED", actor: token.actor });
-            const edItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edXml.xml, token.actor), {
-                parent: token.actor,
-            });
-            edItem.system.LEVELS = ed;
-            edItem._postUpload();
-            edItem.system.description = `${ed} ED from characteristics`;
-            conditionalDefenses.push(edItem);
         }
     }
 
