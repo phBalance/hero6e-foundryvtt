@@ -30,7 +30,7 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
  * @returns {number} distanceInMetres
  */
 export function calculateDistanceBetween(origin, target) {
-    if (!target) {
+    if (!origin || !target) {
         return {
             distance: 0,
             cost: 0,
