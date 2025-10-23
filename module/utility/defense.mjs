@@ -422,7 +422,7 @@ export async function getConditionalDefenses(token, item, avad) {
             const value = parseInt(token.actor.system.characteristics[char.toLocaleLowerCase()].value);
             if (value > 0 && item.system.INPUT === char) {
                 const charItem = new HeroSystem6eItem(
-                    { name: `core ${char}`, type: "characteristic", system: token.actor.system[char]._source },
+                    { name: `natural ${char}`, type: "characteristic", system: token.actor.system[char]._source },
                     {
                         parent: token.actor,
                     },
