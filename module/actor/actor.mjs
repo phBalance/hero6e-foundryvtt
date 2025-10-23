@@ -69,6 +69,15 @@ export class HeroSystem6eActor extends Actor {
                   ? true
                   : false;
 
+        // Set XMLID for characteristics
+        // Used with conditional defenses, also for future baseInfo calls
+        for (const key of Object.keys(this.system).filter((o) => o.match(/[A-Z]/))) {
+            const char = this.system[key];
+            if (char instanceof HeroItemCharacteristic && !char.XMLID) {
+                this.updateSource({ [`system.${key}.XMLID`]: key, [`system.${key}.xmlTag`]: key });
+            }
+        }
+
         this.updateSource({
             prototypeToken: prototypeToken,
             system: {
@@ -112,6 +121,18 @@ export class HeroSystem6eActor extends Actor {
     _onCreate(data, options, userId) {
         super._onCreate(data, options, userId);
     }
+
+    // prepareData() {
+    //     // Set XMLID of characteristics; typically occurs when new actor without HDC upload
+    //     // Used with conditional defenses
+    //     for (const key of Object.keys(this.system).filter((o) => o.match(/[A-Z]/))) {
+    //         const char = this.system[key];
+    //         if (char instanceof HeroItemCharacteristic && !char.XMLID) {
+    //             char.XMLID = char.schema.name;
+    //             console.log(`Updated XMLID for ${this.name}/${char.XMLID}`);
+    //         }
+    //     }
+    // }
 
     /// Override and should probably be used instead of add/remove ActiveEffect
     async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
