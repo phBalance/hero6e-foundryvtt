@@ -1416,14 +1416,16 @@ export class HeroCharacteristicsModel extends foundry.abstract.DataModel {
             end: new EmbeddedDataField(HeroActorCharacteristic),
             body: new EmbeddedDataField(HeroActorCharacteristic),
             stun: new EmbeddedDataField(HeroActorCharacteristic),
+
             running: new EmbeddedDataField(HeroActorCharacteristic),
             swimming: new EmbeddedDataField(HeroActorCharacteristic),
             leaping: new EmbeddedDataField(HeroActorCharacteristic),
 
+            extradimensionalmovement: new EmbeddedDataField(HeroActorCharacteristic),
             flight: new EmbeddedDataField(HeroActorCharacteristic),
             ftl: new EmbeddedDataField(HeroActorCharacteristic), // Faster Than Light
-            swinging: new EmbeddedDataField(HeroActorCharacteristic),
             gliding: new EmbeddedDataField(HeroActorCharacteristic),
+            swinging: new EmbeddedDataField(HeroActorCharacteristic),
             teleportation: new EmbeddedDataField(HeroActorCharacteristic),
             tunneling: new EmbeddedDataField(HeroActorCharacteristic),
 
@@ -1478,9 +1480,11 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
             END: new EmbeddedDataField(HeroItemCharacteristic),
             BODY: new EmbeddedDataField(HeroItemCharacteristic),
             STUN: new EmbeddedDataField(HeroItemCharacteristic),
+
             RUNNING: new EmbeddedDataField(HeroItemCharacteristic),
             SWIMMING: new EmbeddedDataField(HeroItemCharacteristic),
             LEAPING: new EmbeddedDataField(HeroItemCharacteristic),
+
             BASESIZE: new EmbeddedDataField(HeroItemCharacteristic),
             SIZE: new EmbeddedDataField(HeroItemCharacteristic), // vehicle
             hap: new SchemaField({
