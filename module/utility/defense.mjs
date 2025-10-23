@@ -1,7 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
-import { getPowerInfo } from "./util.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
