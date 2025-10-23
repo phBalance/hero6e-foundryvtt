@@ -2442,7 +2442,6 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             parent: token.actor,
         });
         avad.system.LEVELS = 1;
-        avad._postUpload();
 
         // Massive Kludge: MANEUVERS don't have INPUT but some of the rest of the code includes check for that
         item.system.INPUT = "PD";
