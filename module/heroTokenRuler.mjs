@@ -1,69 +1,10 @@
 import { RoundFavorPlayerDown } from "./utility/round.mjs";
-import { convertSystemUnitsToMetres } from "./utility/units.mjs";
 
 class HeroNullClass {}
 
 const FoundryTokenRuler = foundry.canvas.placeables?.tokens.TokenRuler || HeroNullClass;
 
 export class HeroTokenRuler extends FoundryTokenRuler {
-    static applyHeroMovementConfig() {
-        // Adjusting `Blink (Teleport)` to just be Teleport and maintain its use elsewhere
-        const teleport = {
-            ...CONFIG.Token.movement.actions.blink,
-            label: "TOKEN.MOVEMENT.ACTIONS.teleport.label",
-            canSelect: (token) => parseInt(token.actor?.system.characteristics.teleportation?.value) > 0,
-        };
-
-        foundry.utils.mergeObject(
-            CONFIG.Token.movement.actions,
-            {
-                "-=blink": null,
-                burrow: {
-                    canSelect: (token) => parseInt(token.actor?.system.characteristics.tunneling?.value) > 0,
-                    maxCombatDistance: (token) =>
-                        convertSystemUnitsToMetres(
-                            parseInt(token.actor?.system.characteristics.tunneling?.value) || 0,
-                            token.actor,
-                        ),
-                },
-                "-=crawl": null,
-
-                fly: {
-                    canSelect: (token) => parseInt(token.actor?.system.characteristics.flight?.value) > 0,
-                    maxCombatDistanceMeters: (token) =>
-                        convertSystemUnitsToMetres(
-                            parseInt(token.actor?.system.characteristics.flight?.value) || 0,
-                            token.actor,
-                        ),
-                },
-                jump: {
-                    canSelect: (token) => parseInt(token.actor?.system.characteristics.leaping?.value) > 0,
-                    maxCombatDistanceMeters: (token) =>
-                        convertSystemUnitsToMetres(
-                            parseInt(token.actor?.system.characteristics.leaping?.value) || 0,
-                            token.actor,
-                        ),
-                    "-=getCostFunction": null, // default Foundry jump cost was "cost * 2"
-                },
-                swim: {
-                    canSelect: (token) => parseInt(token.actor?.system.characteristics.swimming?.value) > 0,
-                    maxCombatDistanceMeters: (token) =>
-                        convertSystemUnitsToMetres(
-                            parseInt(token.actor?.system.characteristics.swimming?.value) || 0,
-                            token.actor,
-                        ),
-                },
-                teleport,
-                // Swinging
-                walk: {
-                    maxCombatDistanceMeters: (token) =>
-                        convertSystemUnitsToMetres(parseInt(token.actor?.system.characteristics.running?.value) || 0),
-                },
-            },
-            { performDeletions: true },
-        );
-    }
-
     _getSegmentStyle(waypoint) {
         const style = super._getSegmentStyle(waypoint);
         this.#speedValueStyle(style, waypoint);

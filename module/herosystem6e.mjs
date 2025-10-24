@@ -49,6 +49,8 @@ import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 
 import SettingsHelpers from "./settings/settings-helpers.mjs";
 
+import { HeroSystemTokenHud } from "./token/heroSystemTokenHud.mjs";
+
 import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 import "./utility/adjustment.mjs";
 import "./utility/chat-dice.mjs";
@@ -177,12 +179,14 @@ Hooks.once("init", async function () {
     CONFIG.Actor.documentClass = HeroSystem6eActor;
     CONFIG.Item.documentClass = HeroSystem6eItem;
     CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
+    CONFIG.Token.hudClass = HeroSystemTokenHud;
+    CONFIG.Token.movement.actions = HeroSystemTokenHud.initializeMovementActions(HEROSYS.module);
+    CONFIG.Token.movement.defaultAction = "RUNNING";
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     if (foundry.canvas.placeables) {
         CONFIG.Token.rulerClass = HeroTokenRuler; //V13
-        CONFIG.Token.rulerClass.applyHeroMovementConfig();
     }
     CONFIG.Canvas.rulerClass = HeroRuler; // END Use & calculateVelocityInSystemUnits
 
@@ -509,12 +513,12 @@ function rollItemMacro(itemName, itemType) {
     return item.roll();
 }
 
-// The default Foundry cone angle is 53.13 degrees.
-// This will set the default angle to 60 degrees.
-// REF: https://github.com/dmdorman/hero6e-foundryvtt/issues/40
-Hooks.on("setup", () => (CONFIG.MeasuredTemplate.defaults.angle = 60));
-
 Hooks.on("setup", async () => {
+    // The default Foundry cone angle is 53.13 degrees.
+    // This will set the default angle to 60 degrees.
+    // REF: https://github.com/dmdorman/hero6e-foundryvtt/issues/40
+    CONFIG.MeasuredTemplate.defaults.angle = 60;
+
     // Found undefined item name in old Raymond game
     // This Should never happen, but it did and prevents game.ready
     // Every item requires a name and an id.

@@ -1981,57 +1981,6 @@ export class HeroSystem6eItem extends Item {
         if (item.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.checked === undefined) {
             this.system.checked = true;
         }
-
-        // Endurance
-        //item.system.endEstimate = parseInt(item.end) || 0;
-
-        // Effect
-        //this.configureAttackParameters();
-
-        // Defense
-        // if (item.type === "defense") {
-        //     item.description =
-        //         CONFIG.HERO.defenseTypes[item.system.defenseType] ||
-        //         CONFIG.HERO.defenseTypes5e[item.system.defenseType];
-        // }
-
-        // This seems to still be required. See #2624.
-        //item.updateRoll();
-
-        // Charges
-        // Not sure why we do CHARGES here and in setCharges();
-        // if (parseInt(item.system.charges?.max || 0) > 0) {
-        //     const costsEnd = item.findModsByXmlid("COSTSEND");
-        //     if (item.system.endEstimate === 0 || !costsEnd) {
-        //         item.system.endEstimate = "";
-        //     }
-
-        //     const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${
-        //         item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1
-        //             ? `x${item.system.charges?.clips}`
-        //             : ""
-        //     }`;
-        //     const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
-        //     const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
-        //     const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
-        //     const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
-
-        //     item.system.endEstimate = `${
-        //         item.system.endEstimate ? `${item.system.endEstimate} ` : ""
-        //     }[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
-        // }
-
-        // // 0 END
-        // if (!item.system.endEstimate) {
-        //     item.system.endEstimate = "";
-        // }
-
-        // // Mental
-        // if (item?.flags?.[game.system.id]?.tags?.omcv) {
-        //     item.flags[game.system.id] ??= {};
-        //     item.flags[game.system.id].tags.ocv ??= item.flags[game.system.id]?.tags.omcv;
-        //     item.flags[game.system.id].tags.dcv ??= item.flags[game.system.id]?.tags.dmcv;
-        // }
     }
 
     rollsToHit() {
@@ -2532,6 +2481,39 @@ export class HeroSystem6eItem extends Item {
                     description = `${system.ALIAS} ${system.LEVELS}${getSystemDisplayUnits(
                         this.is5e,
                     )} through ${pd} PD materials`;
+                }
+                break;
+            case "FTL":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    let lightYearsPerTimePeriod = ftlLevelsToLightYearsPerYear(levels);
+                    let timePeriod;
+                    if (lightYearsPerTimePeriod < 12) {
+                        timePeriod = "year";
+                    } else if (lightYearsPerTimePeriod < 52) {
+                        lightYearsPerTimePeriod /= 12;
+                        timePeriod = "month";
+                    } else if (lightYearsPerTimePeriod < 365) {
+                        lightYearsPerTimePeriod /= 52;
+                        timePeriod = "week";
+                    } else if (lightYearsPerTimePeriod < 365 * 24) {
+                        lightYearsPerTimePeriod /= 365;
+                        timePeriod = "day";
+                    } else if (lightYearsPerTimePeriod < 365 * 24 * 60) {
+                        lightYearsPerTimePeriod /= 365 * 24;
+                        timePeriod = "hour";
+                    } else if (lightYearsPerTimePeriod < 365 * 24 * 60 * 60) {
+                        lightYearsPerTimePeriod /= 365 * 24 * 60;
+                        timePeriod = "minute";
+                    } else {
+                        lightYearsPerTimePeriod /= 365 * 24 * 60 * 60;
+                        timePeriod = "segment";
+                    }
+
+                    // Since it's only an approximation, just show whole numbers.
+                    lightYearsPerTimePeriod = RoundFavorPlayerUp(lightYearsPerTimePeriod);
+
+                    description = `${system.ALIAS} (${lightYearsPerTimePeriod} Light Year(s)/${timePeriod})`;
                 }
                 break;
 
@@ -3821,31 +3803,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         return results;
-    }
-
-    updateRoll() {
-        console.error("Depricated updateRoll");
-        return;
-        // const skillData = this.system;
-
-        // skillData.tags = [];
-
-        // if (!this.hasSuccessRoll()) {
-        //     skillData.roll = null;
-        //     return;
-        // }
-
-        // // TODO: Can this be simplified. Should we add some test cases?
-        // // TODO: Luck and unluck...
-
-        // // No Characteristic = no roll (Skill Enhancers for example) except for FINDWEAKNESS
-        // const characteristicBased = skillData.CHARACTERISTIC;
-        // const { roll, tags } = !characteristicBased
-        //     ? this._getNonCharacteristicsBasedRollComponents(skillData)
-        //     : this._getSkillRollComponents(skillData);
-
-        // skillData.roll = roll;
-        // skillData.tags = tags;
     }
 
     _getNonCharacteristicsBasedRollComponents(skillData) {
@@ -5883,6 +5840,15 @@ export function cloneToEffectiveAttackItem({
         effectiveItem,
         strengthItem,
     };
+}
+
+/**
+ * FTL levels start at 0 (1 LY/Y) but don't behave quite right.
+ * @param {Number} levels
+ * @returns
+ */
+export function ftlLevelsToLightYearsPerYear(levels) {
+    return levels < 7 ? Math.pow(2, levels) : 125 * Math.pow(2, levels - 7);
 }
 
 // for testing and pack-load-from-config macro
