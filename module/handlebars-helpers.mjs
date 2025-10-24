@@ -28,6 +28,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("signedString", signedString);
     Handlebars.registerHelper("calculated5eCharacteristic", calculated5eCharacteristic);
     Handlebars.registerHelper("figured5eCharacteristic", figured5eCharacteristic);
+    Handlebars.registerHelper("getUploadLastModifiedDate", getUploadLastModifiedDate);
 }
 
 function indexOf(str, searchTerm) {
@@ -211,4 +212,19 @@ function figured5eCharacteristic(actor, characteristic) {
         console.error(e);
     }
     return "?";
+}
+
+function getUploadLastModifiedDate(actor) {
+    if (!actor) {
+        console.error("getUploadTimeLocale actor is undefined");
+        return "undefined";
+    }
+    const lastModifiedDate = actor.flags?.[game.system.id]?.file?.lastModifiedDate;
+    if (!lastModifiedDate) {
+        console.error("getUploadTimeLocale lastModifiedDate is undefined");
+        return "undefined";
+    }
+
+    const dt = new Date(lastModifiedDate);
+    return dt.toLocaleString();
 }
