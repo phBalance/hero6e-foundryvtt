@@ -1421,7 +1421,6 @@ export class HeroCharacteristicsModel extends foundry.abstract.DataModel {
             swimming: new EmbeddedDataField(HeroActorCharacteristic),
             leaping: new EmbeddedDataField(HeroActorCharacteristic),
 
-            extradimensionalmovement: new EmbeddedDataField(HeroActorCharacteristic),
             flight: new EmbeddedDataField(HeroActorCharacteristic),
             ftl: new EmbeddedDataField(HeroActorCharacteristic), // Faster Than Light
             gliding: new EmbeddedDataField(HeroActorCharacteristic),
