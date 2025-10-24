@@ -1966,9 +1966,9 @@ export class HeroSystem6eActor extends Actor {
                 uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
                 await this.update({ ["name"]: characterName });
 
-                // remove stray flags
+                // Flags
                 await this.setFlag(game.system.id, "uploading", true);
-                await this.setFlag(game.system.id, game.system.id, "uploading", true, "file", {
+                await this.setFlag(game.system.id, "file", {
                     lastModifiedDate: options?.file?.lastModifiedDate,
                     name: options?.file?.name,
                     size: options?.file?.size,
