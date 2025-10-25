@@ -1,10 +1,10 @@
 import { convertSystemUnitsToMetres } from "../utility/units.mjs";
 import { ftlLevelsToLightYearsPerYear } from "../item/item.mjs";
 
-// PH: FIXME: Check if this exists in v12. I suspect it does, but some of the initialization/overriding probably shouldn't
-// check this and if the hero ruler still works calculateReduceOrPushRealCost
-// PH: FIXME: Need to get FTL and extra dimensional appearing. We have icons now
-const TokenHUD = foundry.applications.hud.TokenHUD;
+// PH: FIXME: Need to get extra dimensional appearing. We have icon now
+
+// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
+const FoundryVttTokenHUD = foundry.applications.hud?.TokenHUD || TokenHUD;
 
 /**
  * Generate a canSelect function that is appropriate for the characteristic
@@ -45,7 +45,7 @@ function ftlMaxNonCombatDistanceMeters(token) {
     return metresPerTurnPerLightYearPerYear / speed;
 }
 
-export class HeroSystemTokenHud extends TokenHUD {
+export class HeroSystemTokenHud extends FoundryVttTokenHUD {
     /**
      * Return initialize movement actions
      * @param {string} module
@@ -147,7 +147,7 @@ export class HeroSystemTokenHud extends TokenHUD {
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("tunneling"),
             },
 
-            // Special action that is always required (otherwise v13 crashes)
+            // Special action that is always required (otherwise v13.350 crashes)
             displace: {
                 label: "TOKEN.MOVEMENT.ACTIONS.displace.label",
                 icon: "fa-solid fa-transporter-1",
