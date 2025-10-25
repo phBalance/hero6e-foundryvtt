@@ -4373,7 +4373,7 @@ async function spendResourcesToUse(
             });
     }
 
-    let resourcesUsedDescription = "";
+    let resourcesUsedDescription = "No END Or Charges"; // Catch all for 0 END from any sources and 0 CHARGES.
     if (resourcesUsedDescriptions.length > 0) {
         // Turn array of descriptions into a single string
         if (resourcesUsedDescriptions.length === 1) {
