@@ -5,16 +5,16 @@ class HeroProgressBarV13 {
     static #concurrentProgressBarCount = 0;
 
     /**
-     * @param {string} label
+     * @param {string} message
      * @param {number} max
      * @param {number} [startCount]
      */
-    constructor(label, max, startCount = 0) {
-        this._message = label;
+    constructor(message, max, startCount = 0) {
+        this._message = message;
         this._max = max;
         this._count = startCount;
         this._inProgress = true;
-        this._progressBar = ui.notifications.info(label, { progress: true });
+        this._progressBar = ui.notifications.info(message, { progress: true });
         this._performance = [];
         this._performance.push({ timestamp: Date.now(), message: "constructor", pct: 0 });
 
@@ -28,7 +28,7 @@ class HeroProgressBarV13 {
 
         if (CONFIG.debug.HERO?.ui?.progress) {
             console.debug(
-                `${Date.now()} ${this}: creating progress bar with label "${label}", max ${max}, startCount ${startCount}`,
+                `${Date.now()} ${this}: creating progress bar with label "${message}", max ${max}, startCount ${startCount}`,
             );
         }
     }
@@ -74,13 +74,15 @@ class HeroProgressBarV13 {
         if (this._inProgress) {
             this._inProgress = false;
 
-            // Set to 100% which will cause foundry to fade out the progress bar.
+            // Set to 100% which will cause Foundry to fade out the progress bar.
             this._progressBar.update({ pct: 1, message: message });
             this._performance.push({ timestamp: Date.now(), message: "close", pct: 1 });
 
             --HeroProgressBarV13.#concurrentProgressBarCount;
 
-            if (CONFIG.debug.HERO?.ui?.progress) console.debug(`${Date.now()} ${this}: closing`);
+            if (CONFIG.debug.HERO?.ui?.progress) {
+                console.debug(`${Date.now()} ${this}: closing`);
+            }
         } else {
             console.warn(`${Date.now()} ${this}: close called when already closed`);
         }
@@ -106,14 +108,14 @@ class HeroProgressBarV12 {
         this._max = max;
         this._count = startCount;
         this._inProgress = true;
+        this._performance = [];
+        this._performance.push({ timestamp: Date.now(), message: "constructor", pct: 0 });
 
         // This is very gross reaching in and modifying the CSS while we're using the progress bar.
         document.querySelector("#loading #loading-bar").style.setProperty("white-space", "nowrap");
 
         const progressBarLabel = document.querySelector("#loading #context").style;
         progressBarLabel.setProperty("text-overflow", "ellipsis");
-        //progressBarLabel.setProperty("overflow", "hidden");
-        //progressBarLabel.setProperty("width", "0%");
 
         if (++HeroProgressBarV12.#concurrentProgressBarCount > 1) {
             ui.notifications.warn(
@@ -122,6 +124,12 @@ class HeroProgressBarV12 {
         }
 
         this.advance(this._label, 0);
+
+        if (CONFIG.debug.HERO?.ui?.progress) {
+            console.debug(
+                `${Date.now()} ${this}: creating progress bar with label "${label}", max ${max}, startCount ${startCount}`,
+            );
+        }
     }
 
     toString() {
@@ -149,14 +157,21 @@ class HeroProgressBarV12 {
             pct: percentage,
         });
 
-        //console.log(`ProgressBar: ${percentage}% ${label}`);
+        this._performance.at(-1).delta = Date.now() - this._performance.at(-1).timestamp;
+        this._performance.push({ timestamp: Date.now(), message: label, pct: percentage });
+
+        if (CONFIG.debug.HERO?.ui?.progress) {
+            console.debug(`${Date.now()} ${this}: ${percentage}% (${this._count}/${this._max}) ${label}`);
+        }
     }
 
     close(label = this._label) {
         if (this._inProgress) {
             this._inProgress = false;
-            // Set the percentage to 100 which will cause foundry to fade out the progress bar.
+
+            // Set the percentage to 100 which will cause Foundry to fade out the progress bar.
             SceneNavigation.displayProgressBar({ label: label, pct: 100 });
+            this._performance.push({ timestamp: Date.now(), message: "close", pct: 100 });
 
             document.querySelector("#loading #loading-bar").style.removeProperty("white-space");
 
@@ -166,6 +181,10 @@ class HeroProgressBarV12 {
             progressBarLabel.removeProperty("width");
 
             --HeroProgressBarV12.#concurrentProgressBarCount;
+
+            if (CONFIG.debug.HERO?.ui?.progress) {
+                console.debug(`${Date.now()} ${this}: closing`);
+            }
         } else {
             console.warn(`Progress bar ${this} close called when already closed`);
         }
