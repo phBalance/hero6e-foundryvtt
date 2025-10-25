@@ -896,6 +896,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costEnd: false,
         ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"], // TODO: Remove the 6e here.
         base: 10,
+        cost: function (characteristic) {
+            const levels = characteristic.levels;
+
+            // COM only exists in 5e and it has some weird rules:
+            // 1. It can have starting values of less than 0
+            // 2. You can buyback to 0 COM (-5 points) and after that you pay again. So -10 COM is 0 points, -30 COM is 10 points, etc.
+            if (levels >= -10) {
+                return Math.round(levels / 2);
+            }
+
+            // Pay only for the levels that are less than 0
+            return Math.round(Math.abs(levels + 10) / 2) - 5;
+        },
         costPerLevel: fixedValueFunction(1 / 2),
         baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         xml: `<COM XMLID="COM" ID="1712377275507" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
