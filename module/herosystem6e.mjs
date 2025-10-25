@@ -180,8 +180,13 @@ Hooks.once("init", async function () {
     CONFIG.Item.documentClass = HeroSystem6eItem;
     CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
     CONFIG.Token.hudClass = HeroSystemTokenHud;
-    CONFIG.Token.movement.actions = HeroSystemTokenHud.initializeMovementActions(HEROSYS.module);
-    CONFIG.Token.movement.defaultAction = "RUNNING";
+
+    // v13 onwards. Remove if check when v12 support dropped.
+    if (CONFIG.Token.movement) {
+        CONFIG.Token.movement.actions = HeroSystemTokenHud.initializeMovementActions(HEROSYS.module);
+        CONFIG.Token.movement.defaultAction = "RUNNING";
+    }
+
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;

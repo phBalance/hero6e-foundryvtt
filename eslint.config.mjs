@@ -74,6 +74,7 @@ export default [
                 TextEditor: "readonly",
                 Token: "readonly",
                 TokenDocument: "readonly",
+                TokenHUD: "readonly",
                 ui: "readonly",
                 DetectionMode: "readonly",
                 OutlineOverlayFilter: "readonly",
