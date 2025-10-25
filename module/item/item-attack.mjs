@@ -1107,7 +1107,7 @@ async function doSingleTargetActionToHit(action, options) {
 
     // AUTOFIRE
     // PH: FIXME: Consider autofire on both base and effective attack items. Are they multiplicitive?
-    if (item.effectiveAttackItem.system._active.autofire.shots > 1) {
+    if (item.effectiveAttackItem.system._active.autofire?.shots > 1) {
         const autoFireShots = item.effectiveAttackItem.system._active.autofire.shots;
 
         // Autofire check for multiple hits on single target
