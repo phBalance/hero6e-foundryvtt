@@ -471,8 +471,8 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
             attackHeroRoller.addNumber(pslOffsets, "Penalty Skill Levels");
         }
 
-        // Some maneuvers have a built in RANGE value (like PSLs)
-        const maneuverRangeOffset = parseInt(item.effectiveAttackItem.system.RANGE || 0);
+        // Some maneuvers have a built in RANGE value (like PSLs). These are only possible from the maneuver item.
+        const maneuverRangeOffset = parseInt(item.system.RANGE || 0);
         const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
         remainingRangePenalty += maneuverRangeOffsets;
         attackHeroRoller.addNumber(maneuverRangeOffsets, "Maneuver bonus");
