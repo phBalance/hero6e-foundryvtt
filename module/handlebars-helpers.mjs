@@ -221,7 +221,7 @@ function getUploadLastModifiedDate(actor) {
     }
     const lastModifiedDate = actor.flags?.[game.system.id]?.file?.lastModifiedDate;
     if (!lastModifiedDate) {
-        console.error("getUploadTimeLocale lastModifiedDate is undefined");
+        console.warn("getUploadTimeLocale lastModifiedDate is undefined");
         return "undefined";
     }
 
