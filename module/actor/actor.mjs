@@ -1969,7 +1969,7 @@ export class HeroSystem6eActor extends Actor {
                 // Flags
                 await this.setFlag(game.system.id, "uploading", true);
                 await this.setFlag(game.system.id, "file", {
-                    lastModifiedDate: options?.file?.lastModifiedDate,
+                    lastModifiedDate: options?.file?.lastModified,
                     name: options?.file?.name,
                     size: options?.file?.size,
                     type: options?.file?.type,
