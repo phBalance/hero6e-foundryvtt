@@ -903,11 +903,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // 1. It can have starting values of less than 0
             // 2. You can buyback to 0 COM (-5 points) and after that you pay again. So -10 COM is 0 points, -30 COM is 10 points, etc.
             if (levels >= -10) {
-                return Math.round(levels / 2);
+                return Math.round(levels * this.costPerLevel());
             }
 
             // Pay only for the levels that are less than 0
-            return Math.round(Math.abs(levels + 10) / 2) - 5;
+            return Math.round(Math.abs(levels + 10) * this.costPerLevel()) - 5;
         },
         costPerLevel: fixedValueFunction(1 / 2),
         baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1051,7 +1051,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // 5e gets partial refund
-                const refund = characteristic.levels > 0 ? parseInt((characteristic.core % 1) * 10) : 0;
+                const refund = characteristic.levels > 0 ? +(characteristic.core % 1).toFixed(1) * 10 : 0;
 
                 return characteristic.levels * this.costPerLevel() - refund;
             },

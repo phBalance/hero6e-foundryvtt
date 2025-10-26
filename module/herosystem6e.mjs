@@ -21,7 +21,7 @@ import { GenericRoller } from "./genericRoller.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
 import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
-import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-token.mjs";
+import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./token/actor-token.mjs";
 import {
     HeroSystem6eActorActiveEffects,
     HeroSystem6eActorActiveEffectsSystemData,
