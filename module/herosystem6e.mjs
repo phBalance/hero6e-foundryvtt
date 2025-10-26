@@ -828,33 +828,36 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             );
             for (const flashAe of flashEffects) {
                 const senseAffectingItem = fromUuidSync(flashAe.origin);
+                if (!senseAffectingItem) {
+                    console.error("active effect item not found", flashAe);
+                    break;
+                }
 
-                // Double check maneuver to make sure it is a flash
+                // Double check this is a FLASH or has a EFFECT with FLASH
                 if (
-                    senseAffectingItem?.system.XMLID === "MANEUVER" &&
-                    !senseAffectingItem?.system.EFFECT.includes("FLASH")
+                    senseAffectingItem.system.XMLID !== "FLASH" &&
+                    !senseAffectingItem.system.EFFECT?.includes("FLASH")
                 ) {
                     break;
                 }
-                if (senseAffectingItem) {
-                    const d = flashAe._prepareDuration();
-                    if (d.remaining > 0) {
-                        const newName = `${senseAffectingItem.system.XMLID.replace(
-                            "MANEUVER",
-                            senseAffectingItem.system.ALIAS,
-                        )} ${senseAffectingItem.system.OPTIONID} ${d.remaining} segments remaining [${senseAffectingItem.actor.name}]`;
-                        flashAe.update({ name: newName });
-                    } else {
-                        const cardHtml = `${flashAe.name.replace(/\d+ segments remaining/, "")} has expired.`;
-                        const chatData = {
-                            //author: game.user._id,
-                            content: cardHtml,
-                            speaker: ChatMessage.getSpeaker({ actor }),
-                        };
-                        await ChatMessage.create(chatData);
 
-                        await flashAe.delete();
-                    }
+                const d = flashAe._prepareDuration();
+                if (d.remaining > 0) {
+                    const newName = `${senseAffectingItem.system.XMLID.replace(
+                        "MANEUVER",
+                        senseAffectingItem.system.ALIAS,
+                    )} ${senseAffectingItem.system.OPTIONID} ${d.remaining} segments remaining [${senseAffectingItem.actor.name}]`;
+                    flashAe.update({ name: newName });
+                } else {
+                    const cardHtml = `${flashAe.name.replace(/\d+ segments remaining/, "")} has expired.`;
+                    const chatData = {
+                        //author: game.user._id,
+                        content: cardHtml,
+                        speaker: ChatMessage.getSpeaker({ actor }),
+                    };
+                    await ChatMessage.create(chatData);
+
+                    await flashAe.delete();
                 }
             }
 
