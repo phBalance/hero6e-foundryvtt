@@ -74,8 +74,6 @@ function isStunBasedEffectRoll(item) {
     );
 }
 
-const newDehydrateRehydrateApproach = true;
-
 // PH: FIXME: Should we be looking to override the existing Item JSON functions for this functionality?
 /**
  * Turn an item into JSON.
@@ -83,109 +81,56 @@ const newDehydrateRehydrateApproach = true;
  * @param {HeroSystem6eItem} item - what should be dehydrated
  */
 export function dehydrateAttackItem(item) {
-    if (!newDehydrateRehydrateApproach) {
-        const dehydratedItem = item.toObject(false);
+    const dehydratedObj = {};
+    dehydratedObj.item = item.toObject(false);
 
-        // If there is a strength item, dehydrate it
-        if (item.system._active.effectiveStrItem) {
-            dehydratedItem.system._active.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
-        }
-
-        // If there is a weapon for maneuvers, dehydrate it
-        if (item.system._active.maWeaponItem) {
-            dehydratedItem.system._active.maWeaponItem = item.system._active.maWeaponItem.toObject(false);
-        }
-
-        // If there are linked endurance items, then we need to dehydrate them as well.
-        if (item.system._active.linkedEnd && dehydratedItem.system._active.linkedEnd.length > 0) {
-            dehydratedItem.system._active.linkedEnd = item.system._active.linkedEnd.map((linkedEndItem) => {
-                return {
-                    item: linkedEndItem.item.toObject(false),
-                    uuid: linkedEndItem.uuid,
-                };
-            });
-        }
-
-        // If there are linked associated items, then we need to dehydrate them as well.
-        if (item.system._active.linkedAssociated && dehydratedItem.system._active.linkedAssociated.length > 0) {
-            dehydratedItem.system._active.linkedAssociated = item.system._active.linkedAssociated.map(
-                (linkedAssociatedItem) => {
-                    return {
-                        item: linkedAssociatedItem.item.toObject(false),
-                        uuid: linkedAssociatedItem.uuid,
-                    };
-                },
-            );
-        }
-
-        // If there are linked items, then we need to dehydrate them as well.
-        if (dehydratedItem.system._active.linked && dehydratedItem.system._active.linked.length > 0) {
-            dehydratedItem.system._active.linked = item.system._active.linked.map((linkedItem) => {
-                return {
-                    item: linkedItem.item.toObject(false),
-                    uuid: linkedItem.uuid,
-                };
-            });
-        }
-
-        const stringifiedItem = JSON.stringify(dehydratedItem);
-        return stringifiedItem;
-    } else {
-        const dehydratedObj = {};
-
-        // PH: FIXME: Should need to make a copy first so we don't destroy item.
-        // const copiedItem = foundry.utils.deepClone(item); <--- doesn't actually handle stuff like we want
-        // const copiedItem = JSON.parse(JSON.stringify(item)); <--- won't work
-        dehydratedObj.item = item.toObject(false);
-
-        // If there is a strength item, dehydrate it
-        if (item.system._active.effectiveStrItem) {
-            dehydratedObj.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
-            dehydratedObj.item.system._active.effectiveStrItem = null;
-        }
-
-        // If there is a weapon for maneuvers, dehydrate it
-        if (item.system._active.maWeaponItem) {
-            dehydratedObj.maWeaponItem = item.system._active.maWeaponItem.toObject(false);
-            dehydratedObj.item.system._active.maWeaponItem = null;
-        }
-
-        // If there are linked endurance items, then we need to dehydrate them as well.
-        if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
-            dehydratedObj.linkedEnd = item.system._active.linkedEnd.map((linkedEndItem) => {
-                return {
-                    item: linkedEndItem.item.toObject(false),
-                    uuid: linkedEndItem.uuid,
-                };
-            });
-            dehydratedObj.item.system._active.linkedEnd = null;
-        }
-
-        // If there are linked associated items, then we need to dehydrate them as well.
-        if (item.system._active.linkedAssociated && item.system._active.linkedAssociated.length > 0) {
-            dehydratedObj.linkedAssociated = item.system._active.linkedAssociated.map((linkedAssociatedItem) => {
-                return {
-                    item: linkedAssociatedItem.item.toObject(false),
-                    uuid: linkedAssociatedItem.uuid,
-                };
-            });
-            dehydratedObj.item.system._active.linkedAssociated = null;
-        }
-
-        // If there are linked items, then we need to dehydrate them as well.
-        if (item.system._active.linked && item.system._active.linked.length > 0) {
-            dehydratedObj.linked = item.system._active.linked.map((linkedItem) => {
-                return {
-                    item: linkedItem.item.toObject(false),
-                    uuid: linkedItem.uuid,
-                };
-            });
-            dehydratedObj.item.system._active.linked = null;
-        }
-
-        const stringifiedItem = JSON.stringify(dehydratedObj);
-        return stringifiedItem;
+    // If there is a strength item, dehydrate it
+    if (item.system._active.effectiveStrItem) {
+        dehydratedObj.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
+        dehydratedObj.item.system._active.effectiveStrItem = null;
     }
+
+    // If there is a weapon for maneuvers, dehydrate it
+    if (item.system._active.maWeaponItem) {
+        dehydratedObj.maWeaponItem = item.system._active.maWeaponItem.toObject(false);
+        dehydratedObj.item.system._active.maWeaponItem = null;
+    }
+
+    // If there are linked endurance items, then we need to dehydrate them as well.
+    if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
+        dehydratedObj.linkedEnd = item.system._active.linkedEnd.map((linkedEndItem) => {
+            return {
+                item: linkedEndItem.item.toObject(false),
+                uuid: linkedEndItem.uuid,
+            };
+        });
+        dehydratedObj.item.system._active.linkedEnd = null;
+    }
+
+    // If there are linked associated items, then we need to dehydrate them as well.
+    if (item.system._active.linkedAssociated && item.system._active.linkedAssociated.length > 0) {
+        dehydratedObj.linkedAssociated = item.system._active.linkedAssociated.map((linkedAssociatedItem) => {
+            return {
+                item: linkedAssociatedItem.item.toObject(false),
+                uuid: linkedAssociatedItem.uuid,
+            };
+        });
+        dehydratedObj.item.system._active.linkedAssociated = null;
+    }
+
+    // If there are linked items, then we need to dehydrate them as well.
+    if (item.system._active.linked && item.system._active.linked.length > 0) {
+        dehydratedObj.linked = item.system._active.linked.map((linkedItem) => {
+            return {
+                item: linkedItem.item.toObject(false),
+                uuid: linkedItem.uuid,
+            };
+        });
+        dehydratedObj.item.system._active.linked = null;
+    }
+
+    const stringifiedItem = JSON.stringify(dehydratedObj);
+    return stringifiedItem;
 }
 
 /**
@@ -204,106 +149,57 @@ export function rehydrateActorAndAttackItem(rollInfo) {
  * @param {*} actor
  */
 export function rehydrateAttackItem(itemJsonStr, actor) {
-    if (!newDehydrateRehydrateApproach) {
-        const item = HeroSystem6eItem.fromSource(JSON.parse(itemJsonStr), {
+    const obj = JSON.parse(itemJsonStr);
+
+    const item = HeroSystem6eItem.fromSource(obj.item, {
+        parent: actor,
+    });
+
+    // If there is a strength item, then we need to rehydrate it.
+    if (obj.effectiveStrItem) {
+        item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(obj.effectiveStrItem, {
             parent: actor,
         });
-
-        // If there is a strength item, then we need to rehydrate it.
-        if (item.system._active.effectiveStrItem) {
-            item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(item.system._active.effectiveStrItem, {
-                parent: actor,
-            });
-        }
-
-        // If there is a maneuver item, then we need to rehydrate it.
-        if (item.system._active.maWeaponItem) {
-            item.system._active.maWeaponItem = HeroSystem6eItem.fromSource(item.system._active.maWeaponItem, {
-                parent: actor,
-            });
-        }
-
-        // If there are linked endurance items, then we need to rehydrate them as well.
-        if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
-            item.system._active.linkedEnd.forEach((linkedEndItemData) => {
-                linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
-                    parent: actor,
-                });
-            });
-        }
-
-        // If there are linked associated items, then we need to rehydrate them as well.
-        if (item.system._active.linkedAssociated && item.system._active.linkedAssociated.length > 0) {
-            item.system._active.linkedAssociated.forEach((linkedEndItemData) => {
-                linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
-                    parent: actor,
-                });
-            });
-        }
-
-        // If there are linked items, then we need to rehydrate them as well.
-        if (item.system._active.linked && item.system._active.linked.length > 0) {
-            item.system._active.linked.forEach((linkedItemData) => {
-                linkedItemData.item = HeroSystem6eItem.fromSource(linkedItemData.item, {
-                    parent: actor,
-                });
-            });
-        }
-
-        return { actor, item };
-    } else {
-        const obj = JSON.parse(itemJsonStr);
-
-        const item = HeroSystem6eItem.fromSource(obj.item, {
-            parent: actor,
-        });
-
-        // If there is a strength item, then we need to rehydrate it.
-        if (obj.effectiveStrItem) {
-            item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(obj.effectiveStrItem, {
-                parent: actor,
-            });
-        }
-
-        // If there is a maneuver item, then we need to rehydrate it.
-        if (obj.maWeaponItem) {
-            item.system._active.maWeaponItem = HeroSystem6eItem.fromSource(obj.maWeaponItem, {
-                parent: actor,
-            });
-        }
-
-        // If there are linked endurance items, then we need to rehydrate them as well.
-        if (obj.linkedEnd) {
-            obj.linkedEnd.forEach((linkedEndItemData) => {
-                linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
-                    parent: actor,
-                });
-            });
-            item.system._active.linkedEnd = obj.linkedEnd;
-        }
-
-        // If there are linked associated items, then we need to rehydrate them as well.
-        if (obj.linkedAssociated) {
-            obj.linkedAssociated.forEach((linkedEndItemData) => {
-                linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
-                    parent: actor,
-                });
-            });
-            item.system._active.linkedAssociated = obj.linkedAssociated;
-        }
-
-        // If there are linked items, then we need to rehydrate them as well.
-        if (obj.linked) {
-            obj.linked.forEach((linkedItemData) => {
-                linkedItemData.item = HeroSystem6eItem.fromSource(linkedItemData.item, {
-                    parent: actor,
-                });
-            });
-            item.system._active.linked = obj.linked;
-        }
-
-        return { actor, item };
     }
+
+    // If there is a maneuver item, then we need to rehydrate it.
+    if (obj.maWeaponItem) {
+        item.system._active.maWeaponItem = HeroSystem6eItem.fromSource(obj.maWeaponItem, {
+            parent: actor,
+        });
+    }
+
+    // If there are linked endurance items, then we need to rehydrate them as well.
+    if (obj.linkedEnd) {
+        obj.linkedEnd.forEach((linkedEndItemData) => {
+            linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
+                parent: actor,
+            });
+        });
+        item.system._active.linkedEnd = obj.linkedEnd;
+    }
+
+    // If there are linked associated items, then we need to rehydrate them as well.
+    if (obj.linkedAssociated) {
+        obj.linkedAssociated.forEach((linkedEndItemData) => {
+            linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
+                parent: actor,
+            });
+        });
+        item.system._active.linkedAssociated = obj.linkedAssociated;
+    }
+
+    // If there are linked items, then we need to rehydrate them as well.
+    if (obj.linked) {
+        obj.linked.forEach((linkedItemData) => {
+            linkedItemData.item = HeroSystem6eItem.fromSource(linkedItemData.item, {
+                parent: actor,
+            });
+        });
+        item.system._active.linked = obj.linked;
+    }
+
+    return { actor, item };
 }
 
 /**
