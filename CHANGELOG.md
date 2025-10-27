@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.2.0 20251025 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.1 20251026 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix attacks with advantaged Hand-to-Hand Attacks or Naked Advantages. [#3003](https://github.com/dmdorman/hero6e-foundryvtt/issues/3003)
+
+## Version 4.2.0 20251025
 
 WARNING: This update has significant changes that we have not listed below. Things that previously worked may now be broken. You want to test this version with your world before using in a real game session.
 

@@ -1004,6 +1004,12 @@ export class HeroSystem6eItemManeuver extends HeroSystem6eItemTypeDataModelGette
             USEWEAPON: new BooleanField({ initial: null, nullable: true }),
             WEAPONEFFECT: new StringField(),
             XMLID: new StringField(),
+
+            // NOTE: These don't exist in the HDC XML (because maneuvers aren't in there). We do
+            //       need them, because we can copy advantages from Hand-to-Hand attacks.
+            ADDER: new ArrayField(new EmbeddedDataField(HeroAdderModel)),
+            MODIFIER: new ArrayField(new EmbeddedDataField(HeroModifierModel2)),
+
             _active: new ObjectField(), // action
             is5e: new BooleanField({ initial: null, nullable: true }),
             active: new BooleanField({ initial: null, nullable: true }),

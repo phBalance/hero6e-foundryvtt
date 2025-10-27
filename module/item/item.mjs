@@ -5160,9 +5160,9 @@ export class HeroSystem6eItem extends Item {
 
         const advantagesCopy = itemFrom.advantages
             .filter((advantage) => !advantagesToIgnore.includes(advantage.XMLID))
-            .map((item) => item.clone());
+            .map((advantage) => advantage.clone());
 
-        this.system.MODIFIER = (this.system.MODIFIER || []).concat(advantagesCopy);
+        this.system.MODIFIER = this.system.MODIFIER.concat(advantagesCopy);
 
         // Stash a copy of what we've added in after the fact
         this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(advantagesCopy);
