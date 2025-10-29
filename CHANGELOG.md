@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.2.1 20251026 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.2 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed tooltip truncation due to inch symbol [#3008](https://github.com/dmdorman/hero6e-foundryvtt/issues/3008)
+
+## Version 4.2.1 20251026
 
 - Fix attacks with advantaged Hand-to-Hand Attacks or Naked Advantages. [#3003](https://github.com/dmdorman/hero6e-foundryvtt/issues/3003)
 

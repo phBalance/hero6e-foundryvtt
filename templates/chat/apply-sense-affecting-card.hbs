@@ -34,7 +34,7 @@
         <div class="description-tiny">Defense: {{#unless tags.length}}None{{/unless}}</div>
         {{#each senseGroups}}
             {{#each this.defenseItems}}
-                <div class="description-tiny" title="{{{this.system.description}}}">
+                <div class="description-tiny" title="{{this.system.description}}">
                     {{this.name}} {{this.system.LEVELS}} pt vs {{../XMLID}}
                 </div>
             {{/each}}
