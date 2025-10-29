@@ -4984,9 +4984,9 @@ export class HeroSystem6eItem extends Item {
     /// Real Cost = Active Cost / (1 + total value of all Limitations)
     get _realCost() {
         // VPP parent?
-        // if (this.parentItem?.system.XMLID === "VPP" || this.parentItem?.parentItem?.system.XMLID === "VPP") {
-        //     return 0;
-        // }
+        if (this.parentItem?.system.XMLID === "VPP" || this.parentItem?.parentItem?.system.XMLID === "VPP") {
+            return 0;
+        }
 
         if (this.baseInfo?.realCost) {
             return this.baseInfo.realCost(this);
@@ -5025,6 +5025,7 @@ export class HeroSystem6eItem extends Item {
         return _cost;
     }
 
+    // Real Points are sometimes refferred to as CharacterPoints
     get _characterPointCost() {
         let _cost = this._realCost;
 
