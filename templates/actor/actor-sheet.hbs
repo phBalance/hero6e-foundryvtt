@@ -1,5 +1,5 @@
 {{!-- {{log 'actor-sheet' this}} --}}
-<form class="{{cssClass}}" autocomplete="off">
+<form class="{{cssClass}}" autocomplete="off" data-actor-uuid="{{actor.uuid}}" data-token-uuid="{{token.uuid}}">
     {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}
         <aside>
             <div class="sidebar">

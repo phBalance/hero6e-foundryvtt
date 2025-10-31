@@ -694,6 +694,9 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         // Reload items
         html.find(".item-change-clip").click(this._onItemChangeClips.bind(this));
 
+        // VPP config
+        html.find(".item-change-vpp").click(this._onItemChangeVpp.bind(this));
+
         // Edit Items
         html.find(".item-edit").click(this._onItemEdit.bind(this));
 
@@ -1027,6 +1030,13 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
         return item.changeClips(event);
+    }
+
+    async _onItemChangeVpp(event) {
+        event.preventDefault();
+        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
+        const item = this.actor.items.get(itemId);
+        return item.changeVpp(event);
     }
 
     async _onItemEdit(event) {

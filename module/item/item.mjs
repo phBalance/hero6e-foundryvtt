@@ -44,6 +44,7 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mj
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
+import { ItemVppConfig } from "../applications/apps/ItemVppConfig/item-vpp-config.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -603,12 +604,6 @@ export class HeroSystem6eItem extends Item {
             throw e;
         }
     }
-
-    // setDescription() {
-    //     const startDate = Date.now();
-
-    //     window.prepareData.startDate = (window.prepareData.startDate || 0) + (Date.now() - startDate);
-    // }
 
     get heroValidation() {
         const _heroValidation = [];
@@ -1489,6 +1484,11 @@ export class HeroSystem6eItem extends Item {
         await ChatMessage.create(chatData);
     }
 
+    async changeVpp(event) {
+        const tokenUuid = $(event.currentTarget).closest("[data-token-uuid]").data().tokenUuid;
+        await ItemVppConfig.create({ item: this, tokenUuid });
+    }
+
     isPerceivable(perceptionSuccess) {
         if (["NAKEDMODIFIER", "LIST", "COMPOUNDPOWER"].includes(this.system.XMLID)) {
             return false;
@@ -2246,6 +2246,56 @@ export class HeroSystem6eItem extends Item {
         return this.system.POWER || [];
     }
 
+    get vppPoolPoints() {
+        // The Pool costs indicates the total amount of Real
+        // Points’ worth of powers and abilities the character
+        // can create with his VPP at any one time.
+        if (this.system.XMLID !== "VPP") {
+            console.error(`${this.name} is not a VPP`, this);
+            return 0;
+        }
+
+        return this.system.LEVELS;
+    }
+
+    get vppControlPoints() {
+        // No power in a VPP can have an Active
+        // Point cost greater than the Control Cost.
+        if (this.system.XMLID !== "VPP") {
+            console.error(`${this.name} is not a VPP`, this);
+            return 0;
+        }
+
+        // 6e has a CONTROLCOST adder; 5e is half of pool
+        return this.findModsByXmlid("CONTROLCOST")?.LEVELS || RoundFavorPlayerDown(this.system.LEVELS) / 2;
+    }
+
+    get vppSlotted() {
+        if (this.system.XMLID !== "VPP") {
+            console.error(`${this.name} is not a VPP`, this);
+            return false;
+        }
+
+        return this.system.vppSlotted;
+    }
+
+    // used in HBS
+    get vppUnSlotted() {
+        try {
+            if (this.parentItem?.system.XMLID === "VPP" && !this.system.vppSlot) {
+                return true;
+            }
+
+            if (this.parentItem?.parentItem?.system.XMLID === "VPP" && !this.parentItem.system.vppSlot) {
+                return true;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        return false;
+    }
+
     /**
      * Returns the base cost of an item. It's possible that it costs more beyond there (e.g. STR added etc)
      * @returns number
@@ -2783,7 +2833,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "VPP":
-                description = `${system.ALIAS}, ${parseInt(system.LEVELS)} base + ${parseInt(this.findModsByXmlid("CONTROLCOST")?.LEVELS || RoundFavorPlayerDown(parseInt(system.LEVELS) / 2))} control cost`;
+                description = `${system.ALIAS}, ${this.vppPoolPoints} base + ${this.vppControlPoints} control cost`;
                 break;
 
             case "MULTIPOWER":
@@ -4592,7 +4642,7 @@ export class HeroSystem6eItem extends Item {
 
         let cost = 0;
         for (const child of this.childItems) {
-            cost += parseInt(child.system.realCost);
+            cost += parseInt(child.system.characterPointCost);
         }
 
         let costSuffix = "";
@@ -4639,7 +4689,7 @@ export class HeroSystem6eItem extends Item {
      * However, be aware that HD keep the actual point cost expressed in 1 or 2 decimal points (based on 5e or 6e)
      */
     get characterPointCostForDisplay() {
-        const cost = this.characterPointCost || parseFloat(this.realCost);
+        const cost = this.characterPointCost || parseFloat(this.characterPointCost);
 
         return RoundFavorPlayerUp(cost);
     }
@@ -4653,6 +4703,9 @@ export class HeroSystem6eItem extends Item {
     }
 
     get realCost() {
+        if (this.childItems.length > 0) {
+            return this.childItems.reduce((accumulator, currentValue) => accumulator + currentValue.realCost, 0);
+        }
         return this.calcItemPoints().realCost;
     }
 
@@ -4689,7 +4742,7 @@ export class HeroSystem6eItem extends Item {
         if (this.system?.XMLID !== "LIST") return 0;
         let cost = 0;
         for (const child of this.childItems) {
-            cost += parseInt(child.system.realCost);
+            cost += parseInt(child.system.characterPointCost);
         }
 
         let costSuffix = "";
@@ -4983,11 +5036,6 @@ export class HeroSystem6eItem extends Item {
 
     /// Real Cost = Active Cost / (1 + total value of all Limitations)
     get _realCost() {
-        // VPP parent?
-        if (this.parentItem?.system.XMLID === "VPP" || this.parentItem?.parentItem?.system.XMLID === "VPP") {
-            return 0;
-        }
-
         if (this.baseInfo?.realCost) {
             return this.baseInfo.realCost(this);
         }
@@ -5027,11 +5075,12 @@ export class HeroSystem6eItem extends Item {
 
     // Real Points are sometimes refferred to as CharacterPoints
     get _characterPointCost() {
-        let _cost = this._realCost;
-
+        // VPP parent?
         if (this.parentItem?.system.XMLID === "VPP" || this.parentItem?.parentItem?.system.XMLID === "VPP") {
             return 0;
         }
+
+        let _cost = this._realCost;
 
         // Power cost in Power Framework is applied before limitations
         if (this.parentItem) {

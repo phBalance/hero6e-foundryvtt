@@ -2339,6 +2339,25 @@ export class HeroSystem6eActor extends Actor {
                 ),
             );
 
+            // VPP Slots
+            uploadProgressBar.advance(`${this.name}: VPP Slots`, 0);
+            for (const vppItem of this.items.filter((i) => i.system.XMLID === "VPP")) {
+                // If no vppSlots then pick defaults (currently always defaults)
+                if (!vppItem.childItems.find((i) => i.system.vppSlot)) {
+                    let vppSlottedCost = 0;
+                    const vppChanges = [];
+                    for (const slotItem of vppItem.childItems) {
+                        if (vppSlottedCost + slotItem.realCost <= vppItem.vppPoolPoints) {
+                            vppChanges.push({ _id: slotItem.id, "system.vppSlot": true });
+                            vppSlottedCost += slotItem.realCost;
+                        } else {
+                            vppChanges.push({ _id: slotItem.id, "system.vppSlot": false });
+                        }
+                    }
+                    await this.updateEmbeddedDocuments("Item", vppChanges);
+                }
+            }
+
             // Make sure any powers with characteristic properties
             // reflect in current VALUE
             uploadProgressBar.advance(`${this.name}: FullHealth`, 0);
@@ -3119,7 +3138,7 @@ export class HeroSystem6eActor extends Actor {
         return undefined;
     }
 
-    getActorRealAndActivePoints() {
+    getActorCharacterAndActivePoints() {
         // Calculate realCost & Active Points for bought as characteristics
         let characterPointCost = 0;
         let activePoints = 0;
@@ -3146,7 +3165,8 @@ export class HeroSystem6eActor extends Actor {
                 o.type !== "movement" &&
                 !o.system.XMLID?.startsWith("__"), // Exclude placeholder powers
         )) {
-            let _characterPointCost = parseFloat(item.system?.characterPointCost || item.system?.realCost) || 0;
+            let _characterPointCost =
+                parseFloat(item.system?.characterPointCost || item.system?.characterPointCost) || 0;
             const _activePoints = parseFloat(item.system?.activePoints) || 0;
 
             if (_characterPointCost !== 0) {
@@ -3205,23 +3225,23 @@ export class HeroSystem6eActor extends Actor {
     }
 
     get activePoints() {
-        return this.getActorRealAndActivePoints().activePoints;
+        return this.getActorCharacterAndActivePoints().activePoints;
     }
 
     get characterPointCost() {
-        return this.getActorRealAndActivePoints().characterPointCost;
+        return this.getActorCharacterAndActivePoints().characterPointCost;
     }
 
     get pointsDetail() {
-        return this.getActorRealAndActivePoints().pointsDetail;
+        return this.getActorCharacterAndActivePoints().pointsDetail;
     }
 
     get activePointsDetail() {
-        return this.getActorRealAndActivePoints().activePointsDetail;
+        return this.getActorCharacterAndActivePoints().activePointsDetail;
     }
 
     get realCost() {
-        return this.getActorRealAndActivePoints().realCost;
+        return this.getActorCharacterAndActivePoints().realCost;
     }
 
     pslPentaltyItems(penaltyType) {
