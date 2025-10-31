@@ -469,6 +469,11 @@ tr.top-powers.delta-item {
     background-color: rgb(79 130 180 / 20%);
 }
 
+tr.item.vpp-unslotted,
+tr.top-powers.vpp-unslotted {
+    text-decoration: line-through;
+}
+
 .actor-sheet .sheet-content tr.item.validation {
     background-color: rgb(255 255 0 / 50%);
     text-align: left;

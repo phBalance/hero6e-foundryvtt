@@ -226,7 +226,7 @@
                 <li>
                     <label>
                       <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
-                      <span title="{{{this.description}}}">{{this.name}}</span>
+                      <span title="{{this.description}}">{{this.name}}</span>
                     </label>
                   </li>
               {{/each}}
@@ -258,7 +258,7 @@
               <li>
                   <label>
                     <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="nakedAdvantagesItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
-                    <span  title="{{{this.description}}}">{{this.name}}</span>
+                    <span  title="{{this.description}}">{{this.name}}</span>
                   </label>
                 </li>
             {{/each}}
@@ -323,7 +323,7 @@
 
       {{#each csls}}
         <div class="form-group">
-          <label title="{{{this.cslSkill.system.description}}}">
+          <label title="{{this.cslSkill.system.description}}">
             {{this.cslSkill.name}}
             {{#if (ne this.cslSkill.name "Combat Skill Levels")}}
               (CSL)

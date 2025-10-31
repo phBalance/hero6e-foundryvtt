@@ -34,4 +34,14 @@
                 height="24"
             ></i></a>
     {{/if}}
+
+    {{#if (eq this.system.XMLID "VPP")}}
+        {{log "VPP" this}}
+        <a class="item-image item-change-vpp"><i
+                class="fas fa-cog"
+                title="Change VPP"
+                width="24"
+                height="24"
+            ></i></a>
+    {{/if}}
 {{/if}}
