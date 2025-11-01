@@ -200,7 +200,7 @@ export class ItemVppConfig extends HeroApplication {
             }
             context.render();
         }
-        const vppSelectControls = document.querySelectorAll(".vpp-select-control");
+        const vppSelectControls = this.form.querySelectorAll(".vpp-select-control");
         for (const vppSelect of vppSelectControls) {
             vppSelect.addEventListener("click", (ev) => vppSelectHandler(ev, this));
         }
