@@ -44,7 +44,7 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mj
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
-import { ItemVppConfig } from "../applications/apps/ItemVppConfig/item-vpp-config.mjs";
+import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
