@@ -1,0 +1,46 @@
+{{log "item-vpp-application" this}}
+<section>
+
+    <p>
+        The powers on the left are available to be slotted into the VPP and cannot be used. 
+        The powers on the right are slotted and can be used. 
+        Each slot has an active cost, the total of which cannot exceed the VPP pool points.
+    </p>
+    <hr />
+
+    <div class="flexrow vpp-selects">
+
+        {{!-- Available SELECT --}}
+        <div class="">
+            <span>Available Slots</span>
+            <select id="vppUnSlotted" class="form-control" size="10" multiple="multiple">
+                {{#each vppUnSlottedItems}}
+                <option value="{{this.id}}" title="{{this.system.description}}" data-cost="{{this.realCost}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+
+        {{!-- Controls --}}
+        <div class="flexcol flex0 vpp-select-control">
+            <span>&nbsp;</span>
+            <button type="button" id="rightButton" class="vpp-select-control" disabled><i class="fa-solid fa-chevron-right"></i></button>
+            <button type="button" id="leftButton" class="vpp-select-control" disabled><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" id="defaultButton" class="vpp-select-control">Default</button>
+        </div>
+
+        {{!-- Active SELECT --}}    
+        <div class="">
+            <span>VPP Slots</span>
+            <select id="vppSlotted" class="form-control" size="10" multiple="multiple">
+                {{#each vppSlottedItems}}
+                <option value="{{this.id}}" title="{{this.system.description}}" data-cost="{{this.realCost}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+    <br>
+    <center>
+        Pool points <b>{{vppSlottedCost}}</b> of {{vppPoolPoints}}
+    </center>
+
+</section>

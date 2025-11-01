@@ -49,7 +49,7 @@ export class ItemVppConfig extends HeroApplication {
     static initializeTemplate() {
         ItemVppConfig.PARTS = {
             body: {
-                template: `systems/${HEROSYS.module}/templates/apps/ItemVppConfig/item-vpp-config.hbs`,
+                template: `systems/${HEROSYS.module}/templates/apps/item-vpp-config.hbs`,
             },
             footer: {
                 template: "templates/generic/form-footer.hbs",
@@ -142,9 +142,13 @@ export class ItemVppConfig extends HeroApplication {
     async _onRender(context, options) {
         await super._onRender(context, options);
 
-        function vppSelectHandler(ev, context) {
+        function vppButtonHandler(ev, context) {
+            if (!ev.target.closest("form")) {
+                console.error("unable to locate form", context);
+                return;
+            }
             switch (ev.target.id) {
-                case "rightSelected": {
+                case "rightButton": {
                     const selected = Array.from(
                         ev.target.closest("form").querySelectorAll("#vppUnSlotted option:checked"),
                     );
@@ -152,7 +156,7 @@ export class ItemVppConfig extends HeroApplication {
                     context.#vppSlottedIds.push.apply(context.#vppSlottedIds, selectedIds);
                     break;
                 }
-                case "leftSelected": {
+                case "leftButton": {
                     const selected = Array.from(
                         ev.target.closest("form").querySelectorAll("#vppSlotted option:checked"),
                     );
@@ -160,7 +164,7 @@ export class ItemVppConfig extends HeroApplication {
                     context.#vppSlottedIds = context.#vppSlottedIds.filter((id) => !selectedIds.includes(id));
                     break;
                 }
-                case "reset":
+                case "defaultButton":
                     context.#vppSlottedIds = [];
                     for (const slotItem of context.item.childItems) {
                         if (context.vppSlottedCost + slotItem.realCost <= context.item.vppPoolPoints) {
@@ -173,9 +177,29 @@ export class ItemVppConfig extends HeroApplication {
             }
             context.render();
         }
+
+        function vppSelectHandler(ev, context) {
+            if (!ev.target.closest("form")) {
+                console.error("unable to locate form", context);
+                return;
+            }
+
+            const vppUnSlotted = Array.from(ev.target.closest("form").querySelectorAll("#vppUnSlotted option:checked"));
+            const vppSlotted = Array.from(ev.target.closest("form").querySelectorAll("#vppSlotted option:checked"));
+
+            context.element.querySelector("#rightButton").disabled = vppUnSlotted.length === 0;
+            context.element.querySelector("#leftButton").disabled = vppSlotted.length === 0;
+        }
+
+        // Add EventListeners
         const vppSelectControls = this.form.querySelectorAll(".vpp-select-control");
-        for (const vppSelect of vppSelectControls) {
-            vppSelect.addEventListener("click", (ev) => vppSelectHandler(ev, this));
+        for (const vppSelectButton of vppSelectControls) {
+            vppSelectButton.addEventListener("click", (ev) => vppButtonHandler(ev, this));
+        }
+        const vppSelects = this.form.querySelectorAll("select");
+        for (const vppSelect of vppSelects) {
+            vppSelect.addEventListener("change", (ev) => vppSelectHandler(ev, this));
+            vppSelect.addEventListener("lostfocus", (ev) => vppSelectHandler(ev, this));
         }
     }
 }
