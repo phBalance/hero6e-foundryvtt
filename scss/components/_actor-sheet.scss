@@ -525,6 +525,8 @@ form.application.hero6efoundryvttv2.vpp-config {
     }
 
     select > option {
+        background: none;
+
         &::before {
             display: inline-block;
             content: attr(data-cost) ":";
