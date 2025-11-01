@@ -199,7 +199,6 @@ export class ItemVppConfig extends HeroApplication {
         const vppSelects = this.form.querySelectorAll("select");
         for (const vppSelect of vppSelects) {
             vppSelect.addEventListener("change", (ev) => vppSelectHandler(ev, this));
-            vppSelect.addEventListener("lostfocus", (ev) => vppSelectHandler(ev, this));
         }
     }
 }
