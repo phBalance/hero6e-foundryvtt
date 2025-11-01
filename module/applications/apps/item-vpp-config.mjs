@@ -1,8 +1,8 @@
-import { HEROSYS } from "../../../herosystem6e.mjs";
+import { HEROSYS } from "../../herosystem6e.mjs";
 
-import { HeroApplication } from "../../api/application.mjs";
+import { HeroApplication } from "../api/application.mjs";
 
-import { whisperUserTargetsForActor } from "../../../utility/util.mjs";
+import { whisperUserTargetsForActor } from "../../utility/util.mjs";
 
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
@@ -13,6 +13,10 @@ export class ItemVppConfig extends HeroApplication {
         if (!(options.item?.system?.XMLID === "VPP")) {
             throw new Error("A VPP item must be passed as an option.");
         }
+
+        // uniqueId to prevent duplicate forms for same item
+        options.id = `item-vpp-config-${options.item.uuid.replace(/\./g, "-")}`;
+
         super(options);
         this.#item = options.item;
         this.#tokenUuid = options.tokenUuid;
@@ -23,40 +27,11 @@ export class ItemVppConfig extends HeroApplication {
 
     static DEFAULT_OPTIONS = {
         classes: ["vpp-config"],
-        // form: {
-        //     handler: ItemVppConfig.myFormHandler,
-        //     submitOnChange: false,
-        //     closeOnSubmit: false,
-        // },
-        // actions: {
-        //     myAction: ItemVppConfig.myAction,
-        // },
         window: {
-            icon: "fa-solid fa-edit",
+            icon: "fa-solid fa-cog",
             title: "Title",
-            //resizable: true,
-
-            // controls: [
-            //     {
-            //         // font awesome icon
-            //         icon: "fa-solid fa-triangle-exclamation",
-            //         // string that will be run through localization
-            //         label: "Bar",
-            //         // string that MUST match one of your `actions`
-            //         action: "myAction",
-            //     },
-            // ],
         },
     };
-
-    static async ItemVppConfig(event, form, formData) {
-        // Do things with the returned FormData
-        console.log(event, form, formData);
-    }
-
-    static myAction(event, target) {
-        console.log(this, event, target); // logs the specific application class instance
-    }
 
     _configureRenderOptions(options) {
         // This fills in `options.parts` with an array of ALL part keys by default
@@ -70,8 +45,6 @@ export class ItemVppConfig extends HeroApplication {
             },
         });
     }
-
-    static PARTS = null; // Initialized in initializeTemplate
 
     static initializeTemplate() {
         ItemVppConfig.PARTS = {

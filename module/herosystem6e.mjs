@@ -28,7 +28,7 @@ import {
 } from "./actor/actor-active-effects.mjs";
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 
-import { ItemVppConfig } from "./applications/apps/ItemVppConfig/item-vpp-config.mjs";
+import { ItemVppConfig } from "./applications/apps/item-vpp-config.mjs";
 
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
 import {
