@@ -1,5 +1,7 @@
-import { systemPath } from "../../../constants.mjs";
+import { HEROSYS } from "../../../herosystem6e.mjs";
+
 import { HeroApplication } from "../../api/application.mjs";
+
 import { whisperUserTargetsForActor } from "../../../utility/util.mjs";
 
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
@@ -69,14 +71,18 @@ export class ItemVppConfig extends HeroApplication {
         });
     }
 
-    static PARTS = {
-        body: {
-            template: systemPath("templates/apps/ItemVppConfig/item-vpp-config.hbs"),
-        },
-        footer: {
-            template: "templates/generic/form-footer.hbs",
-        },
-    };
+    static PARTS = null; // Initialized in initializeTemplate
+
+    static initializeTemplate() {
+        ItemVppConfig.PARTS = {
+            body: {
+                template: `systems/${HEROSYS.module}/templates/apps/ItemVppConfig/item-vpp-config.hbs`,
+            },
+            footer: {
+                template: "templates/generic/form-footer.hbs",
+            },
+        };
+    }
 
     #item;
     get item() {
@@ -194,7 +200,7 @@ export class ItemVppConfig extends HeroApplication {
             }
             context.render();
         }
-        const vppSelectControls = document.querySelectorAll(".vpp-select-control");
+        const vppSelectControls = this.form.querySelectorAll(".vpp-select-control");
         for (const vppSelect of vppSelectControls) {
             vppSelect.addEventListener("click", (ev) => vppSelectHandler(ev, this));
         }

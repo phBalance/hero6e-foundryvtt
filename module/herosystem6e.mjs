@@ -28,6 +28,8 @@ import {
 } from "./actor/actor-active-effects.mjs";
 import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 
+import { ItemVppConfig } from "./applications/apps/ItemVppConfig/item-vpp-config.mjs";
+
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
 import {
     HeroActorModel,
@@ -299,6 +301,8 @@ Hooks.once("init", async function () {
     ];
     // Handlebars Templates and Partials
     foundryVttLoadTemplates(templatePaths);
+
+    ItemVppConfig.initializeTemplate();
 
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;
