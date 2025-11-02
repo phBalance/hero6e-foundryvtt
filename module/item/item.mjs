@@ -4708,10 +4708,9 @@ export class HeroSystem6eItem extends Item {
     }
 
     get realCost() {
-        // Duplciate of system.realCost()?
-        // if (this.childItems.length > 0) {
-        //     return this.childItems.reduce((accumulator, currentValue) => accumulator + currentValue.realCost, 0);
-        // }
+        if (this.system.XMLID === "COMPOUNDPOWER" && this.childItems.length > 0) {
+            return this.childItems.reduce((accumulator, currentValue) => accumulator + currentValue.realCost, 0);
+        }
         return this.calcItemPoints().realCost;
     }
 
