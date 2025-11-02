@@ -4,7 +4,7 @@
     <p>
         The powers on the left are available to be slotted into the VPP and cannot be used. 
         The powers on the right are slotted and can be used. 
-        Each slot has an active cost, the total of which cannot exceed the VPP pool points.
+        Each slot has an active cost, the total of which cannot exceed the power pool points.
     </p>
     <hr />
 
@@ -12,7 +12,7 @@
 
         {{!-- Available SELECT --}}
         <div class="">
-            <span>Available Slots</span>
+            <span>Available Powers</span>
             <select id="vppUnSlotted" class="form-control" size="10" multiple="multiple">
                 {{#each vppUnSlottedItems}}
                 <option value="{{this.id}}" title="{{this.system.description}}" data-cost="{{this.realCost}}">{{this.name}}</option>
@@ -30,7 +30,7 @@
 
         {{!-- Active SELECT --}}    
         <div class="">
-            <span>VPP Slots</span>
+            <span>Slotted Powers</span>
             <select id="vppSlotted" class="form-control" size="10" multiple="multiple">
                 {{#each vppSlottedItems}}
                 <option value="{{this.id}}" title="{{this.system.description}}" data-cost="{{this.realCost}}">{{this.name}}</option>
@@ -39,8 +39,8 @@
         </div>
     </div>
     <br>
-    <center>
-        Pool points <b>{{vppSlottedCost}}</b> of {{vppPoolPoints}}
+    <center style="{{#if (gt vppSlottedCost vppPoolPoints)}}color:red;{{/if}}">
+        Variable power pool points <b>{{vppSlottedCost}}</b> of {{vppPoolPoints}}
     </center>
 
 </section>

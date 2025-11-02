@@ -856,7 +856,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
             csl: new ArrayField(new StringField()), // Combat Skill levels
             checked: new BooleanField({ initial: false }), // DEADLYBLOW
-            vppSlot: new BooleanField({ nullable: true }),
+            vppSlotted: new BooleanField({ nullable: true }),
         };
     }
 }

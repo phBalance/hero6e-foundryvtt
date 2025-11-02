@@ -2267,7 +2267,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // 6e has a CONTROLCOST adder; 5e is half of pool
-        return this.findModsByXmlid("CONTROLCOST")?.LEVELS || RoundFavorPlayerDown(this.system.LEVELS) / 2;
+        return this.findModsByXmlid("CONTROLCOST")?.LEVELS || RoundFavorPlayerDown(this.system.LEVELS / 2);
     }
 
     get vppSlotted() {
@@ -2282,11 +2282,11 @@ export class HeroSystem6eItem extends Item {
     // used in HBS
     get vppUnSlotted() {
         try {
-            if (this.parentItem?.system.XMLID === "VPP" && !this.system.vppSlot) {
+            if (this.parentItem?.system.XMLID === "VPP" && !this.system.vppSlotted) {
                 return true;
             }
 
-            if (this.parentItem?.parentItem?.system.XMLID === "VPP" && !this.parentItem.system.vppSlot) {
+            if (this.parentItem?.parentItem?.system.XMLID === "VPP" && !this.parentItem.system.vppSlotted) {
                 return true;
             }
         } catch (e) {
@@ -3395,7 +3395,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Active Points show if there are limitations or the real cost is not equal to the displayed cost
-        if (this._activePoints !== this._realCost || this.realCost !== this.characterPointCost) {
+        if (this._activePoints !== this.characterPointCost) {
             if (this.activePoints) {
                 description += " (" + this.activePointCostForDisplay + " Active Points);";
             }
@@ -3413,6 +3413,11 @@ export class HeroSystem6eItem extends Item {
         // Disadvantages sorted low to high
         for (const modifier of modifiers) {
             description += this.createPowerDescriptionModifier(modifier);
+        }
+
+        // VPP show real cost of each child
+        if (this.parentItem?.system.XMLID === "VPP") {
+            description += ` Real Cost ${this.realCost}`;
         }
 
         description = (description || "")
