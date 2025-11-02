@@ -5768,15 +5768,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             descriptionFactory: function (item) {
                 const noStrIncrease = item.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
-                const noDefIncrease = item.modifiers.find((mod) => mod.XMLID === "NODEFINCREASE");
 
                 const strDisplay = `+${noStrIncrease ? 0 : item.system.LEVELS * 5} STR`;
                 const massDisplay = `${Math.pow(2, item.system.LEVELS) * 100} kg mass`;
                 const kbDisplay = `-${hexDistanceToSystemDisplayString(item.system.LEVELS, item.actor)} KB`;
-                // NODEFINCREASE allows for ED, PD, or EDPD as option.
-                const armorDisplay = (() => {
-                    const noPdIncrease = noDefIncrease?.OPTION.includes("PD");
-                    const noEdIncrease = noDefIncrease?.OPTION.includes("ED");
+                const defenseDisplay = (() => {
+                    const noDefIncrease = item.modifiers.find((mod) => mod.XMLID === "NODEFINCREASE");
+                    // NODEFINCREASE allows for ED, PD, or EDPD as option.
+                    const noPdIncrease = noDefIncrease?.OPTIONID.includes("PD");
+                    const noEdIncrease = noDefIncrease?.OPTIONID.includes("ED");
 
                     if (noPdIncrease && noEdIncrease) return "";
 
@@ -5784,7 +5784,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     return `+${item.system.LEVELS} ${displayTypes}`;
                 })();
 
-                const details = [massDisplay, strDisplay, armorDisplay, kbDisplay].filter(Boolean).join(", ");
+                const details = [massDisplay, strDisplay, defenseDisplay, kbDisplay].filter(Boolean).join(", ");
 
                 return `${item.system.ALIAS} (${details})`;
             },
