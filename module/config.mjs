@@ -8221,6 +8221,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // GENERIC_OBJECT related
+            key: "ADDER",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="GENERIC_OBJECT" ID="1731203796826" BASECOST="1.0" LEVELS="0" ALIAS="Ego Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // ENTANGLE related
             key: "ADDITIONALED",
             behaviors: ["adder"],
@@ -8283,6 +8294,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPON_FAMILIARITY related
+            key: "ANTIAIRCRAFT",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ANTIAIRCRAFT" ID="1759094995666" BASECOST="1.0" LEVELS="0" ALIAS="Anti-Aircraft Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "ANTITANK",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ANTITANK" ID="1759094996237" BASECOST="1.0" LEVELS="0" ALIAS="Anti-Tank Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // HUNTED related
             key: "APPEARANCE",
             behaviors: ["adder"],
@@ -8294,12 +8327,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ANIMAL_HANDLER related
+            key: "AQUATIC",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="AQUATIC" ID="1762052682734" BASECOST="2.0" LEVELS="0" ALIAS="Aquatic Animals" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "ARARE",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="ARARE" ID="1759094965964" BASECOST="1.0" LEVELS="0" ALIAS="Arare" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DANGER_SENSE related
+            key: "AREA",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="AREA" ID="1732478113505" BASECOST="5.0" LEVELS="0" ALIAS="Area" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="IMMEDIATE_VICINITY" OPTIONID="IMMEDIATE_VICINITY" OPTION_ALIAS="immediate vicinity" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8317,11 +8372,33 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             // WEAPON_FAMILIARITY related
+            key: "ARTILLERY",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ARTILLERY" ID="1759094996678" BASECOST="1.0" LEVELS="0" ALIAS="Artillery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
             key: "ATATL",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="ATATL" ID="1759094966470" BASECOST="1.0" LEVELS="0" ALIAS="Atatl" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // VULNERABILITY related
+            key: "ATTACK",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ATTACK" ID="1762048198268" BASECOST="5.0" LEVELS="0" ALIAS="The Attack Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UNCOMMON" OPTIONID="UNCOMMON" OPTION_ALIAS="(Uncommon" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8375,6 +8452,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="BEAMWEAPONS" ID="1759095032335" BASECOST="2.0" LEVELS="0" ALIAS="Beam Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ANIMAL_HANDLER related
+            key: "BIRDS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="BIRDS" ID="1762052683320" BASECOST="2.0" LEVELS="0" ALIAS="Birds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8448,6 +8536,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ANIMAL_HANDLER related
+            key: "BOVINES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="BOVINES" ID="1757193893838" BASECOST="2.0" LEVELS="0" ALIAS="Bovines" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "BOWS",
             behaviors: ["adder"],
@@ -8465,6 +8564,29 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="BURNOUT" ID="1707272379163" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            // ANIMAL_HANDLER related
+            key: "CAMELS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="CAMELS" ID="1762052684160" BASECOST="2.0" LEVELS="0" ALIAS="Camels" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ANIMAL_HANDLER related
+            key: "CANINES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="CANINES" ID="1757193903382" BASECOST="2.0" LEVELS="0" ALIAS="Canines" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8509,6 +8631,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="CHAIN" ID="1759094946877" BASECOST="1.0" LEVELS="0" ALIAS="Chain &amp; Rope Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ACCIDENTALCHANGE related
+            key: "CHANCETOCHANGE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="CHANCETOCHANGE" ID="1732470502005" BASECOST="0.0" LEVELS="0" ALIAS="Chance To Change" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INFREQUENT" OPTIONID="INFREQUENT" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8563,7 +8696,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
     addPower(
-        {},
         {
             // CHARGES related
             key: "CLIPS",
@@ -8786,12 +8918,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPON_FAMILIARITY related
+            key: "DISINTEGRATORS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="DISINTEGRATORS" ID="1759095003570" BASECOST="1.0" LEVELS="0" ALIAS="Disintegrators" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // FORGERY related
             key: "DOCUMENTS",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="DOCUMENTS" ID="1740275768279" BASECOST="2.0" LEVELS="0" ALIAS="Documents" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // AUTOFIRE related
+            key: "DOUBLE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="DOUBLE" ID="1760909069341" BASECOST="0.0" LEVELS="1" ALIAS="x2 Shots" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="0.5" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8847,7 +9001,29 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // ANIMAL_HANDLER related
+            key: "DRAGONS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="DRAGONS" ID="1757193905408" BASECOST="2.0" LEVELS="0" ALIAS="Dragons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
 
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "EARLYEMPLACEDWEAPONS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="EARLYEMPLACEDWEAPONS" ID="1759094995247" BASECOST="1.0" LEVELS="0" ALIAS="Early Emplaced Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // WEAPON_FAMILIARITY related
@@ -8883,6 +9059,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPON_FAMILIARITY related
+            key: "EARLYPERCUSSIONFIREARMS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="EARLYPERCUSSIONFIREARMS" ID="1759094982049" BASECOST="1.0" LEVELS="0" ALIAS="Early Percussion Firearms" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // MINDSCAN efffects related
             key: "ECVBONUS",
             behaviors: ["adder"],
@@ -8900,6 +9087,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         xml: `<ADDER XMLID="ED" ID="1752359726494" BASECOST="0.5" LEVELS="0" ALIAS="ED" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
+    addPower(
+        {
+            // DEPENDENCE related
+            key: "EFFECT",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="EFFECT" ID="1704506813677" BASECOST="5.0" LEVELS="0" ALIAS="Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DAMAGE1D6" OPTIONID="DAMAGE1D6" OPTION_ALIAS="Takes 1d6 Damage" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // SOCIALLIMITATION related
@@ -8952,6 +9150,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="ELECTRICWHIP" ID="1759094936730" BASECOST="1.0" LEVELS="0" ALIAS="Electric Whip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "ELECTRONBEAM",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ELECTRONBEAM" ID="1759095001322" BASECOST="1.0" LEVELS="0" ALIAS="Electron Beam Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ANIMAL_HANDLER related
+            key: "ELEPHANTS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ELEPHANTS" ID="1757193906512" BASECOST="2.0" LEVELS="0" ALIAS="Elephants" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9011,6 +9231,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ANIMAL_HANDLER related
+            key: "EQUINES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="EQUINES" ID="1757193907144" BASECOST="2.0" LEVELS="0" ALIAS="Equines" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TRIGGER related
             key: "EXPIRE",
             behaviors: ["adder"],
@@ -9032,6 +9263,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // ANIMAL_HANDLER related
+            key: "FELINES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="FELINES" ID="1757193665259" BASECOST="2.0" LEVELS="0" ALIAS="Felines" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // RIVALRY related
@@ -9072,6 +9314,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="FLAILS" ID="1759094931202" BASECOST="1.0" LEVELS="0" ALIAS="Flails" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "FLAMETHROWERS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="FLAMETHROWERS" ID="1759094993320" BASECOST="1.0" LEVELS="0" ALIAS="Flamethrowers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9138,7 +9391,62 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "GAUSSGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="GAUSSGUNS" ID="1759094987322" BASECOST="1.0" LEVELS="0" ALIAS="Gauss Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "GRENADELAUNCHERS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="GRENADELAUNCHERS" ID="1759094993738" BASECOST="1.0" LEVELS="0" ALIAS="Grenade Launchers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
 
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "HANDGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HANDGUNS" ID="1759094984582" BASECOST="1.0" LEVELS="0" ALIAS="Handguns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // TRANSFORM related
+            key: "HEALEDBY",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HEALEDBY" ID="1760247859028" BASECOST="0.0" LEVELS="0" ALIAS="Healed back by" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="METHOD" OPTIONID="METHOD" OPTION_ALIAS="" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "HEAVYMACHINEGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HEAVYMACHINEGUNS" ID="1759094994155" BASECOST="1.0" LEVELS="0" ALIAS="General Purpose/Heavy Machine Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // TRANSPORT_FAMILIARITY related
@@ -9169,6 +9477,39 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="HOOKSWORD" ID="1759094942254" BASECOST="1.0" LEVELS="0" ALIAS="Hook Sword" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "HOWITZERS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HOWITZERS" ID="1759094997080" BASECOST="1.0" LEVELS="0" ALIAS="Howitzers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // REPUTATION related
+            key: "HOWWELL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HOWWELL" ID="1755459521093" BASECOST="0.0" LEVELS="0" ALIAS="How Well Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // REPUTATION related
+            key: "HOWWIDE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HOWWIDE" ID="1755459521087" BASECOST="1.0" LEVELS="0" ALIAS="How Widely Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MEDIUMGROUP" OPTIONID="MEDIUMGROUP" OPTION_ALIAS="A medium-sized group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9242,11 +9583,31 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ANIMAL_HANDLER related
+            key: "INSECTS",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="INSECTS" ID="1762052685705" BASECOST="2.0" LEVELS="0" ALIAS="Insects &amp; Anthropods" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // PSYCHOLOGICALLIMITATION related
             key: "INTENSITY",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INTENSITY" ID="1709447166359" BASECOST="0.0" LEVELS="0" ALIAS="Intensity Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MODERATE" OPTIONID="MODERATE" OPTION_ALIAS="Moderate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "IONBLASTER",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="IONBLASTER" ID="1759095002574" BASECOST="1.0" LEVELS="0" ALIAS="Ion Blasters" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9396,6 +9757,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "LASERPISTOL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="LASERPISTOL" ID="1759095000406" BASECOST="1.0" LEVELS="0" ALIAS="Laser Pistols" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "LASERRIFLE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="LASERRIFLE" ID="1759095000913" BASECOST="1.0" LEVELS="0" ALIAS="Laser Rifles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(undefined, {
         // MONEYDISAD related
         key: "LEVEL",
@@ -9434,6 +9817,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="LIMITEDRECOVER" ID="1729971742993" BASECOST="-0.5" LEVELS="0" ALIAS="Recovers after 2 Hours of Study" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "LIQUIDRIFLE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="LIQUIDRIFLE" ID="1759094986848" BASECOST="1.0" LEVELS="0" ALIAS="Liquid-Propellant Rifles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "LMGS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="LMGS" ID="1759094984132" BASECOST="1.0" LEVELS="0" ALIAS="Assault Rifles/LMGs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9512,6 +9917,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPON_FAMILIARITY related
+            key: "MISSILEGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="MISSILEGUNS" ID="1759094990076" BASECOST="1.0" LEVELS="0" ALIAS="Missile Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "MOBILE",
             behaviors: ["adder"],
             type: ["adder"],
@@ -9551,6 +9967,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="MONEY" ID="1740275766578" BASECOST="2.0" LEVELS="0" ALIAS="Money (Counterfeiting)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "MORTARS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="MORTARS" ID="1759094997467" BASECOST="1.0" LEVELS="0" ALIAS="Mortars" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9623,6 +10050,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // FLASH and presumably other sense related powers
+            key: "NORMALHEARING",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NORMALHEARING" ID="1754778618210" BASECOST="3.0" LEVELS="0" ALIAS="Normal Hearing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // FLASH and presumably other sense related powers
+            key: "NORMALSIGHT",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NORMALSIGHT" ID="1755459402833" BASECOST="5.0" LEVELS="0" ALIAS="Normal Sight" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // EXTRATIME related
             key: "NOOTHERACTIONS",
             behaviors: ["adder"],
@@ -9662,6 +10111,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="OCCUR" ID="1704506848422" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // PHYSICALLIMITATION related
+            key: "OCCURS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="OCCURS" ID="1704506834686" BASECOST="5.0" LEVELS="0" ALIAS="Limitation Occurs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INFREQUENTLY" OPTIONID="INFREQUENTLY" OPTION_ALIAS="(Infrequently" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9711,7 +10171,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            // FORGERY related
+            // FORGERY, ANIMAL_HANDLER related
             key: "OTHER",
             behaviors: ["adder"],
             type: ["adder"],
@@ -9732,6 +10192,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "PARTICLEGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="PARTICLEGUNS" ID="1759095001740" BASECOST="1.0" LEVELS="0" ALIAS="Particle Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(undefined, {
         // TRANSPARENT related
         key: "PD",
@@ -9748,6 +10219,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="PENDJEPIT" ID="1759094944643" BASECOST="1.0" LEVELS="0" ALIAS="Pendjepit" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "PLASMAGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="PLASMAGUNS" ID="1759095003048" BASECOST="1.0" LEVELS="0" ALIAS="Plasma Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9779,6 +10261,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="POLEARMS" ID="1759094954869" BASECOST="1.0" LEVELS="0" ALIAS="Polearms and Spears" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "POLYMERGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="POLYMERGUNS" ID="1759094987796" BASECOST="1.0" LEVELS="0" ALIAS="Polymer Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9848,6 +10341,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ANIMAL_HANDLER related
+            key: "RAPTORS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="RAPTORS" ID="1762052686224" BASECOST="2.0" LEVELS="0" ALIAS="Raptors" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // DISTINCTIVEFEATURES related
             key: "REACTION",
             behaviors: ["adder"],
@@ -9870,12 +10374,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPON_FAMILIARITY related
+            key: "RECOILLESSGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="RECOILLESSGUNS" ID="1759094997884" BASECOST="1.0" LEVELS="0" ALIAS="Recoilless Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // CHARGES related
             key: "RECOVERABLE",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="RECOVERABLE" ID="1737924558549" BASECOST="0.5" LEVELS="0" ALIAS="Recoverable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ANIMAL_HANDLER related
+            key: "REPTILES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="REPTILES" ID="1762052686794" BASECOST="2.0" LEVELS="0" ALIAS="Reptiles &amp; Amphibians" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9904,11 +10430,44 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             // WEAPON_FAMILIARITY related
+            key: "RIFLES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="RIFLES" ID="1759094984992" BASECOST="1.0" LEVELS="0" ALIAS="Rifles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
             key: "RINGS",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="RINGS" ID="1759094948597" BASECOST="1.0" LEVELS="0" ALIAS="Rings" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "ROCKETPISTOLS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ROCKETPISTOLS" ID="1759094988246" BASECOST="1.0" LEVELS="0" ALIAS="Rocket Pistols" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "ROCKETRIFLES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ROCKETRIFLES" ID="1759094988752" BASECOST="1.0" LEVELS="0" ALIAS="Rocket Rifles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -9954,11 +10513,53 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // DANGER_SENSE and presumably other senses related
+            key: "SENSE",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SENSE" ID="1732478113494" BASECOST="2.0" LEVELS="0" ALIAS="Function as a Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // DISTINCTIVEFEATURES related
             key: "SENSING",
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SENSING" ID="1754364265112" BASECOST="0.0" LEVELS="0" ALIAS="Sensing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Detectable By Commonly-Used Senses" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DANGER_SENSE related
+            key: "SENSITIVITY",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SENSITIVITY" ID="1732478113499" BASECOST="5.0" LEVELS="0" ALIAS="Sensitivity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OUT_OF_COMBAT" OPTIONID="OUT_OF_COMBAT" OPTION_ALIAS="out of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "SHOTGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SHOTGUNS" ID="1759094985410" BASECOST="1.0" LEVELS="0" ALIAS="Shotguns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "SHOULDERFIRED",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SHOULDERFIRED" ID="1759094994606" BASECOST="1.0" LEVELS="0" ALIAS="Shoulder-Fired Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -10108,6 +10709,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             // WEAPON_FAMILIARITY related
+            key: "SONICSTUNNER",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SONICSTUNNER" ID="1759094989186" BASECOST="1.0" LEVELS="0" ALIAS="Sonic Stunners" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
             key: "SPREADTHEWATER",
             behaviors: ["adder"],
             type: ["adder"],
@@ -10184,12 +10796,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPON_FAMILIARITY related
+            key: "SUBMACHINEGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SUBMACHINEGUNS" ID="1759094985893" BASECOST="1.0" LEVELS="0" ALIAS="Submachine Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TRANSPORT_FAMILIARITY related
             key: "SUBMARINES",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SUBMARINES" ID="1756738546770" BASECOST="1.0" LEVELS="0" ALIAS="Submarines" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DEPENDENCE related
+            key: "SUBSTANCE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SUBSTANCE" ID="1704506813686" BASECOST="5.0" LEVELS="0" ALIAS="Dependent Substance Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYCOMMON" OPTIONID="VERYCOMMON" OPTION_ALIAS="(Very Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -10202,17 +10836,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(1 / 2),
             xml: `<ADDER XMLID="TELEPATHYEFFECT" ID="1737915448081" BASECOST="0.0" LEVELS="10" ALIAS="+10 Points of Telepathy effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
-        },
-        {},
-    );
-    addPower(
-        {
-            // DAMAGEOVERTIME related
-            key: "TIMEBETWEEN",
-            behaviors: ["adder"],
-            type: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="TIMEBETWEEN" ID="1738534117245" BASECOST="2.0" LEVELS="0" ALIAS="damage occurs every" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEGMENT" OPTIONID="SEGMENT" OPTION_ALIAS="Segment" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -10252,6 +10875,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             // WEAPON_FAMILIARITY related
+            key: "THROWNGRENADES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="THROWNGRENADES" ID="1759094986350" BASECOST="1.0" LEVELS="0" ALIAS="Thrown Grenades" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
             key: "THROWNKNIVES",
             behaviors: ["adder"],
             type: ["adder"],
@@ -10273,12 +10907,45 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // DEPENDENCE related
+            key: "TIME",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="TIME" ID="1704506813702" BASECOST="25.0" LEVELS="0" ALIAS="Time Before Suffering Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEGMENT" OPTIONID="SEGMENT" OPTION_ALIAS="1 Segment" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DAMAGEOVERTIME related
+            key: "TIMEBETWEEN",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="TIMEBETWEEN" ID="1738534117245" BASECOST="2.0" LEVELS="0" ALIAS="damage occurs every" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEGMENT" OPTIONID="SEGMENT" OPTION_ALIAS="Segment" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TRANSPORT_FAMILIARITY related
             key: "TRACKEDMILITARY",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="TRACKEDMILITARY" ID="1756738532569" BASECOST="1.0" LEVELS="0" ALIAS="Tracked Military Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "TRANQGUNS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="TRANQGUNS" ID="1759094991102" BASECOST="1.0" LEVELS="0" ALIAS="Tranquilizer Dart Guns" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -10362,6 +11029,50 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPON_FAMILIARITY related
+            key: "UNCOMMONMARTIAL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="UNCOMMONMARTIAL" ID="1759094959312" BASECOST="0.0" LEVELS="0" ALIAS="Uncommon Martial Arts Melee Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "UNCOMMONMELEE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="UNCOMMONMELEE" ID="1759094938545" BASECOST="0.0" LEVELS="0" ALIAS="Uncommon Melee Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "UNCOMMONMISSILEWEAPONS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="UNCOMMONMISSILEWEAPONS" ID="1759094973491" BASECOST="0.0" LEVELS="0" ALIAS="Uncommon Missile Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WEAPON_FAMILIARITY related
+            key: "UNCOMMONMODERNWEAPONS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="UNCOMMONMODERNWEAPONS" ID="1759094994607" BASECOST="0.0" LEVELS="0" ALIAS="Uncommon Modern Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TRANSPORT_FAMILIARITY related
             key: "UNCOMMONMOTORIZEDGROUNDVEHICLES",
             behaviors: ["adder"],
@@ -10373,12 +11084,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ANIMAL_HANDLER related
+            key: "URSINES",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="URSINES" ID="1762052688375" BASECOST="2.0" LEVELS="0" ALIAS="Ursines" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "URUMI",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="URUMI" ID="1759094958725" BASECOST="1.0" LEVELS="0" ALIAS="Urumi" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DEPENDENTNPC related
+            key: "USEFULNESS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="USEFULNESS" ID="1704506818256" BASECOST="10.0" LEVELS="0" ALIAS="Usefulness" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INCOMPENTENT" OPTIONID="INCOMPENTENT" OPTION_ALIAS="(Incompetent" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -11362,6 +12095,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // VULNERABILITY related
+            key: "MULTIPLIER",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="MULTIPLIER" ID="1707069728157" BASECOST="0.0" LEVELS="0" ALIAS="Vulnerability Multiplier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFSTUN" OPTIONID="HALFSTUN" OPTION_ALIAS="1 1/2 x STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
 
     addPower(undefined, {
         key: "NND",
@@ -11387,6 +12131,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOCONSCIOUSCONTROL" ID="1737065783478" BASECOST="-2.0" LEVELS="0" ALIAS="No Conscious Control" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DENSITYINCREASE related
+            key: "NODEFINCREASE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="NODEFINCREASE" ID="1762042798721" BASECOST="-0.25" LEVELS="0" ALIAS="No Defense Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ED" OPTIONID="ED" OPTION_ALIAS="does not provide ED" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -11475,6 +12230,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOSTRBONUS" ID="1612300735512" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Bonus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DENSITYINCREASE related
+            key: "NOSTRINCREASE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762042798715" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
