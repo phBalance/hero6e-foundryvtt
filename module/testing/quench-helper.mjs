@@ -1,7 +1,11 @@
 export async function createQuenchActor({ quench, contents, is5e }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
     const name = CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";
-    const quenchName = `_Quench ${quench?.title} ${name} ${Date.now().toString()}`;
+    const quenchName =
+        `_Quench ${quench?.title || quench?.currentTest?.parent?.title} ${name} ${Date.now().toString()}`.replace(
+            /\W+/g,
+            " ",
+        );
 
     // Delete any previous leftover actors for this test
     const oldQuenchActors = game.actors.filter((a) => a.name.includes(quench.title));
@@ -48,6 +52,10 @@ export async function deleteQuenchActor({ quench, actor }) {
         quench.suites?.find((s) => s.tests.find((t) => t.state !== "passed"))
     ) {
         console.error("skipping deletion of actor because tests failed");
+        return;
+    }
+
+    if (quench.currentTest?.state === undefined) {
         return;
     }
 
