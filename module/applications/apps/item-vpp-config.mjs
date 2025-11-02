@@ -192,7 +192,7 @@ export class ItemVppConfig extends HeroApplication {
         }
 
         // Add EventListeners
-        const vppSelectControls = this.form.querySelectorAll(".vpp-select-control");
+        const vppSelectControls = this.form.querySelectorAll("button.vpp-select-control");
         for (const vppSelectButton of vppSelectControls) {
             vppSelectButton.addEventListener("click", (ev) => vppButtonHandler(ev, this));
         }
