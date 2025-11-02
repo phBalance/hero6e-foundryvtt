@@ -80,7 +80,7 @@ export class ItemVppConfig extends HeroApplication {
 
     async _prepareContext(options) {
         if (options.isFirstRender) {
-            this.#vppSlottedIds = this.item.childItems.filter((i) => i.system.vppSlot).map((i) => i.id);
+            this.#vppSlottedIds = this.item.childItems.filter((i) => i.system.vppSlotted).map((i) => i.id);
         }
 
         return super._prepareContext(options);
@@ -119,10 +119,12 @@ export class ItemVppConfig extends HeroApplication {
         const changes = [];
         const changeContent = [];
         for (const vppItem of this.item.childItems) {
-            const vppSlot = this.#vppSlottedIds.includes(vppItem.id);
-            if (vppItem.system.vppSlot !== vppSlot) {
-                changes.push({ _id: vppItem.id, ["system.vppSlot"]: vppSlot });
-                changeContent.push(`<li>${vppItem.name}: ${!vppItem.system.vppSlot ? "Slotted" : "Unslottted"}</li>`);
+            const vppSlotted = this.#vppSlottedIds.includes(vppItem.id);
+            if (vppItem.system.vppSlotted !== vppSlotted) {
+                changes.push({ _id: vppItem.id, ["system.vppSlotted"]: vppSlotted });
+                changeContent.push(
+                    `<li>${vppItem.name}: ${!vppItem.system.vppSlotted ? "Slotted" : "Unslottted"}</li>`,
+                );
             }
         }
         if (changes.length > 0) {
@@ -131,7 +133,7 @@ export class ItemVppConfig extends HeroApplication {
             const chatData = {
                 author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.IC,
-                content: `${this.item.name} slots were changed. VPP pool points: ${this.vppSlottedCost} of ${this.item.vppPoolPoints}. <ul>${changeContent.join("")}</ul>`,
+                content: `${this.item.name} slots were changed. Variable power pool points: ${this.vppSlottedCost} of ${this.item.vppPoolPoints}. <ul>${changeContent.join("")}</ul>`,
                 whisper: whisperUserTargetsForActor(this.item.actor),
                 speaker: ChatMessage.getSpeaker({ actor: this.item.actor, token: fromUuidSync(this.#tokenUuid) }),
             };
@@ -184,6 +186,16 @@ export class ItemVppConfig extends HeroApplication {
                 return;
             }
 
+            // Clear all select options upon SELECT 'blur'
+            if (ev.type === "blur") {
+                for (let el of ["#vppSlotted", "#vppUnSlotted"]) {
+                    ev.target
+                        .closest("form")
+                        .querySelectorAll(`${el} option:checked`)
+                        .forEach((opt) => (opt.selected = false));
+                }
+            }
+
             const vppUnSlotted = Array.from(ev.target.closest("form").querySelectorAll("#vppUnSlotted option:checked"));
             const vppSlotted = Array.from(ev.target.closest("form").querySelectorAll("#vppSlotted option:checked"));
 
@@ -194,11 +206,13 @@ export class ItemVppConfig extends HeroApplication {
         // Add EventListeners
         const vppSelectControls = this.form.querySelectorAll("button.vpp-select-control");
         for (const vppSelectButton of vppSelectControls) {
-            vppSelectButton.addEventListener("click", (ev) => vppButtonHandler(ev, this));
+            // Careful "click" doesn't work because blur occurs before click, but mousedown occurs before blur.
+            vppSelectButton.addEventListener("mousedown", (ev) => vppButtonHandler(ev, this));
         }
         const vppSelects = this.form.querySelectorAll("select");
         for (const vppSelect of vppSelects) {
             vppSelect.addEventListener("change", (ev) => vppSelectHandler(ev, this));
+            vppSelect.addEventListener("blur", (ev) => vppSelectHandler(ev, this));
         }
     }
 }

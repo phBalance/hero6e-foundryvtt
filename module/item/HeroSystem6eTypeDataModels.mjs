@@ -580,23 +580,23 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get activePoints() {
-        return this.parent.calcItemPoints().activePoints;
+        return this.parent.activePoints;
     }
 
     get characterPointCost() {
-        return this.parent.calcItemPoints().characterPointCost;
+        return this.parent.characterPointCost;
     }
 
     get realCost() {
-        return this.parent.calcItemPoints().realCost;
+        return this.parent.realCost;
     }
 
     get _activePointsWithoutEndMods() {
-        return this.parent.calcItemPoints()._activePointsWithoutEndMods;
+        return this.parent._activePointsWithoutEndMods;
     }
 
     get _advantages() {
-        return this.parent.calcItemPoints()._advantages;
+        return this.parent._advantages;
     }
 
     get killing() {
@@ -856,7 +856,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
             csl: new ArrayField(new StringField()), // Combat Skill levels
             checked: new BooleanField({ initial: false }), // DEADLYBLOW
-            vppSlot: new BooleanField({ nullable: true }),
+            vppSlotted: new BooleanField({ nullable: true }),
         };
     }
 }
