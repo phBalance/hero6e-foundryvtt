@@ -14025,9 +14025,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-1" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {
             xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
-        {},
     );
     addPower(
         {
