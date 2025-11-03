@@ -13976,23 +13976,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         OPTIONID: "PD",
                         OPTION: "PD",
                         OPTION_ALIAS: "does not provide PD",
-                        BASECOST: "0"
+                        BASECOST: "0",
                     },
                     {
                         OPTIONID: "ED",
                         OPTION: "ED",
                         OPTION_ALIAS: "does not provide ED",
-                        BASECOST: "0"
+                        BASECOST: "0",
                     },
                     {
                         OPTIONID: "PDED",
                         OPTION: "PDED",
                         OPTION_ALIAS: "does not provide PD or ED",
-                        BASECOST: "-0.25"
-                    }
-                ]
+                        BASECOST: "-0.25",
+                    },
+                ],
             },
-            xml: `<MODIFIER XMLID="NODEFINCREASE" ID="1762009637585" BASECOST="-0.5" LEVELS="0" ALIAS="No Defense Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PDED" OPTIONID="PDED" OPTION_ALIAS="does not provide PD or ED" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`
+            xml: `<MODIFIER XMLID="NODEFINCREASE" ID="1762009637585" BASECOST="-0.5" LEVELS="0" ALIAS="No Defense Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PDED" OPTIONID="PDED" OPTION_ALIAS="does not provide PD or ED" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {
             editOptions: {
@@ -14001,35 +14001,33 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         OPTIONID: "PD",
                         OPTION: "PD",
                         OPTION_ALIAS: "does not provide PD",
-                        BASECOST: "-0.25"
+                        BASECOST: "-0.25",
                     },
                     {
                         OPTIONID: "ED",
                         OPTION: "ED",
                         OPTION_ALIAS: "does not provide ED",
-                        BASECOST: "-0.25"
+                        BASECOST: "-0.25",
                     },
                     {
                         OPTIONID: "PDED",
                         OPTION: "PDED",
                         OPTION_ALIAS: "does not provide PD or ED",
-                        BASECOST: "-0.5"
-                    }
-                ]
+                        BASECOST: "-0.5",
+                    },
+                ],
             },
-        }
+        },
     );
     addPower(
         {
             key: "NOSTRINCREASE",
             behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(1),
+            costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`
+            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
-        {
-            costPerLevel: fixedValueFunction(1/2)
-        }
+        {},
     );
     addPower(
         {
