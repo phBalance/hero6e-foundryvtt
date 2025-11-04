@@ -841,7 +841,6 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             POWER: new ArrayField(new EmbeddedDataField(HeroPowerModel)),
             SFX: new StringField(),
             XMLID: new StringField(),
-            xmlid: new StringField(),
             SHOW_ACTIVE_COST: new BooleanField({ initial: null, nullable: true }),
             INCLUDE_NOTES_IN_PRINTOUT: new BooleanField({ initial: null, nullable: true }),
             _active: new ObjectField(), // action  (consider renaming)

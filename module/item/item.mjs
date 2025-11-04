@@ -43,7 +43,7 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
+import { HeroAdderModel, HeroModifierModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 
 export function initializeItemHandlebarsHelpers() {
@@ -1629,13 +1629,13 @@ export class HeroSystem6eItem extends Item {
         return recursiveFindByXmlid.call(this, xmlid);
     }
 
-    findModById(id, xmlid) {
+    findModByHcdId(id, xmlid) {
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
             if (this.system?.[key]) {
                 // Intentionally using == here to take advantage of string/int equality
                 const value = this.system[key].find((o) => o.ID == id);
                 if (value) {
-                    return { ...value, _parentKey: key };
+                    return value;
                 }
 
                 for (const subMod of this.system[key]) {
@@ -1652,7 +1652,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         ui.notifications.error(`Unable to find ${id}/${xmlid} from ${this.name}.`);
-        return false;
+        return null;
     }
 
     async deleteModById(id, xmlid) {
@@ -5295,7 +5295,6 @@ export class HeroSystem6eItem extends Item {
         } else if (diceParts.d6Less1DieCount && !minusOnePipAdder) {
             // Add the adder
             const newAdder = createModifierOrAdderFromXml(minusOnePipAdderData.xml);
-            this.system.ADDER ??= [];
             this.system.ADDER.push(new HeroAdderModel(newAdder, { parent: this }));
         }
 
@@ -5339,7 +5338,6 @@ export class HeroSystem6eItem extends Item {
             xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
 
             const newAdder = createModifierOrAdderFromXml(xml);
-            this.system.ADDER ??= [];
             this.system.ADDER.push(new HeroAdderModel(newAdder, { parent: this }));
         }
 
@@ -5383,7 +5381,6 @@ export class HeroSystem6eItem extends Item {
             xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
 
             const newAdder = createModifierOrAdderFromXml(xml);
-            this.system.ADDER ??= [];
             this.system.ADDER.push(new HeroAdderModel(newAdder, { parent: this }));
         }
     }
@@ -5583,10 +5580,12 @@ export function createModifierOrAdderFromXml(xml) {
                 modifierOrAdderData[attribute.name] = attribute.value.trim();
         }
     }
-    modifierOrAdderData.xmlTag = xmlDoc.children[0].tagName;
 
-    // Create a unique ID
+    // Create a unique HDC ID
     modifierOrAdderData.ID = new Date().getTime().toString();
+
+    // Ensure consistant tagName
+    modifierOrAdderData.xmlTag = xmlDoc.children[0].tagName;
 
     return modifierOrAdderData;
 }

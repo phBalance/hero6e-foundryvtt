@@ -31,11 +31,11 @@ export class ItemModifierFormApplication extends FormApplication {
         console.log(this.data.mod);
         const data = this.data;
 
-        const configPowerInfo = getPowerInfo({
-            xmlid: this.data?.mod?.XMLID,
-            actor: this.data.item.actor,
-        });
-        data.editOptions = configPowerInfo?.editOptions;
+        if (!this.data.mod.baseInfo) {
+            ui.notifications.error(`${this.data?.mod?.XMLID} missing baseInfo`, this);
+        }
+
+        data.editOptions = this.data.mod.baseInfo?.editOptions;
         return data;
     }
 
@@ -66,7 +66,7 @@ export class ItemModifierFormApplication extends FormApplication {
             // this.data.mod.BASECOST_total = this.data.mod.baseCost;
         }
 
-        const oldMod = this.data.item.findModById(this.data.mod.ID);
+        const oldMod = this.data.item.findModByHcdId(this.data.mod.ID);
         const idx = this.data.item.system[oldMod._parentKey].findIndex((o) => o.ID == oldMod.ID);
         this.data.item.system[oldMod._parentKey][idx] = this.data.mod;
         await this.data.item.update({ system: this.data.item.system });
