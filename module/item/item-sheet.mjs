@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { createModifierOrAdderFromXml } from "./item.mjs";
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../utility/adjustment.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
+import { HeroAdderModel, HeroModifierModel } from "./HeroSystem6eTypeDataModels.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
@@ -345,13 +346,24 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                         // Track when added manually for diagnostic purposes
                         modifierOrAdderData.versionHeroSystem6eManuallyCreated = game.system.version;
 
-                        // Add the modifer (create array if necessary)
-                        item.system[adderOrModifier.toUpperCase()] ??= [];
-                        item.system[adderOrModifier.toUpperCase()].push(modifierOrAdderData);
+                        let dataModelObject = null;
+                        if (modifierOrAdderData.xmlTag === "ADDER") {
+                            dataModelObject = new HeroAdderModel(modifierOrAdderData, { parent: item });
+                        }
+                        if (modifierOrAdderData.xmlTag === "MODIFIER") {
+                            dataModelObject = new HeroModifierModel(modifierOrAdderData, { parent: item });
+                        }
 
-                        await item._postUpload();
-                        await item.actor.CalcActorRealAndActivePoints();
+                        if (!dataModelObject || !dataModelObject.XMLID) {
+                            ui.notifications.error(`unable to create ${adderOrModifier}`);
+                            return;
+                        }
 
+                        // Add the MODIFIER or ADDER to the array
+                        await item.update({
+                            [`system.${adderOrModifier.toUpperCase()}`]:
+                                item.system[adderOrModifier.toUpperCase()].concat(dataModelObject),
+                        });
                         return;
                     },
                 },
@@ -377,7 +389,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         const templateData = {
             item: this.item,
-            mod: this.item.findModById(id, xmlid),
+            mod: this.item.findModByHcdId(id, xmlid),
         };
         await new ItemModifierFormApplication(templateData).render(true);
     }
