@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { createModifierOrAdderFromXml } from "./item.mjs";
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../utility/adjustment.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
-import { HeroActorModel, HeroAdderModel, HeroModifierModel } from "./HeroSystem6eTypeDataModels.mjs";
+import { HeroAdderModel, HeroModifierModel } from "./HeroSystem6eTypeDataModels.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;

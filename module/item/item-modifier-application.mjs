@@ -1,7 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 
-import { getPowerInfo } from "../utility/util.mjs";
-
 export class ItemModifierFormApplication extends FormApplication {
     constructor(data) {
         super();
