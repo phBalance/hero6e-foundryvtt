@@ -354,18 +354,17 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
             // Active Point Summary
             data.activePointSummary = [];
-            for (const key of Object.keys(this.actor.system.characteristics)) {
-                const char = this.actor.system.characteristics[key];
-                const powerInfo = getPowerInfo({
-                    xmlid: key.toUpperCase(),
-                    actor: this.actor,
-                    xmlTag: key.toUpperCase(),
-                });
+            for (const powerInfo of getCharacteristicInfoArrayForActor(this.actor)) {
+                const char = this.actor.system.characteristics[powerInfo.key.toLowerCase()];
+                if (!char) {
+                    console.error(`${powerInfo.key} not found in actor.system.characteristics`);
+                    continue;
+                }
                 let valueTop = Math.max(char.value, char.max);
                 let activePoints = valueTop * (powerInfo?.cost || 0);
                 if (activePoints > 0) {
                     data.activePointSummary.push({
-                        name: powerInfo?.name || key,
+                        name: powerInfo.name,
                         activePoints: activePoints,
                     });
                 }

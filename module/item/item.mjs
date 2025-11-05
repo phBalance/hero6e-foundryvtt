@@ -365,8 +365,12 @@ export class HeroSystem6eItem extends Item {
                 }
                 if (this.actor && game.actors.get(this.actor.id)) {
                     for (const change of activeEffect.changes) {
+                        const value = foundry.utils.getProperty(this.actor, change.key);
+                        if (!value) {
+                            console.error(`${change.key} is ${value}`);
+                        }
                         await this.actor.update({
-                            [change.key.replace(".max", ".value")]: foundry.utils.getProperty(this.actor, change.key),
+                            [change.key.replace(".max", ".value")]: value || 0,
                         });
                     }
                 }
