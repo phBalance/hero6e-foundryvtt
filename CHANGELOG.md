@@ -5,7 +5,7 @@
 - Fixed tooltip truncation due to inch symbol [#3008](https://github.com/dmdorman/hero6e-foundryvtt/issues/3008)
 - Various VPP improvements, including the ability to choose VPP slots. Exceeding VPP pool is not enforced. [#2743](https://github.com/dmdorman/hero6e-foundryvtt/issues/2743) [#2869](https://github.com/dmdorman/hero6e-foundryvtt/issues/2869)
 - Fixed ability to add MODIFIERs from item sheet. [#3006](https://github.com/dmdorman/hero6e-foundryvtt/issues/3006)
-- Fixed ability to edit MODIFIER from item sheet. [#3031](https://github.com/dmdorman/hero6e-foundryvtt/issues/3031)
+- Fixed ability to edit MODIFIERs from item sheet. [#3031](https://github.com/dmdorman/hero6e-foundryvtt/issues/3031)
 - Improved Requires A Skill Roll (RSR). You can now put skill in ROLL or COMMENTS. Also will now properly match on SKILL even when you rename a skill. [#3028](https://github.com/dmdorman/hero6e-foundryvtt/issues/3028)
 
 ## Version 4.2.1 20251026
