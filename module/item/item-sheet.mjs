@@ -382,14 +382,20 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         const xmlid = $(event.currentTarget).closest("[data-xmlid]").data().xmlid;
         const adderId = $(event.currentTarget).closest("[data-adder]")?.data()?.adder;
         const modifierId = $(event.currentTarget).closest("[data-modifier]")?.data()?.modifier;
-        const id = adderId || modifierId;
-        if (!xmlid || !id) {
+        if (!adderId && !modifierId) {
+            return ui.notifications.error(`Unable to edit adder/modifier.`);
+        }
+
+        const adderOrModifier =
+            this.item.system.ADDER.find((m) => m.ID == adderId) ||
+            this.item.system.MODIFIER.find((m) => m.ID == modifierId);
+        if (!adderOrModifier || adderOrModifier.XMLID !== xmlid) {
             return ui.notifications.error(`Unable to edit adder/modifier.`);
         }
 
         const templateData = {
             item: this.item,
-            mod: this.item.findModByHcdId(id, xmlid),
+            mod: adderOrModifier,
         };
         await new ItemModifierFormApplication(templateData).render(true);
     }
