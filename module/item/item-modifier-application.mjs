@@ -5,6 +5,7 @@ export class ItemModifierFormApplication extends FormApplication {
         super();
         this.data = data;
         this.options.title = `Edit ${data.mod.XMLID} of ${data.item.system.XMLID}`;
+        globalThis.mod = this.data.mod;
     }
 
     async updateItem() {
