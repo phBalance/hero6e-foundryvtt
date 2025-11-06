@@ -62,6 +62,8 @@ export class ItemModifierFormApplication extends FormApplication {
             this.data.mod.BASECOST = choiceSelected.BASECOST || this.data.mod.BASECOST;
         }
 
+        // TODO: Can we use super._updateObject?
+
         await this.data.item.update({
             [`system.${this.data.mod.xmlTag}`]: this.data.item.system[this.data.mod.xmlTag],
         });
