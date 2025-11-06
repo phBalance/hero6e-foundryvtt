@@ -65,6 +65,13 @@
             </div>
             {{/if}}
 
+            {{#if (isdefined mod.ROLLALIAS)}}
+            <div class="form-group">
+                <label>ROLLALIAS</label>
+                <input type="text" name="mod.ROLLALIAS" value="{{mod.ROLLALIAS}}" data-dtype="text" />
+            </div>
+            {{/if}}
+
         {{/if}}
 
         {{#if (isdefined mod.COMMENTS)}}

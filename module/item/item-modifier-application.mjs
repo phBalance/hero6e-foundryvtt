@@ -53,24 +53,18 @@ export class ItemModifierFormApplication extends FormApplication {
     async _updateObject(event, formData) {
         console.log(event, formData);
         const expandedData = foundry.utils.expandObject(formData);
-        this.data.mod = { ...this.data.mod, ...expandedData.mod };
+        this.data.mod = foundry.utils.mergeObject(this.data.mod, expandedData.mod);
 
         if (this.data.editOptions?.choices) {
             const choiceSelected = this.data.editOptions.choices.find((o) => o.OPTIONID === this.data.mod.OPTIONID);
             this.data.mod.OPTION = choiceSelected.OPTION;
             this.data.mod.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
             this.data.mod.BASECOST = choiceSelected.BASECOST || this.data.mod.BASECOST;
-            // this.data.mod.baseCost = this.data.mod.BASECOST;
-            // this.data.mod.BASECOST_total = this.data.mod.baseCost;
         }
 
-        const oldMod = this.data.item.findModByHcdId(this.data.mod.ID);
-        const idx = this.data.item.system[oldMod._parentKey].findIndex((o) => o.ID == oldMod.ID);
-        this.data.item.system[oldMod._parentKey][idx] = this.data.mod;
-        await this.data.item.update({ system: this.data.item.system });
-
-        await this.data.item._postUpload();
-        await this.data.item.actor.CalcActorRealAndActivePoints();
+        await this.data.item.update({
+            [`system.${this.data.mod.xmlTag}`]: this.data.item.system[this.data.mod.xmlTag],
+        });
 
         // Show any changes
         this.render();
