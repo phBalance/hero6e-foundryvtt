@@ -5680,11 +5680,27 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
                         (o.system.XMLID === OPTION_ALIAS.toUpperCase() ||
                             o.name.toUpperCase() === OPTION_ALIAS.toUpperCase()),
                 );
+
+                // ROLLALIAS has the skill
+                if (!skill && rar.ROLLALIAS) {
+                    skill = item.actor.items.find(
+                        (o) =>
+                            o.baseInfo?.type.includes("skill") &&
+                            (o.system.XMLID.replace("_SKILL", "") === rar.ROLLALIAS.toUpperCase() ||
+                                o.name.toUpperCase() === rar.ROLLALIAS.toUpperCase() ||
+                                o.system.INPUT?.toUpperCase() === rar.ROLLALIAS.toUpperCase()),
+                    );
+                    if (skill) {
+                        OPTION_ALIAS = rar.ROLLALIAS;
+                    }
+                }
+
+                // COMMENTS has the skill
                 if (!skill && rar.COMMENTS) {
                     skill = item.actor.items.find(
                         (o) =>
                             o.baseInfo?.type.includes("skill") &&
-                            (o.system.XMLID === rar.COMMENTS.toUpperCase() ||
+                            (o.system.XMLID.replace("_SKILL", "") === rar.COMMENTS.toUpperCase() ||
                                 o.name.toUpperCase() === rar.COMMENTS.toUpperCase() ||
                                 o.system.INPUT?.toUpperCase() === rar.COMMENTS.toUpperCase()),
                     );
@@ -5692,6 +5708,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
                         OPTION_ALIAS = rar.COMMENTS;
                     }
                 }
+
                 if (!skill && rar.COMMENTS) {
                     let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
                     if (char) {
@@ -5703,6 +5720,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
                         value = char?.roll;
                     }
                 }
+
                 if (skill) {
                     value = parseInt(skill.system.roll);
                     if (rar.OPTIONID === "SKILL1PER5")
