@@ -897,7 +897,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"], // TODO: Remove the 6e here.
         base: 10,
         cost: function (characteristic) {
-            const levels = characteristic.levels;
+            // This could be a natural characteristic or a power
+            const levels = characteristic.levels ?? characteristic.system.LEVELS;
 
             // COM only exists in 5e and it has some weird rules:
             // 1. It can have starting values of less than 0
