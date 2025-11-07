@@ -552,7 +552,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 if (!adder && checked) {
                     const newAdder = {
                         XMLID: "ADDER",
-                        ID: new Date().getTime().toString(),
+                        ID: new Date().getTime(),
                         ALIAS: attackItem.name,
                         BASECOST: "0.0",
                         LEVELS: "0",

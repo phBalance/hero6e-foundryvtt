@@ -2287,9 +2287,10 @@ export class HeroSystem6eActor extends Actor {
             // Working on a merge to update previously existing items.
             // Add existing item.id (if it exists), which we will use for the pending update.
             // There may be an item that was converted to equipment/power
+            // Also note that system.ID is natively a string from HDC, which we coerce into INT so use == instead of ===
             itemsToCreate = itemsToCreate.map((m) =>
                 foundry.utils.mergeObject(m, {
-                    _id: this.items.find((i) => i.system.ID === m.system.ID)?.id,
+                    _id: this.items.find((i) => i.system.ID == m.system.ID)?.id,
                 }),
             );
             const itemsToUpdate = itemsToCreate.filter((o) => o._id);
@@ -2367,7 +2368,7 @@ export class HeroSystem6eActor extends Actor {
             // retainValuesOnUpload Charges
             uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges`, 0);
             for (const chargeData of retainValuesOnUpload.charges) {
-                const item = this.items.find((i) => i.system.ID === chargeData.ID);
+                const item = this.items.find((i) => i.system.ID == chargeData.ID);
                 if (item) {
                     const chargesUsed = Math.max(0, chargeData.charges.max - chargeData.charges.value);
                     if (chargesUsed) {
@@ -2609,14 +2610,14 @@ export class HeroSystem6eActor extends Actor {
             // duplicate ID can be a problem
             for (const item of this.items) {
                 if (item.system.ID) {
-                    const dups = this.items.filter((i) => i.system.ID === item.system.ID);
+                    const dups = this.items.filter((i) => i.system.ID == item.system.ID);
                     if (dups.length > 1) {
                         // Try to give duplicate items a new ID
                         for (const dupItem of dups.splice(1)) {
                             if (dupItem.childItems.length === 0) {
                                 await dupItem.update({
                                     // [`system.idDuplicate`]: dupItem.system.ID,
-                                    [`system.ID`]: new Date().getTime().toString(),
+                                    [`system.ID`]: new Date().getTime(),
                                     [`system.error`]: [
                                         ...(dupItem.system.error || []),
                                         "Duplicate ID, created new one",
@@ -2704,7 +2705,7 @@ export class HeroSystem6eActor extends Actor {
                 const itemsToDelete = this.items.filter(
                     (item) =>
                         !itemsToUpdate.find((o) => item.id === o._id) &&
-                        !itemsToCreate.find((p) => item.system.ID === p.system.ID) &&
+                        !itemsToCreate.find((p) => item.system.ID == p.system.ID) &&
                         item.type !== "maneuver" &&
                         item.system.XMLID !== "PERCEPTION",
                 );

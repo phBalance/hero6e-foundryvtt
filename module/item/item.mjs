@@ -5586,7 +5586,7 @@ export function createModifierOrAdderFromXml(xml) {
     }
 
     // Create a unique HDC ID
-    modifierOrAdderData.ID = new Date().getTime().toString();
+    modifierOrAdderData.ID = new Date().getTime();
 
     // Ensure consistant tagName
     modifierOrAdderData.xmlTag = xmlDoc.children[0].tagName;

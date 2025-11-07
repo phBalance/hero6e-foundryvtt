@@ -483,7 +483,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     async dropFrameworkItem(item, parentId, children) {
         // Make sure we get new system.ID's
         const itemData = item.toObject();
-        itemData.system.ID = new Date().getTime().toString();
+        itemData.system.ID = new Date().getTime();
         delete itemData.system.PARENTID;
         if (parentId) {
             itemData.system.PARENTID = parentId;
@@ -557,7 +557,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         const itemData = item.toObject();
 
         // Create new system.ID
-        itemData.system.ID = new Date().getTime().toString();
+        itemData.system.ID = new Date().getTime();
 
         // Remove system.PARENTID
         delete itemData.system.PARENTID;
@@ -1202,7 +1202,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
 
                         // Create a unique ID
-                        itemData.system.ID = new Date().getTime().toString();
+                        itemData.system.ID = new Date().getTime();
 
                         // Finally, create the item!
                         await HeroSystem6eItem.create(itemData, {
