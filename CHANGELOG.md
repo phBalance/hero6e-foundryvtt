@@ -7,6 +7,7 @@
 - Fixed ability to add MODIFIERs from item sheet. [#3006](https://github.com/dmdorman/hero6e-foundryvtt/issues/3006)
 - Fixed ability to edit MODIFIERs from item sheet. [#3031](https://github.com/dmdorman/hero6e-foundryvtt/issues/3031)
 - Improved Requires A Skill Roll (RSR). You can now put skill in ROLL or COMMENTS. Also will now properly match on SKILL even when you rename a skill. [#3028](https://github.com/dmdorman/hero6e-foundryvtt/issues/3028)
+- Show to hit rolls even when no target is selected. [#3026](https://github.com/dmdorman/hero6e-foundryvtt/issues/3026)
 
 ## Version 4.2.1 20251026
 

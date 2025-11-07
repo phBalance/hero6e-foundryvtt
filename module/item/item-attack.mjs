@@ -966,38 +966,35 @@ async function doSingleTargetActionToHit(action, options) {
             }
         }
 
-        if (target.id) {
-            // Don't bother to track a bogus target created so we get dice no nice rolls when no target selected.
-            targetData.push({
-                id: target.id,
-                name: `${target.name || "No Target Selected"}${options.targetEntangle ? " [ENTANGLE]" : ""}`,
-                aoeAlwaysHit: aoeAlwaysHit,
-                explosion: explosion,
-                toHitChar: toHitChar,
-                toHitRollTotal: toHitRollTotal,
-                autoSuccess: autoSuccess,
-                hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
-                value: targetDefenseValue,
-                result: { hit: hit, by: by.toString() },
-                roller: options.mindScanMinds
-                    ? targetsArray[0].id === target.id
-                        ? targetHeroRoller
-                        : null
-                    : targetHeroRoller,
-                renderedRoll: await targetHeroRoller.render(),
-            });
+        targetData.push({
+            id: target.id,
+            name: `${target.name || "No Target Selected"}${options.targetEntangle ? " [ENTANGLE]" : ""}`,
+            aoeAlwaysHit: aoeAlwaysHit,
+            explosion: explosion,
+            toHitChar: toHitChar,
+            toHitRollTotal: toHitRollTotal,
+            autoSuccess: autoSuccess,
+            hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
+            value: targetDefenseValue,
+            result: { hit: hit, by: by.toString() },
+            roller: options.mindScanMinds
+                ? targetsArray[0].id === target.id
+                    ? targetHeroRoller
+                    : null
+                : targetHeroRoller,
+            renderedRoll: await targetHeroRoller.render(),
+        });
 
-            // Keep track of which tokens were hit so we can apply damage later,
-            // Assume beneficial adjustment powers always hits
-            if (
-                hit === "Hit" ||
-                hit === "Auto Hit" ||
-                item.system.XMLID == "AID" ||
-                item.system.XMLID === "HEALING" ||
-                item.system.XMLID === "SUCCOR"
-            ) {
-                targetIds.push(target.id);
-            }
+        // Keep track of which tokens were hit so we can apply damage later,
+        // Assume beneficial adjustment powers always hits
+        if (
+            hit === "Hit" ||
+            hit === "Auto Hit" ||
+            item.system.XMLID == "AID" ||
+            item.system.XMLID === "HEALING" ||
+            item.system.XMLID === "SUCCOR"
+        ) {
+            targetIds.push(target.id);
         }
     }
 
@@ -1101,7 +1098,6 @@ async function doSingleTargetActionToHit(action, options) {
     const cardData = {
         // dice rolls
         velocity: options.velocity,
-        toHitRollTotal: targetData?.[0]?.toHitRollTotal,
 
         // data for damage card
         actor,
