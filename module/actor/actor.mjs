@@ -2287,9 +2287,10 @@ export class HeroSystem6eActor extends Actor {
             // Working on a merge to update previously existing items.
             // Add existing item.id (if it exists), which we will use for the pending update.
             // There may be an item that was converted to equipment/power
+            // Also note that system.ID is natively a string from HDC, which we coerce into INT so use == instead of ===
             itemsToCreate = itemsToCreate.map((m) =>
                 foundry.utils.mergeObject(m, {
-                    _id: this.items.find((i) => i.system.ID === m.system.ID)?.id,
+                    _id: this.items.find((i) => i.system.ID == m.system.ID)?.id,
                 }),
             );
             const itemsToUpdate = itemsToCreate.filter((o) => o._id);
@@ -2616,7 +2617,7 @@ export class HeroSystem6eActor extends Actor {
                             if (dupItem.childItems.length === 0) {
                                 await dupItem.update({
                                     // [`system.idDuplicate`]: dupItem.system.ID,
-                                    [`system.ID`]: new Date().getTime().toString(),
+                                    [`system.ID`]: new Date().getTime(),
                                     [`system.error`]: [
                                         ...(dupItem.system.error || []),
                                         "Duplicate ID, created new one",
