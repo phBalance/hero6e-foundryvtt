@@ -81,7 +81,11 @@
             {{#unless target.aoeAlwaysHit}}
                 {{#if (not ../maxMinds)}}
                     <div class="card-section">
+                        {{#if targetData}}
                         <div class="description-tiny">Attack Roll<br>vs.<br>{{target.name}}</div>
+                        {{else}}
+                        <div class="description-tiny">This attack had no target so some details (like range penalties) are not considered. Target DCV is presumed to be an inanimate object. GM should review this roll carefully.</div>
+                        {{/if}}
                         <div class="hit-roll">{{{ target.renderedRoll }}}</div>
                         <div class="description-medium">
                             {{{ target.hitRollText }}}
