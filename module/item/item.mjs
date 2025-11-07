@@ -3638,7 +3638,7 @@ export class HeroSystem6eItem extends Item {
 
         let fraction = "";
 
-        let BASECOST_total = modifier.BASECOST_total || modifier.BASECOST;
+        let BASECOST_total = modifier.BASECOST_total ?? modifier.BASECOST;
 
         if (BASECOST_total == 0) {
             fraction += "+0";

@@ -5,6 +5,7 @@ export class ItemModifierFormApplication extends FormApplication {
         super();
         this.data = data;
         this.options.title = `Edit ${data.mod.XMLID} of ${data.item.system.XMLID}`;
+        globalThis.mod = this.data.mod;
     }
 
     async updateItem() {
@@ -61,6 +62,8 @@ export class ItemModifierFormApplication extends FormApplication {
             this.data.mod.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
             this.data.mod.BASECOST = choiceSelected.BASECOST || this.data.mod.BASECOST;
         }
+
+        // TODO: Can we use super._updateObject?
 
         await this.data.item.update({
             [`system.${this.data.mod.xmlTag}`]: this.data.item.system[this.data.mod.xmlTag],

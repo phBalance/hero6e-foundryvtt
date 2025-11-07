@@ -30,7 +30,6 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
     static defineSchema() {
         return {
             XMLID: new StringField(),
-            xmlid: new StringField(),
             ID: new HeroNumberField({ integer: true }),
             BASECOST: new HeroNumberField({ integer: false }),
             LEVELS: new HeroNumberField({ integer: true }),
