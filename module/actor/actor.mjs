@@ -2368,7 +2368,7 @@ export class HeroSystem6eActor extends Actor {
             // retainValuesOnUpload Charges
             uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges`, 0);
             for (const chargeData of retainValuesOnUpload.charges) {
-                const item = this.items.find((i) => i.system.ID === chargeData.ID);
+                const item = this.items.find((i) => i.system.ID == chargeData.ID);
                 if (item) {
                     const chargesUsed = Math.max(0, chargeData.charges.max - chargeData.charges.value);
                     if (chargesUsed) {
@@ -2610,7 +2610,7 @@ export class HeroSystem6eActor extends Actor {
             // duplicate ID can be a problem
             for (const item of this.items) {
                 if (item.system.ID) {
-                    const dups = this.items.filter((i) => i.system.ID === item.system.ID);
+                    const dups = this.items.filter((i) => i.system.ID == item.system.ID);
                     if (dups.length > 1) {
                         // Try to give duplicate items a new ID
                         for (const dupItem of dups.splice(1)) {
@@ -2705,7 +2705,7 @@ export class HeroSystem6eActor extends Actor {
                 const itemsToDelete = this.items.filter(
                     (item) =>
                         !itemsToUpdate.find((o) => item.id === o._id) &&
-                        !itemsToCreate.find((p) => item.system.ID === p.system.ID) &&
+                        !itemsToCreate.find((p) => item.system.ID == p.system.ID) &&
                         item.type !== "maneuver" &&
                         item.system.XMLID !== "PERCEPTION",
                 );
