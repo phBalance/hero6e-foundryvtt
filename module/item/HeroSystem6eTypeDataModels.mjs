@@ -400,8 +400,8 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             return this.parent.getItemDescription();
         } catch (e) {
             console.error(e, this);
+            return e.message ?? "error";
         }
-        return null;
     }
 
     get hdcHTMLCollection() {

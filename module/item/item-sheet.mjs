@@ -405,26 +405,30 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         const xmlid = $(event.currentTarget).closest("[data-xmlid]").data().xmlid;
         const adderId = $(event.currentTarget).closest("[data-adder]")?.data()?.adder;
         const modifierId = $(event.currentTarget).closest("[data-modifier]")?.data()?.modifier;
-        const id = adderId || modifierId;
-        if (!id) {
-            return ui.notifications.error(`Unable to delete modifier/adder.`);
+        if (!adderId && !modifierId) {
+            return ui.notifications.error(`Unable to edit adder/modifier.`);
+        }
+
+        const adderOrModifier =
+            this.item.system.ADDER.find((m) => m.ID == adderId) ||
+            this.item.system.MODIFIER.find((m) => m.ID == modifierId);
+        if (!adderOrModifier || adderOrModifier.XMLID !== xmlid) {
+            return ui.notifications.error(`Unable to edit adder/modifier.`);
         }
 
         const confirmed = await Dialog.confirm({
-            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+            title:
+                game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title") +
+                ` ${adderOrModifier.ALIAS ?? adderOrModifier.XMLID}`,
             content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),
         });
 
         if (confirmed) {
-            await this.item.deleteModById(id, xmlid);
-
-            // if (this.item.system.charges && xmlid === "CHARGES") {
-            //     delete this.item.system.charges;
-            //     await this.item.update({ system: this.item.system });
-            // }
-
-            await this.item._postUpload();
-            await this.item.actor.CalcActorRealAndActivePoints();
+            await this.item.update({
+                [`system.${adderOrModifier.xmlTag}`]: this.item.system[adderOrModifier.xmlTag].filter(
+                    (o) => o.ID != adderOrModifier.ID,
+                ),
+            });
 
             this.render();
         }
@@ -589,13 +593,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         if (this.item.system.EVERYMAN && !this.item.system.FAMILIARITY) {
             await this.item.update({ "system.FAMILIARITY": true });
         }
-
-        // HD lite (currently only SKILL) uses generic _postUpload
-        // TODO: Much of the above is likely not necessary as _postUpload does alot
-        // await this.item._postUpload();
-        // if (this.item.actor) {
-        //     await this.item.actor.CalcActorRealAndActivePoints();
-        // }
     }
 
     async _onEffectCreate(event) {
@@ -649,9 +646,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         // Also need to use force replace ==items for this to work in v13
         await this.item.update({ [`type`]: "power", [`==system`]: this.item.system }, { recursive: false });
-
-        // Recalc actor costs
-        await this.actor?._postUpload();
     }
 
     async _onConvertToEquipment(event) {
@@ -659,8 +653,5 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         // Also need to use force replace ==items for this to work in v13
         await this.item.update({ [`type`]: "equipment", [`==system`]: this.item.system }, { recursive: false });
-
-        // Recalc actor costs
-        await this.actor?._postUpload();
     }
 }
