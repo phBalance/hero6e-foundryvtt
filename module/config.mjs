@@ -5757,7 +5757,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
 
                     case "KB":
-                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * (actorItemDefense.is5e ? 1 : 2);
+                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * convertHexesToSystemUnits(1, actorItemDefense.actor);
                         break;
                 }
                 if (value > 0) {
