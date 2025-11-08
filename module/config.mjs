@@ -2,6 +2,7 @@ import { createDefenseProfile } from "./utility/defense.mjs";
 import * as heroDice from "./utility/dice.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
 import {
+    convertHexesToSystemUnits,
     getRoundedUpDistanceInSystemUnits,
     getSystemDisplayUnits,
     hexDistanceToSystemDisplayString,
@@ -5757,7 +5758,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
 
                     case "KB":
-                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * 2;
+                        value =
+                            (parseInt(actorItemDefense.adjustedLevels) || 0) *
+                            convertHexesToSystemUnits(1, actorItemDefense.actor);
                         break;
                 }
                 if (value > 0) {
@@ -5768,9 +5771,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             descriptionFactory: function (item) {
                 const noStrIncrease = item.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
-                return `${item.system.ALIAS} (${Math.pow(2, item.system.LEVELS) * 100} kg mass, +${
-                    noStrIncrease ? 0 : item.system.LEVELS * 5
-                } STR, +${item.system.LEVELS} PD/ED, -${hexDistanceToSystemDisplayString(item.system.LEVELS, item.actor)} KB)`;
+
+                const strDisplay = `+${noStrIncrease ? 0 : item.system.LEVELS * 5} STR`;
+                const massDisplay = `${Math.pow(2, item.system.LEVELS) * 100} kg mass`;
+                const kbDisplay = `-${hexDistanceToSystemDisplayString(item.system.LEVELS, item.actor)} KB`;
+                const defenseDisplay = (() => {
+                    const noDefIncrease = item.modifiers.find((mod) => mod.XMLID === "NODEFINCREASE");
+                    // NODEFINCREASE allows for ED, PD, or EDPD as option.
+                    const noPdIncrease = noDefIncrease?.OPTIONID.includes("PD");
+                    const noEdIncrease = noDefIncrease?.OPTIONID.includes("ED");
+
+                    if (noPdIncrease && noEdIncrease) return "";
+
+                    const displayTypes = [noPdIncrease ? "" : "PD", noEdIncrease ? "" : "ED"].filter(Boolean).join("/");
+                    return `+${item.system.LEVELS} ${displayTypes}`;
+                })();
+
+                const details = [massDisplay, strDisplay, defenseDisplay, kbDisplay].filter(Boolean).join(", ");
+
+                return `${item.system.ALIAS} (${details})`;
             },
             xml: `<POWER XMLID="DENSITYINCREASE" ID="1709333874268" BASECOST="0.0" LEVELS="1" ALIAS="Density Increase" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -13921,14 +13940,58 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            // DENSITYINCREASE related
             key: "NODEFINCREASE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NODEFINCREASE" ID="1762042798721" BASECOST="-0.25" LEVELS="0" ALIAS="No Defense Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ED" OPTIONID="ED" OPTION_ALIAS="does not provide ED" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+            editOptions: {
+                choices: [
+                    {
+                        OPTIONID: "PD",
+                        OPTION: "PD",
+                        OPTION_ALIAS: "does not provide PD",
+                        BASECOST: "0",
+                    },
+                    {
+                        OPTIONID: "ED",
+                        OPTION: "ED",
+                        OPTION_ALIAS: "does not provide ED",
+                        BASECOST: "0",
+                    },
+                    {
+                        OPTIONID: "PDED",
+                        OPTION: "PDED",
+                        OPTION_ALIAS: "does not provide PD or ED",
+                        BASECOST: "-0.25",
+                    },
+                ],
+            },
+            xml: `<MODIFIER XMLID="NODEFINCREASE" ID="1762009637585" BASECOST="-0.5" LEVELS="0" ALIAS="No Defense Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PDED" OPTIONID="PDED" OPTION_ALIAS="does not provide PD or ED" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
-        {},
+        {
+            editOptions: {
+                choices: [
+                    {
+                        OPTIONID: "PD",
+                        OPTION: "PD",
+                        OPTION_ALIAS: "does not provide PD",
+                        BASECOST: "-0.25",
+                    },
+                    {
+                        OPTIONID: "ED",
+                        OPTION: "ED",
+                        OPTION_ALIAS: "does not provide ED",
+                        BASECOST: "-0.25",
+                    },
+                    {
+                        OPTIONID: "PDED",
+                        OPTION: "PDED",
+                        OPTION_ALIAS: "does not provide PD or ED",
+                        BASECOST: "-0.5",
+                    },
+                ],
+            },
+        },
     );
     addPower(undefined, {
         key: "NOFIGURED",
@@ -14020,14 +14083,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            // DENSITYINCREASE related
             key: "NOSTRINCREASE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762042798715" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-1" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
-        {},
+        {
+            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
     );
     addPower(
         {

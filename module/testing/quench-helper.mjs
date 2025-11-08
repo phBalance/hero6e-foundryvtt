@@ -35,7 +35,7 @@ export async function createQuenchActor({ quench, contents, is5e }) {
         }
     }
 
-    actor.FullHealth();
+    await actor.FullHealth();
 
     return actor;
 }

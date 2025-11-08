@@ -8,6 +8,8 @@
 - Fixed ability to edit MODIFIERs from item sheet. [#3031](https://github.com/dmdorman/hero6e-foundryvtt/issues/3031)
 - Improved Requires A Skill Roll (RSR). You can now put skill in ROLL or COMMENTS. Also will now properly match on SKILL even when you rename a skill. [#3028](https://github.com/dmdorman/hero6e-foundryvtt/issues/3028)
 - Show to hit rolls even when no target is selected. [#3026](https://github.com/dmdorman/hero6e-foundryvtt/issues/3026)
+- Add support for NODEFINCREASE modifier to DENSITYINCREASE. [#3012](https://github.com/dmdorman/hero6e-foundryvtt/issues/3012)
+- DENSITYINCREASE in 5e should no longer have doubled knockback resistance. [#3012](https://github.com/dmdorman/hero6e-foundryvtt/issues/3012) [#3024](https://github.com/dmdorman/hero6e-foundryvtt/issues/3024)
 
 ## Version 4.2.1 20251026
 
