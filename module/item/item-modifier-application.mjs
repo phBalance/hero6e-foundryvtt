@@ -56,6 +56,8 @@ export class ItemModifierFormApplication extends FormApplication {
         const expandedData = foundry.utils.expandObject(formData);
         this.data.mod = foundry.utils.mergeObject(this.data.mod, expandedData.mod);
 
+        //this.data.mod.LEVELS = expandedData.mod.LEVELS;
+
         if (this.data.editOptions?.choices) {
             const choiceSelected = this.data.editOptions.choices.find((o) => o.OPTIONID === this.data.mod.OPTIONID);
             this.data.mod.OPTION = choiceSelected.OPTION;
@@ -63,13 +65,14 @@ export class ItemModifierFormApplication extends FormApplication {
             this.data.mod.BASECOST = choiceSelected.BASECOST || this.data.mod.BASECOST;
         }
 
-        // TODO: Can we use super._updateObject?
-
         await this.data.item.update({
             [`system.${this.data.mod.xmlTag}`]: this.data.item.system[this.data.mod.xmlTag],
         });
 
-        // Show any changes
+        // For some reason item.onUpdate isn't getting called when updating an array
+        this.data.item.render();
+
+        // Show any changes from dropdowns
         this.render();
     }
 }

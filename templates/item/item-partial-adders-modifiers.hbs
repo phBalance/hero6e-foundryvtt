@@ -11,7 +11,7 @@
         </th>
     </tr>
     {{#each item.adders as |adder XMLID|}}
-        <tr data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
+        <tr data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}" data-idx="@index">
             <td class="left">{{adder.ALIAS}}</td>
             <td>{{#if adder.SELECTED}}{{adder.BASECOST_total}}{{/if}}</td>
             <td class="right">
@@ -24,7 +24,7 @@
         </tr>
 
         {{#each adder.ADDER as |adder XMLID|}}
-            <tr  class="modifier-adder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
+            <tr  class="modifier-adder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}" data-idx="@index"></tr>
                 <td class="left">{{adder.ALIAS}}</td>
                 <td>{{adder.BASECOST_total}}</td>
                 <td class="right"></td>
@@ -44,7 +44,7 @@
         {{!-- <th>Add</th> --}}
     </tr>
     {{#each item.modifiers as |mod id|}}
-        <tr class="{{#if mod.parentId}} from-parent{{/if}}" data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
+        <tr class="{{#if mod.parentId}} from-parent{{/if}}" data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}" data-idx="@index">
             <td class="left" title="{{mod.XMLID}}">{{mod.ALIAS}} {{mod.OPTION_ALIAS}} {{#if mod.PRIVATE}}p{{/if}}</td>
             <td>{{mod.cost}}</td>
             <td class="right">
@@ -59,7 +59,7 @@
         </tr>
 
         {{#each mod.adders as |adder id|}}
-            <tr class="hero modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}"data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
+            <tr class="hero modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}"data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}" data-idx="@index">
                 <td class="left" title="{{adder.XMLID}}">{{adder.ALIAS}} {{adder.OPTION_ALIAS}} {{#if adder.PRIVATE}}p{{/if}}</td>
                 <td>{{adder.cost}}</td>
                 <td class="right">
@@ -73,7 +73,7 @@
         {{/each}}
 
         {{#each mod.modifiers as |mod2 id|}}
-            <tr class="hero modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}"data-xmlid="{{mod2.XMLID}}" data-adder="{{mod2.ID}}">
+            <tr class="hero modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}"data-xmlid="{{mod2.XMLID}}" data-adder="{{mod2.ID}}" data-idx="@index">
                 <td class="left" title="{{mod2.XMLID}}">{{mod2.ALIAS}} {{mod2.OPTION_ALIAS}} {{#if mod2.PRIVATE}}p{{/if}}</td>
                 <td>{{mod2.cost}}</td>
                 <td class="right">
