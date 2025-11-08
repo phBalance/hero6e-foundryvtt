@@ -13935,36 +13935,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    addPower(
-        {
-            // DENSITYINCREASE related
-            key: "NODEFINCREASE",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NODEFINCREASE" ID="1762042798721" BASECOST="-0.25" LEVELS="0" ALIAS="No Defense Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ED" OPTIONID="ED" OPTION_ALIAS="does not provide ED" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        {},
-    );
-    addPower(undefined, {
-        key: "NOFIGURED",
-        behaviors: ["modifier"],
-        costPerLevel: fixedValueFunction(0),
-        dcAffecting: fixedValueFunction(false),
-        xml: `<MODIFIER XMLID="NOFIGURED" ID="1737921312173" BASECOST="-0.5" LEVELS="0" ALIAS="No Figured Characteristics" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-    });
-    addPower(
-        {
-            // MOVEMENT related
-            key: "NOGRAVITYPENALTY",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NOGRAVITYPENALTY" ID="1737921008650" BASECOST="0.5" LEVELS="0" ALIAS="No Gravity Penalty" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        {},
-    );
-    addPower(
+        addPower(
         {
             key: "NODEFINCREASE",
             behaviors: ["modifier"],
@@ -14019,17 +13990,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
         },
     );
+    addPower(undefined, {
+        key: "NOFIGURED",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(false),
+        xml: `<MODIFIER XMLID="NOFIGURED" ID="1737921312173" BASECOST="-0.5" LEVELS="0" ALIAS="No Figured Characteristics" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
     addPower(
         {
-            key: "NOSTRINCREASE",
+            // MOVEMENT related
+            key: "NOGRAVITYPENALTY",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-1" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+            xml: `<MODIFIER XMLID="NOGRAVITYPENALTY" ID="1737921008650" BASECOST="0.5" LEVELS="0" ALIAS="No Gravity Penalty" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
-        {
-            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
+        {},
     );
     addPower(
         {
@@ -14103,14 +14080,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            // DENSITYINCREASE related
             key: "NOSTRINCREASE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762042798715" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-1" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
-        {},
+        {
+            xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
     );
     addPower(
         {
