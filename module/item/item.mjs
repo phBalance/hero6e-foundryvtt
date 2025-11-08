@@ -4629,6 +4629,11 @@ export class HeroSystem6eItem extends Item {
             console.error(e);
         }
 
+        // VPP unslotted
+        if (this.vppUnSlotted) {
+            return false;
+        }
+
         const ae = this.effects.contents?.[0];
         if (ae && ae.disabled === this.system.active) {
             // console.log(
