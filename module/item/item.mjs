@@ -5688,134 +5688,213 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         return true;
     }
 
-    let OPTION_ALIAS = rar.OPTION_ALIAS;
+    const RAR_OPTION_ALIAS = rar.OPTION_ALIAS;
+    let OPTION_ALIAS = RAR_OPTION_ALIAS;
 
     // Requires A Roll (generic) default to 11
     let value = parseInt(rar.OPTIONID);
+    // if the RaR is an Activation roll, then we have the value we need
+    if (isNaN(value)) {
+        const RAR_OPTION_ALIAS_SUBSTRING =
+            RAR_OPTION_ALIAS?.toUpperCase().split(",")[0].replace(/ROLL/i, "").trim() ?? "";
+        const RAR_ALIAS = rar.ALIAS?.toUpperCase() ?? ""; // From the "Display" field. ex: "Requires A Magic Roll"
+        const RAR_COMMENTS = rar.COMMENTS?.toUpperCase() ?? ""; // From the "Comments" field. ex: might just say "Magic"
+        const RAR_ROLLALIAS = rar.ROLLALIAS?.toUpperCase() ?? "";
 
-    switch (rar.OPTIONID) {
-        case "SKILL":
-        case "SKILL1PER5":
-        case "SKILL1PER20":
-        case "BASICRSR":
-            {
-                OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
-                let skill = item.actor.items.find(
-                    (o) =>
-                        o.baseInfo?.type.includes("skill") &&
-                        (o.system.XMLID === OPTION_ALIAS.toUpperCase() ||
-                            o.name.toUpperCase() === OPTION_ALIAS.toUpperCase()),
-                );
+        const matchRequiredSkillRoll = (o) => {
+            const aliasUpper = o.system.ALIAS?.toUpperCase() ?? "";
+            const nameUpper = o.name?.toUpperCase() ?? "";
+            if (o.system.XMLID === RAR_OPTION_ALIAS_SUBSTRING) {
+                OPTION_ALIAS = RAR_OPTION_ALIAS_SUBSTRING;
+                return true;
+            }
+            if (
+                RAR_ROLLALIAS &&
+                (o.system.XMLID.startsWith(RAR_ROLLALIAS) ||
+                    RAR_ROLLALIAS === nameUpper ||
+                    RAR_ROLLALIAS === aliasUpper)
+            ) {
+                OPTION_ALIAS = rar.ROLLALIAS;
+                return true;
+            }
+            if (
+                aliasUpper &&
+                (RAR_OPTION_ALIAS_SUBSTRING === aliasUpper ||
+                    RAR_COMMENTS === aliasUpper ||
+                    RAR_ALIAS.includes(aliasUpper))
+            ) {
+                OPTION_ALIAS = o.system.ALIAS;
+                return true;
+            }
+            if (
+                nameUpper &&
+                (RAR_OPTION_ALIAS_SUBSTRING === nameUpper ||
+                    RAR_COMMENTS === nameUpper ||
+                    RAR_ALIAS.includes(nameUpper))
+            ) {
+                OPTION_ALIAS = o.name;
+                return true;
+            }
+            return false;
+        };
 
-                // ROLLALIAS has the skill
-                if (!skill && rar.ROLLALIAS) {
-                    skill = item.actor.items.find(
-                        (o) =>
-                            o.baseInfo?.type.includes("skill") &&
-                            (o.system.XMLID.replace("_SKILL", "") === rar.ROLLALIAS.toUpperCase() ||
-                                o.name.toUpperCase() === rar.ROLLALIAS.toUpperCase() ||
-                                o.system.INPUT?.toUpperCase() === rar.ROLLALIAS.toUpperCase()),
-                    );
-                    if (skill) {
-                        OPTION_ALIAS = rar.ROLLALIAS;
+        const matchBackgroundSkillRoll = (o) => {
+            if (rar.OPTIONID !== o.system.ALIAS && !(rar.OPTIONID === "SS" && o.system.XMLID === "SCIENCE_SKILL")) {
+                return false;
+            }
+            const inputUpper = o.system.INPUT?.toUpperCase() ?? "";
+            if (
+                inputUpper &&
+                (RAR_OPTION_ALIAS_SUBSTRING === inputUpper ||
+                    RAR_COMMENTS === inputUpper ||
+                    RAR_ALIAS.includes(inputUpper) ||
+                    RAR_ROLLALIAS === inputUpper)
+            ) {
+                OPTION_ALIAS = o.system.INPUT;
+                return true;
+            }
+            return matchRequiredSkillRoll(o);
+        };
+
+        const characteristicKeys = Object.keys(item.actor.system.characteristics).map((k) => k.toLowerCase());
+        const rarDisplayMaybeHasCharKey = RAR_ALIAS.toLowerCase();
+        const rarOptionMaybeIsCharKey = RAR_OPTION_ALIAS_SUBSTRING.toLowerCase();
+
+        const getRequiredCharacteristicKey = () => {
+            const maybeCharacteristicKey = RAR_COMMENTS.toLowerCase(); // pre or presence
+            if (characteristicKeys.includes(maybeCharacteristicKey)) {
+                // finds pre, not presence
+                return maybeCharacteristicKey;
+            }
+            const matchedKeyInComment = characteristicKeys.find((key) => maybeCharacteristicKey.includes(key));
+            if (matchedKeyInComment) {
+                return matchedKeyInComment;
+            }
+            const matchedKeyInName = characteristicKeys.find((key) => rarDisplayMaybeHasCharKey.includes(key));
+            if (matchedKeyInName) {
+                return matchedKeyInName;
+            }
+            const matchedKeyInOption = characteristicKeys.find((key) => rarOptionMaybeIsCharKey.includes(key));
+            return matchedKeyInOption ?? "";
+        };
+
+        const filterSkillRollItems = (o) => {
+            return (
+                o.baseInfo?.type?.includes("skill") && // is a skill
+                !o.baseInfo?.type?.includes("enhancer") && // is not an enhancer (scholar, scientist, etc.)
+                o.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
+                o.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
+            );
+        };
+
+        switch (rar.OPTIONID) {
+            case "SKILL":
+            case "SKILL1PER5":
+            case "SKILL1PER20":
+            case "BASICRSR":
+            case "PER":
+            case "KS":
+            case "PS":
+            case "SS":
+                {
+                    OPTION_ALIAS = RAR_OPTION_ALIAS_SUBSTRING;
+                    let skill = undefined;
+                    if (["SS", "KS", "PS"].includes(rar.OPTIONID)) {
+                        skill = item.actor.items.find((o) => filterSkillRollItems(o) && matchBackgroundSkillRoll(o));
+                    } else if (rar.OPTIONID === "PER") {
+                        skill = item.actor.items.find((o) => o.system.XMLID === "PERCEPTION");
+                    } else {
+                        skill = item.actor.items.find((o) => filterSkillRollItems(o) && matchRequiredSkillRoll(o));
                     }
-                }
+                    if (!skill) {
+                        // still no skill found; did they put in a characteristic instead?
+                        const charKey = getRequiredCharacteristicKey();
+                        let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                        if (char) {
+                            // Should we change the RaR OPTIONID?
+                            OPTION_ALIAS = charKey.toUpperCase();
+                            ui.notifications.warn(
+                                `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`,
+                            );
 
-                // COMMENTS has the skill
-                if (!skill && rar.COMMENTS) {
-                    skill = item.actor.items.find(
-                        (o) =>
-                            o.baseInfo?.type.includes("skill") &&
-                            (o.system.XMLID.replace("_SKILL", "") === rar.COMMENTS.toUpperCase() ||
-                                o.name.toUpperCase() === rar.COMMENTS.toUpperCase() ||
-                                o.system.INPUT?.toUpperCase() === rar.COMMENTS.toUpperCase()),
-                    );
-                    if (skill) {
-                        OPTION_ALIAS = rar.COMMENTS;
+                            value = parseInt(char.roll);
+                            if (isNaN(value)) {
+                                value = 11;
+                            }
+                            OPTION_ALIAS += ` ${value}-`;
+                        }
                     }
-                }
 
-                if (!skill && rar.COMMENTS) {
-                    let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
-                    if (char) {
+                    if (skill) {
+                        // Should we save this in the ROLLALIAS?
+                        value = parseInt(skill.system.roll);
+                        if (isNaN(value)) {
+                            value = 11;
+                        }
+                        if (rar.OPTIONID === "SKILL1PER5")
+                            value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 5));
+                        if (rar.OPTIONID === "SKILL1PER20")
+                            value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 20));
+                        OPTION_ALIAS += ` ${value}-`;
+                    } else {
                         ui.notifications.warn(
-                            `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`,
+                            `${item.actor.name} has a power ${item.name}. Expecting 'SKILL roll', where SKILL is the name of an owned skill.<br>Put the name of the skill into the Options or Comments of the Requires A Roll modifier for the best results.`,
                         );
 
-                        // Lets try anyway
-                        value = char?.roll;
+                        if (!overrideCanAct) {
+                            const actor = item.actor;
+                            const token = actor.token;
+                            const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+                            speaker.alias = actor.name;
+                            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+
+                            const chatData = {
+                                style: CONST.CHAT_MESSAGE_STYLES.IC,
+                                author: game.user._id,
+                                content:
+                                    `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
+                                    `\nPress <b>${overrideKeyText}</b> to override.`,
+                                speaker: speaker,
+                            };
+
+                            await ChatMessage.create(chatData);
+
+                            return false;
+                        }
                     }
                 }
+                break;
 
-                if (skill) {
-                    value = parseInt(skill.system.roll);
-                    if (rar.OPTIONID === "SKILL1PER5")
-                        value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 5));
-                    if (rar.OPTIONID === "SKILL1PER20")
-                        value = Math.max(3, value - Math.floor(parseInt(item.activePoints) / 20));
+            case "CHAR":
+                {
+                    const charKey = getRequiredCharacteristicKey();
 
-                    OPTION_ALIAS += ` ${value}-`;
-                } else {
-                    ui.notifications.warn(
-                        `${item.actor.name} has a power ${item.name}. Expecting 'SKILL roll', where SKILL is the name of an owned skill.`,
-                    );
-
-                    if (!overrideCanAct) {
-                        const actor = item.actor;
-                        const token = actor.token;
-                        const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-                        speaker.alias = actor.name;
-                        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-
-                        const chatData = {
-                            style: CONST.CHAT_MESSAGE_STYLES.IC,
-                            author: game.user._id,
-                            content:
-                                `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
-                                `\nPress <b>${overrideKeyText}</b> to override.`,
-                            speaker: speaker,
-                        };
-
-                        await ChatMessage.create(chatData);
-
-                        return false;
-                    }
-                }
-            }
-            break;
-
-        case "CHAR":
-            {
-                OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
-                let char = item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
-                if (!char && rar.COMMENTS) {
-                    char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                    let char = item.actor.system.characteristics[charKey];
                     if (char) {
-                        OPTION_ALIAS = rar.COMMENTS;
+                        // Should we update the RaR if the stat was not in COMMENT
+                        item.actor.updateRollable(RAR_OPTION_ALIAS);
+                        value = parseInt(char.roll);
+                        OPTION_ALIAS += ` ${value}-`;
+                    } else {
+                        ui.notifications.warn(
+                            `${item.actor.name} has a power ${item.name}. Expecting 'CHAR roll', where CHAR is the name of a characteristic.<br>Put the name of the characteristic into the Options or Comments of the Requires A Roll modifier for the best results.`,
+                        );
                     }
                 }
-                if (char) {
-                    item.actor.updateRollable(OPTION_ALIAS.toLowerCase());
-                    value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
-                    OPTION_ALIAS += ` ${value}-`;
-                } else {
+                break;
+
+            default:
+                if (!value) {
                     ui.notifications.warn(
-                        `${item.actor.name} has a power ${item.name}. Expecting 'CHAR roll', where CHAR is the name of a characteristic.`,
+                        `${item.actor.name} has a power ${item.name}. ${OPTION_ALIAS} is not supported.`,
                     );
+
+                    // Try to continue
+                    value = 11;
                 }
-            }
-            break;
-
-        default:
-            if (!value) {
-                ui.notifications.warn(`${item.actor.name} has a power ${item.name}. ${OPTION_ALIAS} is not supported.`);
-
-                // Try to continue
-                value = 11;
-            }
-            break;
+                break;
+        }
     }
-
     const successValue = parseInt(value);
     const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
     await activationRoller.roll();
@@ -5824,7 +5903,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     const total = activationRoller.getSuccessTotal();
     const margin = successValue - total;
 
-    const flavor = `${item.name.toUpperCase()} (${OPTION_ALIAS}) activation ${
+    const flavor = `${item.name} (${OPTION_ALIAS}) activation ${
         succeeded ? "succeeded" : "failed"
     } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
     let cardHtml = await activationRoller.render(flavor);
