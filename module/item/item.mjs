@@ -4648,6 +4648,10 @@ export class HeroSystem6eItem extends Item {
             return true;
         }
 
+        if (this.type === "maneuver" && !this.baseInfo?.behaviors.includes("activatable")) {
+            return true;
+        }
+
         return this.system.active;
     }
 
