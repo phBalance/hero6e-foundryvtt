@@ -8570,10 +8570,7 @@ export function registerUploadTests(quench) {
                                 actor.system.characteristics.pd.core + 5,
                                 actor.system.characteristics.pd.value,
                             );
-                            assert.equal(
-                                actor.system.characteristics.pd.core + 5,
-                                actor.system.characteristics.pd.max,
-                            );
+                            assert.equal(actor.system.characteristics.pd.core + 5, actor.system.characteristics.pd.max);
                         });
 
                         it("does not increase ED", function () {

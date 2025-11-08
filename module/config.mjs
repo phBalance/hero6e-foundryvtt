@@ -2,6 +2,7 @@ import { createDefenseProfile } from "./utility/defense.mjs";
 import * as heroDice from "./utility/dice.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
 import {
+    convertHexesToSystemUnits,
     getRoundedUpDistanceInSystemUnits,
     getSystemDisplayUnits,
     hexDistanceToSystemDisplayString,
@@ -5757,7 +5758,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
 
                     case "KB":
-                        value = (parseInt(actorItemDefense.adjustedLevels) || 0) * convertHexesToSystemUnits(1, actorItemDefense.actor);
+                        value =
+                            (parseInt(actorItemDefense.adjustedLevels) || 0) *
+                            convertHexesToSystemUnits(1, actorItemDefense.actor);
                         break;
                 }
                 if (value > 0) {
@@ -13935,7 +13938,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-        addPower(
+    addPower(
         {
             key: "NODEFINCREASE",
             behaviors: ["modifier"],
