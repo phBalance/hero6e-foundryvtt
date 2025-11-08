@@ -8389,6 +8389,10 @@ export function registerUploadTests(quench) {
                             await actor.FullHealth();
                         });
 
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
+                        });
+
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
@@ -8444,6 +8448,10 @@ export function registerUploadTests(quench) {
                             await actor.FullHealth();
                         });
 
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
+                        });
+
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
@@ -8483,6 +8491,10 @@ export function registerUploadTests(quench) {
 
                             await item.setActiveEffects();
                             await actor.FullHealth();
+                        });
+
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
                         });
 
                         it("description", function () {
@@ -8529,8 +8541,13 @@ export function registerUploadTests(quench) {
                                 parent: actor,
                             });
 
+                            //await item.toggle();
                             await item.setActiveEffects();
-                            await actor.FullHealth();
+                            //await actor.FullHealth();
+                        });
+
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
                         });
 
                         it("description", function () {
@@ -8552,6 +8569,10 @@ export function registerUploadTests(quench) {
                             assert.equal(
                                 actor.system.characteristics.pd.core + 5,
                                 actor.system.characteristics.pd.value,
+                            );
+                            assert.equal(
+                                actor.system.characteristics.pd.core + 5,
+                                actor.system.characteristics.pd.max,
                             );
                         });
 
@@ -8579,6 +8600,10 @@ export function registerUploadTests(quench) {
 
                             await item.setActiveEffects();
                             await actor.FullHealth();
+                        });
+
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
                         });
 
                         it("description", function () {
@@ -8623,6 +8648,10 @@ export function registerUploadTests(quench) {
 
                             await item.setActiveEffects();
                             await actor.FullHealth();
+                        });
+
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
                         });
 
                         it("description", function () {
@@ -8680,6 +8709,10 @@ export function registerUploadTests(quench) {
                             await actor.FullHealth();
                         });
 
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
+                        });
+
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
@@ -8719,6 +8752,10 @@ export function registerUploadTests(quench) {
 
                             await item.setActiveEffects();
                             await actor.FullHealth();
+                        });
+
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
                         });
 
                         it("description", function () {
@@ -8769,6 +8806,10 @@ export function registerUploadTests(quench) {
                             await actor.FullHealth();
                         });
 
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
+                        });
+
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
@@ -8815,6 +8856,10 @@ export function registerUploadTests(quench) {
 
                             await item.setActiveEffects();
                             await actor.FullHealth();
+                        });
+
+                        it("is active", function () {
+                            assert.equal(item.isActive, true);
                         });
 
                         it("description", function () {
