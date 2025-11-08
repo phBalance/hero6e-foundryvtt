@@ -4629,6 +4629,11 @@ export class HeroSystem6eItem extends Item {
             console.error(e);
         }
 
+        // VPP unslotted
+        if (this.vppUnSlotted) {
+            return false;
+        }
+
         const ae = this.effects.contents?.[0];
         if (ae && ae.disabled === this.system.active) {
             // console.log(
@@ -4640,6 +4645,10 @@ export class HeroSystem6eItem extends Item {
         if (this.system.active === undefined) {
             console.warn(`${this.name} system.active === undefined, assuming true`);
 
+            return true;
+        }
+
+        if (this.type === "maneuver" && !this.baseInfo?.behaviors.includes("activatable")) {
             return true;
         }
 

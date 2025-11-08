@@ -820,6 +820,14 @@ export class HeroSystem6eCombat extends Combat {
                     resourcesUsedDescriptionRenderedRoll,
                     resourcesRequired,
                 } = await userInteractiveVerifyOptionallyPromptThenSpendResources(powerUsingResourcesToContinue, {});
+                if (
+                    resourcesRequired.totalCharges === 0 &&
+                    resourcesRequired.totalEnd === 0 &&
+                    resourcesRequired.totalReserveEnd === 0
+                ) {
+                    console.log(`Skipping ${powerUsingResourcesToContinue.name} required no resources`);
+                    continue;
+                }
                 if (error || warning) {
                     content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
                     await powerUsingResourcesToContinue.toggle();
