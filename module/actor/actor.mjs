@@ -1890,11 +1890,12 @@ export class HeroSystem6eActor extends Actor {
                 charges: this.items
                     .filter(
                         (item) =>
-                            item.system.charges &&
+                            item.system.charges?.CHARGES &&
                             (item.system.charges.max !== item.system.charges.value ||
                                 item.system.charges.clipsMax !== item.system.charges.clips),
                     )
-                    .map((o) => o.system),
+                    .map((o) => ({ id: o.id, charges: foundry.utils.deepClone(o.system.charges._source) })),
+
                 was5e: this.is5e,
             };
 
@@ -2307,8 +2308,16 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
+            // Make sure itemsToUpdate have ADDER/MODIFIER/POWER array
+            // Which allows a new HDC to remove ADDER during update, without it will never clear
+            for (const itemToUpdate of itemsToUpdate) {
+                itemToUpdate.system.ADDER ??= [];
+                itemToUpdate.system.MODIFIER ??= [];
+                itemToUpdate.system.POWER ??= [];
+            }
+
             // update existing document, overwriting any MODIFIERS, etc
-            await this.updateEmbeddedDocuments("Item", itemsToUpdate, { diff: false, recursive: false });
+            await this.updateEmbeddedDocuments("Item", itemsToUpdate);
 
             uploadProgressBar.advance(`${this.name}: Updated Items`, itemsToUpdate.length);
 
@@ -2367,30 +2376,22 @@ export class HeroSystem6eActor extends Actor {
             // reflect in current VALUE
             uploadProgressBar.advance(`${this.name}: FullHealth`, 0);
             await this.FullHealth();
+            // Kluge to ensure characteristic values match max
+            for (const key of Object.keys(this.system.characteristics)) {
+                await this.update({ [`system.characteristics.${key}.value`]: this.system.characteristics[key].max });
+            }
             uploadProgressBar.advance(`${this.name}: FullHealth complete`, 1);
 
             // retainValuesOnUpload Charges
             uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges`, 0);
             for (const chargeData of retainValuesOnUpload.charges) {
                 // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
-                const item = this.items.find((i) => i.system.ID == chargeData.ID);
+                const item = this.items.find((i) => i.id === chargeData.id);
                 if (item) {
-                    const chargesUsed = Math.max(0, chargeData.charges.max - chargeData.charges.value);
-                    if (chargesUsed) {
-                        await item.update({
-                            "system.charges.value": Math.max(0, item.system.charges.max - chargesUsed),
-                        });
-                    }
-
-                    const clipsUsed = Math.max(0, chargeData.charges.clips - chargeData.charges.clipsMax);
-                    if (clipsUsed) {
-                        await item.update({
-                            "system.clips.value": Math.max(0, item.system.charges.clipsMax - clipsUsed),
-                        });
-                    }
-
-                    //item.updateItemDescription();
-                    await item.update({ "system.description": item.system.description });
+                    await item.update({
+                        "system.charges.value": Math.min(item.system.charges.value, chargeData.charges.value),
+                        "system.charges.clips": Math.min(item.system.charges.clips, chargeData.charges.clips),
+                    });
                 } else {
                     console.warn(
                         `Unable to locate ${chargeData.NAME}/${chargeData.ALIAS} to consume charges after upload.`,
@@ -2453,8 +2454,8 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: Processed non characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processed all items`, 0);
 
-            // Full Health
-            await this.FullHealth();
+            // Full Health (not needed?  Issues with retained values)
+            //await this.FullHealth();
 
             uploadPerformance.invalidTargets = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
