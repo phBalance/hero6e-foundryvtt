@@ -3020,14 +3020,17 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "STRIKING_APPEARANCE": {
-                const levels = parseInt(system.LEVELS);
+                const levels = system.LEVELS;
                 description = `+${levels}/+${levels}d6 ${system.ALIAS} (${system.OPTION_ALIAS})`;
                 break;
             }
 
-            case "CHANGEENVIRONMENT":
-                description = `${system.ALIAS}`;
+            case "CHANGEENVIRONMENT": {
+                // 5e includes a radius in the power. 6e requires purchasing it as a modifier.
+                const radiusOfEffect = `${this.is5e ? ` ${Math.pow(2, system.LEVELS - 1)}${getSystemDisplayUnits(this.is5e)} radius` : ""}`;
+                description = `${system.ALIAS}${radiusOfEffect}`;
                 break;
+            }
 
             case "POSSESSION":
                 {

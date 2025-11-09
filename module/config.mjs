@@ -5481,7 +5481,33 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="CHANGEENVIRONMENT" ID="1711932803443" BASECOST="0.0" LEVELS="0" ALIAS="Change Environment" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
-        { costPerLevel: fixedValueFunction(5) },
+        {
+            addersCost: (item) => {
+                // 5e Change Environment gives 1 level of an adder for free but it must be the least expensive adder.
+                const sortedAdderValuation = item.adders.sort((a, b) => {
+                    const aCost = a.BASECOST || a.LVLCOST;
+                    const bCost = b.BASECOST || b.LVLCOST;
+                    return aCost - bCost;
+                });
+
+                // Remove cost of 1 LEVEL of the least expensive adder
+                if (sortedAdderValuation.length === 0) {
+                    console.warn(`CHANGEENVIRONMENT ${item.detailedName()} couldn't find any combat effects.`);
+                    return 0;
+                }
+
+                // Remove the lowest level cost
+                const freeLevelCostToRemove = sortedAdderValuation[0].BASECOST || sortedAdderValuation[0].LVLCOST;
+
+                let costOfAdders = -freeLevelCostToRemove;
+                for (const adder of item.adders) {
+                    costOfAdders += adder.cost;
+                }
+
+                return costOfAdders;
+            },
+            costPerLevel: fixedValueFunction(5),
+        },
     );
     addPower(
         {
@@ -8263,17 +8289,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    addPower(
-        {
-            // GENERIC_OBJECT related
-            key: "ADDER",
-            behaviors: ["adder"],
-            type: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="GENERIC_OBJECT" ID="1731203796826" BASECOST="1.0" LEVELS="0" ALIAS="Ego Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-        },
-        {},
-    );
+    // PH: FIXME: Need to think about ADDER and MODIFIER etc. Right now the tests fail with this
+    //            as the key and the XMLID don't match.
+    // addPower(
+    //     {
+    //         // GENERIC_OBJECT related
+    //         key: "ADDER",
+    //         behaviors: ["adder"],
+    //         type: ["adder"],
+    //         costPerLevel: fixedValueFunction(0),
+    //         xml: `<ADDER XMLID="GENERIC_OBJECT" ID="1731203796826" BASECOST="1.0" LEVELS="0" ALIAS="Ego Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    //     },
+    //     {},
+    // );
     addPower(
         {
             // ENTANGLE related
