@@ -6412,8 +6412,9 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("CHANGEENVIRONMENT", async function () {
-                const contents = `
+            describe.only("CHANGEENVIRONMENT", async function () {
+                describe("6e", async function () {
+                    const contents = `
                     <POWER XMLID="CHANGEENVIRONMENT" ID="1709333795869" BASECOST="0.0" LEVELS="0" ALIAS="Change Environment" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         <NOTES />
                         <ADDER XMLID="ALTERABLEORIGIN" ID="1711727581621" BASECOST="5.0" LEVELS="0" ALIAS="Alterable Origin Point" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -6475,46 +6476,114 @@ export function registerUploadTests(quench) {
                         </ADDER>
                     </POWER>
                 `;
-                let item;
+                    let item;
 
-                before(async function () {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = true;
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
                     });
 
-                    actor.items.set(item.system.XMLID, item);
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Change Environment (Alterable Origin Point; Reduced Negation (1); Varying Combat Effects; -1 PER Roll; -1 to Characteristic Roll or Skill Roll; -1m of any mode of Movement; -1 Wind Levels; +1 Wind Levels; -1 Temperature Level Adjustment; +1 Temperature Level Adjustment; -1 Characteristic Roll and all Skill Rolls based on Characteristic; -1; -1 point of EGO; -1 to Breakout Rolls; +1 Points of Damage; Suffocation; Stunning; +1 Points of Telekinetic STR; Long-Lasting)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 116);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 116);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.LEVELS, 0);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.end, 12);
+                    });
                 });
 
-                it("description", function () {
-                    assert.equal(
-                        item.system.description,
-                        "Change Environment (Alterable Origin Point; Reduced Negation (1); Varying Combat Effects; -1 PER Roll; -1 to Characteristic Roll or Skill Roll; -1m of any mode of Movement; -1 Wind Levels; +1 Wind Levels; -1 Temperature Level Adjustment; +1 Temperature Level Adjustment; -1 Characteristic Roll and all Skill Rolls based on Characteristic; -1; -1 point of EGO; -1 to Breakout Rolls; +1 Points of Damage; Suffocation; Stunning; +1 Points of Telekinetic STR; Long-Lasting)",
-                    );
-                });
+                describe("5e", async function () {
+                    const contents = `
+                        <POWER XMLID="CHANGEENVIRONMENT" ID="1761348802438" BASECOST="0.0" LEVELS="3" ALIAS="Change Environment" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="TEMPERATUREINCREASE" ID="1762626977580" BASECOST="0.0" LEVELS="2" ALIAS="+2 Temperature Level Adjustment" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="REDUCEDEND" ID="1762626977585" BASECOST="0.5" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ZERO" OPTIONID="ZERO" OPTION_ALIAS="0 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="NORANGE" ID="1762626977587" BASECOST="-0.5" LEVELS="0" ALIAS="No Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="PERSISTENT" ID="1762626977588" BASECOST="0.5" LEVELS="0" ALIAS="Persistent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="INHERENT" ID="1762626977589" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="ALWAYSON" ID="1762626977590" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
 
-                it("realCost", function () {
-                    assert.equal(item.realCost, 116);
-                });
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
 
-                it("activePoints", function () {
-                    assert.equal(item.activePoints, 116);
-                });
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
 
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS, 0);
-                });
+                        actor.items.set(item.system.XMLID, item);
+                    });
 
-                it("end", function () {
-                    assert.equal(item.end, 12);
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            'Change Environment 4" radius (+2 Temperature Level Adjustment), Inherent (+1/4), Reduced Endurance (0 END; +1/2), Persistent (+1/2) (40 Active Points); No Range (-1/2), Always On (-1/2)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 20);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 40);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.LEVELS, 3);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.end, 0);
+                    });
                 });
             });
 
