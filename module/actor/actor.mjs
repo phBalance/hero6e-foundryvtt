@@ -1927,10 +1927,13 @@ export class HeroSystem6eActor extends Actor {
                 (heroJson.CHARACTER.TALENTS?.length || 0) +
                 (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
                 1 + // Validating adjustment and powers
+                1 + // FullHealth
+                1 + // VPP
                 1 + // Images
                 1 + // Final save
                 1 + // Restore retained damage
                 1; // Not really sure why we need an extra +1
+
             uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess);
             uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
 
@@ -2341,7 +2344,7 @@ export class HeroSystem6eActor extends Actor {
             );
 
             // VPP Slots
-            uploadProgressBar.advance(`${this.name}: VPP Slots`, 0);
+            uploadProgressBar.advance(`${this.name}: VPP Slots auto selection`, 0);
             for (const vppItem of this.items.filter((i) => i.system.XMLID === "VPP")) {
                 // If no vppSlots then pick defaults (currently always defaults)
                 if (!vppItem.childItems.find((i) => i.system.vppSlotted)) {
@@ -2358,16 +2361,18 @@ export class HeroSystem6eActor extends Actor {
                     await this.updateEmbeddedDocuments("Item", vppChanges);
                 }
             }
+            uploadProgressBar.advance(`${this.name}: VPP Slots auto selection complete`, 1);
 
             // Make sure any powers with characteristic properties
             // reflect in current VALUE
             uploadProgressBar.advance(`${this.name}: FullHealth`, 0);
             await this.FullHealth();
-            uploadProgressBar.advance(`${this.name}: FullHealth complete`, 0);
+            uploadProgressBar.advance(`${this.name}: FullHealth complete`, 1);
 
             // retainValuesOnUpload Charges
             uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges`, 0);
             for (const chargeData of retainValuesOnUpload.charges) {
+                // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
                 const item = this.items.find((i) => i.system.ID == chargeData.ID);
                 if (item) {
                     const chargesUsed = Math.max(0, chargeData.charges.max - chargeData.charges.value);
@@ -2610,6 +2615,7 @@ export class HeroSystem6eActor extends Actor {
             // duplicate ID can be a problem
             for (const item of this.items) {
                 if (item.system.ID) {
+                    // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
                     const dups = this.items.filter((i) => i.system.ID == item.system.ID);
                     if (dups.length > 1) {
                         // Try to give duplicate items a new ID
@@ -2702,6 +2708,7 @@ export class HeroSystem6eActor extends Actor {
 
             // Delete any old items that weren't updated, added or part of freeStuff
             if (this.id) {
+                // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
                 const itemsToDelete = this.items.filter(
                     (item) =>
                         !itemsToUpdate.find((o) => item.id === o._id) &&

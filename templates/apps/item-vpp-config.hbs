@@ -13,7 +13,7 @@
         {{!-- Available SELECT --}}
         <div class="">
             <span>Available Powers</span>
-            <select id="vppUnSlotted" class="form-control" size="10" multiple="multiple">
+            <select id="vppUnslottedPowerSelect" class="form-control" size="10" multiple="multiple">
                 {{#each vppUnSlottedItems}}
                 <option value="{{this.id}}" title="{{this.system.description}}" data-cost="{{this.realCost}}">{{this.name}}</option>
                 {{/each}}
@@ -23,15 +23,15 @@
         {{!-- Controls --}}
         <div class="flexcol flex0 vpp-select-control">
             <span>&nbsp;</span>
-            <button type="button" id="rightButton" class="vpp-select-control" disabled><i class="fa-solid fa-chevron-right"></i></button>
-            <button type="button" id="leftButton" class="vpp-select-control" disabled><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" id="slotPowerButton" class="vpp-select-control" disabled><i class="fa-solid fa-chevron-right"></i></button>
+            <button type="button" id="unslotPowerButton" class="vpp-select-control" disabled><i class="fa-solid fa-chevron-left"></i></button>
             <button type="button" id="defaultButton" class="vpp-select-control">Default</button>
         </div>
 
         {{!-- Active SELECT --}}    
         <div class="">
             <span>Slotted Powers</span>
-            <select id="vppSlotted" class="form-control" size="10" multiple="multiple">
+            <select id="vppSlottedPowerSelect" class="form-control" size="10" multiple="multiple">
                 {{#each vppSlottedItems}}
                 <option value="{{this.id}}" title="{{this.system.description}}" data-cost="{{this.realCost}}">{{this.name}}</option>
                 {{/each}}
