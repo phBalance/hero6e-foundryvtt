@@ -2377,8 +2377,16 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: FullHealth`, 0);
             await this.FullHealth();
             // Kluge to ensure characteristic values match max
-            for (const key of Object.keys(this.system.characteristics)) {
-                await this.update({ [`system.characteristics.${key}.value`]: this.system.characteristics[key].max });
+            try {
+                if (this.id) {
+                    for (const key of Object.keys(this.system.characteristics)) {
+                        await this.update({
+                            [`system.characteristics.${key}.value`]: this.system.characteristics[key].max,
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error(e);
             }
             uploadProgressBar.advance(`${this.name}: FullHealth complete`, 1);
 
