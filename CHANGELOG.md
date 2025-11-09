@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.2.2 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.2 20251108 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Various VPP improvements, including the ability to choose VPP slots. Exceeding VPP pool is not enforced. [#2743](https://github.com/dmdorman/hero6e-foundryvtt/issues/2743) [#2869](https://github.com/dmdorman/hero6e-foundryvtt/issues/2869)
 - Fixed ability to add/edit/delete MODIFIERs from item sheet. [#3006](https://github.com/dmdorman/hero6e-foundryvtt/issues/3006) [#3031](https://github.com/dmdorman/hero6e-foundryvtt/issues/3031)
