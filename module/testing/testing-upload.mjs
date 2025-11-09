@@ -6412,7 +6412,7 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe.only("CHANGEENVIRONMENT", async function () {
+            describe("CHANGEENVIRONMENT", async function () {
                 describe("6e", async function () {
                     const contents = `
                     <POWER XMLID="CHANGEENVIRONMENT" ID="1709333795869" BASECOST="0.0" LEVELS="0" ALIAS="Change Environment" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
