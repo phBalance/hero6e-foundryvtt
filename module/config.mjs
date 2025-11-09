@@ -659,12 +659,13 @@ function pdEdCostPerLevel(itemOrActor) {
 
 /**
  * @typedef {Object} PowerDescription
- * @param {string} key - Hero Designer XMLID of the power
- * @param {string} name - Human readable name of the power
- * @param {string} base - Base number of levels that are given automatically
- * @param {string} cost - Cost in character points per additional level
- * @param {Array<string>} type - A list of types associated with this power
- * @param {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "to-hit" | "activatable" | "adder" | "modifier">} behaviors - A list of the behavior types this power exhibits in the code
+ * @type Object
+ * @property {string} key - Hero Designer XMLID of the power
+ * @property {string} name - Human readable name of the power
+ * @property {string} base - Base number of levels that are given automatically
+ * @property {string} cost - Cost in character points per additional level
+ * @property {Array<string>} type - A list of types associated with this power
+ * @property {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "to-hit" | "activatable" | "adder" | "modifier">} behaviors - A list of the behavior types this power exhibits in the code
  *                                       "non-hd" - this is not an XMLID that comes from Hero Designer
  *                                       "optional-maneuver" - this is an optional combat maneuver
  *                                       "success" - can roll some kind of success roll for this power
@@ -674,9 +675,9 @@ function pdEdCostPerLevel(itemOrActor) {
  *                                       "adder" - this power is actually a power adder
  *                                       "modifier" - this power is actually a power modifier (aka advantage)
  *
- * @param {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
- * @param {HERO.RANGE_TYPES} range - The range of the power
- * @param {boolean} [costEnd] - If the power costs endurance to use. true if it does, false or undefined if it doesn't
+ * @property {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
+ * @property {HERO.RANGE_TYPES} range - The range of the power
+ * @property {boolean} [costEnd] - If the power costs endurance to use. true if it does, false or undefined if it doesn't
  */
 
 /**
@@ -8308,11 +8309,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ADDITIONALBODY",
             behaviors: ["adder"],
             type: ["adder"],
-            costPerLevel: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(5),
             xml: `<ADDER XMLID="ADDITIONALBODY" ID="1759025236331" BASECOST="0.0" LEVELS="4" ALIAS="+4d6 Additional BODY" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
+    addPower(undefined, {
+        // ENTANGLE related
+        key: "ADDITIONALDEF",
+        behaviors: ["adder"],
+        type: ["adder"],
+        costPerLevel: fixedValueFunction(5),
+        xml: `<ADDER XMLID="ADDITIONALDEF" ID="1762666240636" BASECOST="0.0" LEVELS="1" ALIAS="+1 Additional DEF" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // ENTANGLE related
@@ -8339,6 +8348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(5 / 2),
+            // PH: FIXME: Why is there cost function for ADDITIONALPD? Should be same as ED.
             xml: `<ADDER XMLID="ADDITIONALPD" ID="1738019116299" BASECOST="0.0" LEVELS="1" ALIAS="+1 Additional PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8394,6 +8404,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="ALTERABLEORIGIN" ID="1711727699280" BASECOST="5.0" LEVELS="0" ALIAS="Alterable Origin Point" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            // MANDATORYEFFECT related
+            key: "ALWAYS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ALWAYS" ID="1762138779539" BASECOST="-0.25" LEVELS="0" ALIAS="Must Always Achieve [Particular Effect]" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         undefined,
     );
@@ -8891,6 +8912,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<ADDER XMLID="BREAKABILITY" ID="1762133129109" BASECOST="-0.25" LEVELS="0" ALIAS="Breakability" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FRAGILE" OPTIONID="FRAGILE" OPTION_ALIAS="Fragile" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
+    );
+    addPower(
+        {
+            // CHANGEENVIRONMENT related
+            key: "BREAKOUT",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(3),
+            xml: `<ADDER XMLID="BREAKOUT" ID="1711727603898" BASECOST="0.0" LEVELS="1" ALIAS="-1 to Breakout Rolls" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        undefined,
     );
     addPower(
         {
@@ -9964,6 +9996,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // WEAPONSMITH related
+            key: "FIREARMS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="FIREARMS" ID="1762657674988" BASECOST="2.0" LEVELS="0" ALIAS="Firearms" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "FISTLOADS",
             behaviors: ["adder"],
@@ -10434,6 +10477,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         xml: `<ADDER XMLID="INCREASEDMAX" ID="1734826313991" BASECOST="0.0" LEVELS="3" ALIAS="Increased Maximum (+3 points)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
     });
+    addPower(
+        {
+            // MULTIFORM related
+            key: "INCREASENUMBER",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="INCREASENUMBER" ID="1762663925143" BASECOST="0.0" LEVELS="1" ALIAS="x2 Number Of Forms" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // CLIPS related
@@ -11224,11 +11278,36 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             // CHANGEENVIRONMENT related
-            key: "MOVEMENT",
+            key: "MOVEMENT", // In 6e this is negative wind levels
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(5),
+            xml: `<ADDER XMLID="MOVEMENT" ID="1762136788974" BASECOST="0.0" LEVELS="1" ALIAS="-1&quot; of any one mode of Movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {
+            // In 5e this is negative to any movement type
+            costPerLevel: fixedValueFunction(3),
+        },
+    );
+    addPower(
+        {
+            // CHANGEENVIRONMENT related
+            key: "MOVEMENT6E",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(1),
+            xml: `<ADDER XMLID="MOVEMENT6E" ID="1762664140420" BASECOST="0.0" LEVELS="8" ALIAS="-8m of any mode of Movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            // Mental power related
+            key: "MULTIPLECLASSES",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="MOVEMENT" ID="1762136788974" BASECOST="0.0" LEVELS="1" ALIAS="-1&quot; of any one mode of Movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+            xml: `<ADDER XMLID="MULTIPLECLASSES" ID="1762663582274" BASECOST="10.0" LEVELS="0" ALIAS="Additional Class of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -11373,6 +11452,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="NONPROPORTIONAL" ID="1762136506574" BASECOST="0.25" LEVELS="0" ALIAS="Lesser Power need not be used proportionally to Power with which it is Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // TELEPORTATION related
+            key: "NORELATIVEVELOCITY",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NORELATIVEVELOCITY" ID="1762663752216" BASECOST="10.0" LEVELS="0" ALIAS="No Relative Velocity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -12493,6 +12583,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // ENTANGLE related
+            key: "STOPSENSE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="STOPSENSE" ID="1762666247198" BASECOST="5.0" LEVELS="0" ALIAS="Stops A Given Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMALHEARING" OPTIONID="NORMALHEARING" OPTION_ALIAS="Normal Hearing" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // ENTANGLE related
+            key: "STOPSENSEGROUP",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="STOPSENSEGROUP" ID="1762666248940" BASECOST="10.0" LEVELS="0" ALIAS="Stops A Given Sense Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "STUNRODS",
             behaviors: ["adder"],
@@ -13483,6 +13595,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "BASEDONCON",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="BASEDONCON" ID="1762138803705" BASECOST="-1.0" LEVELS="0" ALIAS="Based on CON" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PD" OPTIONID="PD" OPTION_ALIAS="Defense: PD" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "BEAM",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -13870,6 +13992,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         xml: `<MODIFIER XMLID="EXPLOSION" ID="1713379744211" BASECOST="0.5" LEVELS="1" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="Normal (Radius)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
     });
+    addPower(
+        {
+            key: "EYECONTACTREQUIRED",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="EYECONTACTREQUIRED" ID="1762138788577" BASECOST="-0.5" LEVELS="0" ALIAS="Eye Contact Required" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+        },
+        {},
+    );
 
     addPower(
         {
@@ -14085,6 +14217,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // Mental powers related
+            key: "MANDATORYEFFECT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="MANDATORYEFFECT" ID="1762138776945" BASECOST="-0.25" LEVELS="0" ALIAS="Mandatory Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TEN" OPTIONID="TEN" OPTION_ALIAS="EGO +10" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(
         {
             key: "MASS",
@@ -14360,6 +14503,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            key: "ONLYONAPPROPRIATETERRAIN",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ONLYONAPPROPRIATETERRAIN" ID="1762138763375" BASECOST="-1.0" LEVELS="0" ALIAS="Only On Appropriate Terrain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SNOWANDICE" OPTIONID="SNOWANDICE" OPTION_ALIAS="Only on snow and ice" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(undefined, {
         key: "ONLYONSURFACE",
         behaviors: ["modifier"],
@@ -14395,6 +14548,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "OTHERSONLY",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(false),
+        xml: `<MODIFIER XMLID="OTHERSONLY" ID="1762138755473" BASECOST="-0.5" LEVELS="0" ALIAS="Others Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+    });
 
     addPower(
         {
@@ -14496,6 +14656,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // Movement related
+        key: "RESTRICTEDPATH",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(false),
+        xml: `<MODIFIER XMLID="RESTRICTEDPATH" ID="1762138740833" BASECOST="-1.0" LEVELS="0" ALIAS="Restricted Path" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+    });
     addPower(
         {
             key: "REALARMOR",
