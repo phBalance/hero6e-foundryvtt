@@ -41,7 +41,7 @@ export class ItemVppConfig extends HeroApplication {
         // Window title
         options = foundry.utils.mergeObject(options, {
             window: {
-                title: `CONFIGURE: ${this.item.name}`,
+                title: `VPP SLOT SELECT: ${this.item.name}`,
             },
         });
     }
@@ -150,17 +150,17 @@ export class ItemVppConfig extends HeroApplication {
                 return;
             }
             switch (ev.target.id) {
-                case "rightButton": {
+                case "slotPowerButton": {
                     const selected = Array.from(
-                        ev.target.closest("form").querySelectorAll("#vppUnSlotted option:checked"),
+                        ev.target.closest("form").querySelectorAll("#vppUnslottedPowerSelect option:checked"),
                     );
                     const selectedIds = selected.map((o) => o.value);
                     context.#vppSlottedIds.push.apply(context.#vppSlottedIds, selectedIds);
                     break;
                 }
-                case "leftButton": {
+                case "unslotPowerButton": {
                     const selected = Array.from(
-                        ev.target.closest("form").querySelectorAll("#vppSlotted option:checked"),
+                        ev.target.closest("form").querySelectorAll("#vppSlottedPowerSelect option:checked"),
                     );
                     const selectedIds = selected.map((o) => o.value);
                     context.#vppSlottedIds = context.#vppSlottedIds.filter((id) => !selectedIds.includes(id));
@@ -188,7 +188,7 @@ export class ItemVppConfig extends HeroApplication {
 
             // Clear all select options upon SELECT 'blur'
             if (ev.type === "blur") {
-                for (let el of ["#vppSlotted", "#vppUnSlotted"]) {
+                for (const el of ["#vppUnslottedPowerSelect", "#vppSlottedPowerSelect"]) {
                     ev.target
                         .closest("form")
                         .querySelectorAll(`${el} option:checked`)
@@ -196,11 +196,15 @@ export class ItemVppConfig extends HeroApplication {
                 }
             }
 
-            const vppUnSlotted = Array.from(ev.target.closest("form").querySelectorAll("#vppUnSlotted option:checked"));
-            const vppSlotted = Array.from(ev.target.closest("form").querySelectorAll("#vppSlotted option:checked"));
+            const vppUnSlotted = Array.from(
+                ev.target.closest("form").querySelectorAll("#vppUnslottedPowerSelect option:checked"),
+            );
+            const vppSlotted = Array.from(
+                ev.target.closest("form").querySelectorAll("#vppSlottedPowerSelect option:checked"),
+            );
 
-            context.element.querySelector("#rightButton").disabled = vppUnSlotted.length === 0;
-            context.element.querySelector("#leftButton").disabled = vppSlotted.length === 0;
+            context.element.querySelector("#slotPowerButton").disabled = vppUnSlotted.length === 0;
+            context.element.querySelector("#unslotPowerButton").disabled = vppSlotted.length === 0;
         }
 
         // Add EventListeners

@@ -825,7 +825,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             ADDER: new ArrayField(new EmbeddedDataField(HeroAdderModel)),
             ALIAS: new StringField(),
             TEXT: new StringField(),
-            BASECOST: new StringField(),
+            BASECOST: new HeroNumberField({ integer: false }),
             COLOR: new StringField(),
             GRAPHIC: new StringField(),
             ID: new HeroNumberField({ integer: true }),
