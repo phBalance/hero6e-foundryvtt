@@ -418,9 +418,9 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get range() {
-        let _range = this.baseInfo?.range;
+        let range = this.baseInfo?.range;
         try {
-            if (!_range) {
+            if (!range) {
                 // This should never happen, missing something from CONFIG.mjs?  Perhaps with super old actors?
                 console.error(`Missing range`, this);
                 return CONFIG.HERO.RANGE_TYPES.SELF;
@@ -428,7 +428,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
 
             // Short circuit if there are no modifiers
             if (this.MODIFIER === undefined) {
-                return _range;
+                return range;
             }
 
             // Range Modifiers "self", "no range", "standard", or "los" based on base power.
@@ -449,54 +449,54 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
 
             // Based on EGO combat value comes with line of sight
             if (BOECV) {
-                _range = CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT;
+                range = CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT;
             }
 
             // Self only powers cannot be bought to have range unless they become usable on others at which point
             // they gain no range.
-            if (_range === CONFIG.HERO.RANGE_TYPES.SELF) {
+            if (range === CONFIG.HERO.RANGE_TYPES.SELF) {
                 if (UOO) {
-                    _range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+                    range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
                 }
             }
 
             // No range can be bought to have range.
-            if (_range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
+            if (range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
                 if (RANGED) {
-                    _range = CONFIG.HERO.RANGE_TYPES.STANDARD;
+                    range = CONFIG.HERO.RANGE_TYPES.STANDARD;
                 }
             }
 
             // Standard range can be bought up or bought down.
-            if (_range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
+            if (range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
                 if (NORANGE) {
-                    _range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+                    range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
                 } else if (LOS) {
-                    _range = CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT;
+                    range = CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT;
                 } else if (limitedRange) {
-                    _range = CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE;
+                    range = CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE;
                 } else if (rangeBasedOnStrength) {
-                    _range = CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR;
+                    range = CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR;
                 }
             }
 
             // Line of sight can be bought down
-            if (_range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT) {
+            if (range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT) {
                 if (NORMALRANGE) {
-                    _range = CONFIG.HERO.RANGE_TYPES.STANDARD;
+                    range = CONFIG.HERO.RANGE_TYPES.STANDARD;
                 } else if (rangeBasedOnStrength) {
-                    _range = CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR;
+                    range = CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR;
                 } else if (limitedRange) {
-                    _range = CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE;
+                    range = CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE;
                 } else if (NORANGE) {
-                    _range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+                    range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
                 }
             }
         } catch (e) {
             console.error(e);
         }
 
-        return _range;
+        return range;
     }
 
     get #rollProps() {
