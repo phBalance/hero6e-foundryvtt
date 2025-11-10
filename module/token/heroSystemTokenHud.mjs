@@ -11,7 +11,10 @@ const FoundryVttTokenHUD = foundry.applications.hud?.TokenHUD || TokenHUD;
  * @param {String} characteristic
  */
 function generateMovementCanSelectFunction(characteristic) {
-    return (token) => parseInt(token.actor?.system.characteristics[characteristic]?.value || 0) > 0;
+    return (token) => {
+        const combatMovementInSystemUnits = token.actor?.system.characteristics[characteristic]?.value || 0;
+        return combatMovementInSystemUnits > 0;
+    };
 }
 
 /**
@@ -19,26 +22,34 @@ function generateMovementCanSelectFunction(characteristic) {
  * @param {String} characteristic
  */
 function generateMovementMaxCombatDistanceMeters(characteristic) {
-    return (token) =>
-        convertSystemUnitsToMetres(
-            parseInt(token.actor?.system.characteristics[characteristic]?.value || 0) || 0,
-            token.actor,
-        );
+    return (token) => {
+        const combatMovementInSystemUnits = token.actor?.system.characteristics[characteristic]?.value || 0;
+        return convertSystemUnitsToMetres(combatMovementInSystemUnits, token.actor);
+    };
+}
+
+function generateMovementMaxNonCombatDistanceMeters(characteristic) {
+    return (token) => {
+        const combatMovementInSystemUnits = token.actor?.system.characteristics[characteristic]?.value || 0;
+        const nonCombatMultiplier = 2; // PH: FIXME: This is wrong. Need to look at the actual power that is being used.
+        return convertSystemUnitsToMetres(nonCombatMultiplier * combatMovementInSystemUnits, token.actor);
+    };
 }
 
 // PH: FIXME: Base FTL is 0 LEVELS. Probably this is not expected elsewhere
 function ftlCanSelect(token) {
-    return parseInt(token.actor?.system.characteristics.ftl?.value || -1) > -1;
+    const ftlLevels = token.actor?.system.characteristics.ftl?.value || -1;
+    return ftlLevels > -1;
 }
 
 function ftlMaxNonCombatDistanceMeters(token) {
-    const levels = parseInt(token.actor?.system.characteristics.ftl?.value || -1);
-    if (levels <= -1) {
+    const ftlLevels = token.actor?.system.characteristics.ftl?.value || -1;
+    if (ftlLevels <= -1) {
         return 0;
     }
 
     // FTL is given movement per year - not per phase. Convert to per phase based on speed.
-    const lightYearsPerYear = ftlLevelsToLightYearsPerYear(levels);
+    const lightYearsPerYear = ftlLevelsToLightYearsPerYear(ftlLevels);
     const metresPerTurnPerLightYearPerYear = 2.998e8 * lightYearsPerYear;
     const speed = parseInt(token.actor?.system.characteristics.spd?.value || 0);
 
@@ -52,6 +63,8 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
      * @return {Object} movementActions
      */
     static initializeMovementActions(module) {
+        // PH: FIXME: FoundryVTT makes the assumption that the types of movement are defined by the system rather than by the token.
+        // NOTE: maxCombatDistanceMeters and maxNonCombatDistanceMeters properties are custom to hero system
         return {
             RUNNING: {
                 label: "Running",
@@ -61,6 +74,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 0,
                 canSelect: generateMovementCanSelectFunction("running"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("running"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("running"),
             },
             SWIMMING: {
                 label: "Swimming",
@@ -70,6 +84,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 1,
                 canSelect: generateMovementCanSelectFunction("swimming"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("swimming"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("swimming"),
             },
             LEAPING: {
                 label: "Leaping",
@@ -79,6 +94,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 2,
                 canSelect: generateMovementCanSelectFunction("leaping"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("leaping"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("leaping"),
             },
 
             EXTRADIMENSIONALMOVEMENT: {
@@ -89,6 +105,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 3,
                 canSelect: generateMovementCanSelectFunction("extradimensionalmovement"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("extradimensionalmovement"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("extradimensionalmovement"),
             },
             FLIGHT: {
                 label: "Flight",
@@ -98,6 +115,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 4,
                 canSelect: generateMovementCanSelectFunction("flight"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("flight"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("flight"),
             },
             FTL: {
                 label: "Faster Than Light",
@@ -107,7 +125,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 5,
                 canSelect: ftlCanSelect,
                 maxCombatDistanceMeters: () => 0, // FTL does not support combat - only non combat
-                maxNonCombatDistanceMetres: ftlMaxNonCombatDistanceMeters,
+                maxNonCombatDistanceMeters: ftlMaxNonCombatDistanceMeters,
             },
             GLIDING: {
                 label: "Gliding",
@@ -117,6 +135,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 6,
                 canSelect: generateMovementCanSelectFunction("gliding"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("gliding"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("gliding"),
             },
             SWINGING: {
                 label: "Swinging",
@@ -126,6 +145,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 7,
                 canSelect: generateMovementCanSelectFunction("swinging"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("swinging"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("swinging"),
             },
             TELEPORTATION: {
                 label: "Teleportation",
@@ -136,6 +156,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 teleport: true,
                 canSelect: generateMovementCanSelectFunction("teleportation"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("teleportation"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("teleportation"),
             },
             TUNNELING: {
                 label: "Tunneling",
@@ -145,6 +166,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 order: 9,
                 canSelect: generateMovementCanSelectFunction("tunneling"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("tunneling"),
+                maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("tunneling"),
             },
 
             // Special action that is always required (otherwise v13.350 crashes)
@@ -161,13 +183,9 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 canSelect: () => false,
                 deriveTerrainDifficulty: () => 1,
                 getCostFunction: () => () => 0,
+                maxCombatDistanceMeters: () => 0,
+                maxNonCombatDistanceMeters: () => 0,
             },
         };
     }
-
-    // PH: FIXME: Do we want to actually activate this movement power?
-    // static async #movementAction(event, target) {
-    //     // Call the super version of this
-    //     return TokenHUD.DEFAULT_OPTIONS.actions.movementAction.call(this, ...arguments);
-    // }
 }
