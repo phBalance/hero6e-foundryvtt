@@ -132,22 +132,6 @@ $sidebar-width: 136px;
     margin-left: 0;
 }
 
-/* Note that tr elements themselves can't be position: sticky */
-.savuori.actor-sheet table tr th.sticky {
-    position: sticky;
-    top: 0;
-    z-index: 1; /* pesky checkboxes */
-    background-color: "red"; /* $sheet-header-background; */
-}
-
-/* Note that tr elements themselves can't be position: sticky */
-.savuori.actor-sheet table tr th.sticky2 {
-    position: sticky;
-    top: 33px;
-    z-index: 1; /* pesky checkboxes */
-    background-color: "red"; /* $sheet-header-background; */
-}
-
 .savuori th.left,
 .savuori td.left {
     padding-left: 1em;
