@@ -1,25 +1,22 @@
 <div class="tab tab-body" data-group="primary" data-tab="martialArts">
     <table>
-        <tr class="sticky">
-            <th colspan="2" class="right">Filter:</th>
-            <th colspan="7">
+        <tr>
+            <th class="sticky" colspan="2" class="right">Filter:</th>
+            <th class="sticky" colspan="7">
                 <input class="left" name="itemFilters.martial" type="text"
                     value="{{options.itemFilters.martial}}">
             </th>
         </tr>
-        <tr class="sticky2">
-            <th></th>
-            <th>{{localize "ActorSheet.Cost"}}</th>
-            <th class="left">{{localize "ActorSheet.Name"}}</th>
-            <th class="left">{{localize "ActorSheet.Description"}}</th>
-            <th>{{localize "ActorSheet.Phase"}}</th>
-            <th>{{localize "ActorSheet.OCV"}}</th>
-            <th>{{localize "ActorSheet.DCV"}}</th>
-            <th>{{localize "ActorSheet.Roll"}}</th>
-            <th>
-                {{!-- <a class="item-control item-create" title="Create Martial Art" data-type="martialArt">
-                    <i class="fas fa-plus"></i> Add MartialArt</a> --}}
-            </th> 
+        <tr>
+            <th class="sticky2"></th>
+            <th class="sticky2">{{localize "ActorSheet.Cost"}}</th>
+            <th class="left sticky2">{{localize "ActorSheet.Name"}}</th>
+            <th class="left sticky2">{{localize "ActorSheet.Description"}}</th>
+            <th class="sticky2">{{localize "ActorSheet.Phase"}}</th>
+            <th class="sticky2">{{localize "ActorSheet.OCV"}}</th>
+            <th class="sticky2">{{localize "ActorSheet.DCV"}}</th>
+            <th class="sticky2">{{localize "ActorSheet.Roll"}}</th>
+            <th class="sticky2"></th> 
         </tr>
 
         {{#each items as |item id|}}

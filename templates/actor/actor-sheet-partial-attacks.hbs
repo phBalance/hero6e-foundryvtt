@@ -1,17 +1,17 @@
 <div class="tab tab-body" data-group="primary" data-tab="attacks">
     <table>
-        <tr class="sticky">
-            <th></th>
-            <th class="left">{{localize "ActorSheet.Name"}}</th>
-            <th>{{localize "ActorSheet.OCV"}}</th>
-            <th>{{localize "ActorSheet.DCV"}}</th>
-            <th>{{localize "ActorSheet.OffVDef"}}</th>
-            <th>{{localize "ActorSheet.Dmg"}}</th>
-            <th>{{localize "ActorSheet.Res"}}</th>
-            <th>{{localize "ActorSheet.End"}}</th>
-            <th>{{localize "ActorSheet.Aoe"}}</th>
-            <th>{{localize "ActorSheet.Roll"}}</th>
-            <th></th>
+        <tr>
+            <th class="sticky"></th>
+            <th class="left sticky">{{localize "ActorSheet.Name"}}</th>
+            <th class="sticky">{{localize "ActorSheet.OCV"}}</th>
+            <th class="sticky">{{localize "ActorSheet.DCV"}}</th>
+            <th class="sticky">{{localize "ActorSheet.OffVDef"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Dmg"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Res"}}</th>
+            <th class="sticky">{{localize "ActorSheet.End"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Aoe"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Roll"}}</th>
+            <th class="sticky"></th>
         </tr>
         {{#each items as |item id|}}
             {{#if (or (eq item.type "attack") (and (or (eq item.system.XMLID "STRIKE") (ne item.type "maneuver")) (itemHasActionBehavior item "to-hit") (ne item.system.XMLID "__STRENGTHDAMAGE")))}}

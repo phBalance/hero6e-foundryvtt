@@ -1,12 +1,11 @@
 <div class="tab tab-body" data-group="primary" data-tab="defenses">
     <table>
-        <tr class="sticky">
-            <th></th>
-            <th class="left">{{localize "ActorSheet.Description"}}</th>
-            <th>{{localize "ActorSheet.End"}}</th>
-            <th>{{localize "ActorSheet.Active"}}</th>
-            <th>
-            </th>
+        <tr>
+            <th class="sticky"></th>
+            <th class="left sticky">{{localize "ActorSheet.Description"}}</th>
+            <th class="sticky">{{localize "ActorSheet.End"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Active"}}</th>
+            <th class="sticky"></th>
         </tr>
         {{#each items as |item id|}}
             {{#if (or (includes item.baseInfo.type "defense") (hasDefenseActiveEffect item)) }}
