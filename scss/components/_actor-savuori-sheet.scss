@@ -132,9 +132,18 @@ $sidebar-width: 136px;
     margin-left: 0;
 }
 
-.savuori.actor-sheet table tr.sticky {
+/* Note that tr elements themselves can't be position: sticky */
+.savuori.actor-sheet table tr th.sticky {
     position: sticky;
     top: 0;
+    z-index: 1; /* pesky checkboxes */
+    background-color: "red"; /* $sheet-header-background; */
+}
+
+/* Note that tr elements themselves can't be position: sticky */
+.savuori.actor-sheet table tr th.sticky2 {
+    position: sticky;
+    top: 33px;
     z-index: 1; /* pesky checkboxes */
     background-color: "red"; /* $sheet-header-background; */
 }
@@ -205,7 +214,6 @@ $sidebar-width: 136px;
 /* TAB */
 .savuori .tab-body {
     height: 100%;
-    overflow-y: auto;
     background-color: $sheet-lighter-background;
     margin: 10px;
 }

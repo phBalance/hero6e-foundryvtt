@@ -1,16 +1,14 @@
 <div class="tab tab-body" data-group="primary" data-tab="characteristics">
     <table>
-        <tr class="sticky">
-            <th title="{{localize 'ActorSheet.ValueTitle'}}">{{localize "ActorSheet.Value"}}</th>
-            <th title="{{localize 'ActorSheet.MaxTitle'}}">{{localize "ActorSheet.Max"}}</th>
-            <th title="{{localize 'ActorSheet.CoreTitle'}}">{{localize "ActorSheet.Core"}}</th>
-            <th title="{{localize 'ActorSheet.LevelsTitle'}}">{{localize "ActorSheet.Levels"}}</th>
-            {{!-- {{#if alphaTesting}}<th title="{{localize 'ActorSheet.APTitle'}}">{{localize "ActorSheet.AP"}}</th>{{/if}} --}}
-            <th title="{{localize 'ActorSheet.CharTitle'}}">{{localize "ActorSheet.Char"}}</th>
-            <th title="{{localize 'ActorSheet.BaseTitle'}}">{{localize "ActorSheet.Base"}}</th>
-            <th title="{{localize 'ActorSheet.CostTitle'}}">{{localize "ActorSheet.Cost"}}</th>
-            <th>{{localize "ActorSheet.Roll"}}</th>
-            <th title="{{localize 'ActorSheet.NoteTitle'}}">{{localize "ActorSheet.Notes"}}</th>
+        <tr>
+            <th class="sticky" title="{{localize 'ActorSheet.MaxTitle'}}">{{localize "ActorSheet.Max"}}</th>
+            <th class="sticky" title="{{localize 'ActorSheet.CoreTitle'}}">{{localize "ActorSheet.Core"}}</th>
+            <th class="sticky" title="{{localize 'ActorSheet.LevelsTitle'}}">{{localize "ActorSheet.Levels"}}</th>
+            <th class="sticky" title="{{localize 'ActorSheet.CharTitle'}}">{{localize "ActorSheet.Char"}}</th>
+            <th class="sticky" title="{{localize 'ActorSheet.BaseTitle'}}">{{localize "ActorSheet.Base"}}</th>
+            <th class="sticky" title="{{localize 'ActorSheet.CostTitle'}}">{{localize "ActorSheet.Cost"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Roll"}}</th>
+            <th class="sticky" title="{{localize 'ActorSheet.NoteTitle'}}">{{localize "ActorSheet.Notes"}}</th>
         </tr>
         {{#each characteristics as |characteristic|}}
             <tr class="characteristic">

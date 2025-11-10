@@ -165,18 +165,16 @@
     background-color: #cfcec3;
 }
 
-// .herosystem6e.sheet.item table tr.active-effects.adders {
-//     background-color: blue;
-// }
-
-.actor-sheet table tr.sticky {
+/* Note that tr elements themselves can't be position: sticky */
+.actor-sheet table tr th.sticky {
     position: sticky;
     top: 0;
     z-index: 1; /* pesky checkboxes */
     background-color: #cfcec3;
 }
 
-.actor-sheet table tr.sticky2 {
+/* Note that tr elements themselves can't be position: sticky */
+.actor-sheet table tr th.sticky2 {
     position: sticky;
     top: 33px;
     z-index: 1; /* pesky checkboxes */

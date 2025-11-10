@@ -1,15 +1,14 @@
 <div class="tab tab-body" data-group="primary" data-tab="maneuvers">
     <table>
-        <tr class="sticky">
-            <th></th>
-            <th class="left">{{localize "ActorSheet.Name"}}</th>
-            <th>{{localize "ActorSheet.Effect"}}</th>
-            <th>{{localize "ActorSheet.Phase"}}</th>
-            <th>{{localize "ActorSheet.OCV"}}</th>
-            <th>{{localize "ActorSheet.DCV"}}</th>
-            <th>{{localize "ActorSheet.Active"}}</th>
-            <th>
-            </th>
+        <tr>
+            <th class="sticky"></th>
+            <th class="left sticky">{{localize "ActorSheet.Name"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Effect"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Phase"}}</th>
+            <th class="sticky">{{localize "ActorSheet.OCV"}}</th>
+            <th class="sticky">{{localize "ActorSheet.DCV"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Active"}}</th>
+            <th class="sticky"></th>
         </tr>
         {{#each items as |item id|}}
             {{#if (or (and (itemIsManeuver item) (eq (itemIsOptionalManeuver item) false)) (and (eq (gameConfigValue "optionalManeuvers") true) (itemIsOptionalManeuver item))) }}

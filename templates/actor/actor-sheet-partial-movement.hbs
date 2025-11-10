@@ -1,15 +1,12 @@
 <div class="tab tab-body" data-group="primary" data-tab="movement">
     <table>
-        <tr class="sticky">
-            <th></th>
-            <th class="left">{{localize "ActorSheet.Name"}}</th>
-            <th class="left">{{localize "ActorSheet.Description"}}</th>
-            <th>{{localize "ActorSheet.LEVELS"}}</th>
-            <th>{{localize "ActorSheet.Active"}}</th>
-            <th class="right">
-                {{!-- <a class="item-control item-create" title="Create movement" data-type="movement">
-                    <i class="fas fa-plus"></i> Add Movement</a> --}}
-            </th>
+        <tr>
+            <th class="sticky"></th>
+            <th class="left sticky">{{localize "ActorSheet.Name"}}</th>
+            <th class="left sticky">{{localize "ActorSheet.Description"}}</th>
+            <th class="sticky">{{localize "ActorSheet.LEVELS"}}</th>
+            <th class="sticky">{{localize "ActorSheet.Active"}}</th>
+            <th class="right sticky"></th>
         </tr>
         {{#each items as |item id|}}
             {{#if (includes item.baseInfo.type "movement") }}
