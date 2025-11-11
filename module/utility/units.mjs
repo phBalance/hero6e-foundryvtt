@@ -1,5 +1,15 @@
 import { RoundFavorPlayerDown } from "./round.mjs";
 
+/**
+ * Hero System and the FoundryVTT system force us to use a number of different units for measurements.
+ *
+ * Hero System 5e uses 2m hexes (1 hex = 1")
+ * Hero System 6e uses metres (no hexes)
+ * Internally, we typically use system units (" or m) depending on the system of the actor/item.
+ *
+ * FoundryVTT uses grid units of any dimension (defined on a per scene basis) or pixels if we're dealing with canvas.
+ */
+
 export function getSystemDisplayUnits(is5e) {
     if (is5e !== false && is5e !== true && is5e !== undefined) {
         console.error(`bad is5e paramater`, is5e);
@@ -86,4 +96,56 @@ export function getRoundedUpDistanceInSystemUnits(distanceInMetres, actor) {
     const roundedDistanceInMetres = is5e ? Math.ceil(distanceInMetres / 2) : Math.ceil(distanceInMetres);
 
     return roundedDistanceInMetres;
+}
+
+/**
+ *  Get a multiplier that tries to translates from grid units, which are freeform text, to meters
+ */
+export function gridUnitsToMeters() {
+    const units = game.canvas.grid.units;
+    let distanceMultiplier;
+
+    if (units === "m") {
+        distanceMultiplier = 1;
+    } else if (units === '"') {
+        distanceMultiplier = 2;
+    } else if (units === "km") {
+        distanceMultiplier = 1000;
+    } else if (units === "miles") {
+        distanceMultiplier = 1609.34;
+    } else {
+        // Not sure what the units might be. Guess meters.
+        ui.notification.error(`Unknown units (${units}) for canvas`);
+        distanceMultiplier = 1;
+    }
+
+    return distanceMultiplier;
+}
+
+/**
+ * Try to translate the grid into meters (i.e. m/grid unit)
+ *
+ * @returns number
+ */
+export function getGridSizeInMeters() {
+    const distance = game.canvas.grid.distance || 1;
+    const distanceMultiplier = gridUnitsToMeters();
+
+    return distance * distanceMultiplier;
+}
+
+/**
+ * Given a distance in meters, translate that into rounded up number of grids
+ *
+ * @param {number} distanceInMeters
+ * @returns number
+ */
+export function roundDistanceInMetersUpToNumberOfGridUnits(distanceInMeters) {
+    const gridSizeInMeters = getGridSizeInMeters();
+
+    if (distanceInMeters % gridSizeInMeters !== 0) {
+        distanceInMeters += gridSizeInMeters - (distanceInMeters % gridSizeInMeters);
+    }
+
+    return distanceInMeters;
 }
