@@ -6,7 +6,7 @@ import {
 } from "../utility/damage.mjs";
 import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
 import { cloneToEffectiveAttackItem } from "../item/item.mjs";
-import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
+import { convertSystemUnitsToMetres, getGridSizeInMeters, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { Attack } from "../utility/attack.mjs";
 
@@ -859,14 +859,15 @@ export class ItemAttackFormApplication extends FormApplication {
         );
 
         // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
-        //       for distance we need to subtract 0.5"/1m.
-        const distance = aoeValue * sizeConversionToMeters - (HexTemplates && hexGrid ? 1 : 0);
+        //       for distance we need to subtract 0.5"/1m from the radius.
+        const distanceInMeters = aoeValue * sizeConversionToMeters - (HexTemplates && hexGrid ? 1 : 0);
+        const distanceInGridUnits = distanceInMeters / getGridSizeInMeters();
 
         const effectiveAttackItemOriginalItemId = getEffectiveItemOriginalItemId(item.effectiveAttackItem);
         const templateData = {
             t: templateType,
             author: game.user.id,
-            distance: distance,
+            distance: distanceInGridUnits,
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {

@@ -1,4 +1,4 @@
-import { getRoundedFavorPlayerDownDistanceInSystemUnits } from "./units.mjs";
+import { getRoundedFavorPlayerDownDistanceInSystemUnits, gridUnitsToMeters } from "./units.mjs";
 import HeroSystem6eMeasuredTemplate from "../measuretemplate.mjs";
 import { RoundFavorPlayerDown } from "./round.mjs";
 
@@ -45,8 +45,9 @@ export function calculateDistanceBetween(origin, target) {
     } catch (e) {
         console.error(e, origin, target);
     }
+
     const distanceMeasurePath = canvas.grid.measurePath(path);
-    const originalMeasureDistance = RoundFavorPlayerDown(distanceMeasurePath.distance);
+    const originalMeasureDistanceMeters = RoundFavorPlayerDown(distanceMeasurePath.distance * gridUnitsToMeters());
 
     // We don't yet support measuring 3D distance between a token and a template volume, so we
     // return the original distance
@@ -55,7 +56,7 @@ export function calculateDistanceBetween(origin, target) {
         target._object instanceof HeroSystem6eMeasuredTemplate;
     if (templateInvolved) {
         return {
-            distance: originalMeasureDistance,
+            distance: originalMeasureDistanceMeters,
             cost: distanceMeasurePath.cost,
             gridSpaces: distanceMeasurePath.spaces,
         };
@@ -65,7 +66,7 @@ export function calculateDistanceBetween(origin, target) {
     const targetElevation = target.document ? target.document.elevation || 0 : target.elevation || 0;
     if (originElevation === targetElevation) {
         return {
-            distance: originalMeasureDistance,
+            distance: originalMeasureDistanceMeters,
             cost: distanceMeasurePath.cost,
             gridSpaces: distanceMeasurePath.spaces,
         };
@@ -75,7 +76,7 @@ export function calculateDistanceBetween(origin, target) {
     // we can use the origin token's actor.
     const rulesActor = origin.actor;
     const threeDDistance = Math.sqrt(
-        Math.pow(originElevation - targetElevation, 2) + Math.pow(originalMeasureDistance, 2),
+        Math.pow(originElevation - targetElevation, 2) + Math.pow(originalMeasureDistanceMeters, 2),
     );
 
     return {
