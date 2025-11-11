@@ -5965,7 +5965,6 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     const total = activationRoller.getSuccessTotal();
     const margin = successValue - total;
 
-
     const skillName = skill?.system.ALIAS || skill?.name;
     const charName = char?.name;
     const activationFrom = (skill) ? `${skillName}:` : ((char) ? `${charName}:` : "");
@@ -5973,11 +5972,9 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     const divisor = findRollDivisor(rar);
     const penalty = (isNaN(divisor)?"":`, -1 per ${divisor} active points`)
 
-    const penaltyString = (penalty)?`${penalty}:-${minus}`:"";
+    const penaltyString = (penalty)?`${penalty}: -${minus}`:"";
 
     console.log(`flavor ${item.name} (${activationFrom}${targetRoll}${penaltyString})`);    
-
-
 
     // TODO add text of minus
     const flavor = `${item.name}(${activationFrom}${targetRoll}${penaltyString}) activation ${
