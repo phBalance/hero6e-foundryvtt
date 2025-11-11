@@ -200,7 +200,8 @@ export class HeroAdderModelCommon extends HeroItemModCommonModel {
                 if (
                     this.item.system.XMLID !== "TRANSPORT_FAMILIARITY" &&
                     this.item.system.XMLID !== "WEAPON_FAMILIARITY" &&
-                    this.item.system.XMLID !== "SURVIVAL"
+                    this.item.system.XMLID !== "SURVIVAL" &&
+                    this.item.system.XMLID !== "GAMBLING"
                 ) {
                     console.warn(
                         `We found another example of a skill with category limitations ${this.item.system.XMLID}`,
