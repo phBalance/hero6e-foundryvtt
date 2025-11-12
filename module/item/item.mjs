@@ -45,6 +45,8 @@ import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
+import { calculateDicePartsForItem } from "../utility/damage.mjs";
+
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -5720,7 +5722,10 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     if (!rar) {
         return true;
     }
+    // todo why OPTION and not OPTIONID to look for background skills (OPTIONID can't be altered by user)
     const rarOptionIsBackground = rar.OPTION.substring(0, 2).toUpperCase();
+    console.log(`rarOptionIsBackground: ${rarOptionIsBackground} OPTION: ${rar.OPTION}  OPTIONID: ${rar.OPTIONID}`);
+
     //TODO remove when finished
     function logAttributes(items, filterFn, attributesToLog = []) {
         const matches = items.filter(filterFn);
@@ -5739,8 +5744,9 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
 
         return matches; // return matching items in case caller needs them
     }
+
     const filterSkillRollItems = (o) => {
-        if(!o.isRollable()){return false;}
+        if (!o.isRollable()) { return false; }
         return (
             o.baseInfo?.type?.includes("skill") && // is a skill
             !o.baseInfo?.type?.includes("enhancer") && // is not an enhancer (scholar, scientist, etc.)
@@ -5756,39 +5762,63 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     };
 
     const findSkillRoll = (rar) => {
-        const rarAliasDisplay = rar.ALIAS.toUpperCase();// From the "Display" field. ex: "Requires A Magic Roll"
-        const rarOptionsAlias = rar.OPTION_ALIAS.toUpperCase(); // From the "Options" field. ex: "Magic Roll, -1 per 5 Active Points modifier"
-        const rarComments = rar.COMMENTS.toUpperCase(); // From Comments, begins blank, common use would be to enter just the skill name
-        
+        const rarAliasDisplay = rar.ALIAS?.toUpperCase() || "";// From the "Display" field. ex: "Requires A Magic Roll"
+        // OPTION_ALIAS is different in 5e: it is entered in the Type field
+        const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || ""; // From the "Options" field. ex: "Magic Roll, -1 per 5 Active Points modifier"
+        const rarComments = rar.COMMENTS?.toUpperCase() || ""; // From Comments, begins blank, common use would be to enter just the skill name
+        const rarRollAlias = rar.ROLLALIAS?.toUpperCase() || "";// From the 5e "Roll" field. ex: "STR", "Acrobatics"
+
+        const rar_AliasDisplay = rarAliasDisplay.replaceAll(' ', "_");
+        const rar_OptionsAlias = rarOptionsAlias.replaceAll(' ', "_");
+        const rar_Comments = rarComments.replaceAll(' ', "_");
+        const rar_RollAlias = rarRollAlias.replaceAll(' ', "_");
+
+
         const matchRequiredSkillRoll = (o) => {
-            const xmlIdMatch = 
+            // TODO
+            // it might be worthwhile to also try with underscores in the XMLID '_' replaced with spaces ' ' to match better
+            // or vice versa, put underscores in the stable RaR strings and search with underscores present
+            // this is IN ADDITION to what's here now; dont replace this
+            const xmlIdMatch =
                 rarAliasDisplay.includes(o.system.XMLID) ||
                 rarOptionsAlias.includes(o.system.XMLID) ||
+                rarRollAlias.includes(o.system.XMLID) ||
                 rarComments.includes(o.system.XMLID);
-            if (xmlIdMatch){
+            if (xmlIdMatch) {
                 return true;
             }
             const nameUpper = o.name?.toUpperCase() ?? "";
-            const nameMatch = 
+            const nameMatch =
                 nameUpper && rarOptionIsBackground !== nameUpper &&
                 (rarAliasDisplay.includes(nameUpper) ||
-                rarOptionsAlias.includes(nameUpper) ||
-                rarComments.includes(nameUpper));
-            if (nameMatch){
+                    rarOptionsAlias.includes(nameUpper) ||
+                    rarRollAlias.includes(nameUpper) ||
+                    rarComments.includes(nameUpper));
+            if (nameMatch) {
                 return true;
             }
             const aliasUpper = o.system.ALIAS?.toUpperCase() ?? "";
-            const aliasMatch = 
+            const aliasMatch =
                 aliasUpper && rarOptionIsBackground !== aliasUpper &&
                 (rarAliasDisplay.includes(aliasUpper) ||
-                rarOptionsAlias.includes(aliasUpper) ||
-                rarComments.includes(aliasUpper));
-            if (aliasMatch){
+                    rarOptionsAlias.includes(aliasUpper) ||
+                    rarRollAlias.includes(aliasUpper) ||
+                    rarComments.includes(aliasUpper));
+            if (aliasMatch) {
                 return true;
             }
-            // TODO 5e ROLLALIAS
-            // TODO 5e ACTIVATION
-            
+            // Some skills have an underscore in them; the user might not have the name matched exactly
+            // so if there is an underscore (as in SLEIGHT_OF_HAND), we check for that here
+            const xml_Id_Match =
+                /_/.test(o.system.XMLID) &&
+                (rar_AliasDisplay.includes(o.system.XMLID) ||
+                    rar_OptionsAlias.includes(o.system.XMLID) ||
+                    rar_RollAlias.includes(o.system.XMLID) ||
+                    rar_Comments.includes(o.system.XMLID));
+            if (xml_Id_Match) {
+                return true;
+            }
+
             // TODO check 'Text'? 
             // TODO check 'Type'? 
             return false;
@@ -5802,34 +5832,34 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         };
 
         const isBackgroundSkillType = () => {
-            return (Object.keys(backgroundSkillKeys).includes(rarOptionIsBackground))
+            return (rar.OPTIONID === "BASICRSR") || (Object.keys(backgroundSkillKeys).includes(rarOptionIsBackground))
         };
 
         const matchBackgroundSkillType = (o) => {
-            return (backgroundSkillKeys[rarOptionIsBackground] === o.system.XMLID);
+            return (rar.OPTIONID === "BASICRSR") || (backgroundSkillKeys[rarOptionIsBackground] === o.system.XMLID);
         };
 
         const matchBackgroundSkillRoll = (o) => {
-            if(!matchBackgroundSkillType(o)){
+            if (!matchBackgroundSkillType(o)) {
                 return false;
             }
             const inputUpper = o.system.INPUT?.toUpperCase() ?? "";
-            const inputMatch =  (
-                inputUpper &&  rarOptionIsBackground !== inputUpper &&
+            const inputMatch = (
+                inputUpper && rarOptionIsBackground !== inputUpper &&
                 (rarAliasDisplay.includes(inputUpper) ||
-                rarOptionsAlias.includes(inputUpper) ||
-                rarComments.includes(inputUpper)));
-            if (inputMatch){
+                    rarOptionsAlias.includes(inputUpper) ||
+                    rarComments.includes(inputUpper)));
+            if (inputMatch) {
                 return true;
             }
             return matchRequiredSkillRoll(o);
         };
 
-        if (rar.OPTIONID === "PER") {
+        if (rar.OPTIONID === "PER" || rar.ROLLALIAS === "PER") {
             return item.actor.items.find((o) => o.system.XMLID === "PERCEPTION");
-        }
-        // background skill
-        if (isBackgroundSkillType()) {
+        } else if (rar.OPTIONID.includes("LUCK")) {
+            return item.actor.items.find((o) => o.system.XMLID === "LUCK");
+        } else if (isBackgroundSkillType()) {
             return item.actor.items.find((o) => filterSkillRollItems(o) && matchBackgroundSkillRoll(o));
         }
         return item.actor.items.find((o) => filterSkillRollItems(o) && matchRequiredSkillRoll(o));
@@ -5837,11 +5867,21 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
 
     const findRollDivisor = (rar) => {
         // item.activePoints is a number
-        if (rar.OPTIONID.includes("1PER5")){
+        if (rar.OPTIONID.includes("1PER5")) {
             return 5;
         }
-        if (rar.OPTIONID.includes("1PER20")){
+        if (rar.OPTIONID.includes("1PER20")) {
             return 20;
+        }
+        const divisorOption = rar.ADDER.find(o => {
+            return (o.XMLID === "MINUS1PER20") || (o.XMLID === "MINUS1PER5");
+        });
+
+        if(divisorOption?.XMLID  === "MINUS1PER20"){
+            return 20;
+        }
+        if(divisorOption?.XMLID  === "MINUS1PER5"){
+            return 5;
         }
         // activation rolls have no minuses due to active points
         if (!isNaN(parseInt(rar.OPTION, 10))) {
@@ -5852,7 +5892,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
 
     const findRollMinus = (rar) => {
         const divisor = findRollDivisor(rar);
-        if(isNaN(divisor)){
+        if (isNaN(divisor)) {
             return 0;
         }
         return Math.floor(parseInt(item.activePoints) / divisor);
@@ -5860,44 +5900,59 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
 
     const characteristicKeys = Object.keys(item.actor.system.characteristics)
         .filter((k) => item.actor.system.characteristics[k].roll != null);
-    const rarDisplayMaybeHasCharKey = rar.ALIAS.toLowerCase();
-    const rarOptionMaybeHasCharKey = rar.OPTION_ALIAS.toLowerCase();
-    const maybeCharacteristicKey = rar.COMMENTS.toLowerCase(); // pre or presence, STR or Strength
+    const rarDisplayMaybeHasCharKey = rar.ALIAS?.toLowerCase() || "";
+    const rarOptionMaybeHasCharKey = rar.OPTION_ALIAS?.toLowerCase() || "";
+    const rarCommentMaybeHasCharKey = rar.COMMENTS?.toLowerCase() || ""; // pre or presence, STR or Strength
+    const rarRollAliasMaybeHasCharKey = rar.ROLLALIAS?.toLowerCase() || "";
+    // The \b ensures the match is at the start of a word
+    const characteristicKeyRegex = characteristicKeys.reduce((accumulator, currentKey) => {
+        // For each key, create the RegExp object
+        const regex = new RegExp(`\\b${currentKey}`, 'i');
+        accumulator[currentKey] = regex;
+        return accumulator;
+    }, {});
 
     const getRequiredCharacteristicKey = () => {
-        if (characteristicKeys.includes(maybeCharacteristicKey)) {
+        // exact match in comments
+        if (characteristicKeys.includes(rarCommentMaybeHasCharKey)) {
             // finds pre, not presence
-            return maybeCharacteristicKey;
+            return rarCommentMaybeHasCharKey;
         }
-        const matchedKeyInComment = characteristicKeys.find((key) => maybeCharacteristicKey.includes(key));
+        // comment would be Strength, Intelligence, Presence etc.
+        const matchedKeyInComment = characteristicKeys.find((key) => characteristicKeyRegex[key].test(rarCommentMaybeHasCharKey));
         if (matchedKeyInComment) {
             return matchedKeyInComment;
         }
-        const matchedKeyInName = characteristicKeys.find((key) => rarDisplayMaybeHasCharKey.includes(key));
+        const matchedKeyInName = characteristicKeys.find((key) => characteristicKeyRegex[key].test(rarDisplayMaybeHasCharKey));
         if (matchedKeyInName) {
             return matchedKeyInName;
         }
-        const matchedKeyInOption = characteristicKeys.find((key) => rarOptionMaybeHasCharKey.includes(key));
+        const matchedKeyInRollAlias = characteristicKeys.find((key) => characteristicKeyRegex[key].test(rarRollAliasMaybeHasCharKey));
+        if (matchedKeyInRollAlias) {
+            return matchedKeyInRollAlias;
+        }
+        const matchedKeyInOption = characteristicKeys.find((key) => characteristicKeyRegex[key].test(rarOptionMaybeHasCharKey));
         return matchedKeyInOption ?? "";
     };
 
     const charKey = getRequiredCharacteristicKey();
 
     // if the RaR is an Activation roll, then we have the value we need
-    logAttributes([rar],() => true, ["parent.NAME", "ALIAS", "OPTION", "OPTION_ALIAS", "OPTIONID", "COMMENTS", "OPTION", "ROLLALIAS"]);
+    logAttributes([rar], () => true, ["parent.NAME", "ALIAS", "OPTION", "OPTION_ALIAS", "OPTIONID", "COMMENTS", "OPTION", "ROLLALIAS"]);
     let value = findRollValue(rar);
     let skill = undefined;
     let char = undefined;
     if (isNaN(value)) {
         logAttributes(item.actor.items, filterSkillRollItems, ["name", "system.XMLID", "system.ALIAS", "system.INPUT"]);
-        if(rar.OPTIONID !== "CHAR"){
+        if (rar.OPTIONID !== "CHAR") {
             skill = findSkillRoll(rar);
         }
-        if(!skill){
+        if (!skill) {
             char = item.actor.system.characteristics[charKey];
             if (char) {
                 // if we weren't supposed to look for a char but we had to find one the rar is not constructed right
-                if (rar.OPTIONID !== "CHAR") {
+                // 5e BASICRSR is Skills and Characteristics
+                if (rar.OPTIONID !== "CHAR" && rar.OPTIONID !== "BASICRSR") {
                     ui.notifications.warn(
                         `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${charKey.toUpperCase()} should be a Characteristic Roll.`,
                     );
@@ -5933,53 +5988,92 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             }
         }
     }
-    if (skill) {
-        // skill.system.roll is a string
-        value = parseInt(skill.system.roll);
-        if (isNaN(value)) {
-            // sumthing wrong with the skill?
-            value = 11;
-        }
-    } else if (char) {
-        // a char.roll is an int
-        value = char.roll;
-    } else if (!value) {
-        ui.notifications.warn(
-            `${item.actor.name} has a power ${item.name}. ${rar.OPTION_ALIAS} is not supported.`,
-        );
-        // Try to continue
-        value = 11;
-    }
-    // TODO: for refactor this should return: skill, char, value, rollModifier so that the output can be constructed.
+    // TODO: for refactor the above should return: skill, char, value, rollModifier so that the output can be constructed.
 
-    const minus = findRollMinus(rar);
-    value -= minus;
-    const successValue = parseInt(value);
-
-    //TODO what about additional skill levels used to influence the activation roll?
-    const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
-    await activationRoller.roll();
-    let succeeded = activationRoller.getSuccess();
-    const autoSuccess = activationRoller.getAutoSuccess();
-    const total = activationRoller.getSuccessTotal();
-    const margin = successValue - total;
-
+    let succeeded = false;
+    let flavor = "";
+    let cardHtml = "";
+    let roller = null;
     const usefulAlias = rarOptionIsBackground !== skill?.system.ALIAS ? skill?.system.ALIAS : "";
     const skillName = skill?.system.INPUT || usefulAlias || skill?.name;
     const charName = charKey?.toUpperCase();
     const activationFrom = (skill) ? `${skillName}:` : ((char) ? `${charName}:` : "");
-    const targetRoll = (skill) ? skill.system.roll : ((char) ? char.roll : rar.OPTION_ALIAS);
-    const divisor = findRollDivisor(rar);
-    const penalty = (isNaN(divisor)?"":`, -1 per ${divisor} active points`)
+    if (skill?.system.XMLID === "LUCK") {
+        const { diceParts } = calculateDicePartsForItem(skill, {});
 
-    const penaltyString = (penalty)?`${penalty}: -${minus}`:"";
+        roller = new HeroRoller()
+            .modifyTo5e(skill.actor.system.is5e)
+            .makeEffectRoll()
+            .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
+            .addHalfDice(diceParts.halfDieCount >= 1 ? diceParts.halfDieCount : 0)
+            .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
+            .addNumber(diceParts.constant);
+        await roller.roll();
+        console.log("Luck Roll:", roller);
+        console.log("Luck Roll EffectTerms:", roller.getEffectTerms());
+        console.log("Luck Roll EffectTotal:", roller.getEffectTotal());
 
-    console.log(`flavor ${item.name} (${activationFrom}${targetRoll}${penaltyString})`);    
+        const lucky = roller.getEffectTerms();
+        console.log(`flavor ${item.name} (${activationFrom}${lucky})`);
+        // Each “6” rolled counts as 1 point of Luck. 
+        const luck = lucky.reduce((accumulator, dieRoll) => {
+            if (dieRoll === 6) { accumulator += 1; }
+            return accumulator;
+        }, 0);
+        if(rar.OPTIONID === "ONELUCK"){
+            succeeded = luck >= 1;
+        }
+        else if(rar.OPTIONID === "TWOLUCK"){
+            succeeded = luck >= 2;
+        }
+        else if(rar.OPTIONID === "THREELUCK"){
+            succeeded = luck >= 3;
+        }
+        flavor = `${item.name} (${activationFrom} rolled ${lucky} for ${luck} points) activation ${succeeded ? "succeeded" : "failed"} `;
+    }
+    else {
+        if (skill) {
+            // skill.system.roll is a string
+            value = parseInt(skill.system.roll);
+            if (isNaN(value)) {
+                // sumthing wrong with the skill?
+                value = 11;
+            }
+        } else if (char) {
+            // a char.roll is an int
+            value = char.roll;
+        } else if (!value) {
+            ui.notifications.warn(
+                `${item.actor.name} has a power ${item.name}. ${rar.OPTION_ALIAS} is not supported.`,
+            );
+            // Try to continue
+            value = 11;
+        }
+        const minus = findRollMinus(rar);
+        value -= minus;
+        const successValue = parseInt(value);
 
-    const flavor = `${item.name} (${activationFrom}${targetRoll}${penaltyString}) activation ${
-        succeeded ? "succeeded" : "failed"
-    } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
-    let cardHtml = await activationRoller.render(flavor);
+        //TODO what about additional skill levels used to influence the activation roll?
+        roller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
+        await roller.roll();
+        succeeded = roller.getSuccess();
+        const autoSuccess = roller.getAutoSuccess();
+        const total = roller.getSuccessTotal();
+        const margin = successValue - total;
+
+        const targetRoll = (skill) ? skill.system.roll : ((char) ? char.roll : `${rar.OPTION_ALIAS}:${value}-`);
+        const divisor = findRollDivisor(rar);
+        const penalty = (isNaN(divisor) ? "" : `, -1 per ${divisor} active points`)
+
+        const penaltyString = (penalty) ? `${penalty}: -${minus}` : "";
+
+        console.log(`flavor ${item.name} (${activationFrom}${targetRoll}${penaltyString})`);
+
+        flavor = `${item.name} (${activationFrom}${targetRoll}${penaltyString}) activation ${succeeded ? "succeeded" : "failed"
+            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+    }
+    cardHtml = await roller.render(flavor);
+
 
     // FORCE success
     if (!succeeded && overrideCanAct) {
@@ -5999,7 +6093,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.IC,
-        rolls: activationRoller.rawRolls(),
+        rolls: roller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
