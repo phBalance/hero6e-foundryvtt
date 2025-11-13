@@ -530,7 +530,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
                     if (this[attribute.name] === undefined) {
                         console.error(
-                            `${this.parent.type} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`,
+                            `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`,
                         );
                     }
 
@@ -839,6 +839,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             PARENTID: new HeroNumberField({ integer: true }),
             POSITION: new HeroNumberField({ integer: true }),
             POWER: new ArrayField(new EmbeddedDataField(HeroPowerModel)),
+
             SFX: new StringField(),
             XMLID: new StringField(),
             SHOW_ACTIVE_COST: new BooleanField({ initial: null, nullable: true }),
@@ -1099,7 +1100,16 @@ export class HeroSystem6eItemDisadvantage extends HeroSystem6eItemTypeDataModelP
     static defineSchema() {
         //const { ObjectField, StringField, ArrayField, EmbeddedDataField } = foundry.data.fields;
         // Note that the return is just a simple object
-        return { ...super.defineSchema() };
+        return {
+            ...super.defineSchema(),
+            SHOWALIAS: new BooleanField({ initial: null, nullable: true }), // Disadvantages Normal Characteristic Maxima
+            PRIVATE: new BooleanField({ initial: null, nullable: true }), // Disadvantages Normal Characteristic Maxima
+            GROUP: new BooleanField({ initial: null, nullable: true }), // Disadvantages Normal Characteristic Maxima
+            SELECTED: new BooleanField({ initial: null, nullable: true }), // Disadvantages Normal Characteristic Maxima
+            REQUIRED: new BooleanField({ initial: null, nullable: true }), // Disadvantages Normal Characteristic Maxima
+            INCLUDEINBASE: new BooleanField({ initial: null, nullable: true }), // Disadvantages Normal Characteristic Maxima
+            DISPLAYINSTRING: new BooleanField({ initial: null, nullable: true }), // Disadvantages Normal Characteristic Maxima
+        };
     }
 }
 
