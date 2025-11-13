@@ -8047,6 +8047,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         </DISAD>`,
     });
 
+    /// CAUTION: 5e Normal Characteristic Maxima is a disadvantage, but XML defines it as an ADDER
+    addPower(undefined, {
+        key: "NCM",
+        type: ["disadvantage"],
+        behaviors: [],
+        costPerLevel: fixedValueFunction(0), // TODO: needs function
+        target: "self only",
+        range: HERO.RANGE_TYPES.SELF,
+        xml: `<ADDER XMLID="NCM" ID="1763056887996" BASECOST="20.0" LEVELS="0" ALIAS="Normal Characteristic Maxima" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+        </ADDER>`,
+    });
+
     addPower(
         {
             key: "PHYSICALLIMITATION",
