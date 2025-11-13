@@ -2285,17 +2285,17 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        return this.system.vppSlotted;
+        return this.system.CARRIED;
     }
 
     // used in HBS
     get vppUnSlotted() {
         try {
-            if (this.parentItem?.system.XMLID === "VPP" && !this.system.vppSlotted) {
+            if (this.parentItem?.system.XMLID === "VPP" && !this.system.CARRIED) {
                 return true;
             }
 
-            if (this.parentItem?.parentItem?.system.XMLID === "VPP" && !this.parentItem.system.vppSlotted) {
+            if (this.parentItem?.parentItem?.system.XMLID === "VPP" && !this.parentItem.system.CARRIED) {
                 return true;
             }
         } catch (e) {
@@ -4630,6 +4630,25 @@ export class HeroSystem6eItem extends Item {
         return false;
     }
 
+    get showAttack() {
+        try {
+            if (this.disabledOIHID) return false;
+        } catch (e) {
+            console.error(e);
+        }
+
+        // VPP unslotted
+        if (this.vppUnSlotted) {
+            return false;
+        }
+
+        if (this.type === "equipment" && this.system.CARRIED !== true) {
+            return false;
+        }
+
+        return true;
+    }
+
     get isActive() {
         try {
             if (this.disabledOIHID) return false;
@@ -4735,7 +4754,7 @@ export class HeroSystem6eItem extends Item {
                 0,
             );
             if (__realCost !== this.calcItemPoints().realCost) {
-                console.error(`calItemPoints !== realCost of child items`, this);
+                console.warn(`calItemPoints !== realCost of child items`, this);
             } else {
                 console.warn(`Why doens't calItemPoints include child items`, this);
             }

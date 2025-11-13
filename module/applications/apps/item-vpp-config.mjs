@@ -80,7 +80,7 @@ export class ItemVppConfig extends HeroApplication {
 
     async _prepareContext(options) {
         if (options.isFirstRender) {
-            this.#vppSlottedIds = this.item.childItems.filter((i) => i.system.vppSlotted).map((i) => i.id);
+            this.#vppSlottedIds = this.item.childItems.filter((i) => i.system.CARRIED).map((i) => i.id);
         }
 
         return super._prepareContext(options);
@@ -121,10 +121,8 @@ export class ItemVppConfig extends HeroApplication {
         for (const vppItem of this.item.childItems) {
             const vppSlotted = this.#vppSlottedIds.includes(vppItem.id);
             if (vppItem.system.vppSlotted !== vppSlotted) {
-                changes.push({ _id: vppItem.id, ["system.vppSlotted"]: vppSlotted });
-                changeContent.push(
-                    `<li>${vppItem.name}: ${!vppItem.system.vppSlotted ? "Slotted" : "Unslottted"}</li>`,
-                );
+                changes.push({ _id: vppItem.id, ["system.CARRIED"]: vppSlotted });
+                changeContent.push(`<li>${vppItem.name}: ${!vppItem.system.CARRIED ? "Slotted" : "Unslottted"}</li>`);
             }
         }
         if (changes.length > 0) {

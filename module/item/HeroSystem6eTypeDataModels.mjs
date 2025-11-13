@@ -856,7 +856,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
             csl: new ArrayField(new StringField()), // Combat Skill levels
             checked: new BooleanField({ initial: false }), // DEADLYBLOW
-            vppSlotted: new BooleanField({ nullable: true }),
+            CARRIED: new BooleanField({ nullable: true }), // Typically for equipment; extending to include VPP
         };
     }
 }
@@ -934,7 +934,7 @@ export class HeroSystem6eItemEquipment extends HeroSystem6eItemPower {
         // Note that the return is just a simple object
         return {
             ...super.defineSchema(),
-            CARRIED: new StringField(),
+            CARRIED: new BooleanField({ nullable: true }),
             EVER: new StringField(),
             PRICE: new StringField(),
             SKILL: new StringField(),

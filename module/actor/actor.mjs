@@ -2356,15 +2356,15 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: VPP Slots auto selection`, 0);
             for (const vppItem of this.items.filter((i) => i.system.XMLID === "VPP")) {
                 // If no vppSlots then pick defaults (currently always defaults)
-                if (!vppItem.childItems.find((i) => i.system.vppSlotted)) {
+                if (!vppItem.childItems.find((i) => i.system.CARRIED)) {
                     let vppSlottedCost = 0;
                     const vppChanges = [];
                     for (const slotItem of vppItem.childItems) {
                         if (vppSlottedCost + slotItem.realCost <= vppItem.vppPoolPoints) {
-                            vppChanges.push({ _id: slotItem.id, "system.vppSlotted": true });
+                            vppChanges.push({ _id: slotItem.id, "system.CARRIED": true });
                             vppSlottedCost += slotItem.realCost;
                         } else {
-                            vppChanges.push({ _id: slotItem.id, "system.vppSlotted": false });
+                            vppChanges.push({ _id: slotItem.id, "system.CARRIED": false });
                         }
                     }
                     await this.updateEmbeddedDocuments("Item", vppChanges);
