@@ -690,6 +690,9 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         // Toggle items
         html.find(".item-toggle").click(this._onItemToggle.bind(this));
 
+        // Update items
+        html.find(".item-update").click(this._onItemUpdate.bind(this));
+
         // Reload items
         html.find(".item-change-clip").click(this._onItemChangeClips.bind(this));
 
@@ -1003,6 +1006,18 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
         return item.toggle(event);
+    }
+
+    async _onItemUpdate(event) {
+        event.preventDefault();
+        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
+        const item = this.actor.items.get(itemId);
+        const key = event.currentTarget.name;
+        let value = event.currentTarget.value;
+        if (event.currentTarget.type === "checkbox") {
+            value = event.currentTarget.checked;
+        }
+        return item.update({ [`${key}`]: value });
     }
 
     _getHeaderButtons() {

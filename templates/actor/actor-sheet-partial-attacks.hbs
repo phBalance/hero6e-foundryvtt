@@ -15,7 +15,7 @@
         </tr>
         {{#each items as |item id|}}
             {{#if (or (eq item.type "attack") (and (or (eq item.system.XMLID "STRIKE") (ne item.type "maneuver")) (itemHasActionBehavior item "to-hit") (ne item.system.XMLID "__STRENGTHDAMAGE")))}}
-                {{#unless (or (eq item.type "equipment") (eq item.isActive false))}}
+                {{#if item.showAttack}}
                 <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}}"
                     data-item-id="{{item._id}}" >
                     <td>
@@ -73,7 +73,7 @@
                     </td>
                     </td>
                 </tr>
-                {{/unless}}
+                {{/if}}
             {{/if}}
         {{/each}}
     </table>

@@ -52,9 +52,10 @@
     <td>
         {{#unless this.isSeparator}}
             {{#if (or this.isContainer (not this.parentItem)) }}
-                <input class="item-toggle" type="checkbox"  name="this.system.active"  {{checked
-                    this.system.active}} data-dtype="Boolean" />
+                <input class="item-update" type="checkbox"  name="system.CARRIED"  {{checked
+                    this.system.CARRIED}} data-dtype="Boolean" />
             {{/if}}
+            
         {{/unless}}
     </td>
     <td>
