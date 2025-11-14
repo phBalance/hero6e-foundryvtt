@@ -3,6 +3,7 @@
 ## Version 4.2.3 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed missing items in attack tab. [#3068](https://github.com/dmdorman/hero6e-foundryvtt/issues/3068)
+- AVLD is now STUN only. [#3083](https://github.com/dmdorman/hero6e-foundryvtt/issues/3083)
 
 ## Version 4.2.2 20251108 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
