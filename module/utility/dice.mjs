@@ -306,7 +306,6 @@ export class HeroRoller {
         return this;
     }
 
-
     makeEffectRoll(apply = true) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.EFFECT;
@@ -880,7 +879,11 @@ export class HeroRoller {
     }
 
     getBaseTerms() {
-        if (this._type === HeroRoller.ROLL_TYPE.FLASH || this._type === HeroRoller.ROLL_TYPE.ENTANGLE || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.FLASH ||
+            this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+            this._type === HeroRoller.ROLL_TYPE.LUCK
+        ) {
             console.error(`attempting to get baseTerms for roll type ${this._type}`);
         }
 
@@ -1198,7 +1201,7 @@ export class HeroRoller {
                 // constants for entangle are straight body
                 if (this._type === HeroRoller.ROLL_TYPE.ENTANGLE && termQualifier === HeroRoller.QUALIFIER.NUMBER) {
                     return originalResult;
-                } else if (this._type === HeroRoller.ROLL_TYPE.LUCK){
+                } else if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
                     if (originalResult <= 5) {
                         return 0;
                     }
@@ -1483,7 +1486,9 @@ export class HeroRoller {
             const baseFormulaPurpose = this.#buildFormulaBasePurpose();
 
             const baseTermTooltip =
-                this._type === HeroRoller.ROLL_TYPE.ENTANGLE || this._type === HeroRoller.ROLL_TYPE.FLASH || this._type === HeroRoller.ROLL_TYPE.LUCK
+                this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+                this._type === HeroRoller.ROLL_TYPE.FLASH ||
+                this._type === HeroRoller.ROLL_TYPE.LUCK
                     ? ""
                     : `
                     <div class="dice">
@@ -1669,10 +1674,9 @@ export class HeroRoller {
 
             case HeroRoller.ROLL_TYPE.FLASH:
                 return "Segments";
-            
+
             case HeroRoller.ROLL_TYPE.LUCK:
                 return "Points";
-
 
             default:
                 console.error(`unknown base purpose type ${this._type}`);

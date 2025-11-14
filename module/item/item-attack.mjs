@@ -1721,8 +1721,7 @@ export async function rollLuck(item) {
     const luckRoller = new HeroRoller()
         .modifyTo5e(item.actor.system.is5e)
         .makeLuckRoll()
-        .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
-;
+        .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
     await luckRoller.roll();
 
     const cardHtml = await luckRoller.render(`${item.name} Luck Roll`);
