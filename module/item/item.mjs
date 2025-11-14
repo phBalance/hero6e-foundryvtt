@@ -3796,7 +3796,8 @@ export class HeroSystem6eItem extends Item {
 
         const stunOnly = this.findModsByXmlid("STUNONLY");
         const nnd = this.findModsByXmlid("NND");
-        if (stunOnly || nnd) {
+        const avld = this.findModsByXmlid("AVLD");
+        if (stunOnly || nnd || avld) {
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
         }
 
