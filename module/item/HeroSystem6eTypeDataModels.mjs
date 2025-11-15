@@ -629,9 +629,6 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get endEstimate() {
-        // STR (or any other characteristic only cost end when the native STR is used)
-        if (this.item.baseInfo?.type.includes("characteristic")) return 0;
-
         return this.item.end;
     }
 
