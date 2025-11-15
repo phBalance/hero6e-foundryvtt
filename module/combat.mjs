@@ -1117,7 +1117,7 @@ export class HeroSystem6eCombat extends Combat {
                 if (combatant.actor.statuses.has("knockedOut")) {
                     if (combatant.actor.system.characteristics.stun?.value < -20) {
                         console.log(`${combatant.name} is knockedOut. Skipping PostSegment12 recovery.`);
-                        return;
+                        continue;
                     }
                 }
 
