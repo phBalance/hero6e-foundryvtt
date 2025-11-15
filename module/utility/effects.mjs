@@ -117,17 +117,20 @@ export async function onActiveEffectToggle(effect, newActiveState) {
     // system.active and the AE.disabled
     await Promise.all(promises);
 
+    console.warn("aaron to review toggle");
+
     // Characteristic VALUE should change when toggled on
+    const actorChanges = {};
     for (const change of effect.changes) {
-        console.warn("aaron to review toggle");
         // match something like system.characteristics.stun.max
         const charMatch = change.key.match(/characteristics\.(.+)\.max$/);
         if (charMatch) {
             const char = charMatch[1];
             const value = newActiveState ? parseInt(change.value) : -parseInt(change.value);
-            await actor.update({
-                [`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].value) + value,
-            });
+            actorChanges[`system.characteristics.${char}.value`] =
+                parseInt(actor.system.characteristics[char].value) + value;
         }
     }
+
+    return Object.keys(actorChanges).length > 0 ? actor.update(actorChanges) : null;
 }
