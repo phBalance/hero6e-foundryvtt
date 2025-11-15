@@ -115,7 +115,7 @@ export function gridUnitsToMeters() {
         distanceMultiplier = 1609.34;
     } else {
         // Not sure what the units might be. Guess meters.
-        ui.notification.error(`Unknown units (${units}) for canvas`);
+        ui.notifications.error(`Unknown units (${units}) for canvas. Expecting m, ", km, or miles.`);
         distanceMultiplier = 1;
     }
 
