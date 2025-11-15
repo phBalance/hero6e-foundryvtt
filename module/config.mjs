@@ -8047,16 +8047,53 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         </DISAD>`,
     });
 
-    /// CAUTION: 5e Normal Characteristic Maxima is a disadvantage, but XML defines it as an ADDER
+    // CAUTION: 5e Normal Characteristic Maxima is a disadvantage, but XML defines it as an ADDER
+    // NOTE: AGE doesn't exist as a normal disadvantage in HD - you find it on the characteristics tab behind a checkbox
     addPower(undefined, {
+        // AGE related
         key: "NCM",
         type: ["disadvantage"],
         behaviors: [],
-        costPerLevel: fixedValueFunction(0), // TODO: needs function
+        costPerLevel: fixedValueFunction(0),
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
-        xml: `<ADDER XMLID="NCM" ID="1763056887996" BASECOST="20.0" LEVELS="0" ALIAS="Normal Characteristic Maxima" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-        </ADDER>`,
+        xml: `<ADDER XMLID="NCM" ID="1763056887996" BASECOST="20.0" LEVELS="0" ALIAS="Normal Characteristic Maxima" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
+    addPower(undefined, {
+        key: "NCM10",
+        type: ["disadvantage"],
+        behaviors: [],
+        costPerLevel: fixedValueFunction(0),
+        target: "self only",
+        range: HERO.RANGE_TYPES.SELF,
+        xml: `<ADDER XMLID="NCM10" ID="1762923975066" BASECOST="15.0" LEVELS="0" ALIAS="Age:  10-" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
+    addPower(undefined, {
+        key: "NCM10NICE",
+        type: ["disadvantage"],
+        behaviors: [],
+        costPerLevel: fixedValueFunction(0),
+        target: "self only",
+        range: HERO.RANGE_TYPES.SELF,
+        xml: `<ADDER XMLID="NCM10NICE" ID="1762923975067" BASECOST="15.0" LEVELS="0" ALIAS="Age:  10-" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
+    addPower(undefined, {
+        key: "NCM40",
+        type: ["disadvantage"],
+        behaviors: [],
+        costPerLevel: fixedValueFunction(0),
+        target: "self only",
+        range: HERO.RANGE_TYPES.SELF,
+        xml: `<ADDER XMLID="NCM40" ID="1762923975064" BASECOST="5.0" LEVELS="0" ALIAS="Age:  40+" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
+    addPower(undefined, {
+        key: "NCM60",
+        type: ["disadvantage"],
+        behaviors: [],
+        costPerLevel: fixedValueFunction(0),
+        target: "self only",
+        range: HERO.RANGE_TYPES.SELF,
+        xml: `<ADDER XMLID="NCM60" ID="1762923975065" BASECOST="10.0" LEVELS="0" ALIAS="Age:  60+" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
 
     addPower(

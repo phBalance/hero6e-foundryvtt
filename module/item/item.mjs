@@ -4635,18 +4635,19 @@ export class HeroSystem6eItem extends Item {
 
     get showAttack() {
         try {
-            if (this.disabledOIHID) return false;
+            if (this.disabledOIHID) {
+                return false;
+            }
+
+            if (this.vppUnSlotted) {
+                return false;
+            }
+
+            if (this.type === "equipment" && this.system.CARRIED !== true) {
+                return false;
+            }
         } catch (e) {
             console.error(e);
-        }
-
-        // VPP unslotted
-        if (this.vppUnSlotted) {
-            return false;
-        }
-
-        if (this.type === "equipment" && this.system.CARRIED !== true) {
-            return false;
         }
 
         return true;
