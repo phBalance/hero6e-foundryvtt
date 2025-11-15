@@ -3,6 +3,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import {
     collectActionDataBeforeToHitOptions,
     rollEffect,
+    rollLuck,
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
@@ -990,7 +991,7 @@ export class HeroSystem6eItem extends Item {
             switch (this.system.XMLID) {
                 case "LUCK":
                 case "UNLUCK":
-                    return rollEffect(this, event);
+                    return rollLuck(this, event);
 
                 case "DEPENDENCE":
                 case "SUSCEPTIBILITY":

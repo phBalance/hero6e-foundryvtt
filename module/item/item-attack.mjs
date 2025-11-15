@@ -1715,6 +1715,29 @@ export async function rollEffect(item) {
     await ChatMessage.create(chatData);
 }
 
+export async function rollLuck(item) {
+    const { diceParts } = calculateDicePartsForItem(item, {});
+
+    const luckRoller = new HeroRoller()
+        .modifyTo5e(item.actor.system.is5e)
+        .makeLuckRoll()
+        .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
+    await luckRoller.roll();
+
+    const cardHtml = await luckRoller.render(`${item.name} Luck Roll`);
+
+    const speaker = ChatMessage.getSpeaker();
+    const chatData = {
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        rolls: luckRoller.rawRolls(),
+        author: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
+}
+
 /**
  * Event handler for when the Roll Damage button is clicked. Should only roll damage. The effects of damage
  * are calculated later in the sequence when the apply buttons are pushed.
