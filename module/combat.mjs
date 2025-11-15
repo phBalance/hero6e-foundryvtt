@@ -1114,6 +1114,13 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "npcOnly" && actor.type == "npc") ||
                 (automation === "pcEndOnly" && actor.type === "pc")
             ) {
+                if (combatant.actor.statuses.has("knockedOut")) {
+                    if (combatant.actor.system.characteristics.stun?.value < -20) {
+                        console.log(`${combatant.name} is knockedOut. Skipping PostSegment12 recovery.`);
+                        return;
+                    }
+                }
+
                 const showToAll = !combatant.hidden && (combatant.hasPlayerOwner || combatant.actor?.type === "pc");
 
                 // Make sure combatant is visible in combat tracker
