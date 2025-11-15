@@ -254,11 +254,15 @@ export async function expireEffects(actor, expiresOn) {
         }
 
         if (!expiresOn) {
-            console.error(`missing expiresOn`);
+            console.error(`${actor?.name}/${ae?.name} is missing expiresOn`, ae);
             return;
         }
 
-        if (expiresOn.includes("segment") && aeExpiresOn.includes("turn") && actor.inCombat) {
+        if (!aeExpiresOn) {
+            console.error(`${actor?.name}/${ae?.name} is missing aeExpiresOn`, ae);
+        }
+
+        if (expiresOn.includes("segment") && aeExpiresOn?.includes("turn") && actor.inCombat) {
             return;
         }
 
