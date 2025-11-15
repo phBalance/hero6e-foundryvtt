@@ -1091,7 +1091,7 @@ export class HeroSystem6eCombat extends Combat {
         content += "<ul>";
         contentHidden += "<ul>";
         let hasHidden = false;
-        for (const combatant of this.getUniqueCombatants().filter((o) => !o.defeated)) {
+        for (const combatant of this.getUniqueCombatants().filter((o) => !o.isDefeated)) {
             const actor = combatant.actor;
 
             // Make sure we have a valid actor
