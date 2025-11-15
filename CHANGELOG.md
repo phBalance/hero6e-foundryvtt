@@ -4,6 +4,7 @@
 
 - Fixed missing items in attack tab. [#3068](https://github.com/dmdorman/hero6e-foundryvtt/issues/3068)
 - AVLD is now STUN only. [#3083](https://github.com/dmdorman/hero6e-foundryvtt/issues/3083)
+- Defeated combatants no longer get post segment 12 recovery. No post segment 12 recovery for actors with less than -20 STUN. One minute+ recoveries not supported. [#3102](https://github.com/dmdorman/hero6e-foundryvtt/issues/3102)
 
 ## Version 4.2.2 20251108 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

@@ -5163,6 +5163,9 @@ export class HeroSystem6eItem extends Item {
     }
 
     get end() {
+        // STR (or any other characteristic only cost end when the native STR is used)
+        if (this.baseInfo?.type.includes("characteristic")) return 0;
+
         let end = this.getBaseEndCost();
 
         const increasedEnd = this.findModsByXmlid("INCREASEDEND");
