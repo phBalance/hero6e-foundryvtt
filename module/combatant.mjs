@@ -83,7 +83,6 @@ export class HeroSystem6eCombatant extends Combatant {
     }
 
     get isDefeated() {
-        // this.defeated || !!this.actor?.statuses.has(CONFIG.specialStatusEffects.DEFEATED);
         return super.isDefeated || this.actor?.knockedOutOfCombat;
     }
 }
