@@ -1,11 +1,12 @@
 # Releases
 
-## Version 4.2.3 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.3 20251115 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed missing items in attack tab. [#3068](https://github.com/dmdorman/hero6e-foundryvtt/issues/3068)
 - AVLD is now STUN only. [#3083](https://github.com/dmdorman/hero6e-foundryvtt/issues/3083)
 - Defeated combatants no longer get post segment 12 recovery. No post segment 12 recovery for actors with less than -20 STUN. One minute+ recoveries not supported. [#3102](https://github.com/dmdorman/hero6e-foundryvtt/issues/3102)
-- Scene grid sizes with units of m, ", km, and miles are now supported. For gridless scenes, a size of 1m is suggested for the configured grid size. [#3072](https://github.com/dmdorman/hero6e-foundryvtt/issues/3072) [#2409](https://github.com/dmdorman/hero6e-foundryvtt/issues/2409) [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997) [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997)
+- Scene grid sizes with units of m, ", km, and miles are now supported. For gridless scenes, a size of 1m is suggested for the configured grid size. [#3072](https://github.com/dmdorman/hero6e-foundryvtt/issues/3072) [#2409](https://github.com/dmdorman/hero6e-foundryvtt/issues/2409) [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997) [#848](https://github.com/dmdorman/hero6e-foundryvtt/issues/848)
+- Improved support for skill and luck based roll for activation.
 
 ## Version 4.2.2 20251108 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
