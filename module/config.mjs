@@ -6032,8 +6032,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const additionalPD = parseInt(item.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
                 const additionalED = parseInt(item.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
 
-                const rPD = baseDef + additionalPD;
-                const rED = baseDef + additionalED;
+                const rPD = baseDef + additionalDef + additionalPD;
+                const rED = baseDef + additionalDef + additionalED;
                 // 6e +1 DEF = +2 rMD. NOTE: HD doesn't have ability to buy MD in 6e.
                 const rMD = baseDef + 2 * (additionalDef || additionalPD + additionalED);
 
