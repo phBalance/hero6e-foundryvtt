@@ -2875,16 +2875,16 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
     let defense;
     let defenseType;
-    switch (attackItem?.system.class) {
-        case "physical":
+    switch (attackItem.attackDefenseVs) {
+        case "PD":
             defense = entangleAE.flags[game.system.id]?.entangleDefense.rPD;
             defenseType = "rPD";
             break;
-        case "energy":
+        case "ED":
             defense = entangleAE.flags[game.system.id]?.entangleDefense.rED;
             defenseType = "rED";
             break;
-        case "mental":
+        case "MD":
             defense = entangleAE.flags[game.system.id]?.entangleDefense.rMD;
             defenseType = "rPMD";
             break;
