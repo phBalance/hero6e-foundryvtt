@@ -1,6 +1,8 @@
 import { RoundFavorPlayerDown } from "./round.mjs";
 
 /**
+ * A note about units
+ *
  * Hero System and the FoundryVTT system force us to use a number of different units for measurements.
  *
  * Hero System 5e uses 2m hexes (1 hex = 1")
@@ -14,31 +16,44 @@ export function getSystemDisplayUnits(is5e) {
     if (is5e !== false && is5e !== true && is5e !== undefined) {
         console.error(`bad is5e paramater`, is5e);
     }
+
     return is5e ? '"' : "m";
 }
 
 /**
  *
  * @param {number} distanceInSystemUnits
- * @param {object} actor
+ * @param {boolean} is5e
  * @returns number
  */
-export function convertSystemUnitsToMetres(distanceInSystemUnits, actor) {
-    return distanceInSystemUnits * (actor?.system?.is5e ? 2 : 1);
+export function convertSystemUnitsToMetres(distanceInSystemUnits, is5e) {
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error(`bad is5e paramater`, is5e);
+    }
+
+    return distanceInSystemUnits * (is5e?.system?.is5e ? 2 : 1);
 }
 
 /**
  *
  * @param {number} distanceInHexes
- * @param {object} actor
+ * @param {boolean} is5e
  * @returns number - number of system units of the hex (same for 5e and double for 6e)
  */
-export function convertHexesToSystemUnits(distanceInHexes, actor) {
-    return distanceInHexes * (actor?.system?.is5e ? 1 : 2);
+export function convertHexesToSystemUnits(distanceInHexes, is5e) {
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error(`bad is5e paramater`, is5e);
+    }
+
+    return distanceInHexes * (is5e ? 1 : 2);
 }
 
-export function hexDistanceToSystemDisplayString(distanceInHexes, actor) {
-    return `${convertHexesToSystemUnits(distanceInHexes, actor)}${getSystemDisplayUnits(actor?.system?.is5e)}`;
+export function hexDistanceToSystemDisplayString(distanceInHexes, is5e) {
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error(`bad is5e paramater`, is5e);
+    }
+
+    return `${convertHexesToSystemUnits(distanceInHexes, is5e)}${getSystemDisplayUnits(is5e)}`;
 }
 
 /**
@@ -47,11 +62,13 @@ export function hexDistanceToSystemDisplayString(distanceInHexes, actor) {
  * 9.9m is 9m in 6e and 4" in 5e.
  *
  * @param {number} distanceInMetres
- * @param {object} actor
+ * @param {boolean} is5e
  * @returns number
  */
-export function getRoundedDownDistanceInSystemUnits(distanceInMetres, actor) {
-    const is5e = actor?.system?.is5e;
+export function getRoundedDownDistanceInSystemUnits(distanceInMetres, is5e) {
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error(`bad is5e paramater`, is5e);
+    }
 
     const roundedDistanceInMetres = is5e ? Math.floor(distanceInMetres / 2) : Math.floor(distanceInMetres);
 
@@ -68,11 +85,13 @@ export function getRoundedDownDistanceInSystemUnits(distanceInMetres, actor) {
  * 9.9m is 10m in 6e and 5" in 5e.
  *
  * @param {number} distanceInMetres
- * @param {object} actor
+ * @param {boolean} is5e
  * @returns number
  */
-export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres, actor) {
-    const is5e = actor?.system?.is5e;
+export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres, is5e) {
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error(`bad is5e paramater`, is5e);
+    }
 
     const roundedDistanceInMetres = is5e
         ? RoundFavorPlayerDown(distanceInMetres / 2)
@@ -87,11 +106,13 @@ export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres,
  * 9.9m is 10m in 6e and 5" in 5e.
  *
  * @param {number} distanceInMetres
- * @param {object} actor
+ * @param {boolean} is5e
  * @returns number
  */
-export function getRoundedUpDistanceInSystemUnits(distanceInMetres, actor) {
-    const is5e = actor?.system?.is5e;
+export function getRoundedUpDistanceInSystemUnits(distanceInMetres, is5e) {
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error(`bad is5e paramater`, is5e);
+    }
 
     const roundedDistanceInMetres = is5e ? Math.ceil(distanceInMetres / 2) : Math.ceil(distanceInMetres);
 

@@ -24,7 +24,7 @@ function generateMovementCanSelectFunction(characteristic) {
 function generateMovementMaxCombatDistanceMeters(characteristic) {
     return (token) => {
         const combatMovementInSystemUnits = token.actor?.system.characteristics[characteristic]?.value || 0;
-        return convertSystemUnitsToMetres(combatMovementInSystemUnits, token.actor);
+        return convertSystemUnitsToMetres(combatMovementInSystemUnits, token.actor.is5e);
     };
 }
 
@@ -32,7 +32,7 @@ function generateMovementMaxNonCombatDistanceMeters(characteristic) {
     return (token) => {
         const combatMovementInSystemUnits = token.actor?.system.characteristics[characteristic]?.value || 0;
         const nonCombatMultiplier = 2; // PH: FIXME: This is wrong. Need to look at the actual power that is being used.
-        return convertSystemUnitsToMetres(nonCombatMultiplier * combatMovementInSystemUnits, token.actor);
+        return convertSystemUnitsToMetres(nonCombatMultiplier * combatMovementInSystemUnits, token.actor.is5e);
     };
 }
 

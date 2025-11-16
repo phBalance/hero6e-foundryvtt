@@ -2598,7 +2598,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeText: function (item) {
                 // The maximum length of the swingline
                 let distanceInMetres = item.system.basePointsPlusAdders * 10;
-                return `Max swingline length ${getRoundedUpDistanceInSystemUnits(distanceInMetres, item.actor)}`;
+                return `Max swingline length ${getRoundedUpDistanceInSystemUnits(distanceInMetres, item.actor.is5e)}`;
             },
             costEnd: true,
             costPerLevel: fixedValueFunction(1 / 2),
@@ -5787,7 +5787,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     case "KB":
                         value =
                             (parseInt(actorItemDefense.adjustedLevels) || 0) *
-                            convertHexesToSystemUnits(1, actorItemDefense.actor);
+                            convertHexesToSystemUnits(1, actorItemDefense.actor.is5e);
                         break;
                 }
                 if (value > 0) {
@@ -5801,7 +5801,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 const strDisplay = `+${noStrIncrease ? 0 : item.system.LEVELS * 5} STR`;
                 const massDisplay = `${Math.pow(2, item.system.LEVELS) * 100} kg mass`;
-                const kbDisplay = `-${hexDistanceToSystemDisplayString(item.system.LEVELS, item.actor)} KB`;
+                const kbDisplay = `-${hexDistanceToSystemDisplayString(item.system.LEVELS, item.actor.is5e)} KB`;
                 const defenseDisplay = (() => {
                     const noDefIncrease = item.modifiers.find((mod) => mod.XMLID === "NODEFINCREASE");
                     // NODEFINCREASE allows for ED, PD, or EDPD as option.

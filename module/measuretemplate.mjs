@@ -1,7 +1,20 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 
+import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits, gridUnitsToMeters } from "./utility/units.mjs";
+
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttMeasuredTemplate = foundry.canvas?.placeables?.MeasuredTemplate || MeasuredTemplate;
+
+function isHexTemplatesEnabled() {
+    return game.settings.get(HEROSYS.module, "HexTemplates");
+}
+
+function currentSceneUsesHexGrid() {
+    return !(
+        game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
+        game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
+    );
+}
 
 export default class HeroSystem6eMeasuredTemplate extends FoundryVttMeasuredTemplate {
     async _onClickLeft(event) {
@@ -24,12 +37,8 @@ export default class HeroSystem6eMeasuredTemplate extends FoundryVttMeasuredTemp
     _computeShape() {
         const { t: shapeType, distance, direction, angle } = this.document;
 
-        const HexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
-
-        const hexGrid = !(
-            game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
-            game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
-        );
+        const HexTemplates = isHexTemplatesEnabled();
+        const hexGrid = currentSceneUsesHexGrid();
 
         if (HexTemplates && hexGrid) {
             if (shapeType === "circle") {
@@ -44,6 +53,41 @@ export default class HeroSystem6eMeasuredTemplate extends FoundryVttMeasuredTemp
         }
 
         return super._computeShape();
+    }
+
+    /**
+     * FoundryVTT, quite reasonably, reports euclidianly factually correct text values. Unfortunately, we have 2 problems with this:
+     * - 5e does not match euclidian geometry for radius as the first 1"/2m is actually 0.5"/1m in the scene.
+     * - We would like templates created from 5e powers should report their distances in " regardless of the scene units.
+     *
+     * NOTE: This is a potential maintenance headache as we're not able to call the super with the way it's implemented in v13.
+     */
+    _refreshRulerText() {
+        const { t: shapeType, distance: numGridUnits, flags } = this.document;
+
+        // Provide intelligent defaults as it's possible to create templates independently of an AoE attack.
+        const is5e = flags[game.system.id]?.is5e ?? false;
+        const usesHexTemplate = flags[game.system.id]?.usesHexTemplate ?? isHexTemplatesEnabled();
+
+        if (shapeType === "circle" || shapeType === "cone" || shapeType === "ray") {
+            const originalSizeInMeters = numGridUnits * gridUnitsToMeters() + (usesHexTemplate ? 1 : 0);
+            const distanceInSystemUnits = getRoundedUpDistanceInSystemUnits(originalSizeInMeters, is5e);
+            const systemUnit = getSystemDisplayUnits(is5e);
+            const systemUnitsText = `${distanceInSystemUnits}${systemUnit}`;
+
+            const gridUnit = game.canvas.grid.units;
+            const originalSizeInGridUnits = originalSizeInMeters / gridUnitsToMeters();
+            const gridUnitsText = `${originalSizeInGridUnits}${gridUnit}`;
+
+            // Show in the system units and then, if different, the size in grid units.
+            this.ruler.text = `${systemUnitsText}${systemUnit !== gridUnit ? ` (${gridUnitsText})` : ""}`;
+        } else if (shapeType === "rect") {
+            this.ruler.text = "This space for rent";
+        } else {
+            super._refreshRulerText();
+        }
+
+        this.ruler.position.set(this.ray.dx + 10, this.ray.dy + 5);
     }
 
     async _onUpdate(data, options, userId) {

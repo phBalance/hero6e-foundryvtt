@@ -356,7 +356,7 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
 
         attackHeroRoller.addNumber(
             baseRangePenalty,
-            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor)}${getSystemDisplayUnits(item.actor.is5e)})`,
+            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor.is5e)}${getSystemDisplayUnits(item.actor.is5e)})`,
         );
 
         // PENALTY_SKILL_LEVELS (range)
@@ -960,7 +960,7 @@ async function doSingleTargetActionToHit(action, options) {
             // Distance from aoeTemplate origin to target/token center
             if (aoeTemplate && target.id) {
                 const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.getCenterPoint()).distance;
-                by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
+                by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor.is5e)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from template origin)`;
             }
@@ -1406,14 +1406,14 @@ export async function _onRollKnockback(event) {
         <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 2,
-                item.actor,
+                item.actor.is5e,
             )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked into a solid object, 
             to a maximum of the PD + BODY of the object hit.
         </p>
         <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 4,
-                item.actor,
+                item.actor.is5e,
             )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes. <strong>This is the default value below</strong>.
         </p>
         <p>
