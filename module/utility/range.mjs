@@ -14,7 +14,7 @@ import { RoundFavorPlayerDown } from "./round.mjs";
 export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, actor) {
     const is5e = actor?.system?.is5e;
     const roundedDistanceInMetres =
-        getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres, actor) * (is5e ? 2 : 1);
+        getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres, is5e) * (is5e ? 2 : 1);
     const basicRangePenalty = Math.ceil(Math.log2(roundedDistanceInMetres / 8)) * 2;
     const rangePenalty = Math.max(0, basicRangePenalty);
 
@@ -80,7 +80,7 @@ export function calculateDistanceBetween(origin, target) {
     );
 
     return {
-        distance: getRoundedFavorPlayerDownDistanceInSystemUnits(threeDDistance, rulesActor),
+        distance: getRoundedFavorPlayerDownDistanceInSystemUnits(threeDDistance, rulesActor.is5e),
         cost: 0, // FIXME: to be implemented
         gridSpaces: 0, // FIXME: to be implemented
     };

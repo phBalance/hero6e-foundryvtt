@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.2.3 20251115 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.4 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- AoE templates now show the size in both the units of the attack's system and, if different, the scene's units. Also, to avoid confusion, 5e templates will now report the system size even though it is not the same as the actual/euclidian size. [#981](https://github.com/dmdorman/hero6e-foundryvtt/issues/981)
+
+## Version 4.2.3 20251115
 
 - Fixed missing items in attack tab. [#3068](https://github.com/dmdorman/hero6e-foundryvtt/issues/3068)
 - AVLD is now STUN only. [#3083](https://github.com/dmdorman/hero6e-foundryvtt/issues/3083)
@@ -8,7 +12,7 @@
 - Scene grid sizes with units of m, ", km, and miles are now supported. For gridless scenes, a size of 1m is suggested for the configured grid size. [#3072](https://github.com/dmdorman/hero6e-foundryvtt/issues/3072) [#2409](https://github.com/dmdorman/hero6e-foundryvtt/issues/2409) [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997) [#848](https://github.com/dmdorman/hero6e-foundryvtt/issues/848)
 - Improved support for skill and luck based roll for activation.
 
-## Version 4.2.2 20251108 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.2 20251108
 
 - Various VPP improvements, including the ability to choose VPP slots. Exceeding VPP pool is not enforced. [#2743](https://github.com/dmdorman/hero6e-foundryvtt/issues/2743) [#2869](https://github.com/dmdorman/hero6e-foundryvtt/issues/2869)
 - Fixed ability to add/edit/delete MODIFIERs from item sheet. [#3006](https://github.com/dmdorman/hero6e-foundryvtt/issues/3006) [#3031](https://github.com/dmdorman/hero6e-foundryvtt/issues/3031)

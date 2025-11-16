@@ -850,7 +850,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
 
-        const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
+        const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor.is5e);
 
         const HexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
         const hexGrid = !(
@@ -881,6 +881,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     aoeValue,
                     sizeConversionToMeters,
                     usesHexTemplate: HexTemplates && hexGrid,
+                    is5e: item.effectiveAttackItem.is5e,
                 },
             },
         };
