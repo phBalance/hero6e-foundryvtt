@@ -7036,7 +7036,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
-                        assert.equal(item.system.description, "Entangle 2d6, 2 rPD/2 rED (+2 Additional DEF)");
+                        assert.equal(item.system.description, "Entangle 2d6, 4 rPD/4 rED (+2 Additional DEF)");
                     });
 
                     it("realCost", function () {
