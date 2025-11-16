@@ -857,6 +857,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             csl: new ArrayField(new StringField()), // Combat Skill levels
             checked: new BooleanField({ initial: false }), // DEADLYBLOW
             CARRIED: new BooleanField({ nullable: true }), // Typically for equipment; extending to include VPP
+            FILE_ASSOCIATION: new StringField({ nullable: true }), // Follower file association in HDC
         };
     }
 }
