@@ -1268,6 +1268,14 @@ function getAttackTags(item) {
     // item modifiers
     for (const mod of baseAttackItem.system.MODIFIER || []) {
         switch (mod.XMLID) {
+            case "AVAD":
+            case "AVLD":
+                attackTags.push({
+                    name: `${mod.ALIAS || mod.XMLID}`,
+                    title: `${mod.XMLID} versus ${mod.INPUT}`,
+                });
+                break;
+
             case "AUTOFIRE":
                 {
                     const autoFireShots = parseInt(mod.OPTION_ALIAS.match(/\d+/));
@@ -1300,14 +1308,6 @@ function getAttackTags(item) {
                 attackTags.push({
                     name: `${strMinimum} ${mod.ALIAS || mod.XMLID}`,
                     title: `${mod.XMLID}`,
-                });
-                break;
-            }
-
-            case "AVAD": {
-                attackTags.push({
-                    name: `${mod.ALIAS || mod.XMLID}`,
-                    title: `${mod.XMLID}\n${mod.INPUT}`,
                 });
                 break;
             }
