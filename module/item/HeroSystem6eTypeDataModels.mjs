@@ -1,7 +1,5 @@
-//import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { getPowerInfo, squelch } from "../utility/util.mjs";
-//import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import {
@@ -11,6 +9,30 @@ import {
 } from "../utility/damage.mjs";
 import { maneuverHasFlashTrait, maneuverHasBlockTrait } from "./maneuver.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
+
+// XML parsing is expensive when done frequently during actions like loading characters.
+// Use this for storing the parsed value and then clear it out after 10 seconds.
+class TimeClearedCache {
+    #TIMEOUT_VALUE = 10000;
+    #cacheValue = null;
+    #timerId = null;
+
+    get cacheValue() {
+        return this.#cacheValue;
+    }
+
+    set cacheValue(value) {
+        this.#cacheValue = value;
+
+        // Clear out the cache sometime after it's set.
+        if (!this.#timerId) {
+            this.#timerId = setTimeout(() => {
+                this.#cacheValue = null;
+                this.#timerId = null;
+            }, this.#TIMEOUT_VALUE);
+        }
+    }
+}
 
 const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
 
@@ -74,9 +96,18 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             CLIPS_COST: new HeroNumberField({ integer: false }),
         };
     }
+
+    #cachedParsedXml = new TimeClearedCache();
+
     get hdcHTMLCollection() {
         try {
-            return this._hdcXml ? new DOMParser().parseFromString(this._hdcXml, "text/xml") : null;
+            if (this._hdcXml) {
+                if (!this.#cachedParsedXml.cacheValue) {
+                    this.#cachedParsedXml.cacheValue = new DOMParser().parseFromString(this._hdcXml, "text/xml");
+                }
+                return this.#cachedParsedXml.cacheValue;
+            }
+            return null;
         } catch (e) {
             console.error(e);
         }
@@ -407,9 +438,17 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         }
     }
 
+    #cachedParsedXml = new TimeClearedCache();
+
     get hdcHTMLCollection() {
         try {
-            return this._hdcXml ? new DOMParser().parseFromString(this._hdcXml, "text/xml") : null;
+            if (this._hdcXml) {
+                if (!this.#cachedParsedXml.cacheValue) {
+                    this.#cachedParsedXml.cacheValue = new DOMParser().parseFromString(this._hdcXml, "text/xml");
+                }
+                return this.#cachedParsedXml.cacheValue;
+            }
+            return null;
         } catch (e) {
             console.error(e);
         }
@@ -554,7 +593,6 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
                         }
                     }
                 }
-                ``;
             }
         } catch (e) {
             console.error(e);
@@ -1211,9 +1249,17 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
         return null;
     }
 
+    #cachedParsedXml = new TimeClearedCache();
+
     get hdcHTMLCollection() {
         try {
-            return this._hdcXml ? new DOMParser().parseFromString(this._hdcXml, "text/xml") : null;
+            if (this._hdcXml) {
+                if (!this.#cachedParsedXml.cacheValue) {
+                    this.#cachedParsedXml.cacheValue = new DOMParser().parseFromString(this._hdcXml, "text/xml");
+                }
+                return this.#cachedParsedXml.cacheValue;
+            }
+            return null;
         } catch (e) {
             console.error(e);
         }
@@ -1515,9 +1561,17 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
         };
     }
 
+    #cachedParsedXml = new TimeClearedCache();
+
     get hdcHTMLCollection() {
         try {
-            return this._hdcXml ? new DOMParser().parseFromString(this._hdcXml, "text/xml") : null;
+            if (this._hdcXml) {
+                if (!this.#cachedParsedXml.cacheValue) {
+                    this.#cachedParsedXml.cacheValue = new DOMParser().parseFromString(this._hdcXml, "text/xml");
+                }
+                return this.#cachedParsedXml.cacheValue;
+            }
+            return null;
         } catch (e) {
             console.error(e);
         }
