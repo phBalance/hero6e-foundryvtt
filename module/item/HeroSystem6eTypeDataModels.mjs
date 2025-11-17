@@ -956,6 +956,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             PROFICIENCY: new BooleanField({ initial: null, nullable: true }),
             ROLL: new StringField(),
             TYPE: new StringField(),
+            targetId: new StringField(), // CSL
 
             // Perk
             BASEPOINTS: new StringField(),
