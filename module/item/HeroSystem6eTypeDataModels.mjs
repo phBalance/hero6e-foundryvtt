@@ -94,6 +94,7 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             DISPLAY: new StringField(),
             SCALE: new StringField(),
             CLIPS_COST: new HeroNumberField({ integer: false }),
+            targetId: new StringField(), // CSL
         };
     }
 

@@ -8341,17 +8341,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     // PH: FIXME: Need to think about ADDER and MODIFIER etc. Right now the tests fail with this
     //            as the key and the XMLID don't match.
-    // addPower(
-    //     {
-    //         // GENERIC_OBJECT related
-    //         key: "ADDER",
-    //         behaviors: ["adder"],
-    //         type: ["adder"],
-    //         costPerLevel: fixedValueFunction(0),
-    //         xml: `<ADDER XMLID="GENERIC_OBJECT" ID="1731203796826" BASECOST="1.0" LEVELS="0" ALIAS="Ego Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-    //     },
-    //     {},
-    // );
+    addPower(
+        {
+            // GENERIC_OBJECT related
+            key: "ADDER",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="GENERIC_OBJECT" ID="1763502186249" BASECOST="0.0" LEVELS="0" ALIAS="Custom Adder" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // ENTANGLE related

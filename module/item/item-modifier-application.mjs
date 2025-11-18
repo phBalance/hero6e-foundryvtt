@@ -34,6 +34,8 @@ export class ItemModifierFormApplication extends FormApplication {
             ui.notifications.error(`${this.data?.mod?.XMLID} missing baseInfo`, this);
         }
 
+        globalThis.mod = this.data.mod;
+
         data.editOptions = this.data.mod.baseInfo?.editOptions;
         return data;
     }
