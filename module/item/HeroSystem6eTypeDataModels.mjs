@@ -94,6 +94,7 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             DISPLAY: new StringField(),
             SCALE: new StringField(),
             CLIPS_COST: new HeroNumberField({ integer: false }),
+            targetId: new StringField(), // CSL
         };
     }
 
@@ -956,7 +957,6 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             PROFICIENCY: new BooleanField({ initial: null, nullable: true }),
             ROLL: new StringField(),
             TYPE: new StringField(),
-            targetId: new StringField(), // CSL
 
             // Perk
             BASEPOINTS: new StringField(),
