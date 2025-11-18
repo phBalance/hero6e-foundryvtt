@@ -1933,6 +1933,7 @@ export class HeroSystem6eActor extends Actor {
                 1 + // Images
                 1 + // Final save
                 1 + // Restore retained damage
+                1 + // CSL assignment
                 1; // Not really sure why we need an extra +1
 
             uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess);
@@ -2673,6 +2674,23 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
             uploadProgressBar.advance(`${this.name}: Restored retained damage`, 0);
+
+            uploadProgressBar.advance(`${this.name}: Assign targetId for Combat Skill Levels CSL`, 1);
+            for (const csl of this.allCslSkills) {
+                const _ADDER = Array.from(csl.system.ADDER);
+                for (const customAdder of _ADDER.filter((a) => a.XMLID === "ADDER")) {
+                    const targetId = this._cslItems.find((item) =>
+                        `${item.name}${item.system.ALIAS}${item.system.XMLID}`.match(
+                            new RegExp(customAdder.ALIAS, "i"),
+                        ),
+                    )?.id;
+                    if (targetId) {
+                        customAdder.updateSource({ targetId });
+                    }
+                }
+                await csl.update({ [`system.ADDER`]: _ADDER });
+            }
+            uploadProgressBar.advance(`${this.name}: Processed CSL`, 0);
 
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);
@@ -3675,8 +3693,12 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
+    get allCslSkills() {
+        return this.items.filter((item) => item.isCsl);
+    }
+
     get activeCslSkills() {
-        return this.items.filter((item) => item.isCsl) || [];
+        return this.allCslSkills.filter((item) => item.isActive);
     }
 
     get preferredAttacksForCsls() {

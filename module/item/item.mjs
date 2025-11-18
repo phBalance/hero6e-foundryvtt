@@ -5522,6 +5522,14 @@ export class HeroSystem6eItem extends Item {
             return [];
         }
 
+        // Custom ADDER (if any defined, then base response solely custom adders)
+        if (this.adders.find((a) => a.targetId)) {
+            if (this.adders.find((a) => a.targetId === attackItem.id)) {
+                return true;
+            }
+            return false;
+        }
+
         // CSL associated with same compound power
         // Note that we don't bother verifying Mental/Physical, nor ADDER that may associate wth a different attackItem
         if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
@@ -5582,19 +5590,6 @@ export class HeroSystem6eItem extends Item {
         // DCV versus all of them.
         if (this.system.OPTIONID === "DCV") {
             return true;
-        }
-
-        // Custom ADDER
-        if (this.adders) {
-            if (
-                this.adders
-                    .filter((adder) => adder.XMLID === "ADDER")
-                    .filter((adder) => attackItem.system.ALIAS === adder.ALIAS)
-            ) {
-                return true;
-            } else {
-                return false;
-            }
         }
 
         return false;
