@@ -425,9 +425,9 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         if (confirmed) {
             await this.item.update({
-                [`system.${adderOrModifier.XMLID}`]: this.item.system[adderOrModifier.XMLID].filter(
-                    (o) => o.ID != adderOrModifier.ID,
-                ),
+                [`system.${adderOrModifier.xmlTag}`]: this.item.system[adderOrModifier.xmlTag]
+                    .filter((o) => o.ID != adderOrModifier.ID)
+                    .map((o) => o._source),
             });
 
             this.render();

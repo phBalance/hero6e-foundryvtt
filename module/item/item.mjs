@@ -19,7 +19,7 @@ import {
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
-import { onActiveEffectToggle } from "../utility/effects.mjs";
+//import { onActiveEffectToggle } from "../utility/effects.mjs";
 import {
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
@@ -324,9 +324,12 @@ export class HeroSystem6eItem extends Item {
 
             // ACTIVE EFFECTS
             if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
-                const activeEffect = Array.from(this.effects)?.[0] || {};
+                const activeEffect =
+                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                    this.effects.find((ae) => !ae.system.XMLID) ??
+                    {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.LEVELS}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
+                activeEffect.img = this.baseInfo?.img ?? "icons/svg/upgrade.svg";
                 activeEffect.description = this.system.description;
                 activeEffect.changes = [
                     {
@@ -355,31 +358,25 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
                 activeEffect.transfer = true;
-                activeEffect.disabled = !this.system.active;
+                activeEffect.disabled ??= !this.system.active;
+                activeEffect.system ??= { XMLID: this.system.XMLID };
 
                 if (activeEffect.update) {
                     await activeEffect.update({
                         name: activeEffect.name,
                         changes: activeEffect.changes,
+                        img: activeEffect.img,
                     });
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
-                if (this.actor && game.actors.get(this.actor.id)) {
-                    for (const change of activeEffect.changes) {
-                        const value = foundry.utils.getProperty(this.actor, change.key);
-                        if (!value) {
-                            console.error(`${change.key} is ${value}`);
-                        }
-                        await this.actor.update({
-                            [change.key.replace(".max", ".value")]: value || 0,
-                        });
-                    }
-                }
             }
 
             if (this.id && this.type !== "characteristic" && this.baseInfo?.type?.includes("characteristic")) {
-                const activeEffect = Array.from(this.effects)?.[0] || {};
+                const activeEffect =
+                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                    this.effects.find((ae) => !ae.system.XMLID) ??
+                    {};
                 const value = this.system.LEVELS;
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
@@ -392,7 +389,8 @@ export class HeroSystem6eItem extends Item {
                     },
                 ];
                 activeEffect.transfer = true;
-                activeEffect.disabled = !this.system.active;
+                activeEffect.disabled ??= !this.system.active;
+                activeEffect.system ??= { XMLID: this.system.XMLID };
 
                 if (activeEffect.update) {
                     const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
@@ -422,7 +420,10 @@ export class HeroSystem6eItem extends Item {
                 const pdAdd = noDefIncreasePd ? 0 : this.system.LEVELS;
                 const edAdd = noDefIncreaseEd ? 0 : this.system.LEVELS;
 
-                let activeEffect = Array.from(this.effects)?.[0] || {};
+                const activeEffect =
+                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                    this.effects.find((ae) => !ae.system.XMLID) ??
+                    {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.LEVELS}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
                 activeEffect.changes = [
@@ -443,7 +444,8 @@ export class HeroSystem6eItem extends Item {
                     },
                 ];
                 activeEffect.transfer = true;
-                activeEffect.disabled = !this.system.active;
+                activeEffect.disabled ??= !this.system.active;
+                activeEffect.system ??= { XMLID: this.system.XMLID };
 
                 if (activeEffect.update) {
                     await activeEffect.update({
@@ -467,7 +469,10 @@ export class HeroSystem6eItem extends Item {
             // Generic activeEffect (preferred; so far just GROWTH)
             if (this.baseInfo?.activeEffect) {
                 const activeEffect = this.baseInfo?.activeEffect(this);
-                const currentAE = Array.from(this.effects)?.[0];
+                const currentAE =
+                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                    this.effects.find((ae) => !ae.system.XMLID) ??
+                    {};
                 if (currentAE) {
                     if (this.id) {
                         await currentAE.update({
@@ -490,7 +495,10 @@ export class HeroSystem6eItem extends Item {
             if (this.id && this.system.XMLID === "SHRINKING") {
                 const dcvAdd = Math.floor(this.system.LEVELS) * 2;
 
-                let activeEffect = Array.from(this.effects)?.[0] || {};
+                const activeEffect =
+                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                    this.effects.find((ae) => !ae.system.XMLID) ??
+                    {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
                 activeEffect.changes = [
@@ -501,6 +509,7 @@ export class HeroSystem6eItem extends Item {
                     },
                 ];
                 activeEffect.transfer = true;
+                activeEffect.system ??= { XMLID: this.system.XMLID };
 
                 if (activeEffect.update) {
                     await activeEffect.update({
@@ -520,7 +529,10 @@ export class HeroSystem6eItem extends Item {
             if (this.id && MOBILITY && hasDCV) {
                 const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
 
-                const activeEffect = Array.from(this.effects)?.[0] || {};
+                const activeEffect =
+                    this.effects.find((ae) => ae.system.XMLID === "MOBILITY") ??
+                    this.effects.find((ae) => !ae.system.XMLID) ??
+                    {};
                 if (dcvValue !== null) {
                     activeEffect.name =
                         (this.name ? `${this.name}/${MOBILITY.parent.name || MOBILITY.parent.ALIAS}: ` : "") +
@@ -528,13 +540,16 @@ export class HeroSystem6eItem extends Item {
                     activeEffect.img = "icons/svg/downgrade.svg";
                     activeEffect.changes = [
                         {
-                            key: "system.characteristics.dcv.value",
+                            key: "system.characteristics.dcv.max",
                             value: dcvValue,
                             mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                         },
                     ];
                     activeEffect.transfer = true;
                     activeEffect.disabled = !this.system.active;
+                    activeEffect.system ??= {
+                        XMLID: "MOBILITY",
+                    };
 
                     if (activeEffect.update) {
                         await activeEffect.update({
@@ -558,7 +573,10 @@ export class HeroSystem6eItem extends Item {
                         `You must install the <b>Active Token Effects</b> module for carried lights to work`,
                     );
                 }
-                let activeEffect = Array.from(this.effects)?.[0] || {};
+                let activeEffect =
+                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                    this.effects.find((ae) => !ae.system.XMLID) ??
+                    {};
                 if (this.system.active || !activeEffect.update) {
                     activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
                     activeEffect.img = "icons/svg/light.svg";
@@ -569,6 +587,7 @@ export class HeroSystem6eItem extends Item {
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         },
                     ];
+                    activeEffect.system ??= { XMLID: this.system.XMLID };
                     if (!activeEffect.update) {
                         activeEffect.disabled = true;
                     }
@@ -593,7 +612,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // Generic defeault toggle to on (if it doesn't use charges or END or part of multipower)
+            // Generic default toggle to on (if it doesn't use charges or END or part of multipower)
             if (
                 this.isActivatable() &&
                 this.system.active === undefined &&
@@ -608,6 +627,17 @@ export class HeroSystem6eItem extends Item {
                 // Invisibility status effect for SIGHTGROUP?
                 if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
                     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
+                }
+            }
+
+            // Sanity check for duplicate effects
+            for (const ae1 of this.effects) {
+                if (
+                    this.effects.find(
+                        (ae2) => ae1.system.XMLID && ae1.system.XMLID === ae2.system.XMLID && ae1.id !== ae2.id,
+                    )
+                ) {
+                    console.error(`Duplicate ${ae1.system.XMLID} effects on ${this.name}`);
                 }
             }
         } catch (e) {
@@ -653,7 +683,10 @@ export class HeroSystem6eItem extends Item {
             .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
 
         if (!_pslPenaltyType) {
-            console.warn(`Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS}"`, this);
+            console.warn(
+                `Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.name}`,
+                this,
+            );
         }
 
         return _pslPenaltyType;
@@ -760,12 +793,20 @@ export class HeroSystem6eItem extends Item {
     }
 
     async _onUpdate(changed, options, userId) {
-        // CSL
+        // We favor effect.disabled over system.active (in fact shouldn't be changing system.active)
+        if (this.effect && changed.system.active !== undefined) {
+            console.error(`We are updating system.active instead of the effect.disabled`);
+        }
 
         super._onUpdate(changed, options, userId);
 
         if (!this.isOwner) {
             //console.log(`Skipping _onUpdate because this client is not an owner of ${this.actor.name}:${this.name}`);
+            return;
+        }
+
+        if (game.userId !== userId) {
+            console.log(`Skipping ${this.name} _onUpdate for user ${userId}`);
             return;
         }
 
@@ -1153,6 +1194,262 @@ export class HeroSystem6eItem extends Item {
         ChatMessage.create(chatData);
     }
 
+    async toggleOn(event) {
+        const item = this;
+
+        if (item.isActive) {
+            console.warn(`${item.name} is already on`);
+            return;
+        }
+
+        if (!this.actor.canAct(true, event)) {
+            return;
+        }
+
+        // Make sure there are enough resources and consume them
+        const {
+            error: resourceError,
+            warning: resourceWarning,
+            resourcesUsedDescription,
+            resourcesUsedDescriptionRenderedRoll,
+        } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
+            noResourceUse: overrideCanAct,
+        });
+        if (resourceError) {
+            return ui.notifications.error(`${item.name} ${resourceError}`);
+        } else if (resourceWarning) {
+            return ui.notifications.warn(`${item.name} ${resourceWarning}`);
+        }
+
+        // Make sure VPP pool is large enough
+        const VPP = item.parentItem?.system.XMLID === "VPP" ? item.parentItem : null;
+
+        if (VPP) {
+            // Pool points (LEVELS) is the total amount of Real
+            // Points’ worth of powers and abilities the character
+            // can create with his VPP at any one time.
+            // TODO: confirm VPP costs
+            // const currentPool = VPP.childItems
+            //     .filter((i) => i.system.active)
+            //     .reduce((accumulator, _item) => accumulator + _item.system.realCost, 0);
+            // if (currentPool + parseInt(item.system?.realCost || 0) > parseInt(VPP.system.LEVELS || 0)) {
+            //     if (overrideCanAct) {
+            //         const token = tokenEducatedGuess({
+            //             item: this,
+            //         });
+            //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+            //         //speaker.alias = actor.name;
+            //         const chatData = {
+            //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             author: game.user._id,
+            //             content: `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.`,
+            //             speaker: speaker,
+            //             whisper: whisperUserTargetsForActor(this.actor),
+            //         };
+            //         await ChatMessage.create(chatData);
+            //     } else {
+            //         const token = tokenEducatedGuess({
+            //             item: this,
+            //         });
+            //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+            //         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+            //         const chatData = {
+            //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             author: game.user._id,
+            //             content:
+            //                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.` +
+            //                 `Use ${overrideKeyText} to override.` +
+            //                 `<ul>${VPP.childItems
+            //                     .filter((i) => i.system.active)
+            //                     .map((item) => `<li>${parseInt(item.system?.realCost || 0)}RC: ${item.name}</li>`)
+            //                     .join("")}</ul>` +
+            //                 `<hr>${parseInt(item.system?.realCost || 0)}RC: ${item.name}`,
+            //             speaker: speaker,
+            //             whisper: whisperUserTargetsForActor(this.actor),
+            //         };
+            //         await ChatMessage.create(chatData);
+            //         console.log(item, VPP, currentPool);
+            //         return ui.notifications.error(
+            //             `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.`,
+            //         );
+            //     }
+            // }
+            // PH: FIXME: This check is wrong for 5e where the pool cost determines the max AP
+            //const controlCost = parseInt(VPP.findModsByXmlid("CONTROLCOST")?.LEVELS || 0);
+            // if (!item.is5e && parseInt(item.system?.activePoints || 0) > controlCost) {
+            //     console.log(item, VPP, controlCost);
+            //     if (overrideCanAct) {
+            //         const token = tokenEducatedGuess({
+            //             item: this,
+            //         });
+            //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+            //         //speaker.alias = actor.name;
+            //         const chatData = {
+            //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             author: game.user._id,
+            //             content: `${item.name} was activated even though it exceed the ${VPP.name} control cost`,
+            //             speaker: speaker,
+            //             whisper: whisperUserTargetsForActor(this.actor),
+            //         };
+            //         await ChatMessage.create(chatData);
+            //     } else {
+            //         const token = tokenEducatedGuess({
+            //             item: this,
+            //         });
+            //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+            //         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+            //         //speaker.alias = actor.name;
+            //         const chatData = {
+            //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             author: game.user._id,
+            //             content:
+            //                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP. ` +
+            //                 `Use ${overrideKeyText} to override.`,
+            //             speaker: speaker,
+            //             whisper: whisperUserTargetsForActor(this.actor),
+            //         };
+            //         await ChatMessage.create(chatData);
+            //         return ui.notifications.error(
+            //             `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP.`,
+            //         );
+            //     }
+            // }
+        }
+
+        const success = await rollRequiresASkillRollCheck(this, event);
+        if (!success) {
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+            speaker["alias"] = item.actor.name;
+
+            const chatData = {
+                author: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                content: `${
+                    resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"
+                } to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
+                whisper: whisperUserTargetsForActor(item.actor),
+                speaker,
+            };
+            await ChatMessage.create(chatData);
+
+            return;
+        }
+
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+        speaker["alias"] = item.actor.name;
+
+        const chatData = {
+            author: game.user._id,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            content: `${
+                resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
+            } ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
+            whisper: whisperUserTargetsForActor(item.actor),
+            speaker,
+        };
+        await ChatMessage.create(chatData);
+
+        // A continuing charges use is tracked by an active effect. Start it.
+        await _startIfIsAContinuingCharge(this);
+
+        // Toggle status effect on based on power
+        // if (this.system.XMLID === "INVISIBILITY") {
+        //     // Invisibility status effect for SIGHTGROUP?
+        //     if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
+        //         await this.actor.toggleStatusEffect(
+        //             HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
+        //             {
+        //                 active: true,
+        //             },
+        //         );
+        //     }
+        // } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
+        //     await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
+        //         active: true,
+        //     });
+        // } else if (this.system.XMLID === "DESOLIDIFICATION") {
+        //     await this.actor.toggleStatusEffect(
+        //         HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
+        //         {
+        //             active: true,
+        //         },
+        //     );
+        // } else
+        //
+        if (["maneuver", "martialart"].includes(item.type)) {
+            await activateManeuver(this);
+        }
+
+        await this.setActive(true);
+    }
+
+    async toggleOff() {
+        const item = this;
+        // Let GM know power was deactivated
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+        speaker["alias"] = item.actor.name;
+
+        const chatData = {
+            author: game.user._id,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            content: `Turned off ${item.name}`,
+            whisper: whisperUserTargetsForActor(item.actor),
+            speaker,
+        };
+        await ChatMessage.create(chatData);
+
+        // Toggle status effect off based on power
+        // if (this.system.XMLID === "INVISIBILITY") {
+        //     // Remove Invisibility status effect
+        //     if (this.actor.statuses.has("invisible")) {
+        //         await this.actor.toggleStatusEffect(
+        //             HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
+        //             {
+        //                 active: false,
+        //             },
+        //         );
+        //         // await this.actor.removeActiveEffect(
+        //         //     HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
+        //         // );
+        //     }
+        // } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
+        //     if (this.actor.statuses.has("fly")) {
+        //         await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
+        //             active: false,
+        //         });
+        //         //await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
+        //     }
+        // } else if (this.system.XMLID === "DESOLIDIFICATION") {
+        //     await this.actor.toggleStatusEffect(
+        //         HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
+        //         {
+        //             active: false,
+        //         },
+        //     );
+        //     // await this.actor.removeActiveEffect(
+        //     //     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
+        //     // );
+        // } else
+        //
+        if (["maneuver", "martialart"].includes(item.type)) {
+            await deactivateManeuver(this);
+        }
+
+        await this.setActive(false);
+    }
+
+    async setActive(value) {
+        if (this.effects.size > 0) {
+            // multiple ActiveEffects on an item are possible such as FLIGHT with BULKY FOCUS
+            const changes = [];
+            for (const ae of this.effects) {
+                changes.push({ _id: ae.id, disabled: !value });
+            }
+            return this.updateEmbeddedDocuments("ActiveEffect", changes);
+        }
+        return this.update({ "system.active": value });
+    }
+
     /**
      *
      * @param {Event} [event]
@@ -1162,287 +1459,82 @@ export class HeroSystem6eItem extends Item {
         let item = this;
 
         if (!item.isActive) {
-            if (!this.actor.canAct(true, event)) {
-                return;
-            }
-
-            // Make sure there are enough resources and consume them
-            const {
-                error: resourceError,
-                warning: resourceWarning,
-                resourcesUsedDescription,
-                resourcesUsedDescriptionRenderedRoll,
-            } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
-                noResourceUse: overrideCanAct,
-            });
-            if (resourceError) {
-                return ui.notifications.error(`${item.name} ${resourceError}`);
-            } else if (resourceWarning) {
-                return ui.notifications.warn(`${item.name} ${resourceWarning}`);
-            }
-
-            // Make sure VPP pool is large enough
-            const VPP = item.parentItem?.system.XMLID === "VPP" ? item.parentItem : null;
-
-            if (VPP) {
-                // Pool points (LEVELS) is the total amount of Real
-                // Points’ worth of powers and abilities the character
-                // can create with his VPP at any one time.
-                // TODO: confirm VPP costs
-                // const currentPool = VPP.childItems
-                //     .filter((i) => i.system.active)
-                //     .reduce((accumulator, _item) => accumulator + _item.system.realCost, 0);
-                // if (currentPool + parseInt(item.system?.realCost || 0) > parseInt(VPP.system.LEVELS || 0)) {
-                //     if (overrideCanAct) {
-                //         const token = tokenEducatedGuess({
-                //             item: this,
-                //         });
-                //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
-                //         //speaker.alias = actor.name;
-                //         const chatData = {
-                //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
-                //             author: game.user._id,
-                //             content: `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.`,
-                //             speaker: speaker,
-                //             whisper: whisperUserTargetsForActor(this.actor),
-                //         };
-                //         await ChatMessage.create(chatData);
-                //     } else {
-                //         const token = tokenEducatedGuess({
-                //             item: this,
-                //         });
-                //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
-                //         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-                //         const chatData = {
-                //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
-                //             author: game.user._id,
-                //             content:
-                //                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.` +
-                //                 `Use ${overrideKeyText} to override.` +
-                //                 `<ul>${VPP.childItems
-                //                     .filter((i) => i.system.active)
-                //                     .map((item) => `<li>${parseInt(item.system?.realCost || 0)}RC: ${item.name}</li>`)
-                //                     .join("")}</ul>` +
-                //                 `<hr>${parseInt(item.system?.realCost || 0)}RC: ${item.name}`,
-                //             speaker: speaker,
-                //             whisper: whisperUserTargetsForActor(this.actor),
-                //         };
-                //         await ChatMessage.create(chatData);
-                //         console.log(item, VPP, currentPool);
-                //         return ui.notifications.error(
-                //             `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.`,
-                //         );
-                //     }
-                // }
-                // PH: FIXME: This check is wrong for 5e where the pool cost determines the max AP
-                //const controlCost = parseInt(VPP.findModsByXmlid("CONTROLCOST")?.LEVELS || 0);
-                // if (!item.is5e && parseInt(item.system?.activePoints || 0) > controlCost) {
-                //     console.log(item, VPP, controlCost);
-                //     if (overrideCanAct) {
-                //         const token = tokenEducatedGuess({
-                //             item: this,
-                //         });
-                //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
-                //         //speaker.alias = actor.name;
-                //         const chatData = {
-                //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
-                //             author: game.user._id,
-                //             content: `${item.name} was activated even though it exceed the ${VPP.name} control cost`,
-                //             speaker: speaker,
-                //             whisper: whisperUserTargetsForActor(this.actor),
-                //         };
-                //         await ChatMessage.create(chatData);
-                //     } else {
-                //         const token = tokenEducatedGuess({
-                //             item: this,
-                //         });
-                //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
-                //         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-                //         //speaker.alias = actor.name;
-                //         const chatData = {
-                //             style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
-                //             author: game.user._id,
-                //             content:
-                //                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP. ` +
-                //                 `Use ${overrideKeyText} to override.`,
-                //             speaker: speaker,
-                //             whisper: whisperUserTargetsForActor(this.actor),
-                //         };
-                //         await ChatMessage.create(chatData);
-                //         return ui.notifications.error(
-                //             `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP.`,
-                //         );
-                //     }
-                // }
-            }
-
-            const success = await rollRequiresASkillRollCheck(this, event);
-            if (!success) {
-                const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-                speaker["alias"] = item.actor.name;
-
-                const chatData = {
-                    author: game.user._id,
-                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                    content: `${
-                        resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"
-                    } to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
-                    whisper: whisperUserTargetsForActor(item.actor),
-                    speaker,
-                };
-                await ChatMessage.create(chatData);
-
-                return;
-            }
-
-            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-            speaker["alias"] = item.actor.name;
-
-            const chatData = {
-                author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                content: `${
-                    resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
-                } ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
-                whisper: whisperUserTargetsForActor(item.actor),
-                speaker,
-            };
-            await ChatMessage.create(chatData);
-
-            // A continuing charges use is tracked by an active effect. Start it.
-            await _startIfIsAContinuingCharge(this);
-
-            // Toggle status effect on based on power
-            if (this.system.XMLID === "INVISIBILITY") {
-                // Invisibility status effect for SIGHTGROUP?
-                if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-                    await this.actor.toggleStatusEffect(
-                        HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
-                        {
-                            active: true,
-                        },
-                    );
-                }
-            } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
-                await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
-                    active: true,
-                });
-            } else if (this.system.XMLID === "DESOLIDIFICATION") {
-                await this.actor.toggleStatusEffect(
-                    HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
-                    {
-                        active: true,
-                    },
-                );
-            } else if (["maneuver", "martialart"].includes(item.type)) {
-                await activateManeuver(this);
-            }
+            await this.toggleOn(event);
         } else {
-            // Let GM know power was deactivated
-            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-            speaker["alias"] = item.actor.name;
-
-            const chatData = {
-                author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                content: `Turned off ${item.name}`,
-                whisper: whisperUserTargetsForActor(item.actor),
-                speaker,
-            };
-            await ChatMessage.create(chatData);
-
-            // Toggle status effect off based on power
-            if (this.system.XMLID === "INVISIBILITY") {
-                // Remove Invisibility status effect
-                if (this.actor.statuses.has("invisible")) {
-                    await this.actor.toggleStatusEffect(
-                        HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
-                        {
-                            active: false,
-                        },
-                    );
-                    // await this.actor.removeActiveEffect(
-                    //     HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
-                    // );
-                }
-            } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
-                if (this.actor.statuses.has("fly")) {
-                    await this.actor.toggleStatusEffect(
-                        HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id,
-                        {
-                            active: false,
-                        },
-                    );
-                    //await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
-                }
-            } else if (this.system.XMLID === "DESOLIDIFICATION") {
-                await this.actor.toggleStatusEffect(
-                    HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
-                    {
-                        active: false,
-                    },
-                );
-                // await this.actor.removeActiveEffect(
-                //     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
-                // );
-            } else if (["maneuver", "martialart"].includes(item.type)) {
-                await deactivateManeuver(this);
-            }
+            await this.toggleOff();
         }
 
-        const attr = "system.active";
-        const newValue = !foundry.utils.getProperty(item, attr);
-        const firstAE = item.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
+        // AARON: How much of the rest of this code do we really need?
+
+        // const attr = "system.active";
+        // const newValue = !foundry.utils.getProperty(item, attr);
+        // const firstAE = item.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
 
         switch (this.type) {
-            case "defense":
-                await item.update({ [attr]: newValue });
-                break;
+            //     case "defense":
+            //         await item.update({ [attr]: newValue });
+            //         break;
 
-            case "power":
-            case "equipment":
-                {
-                    // Is this a defense power?  If so toggle active state
-                    // const configPowerInfo = item.baseInfo;
-                    // if (
-                    //     (configPowerInfo && configPowerInfo.type.includes("defense")) ||
-                    //     configPowerInfo.behaviors.includes("defense") ||
-                    //     item.type === "equipment"
-                    // ) {
-                    //     await item.update({ [attr]: newValue });
-                    // }
+            //     case "power":
+            //     case "equipment":
+            //         {
+            //             // Is this a defense power?  If so toggle active state
+            //             // const configPowerInfo = item.baseInfo;
+            //             // if (
+            //             //     (configPowerInfo && configPowerInfo.type.includes("defense")) ||
+            //             //     configPowerInfo.behaviors.includes("defense") ||
+            //             //     item.type === "equipment"
+            //             // ) {
+            //             //     await item.update({ [attr]: newValue });
+            //             // }
 
-                    // Check if there is an ActiveEffect associated with this item
-                    if (firstAE) {
-                        const newActiveState = firstAE.disabled;
-                        // const effects = item.effects
-                        //     .filter((ae) => ae.disabled === newValue)
-                        //     .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
-                        for (const activeEffect of item.effects) {
-                            await onActiveEffectToggle(activeEffect, newActiveState);
-                        }
-                    } else {
-                        await item.update({ [attr]: newValue });
-                    }
-                }
-                break;
+            //             // Check if there is an ActiveEffect associated with this item
+            //             if (firstAE) {
+            //                 const newActiveState = firstAE.disabled;
+            //                 // const effects = item.effects
+            //                 //     .filter((ae) => ae.disabled === newValue)
+            //                 //     .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
+            //                 for (const activeEffect of item.effects) {
+            //                     await onActiveEffectToggle(activeEffect, newActiveState);
+            //                 }
+            //             } else {
+            //                 await item.update({ [attr]: newValue });
+            //             }
+            //         }
+            //         break;
 
             case "martialart":
             case "maneuver":
                 await enforceManeuverLimits(this.actor, this);
                 break;
 
-            case "talent": // COMBAT_LUCK
-                await item.update({ [attr]: newValue });
-                break;
+            // case "talent": // COMBAT_LUCK
+            //     await item.update({ [attr]: newValue });
+            //     break;
 
-            case "skill": // COMBAT_LEVELS
-                await item.update({ [attr]: newValue });
-                break;
+            // case "skill": // COMBAT_LEVELS
+            //     await item.update({ [attr]: newValue });
+            //     break;
 
-            default:
-                ui.notifications.warn(`${this.name} toggle may be incomplete`);
-                break;
+            // default:
+            //     ui.notifications.warn(`${this.name} toggle may be incomplete`);
+            //     break;
+        }
+
+        // Generic set VALUE = MAX
+        if (this.actor && game.actors.get(this.actor.id)) {
+            for (const activeEffect of this.transferredEffects) {
+                for (const change of activeEffect.changes) {
+                    const maxValue = foundry.utils.getProperty(this.actor, change.key);
+                    if (maxValue == undefined) {
+                        console.error(`${change.key} is ${maxValue}`);
+                        continue;
+                    }
+                    await this.actor.update({
+                        [change.key.replace(".max", ".value")]: maxValue || 0,
+                    });
+                }
+            }
         }
 
         // DENSITYINCREASE can affect Encumbrance & Movements
@@ -4665,12 +4757,20 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        const ae = this.effects.contents?.[0];
-        if (ae && ae.disabled === this.system.active) {
-            // console.log(
-            //     `${this.name} has "active" mismatch between item and AE. Using AE as autorative. This is expeteced when toggling as V12/13 doesn't allow updating Item & AE in one operation.`,
-            // );
-            return !ae.disabled;
+        // Favor disable status of associated ActiveEffect
+        if (this.effects.size > 0) {
+            // if (ae.disabled === this.system.active) {
+            //     console.log(
+            //         `${this.name} has "active" mismatch between item and AE. Using AE as autorative. This is expeteced when toggling as V12/13 doesn't allow updating Item & AE in one operation.`,
+            //     );
+            // }
+            const _disabled = this.effects.contents[0].disabled;
+            for (const ae of this.effects) {
+                if (ae.disabled !== _disabled) {
+                    console.error(`ActiveEffect.disabled mismatch ${this.actor}/${this.name}/${ae.name}`, this);
+                }
+            }
+            return !_disabled;
         }
 
         if (this.system.active === undefined) {

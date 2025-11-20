@@ -2430,6 +2430,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(20),
             ignoreFor: ["pc", "npc", "automaton", "vehicle", "base2", "computer", "ai"], // There aren't really any LEVELS or a .value for this power, no need to show on CHARACTERISTICS tab //
+            img: `systems/hero6efoundryvttv2/icons/movement/star-gate.svg`,
             xml: `<POWER XMLID="EXTRADIMENSIONALMOVEMENT" ID="1709333909749" BASECOST="20.0" LEVELS="0" ALIAS="Extra-Dimensional Movement" POSITION="42" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" />`,
         },
         {},
@@ -2446,6 +2447,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             ignoreFor: ["base2", "computer", "ai"],
+            img: "icons/svg/wing.svg",
             xml: `<POWER XMLID="FLIGHT" ID="1709333921734" BASECOST="0.0" LEVELS="1" ALIAS="Flight" POSITION="46" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" />`,
         },
         {
@@ -2497,6 +2499,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             costPerLevel: fixedValueFunction(2),
             ignoreFor: ["base2", "computer", "ai"],
+            img: `systems/hero6efoundryvttv2/icons/movement/rocket.svg`,
             xml: `<POWER XMLID="FTL" ID="1712026014674" BASECOST="10.0" LEVELS="0" ALIAS="Faster-Than-Light Travel" POSITION="43" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" />`,
         },
         {},
@@ -2512,6 +2515,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costEnd: false,
         costPerLevel: fixedValueFunction(1),
         ignoreFor: ["base2", "computer", "ai"],
+        img: `systems/hero6efoundryvttv2/icons/movement/hang-glider.svg`,
         xml: `<POWER XMLID="GLIDING" ID="1709342639684" BASECOST="0.0" LEVELS="1" ALIAS="Gliding" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" />`,
     });
 
@@ -2540,6 +2544,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Div by 2 again to get inches to match HD
                 return Math.floor(actor.system.characteristics.str[subKey] / 2.5 / 2);
             },
+            img: "icons/svg/jump.svg",
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -2560,6 +2565,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
+            img: "icons/svg/walk.svg",
             xml: `<RUNNING XMLID="RUNNING" ID="1709334005554" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="72" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -2580,6 +2586,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
+            img: "icons/svg/whale.svg",
             xml: `<SWIMMING XMLID="SWIMMING" ID="1709334019357" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="77" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -2603,6 +2610,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(1 / 2),
             ignoreFor: ["base2", "computer", "ai"],
+            img: `systems/hero6efoundryvttv2/icons/movement/grapple-hook.svg`,
             xml: `<POWER XMLID="SWINGING" ID="1709334021575" BASECOST="0.0" LEVELS="1" ALIAS="Swinging" POSITION="78" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" />`,
         },
         {
@@ -2621,6 +2629,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             ignoreFor: ["base2", "computer", "ai"],
+            img: "icons/svg/teleport.svg",
             xml: `<POWER XMLID="TELEPORTATION" ID="1709334031905" BASECOST="0.0" LEVELS="1" ALIAS="Teleportation" POSITION="81" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" />`,
         },
         {
@@ -2638,6 +2647,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             ignoreFor: ["base2", "computer", "ai"],
+            img: "icons/svg/burrow.svg",
             xml: `<POWER XMLID="TUNNELING" ID="1709334041436" BASECOST="2.0" LEVELS="1" ALIAS="Tunneling" POSITION="85" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" />`,
         },
         {
@@ -6468,6 +6478,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                     },
                 ];
+                ae.system = {
+                    XMLID: "GROWTH",
+                };
                 return ae;
             },
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
