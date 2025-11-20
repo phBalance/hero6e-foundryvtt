@@ -2053,7 +2053,10 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: is5e`, 0);
             let _is5e = true;
 
-            const template = heroJson.CHARACTER?.TEMPLATE || heroJson.CHARACTER?.BASIC_CONFIGURATION?.TEMPLATE;
+            const template =
+                heroJson.CHARACTER?.TEMPLATE?.extends ||
+                heroJson.CHARACTER?.TEMPLATE ||
+                heroJson.CHARACTER?.BASIC_CONFIGURATION?.TEMPLATE;
 
             if (typeof template === "string") {
                 if (template.includes("builtIn.") && !template.includes("6E.")) {
