@@ -7,6 +7,7 @@
 - Entangles can again be damaged and destroyed when attacked. [#3090](https://github.com/dmdorman/hero6e-foundryvtt/issues/3090)
 - Fixed DEX/EGO selection for initiative. [#3131](https://github.com/dmdorman/hero6e-foundryvtt/issues/3131)
 - Fixed CSL UI selection [#3132](https://github.com/dmdorman/hero6e-foundryvtt/issues/3132)
+- Fixed issue with powers that grant movement that have a FOCUS/MOBILITY limitation. [#3137](https://github.com/dmdorman/hero6e-foundryvtt/issues/3137)
 
 ## Version 4.2.3 20251115
 

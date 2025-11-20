@@ -91,6 +91,7 @@ export async function onManageActiveEffect(event, owner) {
 }
 
 export async function onActiveEffectToggle(effect, newActiveState) {
+    console.error("depreciated?");
     // guard (we turned off an AID/DRAIN active effect, don't toggle the base item)
     if (effect.flags[game.system.id]?.type === "adjustment") return;
 

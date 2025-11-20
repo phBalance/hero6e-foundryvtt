@@ -6,14 +6,7 @@ export class HeroSystem6eActorActiveEffectsSystemData extends foundry.abstract.T
         const fields = foundry.data.fields;
         return {
             // Make sure active-effect-config.hbs has all these fields so they don't get lost during editing
-            changes: new fields.ArrayField(
-                new fields.SchemaField({
-                    seconds: new fields.NumberField({ integer: true }),
-                    activePoints: new fields.NumberField({ integer: false }),
-                    source: new fields.StringField(),
-                    startTime: new fields.NumberField({ integer: true }),
-                }),
-            ),
+            XMLID: new fields.StringField(),
         };
     }
 }
