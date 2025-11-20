@@ -629,6 +629,17 @@ export class HeroSystem6eItem extends Item {
                     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
                 }
             }
+
+            // Sanity check for duplicate effects
+            for (const ae1 of this.effects) {
+                if (
+                    this.effects.find(
+                        (ae2) => ae1.system.XMLID && ae1.system.XMLID === ae2.system.XMLID && ae1.id !== ae2.id,
+                    )
+                ) {
+                    console.error(`Duplicate ${ae1.system.XMLID} effects on ${this.name}`);
+                }
+            }
         } catch (e) {
             console.error(e, this);
             throw e;
