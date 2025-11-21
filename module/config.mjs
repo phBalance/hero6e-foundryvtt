@@ -2534,10 +2534,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["base2", "computer", "ai"],
             notes: function (char) {
                 return `${Math.max(0, char.value)}${getSystemDisplayUnits(
-                    char.actor.system.is5e,
-                )} forward, ${Math.max(0, Math.round(char.value / 2))}${getSystemDisplayUnits(
-                    char.actor.system.is5e,
-                )} upward`;
+                    char.actor.is5e,
+                )} forward, ${Math.max(0, Math.round(char.value / 2))}${getSystemDisplayUnits(char.actor.is5e)} upward`;
             },
             figured5eCharacteristic: function (actor, subKey) {
                 // STR/2.5 = free meters of leaping
