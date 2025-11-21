@@ -46,72 +46,77 @@ export class HeroSystem6eActor extends Actor {
 
         //TODO: Add user configuration for initial prototype settings
 
-        HEROSYS.log(false, "_preCreate");
-        let prototypeToken = {
-            displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
-            displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
-        };
-
-        if (this.type != "npc") {
-            prototypeToken = {
-                ...prototypeToken,
-                actorLink: true,
-                disposition: CONST.TOKEN_DISPOSITIONS.FRIENDLY,
-                displayBars: CONST.TOKEN_DISPLAY_MODES.ALWAYS,
+        // Only updateSource when is5e is undefined.
+        // When is5e is defined then we are likely drag/drop to/drop a
+        // compendium and all this data already exists so don't overwrite.
+        if (this.system.is5e === undefined) {
+            HEROSYS.log(false, "_preCreate");
+            let prototypeToken = {
+                displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
                 displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
             };
-        }
 
-        const is5e =
-            options.is5e != undefined
-                ? options.is5e
-                : game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
-                  ? true
-                  : false;
-
-        // Set XMLID for characteristics
-        // Used with conditional defenses, also for future baseInfo calls
-        for (const key of Object.keys(this.system).filter((o) => o.match(/[A-Z]/))) {
-            const char = this.system[key];
-            if (char instanceof HeroItemCharacteristic && !char.XMLID) {
-                this.updateSource({ [`system.${key}.XMLID`]: key, [`system.${key}.xmlTag`]: key });
+            if (this.type != "npc") {
+                prototypeToken = {
+                    ...prototypeToken,
+                    actorLink: true,
+                    disposition: CONST.TOKEN_DISPOSITIONS.FRIENDLY,
+                    displayBars: CONST.TOKEN_DISPLAY_MODES.ALWAYS,
+                    displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
+                };
             }
-        }
 
-        this.updateSource({
-            prototypeToken: prototypeToken,
-            system: {
-                versionHeroSystem6eCreated: game.system.version,
-                is5e,
-            },
-        });
+            const is5e =
+                options.is5e != undefined
+                    ? options.is5e
+                    : game.settings.get(HEROSYS.module, "DefaultEdition") === "five"
+                      ? true
+                      : false;
 
-        // Characteristic defaults
-        for (const charBaseInfo of getCharacteristicInfoArrayForActor(this)) {
-            // Using core to account for 5e calculated/figured characteristics
-            const core = this.system.characteristics[charBaseInfo.key.toLowerCase()]?.core || 0;
+            // Set XMLID for characteristics
+            // Used with conditional defenses, also for future baseInfo calls
+            for (const key of Object.keys(this.system).filter((o) => o.match(/[A-Z]/))) {
+                const char = this.system[key];
+                if (char instanceof HeroItemCharacteristic && !char.XMLID) {
+                    this.updateSource({ [`system.${key}.XMLID`]: key, [`system.${key}.xmlTag`]: key });
+                }
+            }
+
             this.updateSource({
-                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: core,
-                [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: core,
+                prototypeToken: prototypeToken,
+                system: {
+                    versionHeroSystem6eCreated: game.system.version,
+                    is5e,
+                },
+            });
+
+            // Characteristic defaults
+            for (const charBaseInfo of getCharacteristicInfoArrayForActor(this)) {
+                // Using core to account for 5e calculated/figured characteristics
+                const core = this.system.characteristics[charBaseInfo.key.toLowerCase()]?.core || 0;
+                this.updateSource({
+                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: core,
+                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: core,
+                });
+            }
+
+            if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
+                await this.addFreeStuff();
+            }
+
+            // for (const item of this.items) {
+            //     await item._postUpload();
+            // }
+
+            // REF: https://foundryvtt.wiki/en/development/api/document _preCreate
+            // Careful: toObject only returns system props that are part of schema
+            // so we merge in the entire system
+            // Also need to use force replace ==items for this to work in v13
+            const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
+            this.updateSource({
+                [`==items`]: items,
             });
         }
-
-        if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
-            await this.addFreeStuff();
-        }
-
-        // for (const item of this.items) {
-        //     await item._postUpload();
-        // }
-
-        // REF: https://foundryvtt.wiki/en/development/api/document _preCreate
-        // Careful: toObject only returns system props that are part of schema
-        // so we merge in the entire system
-        // Also need to use force replace ==items for this to work in v13
-        const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
-        this.updateSource({
-            [`==items`]: items,
-        });
 
         // For debugging purposes
         window.actor = this;
