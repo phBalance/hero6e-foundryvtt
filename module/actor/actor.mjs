@@ -3331,6 +3331,10 @@ export class HeroSystem6eActor extends Actor {
             return this.system.is5e;
         }
 
+        if (this.system.is5e == null) {
+            return game.settings.get(HEROSYS.module, "DefaultEdition") === "five" ? true : false;
+        }
+
         return this.system.is5e;
     }
 
