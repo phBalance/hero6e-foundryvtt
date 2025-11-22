@@ -455,7 +455,7 @@ export default class SettingsHelpers {
             scope: "client",
             config: true,
             type: Boolean,
-            default: false,
+            default: true,
             requiresReload: true,
         });
 
