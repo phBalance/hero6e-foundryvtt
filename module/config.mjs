@@ -2760,6 +2760,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="ARMORSMITH" ID="1763826715627" BASECOST="3.0" LEVELS="0" ALIAS="Armorsmith" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
     addPower(
         {
@@ -3210,6 +3211,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="FEINT" ID="1763826725179" BASECOST="3.0" LEVELS="0" ALIAS="Feint" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
     addPower(
         {
@@ -3286,6 +3288,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="HOIST" ID="1763826732484" BASECOST="3.0" LEVELS="0" ALIAS="Hoist" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
 
     addPower(undefined, {
@@ -3297,6 +3300,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="INSTRUCTOR" ID="1763826734980" BASECOST="3.0" LEVELS="0" ALIAS="Instructor" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
     addPower(
         {
@@ -3475,6 +3479,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            xml: `<SKILL XMLID="MIF" ID="1762890667798" BASECOST="0.0" LEVELS="0" ALIAS="Musical Instrument Familiarity" POSITION="40" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1732469522885" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
         {},
     );
@@ -3503,16 +3508,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<POWER XMLID="NEGATIVECOMBATSKILLLEVELS" ID="1763830401211" BASECOST="0.0" LEVELS="1" ALIAS="Negative Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="DCV" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
     addPower(undefined, {
         key: "NEGATIVEPENALTYSKILLLEVELS",
         type: ["skill"],
+        behaviors: [],
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
-        behaviors: [],
+        xml: `<POWER XMLID="NEGATIVEPENALTYSKILLLEVELS" ID="1763830404491" BASECOST="0.0" LEVELS="1" ALIAS="Negative Penalty Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="[a single attack]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Hit Location modifiers" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
     addPower(undefined, {
         key: "NEGATIVESKILLLEVELS",
@@ -3523,6 +3530,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<POWER XMLID="NEGATIVESKILLLEVELS" ID="1763830407179" BASECOST="0.0" LEVELS="1" ALIAS="Negative Skill Levels" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="[any one Skill]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
 
     addPower(
@@ -3549,6 +3557,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="PARACHUTING" ID="1763827772291" BASECOST="3.0" LEVELS="0" ALIAS="Parachuting" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
     addPower(
         {
@@ -3706,6 +3715,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            xml: `<SKILL XMLID="PERSUASION" ID="1763827781395" BASECOST="3.0" LEVELS="0" ALIAS="Persuasion" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
         {},
     );
@@ -3719,6 +3729,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            xml: `<SKILL XMLID="POISONING" ID="1763827783123" BASECOST="3.0" LEVELS="0" ALIAS="Poisoning" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
         {},
     );
@@ -3774,6 +3785,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="RAPID_ATTACK_RANGED" ID="1763827789995" BASECOST="5.0" LEVELS="0" ALIAS="Rapid Attack (Ranged)" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
     });
     addPower(undefined, {
         key: "RESEARCH",
@@ -3784,6 +3796,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="RESEARCH" ID="1763827791931" BASECOST="3.0" LEVELS="0" ALIAS="Research" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
     addPower(
         {
@@ -3837,6 +3850,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="SEDUCTION" ID="1763827795667" BASECOST="3.0" LEVELS="0" ALIAS="Seduction" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
     addPower(
         {
@@ -3937,6 +3951,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="SPELL" ID="1763827799555" BASECOST="3.0" LEVELS="0" ALIAS="Spell" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
     addPower(
         {
@@ -4110,6 +4125,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
+        xml: `<SKILL XMLID="TWO_WEAPON_FIGHTING_RANGED" ID="1763827806075" BASECOST="10.0" LEVELS="0" ALIAS="Two-Weapon Fighting (Ranged)" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
     });
 
     addPower(
@@ -7391,6 +7407,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(4),
+            xml: `<EXTRADC XMLID="EXTRADC" ID="1753421156333" BASECOST="0.0" LEVELS="4" ALIAS="+4 HTH Damage Class(es)" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1754267038115" NAME=""></EXTRADC>`,
         },
         {},
     );
@@ -7419,6 +7436,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(4),
+            xml: `<RANGEDDC XMLID="RANGEDDC" ID="1753421165484" BASECOST="0.0" LEVELS="4" ALIAS="+4 Ranged Damage Class(es)" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1754267038115" NAME=""></RANGEDDC>`,
         },
         {},
     );
@@ -7432,6 +7450,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             categorized: true,
+            xml: `<WEAPON_ELEMENT XMLID="WEAPON_ELEMENT" ID="1752445619294" BASECOST="0.0" LEVELS="0" ALIAS="Weapon Element" POSITION="60" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></WEAPON_ELEMENT>`,
         },
         {},
     );
@@ -7447,6 +7466,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
+            xml: `<POWER XMLID="ACTIVESONAR" ID="1763830302787" BASECOST="15.0" LEVELS="0" ALIAS="Active Sonar" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="HEARINGGROUP"></POWER>`,
         },
         {},
     );
@@ -7733,8 +7753,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
-            xml: `<ADDER XMLID="PHYSICAL" ID="1738019507454" BASECOST="0.0" LEVELS="1" ALIAS="Physical DCs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
-            </ADDER>`,
+            xml: `<ADDER XMLID="PHYSICAL" ID="1738019507454" BASECOST="0.0" LEVELS="1" ALIAS="Physical DCs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         undefined,
     );
@@ -7747,6 +7766,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="RADAR" ID="1762134830241" BASECOST="5.0" LEVELS="0" ALIAS="Radar" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7759,6 +7779,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="RADIOPERCEIVETRANSMIT" ID="1762134831344" BASECOST="3.0" LEVELS="0" ALIAS="Radio Perception/Transmission" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7771,6 +7792,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="RADIOPERCEPTION" ID="1762134832412" BASECOST="3.0" LEVELS="0" ALIAS="Radio Perception" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7796,6 +7818,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(3),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="RAPID" ID="1763830631952" BASECOST="0.0" LEVELS="1" ALIAS="Rapid" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7809,6 +7832,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="SPATIALAWARENESS" ID="1762134801878" BASECOST="5.0" LEVELS="0" ALIAS="Spatial Awareness" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7822,6 +7846,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="TARGETINGSENSE" ID="1763830715168" BASECOST="10.0" LEVELS="0" ALIAS="Targeting" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7834,6 +7859,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="TELESCOPIC" ID="1763830718230" BASECOST="0.0" LEVELS="1" ALIAS="Telescopic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7846,6 +7872,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="TRACKINGSENSE" ID="1763830720386" BASECOST="5.0" LEVELS="0" ALIAS="Tracking" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7858,6 +7885,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="TRANSMIT" ID="1763830721657" BASECOST="2.0" LEVELS="0" ALIAS="Transmit" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7893,6 +7921,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 range: null, // infinite
                 //color: "7F00FF",
             },
+            xml: `<ADDER XMLID="ULTRAVIOLETPERCEPTION" ID="1762134835235" BASECOST="5.0" LEVELS="0" ALIAS="Ultraviolet Perception" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
