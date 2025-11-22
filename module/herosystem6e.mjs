@@ -272,6 +272,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-other-perks.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-other-talents.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-other-top.hbs`,
+        `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-analysis.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-powers.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-powers-item.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-skills.hbs`,

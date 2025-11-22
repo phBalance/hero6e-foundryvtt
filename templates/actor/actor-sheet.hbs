@@ -196,14 +196,17 @@
         {{#if hasMartialArts}}
             <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "martialArts")}}validation{{/if}}" data-tab="martialArts">MartialArts</a>
         {{/if}}
-        <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "skill")}}validation{{/if}}" data-tab="skills">Skills</a>
-        <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "maneuver")}}validation{{/if}}" data-tab="maneuvers">Maneuvers</a>
-        <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "power")}}validation{{/if}}" data-tab="powers">Powers</a>
+            <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "skill")}}validation{{/if}}" data-tab="skills">Skills</a>
+            <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "maneuver")}}validation{{/if}}" data-tab="maneuvers">Maneuvers</a>
+            <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "power")}}validation{{/if}}" data-tab="powers">Powers</a>
         {{#if hasEquipment}}
             <a class="item-nav {{#if (actorHeroValidationByItemType this.actor "equipment")}}validation{{/if}}" data-tab="equipment">Equipment</a>
         {{/if}}
-        <a class="item-nav" data-tab="characteristics">Characteristics</a>
-        <a class="item-nav" data-tab="other">Other</a>
+            <a class="item-nav" data-tab="characteristics">Characteristics</a>
+            <a class="item-nav" data-tab="other">Other</a>
+        {{#if alphaTesting}}
+            <a class="item-nav" data-tab="analysis">Analysis</a>
+        {{/if}}
         {{#if actor.invalidItems}}
             <a class="item-nav invalid" data-tab="invalid">Invalid</a>
         {{/if}}
@@ -244,6 +247,9 @@
 
             {{!-- Other Tab --}}
             {{> (getModulePath 'actor/actor-sheet-partial-other.hbs') this }}
+
+            {{!-- Analysis Tab --}}
+            {{> (getModulePath 'actor/actor-sheet-partial-analysis.hbs') this }}
 
             {{!-- Invalid Tab --}}
             {{> (getModulePath 'actor/actor-sheet-partial-invalid.hbs') this }}
