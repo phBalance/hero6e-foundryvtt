@@ -468,16 +468,19 @@ function validatePowers() {
     numViolations += powersWithoutXmlProperty.length;
 
     // All powers with XML need to have matching key and XMLID
-    const powersWithoutMatchingKeyAndXmlid = this.filter((power) => {
-        if (!power.xml) {
-            return false;
-        }
-
+    const powersWithoutMatchingKeyAndXmlid = this.filter((power) => !!power.xml).filter((power) => {
         const parser = new DOMParser();
         const xml = parser.parseFromString(power.xml.trim(), "text/xml");
 
-        // Make sure XMLID's match, if not then skip
-        return power.key !== xml.children[0].getAttribute("XMLID");
+        const xmlid = xml.children[0].getAttribute("XMLID");
+
+        // For GENERIC_OBJECT make sure the tag matches the key
+        if (xmlid === "GENERIC_OBJECT") {
+            return xml.children[0].tagName !== power.key;
+        }
+
+        // Make sure XMLID matches key
+        return power.key !== xmlid;
     });
     if (powersWithoutMatchingKeyAndXmlid.length > 0) {
         console.log(`Powers without matching key and XMLID: `, powersWithoutMatchingKeyAndXmlid);
@@ -8378,8 +8381,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    // PH: FIXME: Need to think about ADDER and MODIFIER etc. Right now the tests fail with this
-    //            as the key and the XMLID don't match.
     addPower(
         {
             // GENERIC_OBJECT related
