@@ -1556,6 +1556,7 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
 
             characteristics: new EmbeddedDataField(HeroCharacteristicsModel),
             versionHeroSystem6eUpload: new StringField(),
+            versionHeroSystem6eCreated: new StringField(),
             is5e: new BooleanField({ initial: null, nullable: true }),
             heroicIdentity: new BooleanField({ initial: null, nullable: true }),
             initiativeCharacteristic: new StringField(),

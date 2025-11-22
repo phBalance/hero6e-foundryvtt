@@ -49,7 +49,7 @@ export class HeroSystem6eActor extends Actor {
         // Only updateSource when is5e is undefined.
         // When is5e is defined then we are likely drag/drop to/drop a
         // compendium and all this data already exists so don't overwrite.
-        if (this.system.is5e === undefined) {
+        if (this.system.is5e == undefined) {
             HEROSYS.log(false, "_preCreate");
             let prototypeToken = {
                 displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,

@@ -220,7 +220,7 @@ export class GenericRoller {
             type: "npc",
         });
         tempActor.system.is5e = is5eAttack;
-        await tempActor._postUpload();
+        //await tempActor._postUpload();
 
         // NOTE: Missing PD vs ED for normal & killing attacks
         // NOTE: No application of damage for anything other than normal and killing attacks
