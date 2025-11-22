@@ -17,8 +17,9 @@ import {
 import { HeroSystem6eItem } from "./item/item.mjs";
 import { squelch } from "./utility/util.mjs";
 import { HeroActorCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
+import * as heroEncounter from "./utility/encounter/encounter.mjs";
 
-export const HERO = { heroDice };
+export const HERO = { heroDice, heroEncounter };
 
 HERO.folderColors = {
     // Base Category

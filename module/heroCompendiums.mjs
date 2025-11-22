@@ -60,6 +60,22 @@ async function CreateHeroMacros() {
         },
     });
 
+    macroItemsArray.push({
+        img: "icons/tools/scribal/magnifying-glass.webp",
+        name: "Pan canvas to last Actor opened",
+        type: "script",
+        command: `const user_token = window.actor.getActiveTokens()[0];
+if(user_token)
+{
+  canvas.animatePan({ x : user_token.x, y : user_token.y, scale:1});
+  canvas.ping(user_token.center);
+}
+        `,
+        flags: {
+            [`${game.system.id}.versionHeroSystem6eManuallyCreated`]: game.system.version,
+        },
+    });
+
     await Macro.createDocuments(macroItemsArray, {
         pack: pack.metadata.id,
     });
