@@ -10,7 +10,6 @@ import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
-//import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 // v13 has namespaced these. When we remove this backwards compatibility then the eslint exception can be cleaned up.

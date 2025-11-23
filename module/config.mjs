@@ -6554,6 +6554,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                     },
                 ];
+                ae.system = {
+                    XMLID: "GROWTH",
+                };
                 return ae;
             },
         },

@@ -3561,7 +3561,7 @@ export class HeroSystem6eActor extends Actor {
                 if (multsUniqueKey.length > 1) {
                     const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
                     const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
-                    // remove all multsUnieuqKey and add back in the keepMult
+                    // remove all multsUniqueKey and add back in the keepMult
                     changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
                     changes.push(keepMult);
                 }

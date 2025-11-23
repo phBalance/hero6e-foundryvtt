@@ -12,6 +12,9 @@ import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 // XML parsing is expensive when done frequently during actions like loading characters.
 // Use this for storing the parsed value and then clear it out after 10 seconds.
+// NOTE: This is a kludge. The 10 seconds is based on the fact we don't really want to keep
+//       cached versions of the result around for a long period of time as they use lots of memory.
+//       A better long term solution would be to have a unique data type that had a timed cache in it.
 class TimeClearedCache {
     #TIMEOUT_VALUE = 10000;
     #cacheValue = null;

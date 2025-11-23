@@ -31,7 +31,7 @@ export function convertSystemUnitsToMetres(distanceInSystemUnits, is5e) {
         console.error(`bad is5e paramater`, is5e);
     }
 
-    return distanceInSystemUnits * (is5e?.system?.is5e ? 2 : 1);
+    return distanceInSystemUnits * (is5e ? 2 : 1);
 }
 
 /**

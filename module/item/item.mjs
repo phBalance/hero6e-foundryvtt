@@ -486,8 +486,6 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
-
-                // Consider a "return" here; would we ever have 2 active effects on an item? Likely not.
             }
 
             // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
