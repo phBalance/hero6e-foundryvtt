@@ -680,15 +680,24 @@ function pdEdCostPerLevel(itemOrActor) {
  * @property {string} base - Base number of levels that are given automatically
  * @property {string} cost - Cost in character points per additional level
  * @property {Array<string>} type - A list of types associated with this power
- * @property {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "to-hit" | "activatable" | "adder" | "modifier">} behaviors - A list of the behavior types this power exhibits in the code
- *                                       "non-hd" - this is not an XMLID that comes from Hero Designer
- *                                       "optional-maneuver" - this is an optional combat maneuver
- *                                       "success" - can roll some kind of success roll for this power
- *                                       "dice" - a damage/effect dice roll is associated with this power
- *                                       "to-hit" - a to-hit dice roll is associated with this power
- *                                       "activatable" - this power can be turned on/off/activated/deactivated
- *                                       "adder" - this power is actually a power adder
- *                                       "modifier" - this power is actually a power modifier (aka advantage)
+ * @property {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "to-hit" | "activatable" | "adder" | "modifier" | "240DegreeArcBuiltIn" | "360DegreeArcBuiltIn" | "microscopicBuiltIn" | "senseBuiltIn" | "rangeBuiltIn" | "rapidBuiltIn" | "targetingBuiltIn" | telescopicBuiltIn | "penetrativeBuiltIn">} behaviors - A list of the behavior types this power exhibits in the code
+ *        "non-hd" - this is not an XMLID that comes from Hero Designer
+ *        "optional-maneuver" - this is an optional combat maneuver
+ *        "success" - can roll some kind of success roll for this power
+ *        "dice" - a damage/effect dice roll is associated with this power
+ *        "to-hit" - a to-hit dice roll is associated with this power
+ *        "activatable" - this power can be turned on/off/activated/deactivated
+ *        "adder" - this power is actually a power adder
+ *        "modifier" - this power is actually a power modifier (aka advantage)
+ *        "240DegreeArcBuiltIn" - this sense power has a 240 degree arc
+ *        "360DegreeArcBuiltIn" - this sense power has a 360 degree arc
+ *        "microscopicBuiltIn" - this sense is microscopic
+ *        "penetrativeBuiltIn" - this sense power is pentrative
+ *        "rangeBuiltIn" - this sense power has range
+ *        "rapidBuiltIn" - this sense is rapid
+ *        "senseBuiltIn" - this sense power is passive
+ *        "targetingBuiltIn" - this sense power can be used for targeting
+ *        "telescopicBuiltIn" - this sense is telescopic
  *
  * @property {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
  * @property {HERO.RANGE_TYPES} range - The range of the power
@@ -7469,14 +7478,31 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACTIVESONAR",
             type: ["sense", "active"],
-            behaviors: ["activatable", "240DegreeArcBuiltIn", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+            behaviors: [
+                "activatable",
+                "240DegreeArcBuiltIn",
+                "microscopicBuiltIn",
+                "senseBuiltIn",
+                "rangeBuiltIn",
+                "targetingBuiltIn",
+                "telescopicBuiltIn",
+            ],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="ACTIVESONAR" ID="1763830302787" BASECOST="15.0" LEVELS="0" ALIAS="Active Sonar" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="HEARINGGROUP"></POWER>`,
         },
-        {},
+        {
+            behaviors: [
+                "activatable",
+                "360DegreeArcBuiltIn",
+                "senseBuiltIn",
+                "rangeBuiltIn",
+                "rapidBuiltIn",
+                "targetingBuiltIn",
+            ],
+        },
     );
     addPower(
         {
@@ -7556,7 +7582,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="DETECT" ID="1763940907865" BASECOST="3.0" LEVELS="0" ALIAS="Detect" POSITION="67" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="A Single Thing" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="UNUSUALGROUP" ACTIVE="Yes"></POWER>`,
         },
-        {},
+        {
+            behaviors: ["activatable", "360DegreeArcBuiltIn"],
+        },
     );
     addPower(
         {
@@ -7607,6 +7635,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="DISCRIMINATORY" ID="1763830727860" BASECOST="5.0" LEVELS="0" ALIAS="Discriminatory" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DISCRIMINATORY",
+            type: ["sense"],
+            behaviors: ["activatable"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costPerLevel: fixedValueFunction(1),
+            xml: `<POWER XMLID="DISCRIMINATORY" ID="1763945795072" BASECOST="10.0" LEVELS="0" ALIAS="Discriminatory" POSITION="85" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
