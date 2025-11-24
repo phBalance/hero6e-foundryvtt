@@ -7,13 +7,7 @@ import {
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
-import {
-    activateManeuver,
-    maneuverCanBeAbortedTo,
-    deactivateManeuver,
-    enforceManeuverLimits,
-    maneuverHasBlockTrait,
-} from "./maneuver.mjs";
+import { activateManeuver, maneuverCanBeAbortedTo, enforceManeuverLimits, maneuverHasBlockTrait } from "./maneuver.mjs";
 import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,

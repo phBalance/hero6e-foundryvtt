@@ -9,7 +9,8 @@ import { RoundFavorPlayerDown } from "../utility/round.mjs";
  * @param {*} actor
  * @param {*} item
  */
-export async function enforceManeuverLimits(actor, item) {
+export async function enforceManeuverLimits() {
+    //actor, item) {
     // const maneuverItems = actor.items.filter((e) => ["maneuver", "martialart"].includes(e.type));
     // AARON commented this out on 11/23/2025 as it messes with active.
     // This isn't enforcing any maneuver limits!
@@ -155,9 +156,6 @@ export async function activateManeuver(item) {
     if (!effect) {
         return;
     }
-
-    // PH: FIXME: This could be simplified as it's really just an effect + the same modifiers
-    const newActiveEffects = [];
 
     // FIXME: These are supposed to be for HTH or ranged combat only except for dodge.
     const dcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
