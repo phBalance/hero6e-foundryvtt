@@ -263,6 +263,7 @@ function _createAEChangeBlock(targetCharOrPower, targetSystem, item) {
         key,
         value: 0,
         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
     };
 }
 
@@ -574,6 +575,7 @@ export async function performAdjustment(
         const changeTemp = _createAEChangeBlock(potentialCharacteristic, targetSystem, attackItem);
         const char = changeTemp.key; //.match(/([a-z]+)\.max/)?.[1];
         changeTemp.mode = CONST.ACTIVE_EFFECT_MODES.CUSTOM;
+        changeTemp.priority = CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.CUSTOM;
 
         // Determine Effective Active Points for this attack
         const _previousActivePointsForThisXmlid = targetActor.temporaryEffects

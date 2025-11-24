@@ -9,6 +9,7 @@
 - Improved CSL UI selection [#3132](https://github.com/dmdorman/hero6e-foundryvtt/issues/3132)
 - Fixed issue with powers that grant movement that have a FOCUS/MOBILITY limitation. [#3137](https://github.com/dmdorman/hero6e-foundryvtt/issues/3137)
 - Improved support for older HDC formats. [#3139](https://github.com/dmdorman/hero6e-foundryvtt/issues/3139)
+- Combat Values are now properly halved last. [#2757](https://github.com/dmdorman/hero6e-foundryvtt/issues/2757) [#2379](https://github.com/dmdorman/hero6e-foundryvtt/issues/2379) [#362](https://github.com/dmdorman/hero6e-foundryvtt/issues/362)
 
 ## Version 4.2.3 20251115
 

@@ -59,6 +59,7 @@ export class Attack {
                 key: `system.characteristics.ocv.value`,
                 value: ocv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
         }
         if (cvModifier.cvMod.dcv) {
@@ -72,6 +73,7 @@ export class Attack {
                 key: `system.characteristics.dcv.value`,
                 value: dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
         }
 
@@ -90,6 +92,7 @@ export class Attack {
                 key: `system.characteristics.dcv.value`,
                 value: cvModifier.cvMod.dcvMultiplier,
                 mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
             });
         }
         if (changes.length < 1) {

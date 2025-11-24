@@ -825,6 +825,7 @@ export class HeroSystem6eActor extends Actor {
                             key: "system.characteristics.dcv.value",
                             value: 0.5,
                             mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                         },
                     ],
                     origin: this.uuid,
@@ -1214,22 +1215,26 @@ export class HeroSystem6eActor extends Actor {
                 key: "system.characteristics.dcv.value",
                 value: _sizeDetails.dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
 
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.str.value",
                 value: _sizeDetails.str,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             sizeActiveEffect.changes.push({
                 key: "kbResistance",
                 value: _sizeDetails.kbResistance,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.body.value",
                 value: _sizeDetails.body,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
 
             if (sizeActiveEffect.id) {
@@ -1317,46 +1322,55 @@ export class HeroSystem6eActor extends Actor {
                         key: "system.characteristics.dcv.value",
                         value: dcvDex,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.dex.value",
                         value: dcvDex,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.running.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.swimming.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.leaping.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.flight.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.swinging.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.teleportation.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.tunneling.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
                 origin: this.uuid,
@@ -1423,31 +1437,37 @@ export class HeroSystem6eActor extends Actor {
                         key: "system.characteristics.dcv.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.running.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.leaping.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.swimming.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.swinging.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.tunneling.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
                 origin: this.uuid,
@@ -3658,6 +3678,56 @@ export class HeroSystem6eActor extends Actor {
 
     get invalidItems() {
         return Array.from(this.items.invalidDocumentIds).map((id) => this.items.getInvalid(id));
+    }
+
+    // Analyze the actor and generate various statistics about it
+    get analysis() {
+        try {
+            return { endurance: this.analyzeEndurance };
+        } catch (e) {
+            console.error(e);
+        }
+        return {};
+    }
+
+    get analyzeEndurance() {
+        const activatablePowersUsingEnd = this.items.filter(
+            (i) => i.isActive && i.type === "power" && i.baseInfo?.behaviors.includes("activatable") && i.end > 0,
+        );
+        const activatablePowerEndSum = Math.max(
+            0,
+            activatablePowersUsingEnd.reduce((a, c) => a + c.end, 0),
+        );
+
+        // const attackPowers = this.items.filter(
+        //     (i) =>
+        //         i.baseInfo.behaviors.includes("to-hit") &&
+        //         (i.type !== "maneuver" || i.system.XMLID === "STRIKE") &&
+        //         i.showAttack,
+        // );
+        // const resourceUsingItems = attackPowers;
+        // const options = {
+        //     effectiveStr: this.system.characteristics.str.value,
+        // };
+        // const resourcesRequired = calculateRequiredResourcesToUse(resourceUsingItems, options);
+
+        // Hacky for now, should  get estimated end for attack
+        const endForAttack = Math.max(
+            1,
+            Math.ceil(
+                this.system.characteristics.str.value /
+                    (game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10),
+            ),
+        );
+
+        const perPhase = 1 + activatablePowerEndSum + endForAttack;
+        const perTurn = perPhase * this.system.characteristics.spd.value || 1;
+        const perTurnWithRecovery = Math.max(0, perTurn - this.system.characteristics.rec.value) || 0;
+        const phasesUntil0End =
+            perTurnWithRecovery > 0
+                ? Math.trunc(this.system.characteristics.end.value / perTurnWithRecovery, 1)
+                : "infinity";
+        return { perPhase, perTurn, phasesUntil0End };
     }
 
     async setNaturalHealing() {
