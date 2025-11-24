@@ -11,17 +11,20 @@ import { RoundFavorPlayerDown } from "../utility/round.mjs";
  */
 export async function enforceManeuverLimits(actor, item) {
     // const maneuverItems = actor.items.filter((e) => ["maneuver", "martialart"].includes(e.type));
-
-    await item.update({ "system.active": !item.system.active });
+    // AARON commented this out on 11/23/2025 as it messes with active.
+    // This isn't enforcing any maneuver limits!
+    // TODO: I don't believe you can set, brace, and haymaker, etc. so that is what we should be enforcing.
+    //await item.update({ "system.active": !item.system.active });
 }
 
 // FIXME: DCV should only be effective against HTH attacks unless it's a Dodge
 function addDcvTraitToChanges(maneuverDcvChange) {
     if (maneuverDcvChange !== 0) {
         return {
-            key: "system.characteristics.dcv.value",
+            key: "system.characteristics.dcv.max",
             value: maneuverDcvChange,
             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
         };
     }
 }
@@ -29,9 +32,10 @@ function addDcvTraitToChanges(maneuverDcvChange) {
 function addOcvTraitToChanges(maneuverOcvChange) {
     if (maneuverOcvChange !== 0) {
         return {
-            key: "system.characteristics.ocv.value",
+            key: "system.characteristics.ocv.max",
             value: maneuverOcvChange,
             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
         };
     }
 }
@@ -178,37 +182,63 @@ export async function activateManeuver(item) {
     const hasDodgeTrait = maneuverHasDodgeTrait(item);
     const hasBlockTrait = maneuverHasBlockTrait(item);
 
+    const activeEffect = item.effects.contents[0] || {
+        changes: [],
+        flags: [],
+    };
+
     // Dodge effect
     if (hasDodgeTrait) {
-        const dodgeStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
-        dodgeStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
-        dodgeStatusEffect.flags = buildManeuverNextPhaseFlags(item);
-        dodgeStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
-        dodgeStatusEffect.duration ??= {};
-        dodgeStatusEffect.duration.startTime = game.time.worldTime;
-        newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
+        //const dodgeStatusEffect = item.effects.contents[0] || foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
+        activeEffect.name = item.name
+            ? `${item.name} (${item.system.XMLID} +${dcvTrait})`
+            : `${item.system.XMLID} +${dcvTrait}`;
+        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.img;
+        activeEffect.flags = buildManeuverNextPhaseFlags(item);
+        activeEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        activeEffect.duration ??= {};
+        activeEffect.duration.startTime = game.time.worldTime;
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.name];
+
+        //newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
     // Block effect
     else if (hasBlockTrait) {
-        const blockStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect);
-        blockStatusEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
-        blockStatusEffect.flags = buildManeuverNextPhaseFlags(item);
-        blockStatusEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
-        blockStatusEffect.duration ??= {};
-        blockStatusEffect.duration.startTime = game.time.worldTime;
-        newActiveEffects.push(item.actor.addActiveEffect(blockStatusEffect));
+        //const blockStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect);
+        activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.img;
+        activeEffect.flags = buildManeuverNextPhaseFlags(item);
+        activeEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        activeEffect.duration ??= {};
+        activeEffect.duration.startTime = game.time.worldTime;
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.name];
     }
 
     // Other maneuvers with effects
     // Turn on any status effects that we have implemented
     else if (item.system.XMLID === "BRACE") {
         // NOTE: This effect is special and doesn't come off as the start of the next phase
-        newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
-    } else if (item.system.XMLID === "HAYMAKER") {
-        newActiveEffects.push(
-            item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect),
+        //newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
+        activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.img;
+        activeEffect.flags = buildManeuverNextPhaseFlags(item);
+        activeEffect.changes = foundry.utils.deepClone(
+            HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.changes,
         );
+        activeEffect.duration ??= {};
+        activeEffect.duration.startTime = game.time.worldTime;
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.name];
+    } else if (item.system.XMLID === "HAYMAKER") {
+        activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name;
+        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.img;
+        activeEffect.flags = buildManeuverNextPhaseFlags(item);
+        activeEffect.changes = foundry.utils.deepClone(
+            HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.changes,
+        );
+        activeEffect.duration ??= {};
+        activeEffect.duration.startTime = game.time.worldTime;
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name];
     } else if (
         item.system.XMLID === "COVER" ||
         item.system.XMLID === "HIPSHOT" ||
@@ -220,59 +250,75 @@ export async function activateManeuver(item) {
         console.error(`Unsupported maneuver ${item.detailedName()}`);
     } else {
         // PH: FIXME: Assume this is a martial maneuver and give it a default effect
-        const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
-        maneuverEffect.flags = buildManeuverNextPhaseFlags(item);
-        maneuverEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
-        maneuverEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
-        maneuverEffect.duration ??= {};
-        maneuverEffect.duration.startTime = game.time.worldTime;
+        //const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
+        activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
+        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.img;
+        activeEffect.flags = buildManeuverNextPhaseFlags(item);
+        activeEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        activeEffect.duration ??= {};
+        activeEffect.duration.startTime = game.time.worldTime;
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.name];
 
-        if (item.actor.effects.find((ae) => ae.name === maneuverEffect.name)) {
-            // Unclear why we are creating this effect a second time.
-            // TODO: Check for duplicate effect sooner.
-            console.warn(`${maneuverEffect.name} already exists`);
-        } else {
-            newActiveEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
-        }
+        // if (item.actor.effects.find((ae1) => ae1.name === ae.name)) {
+        //     // Unclear why we are creating this effect a second time.
+        //     // TODO: Check for duplicate effect sooner.
+        //     console.warn(`${maneuverEffect.name} already exists`);
+        // } else {
+        //     newActiveEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
+        // }
     }
 
-    return Promise.all(newActiveEffects);
+    if (activeEffect.name) {
+        if (activeEffect.update) {
+            await activeEffect.update({ ...activeEffect, _id: undefined });
+        } else {
+            await item.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        }
+    }
 }
 
 /**
  * Deactivate a combat or martial maneuver
  */
 export async function deactivateManeuver(item) {
-    const removedEffects = [];
+    console.error("deprecated deactivateManeuver", item);
 
-    const effect = item.system.EFFECT?.toLowerCase();
-    if (effect) {
-        const hasDodgeTrait = maneuverHasDodgeTrait(item);
-        const hasBlockTrait = maneuverHasBlockTrait(item);
+    // AARON WAS HERE:
+    // activateManeuver creates/updates AE on item/maneuver.
+    // We keep that AE around, attached to the item like we do for Growth/Flight, etc.
+    // using ae.disable to determine if item is active or not (see item.isActive)
+    return;
 
-        if (hasDodgeTrait) {
-            removedEffects.push(
-                item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect),
-            );
-        }
+    // const removedEffects = [];
 
-        if (hasBlockTrait) {
-            removedEffects.push(
-                item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect),
-            );
-        }
-    }
+    // const effect = item.system.EFFECT?.toLowerCase();
+    // if (effect) {
+    //     const hasDodgeTrait = maneuverHasDodgeTrait(item);
+    //     const hasBlockTrait = maneuverHasBlockTrait(item);
 
-    // Turn off any status effects that we have implemented
-    if (item.system.XMLID === "BRACE") {
-        removedEffects.push(item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
-    } else if (item.system.XMLID === "HAYMAKER") {
-        removedEffects.push(
-            item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect),
-        );
-    }
+    //     if (hasDodgeTrait) {
+    //         removedEffects.push(
+    //             item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect),
+    //         );
+    //     }
 
-    return Promise.all(removedEffects);
+    //     if (hasBlockTrait) {
+    //         removedEffects.push(
+    //             item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect),
+    //         );
+    //     }
+    // }
+
+    // // Turn off any status effects that we have implemented
+    // if (item.system.XMLID === "BRACE") {
+    //     removedEffects.push(item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
+    // } else if (item.system.XMLID === "HAYMAKER") {
+    //     removedEffects.push(
+    //         item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect),
+    //     );
+    // }
+
+    // return Promise.all(removedEffects);
 }
 
 /**

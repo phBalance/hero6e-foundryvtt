@@ -44,14 +44,16 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/foundry/daze.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.dmcv.value",
+                        key: "system.characteristics.dmcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
             },
@@ -66,14 +68,16 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: "icons/svg/unconscious.svg",
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
-                        key: "system.characteristics.dmcv.value",
+                        key: "system.characteristics.dmcv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ],
             },
@@ -84,24 +88,28 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/foundry/stoned.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.ocv.value",
+                        key: "system.characteristics.ocv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
-                        key: "system.characteristics.omcv.value",
+                        key: "system.characteristics.omcv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
-                        key: "system.characteristics.dmcv.value",
+                        key: "system.characteristics.dmcv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ],
             },
@@ -140,14 +148,16 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/foundry/skull.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.ocv.value",
+                        key: "system.characteristics.ocv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ],
             },
@@ -166,9 +176,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: "icons/svg/falling.svg",
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
             },
@@ -178,14 +189,16 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: "icons/svg/net.svg",
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.ocv.value",
+                        key: "system.characteristics.ocv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
             },
@@ -242,9 +255,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/underwater.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: -2,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
             },
@@ -254,9 +268,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/standingInWater.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: -2,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
             },
@@ -286,9 +301,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: "icons/svg/statue.svg",
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
             },
@@ -308,9 +324,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/noun-wrestling-1061808.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
             },
@@ -320,9 +337,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `icons/svg/sword.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: -5,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
             },
@@ -344,14 +362,16 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/person-running.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.ocv.value",
+                        key: "system.characteristics.ocv.max",
                         value: 0,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
             },
@@ -403,14 +423,16 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: "icons/svg/blind.svg",
                 changes: [
                     {
-                        key: "system.characteristics.ocv.value",
+                        key: "system.characteristics.ocv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
             },

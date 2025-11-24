@@ -20,7 +20,7 @@
 
     {{#if (itemHasActionBehavior this "activatable")}}
         <input class="item-toggle" type="checkbox"
-            Xname="this.system.active" {{checked this.isActive}} data-dtype="Boolean"
+            Xname="this.isActive" {{checked this.isActive}} data-dtype="Boolean"
             data-action="toggle"
             title="Activation toggle"
         />

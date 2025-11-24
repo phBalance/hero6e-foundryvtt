@@ -826,6 +826,7 @@ export class HeroSystem6eActor extends Actor {
                             key: "system.characteristics.dcv.value",
                             value: 0.5,
                             mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                         },
                     ],
                     origin: this.uuid,
@@ -1215,22 +1216,26 @@ export class HeroSystem6eActor extends Actor {
                 key: "system.characteristics.dcv.value",
                 value: _sizeDetails.dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
 
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.str.value",
                 value: _sizeDetails.str,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             sizeActiveEffect.changes.push({
                 key: "kbResistance",
                 value: _sizeDetails.kbResistance,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.body.value",
                 value: _sizeDetails.body,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
 
             if (sizeActiveEffect.id) {
@@ -1318,46 +1323,55 @@ export class HeroSystem6eActor extends Actor {
                         key: "system.characteristics.dcv.value",
                         value: dcvDex,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.dex.value",
                         value: dcvDex,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.running.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.swimming.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.leaping.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.flight.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.swinging.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.teleportation.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.tunneling.value",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
                 origin: this.uuid,
@@ -1424,31 +1438,37 @@ export class HeroSystem6eActor extends Actor {
                         key: "system.characteristics.dcv.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.running.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.leaping.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.swimming.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.swinging.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.tunneling.value",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
                 origin: this.uuid,

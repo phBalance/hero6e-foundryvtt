@@ -336,6 +336,7 @@ export class HeroSystem6eItem extends Item {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
                         value: parseInt(this.system.LEVELS),
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
                 for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
@@ -346,6 +347,7 @@ export class HeroSystem6eItem extends Item {
                                 key: `system.characteristics.${movementKey.toLowerCase()}.max`,
                                 value: parseInt(this.system.LEVELS),
                                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                             });
                             foundMatch = true;
                         }
@@ -386,6 +388,7 @@ export class HeroSystem6eItem extends Item {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
                         value: value,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
                 activeEffect.transfer = true;
@@ -431,16 +434,19 @@ export class HeroSystem6eItem extends Item {
                         key: "system.characteristics.str.max",
                         value: strAdd,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.pd.max",
                         value: pdAdd,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.ed.max",
                         value: edAdd,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
                 activeEffect.transfer = true;
@@ -504,6 +510,7 @@ export class HeroSystem6eItem extends Item {
                         key: "system.characteristics.dcv.max",
                         value: dcvAdd,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
                 activeEffect.transfer = true;
@@ -541,6 +548,7 @@ export class HeroSystem6eItem extends Item {
                             key: "system.characteristics.dcv.max",
                             value: dcvValue,
                             mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                         },
                     ];
                     activeEffect.transfer = true;
@@ -583,6 +591,7 @@ export class HeroSystem6eItem extends Item {
                             key: "ATL.light.bright",
                             value: parseFloat(this.system.QUANTITY),
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                         },
                     ];
                     activeEffect.system ??= { XMLID: this.system.XMLID };
@@ -1429,9 +1438,9 @@ export class HeroSystem6eItem extends Item {
         //     // );
         // } else
         //
-        if (["maneuver", "martialart"].includes(item.type)) {
-            await deactivateManeuver(this);
-        }
+        // if (["maneuver", "martialart"].includes(item.type)) {
+        //     await deactivateManeuver(this);
+        // }
 
         await this.setActive(false);
     }
@@ -4777,9 +4786,9 @@ export class HeroSystem6eItem extends Item {
             return true;
         }
 
-        if (this.type === "maneuver" && !this.baseInfo?.behaviors.includes("activatable")) {
-            return true;
-        }
+        // if (this.type === "maneuver" && !this.baseInfo?.behaviors.includes("activatable")) {
+        //     return true;
+        // }
 
         return this.system.active;
     }

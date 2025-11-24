@@ -306,6 +306,17 @@ HERO.hitLocationSide = Object.freeze({
     Right: "Right",
 });
 
+HERO.ACTIVE_EFFECT_PRIORITY = {
+    // FoundryVTT defaults to MODE * 10
+    // Lower priorities are performed first
+    ADD: 20,
+    CUSTOM: 0,
+    DOWNGRADE: 30,
+    MULTIPLY: 45, // In HERO this goes mostly last so change value from 10 to 45
+    OVERRIDE: 50,
+    UPGRADE: 40,
+};
+
 HERO.RANGE_TYPES = {
     LIMITED_RANGE: "Limited Range",
     LINE_OF_SIGHT: "Line of Sight",
@@ -6432,16 +6443,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         key: "system.characteristics.str.max",
                         value: details.str,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.body.max",
                         value: details.body,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.stun.max",
                         value: details.stun,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
@@ -6450,31 +6464,37 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         key: "system.characteristics.dcv.max",
                         value: -details.dcv,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.con.max",
                         value: details.con,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.pre.max",
                         value: details.pre,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.pd.max",
                         value: details.pd,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.ed.max",
                         value: details.ed,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.running.max",
                         value: details.running,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
                 ae.system = {
@@ -6534,16 +6554,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         key: "system.characteristics.str.max",
                         value: details.str,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.body.max",
                         value: details.body,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.stun.max",
                         value: details.stun,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
@@ -6552,6 +6575,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         key: "system.characteristics.dcv.max",
                         value: -details.dcv,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
                 ae.system = {

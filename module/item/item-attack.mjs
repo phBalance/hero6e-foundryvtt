@@ -475,6 +475,7 @@ export async function doAoeActionToHit(action, options) {
                         key: `system.characteristics.${_dcvText.toLowerCase()}.value`,
                         value: _dcvValue,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
                 origin: item.uuid,
@@ -783,6 +784,7 @@ async function doSingleTargetActionToHit(action, options) {
                         key: `system.characteristics.${_dcvText.toLowerCase()}.value`,
                         value: _dcvValue,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
                 origin: item.uuid, // PH: FIXME: how can we have a uuid given this is an effective attack item?
