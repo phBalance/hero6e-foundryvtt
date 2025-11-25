@@ -460,8 +460,10 @@ function validatePowers() {
     }
     numViolations += powersWithoutKeyProperty.length;
 
-    // Has XML property
-    const powersWithoutXmlProperty = this.filter((power) => !power.key);
+    // Has XML property, other than things which don't exist in HDCs and a few characteristics (but we catch all charaacteristics due to simple check)
+    const powersWithoutXmlProperty = this.filter((power) => !power.xml)
+        .filter((power) => !power.type.includes("characteristic"))
+        .filter((power) => !power.behaviors.includes("non-hd"));
     if (powersWithoutXmlProperty.length > 0) {
         console.log(`Powers without xml property: `, powersWithoutXmlProperty);
     }
@@ -7441,6 +7443,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             usesStrength: false, // TODO: Not all of these are attacks
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
             doesKillingDamage: maneuverDoesKillingDamage,
+            xml: `<MANEUVER XMLID="MANEUVER" ID="1754249922302" BASECOST="5.0" LEVELS="0" ALIAS="Custom - Flying Knee" POSITION="8" MULTIPLIER="1.0" GRAPHIC="hole" COLOR="50 100 200" SFX="Gravity" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="+1" DCV="+1" DC="2" PHASE="1/2" EFFECT="+v/5 Strike" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="2" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="+v/5 Strike"></MANEUVER>`,
         },
         {},
     );
@@ -8130,7 +8133,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
-            xml: `<POWER XMLID="RANGE" ID="1763943534384" BASECOST="10.0" LEVELS="0" ALIAS="Range" POSITION="80" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMELLGROUP" OPTIONID="SMELLGROUP" OPTION_ALIAS="Smell/Taste Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+            xml: `<POWER XMLID="TELESCOPIC" ID="1763943753376" BASECOST="0.0" LEVELS="1" ALIAS="Telescopic" POSITION="83" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
