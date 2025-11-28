@@ -472,19 +472,16 @@ export class HeroSystem6eItem extends Item {
                 const currentAE =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
-                    {};
+                    null;
                 if (currentAE) {
-                    if (this.id) {
+                    if (currentAE.update) {
                         await currentAE.update({
                             name: activeEffect.name,
                             changes: activeEffect.changes,
                         });
                     } else {
-                        currentAE.name = activeEffect.name;
-                        currentAE.changes = activeEffect.changes;
+                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                     }
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
             }
 
