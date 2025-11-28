@@ -4289,6 +4289,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             costEnd: false,
             isContainer: true,
+            activePoints: function (item) {
+                return item.childItems.reduce(
+                    (accumulator, currentValue) => accumulator + currentValue.activePoints,
+                    0,
+                );
+            },
+            realCost: function (item) {
+                return item.childItems.reduce((accumulator, currentValue) => accumulator + currentValue.realCost, 0);
+            },
             xml: `<POWER XMLID="COMPOUNDPOWER" ID="1763927770583" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
