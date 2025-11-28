@@ -2,7 +2,7 @@ export async function createQuenchActor({ quench, contents, is5e }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
     const name = CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";
     const quenchName =
-        `_Quench ${quench?.title || quench?.currentTest?.parent?.title} ${name} ${Date.now().toString()}`.replace(
+        `_Quench ${Date.now().toString()} ${name} ${quench?.title || quench?.currentTest?.parent?.title}`.replace(
             /\W+/g,
             " ",
         );
@@ -49,6 +49,7 @@ export async function deleteQuenchActor({ quench, actor }) {
 
     if (
         quench.tests?.find((t) => t?.state !== "passed") ||
+        quench.currentTest?.parent?.tests?.find((t) => t?.state !== "passed") ||
         quench.suites?.find((s) => s.tests.find((t) => t.state !== "passed"))
     ) {
         console.error("skipping deletion of actor because tests failed");

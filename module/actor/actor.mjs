@@ -12,6 +12,7 @@ import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
+//import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -2237,7 +2238,7 @@ export class HeroSystem6eActor extends Actor {
                                                     actor: this,
                                                     xmlTag: key,
                                                 });
-                                                if (!power || ["MODIFIER", "ADDER"].includes(power.xmlTag)) {
+                                                if (!power) {
                                                     await ui.notifications.error(
                                                         `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
                                                         {

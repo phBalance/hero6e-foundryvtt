@@ -5746,14 +5746,12 @@ export function registerFullTests(quench) {
                     let actor;
 
                     before(async function () {
-                        actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        await actor.uploadFromXml(contents);
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it.skip("should be the correct number of points", function () {
@@ -5765,7 +5763,7 @@ export function registerFullTests(quench) {
                     });
                 });
 
-                describe.only("can load older HDC format - GitHub issue #2229", function () {
+                describe("can load older HDC format - GitHub issue #2229", function () {
                     const contents = `
                         <?xml version="1.0" encoding="UTF-8"?>
                         <CHARACTER version="2.0">
@@ -6223,14 +6221,12 @@ export function registerFullTests(quench) {
                     let actor;
 
                     before(async function () {
-                        actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        await actor.uploadFromXml(contents);
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     // This is broken because of #2115
