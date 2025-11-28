@@ -4850,18 +4850,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     get realCost() {
-        if (this.system.XMLID === "COMPOUNDPOWER" && this.childItems.length > 0) {
-            const __realCost = this.childItems.reduce(
-                (accumulator, currentValue) => accumulator + currentValue.realCost,
-                0,
-            );
-            if (__realCost !== this.calcItemPoints().realCost) {
-                console.warn(`calItemPoints !== realCost of child items`, this);
-            } else {
-                console.warn(`Why doens't calItemPoints include child items`, this);
-            }
-            return __realCost;
-        }
         return this.calcItemPoints().realCost;
     }
 

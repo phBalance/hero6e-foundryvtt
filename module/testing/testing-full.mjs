@@ -7124,7 +7124,7 @@ export function registerFullTests(quench) {
 
                 describe("tab costs", async function () {
                     // FIXME: Incorrect cost so far
-                    it.skip("should have the correct total cost", function () {
+                    it.only("should have the correct total cost", function () {
                         assert.equal(actor.realCost, 668);
                     });
 
