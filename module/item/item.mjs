@@ -472,19 +472,16 @@ export class HeroSystem6eItem extends Item {
                 const currentAE =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
-                    {};
+                    null;
                 if (currentAE) {
-                    if (this.id) {
+                    if (currentAE.update) {
                         await currentAE.update({
                             name: activeEffect.name,
                             changes: activeEffect.changes,
                         });
                     } else {
-                        currentAE.name = activeEffect.name;
-                        currentAE.changes = activeEffect.changes;
+                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                     }
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
             }
 
@@ -778,7 +775,7 @@ export class HeroSystem6eItem extends Item {
     // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
     // which requested the operation.
     async _preUpdate(changes, options, user) {
-        if (this.system.XMLID === "COMBAT_LEVELS") {
+        if (this.isCsl) {
             const LEVELS = changes.system?.LEVELS || this.system.LEVELS;
             if (this.system.csl.length !== LEVELS) {
                 const csl = new Array(LEVELS);
@@ -5597,7 +5594,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isCsl() {
-        return ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.system.XMLID);
+        return this.baseInfo?.behaviors.includes("csl");
     }
 
     get cslChoices() {
@@ -5638,7 +5635,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         // With All Attacks
-        if (this.system.OPTIONID === "ALL") {
+        if (
+            this.system.OPTIONID === "ALL" ||
+            (this.system.OPTIONID === "BROAD" && this.system.XMLID === "MENTAL_COMBAT_LEVELS")
+        ) {
             // only 6e has MENTAL_COMBAT_LEVELS
 
             switch (this.system.XMLID) {
