@@ -778,7 +778,7 @@ export class HeroSystem6eItem extends Item {
     // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
     // which requested the operation.
     async _preUpdate(changes, options, user) {
-        if (this.system.XMLID === "COMBAT_LEVELS") {
+        if (this.isCsl) {
             const LEVELS = changes.system?.LEVELS || this.system.LEVELS;
             if (this.system.csl.length !== LEVELS) {
                 const csl = new Array(LEVELS);
@@ -5597,7 +5597,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isCsl() {
-        return ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.system.XMLID);
+        return this.baseInfo?.behaviors.includes("csl");
     }
 
     get cslChoices() {
@@ -5638,7 +5638,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         // With All Attacks
-        if (this.system.OPTIONID === "ALL") {
+        if (
+            this.system.OPTIONID === "ALL" ||
+            (this.system.OPTIONID === "BROAD" && this.system.XMLID === "MENTAL_COMBAT_LEVELS")
+        ) {
             // only 6e has MENTAL_COMBAT_LEVELS
 
             switch (this.system.XMLID) {
