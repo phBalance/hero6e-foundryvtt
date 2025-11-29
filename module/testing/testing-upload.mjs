@@ -8461,6 +8461,10 @@ export function registerUploadTests(quench) {
                             }
                         });
 
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
                         it("is active", function () {
                             assert.equal(item.isActive, true);
                         });
@@ -8530,6 +8534,10 @@ export function registerUploadTests(quench) {
                             }
                         });
 
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
                         it("is active", function () {
                             assert.equal(item.isActive, true);
                         });
@@ -8577,6 +8585,10 @@ export function registerUploadTests(quench) {
                             if (!item.isActive) {
                                 await item.toggle();
                             }
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
                         });
 
                         it("is active", function () {
@@ -8636,6 +8648,10 @@ export function registerUploadTests(quench) {
                             }
                         });
 
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
                         it("is active", function () {
                             assert.equal(item.isActive, true);
                         });
@@ -8693,6 +8709,10 @@ export function registerUploadTests(quench) {
                             }
                         });
 
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
                         it("is active", function () {
                             assert.equal(item.isActive, true);
                         });
@@ -8744,6 +8764,10 @@ export function registerUploadTests(quench) {
                             if (!item.isActive) {
                                 await item.toggle();
                             }
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
                         });
 
                         it("is active", function () {
@@ -8815,6 +8839,10 @@ export function registerUploadTests(quench) {
                             }
                         });
 
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
                         it("is active", function () {
                             assert.equal(item.isActive, true);
                         });
@@ -8862,6 +8890,10 @@ export function registerUploadTests(quench) {
                             if (!item.isActive) {
                                 await item.toggle();
                             }
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
                         });
 
                         it("is active", function () {
@@ -8921,6 +8953,10 @@ export function registerUploadTests(quench) {
                             }
                         });
 
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
                         it("is active", function () {
                             assert.equal(item.isActive, true);
                         });
@@ -8976,6 +9012,10 @@ export function registerUploadTests(quench) {
                             if (!item.isActive) {
                                 await item.toggle();
                             }
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
                         });
 
                         it("is active", function () {

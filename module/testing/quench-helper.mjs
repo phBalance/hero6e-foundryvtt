@@ -1,11 +1,20 @@
 export async function createQuenchActor({ quench, contents, is5e }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
     const name = CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";
-    const quenchName =
-        `_Quench ${Date.now().toString()} ${name} ${quench?.title || quench?.currentTest?.parent?.title}`.replace(
-            /\W+/g,
-            " ",
-        );
+
+    function generateQuenchTitleRecursive(quench) {
+        // '__root/hero6efoundryvttv2.utils.defense_root/Resistant Protection/rPD 1'
+        if (!quench.parent) {
+            return quench.title.replace(/\W+/g, "");
+        }
+        return `${generateQuenchTitleRecursive(quench.parent)}/${quench.title.replace(/\W+/g, "")}`;
+    }
+
+    // Need to be a bit careful as we can create invalid XML if name has special characters
+    const quenchName = `_Quench ${Date.now().toString()} ${name.replace(
+        /\W+/g,
+        " ",
+    )} ${generateQuenchTitleRecursive(quench.currentTest || quench.test)}`;
 
     // Delete any previous leftover actors for this test
     const oldQuenchActors = game.actors.filter((a) => a.name.includes(quench.title));
@@ -47,16 +56,14 @@ export async function deleteQuenchActor({ quench, actor }) {
         throw "missing quench";
     }
 
+    // Careful undefined comparisons are tricky
     if (
         quench.tests?.find((t) => t?.state !== "passed") ||
-        quench.currentTest?.parent?.tests?.find((t) => t?.state !== "passed") ||
-        quench.suites?.find((s) => s.tests.find((t) => t.state !== "passed"))
+        quench.currentTest?.state === "failed" ||
+        quench.suites?.find((s) => s.tests.find((t) => t.state !== "passed")) ||
+        quench.test.parent.suites?.find((s) => s.tests.find((t) => t.state === "failed"))
     ) {
         console.error("skipping deletion of actor because tests failed");
-        return;
-    }
-
-    if (quench.currentTest?.state === undefined) {
         return;
     }
 

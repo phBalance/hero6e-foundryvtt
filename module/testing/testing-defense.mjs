@@ -1,4 +1,3 @@
-import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
@@ -7,15 +6,16 @@ export function registerDefenseTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.utils.defense",
         (context) => {
-            const { assert, before, after, describe, it } = context;
+            const { afterEach, assert, beforeEach, describe, it } = context;
 
             describe("Resistant Protection", function () {
                 let actor;
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, is5e: false });
+                beforeEach(async function () {
+                    actor = await createQuenchActor({ quench: this, is5e: true });
+                    await actor.FullHealth();
                 });
 
-                after(async function () {
+                afterEach(async function () {
                     await deleteQuenchActor({ quench: this, actor });
                 });
 
@@ -30,10 +30,6 @@ export function registerDefenseTests(quench) {
                         <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         </POWER>
                     `;
-                    // const itemDefense = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                    //     parent: actor,
-                    // });
-                    // actor.items.set(itemDefense.system.XMLID, itemDefense);
 
                     await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
@@ -42,7 +38,6 @@ export function registerDefenseTests(quench) {
                     const itemAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack, actor), {
                         parent: actor,
                     });
-                    //await actor.FullHealth();
 
                     const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 1);
@@ -54,14 +49,6 @@ export function registerDefenseTests(quench) {
                         <NOTES />
                         </POWER>
                     `;
-                    let actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
 
                     const contentsAttack = `
                         <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -75,7 +62,6 @@ export function registerDefenseTests(quench) {
                     const itemAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack, actor), {
                         parent: actor,
                     });
-                    await actor.FullHealth();
 
                     const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 2);
@@ -87,20 +73,13 @@ export function registerDefenseTests(quench) {
                         <NOTES />
                         </POWER>
                     `;
-                    let actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
 
                     const contentsAttack = `
                         <POWER XMLID="EGOATTACK" ID="1695575160315" BASECOST="0.0" LEVELS="1" ALIAS="Mental Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
                         </POWER>
                     `;
+
                     const itemDefense = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
@@ -109,7 +88,6 @@ export function registerDefenseTests(quench) {
                     const itemAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack, actor), {
                         parent: actor,
                     });
-                    await actor.FullHealth();
 
                     const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 3);
@@ -121,20 +99,13 @@ export function registerDefenseTests(quench) {
                     <NOTES />
                     </POWER>
                 `;
-                    let actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
 
                     const contentsAttack = `
                     <POWER XMLID="DRAIN" ID="1695576093210" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                     <NOTES />
                     </POWER>
                 `;
+
                     const itemDefense = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
@@ -143,8 +114,6 @@ export function registerDefenseTests(quench) {
                     const itemAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack, actor), {
                         parent: actor,
                     });
-
-                    await actor.FullHealth();
 
                     const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 4);

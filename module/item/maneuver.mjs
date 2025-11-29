@@ -180,14 +180,16 @@ export async function activateManeuver(item) {
     const hasDodgeTrait = maneuverHasDodgeTrait(item);
     const hasBlockTrait = maneuverHasBlockTrait(item);
 
-    const activeEffect = item.effects.contents[0] || {
+    // Make sure we have original Item
+    const originalItem = item.id ? item : fromUuidSync(item.system._active.__originalUuid);
+
+    const activeEffect = originalItem.effects.contents[0] || {
         changes: [],
         flags: [],
     };
 
     // Dodge effect
     if (hasDodgeTrait) {
-        //const dodgeStatusEffect = item.effects.contents[0] || foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect);
         activeEffect.name = item.name
             ? `${item.name} (${item.system.XMLID} +${dcvTrait})`
             : `${item.system.XMLID} +${dcvTrait}`;
@@ -197,13 +199,10 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.name];
-
-        //newActiveEffects.push(item.actor.addActiveEffect(dodgeStatusEffect));
     }
 
     // Block effect
     else if (hasBlockTrait) {
-        //const blockStatusEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect);
         activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
@@ -217,7 +216,6 @@ export async function activateManeuver(item) {
     // Turn on any status effects that we have implemented
     else if (item.system.XMLID === "BRACE") {
         // NOTE: This effect is special and doesn't come off as the start of the next phase
-        //newActiveEffects.push(item.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
         activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
@@ -248,7 +246,6 @@ export async function activateManeuver(item) {
         console.error(`Unsupported maneuver ${item.detailedName()}`);
     } else {
         // PH: FIXME: Assume this is a martial maneuver and give it a default effect
-        //const maneuverEffect = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect);
         activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
@@ -256,67 +253,19 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.name];
-
-        // if (item.actor.effects.find((ae1) => ae1.name === ae.name)) {
-        //     // Unclear why we are creating this effect a second time.
-        //     // TODO: Check for duplicate effect sooner.
-        //     console.warn(`${maneuverEffect.name} already exists`);
-        // } else {
-        //     newActiveEffects.push(item.actor.createEmbeddedDocuments("ActiveEffect", [maneuverEffect]));
-        // }
     }
 
     if (activeEffect.name) {
         if (activeEffect.update) {
             await activeEffect.update({ ...activeEffect, _id: undefined });
         } else {
-            await item.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            if (originalItem.id) {
+                await originalItem.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            } else {
+                console.error(`originalItem has no id, something is very wrong here`, originalItem);
+            }
         }
     }
-}
-
-/**
- * Deactivate a combat or martial maneuver
- */
-export async function deactivateManeuver(item) {
-    console.error("deprecated deactivateManeuver", item);
-
-    // AARON WAS HERE:
-    // activateManeuver creates/updates AE on item/maneuver.
-    // We keep that AE around, attached to the item like we do for Growth/Flight, etc.
-    // using ae.disable to determine if item is active or not (see item.isActive)
-    return;
-
-    // const removedEffects = [];
-
-    // const effect = item.system.EFFECT?.toLowerCase();
-    // if (effect) {
-    //     const hasDodgeTrait = maneuverHasDodgeTrait(item);
-    //     const hasBlockTrait = maneuverHasBlockTrait(item);
-
-    //     if (hasDodgeTrait) {
-    //         removedEffects.push(
-    //             item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect),
-    //         );
-    //     }
-
-    //     if (hasBlockTrait) {
-    //         removedEffects.push(
-    //             item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect),
-    //         );
-    //     }
-    // }
-
-    // // Turn off any status effects that we have implemented
-    // if (item.system.XMLID === "BRACE") {
-    //     removedEffects.push(item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect));
-    // } else if (item.system.XMLID === "HAYMAKER") {
-    //     removedEffects.push(
-    //         item.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect),
-    //     );
-    // }
-
-    // return Promise.all(removedEffects);
 }
 
 /**

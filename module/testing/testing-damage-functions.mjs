@@ -1350,7 +1350,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("5e EGOATTACK base points", function () {
-                    assert.equal(item.system.basePointsPlusAdders, 10);
+                    assert.equal(item.basePointsPlusAdders, 10);
                 });
 
                 it("5e EGOATTACK active points", function () {
@@ -1395,7 +1395,7 @@ export function registerDamageFunctionTests(quench) {
                     });
 
                     it("5e Cosmetic TRANSFORM base points", function () {
-                        assert.equal(item.system.basePointsPlusAdders, 10);
+                        assert.equal(item.basePointsPlusAdders, 10);
                     });
 
                     it("5e Cosmetic TRANSFORM active points", function () {
@@ -1442,7 +1442,7 @@ export function registerDamageFunctionTests(quench) {
                     });
 
                     it("5e Minor TRANSFORM base points", function () {
-                        assert.equal(item.system.basePointsPlusAdders, 20);
+                        assert.equal(item.basePointsPlusAdders, 20);
                     });
 
                     it("5e Minor TRANSFORM active points", function () {
@@ -1486,7 +1486,7 @@ export function registerDamageFunctionTests(quench) {
                     });
 
                     it("5e Major TRANSFORM base points", function () {
-                        assert.equal(item.system.basePointsPlusAdders, 30);
+                        assert.equal(item.basePointsPlusAdders, 30);
                     });
 
                     it("5e Major TRANSFORM active points", function () {

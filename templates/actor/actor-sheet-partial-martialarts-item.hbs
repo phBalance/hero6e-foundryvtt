@@ -23,7 +23,7 @@
         </td>
         <td class="td-cost">
             {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
-                {{this.compoundCost}}
+                {{this.compoundCostForDisplay}}
             {{else if this.isSeparator}}
                 {{!-- Show no cost--}}
             {{else if (eq this.system.XMLID "LIST")}}

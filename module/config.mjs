@@ -2630,7 +2630,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             rangeText: function (item) {
                 // The maximum length of the swingline
-                let distanceInMetres = item.system.basePointsPlusAdders * 10;
+                let distanceInMetres = item.basePointsPlusAdders * 10;
                 return `Max swingline length ${getRoundedUpDistanceInSystemUnits(distanceInMetres, item.actor.is5e)}`;
             },
             costEnd: true,
@@ -4294,6 +4294,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     (accumulator, currentValue) => accumulator + currentValue.activePoints,
                     0,
                 );
+            },
+            characterPointCostForElementalControl: function (item) {
+                const activePointsForEntireCompoundPower = item.activePoints;
+
+                // need ratio of Active Points
+                let cpEc = 0;
+                for (const child of item.childItems) {
+                    const childRatioAp = child.activePoints / activePointsForEntireCompoundPower;
+                    const childRatioEcBaseCost = item.elementalControl.system.BASECOST * childRatioAp;
+                    cpEc += RoundFavorPlayerDown(
+                        (Math.max(childRatioEcBaseCost * 2, child.activePoints) - childRatioEcBaseCost) /
+                            (1 + child._limitationCost),
+                    );
+                }
+                return cpEc;
             },
             realCost: function (item) {
                 return item.childItems.reduce((accumulator, currentValue) => accumulator + currentValue.realCost, 0);

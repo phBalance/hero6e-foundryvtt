@@ -1,5 +1,4 @@
 import { registerDamageFunctionTests } from "./testing-damage-functions.mjs";
-import { registerTagTests } from "./testing-tag.mjs";
 import { registerUploadTests } from "./testing-upload.mjs";
 import { registerDefenseTests } from "./testing-defense.mjs";
 import { registerFullTests } from "./testing-full.mjs";
@@ -24,7 +23,6 @@ Hooks.once("ready", async function () {
 Hooks.on("quenchReady", async (quench) => {
     registerGlobalSetup(quench);
     registerDamageFunctionTests(quench);
-    registerTagTests(quench);
     registerDefenseTests(quench);
     registerUploadTests(quench);
     registerFullTests(quench);
