@@ -13,10 +13,6 @@ export function getPowerInfo(options) {
         options.item?.system?.xmlid ||
         options.item?.system?.id;
 
-    // if (xmlid === "EXPLOSION") {
-    //     debugger;
-    // }
-
     const actor = options?.actor || options?.item?.actor;
 
     // Excellent we have a positive source for xmlTag!
@@ -83,10 +79,19 @@ export function getPowerInfo(options) {
 
     const powerDict = is5e ? CONFIG.HERO.powers5eDict : CONFIG.HERO.powers6eDict;
 
-    // ENHANCEDPERCEPTION is a POWER and an ADDER, we can pass in xmlTag to get the right one
+    // ENHANCEDPERCEPTION is a POWER and an ADDER, we can pass in xmlTag to get the right one.
+    // If looking for a POWER, a characteristic, perk, talent, or skill is the preferred result.
     const fullPowerInfoList = powerDict.get(xmlid) || [];
     const powerInfoList = fullPowerInfoList.filter(
-        (power) => !options?.xmlTag || !power.xmlTag || power.xmlTag === options?.xmlTag,
+        (power) =>
+            !options?.xmlTag ||
+            !power.xmlTag ||
+            power.xmlTag === options?.xmlTag ||
+            (options.xmlTag === "POWER" &&
+                (power.type.includes("characteristic") ||
+                    power.type.includes("perk") ||
+                    power.type.includes("talent") ||
+                    power.type.includes("skill"))),
     );
 
     if (powerInfoList.length > 1) {
@@ -103,20 +108,28 @@ export function getPowerInfo(options) {
     if (!powerInfo) {
         powerInfo = fullPowerInfoList[0];
         if (powerInfo) {
-            if (powerInfo.type.some((t) => ["movement", "skill", "characteristic"].includes(t))) {
-                // console.debug(
-                //     `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again may resolve this issue.`,
-                //     powerInfo,
-                //     options,
-                // );
-            } else {
+            if (fullPowerInfoList.length > 1) {
                 console.warn(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again may resolve this issue.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got multiple results. Costs and some functionality may be incorrect.`,
                     powerInfo,
                     options,
                 );
+            } else {
+                if (
+                    ["ADDER", "MODIFIER"].includes(powerInfo.xmlTag) ||
+                    ["ADDER", "MODIFIER"].includes(options?.xmlTag)
+                ) {
+                    if (powerInfo.xmlTag !== options?.xmlTag) {
+                        console.error(
+                            `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Was looking for xmlTag=${options.xmlTag} but got ${powerInfo.xmlTag}. Costs may be incorrect, but shouldn't break core functionality. Uploading the HDC file again may resolve this issue.`,
+                            powerInfo,
+                            options,
+                        );
+                    }
+                }
             }
         }
+
         // FIXME: There are plenty of XMLIDs not yet in config.mjs
         //  else {
         //     console.error(
