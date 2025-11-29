@@ -1386,10 +1386,6 @@ export class HeroSystem6eItem extends Item {
         //     // await this.actor.removeActiveEffect(
         //     //     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
         //     // );
-        // } else
-        //
-        // if (["maneuver", "martialart"].includes(item.type)) {
-        //     await deactivateManeuver(this);
         // }
 
         await this.setActive(false);
