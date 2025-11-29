@@ -625,51 +625,51 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get activePoints() {
-        return this.parent.activePoints;
+        return this.item.activePoints;
     }
 
     get characterPointCost() {
-        return this.parent.characterPointCost;
+        return this.item.characterPointCost;
     }
 
     get realCost() {
-        return this.parent.realCost;
+        return this.item.realCost;
     }
 
     get _activePointsWithoutEndMods() {
-        return this.parent._activePointsWithoutEndMods;
+        return this.item._activePointsWithoutEndMods;
     }
 
     get _advantages() {
-        return this.parent._advantages;
+        return this.item._advantages;
     }
 
     get killing() {
-        return this.parent.getMakeAttack().killing;
+        return this.item.getMakeAttack().killing;
     }
 
     get knockbackMultiplier() {
-        return this.parent.getMakeAttack().knockbackMultiplier;
+        return this.item.getMakeAttack().knockbackMultiplier;
     }
 
     get usesStrength() {
-        return this.parent.getMakeAttack().usesStrength;
+        return this.item.getMakeAttack().usesStrength;
     }
 
     get usesTk() {
-        return this.parent.getMakeAttack().usesTk;
+        return this.item.getMakeAttack().usesTk;
     }
 
     get piercing() {
-        return this.parent.getMakeAttack().piercing;
+        return this.item.getMakeAttack().piercing;
     }
 
     get penetrating() {
-        return this.parent.getMakeAttack().penetrating;
+        return this.item.getMakeAttack().penetrating;
     }
 
     get stunBodyDamage() {
-        return this.parent.getMakeAttack().stunBodyDamage;
+        return this.item.getMakeAttack().stunBodyDamage;
     }
 
     get endEstimate() {

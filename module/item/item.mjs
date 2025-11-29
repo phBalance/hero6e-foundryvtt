@@ -727,49 +727,8 @@ export class HeroSystem6eItem extends Item {
         return super.update(...args);
     }
 
-    calcItemPoints() {
-        //let changed = false;
-        //super.prepareDerivedData();
-
-        if (this.is5e === undefined) {
-            console.warn(`${this.actor?.name}/${this.name}: is5e === undefined`);
-        }
-
-        // Base points plus adders
-        const _basePointsPlusAdders = this._basePoints + this._addersCost;
-        // if (_basePointsPlusAdders !== this.system.basePointsPlusAdders) {
-        //     //changed = true;
-        // }
-        this.system.basePointsPlusAdders = _basePointsPlusAdders;
-        this.system.basePointsPlusAddersForActivePoints = _basePointsPlusAdders - this._negativeCustomAddersCost;
-
-        // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
-        const _activePoints = this._activePoints;
-        // if (_activePoints !== this.system.activePoints) {
-        //     //changed = true;
-        // }
-
-        const results = {
-            activePoints: _activePoints,
-            _activePointsWithoutEndMods: this._activePointsForEnd,
-            _advantages: this._advantageCost,
-        };
-
-        // Real Cost = Active Points / (1 + total value of all limitations)
-        const _realCost = this._realCost;
-        if (_realCost !== results.realCost) {
-            //changed = true;
-            results.realCost = _realCost;
-        }
-
-        // CharacterPointCost
-        //const _characterPointCost = this._characterPointCost;
-        // if (_characterPointCost !== this.system.characterPointCost) {
-        //     changed = true;
-        // }
-        results.characterPointCost = this._characterPointCost;
-
-        return results;
+    get basePointsPlusAdders() {
+        return this._basePoints + this._addersCost;
     }
 
     // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
@@ -1116,7 +1075,7 @@ export class HeroSystem6eItem extends Item {
 
                 case CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE:
                     {
-                        let range = this.system.basePointsPlusAdders * 10;
+                        let range = this.basePointsPlusAdders * 10;
                         if (this.actor?.system?.is5e) {
                             range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
                         }
@@ -1137,7 +1096,7 @@ export class HeroSystem6eItem extends Item {
 
                 case CONFIG.HERO.RANGE_TYPES.STANDARD:
                     {
-                        let range = this.system.basePointsPlusAdders * 10;
+                        let range = this.basePointsPlusAdders * 10;
                         if (this.actor?.system?.is5e) {
                             range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
                         }
@@ -1825,28 +1784,8 @@ export class HeroSystem6eItem extends Item {
         return changed;
     }
 
-    // setInitialRange(power) {
-    //     if (power) {
-    //         this.system.range = power.range;
-    //     } else {
-    //         // This should never happen, missing something from CONFIG.mjs?  Perhaps with super old actors?
-    //         this.system.range = CONFIG.HERO.RANGE_TYPES.SELF;
-    //     }
-    //     return true;
-    // }
-
-    // determinePointCosts() {
-    //     let changed = false;
-    //     changed = this.calcItemPoints() || changed;
-    //     return changed;
-    // }
-
-    // An attempt to cache getPowerInfo for performance reasons.
     get baseInfo() {
         return this.system.baseInfo;
-        // cache getPowerInfo
-        // this._baseInfo ??= getPowerInfo({ item: this, xmlTag: this.system.xmlTag });
-        // return this._baseInfo;
     }
 
     get is5e() {
@@ -4784,13 +4723,13 @@ export class HeroSystem6eItem extends Item {
         return this.system.active;
     }
 
-    get compoundCost() {
+    get compoundCostForDisplay() {
         if (this.system?.XMLID !== "COMPOUNDPOWER") return 0;
 
-        let cost = 0;
-        for (const child of this.childItems) {
-            cost += parseInt(child.system.characterPointCost);
-        }
+        let cost = this.characterPointCost;
+        // for (const child of this.childItems) {
+        //     cost += parseInt(child.system.characterPointCost);
+        // }
 
         let costSuffix = "";
 
@@ -4807,9 +4746,10 @@ export class HeroSystem6eItem extends Item {
                 costSuffix = this.actor?.system.is5e ? "m" : "v";
                 cost = RoundFavorPlayerDown(cost / 5.0);
             }
-        } else if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
-            cost = cost - this.parentItem.system.BASECOST;
         }
+        // else if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
+        //     cost = cost - this.parentItem.system.BASECOST;
+        // }
 
         // PH: FIXME: Don't think this is right. This method is only called from hbs files ...
         return RoundFavorPlayerDown(cost) + costSuffix;
@@ -4842,23 +4782,26 @@ export class HeroSystem6eItem extends Item {
     }
 
     get activePoints() {
-        return this.calcItemPoints().activePoints;
+        return this._activePoints;
     }
 
     get characterPointCost() {
-        return this.calcItemPoints().characterPointCost;
+        if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
+            return 0;
+        }
+        return this._characterPointCost;
     }
 
     get realCost() {
-        return this.calcItemPoints().realCost;
+        return this._realCost;
     }
 
     get _activePointsWithoutEndMods() {
-        return this.calcItemPoints()._activePointsWithoutEndMods;
+        return this._activePointsForEnd;
     }
 
     get _advantages() {
-        return this.calcItemPoints()._advantages;
+        return this._advantageCost;
     }
 
     get characterPointCostForDisplayPlusSuffix() {
@@ -5217,11 +5160,31 @@ export class HeroSystem6eItem extends Item {
         return _cost;
     }
 
+    get elementalControl() {
+        if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
+            return this.parentItem;
+        } else if (this.parentItem?.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
+            return this.parentItem.parentItem;
+        }
+        return null;
+    }
+
     // Real Points are sometimes refferred to as CharacterPoints
     get _characterPointCost() {
         // VPP parent?
         if (this.parentItem?.system.XMLID === "VPP" || this.parentItem?.parentItem?.system.XMLID === "VPP") {
             return 0;
+        }
+
+        if (this.elementalControl) {
+            if (this.baseInfo?.characterPointCostForElementalControl) {
+                return this.baseInfo.characterPointCostForElementalControl(this);
+            }
+            const cp =
+                (Math.max(this.elementalControl.system.BASECOST * 2, this.activePoints) -
+                    this.elementalControl.system.BASECOST) /
+                (1 + this._limitationCost);
+            return RoundFavorPlayerDown(cp);
         }
 
         let _cost = this._realCost;

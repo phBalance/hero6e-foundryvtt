@@ -7122,19 +7122,25 @@ export function registerFullTests(quench) {
                     await actor.FullHealth();
                 });
 
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
+                });
+
                 describe("tab costs", async function () {
-                    // FIXME: Incorrect cost so far
-                    it.only("should have the correct total cost", function () {
-                        assert.equal(actor.realCost, 668);
+                    it("should have the correct total cost", function () {
+                        // HD shows 662 (we think TF shoud cost 4)
+                        // REF: https://www.herogames.com/forums/topic/107693-transport-familiarity-cost-bug/
+                        assert.equal(actor.realCost, 663);
                     });
 
                     it("should have the correct characteristics cost", function () {
                         assert.equal(actor.pointsDetail.characteristics, 248);
                     });
 
-                    // FIXME: Incorrect cost so far
-                    it.skip("should have the correct skills cost", function () {
-                        assert.equal(actor.pointsDetail.skill, 45);
+                    // HD shows 662 (we think TF shoud cost 4)
+                    // REF: https://www.herogames.com/forums/topic/107693-transport-familiarity-cost-bug/
+                    it("should have the correct skills cost", function () {
+                        assert.equal(actor.pointsDetail.skill, 46);
                     });
 
                     it("should have the correct talents cost", function () {
@@ -7149,8 +7155,7 @@ export function registerFullTests(quench) {
                         assert.equal(actor.pointsDetail.martialart, 78);
                     });
 
-                    // FIXME: Incorrect cost so far
-                    it.skip("should have the correct power cost", function () {
+                    it("should have the correct power cost", function () {
                         assert.equal(actor.pointsDetail.power, 223);
                     });
                 });
