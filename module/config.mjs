@@ -519,7 +519,7 @@ function validatePowers() {
                 power.type.includes("movement") ||
                 power.type.includes("body-affecting") ||
                 power.type.includes("standard") ||
-                power.type.includes("skills")),
+                power.type.includes("skill")),
     );
     if (powersWithoutDurationProperty.length > 0) {
         console.log(`Powers without duration property: `, powersWithoutDurationProperty);
@@ -6185,6 +6185,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "FINDWEAKNESS",
         type: ["sense", "special", "skill"],
         behaviors: ["success"],
+        duration: "persistent",
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costPerLevel: fixedValueFunction(5),
