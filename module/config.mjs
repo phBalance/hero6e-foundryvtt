@@ -7588,6 +7588,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DIMENSIONALSINGLE",
             type: ["sense"],
+            behaviors: ["adder"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costPerLevel: fixedValueFunction(1),
+            xml: `<ADDER XMLID="DIMENSIONALSINGLE" ID="1764444031070" BASECOST="5.0" LEVELS="0" ALIAS="Perceive into a single other dimension" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALSINGLE",
+            type: ["sense"],
             behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
@@ -7601,12 +7614,38 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DIMENSIONALGROUP",
             type: ["sense"],
+            behaviors: ["adder"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costPerLevel: fixedValueFunction(1),
+            xml: `<ADDER XMLID="DIMENSIONALGROUP" ID="1712025456851" BASECOST="10.0" LEVELS="0" ALIAS="Perceive into a related group of dimensions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALGROUP",
+            type: ["sense"],
             behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="DIMENSIONALGROUP" ID="1763927025440" BASECOST="20.0" LEVELS="0" ALIAS="Perceive into a related group of dimensions" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTALGROUP" OPTIONID="MENTALGROUP" OPTION_ALIAS="Mental Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALALL",
+            type: ["sense"],
+            behaviors: ["adder"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costPerLevel: fixedValueFunction(1),
+            xml: `<ADDER XMLID="DIMENSIONALALL" ID="1764444047959" BASECOST="15.0" LEVELS="0" ALIAS="Perceive into any dimension" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -7668,6 +7707,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HRRP", // High Range Radio Perception
             type: ["sense", "passive"],
+            behaviors: ["adder"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            costPerLevel: fixedValueFunction(0),
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            xml: `<ADDER XMLID="HRRP" ID="1763830936069" BASECOST="3.0" LEVELS="0" ALIAS="High Range Radio Perception" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "HRRP", // High Range Radio Perception
+            type: ["sense", "passive"],
             behaviors: [
                 "activatable",
                 "240DegreeArcBuiltIn",
@@ -7680,7 +7732,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
-            xml: `<ADDER XMLID="HRRP" ID="1763830936069" BASECOST="3.0" LEVELS="0" ALIAS="High Range Radio Perception" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
+            xml: `<POWER XMLID="HRRP" ID="1764443819286" BASECOST="12.0" LEVELS="0" ALIAS="High Range Radio Perception" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="RADIOGROUP"></POWER>`,
         },
         {},
     );
@@ -12503,17 +12555,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="RAILED" ID="1756738533694" BASECOST="1.0" LEVELS="0" ALIAS="Railed Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-        },
-        {},
-    );
-    addPower(
-        {
-            // DETECT related
-            key: "RANGE",
-            behaviors: ["adder"],
-            type: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="RANGE" ID="1746309597386" BASECOST="5.0" LEVELS="0" ALIAS="Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
