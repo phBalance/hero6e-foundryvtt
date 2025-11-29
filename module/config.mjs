@@ -7541,6 +7541,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            key: "ANALYZESENSE",
+            type: ["sense"],
+            behaviors: ["sense"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costPerLevel: fixedValueFunction(1),
+            xml: `<POWER XMLID="ANALYZESENSE" ID="1763945053136" BASECOST="10.0" LEVELS="0" ALIAS="Analyze" POSITION="114" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
 
     addPower(
         {
@@ -7552,6 +7565,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="CONCEALED" ID="1763830728871" BASECOST="0.0" LEVELS="1" ALIAS="Concealed (-1 with Detect PER Rolls)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CONCEALED",
+            type: ["sense"],
+            behaviors: ["sense"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costPerLevel: fixedValueFunction(1),
+            xml: `<POWER XMLID="CONCEALED" ID="1763945879583" BASECOST="0.0" LEVELS="1" ALIAS="Concealed" POSITION="117" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="fasdfasdf" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
@@ -7699,6 +7725,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costPerLevel: fixedValueFunction(3),
             xml: `<POWER XMLID="ENHANCEDPERCEPTION" ID="1738452641594" BASECOST="0.0" LEVELS="1" ALIAS="Enhanced Perception" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "EXTRA",
+            type: ["sense"],
+            behaviors: ["adder"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            costPerLevel: fixedValueFunction(3),
+            xml: `<ADDER XMLID="EXTRA" ID="1764044787192" BASECOST="5.0" LEVELS="0" ALIAS="Each Extra Thing or Class of Things" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -8112,6 +8151,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             xml: `<ADDER XMLID="RAPID" ID="1763830631952" BASECOST="0.0" LEVELS="1" ALIAS="Rapid" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RAPID",
+            type: ["sense"],
+            behaviors: ["sense"],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            costPerLevel: fixedValueFunction(3),
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            xml: `<POWER XMLID="RAPID" ID="1763829793931" BASECOST="0.0" LEVELS="1" ALIAS="Rapid" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
@@ -15749,6 +15801,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SIDEEFFECTS" ID="1737923914185" BASECOST="-0.25" LEVELS="0" ALIAS="Side Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINOR" OPTIONID="MINOR" OPTION_ALIAS="Minor Side Effect" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SOURCEONLY",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="SOURCEONLY" ID="1763266213674" BASECOST="-1.0" LEVELS="0" ALIAS="Source Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );

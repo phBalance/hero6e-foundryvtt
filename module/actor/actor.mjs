@@ -1500,7 +1500,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async FullHealth() {
-        const tDelta = 500;
+        const tDelta = 100;
         let start = Date.now();
         await this.statuses.clear();
         let end = Date.now();
@@ -2409,11 +2409,11 @@ export class HeroSystem6eActor extends Actor {
             // Kluge to ensure characteristic values match max
             try {
                 if (this.id) {
+                    const changes = {};
                     for (const key of Object.keys(this.system.characteristics)) {
-                        await this.update({
-                            [`system.characteristics.${key}.value`]: this.system.characteristics[key].max,
-                        });
+                        changes[`system.characteristics.${key}.value`] = this.system.characteristics[key].max;
                     }
+                    await this.update(changes);
                 }
             } catch (e) {
                 console.error(e);
