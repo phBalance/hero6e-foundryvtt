@@ -2347,19 +2347,23 @@ export class HeroSystem6eItem extends Item {
      * @returns number
      */
     getBaseEndCost() {
-        // PERKS, TALENTS, COMPLICATIONS, and martial maneuvers do not use endurance.
-        if (["perk", "talent", "complication", "martialart"].includes(this.type)) {
+        const isStrOrStrDamage = this.system.XMLID === "__STRENGTHDAMAGE" || this.system.XMLID === "STR";
+
+        // STR (or any other characteristic only cost end when the native STR is used), PERKS, TALENTS, COMPLICATIONS, and martial maneuvers do not use endurance.
+        if (
+            !isStrOrStrDamage &&
+            ["characteristic", "perk", "talent", "complication", "martialart"].includes(this.type)
+        ) {
             return 0;
         }
 
         // Combat maneuvers cost 1 END
-        if (this.type === "maneuver") {
+        else if (this.type === "maneuver") {
             return 1;
         }
 
         // Everything else is based on 1 END per 10 active points except for strength which is 1 per 5 when using optional heroic rules.
-        const endUnitSize =
-            this.system.XMLID === "__STRENGTHDAMAGE" && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
+        const endUnitSize = isStrOrStrDamage && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
 
         const activePoints = this.system._active?.originalActivePoints ?? this._activePoints;
 
@@ -5221,9 +5225,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     get end() {
-        // STR (or any other characteristic only cost end when the native STR is used)
-        if (this.baseInfo?.type.includes("characteristic")) return 0;
-
         let end = this.getBaseEndCost();
 
         const increasedEnd = this.findModsByXmlid("INCREASEDEND");
