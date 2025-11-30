@@ -4876,8 +4876,224 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("Transport Familiarity w/ partial subadder not exceeding group cost", async function () {
-                const contents = `
+            describe("Transport Familiarity", async function () {
+                describe("TF with no adders", async function () {
+                    const contents = `
+                    <SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1703369639524" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES/>
+                    </SKILL>
+                `;
+                    let item;
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "TF:");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 1);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 1);
+                    });
+                });
+
+                describe("TF with qualified Combat Driver discount", async function () {
+                    const contents = `
+                    <SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1703369639524" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES/>
+                        <ADDER XMLID="COMMONMOTORIZED" ID="1764542051032" BASECOST="2.0" LEVELS="0" ALIAS="Common Motorized Ground Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                        <NOTES />
+                        <ADDER XMLID="LARGEMOTORIZED" ID="1764542051029" BASECOST="1.0" LEVELS="0" ALIAS="Large Motorized Ground Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                        <NOTES />
+                        </ADDER>
+                    </ADDER>
+                    </SKILL>
+                `;
+                    const combatDrivingContents = `
+                    <SKILL XMLID="COMBAT_DRIVING" ID="1764541974445" BASECOST="3.0" LEVELS="0" ALIAS="Combat Driving" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                    <NOTES />
+                    </SKILL>
+                `;
+                    let item;
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(combatDrivingContents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "TF: Large Motorized Ground Vehicles");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 0);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 0);
+                    });
+                });
+
+                describe("TF with non-qualified Combat Driver discount", async function () {
+                    const contents = `
+                    <SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1703369639524" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES/>
+                        <ADDER XMLID="COMMONMOTORIZED" ID="1764542215987" BASECOST="2.0" LEVELS="0" ALIAS="Common Motorized Ground Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </SKILL>
+                `;
+                    const combatDrivingContents = `
+                    <SKILL XMLID="COMBAT_DRIVING" ID="1764541974445" BASECOST="3.0" LEVELS="0" ALIAS="Combat Driving" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                    <NOTES />
+                    </SKILL>
+                `;
+                    let item;
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(combatDrivingContents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "TF: Common Motorized Ground Vehicles");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 2);
+                    });
+                });
+
+                describe("TF with 3 qualified discounts", async function () {
+                    const contents = `
+                    <SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1764541050137" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES />
+                    <ADDER XMLID="RIDINGANIMALS" ID="1764542895894" BASECOST="2.0" LEVELS="0" ALIAS="Riding Animals" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                            <NOTES />
+                            <ADDER XMLID="DOGS" ID="1764542895886" BASECOST="1.0" LEVELS="0" ALIAS="Dogs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                            </ADDER>
+                        </ADDER>
+                        <ADDER XMLID="AIR" ID="1764542901276" BASECOST="0.0" LEVELS="0" ALIAS="Air Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                            <NOTES />
+                            <ADDER XMLID="SMALLPLANES" ID="1764542901275" BASECOST="1.0" LEVELS="0" ALIAS="Small Planes" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                            </ADDER>
+                        </ADDER>
+                        <ADDER XMLID="COLDWEATHERVEHICLES" ID="1764542904082" BASECOST="0.0" LEVELS="0" ALIAS="Cold-Weather Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                            <NOTES />
+                            <ADDER XMLID="SNOWMOBILES" ID="1764542904081" BASECOST="1.0" LEVELS="0" ALIAS="Snowmobiles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                            </ADDER>
+                        </ADDER>
+                        </SKILL>
+                `;
+                    const combatDrivingContents = `
+                    <SKILL XMLID="COMBAT_DRIVING" ID="1764541974445" BASECOST="3.0" LEVELS="0" ALIAS="Combat Driving" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                    <NOTES />
+                    </SKILL>
+                `;
+                    const combatPilotingContents = `
+                    <SKILL XMLID="COMBAT_PILOTING" ID="1764542834947" BASECOST="3.0" LEVELS="0" ALIAS="Combat Piloting" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                    <NOTES />
+                    </SKILL>
+                `;
+                    const ridingContents = `
+                    <SKILL XMLID="RIDING" ID="1764542742358" BASECOST="3.0" LEVELS="0" ALIAS="Riding" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                    <NOTES />
+                    </SKILL>
+                `;
+                    let item;
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(combatDrivingContents, actor), {
+                            parent: actor,
+                        });
+                        await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(combatPilotingContents, actor), {
+                            parent: actor,
+                        });
+                        await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(ridingContents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "TF: Dogs, Small Planes, Snowmobiles");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 0);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 0);
+                    });
+                });
+
+                describe("Transport Familiarity w/ partial subadder not exceeding group cost", async function () {
+                    const contents = `
                     <SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1703369639524" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                         <NOTES/>
                         <ADDER XMLID="COMMONMOTORIZED" ID="1703371010094" BASECOST="2.0" LEVELS="0" ALIAS="Common Motorized Ground Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
@@ -4888,39 +5104,39 @@ export function registerUploadTests(quench) {
                         </ADDER>
                     </SKILL>
                 `;
-                let item;
-                let actor;
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, is5e: false });
-                    item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
+                    let item;
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
                     });
-                    await actor.FullHealth();
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "TF: Small Motorized Ground Vehicles");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 1);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 1);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                it("description", function () {
-                    assert.equal(item.system.description, "TF: Small Motorized Ground Vehicles");
-                });
-
-                it("roll", function () {
-                    expect(item.system.roll).to.not.be.true;
-                });
-
-                it("realCost", function () {
-                    assert.equal(item.realCost, 1);
-                });
-
-                it("activePoints", function () {
-                    assert.equal(item.activePoints, 1);
-                });
-            });
-
-            describe("Transport Familiarity w/ partial subadder exceeding group cost", async function () {
-                const contents = `
+                describe("Transport Familiarity w/ partial subadder exceeding group cost", async function () {
+                    const contents = `
                     <SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1703370592843" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Animals - cost equals category" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                         <NOTES/>
                         <ADDER XMLID="RIDINGANIMALS" ID="1703370951788" BASECOST="2.0" LEVELS="0" ALIAS="Riding Animals" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
@@ -4940,44 +5156,44 @@ export function registerUploadTests(quench) {
                         </ADDER>
                     </SKILL>
                 `;
-                let item;
+                    let item;
 
-                before(async function () {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
                     });
 
-                    actor.items.set(item.system.XMLID, item);
+                    it("description", function () {
+                        assert.equal(item.system.description, "TF: Dogs, Equines, Flying Beasts, Swimming Beasts");
+                    });
+
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 2);
+                    });
                 });
 
-                it("description", function () {
-                    assert.equal(item.system.description, "TF: Dogs, Equines, Flying Beasts, Swimming Beasts");
-                });
-
-                it("roll", function () {
-                    expect(item.system.roll).to.not.be.true;
-                });
-
-                it("realCost", function () {
-                    assert.equal(item.realCost, 2);
-                });
-
-                it("activePoints", function () {
-                    assert.equal(item.activePoints, 2);
-                });
-            });
-
-            describe("Transport Familiarity w/ full subadder", async function () {
-                const contents = `
+                describe("Transport Familiarity w/ full subadder", async function () {
+                    const contents = `
                     <SKILL XMLID="TRANSPORT_FAMILIARITY" ID="1703370640285" BASECOST="0.0" LEVELS="0" ALIAS="TF" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                         <NOTES/>
                         <ADDER XMLID="COMMONMOTORIZED" ID="1703370996086" BASECOST="2.0" LEVELS="0" ALIAS="Common Motorized Ground Vehicles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -4985,39 +5201,40 @@ export function registerUploadTests(quench) {
                         </ADDER>
                     </SKILL>
                 `;
-                let item;
+                    let item;
 
-                before(async function () {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = false;
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
                     });
 
-                    actor.items.set(item.system.XMLID, item);
-                });
+                    it("description", function () {
+                        assert.equal(item.system.description, "TF: Common Motorized Ground Vehicles");
+                    });
 
-                it("description", function () {
-                    assert.equal(item.system.description, "TF: Common Motorized Ground Vehicles");
-                });
+                    it("roll", function () {
+                        expect(item.system.roll).to.not.be.true;
+                    });
 
-                it("roll", function () {
-                    expect(item.system.roll).to.not.be.true;
-                });
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 2);
+                    });
 
-                it("realCost", function () {
-                    assert.equal(item.realCost, 2);
-                });
-
-                it("activePoints", function () {
-                    assert.equal(item.activePoints, 2);
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 2);
+                    });
                 });
             });
 
@@ -9623,6 +9840,46 @@ export function registerUploadTests(quench) {
 
                     it("activePoints", function () {
                         assert.equal(item.system.activePoints, 5);
+                    });
+                });
+            });
+
+            describe.only("Enhanced Perception", async function () {
+                describe("Hearing Group", async function () {
+                    const contents = `
+                    <POWER XMLID="ENHANCEDPERCEPTION" ID="1755377294477" BASECOST="0.0" LEVELS="4" ALIAS="Enhanced Perception" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </POWER>
+                `;
+                    let item;
+
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Enhanced Perception +4 PER with Hearing Group");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 8);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 8);
+
+                        it("characterPointCost", function () {
+                            assert.equal(item.characterPointCost, 8);
+                        });
                     });
                 });
             });

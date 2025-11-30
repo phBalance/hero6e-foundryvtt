@@ -3270,7 +3270,9 @@ export class HeroSystem6eItem extends Item {
                     // Don't show the +1, 1/2d6, 1d6-1 modifier as it's already included in the description's dice formula
                     break;
 
+                case "AIR":
                 case "BEAMWEAPONS":
+                case "COLDWEATHERVEHICLES":
                 case "COMMONMARTIAL":
                 case "COMMONMELEE":
                 case "COMMONMISSILE":
@@ -3278,13 +3280,21 @@ export class HeroSystem6eItem extends Item {
                 case "EARLYFIREARMS":
                 case "EMPLACEDWEAPONS":
                 case "ENERGYWEAPONS":
+                case "MECHA":
+                case "MUSCLEPOWEREDGROUNDVEHICLES":
+                case "RECREATIONALVEHICLES":
                 case "RIDINGANIMALS":
+                case "SCIFI":
                 case "SIEGEENGINES":
                 case "SMALLARMS":
                 case "UNCOMMONMARTIAL":
                 case "UNCOMMONMELEE":
                 case "UNCOMMONMISSILEWEAPONS":
                 case "UNCOMMONMODERNWEAPONS":
+                case "UNCOMMONMOTORIZEDGROUNDVEHICLES":
+                case "WATER":
+                    // TODO: This could be more generic, perhapse look for PRIVATE = FALSE
+
                     // These Transport Familiarity & Weapon Familiarity adders may contain subadders. If they do, then use the subadders
                     // otherwise use the adder.
                     if (adder.SELECTED) {
@@ -4954,6 +4964,18 @@ export class HeroSystem6eItem extends Item {
             _basePoints = Math.max(1, _basePoints);
         }
 
+        // Many ITEMs with no ADDERs costs min 1 point
+        if (
+            !["maneuver", "martialart", "characteristic"].includes(this.type) &&
+            !["PERCEPTION", "__STRENGTHDAMAGE", "LIST"].includes(this.system.XMLID) &&
+            this.adders.length === 0
+        ) {
+            if (_basePoints === 0) {
+                console.warn(`Min cost is 1 pt for ${this.name}`, this);
+            }
+            _basePoints = Math.max(1, _basePoints);
+        }
+
         return _basePoints;
     }
 
@@ -4971,6 +4993,66 @@ export class HeroSystem6eItem extends Item {
                     _cost += Math.max(1, adder.cost - 1);
                 } else {
                     _cost += adder.cost;
+                }
+            }
+        }
+
+        // TRANSPORT_FAMILIARITY discounts
+        // TODO: What if you have more than 1 TF, you only get 1 discount for a single TF
+        if (this.system.XMLID === "TRANSPORT_FAMILIARITY") {
+            // Combat Driving includes Familiarity with
+            // one 1-CP class of vehicles that operate in two dimensions (but
+            // if the character buys the full category, this “free” CP does not
+            // reduce the cost).
+            // TODO: This list is incomplete, need config.mjs entries for all TF's along with valid discounts
+            const COMBAT_DRIVING = this.actor.items.find((item) => item.system.XMLID === "COMBAT_DRIVING");
+            if (COMBAT_DRIVING) {
+                const qualfyingCategoryForDiscount = this.adders.find(
+                    (a) =>
+                        [
+                            "COMMONMOTORIZED",
+                            "MUSCLEPOWEREDGROUNDVEHICLES",
+                            "UNCOMMONMOTORIZEDGROUNDVEHICLES",
+                            "COLDWEATHERVEHICLES",
+                        ].includes(a.XMLID) && !a.SELECTED,
+                );
+                const qualfying1PointDiscount = qualfyingCategoryForDiscount?.adders.find((a) => a.BASECOST === 1);
+                if (qualfying1PointDiscount) {
+                    _cost = Math.max(0, _cost - 1);
+                } else {
+                    console.warn(`COMBAT_DRIVING discount found no matching 1-CP skill`, this);
+                }
+            }
+
+            // Combat Piloting
+            // includes Familiarity with one 1-CP class of vehicles that operate
+            // in three dimensions (but if the character buys the full category,
+            // this “free” CP does not reduce the cost).
+            const COMBAT_PILOTING = this.actor.items.find((item) => item.system.XMLID === "COMBAT_PILOTING");
+            if (COMBAT_PILOTING) {
+                const qualfyingCategoryForDiscount = this.adders.find((a) => ["AIR"].includes(a.XMLID) && !a.SELECTED);
+                const qualfying1PointDiscount = qualfyingCategoryForDiscount?.adders.find((a) => a.BASECOST === 1);
+                if (qualfying1PointDiscount) {
+                    _cost = Math.max(0, _cost - 1);
+                } else {
+                    console.warn(`COMBAT_PILOTING discount found no matching 1-CP skill`, this);
+                }
+            }
+
+            // Combat Piloting
+            // includes Familiarity with one 1-CP class of vehicles that operate
+            // in three dimensions (but if the character buys the full category,
+            // this “free” CP does not reduce the cost).
+            const RIDING = this.actor.items.find((item) => item.system.XMLID === "RIDING");
+            if (RIDING) {
+                const qualfyingCategoryForDiscount = this.adders.find(
+                    (a) => ["RIDINGANIMALS"].includes(a.XMLID) && !a.SELECTED,
+                );
+                const qualfying1PointDiscount = qualfyingCategoryForDiscount?.adders.find((a) => a.BASECOST === 1);
+                if (qualfying1PointDiscount) {
+                    _cost = Math.max(0, _cost - 1);
+                } else {
+                    console.warn(`RIDING discount found no matching 1-CP skill`, this);
                 }
             }
         }

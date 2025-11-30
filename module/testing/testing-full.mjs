@@ -7128,19 +7128,15 @@ export function registerFullTests(quench) {
 
                 describe("tab costs", async function () {
                     it("should have the correct total cost", function () {
-                        // HD shows 662 (we think TF shoud cost 4)
-                        // REF: https://www.herogames.com/forums/topic/107693-transport-familiarity-cost-bug/
-                        assert.equal(actor.realCost, 663);
+                        assert.equal(actor.realCost, 662);
                     });
 
                     it("should have the correct characteristics cost", function () {
                         assert.equal(actor.pointsDetail.characteristics, 248);
                     });
 
-                    // HD shows 662 (we think TF shoud cost 4)
-                    // REF: https://www.herogames.com/forums/topic/107693-transport-familiarity-cost-bug/
-                    it("should have the correct skills cost", function () {
-                        assert.equal(actor.pointsDetail.skill, 46);
+                    it.only("should have the correct skills cost", function () {
+                        assert.equal(actor.pointsDetail.skill, 45);
                     });
 
                     it("should have the correct talents cost", function () {

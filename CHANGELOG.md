@@ -10,8 +10,10 @@
 - Fixed issue with powers that grant movement that have a FOCUS/MOBILITY limitation. [#3137](https://github.com/dmdorman/hero6e-foundryvtt/issues/3137)
 - Improved support for older HDC formats. [#3139](https://github.com/dmdorman/hero6e-foundryvtt/issues/3139)
 - Combat Values are now properly halved last. [#2757](https://github.com/dmdorman/hero6e-foundryvtt/issues/2757) [#2379](https://github.com/dmdorman/hero6e-foundryvtt/issues/2379) [#362](https://github.com/dmdorman/hero6e-foundryvtt/issues/362)
-- Improved handling of duplicate Hero Designer ID's during upload [#3202](https://github.com/dmdorman/hero6e-foundryvtt/issues/3202)
+- Improved handling of duplicate Hero Designer IDs during upload [#3202](https://github.com/dmdorman/hero6e-foundryvtt/issues/3202)
 - Fixed extra resource consumption at start of each turn. [#3193](https://github.com/dmdorman/hero6e-foundryvtt/issues/3193)
+- Improved Skill costs with Riding, Combat Driving, and Combat Piloting discounts.
+- Fixed cost of ENHANCED PERCEPTION.
 
 ## Version 4.2.3 20251115
 
@@ -54,7 +56,7 @@ WARNING: This update has significant changes that we have not listed below. Thin
 - Fixed missing Combat Skill Level settings. [#2830](https://github.com/dmdorman/hero6e-foundryvtt/issues/2830)
 - You are prompted before clearing an existing token image during HDC uploads that have no image in the HDC file. [#2831](https://github.com/dmdorman/hero6e-foundryvtt/issues/2831)
 - Fixed issue that prevented uploading of CHANGE ENVIRONMENT with SELECTIVE TARGET. [#2828](https://github.com/dmdorman/hero6e-foundryvtt/issues/2828)
-- Improved support for dragging actors from compendium into scene or actor sidebaar. [#2573](https://github.com/dmdorman/hero6e-foundryvtt/issues/2573)
+- Improved support for dragging actors from compendium into scene or actor sidebar. [#2573](https://github.com/dmdorman/hero6e-foundryvtt/issues/2573)
 
 ## Version 4.1.16 20250906
 
