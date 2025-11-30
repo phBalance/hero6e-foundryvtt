@@ -1954,6 +1954,16 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        // Some martial arts and maneuvers have temporary effects (OCV/DCV)
+        // but that doesn't mean they are activatable
+        if (this.system.XMLID === "MANEUVER") {
+            return this.isActivatableManeuver();
+        }
+
+        if (this.baseInfo?.behaviors?.includes("activatable")) {
+            return true;
+        }
+
         const itemEffects = this.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
         if (itemEffects) {
             return true;
@@ -1962,13 +1972,6 @@ export class HeroSystem6eItem extends Item {
         // NOTE: item._id can be null in the case of a temporary/effective item.
         const actorEffects = this.actor.effects.find((o) => o.origin === this.actor.items.get(this._id)?.uuid);
         if (actorEffects) {
-            return true;
-        }
-
-        if (
-            this.baseInfo?.behaviors?.includes("activatable") ||
-            (this.system.XMLID === "MANEUVER" && this.isActivatableManeuver())
-        ) {
             return true;
         }
 
