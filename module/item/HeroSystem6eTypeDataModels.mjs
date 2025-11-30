@@ -900,6 +900,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             checked: new BooleanField({ initial: false }), // DEADLYBLOW
             CARRIED: new BooleanField({ nullable: true }), // Typically for equipment; extending to include VPP
             FILE_ASSOCIATION: new StringField({ nullable: true }), // Follower file association in HDC
+            errors: new ArrayField(new StringField()), // During upload we sometimes put stuff in here for debugging
         };
     }
 }

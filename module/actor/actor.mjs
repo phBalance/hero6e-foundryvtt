@@ -2210,6 +2210,21 @@ export class HeroSystem6eActor extends Actor {
                             // Guess for some default values to reduce need for DB updates later
                             this.itemDataDefaults(itemData);
 
+                            // Duplicate ID? (ID may be a string)
+                            // Increment ID until we no longer have a duplciate ID
+                            // Possibility of duplicate ID on PARENT, which may not be handled properly
+                            let dupItem = itemsToCreate.find((item) => item.system.ID == itemData.system.ID);
+                            for (let loop = 1; loop < 99; loop++) {
+                                if (!dupItem) {
+                                    break;
+                                }
+                                console.warn(`Duplicate ID ${itemData.system.ID}`, itemData);
+                                itemData.system.errors ??= [];
+                                itemData.system.errors.push(`Duplicate ID ${itemData.system.ID}`);
+                                itemData.system.ID = parseInt(itemData.system.ID) + 1;
+                                dupItem = itemsToCreate.find((item) => item.system.ID == itemData.system.ID);
+                            }
+
                             // Note that we create COMPOUNDPOWER subitems before creating the parent
                             // so that we can remove the subitems from the parent COMPOUNDPOWER attributes
 
@@ -2281,6 +2296,21 @@ export class HeroSystem6eActor extends Actor {
 
                                     // Guess for some default values to reduce need for DB updates later
                                     this.itemDataDefaults(itemData2);
+
+                                    // Duplicate ID? (ID may be a string)
+                                    // Increment ID until we no longer have a duplciate ID
+                                    // Possibility of duplicate ID on PARENT, which may not be handled properly
+                                    let dupItem = itemsToCreate.find((item) => item.system.ID == itemData2.system.ID);
+                                    for (let loop = 1; loop < 99; loop++) {
+                                        if (!dupItem) {
+                                            break;
+                                        }
+                                        console.warn(`Duplicate ID ${itemData2.system.ID}`, itemData2);
+                                        itemData2.system.errors ??= [];
+                                        itemData2.system.errors.push(`Duplicate ID ${itemData2.system.ID}`);
+                                        itemData2.system.ID = parseInt(itemData2.system.ID) + 1;
+                                        dupItem = itemsToCreate.find((item) => item.system.ID == itemData2.system.ID);
+                                    }
 
                                     if (this.id) {
                                         itemsToCreate.push(itemData2);
@@ -2651,34 +2681,34 @@ export class HeroSystem6eActor extends Actor {
                 core: 3,
             };
 
-            // duplicate ID can be a problem
-            for (const item of this.items) {
-                if (item.system.ID) {
-                    // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
-                    const dups = this.items.filter((i) => i.system.ID == item.system.ID);
-                    if (dups.length > 1) {
-                        // Try to give duplicate items a new ID
-                        for (const dupItem of dups.splice(1)) {
-                            if (dupItem.childItems.length === 0) {
-                                await dupItem.update({
-                                    // [`system.idDuplicate`]: dupItem.system.ID,
-                                    [`system.ID`]: new Date().getTime(),
-                                    [`system.error`]: [
-                                        ...(dupItem.system.error || []),
-                                        "Duplicate ID, created new one",
-                                    ],
-                                });
-                                ui.notifications.warn(`Created new internal ID reference for <b>${item.name}</b>.`);
-                            } else {
-                                ui.notifications.warn(
-                                    `Duplicate ID reference for <b>${item.name}</b> may cause problems.`,
-                                    { permanent: true },
-                                );
-                            }
-                        }
-                    }
-                }
-            }
+            // duplicate ID can be a problem (moved into parser above)
+            // for (const item of this.items) {
+            //     if (item.system.ID) {
+            //         // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
+            //         const dups = this.items.filter((i) => i.system.ID == item.system.ID);
+            //         if (dups.length > 1) {
+            //             // Try to give duplicate items a new ID
+            //             for (const dupItem of dups.splice(1)) {
+            //                 if (dupItem.childItems.length === 0) {
+            //                     await dupItem.update({
+            //                         // [`system.idDuplicate`]: dupItem.system.ID,
+            //                         [`system.ID`]: new Date().getTime(),
+            //                         [`system.error`]: [
+            //                             ...(dupItem.system.error || []),
+            //                             "Duplicate ID, created new one",
+            //                         ],
+            //                     });
+            //                     ui.notifications.warn(`Created new internal ID reference for <b>${item.name}</b>.`);
+            //                 } else {
+            //                     ui.notifications.warn(
+            //                         `Duplicate ID reference for <b>${item.name}</b> may cause problems.`,
+            //                         { permanent: true },
+            //                     );
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
 
             uploadPerformance.postUpload2 = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
