@@ -3283,31 +3283,13 @@ export class HeroSystem6eActor extends Actor {
 
         // DISAD_POINTS: realCost
         const DISAD_POINTS = parseFloat(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
-        const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
+        const _disadPoints = Math.min(DISAD_POINTS, pointsDetail?.disadvantage || 0);
         if (_disadPoints !== 0) {
             pointsDetail.MatchingDisads = _disadPoints;
             activePointsDetail.MatchingDisads = _disadPoints;
-            // characterPointCost -= _disadPoints;
-            // activePoints -= _disadPoints;
         }
 
         let realCost = characterPointCost;
-        //this.system.activePoints = activePoints;
-        // if (this.id) {
-        //     await this.update(
-        //         {
-        //             "system.points": characterPointCost,
-        //             "system.activePoints": activePoints,
-        //             "system.pointsDetail": this.system.pointsDetail,
-        //             "system.activePointsDetail": this.system.activePointsDetail,
-        //         },
-        //         //{ render: false },
-        //         { hideChatMessage: true },
-        //     );
-        // } else {
-        //     //points = characterPointCost;
-        //     //this.system.activePoints = activePoints;
-        // }
 
         return {
             activePoints,
