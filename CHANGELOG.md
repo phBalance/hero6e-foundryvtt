@@ -11,6 +11,7 @@
 - Improved support for older HDC formats. [#3139](https://github.com/dmdorman/hero6e-foundryvtt/issues/3139)
 - Combat Values are now properly halved last. [#2757](https://github.com/dmdorman/hero6e-foundryvtt/issues/2757) [#2379](https://github.com/dmdorman/hero6e-foundryvtt/issues/2379) [#362](https://github.com/dmdorman/hero6e-foundryvtt/issues/362)
 - Improved handling of duplicate Hero Designer ID's during upload [#3202](https://github.com/dmdorman/hero6e-foundryvtt/issues/3202)
+- Fixed extra resource consumption at start of each turn. [#3193](https://github.com/dmdorman/hero6e-foundryvtt/issues/3193)
 
 ## Version 4.2.3 20251115
 

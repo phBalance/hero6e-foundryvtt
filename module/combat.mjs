@@ -808,10 +808,10 @@ export class HeroSystem6eCombat extends Combat {
                     ((parseInt(item.end || 0) > 0 && // Does the power use END?
                         !item.system.MODIFIER?.find(
                             (o) =>
-                                (o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE") ||
+                                (o.XMLID === "COSTSEND" && o.OPTIONID === "ACTIVATE") ||
                                 o.XMLID === "COSTSENDONLYTOACTIVATE",
                         )) || // Does the power use END continuously?
-                        (item.system.charges && !item.system.charges.continuing)), // Does the power use charges but is not continuous (as that is tracked by an effect when made active)?
+                        (item.system.charges.CHARGES && !item.system.charges.continuing)), // Does the power use charges but is not continuous (as that is tracked by an effect when made active)?
             )) {
                 const {
                     error,
