@@ -4031,6 +4031,13 @@ function calculateRequiredCharges(item, boostableChargesToUse) {
     const maximumCharges = item.system.charges?.max || 0;
     let chargesToUse = 0;
 
+    // Strength purchased as a power never costs resources. Strength only consumes resources when used. Internally, strength used for damage, is
+    // tracked via a different XMLID ("__STRENGTHDAMAGE"). We don't distinguish the "I'm lifting something" case.
+    // As well, we don't yet track strength resources used per phase (as they're supposed to be capped modulo exceptions like autofire).
+    if (item.system.XMLID === "STR") {
+        return 0;
+    }
+
     // Does this item use charges?
     if (maximumCharges > 0) {
         // Maximum of 4
@@ -4067,6 +4074,13 @@ function calculateRequiredEnd(item) {
             return 0;
         }
 
+        // Strength purchased as a power never costs resources. Strength only consumes resources when used. Internally, strength used for damage, is
+        // tracked via a different XMLID ("__STRENGTHDAMAGE"). We don't distinguish the "I'm lifting something" case.
+        // As well, we don't yet track strength resources used per phase (as they're supposed to be capped modulo exceptions like autofire).
+        if (item.system.XMLID === "STR") {
+            return 0;
+        }
+
         // Pushing uses 1 END per pushed CP
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
 
@@ -4089,6 +4103,13 @@ function calculateRequiredReserveEndurance(item) {
 
     if (item.system.USE_END_RESERVE && game.settings.get(HEROSYS.module, "use endurance")) {
         // TODO: Lack of support for ENDRESERVEOREND is coded in calculateRequiredEnd
+
+        // Strength purchased as a power never costs resources. Strength only consumes resources when used. Internally, strength used for damage, is
+        // tracked via a different XMLID ("__STRENGTHDAMAGE"). We don't distinguish the "I'm lifting something" case.
+        // As well, we don't yet track strength resources used per phase (as they're supposed to be capped modulo exceptions like autofire).
+        if (item.system.XMLID === "STR") {
+            return 0;
+        }
 
         // Pushing uses 1 END per pushed CP
         const endPerShot = (item.end || 0) + (item.system._active.pushedRealPoints || 0);
