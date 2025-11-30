@@ -7720,7 +7720,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
-            costPerLevel: fixedValueFunction(3),
+            costPerLevel: function (item) {
+                if (item.system.OPTIONID === "ALL") {
+                    return 3;
+                }
+                if (item.system.OPTIONID.includes("GROUP")) {
+                    return 2;
+                }
+                return 1;
+            },
             xml: `<POWER XMLID="ENHANCEDPERCEPTION" ID="1738452641594" BASECOST="0.0" LEVELS="1" ALIAS="Enhanced Perception" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
