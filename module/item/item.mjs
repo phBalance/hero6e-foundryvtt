@@ -1914,11 +1914,19 @@ export class HeroSystem6eItem extends Item {
      * @returns boolean
      */
     isActivatableManeuver() {
+        // FIXME: This is not stand alone, it only handles specific cases. Should default to false like isActivatable()
+        // and handle any item.
+
         // Hero designer has a few ways of marking things as doing damage. For the prebuilt ones you can't look at DAMAGETYPE as it's always "0" even
         // for things like a Flying Dodge. So, we make our decision based on the EFFECT/WEAPONEFFECT. This means that custom maneuvers need to have the
         // correct EFFECT or WEAPONEFFECT specified for things to work.
         // NOTE: Doesn't appear that there is a [WEAPONNNDDC] or [WEAPONFLASHDC] but we're going to add it just in case
         const effect = getManeuverEffect(this);
+
+        // Weapon Elements and anything without item.system.EFFECT
+        if (!effect) {
+            return false;
+        }
 
         // Does it have a recognized damage type?
         if (isManeuverThatDoesReplaceableDamageType(this)) {
@@ -1950,12 +1958,16 @@ export class HeroSystem6eItem extends Item {
 
     // FIXME: This should be trimmed down
     isActivatable() {
+        if (this.baseInfo?.behaviors?.includes("activatable")) {
+            return true;
+        }
+
         if (this.type === "characteristic") {
             return false;
         }
 
         const itemEffects = this.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
-        if (itemEffects) {
+        if (itemEffects && !["martialart", "maneuver"].includes(this.type)) {
             return true;
         }
 
@@ -1965,10 +1977,8 @@ export class HeroSystem6eItem extends Item {
             return true;
         }
 
-        if (
-            this.baseInfo?.behaviors?.includes("activatable") ||
-            (this.system.XMLID === "MANEUVER" && this.isActivatableManeuver())
-        ) {
+        // Careful isActivatableManeuver doesn't stand alone, it only handles specific cases.
+        if (this.system.XMLID === "MANEUVER" && this.isActivatableManeuver()) {
             return true;
         }
 
