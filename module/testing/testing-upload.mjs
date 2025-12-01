@@ -9844,7 +9844,7 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe.only("Enhanced Perception", async function () {
+            describe("Enhanced Perception", async function () {
                 describe("Hearing Group", async function () {
                     const contents = `
                     <POWER XMLID="ENHANCEDPERCEPTION" ID="1755377294477" BASECOST="0.0" LEVELS="4" ALIAS="Enhanced Perception" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">

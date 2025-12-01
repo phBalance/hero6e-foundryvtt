@@ -7135,7 +7135,7 @@ export function registerFullTests(quench) {
                         assert.equal(actor.pointsDetail.characteristics, 248);
                     });
 
-                    it.only("should have the correct skills cost", function () {
+                    it("should have the correct skills cost", function () {
                         assert.equal(actor.pointsDetail.skill, 45);
                     });
 
