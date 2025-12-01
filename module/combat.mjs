@@ -825,23 +825,26 @@ export class HeroSystem6eCombat extends Combat {
                     content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
                     await powerUsingResourcesToContinue.toggle();
                 } else {
-                    // TODO: Aaron added this and shouldn't be needed
-                    // if (
-                    //     resourcesRequired.totalCharges === 0 &&
-                    //     resourcesRequired.totalEnd === 0 &&
-                    //     resourcesRequired.totalReserveEnd === 0
-                    // ) {
-                    //     console.warn(`Skipping ${powerUsingResourcesToContinue.name} required no resources`);
-                    //     continue;
-                    // }
+                    // This check for no resource usage is required in at least 1 (2?) cases:
+                    // - STR as a power. item.end() for the filter will return the reported value but under the hood we say that STR
+                    //   uses 0 END.
+                    // - Continuing fuel charges won't use charges? Will depend how we actually implement them.
+                    // Regardless, we probably don't want to report a stream of no resource usage messages on the start of every turn.
+                    if (
+                        !(
+                            resourcesRequired.totalCharges === 0 &&
+                            resourcesRequired.totalEnd === 0 &&
+                            resourcesRequired.totalReserveEnd === 0
+                        )
+                    ) {
+                        content += resourcesUsedDescription
+                            ? `<li>${powerUsingResourcesToContinue.detailedName()} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
+                            : "";
 
-                    content += resourcesUsedDescription
-                        ? `<li>${powerUsingResourcesToContinue.detailedName()} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
-                        : "";
-
-                    spentResources.totalEnd += resourcesRequired.totalEnd;
-                    spentResources.totalReserveEnd += resourcesRequired.totalReserveEnd;
-                    spentResources.totalCharges += resourcesRequired.totalCharges;
+                        spentResources.totalEnd += resourcesRequired.totalEnd;
+                        spentResources.totalReserveEnd += resourcesRequired.totalReserveEnd;
+                        spentResources.totalCharges += resourcesRequired.totalCharges;
+                    }
                 }
             }
 
