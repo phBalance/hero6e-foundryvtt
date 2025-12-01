@@ -255,7 +255,7 @@ export async function activateManeuver(item) {
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.name];
     }
 
-    if (activeEffect.name) {
+    if (activeEffect.name && activeEffect.changes.length > 0) {
         if (activeEffect.update) {
             await activeEffect.update({ ...activeEffect, _id: undefined });
         } else {
