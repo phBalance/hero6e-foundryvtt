@@ -472,7 +472,7 @@ export class HeroSystem6eItem extends Item {
                 const currentAE =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
-                    null;
+                    {};
                 if (currentAE) {
                     if (currentAE.update) {
                         await currentAE.update({

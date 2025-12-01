@@ -494,13 +494,66 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     }
 
     _onCreate(data, options, userId) {
-        super._onCreate(data, options, userId);
+        super._onCreate(data, options);
         game[HEROSYS.module].effectPanel.refresh();
+        this.#updateValueBasedOnMax(data, options, userId);
     }
 
-    _onUpdate(options, userId) {
-        super._onUpdate(options, userId);
+    _onUpdate(changed, options, userId) {
+        super._onUpdate(changed, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
+        this.#updateValueBasedOnMax(changed, options);
+    }
+
+    async #updateValueBasedOnMax(data, options) {
+        // Update characteristic VALUE when MAX is modified
+
+        const actor = this.target;
+        if (actor.constructor?.name !== "HeroSystem6eActor") {
+            console.warn(`AE target is not an instance of HeroSystem6eActor`, this);
+            return;
+        }
+
+        // Created a disabled AE, do nothing
+        if (options.action === "create" && data.disabled) {
+            return;
+        }
+
+        if (options.action === "update" && data.changes) {
+            console.error("HeroSystem updating of VALUEs based on AE is not supported", data);
+            return;
+        }
+
+        const actorChanges = {};
+        for (const change of this.changes) {
+            const key = change.key.match(/([a-z]+)\.max/)?.[1];
+            if (key) {
+                if (actor?.system?.characteristics?.[key]) {
+                    let value = parseInt(change.value) || 0;
+
+                    // Disabled the effect so back out any changes
+                    if (data.disabled) {
+                        value = -value;
+                    }
+
+                    if (value > 0) {
+                        // Increase value, but don't exceed MAX
+                        const oldValue = actor.system.characteristics[key].value;
+                        const newValue = Math.min(oldValue, actor.system.characteristics[key].max) + value;
+                        console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
+                        actorChanges[`system.characteristics.${key}.value`] = newValue;
+                    }
+                    if (value < 0) {
+                        // Decrease value, but not below MAX
+                        const oldValue = actor.system.characteristics[key].value;
+                        const newValue = Math.max(oldValue, actor.system.characteristics[key].max) + value;
+                        console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
+                        actorChanges[`system.characteristics.${key}.value`] = newValue;
+                    }
+                }
+            }
+        }
+        await actor.update(actorChanges);
     }
 
     _onDelete(options, userId) {

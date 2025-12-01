@@ -1,5 +1,5 @@
-import { HeroSystem6eItem } from "../item/item.mjs";
-import { HeroSystem6eActor } from "../actor/actor.mjs";
+// import { HeroSystem6eItem } from "../item/item.mjs";
+// import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 export async function onManageActiveEffect(event, owner) {
     event.preventDefault();
@@ -44,31 +44,31 @@ export async function onManageActiveEffect(event, owner) {
                     }
 
                     // fixup characteristics value when AE is manually removed
-                    const actor = effect.parent;
-                    for (const change of effect.changes) {
-                        const xmlid = change.key.match(/([a-z]+)\.max/)?.[1];
-                        if (xmlid) {
-                            if (actor?.system?.characteristics?.[xmlid]) {
-                                const value = parseInt(change.value) || 0;
-                                if (value > 0) {
-                                    await actor.update({
-                                        [`system.characteristics.${xmlid}.value`]: Math.max(
-                                            actor.system.characteristics[xmlid].value - value,
-                                            actor.system.characteristics[xmlid].max - value,
-                                        ),
-                                    });
-                                }
-                                if (value < 0) {
-                                    await actor.update({
-                                        [`system.characteristics.${xmlid}.value`]: Math.min(
-                                            actor.system.characteristics[xmlid].value + value,
-                                            actor.system.characteristics[xmlid].max + value,
-                                        ),
-                                    });
-                                }
-                            }
-                        }
-                    }
+                    // const actor = effect.parent;
+                    // for (const change of effect.changes) {
+                    //     const xmlid = change.key.match(/([a-z]+)\.max/)?.[1];
+                    //     if (xmlid) {
+                    //         if (actor?.system?.characteristics?.[xmlid]) {
+                    //             const value = parseInt(change.value) || 0;
+                    //             if (value > 0) {
+                    //                 await actor.update({
+                    //                     [`system.characteristics.${xmlid}.value`]: Math.max(
+                    //                         actor.system.characteristics[xmlid].value - value,
+                    //                         actor.system.characteristics[xmlid].max - value,
+                    //                     ),
+                    //                 });
+                    //             }
+                    //             if (value < 0) {
+                    //                 await actor.update({
+                    //                     [`system.characteristics.${xmlid}.value`]: Math.min(
+                    //                         actor.system.characteristics[xmlid].value + value,
+                    //                         actor.system.characteristics[xmlid].max + value,
+                    //                     ),
+                    //                 });
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     await effect.delete();
                 } else {
                     await item.delete();
@@ -108,9 +108,9 @@ export async function onActiveEffectToggle(effect, newActiveState) {
     }
 
     // If this is an item update active state
-    const origin = await fromUuid(effect.origin);
-    const item = origin instanceof HeroSystem6eItem ? origin : effect.parent;
-    const actor = item?.actor || (item instanceof HeroSystem6eActor ? item : null);
+    // const origin = await fromUuid(effect.origin);
+    // const item = origin instanceof HeroSystem6eItem ? origin : effect.parent;
+    // const actor = item?.actor || (item instanceof HeroSystem6eActor ? item : null);
     // if (item) {
     //     promises.push(item.update({ "system.active": newActiveState }));
     // }
@@ -123,17 +123,17 @@ export async function onActiveEffectToggle(effect, newActiveState) {
     // CHALLENGE: Can we replace this with a different technique?
     // Modifying the VALUE when MAX is changed may be causing race conditions.
     // Can we change MAX & VALUE in the same database operation?
-    const actorChanges = {};
-    for (const change of effect.changes) {
-        // match something like system.characteristics.stun.max
-        const charMatch = change.key.match(/characteristics\.(.+)\.max$/);
-        if (charMatch) {
-            const char = charMatch[1];
-            const value = effect.disabled ? -parseInt(change.value) : parseInt(change.value);
-            actorChanges[`system.characteristics.${char}.value`] =
-                parseInt(actor.system.characteristics[char].value) + value;
-        }
-    }
+    // const actorChanges = {};
+    // for (const change of effect.changes) {
+    //     // match something like system.characteristics.stun.max
+    //     const charMatch = change.key.match(/characteristics\.(.+)\.max$/);
+    //     if (charMatch) {
+    //         const char = charMatch[1];
+    //         const value = effect.disabled ? -parseInt(change.value) : parseInt(change.value);
+    //         actorChanges[`system.characteristics.${char}.value`] =
+    //             parseInt(actor.system.characteristics[char].value) + value;
+    //     }
+    // }
 
-    return Object.keys(actorChanges).length > 0 ? actor.update(actorChanges) : null;
+    //return Object.keys(actorChanges).length > 0 ? actor.update(actorChanges) : null;
 }
