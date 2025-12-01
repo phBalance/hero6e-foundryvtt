@@ -211,6 +211,7 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
         getPowerInfo({
             xmlid: targetCharacteristic.toUpperCase(),
             actor: targetActor,
+            xmlTag: targetPower?.system.xmlTag || targetCharacteristic.toUpperCase(),
         });
 
     // Simplified Healing

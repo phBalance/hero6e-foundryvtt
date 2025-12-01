@@ -1874,7 +1874,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Kluge for TK as we are trying to avoid getInfo overhead
-        if (["TELEKINESIS"].includes(itemData.system.XMLID)) {
+        if (["TELEKINESIS", "NAKEDMODIFIER"].includes(itemData.system.XMLID)) {
             itemData.system.active = false;
         }
     }
