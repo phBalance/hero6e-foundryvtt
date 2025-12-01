@@ -494,15 +494,15 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     }
 
     _onCreate(data, options, userId) {
-        super._onCreate(data, options);
+        super._onCreate(data, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-        this.#updateValueBasedOnMax(data, options, userId);
+        globalThis.setTimeout(() => this.#updateValueBasedOnMax(data, options), 1);
     }
 
     _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-        this.#updateValueBasedOnMax(changed, options);
+        globalThis.setTimeout(() => this.#updateValueBasedOnMax(changed, options), 1);
     }
 
     async #updateValueBasedOnMax(data, options) {
@@ -529,27 +529,30 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             const key = change.key.match(/([a-z]+)\.max/)?.[1];
             if (key) {
                 if (actor?.system?.characteristics?.[key]) {
-                    let value = parseInt(change.value) || 0;
+                    // KLUGE: Set VALUE to MAX for now. We need a better solution.
+                    actorChanges[`system.characteristics.${key}.value`] = actor.system.characteristics[key].max;
+
+                    //let value = parseFloat(change.value) || 0;
 
                     // Disabled the effect so back out any changes
-                    if (data.disabled) {
-                        value = -value;
-                    }
+                    // if (data.disabled) {
+                    //     value = -value;
+                    // }
 
-                    if (value > 0) {
-                        // Increase value, but don't exceed MAX
-                        const oldValue = actor.system.characteristics[key].value;
-                        const newValue = Math.min(oldValue, actor.system.characteristics[key].max) + value;
-                        console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
-                        actorChanges[`system.characteristics.${key}.value`] = newValue;
-                    }
-                    if (value < 0) {
-                        // Decrease value, but not below MAX
-                        const oldValue = actor.system.characteristics[key].value;
-                        const newValue = Math.max(oldValue, actor.system.characteristics[key].max) + value;
-                        console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
-                        actorChanges[`system.characteristics.${key}.value`] = newValue;
-                    }
+                    // if (value > 0) {
+                    //     // Increase value, but don't exceed MAX
+                    //     const oldValue = actor.system.characteristics[key].value;
+                    //     const newValue = Math.min(oldValue, actor.system.characteristics[key].max) + value;
+                    //     console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
+                    //     actorChanges[`system.characteristics.${key}.value`] = newValue;
+                    // }
+                    // if (value < 0) {
+                    //     // Decrease value, but not below MAX
+                    //     const oldValue = actor.system.characteristics[key].value;
+                    //     const newValue = Math.max(oldValue, actor.system.characteristics[key].max) + value;
+                    //     console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
+                    //     actorChanges[`system.characteristics.${key}.value`] = newValue;
+                    // }
                 }
             }
         }
@@ -559,6 +562,9 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
+
+        // Status toggles call this (prone)
+        globalThis.setTimeout(() => this.#updateValueBasedOnMax({}, options), 1);
     }
 
     _prepareDuration() {
