@@ -496,13 +496,19 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     _onCreate(data, options, userId) {
         super._onCreate(data, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-        globalThis.setTimeout(() => this.#updateValueBasedOnMax(data, options), 1);
+
+        if (this.isOwner) {
+            globalThis.setTimeout(() => this.#updateValueBasedOnMax(data, options), 1);
+        }
     }
 
     _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-        globalThis.setTimeout(() => this.#updateValueBasedOnMax(changed, options), 1);
+
+        if (this.isOwner) {
+            globalThis.setTimeout(() => this.#updateValueBasedOnMax(changed, options), 1);
+        }
     }
 
     async #updateValueBasedOnMax(data, options) {
@@ -563,8 +569,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
 
-        // Status toggles call this (prone)
-        globalThis.setTimeout(() => this.#updateValueBasedOnMax({}, options), 1);
+        if (this.isOwner) {
+            // Status toggles call this (e.g. prone)
+            globalThis.setTimeout(() => this.#updateValueBasedOnMax({}, options), 1);
+        }
     }
 
     _prepareDuration() {
