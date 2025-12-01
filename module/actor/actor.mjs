@@ -1500,7 +1500,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async FullHealth() {
-        const tDelta = 100;
+        const tDelta = 500;
         let start = Date.now();
         await this.statuses.clear();
         let end = Date.now();

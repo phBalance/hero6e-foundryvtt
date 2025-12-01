@@ -11,7 +11,7 @@
 - Improved support for older HDC formats. [#3139](https://github.com/dmdorman/hero6e-foundryvtt/issues/3139)
 - Combat Values are now properly halved last. [#2757](https://github.com/dmdorman/hero6e-foundryvtt/issues/2757) [#2379](https://github.com/dmdorman/hero6e-foundryvtt/issues/2379) [#362](https://github.com/dmdorman/hero6e-foundryvtt/issues/362)
 - Improved handling of duplicate Hero Designer IDs during upload [#3202](https://github.com/dmdorman/hero6e-foundryvtt/issues/3202)
-- Fixed extra resource consumption at start of each turn. [#3193](https://github.com/dmdorman/hero6e-foundryvtt/issues/3193)
+- Fixed powers incorrectly using END at start of each turn. [#3193](https://github.com/dmdorman/hero6e-foundryvtt/issues/3193)
 - Improved Skill costs with Riding, Combat Driving, and Combat Piloting discounts.
 - Fixed cost of ENHANCED PERCEPTION.
 
