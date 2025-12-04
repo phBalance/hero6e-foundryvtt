@@ -2360,20 +2360,29 @@ export class HeroSystem6eActor extends Actor {
             const itemsToUpdate = itemsToCreate.filter((o) => o._id);
             itemsToCreate = itemsToCreate.filter((o) => !o._id);
 
-            // Sanity check for item.type and
-            // invalidate the item caches for anything we're going to update
-            for (const item of itemsToUpdate) {
-                if (this.items.find((o) => o.id === item._id).type !== item.type) {
-                    await ui.notifications.warn(`${item.name} changed to type=${item.type}`);
-                }
-            }
-
             // Make sure itemsToUpdate have ADDER/MODIFIER/POWER array
             // Which allows a new HDC to remove ADDER during update, without it will never clear
             for (const itemToUpdate of itemsToUpdate) {
                 itemToUpdate.system.ADDER ??= [];
                 itemToUpdate.system.MODIFIER ??= [];
                 itemToUpdate.system.POWER ??= [];
+            }
+
+            // If item.type is different then:
+            // The type of a Document can be changed only if the system field
+            // is force-replaced (==) or updated with {recursive: false}
+            for (const item of itemsToUpdate) {
+                const itemExisting = this.items.find((o) => o.id === item._id);
+                if (itemExisting?.type !== item.type) {
+                    await ui.notifications.warn(
+                        `${item.name} changed from type=${itemExisting.type} to type=${item.type}`,
+                    );
+
+                    // item2[`==system`] = item2.system;
+                    // delete item2.system;
+
+                    await itemExisting.update({ type: item.type, "==system": item.system });
+                }
             }
 
             // update existing document, overwriting any MODIFIERS, etc
