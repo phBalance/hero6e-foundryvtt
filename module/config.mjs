@@ -8267,6 +8267,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            key: "TRACKINGSENSE",
+            type: ["sense", "passive"],
+            behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            costPerLevel: fixedValueFunction(0),
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            xml: `<POWER XMLID="TRACKINGSENSE" ID="1586662531588" BASECOST="10.0" LEVELS="0" ALIAS="Tracking" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMELLGROUP" OPTIONID="SMELLGROUP" OPTION_ALIAS="Smell/Taste Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Scent" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+
     addPower(
         {
             key: "TRANSMIT",
