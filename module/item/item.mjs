@@ -5715,7 +5715,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         // HTH
-        if (this.system.OPTIONID === "HTH" && attackItem.system.range === "No Range") {
+        // Basic Strike martial arts has a range of "Self" which seems incorrect #3228
+        if (
+            this.system.OPTIONID === "HTH" &&
+            (attackItem.system.range === "No Range" || attackItem.system.CATEGORY === "Hand To Hand")
+        ) {
             return true;
         }
 
