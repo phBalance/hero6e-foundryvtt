@@ -9,20 +9,16 @@ const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplat
 /**
  * Return the full list of possible powers and characteristics. No skills, talents, or perks.
  */
-export function adjustmentSourcesPermissive(actor, is5e) {
+export function adjustmentSourcesPermissive(actor, is5e, item) {
     let choices = {};
 
-    if (!actor) {
-        console.error("Missing Actor");
-        return choices;
-    }
-
-    if (is5e === undefined) is5e = actor.is5e;
-
-    // if (is5e !== false && is5e !== true && is5e !== undefined) {
-    //     console.error("bad paramater", is5e);
+    // Do we really have to have actor? I think we can proceed without it.
+    // if (!actor) {
+    //     console.warn(` ${item?.name} [${item?.uuid}] missing Actor`, item);
     //     return choices;
     // }
+
+    is5e ??= item.is5e;
 
     const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(
@@ -42,7 +38,7 @@ export function adjustmentSourcesPermissive(actor, is5e) {
 
     // Add * to defensive powers
     for (let key of Object.keys(choices)) {
-        if (defensivePowerAdjustmentMultiplier(key, actor, is5e) > 1) {
+        if (defensivePowerAdjustmentMultiplier({ XMLID: key, actor, is5e }) > 1) {
             choices[key] += "*";
         }
     }
@@ -84,7 +80,7 @@ export function adjustmentSourcesStrict(actor) {
 
     // Add * to defensive powers
     for (let key of Object.keys(choices)) {
-        if (defensivePowerAdjustmentMultiplier(key, actor) > 1) {
+        if (defensivePowerAdjustmentMultiplier({ XMLID: key, actor }) > 1) {
             choices[key] += "*";
         }
     }
@@ -106,7 +102,7 @@ const defensiveCharacteristics5e = ["PD", "ED"];
 // 6e (V1 pg 135)
 const defensiveCharacteristics6e = ["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"];
 
-export function defensivePowerAdjustmentMultiplier(XMLID, actor, is5e) {
+export function defensivePowerAdjustmentMultiplier({ XMLID, actor, is5e }) {
     if (!XMLID) return 1;
 
     if (is5e !== false && is5e !== true && is5e !== undefined) {
@@ -197,7 +193,11 @@ export function determineMaxAdjustment(item, simplifiedHealing, potentialCharact
 export function determineCostPerActivePointWithDefenseMultipler(targetCharacteristic, targetPower, targetActor) {
     return (
         determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) *
-        defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e)
+        defensivePowerAdjustmentMultiplier({
+            XMLID: targetCharacteristic.toUpperCase(),
+            actor: targetActor,
+            is5e: targetActor?.is5e,
+        })
     );
 }
 
@@ -482,11 +482,11 @@ export async function performAdjustment(
     const targetSystem = targetCharacteristic != null ? targetActor : targetPower;
 
     // Halve AP, min 1 for defenses
-    let _multiplier = defensivePowerAdjustmentMultiplier(
-        potentialCharacteristic.toUpperCase(),
-        targetActor,
-        targetActor?.is5e,
-    );
+    let _multiplier = defensivePowerAdjustmentMultiplier({
+        XMLID: potentialCharacteristic.toUpperCase(),
+        actor: targetActor,
+        is5e: targetActor?.is5e,
+    });
     if (simplifiedHealing) {
         _multiplier = 1;
     }
