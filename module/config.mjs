@@ -14537,7 +14537,30 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CHARGES",
             behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0), // TODO: Needs a cost function
+            costPerLevel: fixedValueFunction(0),
+            cost: function (modifierModel /* , item */) {
+                // Charges has some unusual cost capping. If they are not recoverable, continuous, or boostable charges then
+                // there is a limit on the charge cost. To implement the cap, charge adders have special cost
+                // functions to put their cost at 0.
+                const chargesBaseCost = modifierModel.BASECOST;
+                const continuing = modifierModel.CONTINUING;
+                const fuel = modifierModel.FUEL;
+                const boostable = modifierModel.BOOSTABLE;
+                const recoverable = modifierModel.RECOVERABLE;
+
+                // Don't cap if these are continuing, fuel, boostable, or recoverable charges.
+                if (!!continuing || !!fuel || !!boostable || !!recoverable) {
+                    return chargesBaseCost;
+                }
+
+                // The only charges that remain are clip based (of course there could be no clip based)
+                const chargeAdders = modifierModel.adders;
+                const adderCost = chargeAdders.reduce((accum, adder) => accum + adder.cost, 0);
+                const totalCost = chargesBaseCost + adderCost;
+
+                // Cap out at +1 by faking the base cost of the CHARGES modifier BASECOST
+                return chargesBaseCost - (totalCost - Math.min(1, totalCost));
+            },
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
