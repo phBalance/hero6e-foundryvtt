@@ -188,8 +188,8 @@ function itemHasActionBehavior(item, actionBehavior) {
             return item.rollsToHit();
         } else if (actionBehavior === "activatable") {
             return item.isActivatable();
-        } else if (actionBehavior === "hasClips") {
-            return item.hasClips();
+        } else if (actionBehavior === "showClipsReload") {
+            return item.showClipsReload;
         }
 
         console.warn(`Unknown request to get action behavior ${actionBehavior}`);
@@ -791,11 +791,16 @@ export class HeroSystem6eItem extends Item {
     async resetToOriginal() {
         // Reset charges
         //this.setCharges({});
-        if (this.system.charges?.CHARGES) {
-            await this.update({
-                ["system.charges.value"]: this.system.charges.max,
-                ["system.charges.clips"]: this.system.charges.clipsMax,
-            });
+        const chargeItemModifier = this.system.chargeItemModifier;
+        if (chargeItemModifier) {
+            if (this.system.charges < this.system.chargesMax) {
+                await this.system.setChargesAndSave(this.system.chargesMax);
+            }
+
+            if (chargeItemModifier.CLIPS && this.system.clips < this.system.clipsMax) {
+                await this.system.setClipsAndSave(this.system.clipsMax);
+            }
+
             if (this.isActive) {
                 await this.toggle();
             }
@@ -820,10 +825,7 @@ export class HeroSystem6eItem extends Item {
         // turn off items that use END, Charges, MP, etc
 
         if (this.type !== "maneuver") {
-            if (this.system.charges === undefined) {
-                console.error("item.system.charges === undefined");
-            }
-            if (this.end > 0 || (this.system.charges?.max > 0 && !this.parentItem?.system.XMLID === "MULTIPOWER")) {
+            if (this.end > 0 || (this.system.chargeItemModifier && !this.parentItem?.system.XMLID === "MULTIPOWER")) {
                 if (this.isActivatable()) {
                     if (this.isActive) {
                         // Was calling this.toggle(), but was slow and showed extra chatMessages during upload
@@ -1503,8 +1505,9 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    hasClips() {
-        return this.system.charges?.clipsMax > 1;
+    get showClipsReload() {
+        // Some things like maneuvers don't typically have CLIPS
+        return this.system.chargeModifier?.CLIPS;
     }
 
     /**
@@ -1513,28 +1516,30 @@ export class HeroSystem6eItem extends Item {
      * @returns {Promise<undefined>}
      */
     async changeClips(/*event*/) {
-        const charges = this.system.charges;
-        if (!charges) {
+        const tokenUuid = $(event.currentTarget).closest("[data-token-uuid]").data().tokenUuid;
+        const token = fromUuidSync(tokenUuid);
+
+        const chargeModifier = this.system.chargeModifier;
+        if (!chargeModifier) {
             return ui.notifications.error(
                 `${this.detailedName()} does not use charges so does not have clips. Please report.`,
             );
-        } else if (charges.clipsMax <= 1) {
+        } else if (!chargeModifier.CLIPS) {
             return ui.notifications.warn(`${this.detailedName()} does not use clips. Please report.`);
-        } else if (charges.clips <= 1) {
+        } else if (this.system.clips < 1) {
             return ui.notifications.error(`${this.detailedName()} does not have 1 clip remaining.`);
         }
 
         // Reload the clip to 1 less clip that should be at full charges.
-        await this.update({
-            [`system.charges.value`]: charges.max,
-            [`system.charges.clips`]: charges.clips - 1,
-        });
+        const previousCharges = this.system.charges;
+        await this.system.setChargesAndSave(this.system.chargesMax);
+        await this.system.setClipsAndSave(this.system.clips - 1);
 
         const chatData = {
             author: game.user._id,
-            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+            speaker: ChatMessage.getSpeaker({ token: token, actor: this.actor }),
             style: CONST.CHAT_MESSAGE_STYLES.IC,
-            content: `Change clips on <b>${this.name}</b>. You drop the clip with ${charges.value} charges. Reloading with a new clip with ${this.system.charges.value} charges. ${this.system.charges.clips} clip(s) remain.`,
+            content: `Change clips on <b>${this.name}</b>. ${(token ?? this.actor).name} drops the clip with ${previousCharges} charges. Reloading with a new clip with ${this.system.charges} charges. ${this.system.clips} clip(s) remain.`,
             whisper: whisperUserTargetsForActor(this.actor),
         };
         await ChatMessage.create(chatData);
@@ -3502,47 +3507,61 @@ export class HeroSystem6eItem extends Item {
             case "CHARGES":
                 {
                     // 1 Recoverable Continuing Charge lasting 1 Minute
+
+                    // Make sure we have the CHARGE modifier for this item,
+                    // not one inherited from parent
+                    const chargeModifier = item.system.chargeModifier;
+                    if (!chargeModifier) {
+                        break;
+                    }
+
+                    const itemWithChargeModifier = chargeModifier.parent.item;
+                    if (!itemWithChargeModifier) {
+                        console.error(`Unable to locate itemWithChargeModifier`, this);
+                        break;
+                    }
+
                     result += ", ";
 
-                    const maxCharges = parseInt(modifier.OPTION_ALIAS);
-                    // if (maxCharges !== parseInt(system.LEVELS)) {
-                    //     console.log(
-                    //         `CHARGES mismatch ${item.actor?.name}:${item.name} is it ${maxCharges} or ${parseInt(system.charges?.max)}. Check parent ${item.parentItem?.name}.`,
-                    //         item,
-                    //     );
-                    // }
-                    const currentCharges = parseInt(this.system.charges?.value);
-                    if (currentCharges != maxCharges) {
-                        result += `${currentCharges}/`;
+                    if (itemWithChargeModifier.system.ID !== this.system.ID) {
+                        result += "all slots ";
                     }
-                    result += modifier.OPTION_ALIAS;
 
-                    const recoverable = (modifier.ADDER || []).find((o) => o.XMLID === "RECOVERABLE");
+                    const chargesMax = itemWithChargeModifier.system.chargesMax;
+                    const charges = itemWithChargeModifier.system.charges;
+                    if (charges != chargesMax) {
+                        result += `${charges}/`;
+                    }
+                    result += chargesMax;
+
+                    const recoverable = chargeModifier.RECOVERABLE;
                     if (recoverable) {
                         result += ` ${recoverable.ALIAS}`;
                     }
 
-                    const boostable = (modifier.ADDER || []).find((o) => o.XMLID === "BOOSTABLE");
+                    const boostable = chargeModifier.BOOSTABLE;
                     if (boostable) {
                         result += ` ${boostable.ALIAS}`;
                     }
 
-                    const continuing = (modifier.ADDER || []).find((o) => o.XMLID === "CONTINUING");
+                    const continuing = chargeModifier.CONTINUING;
                     if (continuing) {
                         result += ` ${continuing.ALIAS}`;
                     }
 
-                    const fuel = (modifier.ADDER || []).find((o) => o.XMLID === "FUEL");
+                    const fuel = chargeModifier.FUEL;
                     if (fuel) {
                         result += ` ${fuel.ALIAS}`;
                     }
 
-                    result += maxCharges > 1 ? " Charges" : " Charge";
+                    result += chargesMax > 1 ? " Charges" : " Charge";
 
-                    const totalClips = this.system.charges?.clipsMax;
-                    if (totalClips != undefined && totalClips > 1) {
-                        const currentClips = this.system.charges?.clips;
-                        result += ` (${currentClips}/${totalClips} clips)`;
+                    if (chargeModifier.CLIPS) {
+                        const clipsMax = itemWithChargeModifier.system.clipsMax;
+                        const clips = itemWithChargeModifier.system.clips;
+                        if (clips !== clipsMax) {
+                            result += `, ${clips}/${clipsMax} Clips`;
+                        }
                     }
 
                     if (continuing) {
@@ -4284,7 +4303,7 @@ export class HeroSystem6eItem extends Item {
             (this.system.XMLID === "TRANSFER" && mustBeStrict)
                 ? adjustmentSourcesStrict
                 : adjustmentSourcesPermissive;
-        let validList = Object.keys(validator(this.actor));
+        let validList = Object.keys(validator({ actor: this.actor }));
 
         // Simple Healing
         if (this.system.XMLID === "HEALING") {

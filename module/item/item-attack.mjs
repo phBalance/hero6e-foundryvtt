@@ -3873,7 +3873,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     if (useResources && resourcesRequired.totalCharges > 0) {
         const chargeUsingItemsWithInsufficientCharges = resourcesRequired.individualResourceUsage
             .filter((usage) => {
-                const startingCharges = parseInt(usage.item.system.charges?.value || 0);
+                const startingCharges = parseInt(usage.item.system.charges || 0);
 
                 return usage.charges > startingCharges;
             })
@@ -4027,8 +4027,8 @@ function calculateRequiredResourcesToUseForSingleItem(item, options) {
  * @returns number
  */
 function calculateRequiredCharges(item, boostableChargesToUse) {
-    const startingCharges = parseInt(item.system.charges?.value || 0);
-    const maximumCharges = item.system.charges?.max || 0;
+    const startingCharges = parseInt(item.system.charges || 0);
+    const maximumCharges = item.system.chargesMax || 0;
     let chargesToUse = 0;
 
     // Strength purchased as a power never costs resources. Strength only consumes resources when used. Internally, strength used for damage, is
@@ -4304,9 +4304,10 @@ async function spendResourcesToUse(
                 resourcesUsedDescriptions.push(`${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`);
 
                 if (canSpendCharges) {
-                    const startingCharges = parseInt(usage.item.system.charges?.value || 0);
+                    const startingCharges = parseInt(usage.item.system.charges || 0);
 
-                    await usage.item.update({ "system.charges.value": startingCharges - chargesToSpend });
+                    await usage.item.system.setChargesAndSave(startingCharges - chargesToSpend);
+                    //await usage.item.update({ "system.charges.value": startingCharges - chargesToSpend });
                 }
             });
     }

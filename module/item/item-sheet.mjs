@@ -169,8 +169,12 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                         ? adjustmentSourcesStrict
                         : adjustmentSourcesPermissive;
 
-                data.possibleEnhances = enhancesValidator(this.actor, this.item.is5e);
-                data.possibleReduces = adjustmentSourcesPermissive(this.actor, this.item.is5e);
+                data.possibleEnhances = enhancesValidator(this.actor, this.item.is5e, this.item);
+                data.possibleReduces = adjustmentSourcesPermissive({
+                    actor: this.actor,
+                    is5e: this.item.is5e,
+                    item: this.item,
+                });
 
                 data.enhances = enhances ? enhances.split(",").map((target) => target.toUpperCase().trim()) : [];
                 data.reduces = reduces ? reduces.split(",").map((target) => target.toUpperCase().trim()) : [];
@@ -592,6 +596,16 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         // Generally rely on HBS to enforce valid combinations.
         if (this.item.system.EVERYMAN && !this.item.system.FAMILIARITY) {
             await this.item.update({ "system.FAMILIARITY": true });
+        }
+
+        // CHARGES
+        if (expandedData.system?.charges) {
+            await this.item.system.setChargesAndSave(expandedData.system.charges);
+        }
+
+        // CLIPS
+        if (expandedData.system?.clips) {
+            await this.item.system.setClipsAndSave(expandedData.system.clips);
         }
     }
 

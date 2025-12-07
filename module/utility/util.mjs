@@ -150,6 +150,9 @@ function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {
+    if (!actor) {
+        console.error("getCharacteristicInfoArrayForActor missing actor", this);
+    }
     const isCharOrMovePowerForActor = _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor);
     const powerList = actor?.system?.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
 

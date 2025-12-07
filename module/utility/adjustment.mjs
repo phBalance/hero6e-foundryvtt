@@ -9,7 +9,7 @@ const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplat
 /**
  * Return the full list of possible powers and characteristics. No skills, talents, or perks.
  */
-export function adjustmentSourcesPermissive(actor, is5e, item) {
+export function adjustmentSourcesPermissive({ actor, is5e, item }) {
     let choices = {};
 
     // Do we really have to have actor? I think we can proceed without it.
@@ -18,7 +18,8 @@ export function adjustmentSourcesPermissive(actor, is5e, item) {
     //     return choices;
     // }
 
-    is5e ??= item.is5e;
+    is5e ??= actor?.is5e;
+    is5e ??= item?.is5e;
 
     const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(
@@ -54,7 +55,7 @@ export function adjustmentSourcesPermissive(actor, is5e, item) {
     return choices;
 }
 
-export function adjustmentSourcesStrict(actor) {
+export function adjustmentSourcesStrict({ actor }) {
     let choices = {};
 
     if (!actor) return choices;

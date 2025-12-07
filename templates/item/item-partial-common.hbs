@@ -313,23 +313,23 @@
 </div>
 {{/if}}
 
-{{#if system.charges.CHARGES}}
+{{#if system.chargeModifier}}
     <div class="form-group">
         <label>Charges</label>
         <div class="flexrow">
-            <input type="text" name="system.charges.value" value="{{system.charges.value}}" data-dtype="Number" />
+            <input type="text" name="system.charges" value="{{system.charges}}" data-dtype="Number" />
             <span>/</span>
-            <input disabled title="maximum, edit with modifier" type="text" name="system.charges.max" value="{{system.charges.max}}" data-dtype="Number" />
+            <input disabled title="maximum, edit with modifier" type="text" name="system.chargesMax" value="{{system.chargesMax}}" data-dtype="Number" />
         </div>
     </div>
 
-    {{#if system.charges.CLIPS}}
+    {{#if system.chargeModifier.CLIPS}}
         <div class="form-group">
             <label>Clips</label>
             <div class="flexrow">
-                <input type="text" name="system.charges.clips" value="{{system.charges.clips}}" data-dtype="Number" />
+                <input type="text" name="system.clips" value="{{system.clips}}" data-dtype="Number" />
                 <span>/</span>
-                <input disabled  title="maximum, edit with modifier" type="text" name="system.charges.clipsMax" value="{{system.charges.clipsMax}}" data-dtype="Number" />
+                <input disabled  title="maximum, edit with modifier" type="text" name="system.clipsMax" value="{{system.clipsMax}}" data-dtype="Number" />
             </div>
     </div>
     {{/if}}

@@ -1333,11 +1333,11 @@ export function registerUploadTests(quench) {
                 });
 
                 it("charges", function () {
-                    assert.equal(item.system.charges.value, 8);
+                    assert.equal(item.system.charges, 8);
                 });
 
                 it("chargesRecoverable", function () {
-                    assert.equal(item.system.charges.recoverable, false);
+                    assert.equal(!!item.system.chargeModifier.RECOVERABLE, false);
                 });
 
                 it("doesn't use strength", function () {
@@ -7639,7 +7639,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("charges", function () {
-                        assert.equal(item.system.charges.max, 2);
+                        assert.equal(item.system.chargesMax, 2);
                     });
                 });
             });

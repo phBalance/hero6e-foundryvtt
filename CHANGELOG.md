@@ -2,6 +2,8 @@
 
 ## Version 4.2.5 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Reworked charges for power frameworks. Charges on a MultiPower reserve for "all slots" now correctly share the charges amongst all the slots. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3167)
+
 ## Version 4.2.4 20251130
 
 - AoE templates now show the size in both the units of the attack's system and, if different, the scene's units. Also, to avoid confusion, 5e templates will now report the system size even though it is not the same as the actual/euclidian size. [#981](https://github.com/dmdorman/hero6e-foundryvtt/issues/981)

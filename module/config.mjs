@@ -295,6 +295,12 @@ HERO.hitLocations = Object.freeze({
     },
 });
 
+HERO.VALIDATION_SEVERITY = {
+    INFO: 1,
+    WARNING: 2,
+    ERROR: 3,
+};
+
 HERO.isSpecialHitLocation = function (location) {
     return HERO.hitLocations[location]?.isSpecialHl ?? false;
 };
@@ -3641,6 +3647,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         property: item.is5e ? "INPUT" : "OPTION_ALIAS",
                         message: `Expecting one of these words [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
                         example: `to offset range penalty OCV modifier with any single attack`,
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 }
 
@@ -3658,6 +3665,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         validations.push({
                             property: "AttacksIncluded",
                             message: `Expecting one or more custom adders with names matching specific attacks this PSL works with.`,
+                            severity: HERO.VALIDATION_SEVERITY.ERROR,
                         });
                     }
                 }
@@ -4359,6 +4367,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             costEnd: false,
             isContainer: true,
+            heroValidation: function (item) {
+                const validations = [];
+
+                // Advantages for Multipower Reserves
+                if (item.system.ADDER.find((adder) => !adder.PRIVATE && adder.cost > 0)) {
+                    validations.push({
+                        property: item.is5e ? "INPUT" : "OPTION_ALIAS",
+                        message: `Gamemasters should be wary of advantages applied to all slots`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                return validations;
+            },
             xml: `<MULTIPOWER XMLID="GENERIC_OBJECT" ID="1763928841940" BASECOST="5.0" LEVELS="0" ALIAS="Multipower" POSITION="109" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></MULTIPOWER>`,
         },
         {},
