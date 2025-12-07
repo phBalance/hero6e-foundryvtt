@@ -1,7 +1,9 @@
 import { convertSystemUnitsToMetres } from "../utility/units.mjs";
 import { ftlLevelsToLightYearsPerYear } from "../item/item.mjs";
 
-// PH: FIXME: Need to get extra dimensional appearing. We have icon now
+// PH: FIXME: Need to get extra dimensional appearing. We have icon now.
+// PH: FIXME: Megamovement is always non combat.
+// PH: FIXME: Encumberance can slow actors down
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttTokenHUD = foundry.applications.hud?.TokenHUD || TokenHUD;
@@ -56,6 +58,64 @@ function ftlMaxNonCombatDistanceMeters(token) {
     return metresPerTurnPerLightYearPerYear / speed;
 }
 
+/**
+ * Callback to register movement cost. Whatever cost is provided is what is returned as gravity
+ * doesn't affect this movement type.
+ *
+ * @callback TokenMovementActionCostFunction
+ * @param {number} baseCost
+ * @param {Readonly<GridOffset3D>} from
+ * @param {Readonly<GridOffset3D>} to
+ * @param {number} distance
+ * @param {DeepReadonly<TokenMovementSegmentData>} segment
+ * @returns {number}
+ */
+function nonGravityAffectedMovementCostFunction(baseCost /* from, to, distance, segment */) {
+    return baseCost;
+}
+
+/**
+ * Callback to register if 1m === 1m. Vertical movement is doubled or halved as gravity
+ * affects this movement type. Valid for running, swimming, swinging, flight, and gliding.
+ *
+ * @callback TokenMovementActionCostFunction
+ * @param {number} baseCost
+ * @param {Readonly<GridOffset3D>} from
+ * @param {Readonly<GridOffset3D>} to
+ * @param {number} distance
+ * @param {DeepReadonly<TokenMovementSegmentData>} segment
+ * @returns {number}
+ */
+function gravityAffectedMovementCostFunction(baseCost, from, to /*, distance, segment */) {
+    const vertical = to.k - from.k;
+
+    // This calculation works because you can't, via FoundryVTT's UI, change height and move at the
+    // same instant. If changing height, double cost going up and halve cost going down. Otherwise
+    // it's just the usual vertical cost.
+    return vertical === 0 ? baseCost : vertical > 0 ? baseCost * 2 : baseCost / 2;
+}
+
+/**
+ * @callback TokenMovementActionCostFunction
+ * @property {TokenDocument} token
+ * @property {TokenMeasureMovementPathOptions} options
+ * @return {TokenMovementActionCostFunction}
+ */
+function getMovementCostFunctionForNonGravityAffectedMovementType(/*token, options*/) {
+    return nonGravityAffectedMovementCostFunction;
+}
+
+/**
+ * @callback TokenMovementActionCostFunction
+ * @property {TokenDocument} token
+ * @property {TokenMeasureMovementPathOptions} options
+ * @return {TokenMovementActionCostFunction}
+ */
+function getMovementCostFunctionForGravityAffectedMovementType(/*token, options*/) {
+    // PH: FIXME: Check power doesn't have appropriate modifier
+    return gravityAffectedMovementCostFunction;
+}
+
 export class HeroSystemTokenHud extends FoundryVttTokenHUD {
     /**
      * Return initialize movement actions
@@ -72,9 +132,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: "icons/svg/walk.svg",
                 isActive: false,
                 order: 0,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("running"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("running"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("running"),
+                getCostFunction: getMovementCostFunctionForGravityAffectedMovementType,
             },
             SWIMMING: {
                 label: "Swimming",
@@ -82,9 +144,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: "icons/svg/whale.svg",
                 isActive: false,
                 order: 1,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("swimming"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("swimming"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("swimming"),
+                getCostFunction: getMovementCostFunctionForGravityAffectedMovementType,
             },
             LEAPING: {
                 label: "Leaping",
@@ -92,9 +156,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: "icons/svg/jump.svg",
                 isActive: false,
                 order: 2,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("leaping"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("leaping"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("leaping"),
+                getCostFunction: getMovementCostFunctionForNonGravityAffectedMovementType,
             },
 
             EXTRADIMENSIONALMOVEMENT: {
@@ -103,9 +169,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: `systems/${module}/icons/movement/star-gate.svg`,
                 isActive: false,
                 order: 3,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("extradimensionalmovement"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("extradimensionalmovement"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("extradimensionalmovement"),
+                getCostFunction: getMovementCostFunctionForNonGravityAffectedMovementType,
             },
             FLIGHT: {
                 label: "Flight",
@@ -113,9 +181,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: "icons/svg/wing.svg",
                 isActive: false,
                 order: 4,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("flight"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("flight"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("flight"),
+                getCostFunction: getMovementCostFunctionForGravityAffectedMovementType,
             },
             FTL: {
                 label: "Faster Than Light",
@@ -123,9 +193,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: `systems/${module}/icons/movement/rocket.svg`,
                 isActive: false,
                 order: 5,
+                teleport: false,
                 canSelect: ftlCanSelect,
                 maxCombatDistanceMeters: () => 0, // FTL does not support combat - only non combat
                 maxNonCombatDistanceMeters: ftlMaxNonCombatDistanceMeters,
+                getCostFunction: getMovementCostFunctionForNonGravityAffectedMovementType,
             },
             GLIDING: {
                 label: "Gliding",
@@ -133,9 +205,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: `systems/${module}/icons/movement/hang-glider.svg`,
                 isActive: false,
                 order: 6,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("gliding"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("gliding"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("gliding"),
+                getCostFunction: getMovementCostFunctionForGravityAffectedMovementType,
             },
             SWINGING: {
                 label: "Swinging",
@@ -143,9 +217,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: `systems/${module}/icons/movement/grapple-hook.svg`,
                 isActive: false,
                 order: 7,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("swinging"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("swinging"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("swinging"),
+                getCostFunction: getMovementCostFunctionForGravityAffectedMovementType,
             },
             TELEPORTATION: {
                 label: "Teleportation",
@@ -157,6 +233,7 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 canSelect: generateMovementCanSelectFunction("teleportation"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("teleportation"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("teleportation"),
+                getCostFunction: getMovementCostFunctionForNonGravityAffectedMovementType,
             },
             TUNNELING: {
                 label: "Tunneling",
@@ -164,9 +241,11 @@ export class HeroSystemTokenHud extends FoundryVttTokenHUD {
                 img: "icons/svg/burrow.svg",
                 isActive: false,
                 order: 9,
+                teleport: false,
                 canSelect: generateMovementCanSelectFunction("tunneling"),
                 maxCombatDistanceMeters: generateMovementMaxCombatDistanceMeters("tunneling"),
                 maxNonCombatDistanceMeters: generateMovementMaxNonCombatDistanceMeters("tunneling"),
+                getCostFunction: getMovementCostFunctionForNonGravityAffectedMovementType,
             },
 
             // Special action that is always required (otherwise v13.350 crashes)
