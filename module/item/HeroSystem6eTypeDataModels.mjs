@@ -37,6 +37,37 @@ class TimeClearedCache {
     }
 }
 
+const _chargeOptionIdToLevel = Object.freeze({
+    ONE: -7,
+    TWO: -6,
+    THREE: -5,
+    FOUR: -4,
+    SIX: -3,
+    EIGHT: -2,
+    TWELVE: -1,
+    SIXTEEN: 0,
+    THIRTYTWO: 1,
+    SIXTYFOUR: 2,
+    ONETWENTYFIVE: 3,
+    TWOFIFTY: 4,
+    FIVEHUNDRED: 5,
+    ONETHOUSAND: 6,
+    TWOTHOUSAND: 7,
+    FOURTHOUSAND: 8,
+    EIGHTTHOUSAND: 9,
+    SIXTEENTHOUSAND: 10,
+});
+
+export function getChargeOptionIdToLevel(optionId) {
+    const level = _chargeOptionIdToLevel[optionId];
+    if (level == null) {
+        console.error(`OPTIONID ${optionId} doesn't have an entry in _chargeOptionIdToLevel`);
+        return 0;
+    }
+
+    return level;
+}
+
 const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
 
 class HeroNumberField extends foundry.data.fields.NumberField {
@@ -349,6 +380,10 @@ class HeroModifierModelCommon extends HeroItemModCommonModel {
 
     get CLIPS() {
         return this.ADDER.find((adder) => adder.XMLID === "CLIPS");
+    }
+
+    get INCREASEDRELOAD() {
+        return this.ADDER.find((adder) => adder.XMLID === "INCREASEDRELOAD");
     }
 
     get CONTINUING() {
@@ -1102,8 +1137,15 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             return 0;
         }
 
-        const LEVELS = this.item.system.chargeModifier.CLIPS.LEVELS || 0;
-        return Math.pow(2, LEVELS);
+        // Max clips gain 2x clips for each level where charges modifier cost + clips adder cost is <= -0.
+        // Max clips gain 4x clips for each level where charges modifer cost + clips adder cost is > -0;
+        // NOTE: Increased reload time adder is considered before clip cost for figuring number of clips.
+        const increasedReloadLevels = (this.item.system.chargeModifier.INCREASEDRELOAD?.BASECOST || 0) * -4;
+        const chargeLevels = getChargeOptionIdToLevel(this.item.system.chargeModifier.OPTIONID) - increasedReloadLevels;
+        const clipLevels = this.item.system.chargeModifier.CLIPS?.LEVELS || 0;
+        const levelsAsLimitation = chargeLevels < 0 ? Math.min(clipLevels, Math.abs(chargeLevels)) : 0;
+        const levelsAsAdvantage = chargeLevels >= 0 ? clipLevels : Math.max(0, clipLevels + chargeLevels);
+        return Math.pow(2, levelsAsLimitation) * Math.pow(4, levelsAsAdvantage);
     }
 
     async setChargesAndSave(value) {
@@ -1135,17 +1177,6 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
         }
         await itemWithChargeModifier.update({ "system._clips": value });
     }
-
-    // setCharges(charges, clips) {
-    //     const myCharges = this.item.system.charges;
-    //     const myClips = this.item.system.clips;
-
-    //     this.item.system.clips.value += 1;
-    //     await this.item.update(this.item);
-
-    //     const myCharges2 = this.item.system.chargeModifier.charges;
-
-    // }
 }
 
 export class HeroSystem6eItemEquipment extends HeroSystem6eItemPower {
