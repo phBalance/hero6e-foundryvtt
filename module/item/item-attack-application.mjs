@@ -150,7 +150,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // Boostable Charges - a maximum of 4 can be spent
             this.data.boostableChargesAvailable =
-                this.data.originalItem.system.chargeModifier.BOOSTABLE && this.data.originalItem.system.charges > 1
+                this.data.originalItem.system.chargeModifier?.BOOSTABLE && this.data.originalItem.system.charges > 1
                     ? Math.min(4, this.data.originalItem.system.charges - 1)
                     : 0;
             this.data.boostableChargesToUse ??= 0;
