@@ -1385,7 +1385,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("charges", function () {
-                    assert.equal(item.system.charges?.value, 0);
+                    assert.equal(item.system.charges, 0);
                 });
 
                 it("doesn't use strength", function () {
