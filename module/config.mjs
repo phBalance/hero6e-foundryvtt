@@ -3647,7 +3647,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         property: item.is5e ? "INPUT" : "OPTION_ALIAS",
                         message: `Expecting one of these words [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
                         example: `to offset range penalty OCV modifier with any single attack`,
-                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
                 }
 
@@ -3665,7 +3665,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         validations.push({
                             property: "AttacksIncluded",
                             message: `Expecting one or more custom adders with names matching specific attacks this PSL works with.`,
-                            severity: HERO.VALIDATION_SEVERITY.ERROR,
+                            severity: HERO.VALIDATION_SEVERITY.WARNING,
                         });
                     }
                 }
@@ -4371,11 +4371,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const validations = [];
 
                 // Advantages for Multipower Reserves
-                if (item.system.ADDER.find((adder) => !adder.PRIVATE && adder.cost > 0)) {
+                const advantages = item.system.MODIFIER.filter((adder) => !adder.PRIVATE && adder.cost > 0);
+                if (advantages.length > 0) {
                     validations.push({
-                        property: item.is5e ? "INPUT" : "OPTION_ALIAS",
-                        message: `Gamemasters should be wary of advantages applied to all slots`,
-                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                        property: advantages.map((m) => m.XMLID),
+                        message: `Gamemasters should be wary of advantages [${advantages.map((m) => m.XMLID).join(",")}] applied to all slots`,
+                        severity: HERO.VALIDATION_SEVERITY.INFO,
                     });
                 }
 

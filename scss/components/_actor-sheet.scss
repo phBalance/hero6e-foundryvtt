@@ -473,8 +473,38 @@ tr.top-powers.vpp-unslotted {
     text-decoration: line-through;
 }
 
-.actor-sheet .sheet-content tr.item.validation {
-    background-color: rgb(255 255 0 / 50%);
+.actor-sheet .sheet-content tr.item.validation-info {
+    background-color: rgb(0 0 255 / 10%);
+    text-align: left;
+    box-shadow: 0 0 0 1px rgb(0 0 255 / 50%) inset;
+
+    td:first-child {
+        text-align: left;
+        padding-left: 2px;
+    }
+
+    i.fa-regular {
+        color: blue;
+    }
+}
+
+.actor-sheet .sheet-content tr.item.validation-warning {
+    background-color: rgb(255 255 0 / 20%);
+    text-align: left;
+    box-shadow: 0 0 0 1px rgb(255 255 0 / 50%) inset;
+
+    td:first-child {
+        text-align: left;
+        padding-left: 2px;
+    }
+
+    i.fa-regular {
+        color: #d6aa28;
+    }
+}
+
+.actor-sheet .sheet-content tr.item.validation-error {
+    background-color: rgb(255 0 0 / 10%);
     text-align: left;
     box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
 
@@ -488,8 +518,16 @@ tr.top-powers.vpp-unslotted {
     }
 }
 
-.actor-sheet a.validation {
-    outline: red solid 1px;
+.actor-sheet a.validation-info {
+    outline: rgb(0 0 255 / 80%) solid 1px;
+}
+
+.actor-sheet a.validation-warning {
+    outline: #d6aa28 solid 2px;
+}
+
+.actor-sheet a.validation-error {
+    outline: rgb(255 0 0 / 80%) solid 1px;
 }
 
 a.item-nav.invalid,
