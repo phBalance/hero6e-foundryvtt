@@ -295,6 +295,12 @@ HERO.hitLocations = Object.freeze({
     },
 });
 
+HERO.VALIDATION_SEVERITY = {
+    INFO: 1,
+    WARNING: 2,
+    ERROR: 3,
+};
+
 HERO.isSpecialHitLocation = function (location) {
     return HERO.hitLocations[location]?.isSpecialHl ?? false;
 };
@@ -3641,6 +3647,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         property: item.is5e ? "INPUT" : "OPTION_ALIAS",
                         message: `Expecting one of these words [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
                         example: `to offset range penalty OCV modifier with any single attack`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
                 }
 
@@ -3658,6 +3665,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         validations.push({
                             property: "AttacksIncluded",
                             message: `Expecting one or more custom adders with names matching specific attacks this PSL works with.`,
+                            severity: HERO.VALIDATION_SEVERITY.WARNING,
                         });
                     }
                 }
@@ -4359,6 +4367,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             costEnd: false,
             isContainer: true,
+            heroValidation: function (item) {
+                const validations = [];
+
+                // Advantages for Multipower Reserves
+                const advantages = item.system.MODIFIER.filter((adder) => !adder.PRIVATE && adder.cost > 0);
+                if (advantages.length > 0) {
+                    validations.push({
+                        property: advantages.map((m) => m.XMLID),
+                        message: `Gamemasters should be wary of advantages [${advantages.map((m) => m.XMLID).join(",")}] applied to all slots`,
+                        severity: HERO.VALIDATION_SEVERITY.INFO,
+                    });
+                }
+
+                return validations;
+            },
             xml: `<MULTIPOWER XMLID="GENERIC_OBJECT" ID="1763928841940" BASECOST="5.0" LEVELS="0" ALIAS="Multipower" POSITION="109" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></MULTIPOWER>`,
         },
         {},
@@ -8267,6 +8290,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            key: "TRACKINGSENSE",
+            type: ["sense", "passive"],
+            behaviors: [],
+            duration: "persistent", // Enhanced Senses are typically persistent
+            costPerLevel: fixedValueFunction(0),
+            target: "self only",
+            range: HERO.RANGE_TYPES.SELF,
+            xml: `<POWER XMLID="TRACKINGSENSE" ID="1586662531588" BASECOST="10.0" LEVELS="0" ALIAS="Tracking" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMELLGROUP" OPTIONID="SMELLGROUP" OPTION_ALIAS="Smell/Taste Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Scent" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+
     addPower(
         {
             key: "TRANSMIT",

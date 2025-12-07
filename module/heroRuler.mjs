@@ -260,24 +260,16 @@ export class HeroRuler extends FoundryVttRuler {
                                 );
 
                                 let content = "";
-                                const CHARGES = movementPower?.findModsByXmlid("CHARGES");
-                                if (CHARGES && movementPower.system.charges && !combatant.flags.dragRuler?.spentEnd) {
-                                    if (movementPower.system.charges.value === 0) {
+                                const charges = movementPower.chargeModifier ? movementPower.system.charges : 0;
+                                if (charges && movementPower.chargeModifier && !combatant.flags.dragRuler?.spentEnd) {
+                                    if (charges === 0) {
                                         ui.notifications.error(
                                             `${token.name} has no charges left and should not be moving.`,
                                         );
                                         content += `${token.name} has no charges left and should not be moving. `;
                                     } else {
-                                        movementPower.system.charges.value = Math.max(
-                                            0,
-                                            parseInt(movementPower.system.charges.value) - 1,
-                                        );
-                                        movementPower.updateItemDescription();
-                                        await movementPower.update({
-                                            "system.charges.value": movementPower.system.charges.value,
-                                            "system.description": movementPower.system.description,
-                                        });
-                                        content += `${token.name} spent one charge of ${movementPower.name} (${movementPower.system.charges.value} charges remain). `;
+                                        await movementPower.system.setChargesAndSave(charges - 1);
+                                        content += `${token.name} spent one charge of ${movementPower.name} (${movementPower.system.charges} charges remain). `;
                                     }
                                 }
 

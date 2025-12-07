@@ -637,14 +637,15 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             }
         }
 
-        // STACKABLE EQUIPMENT: If this is EQUIPMENT and destination has similar, and it has CHARGES then add the charges.
+        // STACKABLE EQUIPMENT: If this is EQUIPMENT and destination has similar, and it has full CHARGES then add the charges.
         if (itemDataArray.length === 1) {
             const stackItem = itemDataArray[0];
             if (stackItem.type === "equipment") {
                 stackItem.system.MODIFIER ??= [];
-                const charges = stackItem.system.MODIFIER.find((o) => o.XMLID === "CHARGES");
-                const levels = parseInt(charges?.OPTION_ALIAS);
-                if (levels > 0) {
+                const CHARGES = stackItem.system.MODIFIER.find((o) => o.XMLID === "CHARGES");
+                const chargesMax = parseInt(CHARGES?.OPTION_ALIAS);
+                const charges = stackItem.system._charges ?? chargesMax;
+                if (chargesMax > 0 && charges === chargesMax) {
                     const existingItem = this.actor.items.find(
                         (o) =>
                             o.type === "equipment" &&
@@ -654,11 +655,15 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                             o.findModsByXmlid("CHARGES"),
                     );
                     if (existingItem) {
-                        console.log(`Adding charges instead of a new item`, existingItem);
-                        await existingItem.update({
-                            [`system.charges.value`]: existingItem.system.charges.value + levels,
-                            [`system.charges.max`]: existingItem.system.charges.max + levels,
-                        });
+                        const chargeItemModifier = existingItem.system.chargeItemModifier;
+                        if (chargeItemModifier) {
+                            ui.notifications.warn(
+                                `Adding <b>${chargesMax}</b> charges to <b>${existingItem.name}</b> instead of a new item.`,
+                            );
+                            await existingItem.system.setChargesAndSave(existingItem.system.charges + chargesMax);
+                        } else {
+                            console.error(`Unable to locate chargeItemModifier`, existingItem);
+                        }
 
                         return [existingItem];
                     }

@@ -23,7 +23,8 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("expandSegment", expandSegment);
     Handlebars.registerHelper("activeSegment", activeSegment);
     Handlebars.registerHelper("actorItemHeroValidation", actorItemHeroValidation);
-    Handlebars.registerHelper("actorHeroValidationByItemType", actorHeroValidationByItemType);
+    Handlebars.registerHelper("actorItemHeroValidationCss", actorItemHeroValidationCss);
+    Handlebars.registerHelper("actorHeroValidationCssByItemType", actorHeroValidationCssByItemType);
     Handlebars.registerHelper("hasCharacteristic", hasCharacteristic);
     Handlebars.registerHelper("signedString", signedString);
     Handlebars.registerHelper("calculated5eCharacteristic", calculated5eCharacteristic);
@@ -175,12 +176,37 @@ function actorItemHeroValidation(item) {
     return item.heroValidation.map((m) => m.message).join(", ");
 }
 
-function actorHeroValidationByItemType(actor, itemType) {
-    return actor.items
+function actorItemHeroValidationCss(item) {
+    function getKeyByValue(object, value) {
+        return Object.keys(object).find((key) => object[key] === value);
+    }
+    const severityMax = Math.max(0, ...item.heroValidation.map((m) => m.severity ?? 0));
+
+    if (severityMax > 0) {
+        return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+    }
+
+    return "";
+}
+
+function actorHeroValidationCssByItemType(actor, itemType) {
+    function getKeyByValue(object, value) {
+        return Object.keys(object).find((key) => object[key] === value);
+    }
+
+    const validationsOfType = actor.items
         .filter((item) => item.type === itemType)
         .reduce((accumulator, currentArray) => {
             return accumulator.concat(currentArray.heroValidation);
         }, []);
+
+    const severityMax = Math.max(0, ...validationsOfType.map((m) => m.severity ?? 0));
+
+    if (severityMax > 0) {
+        return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+    }
+
+    return "";
 }
 
 function hasCharacteristic(actor, characteristic) {

@@ -198,7 +198,24 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
     }
 }
 
+// export class HeroSystem6eCharges extends foundry.abstract.DataModel {
+//     static defineSchema() {
+//         // Note that the return is just a simple object
+//         return {
+//             value: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+//             clips: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+//         };
+//     }
+// }
+
 export class HeroAdderModelCommon extends HeroItemModCommonModel {
+    static defineSchema() {
+        return {
+            ...super.defineSchema(),
+            clips: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+        };
+    }
+
     get cost() {
         let _cost = 0;
         if (this.SELECTED !== false) {
@@ -266,6 +283,13 @@ export class HeroAdderModel extends HeroAdderModelCommon {
 }
 
 class HeroModifierModelCommon extends HeroItemModCommonModel {
+    static defineSchema() {
+        return {
+            ...super.defineSchema(),
+            charges: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+        };
+    }
+
     get cost() {
         let _cost = 0;
         // Custom costs calculations
@@ -319,6 +343,25 @@ class HeroModifierModelCommon extends HeroItemModCommonModel {
         }
         return textArray.join(", ");
     }
+    get BOOSTABLE() {
+        return this.ADDER.find((adder) => adder.XMLID === "BOOSTABLE");
+    }
+
+    get CLIPS() {
+        return this.ADDER.find((adder) => adder.XMLID === "CLIPS");
+    }
+
+    get CONTINUING() {
+        return this.ADDER.find((adder) => adder.XMLID === "CONTINUING");
+    }
+
+    get FUEL() {
+        return this.ADDER.find((adder) => adder.XMLID === "FUEL");
+    }
+
+    get RECOVERABLE() {
+        return this.ADDER.find((adder) => adder.XMLID === "RECOVERABLE");
+    }
 }
 
 class HeroModifierModel2 extends HeroModifierModelCommon {}
@@ -365,72 +408,72 @@ class HeroPowerModel extends HeroItemModCommonModel {
     }
 }
 
-export class HeroSystem6eItemCharges extends foundry.abstract.DataModel {
-    // constructor(data, context) {
-    //     super(data, context);
+// export class HeroSystem6eItemCharges extends foundry.abstract.DataModel {
+//     // constructor(data, context) {
+//     //     super(data, context);
 
-    //     // set initial value
-    //     const CHARGES = this.parent.MODIFIER.find((m) => m.XMLID === "CHARGES");
-    //     if (!CHARGES && data.value !== undefined) {
-    //         this.value = undefined;
-    //     }
-    //     if (data.value === undefined) {
-    //         if (CHARGES) {
-    //             this.value = parseInt(CHARGES.OPTION_ALIAS);
-    //             this.clips = Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0));
-    //         }
-    //     }
-    // }
+//     //     // set initial value
+//     //     const CHARGES = this.parent.MODIFIER.find((m) => m.XMLID === "CHARGES");
+//     //     if (!CHARGES && data.value !== undefined) {
+//     //         this.value = undefined;
+//     //     }
+//     //     if (data.value === undefined) {
+//     //         if (CHARGES) {
+//     //             this.value = parseInt(CHARGES.OPTION_ALIAS);
+//     //             this.clips = Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0));
+//     //         }
+//     //     }
+//     // }
 
-    static defineSchema() {
-        // Note that the return is just a simple object
-        return {
-            value: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-            clips: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-        };
-    }
+//     static defineSchema() {
+//         // Note that the return is just a simple object
+//         return {
+//             value: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+//             clips: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
+//         };
+//     }
 
-    get CHARGES() {
-        return this.item.modifiers.find((m) => m.XMLID === "CHARGES");
-    }
+//     // get CHARGES() {
+//     //     return this.item.modifiers.find((m) => m.XMLID === "CHARGES");
+//     // }
 
-    get item() {
-        if (this.parent.parent instanceof HeroSystem6eItem) {
-            return this.parent.parent;
-        }
-        return null;
-    }
+//     get _item() {
+//         if (this.parent.parent instanceof HeroSystem6eItem) {
+//             return this.parent.parent;
+//         }
+//         return null;
+//     }
 
-    get recoverable() {
-        return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "RECOVERABLE");
-    }
+//     // get recoverable() {
+//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "RECOVERABLE");
+//     // }
 
-    get continuing() {
-        return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "CONTINUING")?.OPTIONID;
-    }
+//     // get continuing() {
+//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "CONTINUING")?.OPTIONID;
+//     // }
 
-    get boostable() {
-        return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "BOOSTABLE");
-    }
-    get fuel() {
-        return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "FUEL");
-    }
+//     // get boostable() {
+//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "BOOSTABLE");
+//     // }
+//     // get fuel() {
+//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "FUEL");
+//     // }
 
-    get max() {
-        if (this.CHARGES) {
-            return parseInt(this.CHARGES?.OPTION_ALIAS);
-        }
-        return null;
-    }
+//     // get max() {
+//     //     if (this.CHARGES) {
+//     //         return parseInt(this.CHARGES?.OPTION_ALIAS);
+//     //     }
+//     //     return null;
+//     // }
 
-    get CLIPS() {
-        return this.CHARGES?.ADDER?.find((o) => o.XMLID === "CLIPS");
-    }
+//     // get CLIPS() {
+//     //     return this.CHARGES?.ADDER?.find((o) => o.XMLID === "CLIPS");
+//     // }
 
-    get clipsMax() {
-        return Math.pow(2, this.CLIPS?.LEVELS || 0);
-    }
-}
+//     // get clipsMax() {
+//     //     return Math.pow(2, this.CLIPS?.LEVELS || 0);
+//     // }
+// }
 
 export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeDataModel {
     get description() {
@@ -854,6 +897,36 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         // Powers never/rarely give DCV bonus
         return 0;
     }
+
+    get chargeModifier() {
+        return this.chargeItemModifier || this.chargeItemParentModifier;
+    }
+
+    get chargeItemModifier() {
+        const modFromItemGetter = this.item.modifiers.find((m) => m.XMLID === "CHARGES");
+        if (!modFromItemGetter) {
+            return modFromItemGetter;
+        }
+        const itemChargeMod = this.item.system.MODIFIER.find(
+            (m) => m.XMLID === "CHARGES" && m.ID === modFromItemGetter.ID,
+        );
+
+        return itemChargeMod;
+    }
+
+    get chargeItemParentModifier() {
+        const modFromItemGetter = this.item.modifiers.find((m) => m.XMLID === "CHARGES");
+
+        if (!modFromItemGetter) {
+            return modFromItemGetter;
+        }
+
+        const parentChargeMod = this.item.parentItem?.system.MODIFIER.find(
+            (m) => m.XMLID === "CHARGES" && m.ID === modFromItemGetter.ID,
+        );
+        console.log(`CHARGE from parent [${this.item.parentItem.name}]`);
+        return parentChargeMod;
+    }
 }
 
 export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeDataModelGetters {
@@ -894,7 +967,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             value: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE
             //max: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE (use LEVELS instead)
             active: new BooleanField({ initial: true, nullable: true }), // is power,skill,equipment active (consider renaming)
-            charges: new EmbeddedDataField(HeroSystem6eItemCharges),
+            //charges: new EmbeddedDataField(HeroSystem6eItemCharges),
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
             csl: new ArrayField(new StringField()), // Combat Skill levels
             checked: new BooleanField({ initial: false }), // DEADLYBLOW
@@ -966,9 +1039,113 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             BASEPOINTS: new StringField(),
             DISADPOINTS: new StringField(),
 
-            charges: new EmbeddedDataField(HeroSystem6eItemCharges),
+            _charges: new HeroNumberField({ initial: 0, integer: true }),
+            _clips: new HeroNumberField({ initial: 0, integer: true }),
+            ablative: new HeroNumberField({ initial: 0, integer: true }), // Store # of times threshold has been exceeded
         };
     }
+
+    get charges() {
+        // Charges with a MP are typically on the parentItem not the slot
+        // so we use a helper to get the right one.
+        if (!this.item.system.chargeModifier) {
+            console.error(`${this.item.name} has no CHARGE modifier`, this);
+            return 0;
+        }
+
+        const itemWithChargeModifier = this.item.system.chargeModifier.parent.item;
+        if (!itemWithChargeModifier) {
+            console.error(`${this.name} has no itemWithChargeModifier`, this);
+            return 0;
+        }
+
+        return itemWithChargeModifier.system._charges ?? 0;
+    }
+
+    get chargesMax() {
+        if (!this.item.system.chargeModifier) {
+            console.error(`${this.name} has no CHARGE modifier`, this);
+            return 0;
+        }
+        return parseInt(this.item.system.chargeModifier.OPTION_ALIAS) || 0;
+    }
+
+    get clips() {
+        // Charges with a MP are typically on the parentItem not the slot
+        // so we use a helper to get the right one.
+        if (!this.item.system.chargeModifier) {
+            console.error(`${this.item.name} charges, yet no CHARGE modifier was found`, this);
+            return 0;
+        }
+
+        const itemWithChargeModifier = this.item.system.chargeModifier.parent.item;
+        if (!itemWithChargeModifier) {
+            console.error(`${this.name} has no itemWithChargeModifier`, this);
+            return 0;
+        }
+
+        if (!itemWithChargeModifier.findModsByXmlid("CLIPS")) {
+            console.error(`${this.name} has no CLIPS adder`, this);
+        }
+
+        return itemWithChargeModifier.system._clips ?? 0;
+    }
+
+    get clipsMax() {
+        if (!this.item.system.chargeModifier) {
+            console.error(`${this.name} has no CHARGE modifier`, this);
+            return 0;
+        }
+
+        if (!this.item.system.chargeModifier.CLIPS) {
+            console.error(`${this.name} has no CLIPS modifier`, this);
+            return 0;
+        }
+
+        const LEVELS = this.item.system.chargeModifier.CLIPS.LEVELS || 0;
+        return Math.pow(2, LEVELS);
+    }
+
+    async setChargesAndSave(value) {
+        if (!this.item.system.chargeModifier) {
+            console.error(`${this.name} called setChargesAndSave but has no CHARGE modifier`, this);
+            return;
+        }
+        const itemWithChargeModifier = this.item.system.chargeModifier.parent.item;
+        if (!itemWithChargeModifier) {
+            console.error(`${this.name} was unable to find itemWithChargeModifier`, this);
+            return;
+        }
+        await itemWithChargeModifier.update({ "system._charges": value });
+    }
+
+    async setClipsAndSave(value) {
+        if (!this.item.system.chargeModifier) {
+            console.error(`${this.name} called setChargesAndSave but has no CHARGE modifier`, this);
+            return;
+        }
+        if (!this.item.system.chargeModifier.CLIPS) {
+            console.error(`${this.name} called setChargesAndSave but has no CLIPS modifier`, this);
+            return;
+        }
+        const itemWithChargeModifier = this.item.system.chargeModifier.parent.item;
+        if (!itemWithChargeModifier) {
+            console.error(`${this.name} was unable to find itemWithChargeModifier`, this);
+            return;
+        }
+        await itemWithChargeModifier.update({ "system._clips": value });
+    }
+
+    // setCharges(charges, clips) {
+    //     const myCharges = this.item.system.charges;
+    //     const myClips = this.item.system.clips;
+
+    //     this.item.system.clips.value += 1;
+    //     await this.item.update(this.item);
+
+    //     const myCharges2 = this.item.system.chargeModifier.charges;
+
+    // }
 }
 
 export class HeroSystem6eItemEquipment extends HeroSystem6eItemPower {
