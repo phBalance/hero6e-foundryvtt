@@ -9885,6 +9885,56 @@ export function registerUploadTests(quench) {
             });
 
             describe("charges", function () {
+                describe("1000 charges", async function () {
+                    const contents = `
+                        <POWER XMLID="ENERGYBLAST" ID="1765087932638" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="130" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <MODIFIER XMLID="CHARGES" ID="1765144089101" BASECOST="1.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONETHOUSAND" OPTIONID="ONETHOUSAND" OPTION_ALIAS="1000" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: false });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Energy Blast 1d6 (ED), 1000 Charges (+1)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 10);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 10);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.LEVELS, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.end, 0);
+                    });
+
+                    it("charges", function () {
+                        assert.equal(item.system.chargesMax, 1000);
+                    });
+
+                    it("clips", function () {
+                        assert.equal(item.system.clipsMax, 0);
+                    });
+                });
+
                 describe("clips", function () {
                     describe("1 level with 12 charges (as limitation)", async function () {
                         const contents = `
@@ -10331,7 +10381,586 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("recoverable", function () {});
+                describe("Boostable", function () {
+                    describe("2 clip levels and with 8 charges", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1765087932638" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="130" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="CHARGES" ID="1765140891185" BASECOST="-0.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EIGHT" OPTIONID="EIGHT" OPTION_ALIAS="8" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" CLIPS_COST="0.5">
+                                    <ADDER XMLID="BOOSTABLE" ID="1765142201533" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="CLIPS" ID="1765142210308" BASECOST="0.5" LEVELS="2" ALIAS="8 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 8 Boostable Charges (Boostable, 8 clips; +1/4)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 6);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 6);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 8);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 8);
+                        });
+                    });
+
+                    describe("2 clip levels and with 12 charges", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1765087932638" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="130" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="CHARGES" ID="1765142645323" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" CLIPS_COST="0.5">
+                                    <ADDER XMLID="BOOSTABLE" ID="1765142647428" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="CLIPS" ID="1765142647429" BASECOST="0.5" LEVELS="2" ALIAS="16 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 12 Boostable Charges (Boostable, 16 clips; +1/2)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 7);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 7);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 12);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 16);
+                        });
+                    });
+
+                    describe("2 clip levels and with 12 charges", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1765087932638" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="130" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="CHARGES" ID="1765142811391" BASECOST="-0.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWELVE" OPTIONID="TWELVE" OPTION_ALIAS="12" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" CLIPS_COST="0.5">
+                                    <ADDER XMLID="BOOSTABLE" ID="1765142813209" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="CLIPS" ID="1765142813210" BASECOST="0.5" LEVELS="2" ALIAS="4 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="INCREASEDRELOAD" ID="1765142816582" BASECOST="-0.5" LEVELS="0" ALIAS="Increased Reloading Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TURN" OPTIONID="TURN" OPTION_ALIAS="1 Turn" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 12 Boostable Charges (Boostable, 4 clips, 1 Turn; +0)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 5);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 5);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 12);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 4);
+                        });
+                    });
+
+                    describe("500 charges not capped at +1", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1765087932638" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="130" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <MODIFIER XMLID="CHARGES" ID="1765143681226" BASECOST="1.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FIVEHUNDRED" OPTIONID="FIVEHUNDRED" OPTION_ALIAS="500" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <ADDER XMLID="BOOSTABLE" ID="1765143716340" BASECOST="0.25" LEVELS="0" ALIAS="Boostable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 500 Boostable Charges (Boostable; +1 1/2)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 12);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 12);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 500);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 0);
+                        });
+                    });
+                });
+
+                describe("Recoverable", function () {
+                    describe("2 clip levels and with 3 charges", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1765087932638" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="130" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="CHARGES" ID="1765143039550" BASECOST="-1.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THREE" OPTIONID="THREE" OPTION_ALIAS="3" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" CLIPS_COST="0.5">
+                                    <ADDER XMLID="CLIPS" ID="1765143041943" BASECOST="0.5" LEVELS="2" ALIAS="4 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="INCREASEDRELOAD" ID="1765143041953" BASECOST="-0.5" LEVELS="0" ALIAS="Increased Reloading Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TURN" OPTIONID="TURN" OPTION_ALIAS="1 Turn" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="RECOVERABLE" ID="1765143049236" BASECOST="0.5" LEVELS="0" ALIAS="Recoverable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED) (5 Active Points); 3 Recoverable Charges (4 clips, 1 Turn, Recoverable; -3/4)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 3);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 5);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 3);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 4);
+                        });
+                    });
+
+                    describe("4 clip levels (2 full phases reload time) and with 4 charges", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1765087932638" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="130" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <MODIFIER XMLID="CHARGES" ID="1765143202241" BASECOST="-1.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FOUR" OPTIONID="FOUR" OPTION_ALIAS="4" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" CLIPS_COST="1.0">
+                                    <ADDER XMLID="CLIPS" ID="1765143205255" BASECOST="1.0" LEVELS="4" ALIAS="32 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="RECOVERABLE" ID="1765143205266" BASECOST="0.5" LEVELS="0" ALIAS="Recoverable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="INCREASEDRELOAD" ID="1765143212975" BASECOST="-0.25" LEVELS="0" ALIAS="Increased Reloading Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="2 Full Phases" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 4 Recoverable Charges (32 clips, Recoverable, 2 Full Phases; +1/4)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 6);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 6);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 4);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 32);
+                        });
+                    });
+                });
+
+                describe("continuous", function () {
+                    describe("4 charges", async function () {
+                        const contents = `
+                            <POWER XMLID="DARKNESS" ID="1765144948455" BASECOST="0.0" LEVELS="1" ALIAS="Darkness" POSITION="133" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <MODIFIER XMLID="CHARGES" ID="1765145177363" BASECOST="-1.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FOUR" OPTIONID="FOUR" OPTION_ALIAS="4" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <ADDER XMLID="CONTINUING" ID="1765145188941" BASECOST="0.25" LEVELS="0" ALIAS="Continuing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="1 Extra Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: true });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                'Darkness to Hearing Group 1" radius (5 Active Points); 4 Continuing Charges lasting 1 Extra Phase (1 Extra Phase; -3/4)',
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 3);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 5);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 4);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 0);
+                        });
+                    });
+
+                    describe("500 charges are not capped", async function () {
+                        const contents = `
+                            <POWER XMLID="DARKNESS" ID="1765144948455" BASECOST="0.0" LEVELS="1" ALIAS="Darkness" POSITION="133" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <MODIFIER XMLID="CHARGES" ID="1765145724747" BASECOST="1.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FIVEHUNDRED" OPTIONID="FIVEHUNDRED" OPTION_ALIAS="500" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <ADDER XMLID="CONTINUING" ID="1765145736755" BASECOST="0.25" LEVELS="0" ALIAS="Continuing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="1 Extra Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: true });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                'Darkness to Hearing Group 1" radius, 500 Continuing Charges lasting 1 Extra Phase (1 Extra Phase; +1 1/2)',
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 12);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 12);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 500);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 0);
+                        });
+                    });
+
+                    describe("longer 500 charges are not capped", async function () {
+                        const contents = `
+                            <POWER XMLID="DARKNESS" ID="1765144948455" BASECOST="0.0" LEVELS="1" ALIAS="Darkness" POSITION="133" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <MODIFIER XMLID="CHARGES" ID="1765145887307" BASECOST="1.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FIVEHUNDRED" OPTIONID="FIVEHUNDRED" OPTION_ALIAS="500" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <ADDER XMLID="CONTINUING" ID="1765145890182" BASECOST="1.25" LEVELS="0" ALIAS="Continuing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWENTYMINUTES" OPTIONID="TWENTYMINUTES" OPTION_ALIAS="20 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: true });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                'Darkness to Hearing Group 1" radius, 500 Continuing Charges lasting 20 Minutes (20 Minutes; +2 1/2)',
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 17);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 17);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 500);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 0);
+                        });
+                    });
+
+                    describe("4 clip levels 1 charges @ longer continuing", async function () {
+                        const contents = `
+                            <POWER XMLID="DARKNESS" ID="1765144948455" BASECOST="0.0" LEVELS="1" ALIAS="Darkness" POSITION="133" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <MODIFIER XMLID="CHARGES" ID="1765146358486" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" CLIPS_COST="1.0">
+                                    <ADDER XMLID="CONTINUING" ID="1765146365683" BASECOST="1.75" LEVELS="0" ALIAS="Continuing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HOUR" OPTIONID="HOUR" OPTION_ALIAS="1 Hour" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                    <ADDER XMLID="CLIPS" ID="1765146400003" BASECOST="1.0" LEVELS="4" ALIAS="256 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: true });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.FullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        // FIXME: ?
+                        // NOTE: This description is technically wrong as HD is wrong considering this 256 clips (it's actually 128)
+                        //       but the 256 clips is an ALIAS that we just blindly dump in.
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                'Darkness to Hearing Group 1" radius, 1 Continuing Charge lasting 1 Hour (1 Hour, 256 clips; +3/4)',
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 9);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 9);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.LEVELS, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("charges", function () {
+                            assert.equal(item.system.chargesMax, 1);
+                        });
+
+                        it("clips", function () {
+                            assert.equal(item.system.clipsMax, 128);
+                        });
+                    });
+                });
             });
         },
         { displayName: "HERO: Upload" },
