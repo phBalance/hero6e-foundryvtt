@@ -3529,7 +3529,7 @@ export class HeroSystem6eItem extends Item {
 
                     const chargesMax = itemWithChargeModifier.system.chargesMax;
                     const charges = itemWithChargeModifier.system.charges;
-                    if (charges != chargesMax) {
+                    if (charges !== chargesMax) {
                         result += `${charges}/`;
                     }
                     result += chargesMax;
@@ -3560,6 +3560,7 @@ export class HeroSystem6eItem extends Item {
                         const clipsMax = itemWithChargeModifier.system.clipsMax;
                         const clips = itemWithChargeModifier.system.clips;
                         if (clips !== clipsMax) {
+                            // PH: FIXME: Why is this not showing max clips all the time?
                             result += `, ${clips}/${clipsMax} Clips`;
                         }
                     }

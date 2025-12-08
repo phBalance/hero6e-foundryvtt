@@ -1138,13 +1138,21 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
         }
 
         // Max clips gain 2x clips for each level where charges modifier cost + clips adder cost is <= -0.
-        // Max clips gain 4x clips for each level where charges modifer cost + clips adder cost is > -0;
-        // NOTE: Increased reload time adder is considered before clip cost for figuring number of clips.
-        const increasedReloadLevels = (this.item.system.chargeModifier.INCREASEDRELOAD?.BASECOST || 0) * -4;
-        const chargeLevels = getChargeOptionIdToLevel(this.item.system.chargeModifier.OPTIONID) - increasedReloadLevels;
+        // Max clips gain 4x clips for each level where charges modifer cost + clips adder cost is > -0. Not clear if that's just the crossing or for all steps thereafter as well.
+        // NOTE: All adders are considered before clip cost for figuring number of clips.
+        const chargeAdders = this.item.system.chargeModifier.adders;
+        const adderCostExcludingClips = chargeAdders
+            .filter((adder) => adder.XMLID !== "CLIPS")
+            .reduce((accum, adder) => accum + adder.cost, 0);
+        const addersLevelsExcludingClips =
+            adderCostExcludingClips * -4 + (this.item.system.chargeModifier.OPTIONID === "ONE" ? 1 : 0);
+        const chargeLevelsExcludingClips =
+            getChargeOptionIdToLevel(this.item.system.chargeModifier.OPTIONID) - addersLevelsExcludingClips;
         const clipLevels = this.item.system.chargeModifier.CLIPS?.LEVELS || 0;
-        const levelsAsLimitation = chargeLevels < 0 ? Math.min(clipLevels, Math.abs(chargeLevels)) : 0;
-        const levelsAsAdvantage = chargeLevels >= 0 ? clipLevels : Math.max(0, clipLevels + chargeLevels);
+        const levelsAsLimitation =
+            chargeLevelsExcludingClips < 0 ? Math.min(clipLevels, Math.abs(chargeLevelsExcludingClips)) : 0;
+        const levelsAsAdvantage =
+            chargeLevelsExcludingClips >= 0 ? clipLevels : Math.max(0, clipLevels + chargeLevelsExcludingClips);
         return Math.pow(2, levelsAsLimitation) * Math.pow(4, levelsAsAdvantage);
     }
 

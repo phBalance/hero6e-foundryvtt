@@ -3,6 +3,8 @@
 ## Version 4.2.5 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Reworked charges for power frameworks. Charges on a MultiPower reserve for "all slots" now correctly share the charges amongst all the slots. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3167)
+- Charge clips are now calculated with 4x multiplier when advantaged. [#3268](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3268)
+- Charge clips are now clamped to +1 when non recoverable, boostable, or continuous. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3267](https://github.com/dmdorman/hero6e-foundryvtt/issues/3267)
 
 ## Version 4.2.4 20251130
 
