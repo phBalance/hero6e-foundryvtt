@@ -15,10 +15,7 @@ export class Attack {
         const actor = action.system.actor;
         Attack.removeActionActiveEffects(actor);
         cvModifiers.forEach((cvModifier) => {
-            // Do not create an AE for OCV as it only works for an instant, no need to keep track of it.
-            if (!cvModifier.cvMod.ocv) {
-                Attack.makeActionActiveEffect(action, cvModifier);
-            }
+            Attack.makeActionActiveEffect(action, cvModifier);
         });
     }
 
@@ -45,29 +42,34 @@ export class Attack {
         // changes include:
         //{ ocv, dcv, dc, dcvMultiplier, ocvMultiplier }
         let icon = "icons/svg/upgrade.svg";
-        let label = `${cvModifier.name}`;
+        let name = `${cvModifier.name}`;
         let comma = false;
         const changes = [];
+
         if (cvModifier.cvMod.ocv) {
-            const ocv = cvModifier.cvMod.ocv;
-            if (ocv < 0) {
-                icon = "icons/svg/downgrade.svg";
-            }
-            label += ` ${ocv.signedStringHero()} OCV`;
-            comma = true;
-            changes.push({
-                key: `system.characteristics.ocv.value`,
-                value: ocv,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-            });
+            console.warn(
+                "Skipping creation an AE for OCV as it only works for an instant, no need to keep track of it.",
+                action,
+            );
+            // const ocv = cvModifier.cvMod.ocv;
+            // if (ocv < 0) {
+            //     icon = "icons/svg/downgrade.svg";
+            // }
+            // label += ` ${ocv.signedStringHero()} OCV`;
+            // comma = true;
+            // changes.push({
+            //     key: `system.characteristics.ocv.value`,
+            //     value: ocv,
+            //     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            //     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+            // });
         }
         if (cvModifier.cvMod.dcv) {
             const dcv = cvModifier.cvMod.dcv;
             if (dcv < 0) {
                 icon = "icons/svg/downgrade.svg";
             }
-            label += `${comma ? "," : ""} ${dcv.signedStringHero()} DCV`;
+            name += `${comma ? "," : ""} ${dcv.signedStringHero()} DCV`;
             comma = true;
             changes.push({
                 key: `system.characteristics.dcv.value`,
@@ -87,7 +89,7 @@ export class Attack {
             if (dcvMultiplier != 0 && dcvMultiplier < 1) {
                 multiplierString = `1/${1.0 / dcvMultiplier}`;
             }
-            label += `${comma ? "," : ""} x${multiplierString} DCV`;
+            name += `${comma ? "," : ""} x${multiplierString} DCV`;
             changes.push({
                 key: `system.characteristics.dcv.value`,
                 value: cvModifier.cvMod.dcvMultiplier,
@@ -100,7 +102,7 @@ export class Attack {
             return;
         }
         const activeEffect = {
-            label,
+            name,
             icon,
             changes,
             origin: item.uuid,
