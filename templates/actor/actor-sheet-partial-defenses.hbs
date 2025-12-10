@@ -8,7 +8,7 @@
             <th class="sticky"></th>
         </tr>
         {{#each items as |item id|}}
-            {{#if (or (includes item.baseInfo.type "defense") (hasDefenseActiveEffect item)) }}
+            {{#if (or (includes item.baseInfo.type "defense") (hasDefenseActiveEffect item) (includes item.baseInfo.behaviors "defense")) }}
                 <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}}"
                     data-item-id="{{item._id}}">
                     <td style="min-width: 24px">
