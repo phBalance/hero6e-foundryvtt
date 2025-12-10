@@ -5,6 +5,7 @@
 - Reworked charges for power frameworks. Charges on a MultiPower reserve for "all slots" now correctly share the charges amongst all the slots. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3167)
 - Charge clips are now calculated with 4x multiplier when advantaged. [#3268](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3268)
 - Charge clips are now clamped to +1 when non recoverable, boostable, or continuous. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3267](https://github.com/dmdorman/hero6e-foundryvtt/issues/3267)
+- Post segment 12 recoveries no longer clear stunned condition. [#3274](https://github.com/dmdorman/hero6e-foundryvtt/issues/3274)
 
 ## Version 4.2.4 20251130
 

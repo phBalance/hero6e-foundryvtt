@@ -1000,7 +1000,7 @@ export class HeroSystem6eCombat extends Combat {
                 await ChatMessage.create(chatData);
             } else if (combatant.actor.statuses.has("knockedOut")) {
                 if (combatant.actor.system.characteristics.stun?.value >= -10) {
-                    await combatant.actor.TakeRecovery(false, combatant.token);
+                    await combatant.actor.TakeRecovery({ asAction: false, token: combatant.token });
                 }
             }
         }
@@ -1082,8 +1082,8 @@ export class HeroSystem6eCombat extends Combat {
         } catch (e) {
             console.warn(
                 `Unable to update postSegment12Round. ` +
-                    `Likely occured because ${this.name} clicked END TURN, triggering PostSegment12, ` +
-                    `and doees not have permissions to update [combat.flags]. ` +
+                    `Likely occurred because ${this.name} clicked END TURN, triggering PostSegment12, ` +
+                    `and does not have permissions to update [combat.flags]. ` +
                     `Future solution is to store "postSegment12Round" in root of Combat schema like we do for "segment". ` +
                     `This is only a problem when rewinding combat tracker.`,
             );
@@ -1130,7 +1130,7 @@ export class HeroSystem6eCombat extends Combat {
                 const showToAll = !combatant.hidden && (combatant.hasPlayerOwner || combatant.actor?.type === "pc");
 
                 // Make sure combatant is visible in combat tracker
-                const recoveryText = await combatant.actor.TakeRecovery(false, combatant.token);
+                const recoveryText = await combatant.actor.TakeRecovery({ asAction: false, token: combatant.token });
                 if (recoveryText) {
                     if (showToAll) {
                         content += "<li>" + recoveryText + "</li>";
