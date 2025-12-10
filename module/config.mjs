@@ -4375,7 +4375,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (advantages.length > 0) {
                     validations.push({
                         property: advantages.map((m) => m.XMLID),
-                        message: `Gamemasters should be wary of advantages [${advantages.map((m) => m.XMLID).join(",")}] applied to all slots`,
+                        message: `Gamemasters should be wary of advantages [${advantages.map((m) => m.XMLID).join(",")}] applied to all slots as it could unbalance the game.`,
                         severity: HERO.VALIDATION_SEVERITY.INFO,
                     });
                 }

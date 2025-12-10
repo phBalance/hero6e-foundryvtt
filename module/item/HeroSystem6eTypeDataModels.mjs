@@ -1084,13 +1084,13 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
         // Charges with a MP are typically on the parentItem not the slot
         // so we use a helper to get the right one.
         if (!this.item.system.chargeModifier) {
-            console.error(`${this.item.name} has no CHARGE modifier`, this);
+            //console.error(`${this.item.name} has no CHARGE modifier`, this);
             return 0;
         }
 
         const itemWithChargeModifier = this.item.system.chargeModifier.parent.item;
         if (!itemWithChargeModifier) {
-            console.error(`${this.name} has no itemWithChargeModifier`, this);
+            //console.error(`${this.name} has no itemWithChargeModifier`, this);
             return 0;
         }
 
@@ -1099,7 +1099,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
 
     get chargesMax() {
         if (!this.item.system.chargeModifier) {
-            console.error(`${this.name} has no CHARGE modifier`, this);
+            //console.error(`${this.name} has no CHARGE modifier`, this);
             return 0;
         }
         return parseInt(this.item.system.chargeModifier.OPTION_ALIAS) || 0;
@@ -1109,18 +1109,18 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
         // Charges with a MP are typically on the parentItem not the slot
         // so we use a helper to get the right one.
         if (!this.item.system.chargeModifier) {
-            console.error(`${this.item.name} charges, yet no CHARGE modifier was found`, this);
+            //console.error(`${this.item.name} charges, yet no CHARGE modifier was found`, this);
             return 0;
         }
 
         const itemWithChargeModifier = this.item.system.chargeModifier.parent.item;
         if (!itemWithChargeModifier) {
-            console.error(`${this.name} has no itemWithChargeModifier`, this);
+            //console.error(`${this.name} has no itemWithChargeModifier`, this);
             return 0;
         }
 
         if (!itemWithChargeModifier.findModsByXmlid("CLIPS")) {
-            console.error(`${this.name} has no CLIPS adder`, this);
+            //console.error(`${this.name} has no CLIPS adder`, this);
         }
 
         return itemWithChargeModifier.system._clips ?? 0;
@@ -1128,12 +1128,12 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
 
     get clipsMax() {
         if (!this.item.system.chargeModifier) {
-            console.error(`${this.name} has no CHARGE modifier`, this);
+            //console.error(`${this.name} has no CHARGE modifier`, this);
             return 0;
         }
 
         if (!this.item.system.chargeModifier.CLIPS) {
-            console.error(`${this.name} has no CLIPS modifier`, this);
+            //console.error(`${this.name} has no CLIPS modifier`, this);
             return 0;
         }
 
