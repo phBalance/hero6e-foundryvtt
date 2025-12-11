@@ -2862,6 +2862,19 @@ export class HeroSystem6eActor extends Actor {
                     }
                 }
             }
+
+            // DataModel check
+            let dataModelErrorCount = 0;
+            for (const item of this.items) {
+                const e = item.system.debugModelProps();
+                if (e) {
+                    if (dataModelErrorCount++ === 0) {
+                        ui.notifications.error(`${this.name}. ${e}<br>Please report`, { permanent: true });
+                    } else {
+                        // the console.error inside debugModelProps will log the rest
+                    }
+                }
+            }
         } catch (e) {
             console.error(e);
             ui.notifications.error(`${this.name} had errors during upload.`);
