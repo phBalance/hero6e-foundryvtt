@@ -5412,6 +5412,27 @@ export class HeroSystem6eItem extends Item {
         return end;
     }
 
+    get endPer1mMovement() {
+        // All begin with all movements costing 1 END per fraction of 10m moved
+        let end = 0.1;
+
+        const increasedEnd = this.findModsByXmlid("INCREASEDEND");
+        if (increasedEnd) {
+            end *= parseInt(increasedEnd.OPTION.replace("x", ""));
+        }
+
+        const reducedEnd =
+            this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
+        if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
+            end = RoundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
+            end = Math.max(1, RoundFavorPlayerDown(end / 2));
+        } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
+            end = 0;
+        }
+
+        return end;
+    }
+
     get duration() {
         let _duration = this.baseInfo?.duration;
         if (this.baseInfo?.behaviors.includes("success")) {

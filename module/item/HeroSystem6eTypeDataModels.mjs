@@ -961,7 +961,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         const parentChargeMod = this.item.parentItem?.system.MODIFIER.find(
             (m) => m.XMLID === "CHARGES" && m.ID === modFromItemGetter.ID,
         );
-        console.log(`CHARGE from parent [${this.item.parentItem.name}]`);
+        //console.log(`CHARGE from parent [${this.item.parentItem.name}]`);
         return parentChargeMod;
     }
 }
