@@ -190,12 +190,15 @@ function actorItemHeroValidationCss(item) {
 }
 
 function actorHeroValidationCssByItemType(actor, itemType) {
+    // Need to be careful here as a SKILL in a COMPOUNDPOWER as a piece of EQUIPMENT
+    // doesn't show in SKILL tab
+
     function getKeyByValue(object, value) {
         return Object.keys(object).find((key) => object[key] === value);
     }
 
     const validationsOfType = actor.items
-        .filter((item) => item.type === itemType)
+        .filter((item) => (item.parentItem?.parentItem || item.parentItem || item).type === itemType)
         .reduce((accumulator, currentArray) => {
             return accumulator.concat(currentArray.heroValidation);
         }, []);
