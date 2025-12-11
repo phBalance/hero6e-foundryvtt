@@ -325,6 +325,7 @@ export class HeroSystem6eItem extends Item {
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.LEVELS}`;
                 activeEffect.img = this.baseInfo?.img ?? "icons/svg/upgrade.svg";
                 activeEffect.description = this.system.description;
+                activeEffect.origin = this.uuid;
                 activeEffect.changes = [
                     {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
@@ -359,9 +360,7 @@ export class HeroSystem6eItem extends Item {
 
                 if (activeEffect.update) {
                     await activeEffect.update({
-                        name: activeEffect.name,
-                        changes: activeEffect.changes,
-                        img: activeEffect.img,
+                        activeEffect,
                     });
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -1406,6 +1405,8 @@ export class HeroSystem6eItem extends Item {
 
     async setActive(value) {
         if (this.effects.size > 0) {
+            // Make sure ActiveEffects are current
+            await this.setActiveEffects();
             // multiple ActiveEffects on an item are possible such as FLIGHT with BULKY FOCUS
             const changes = [];
             for (const ae of this.effects) {
