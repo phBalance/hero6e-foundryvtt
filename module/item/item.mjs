@@ -4715,6 +4715,10 @@ export class HeroSystem6eItem extends Item {
 
     get showAttack() {
         try {
+            if (!this.baseInfo) {
+                return false;
+            }
+
             if (this.disabledOIHID) {
                 return false;
             }
@@ -4726,11 +4730,29 @@ export class HeroSystem6eItem extends Item {
             if (this.type === "equipment" && this.system.CARRIED !== true) {
                 return false;
             }
+
+            if (this.system.XMLID === "STRIKE") {
+                return true;
+            }
+
+            if (this.baseInfo.type.includes("attack")) {
+                return true;
+            }
+
+            if (this.baseInfo.type.includes("to-hit")) {
+                return true;
+            }
+
+            if (this.XMLID === "HANDTOHANDATTACK") {
+                // TODO: Collaborate with Peter.
+                // Aaron would like to show the HTH attack, but roll as a STRIKE + HTH
+                return false;
+            }
         } catch (e) {
             console.error(e);
         }
 
-        return true;
+        return false;
     }
 
     get isActive() {
