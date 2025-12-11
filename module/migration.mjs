@@ -201,7 +201,16 @@ export async function migrateWorld() {
         "Coerce is5e===undefined to boolean value",
         async (actor) => await migrateTo4_2_0(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.18`, "background: #1111FF; color: #FFFFFF");
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.0`, "background: #1111FF; color: #FFFFFF");
+
+    await migrateToVersion(
+        "4.2.5",
+        lastMigration,
+        getAllActorsInGame(),
+        "Ensure perception & maneuvers are proper edition",
+        async (actor) => await migrateTo4_2_5(actor),
+    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.5`, "background: #1111FF; color: #FFFFFF");
 
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 
@@ -236,13 +245,27 @@ async function migrateTo4_2_0(actor) {
     }
 }
 
-// async function convertCharacteristicsToItem(actor) {
-//     for (const key of getCharacteristicInfoArrayForActor(actor).map((bi) => bi.key)) {
-//         if (actor.system[key]) {
-//             //debugger;
-//         }
-//     }
-// }
+async function migrateTo4_2_5(actor) {
+    try {
+        await replaceFreeStuffWithProperEdition(actor);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function replaceFreeStuffWithProperEdition(actor) {
+    // Check for any 5e/6e mismatched free items
+    const mismatchItem = actor.items.find(
+        (item) =>
+            (item.system.XMLID === "PERCEPTION" || item.type === "maneuver") &&
+            (item.system.is5e !== actor.system.is5e || !item.baseInfo),
+    );
+
+    if (mismatchItem) {
+        // Add perception and maneuvers (also removes all mismatched free items)
+        await actor.addFreeStuff();
+    }
+}
 
 async function addXmlidToCharacteristics(actor) {
     const changes = {};

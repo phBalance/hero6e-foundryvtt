@@ -651,9 +651,20 @@ export class HeroSystem6eItem extends Item {
             if (this.baseInfo.heroValidation) {
                 const v = this.baseInfo.heroValidation(this);
                 if (v) {
-                    _heroValidation.push(...this.baseInfo.heroValidation(this));
+                    _heroValidation.push(...v.map((m) => ({ ...m, itemId: this.id })));
                 }
             }
+        }
+
+        const e = this.system.debugModelProps();
+
+        if (e) {
+            _heroValidation.push({
+                //property:
+                message: `PLEASE REPORT THIS ERROR: ${e}`,
+                severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                itemId: this.id,
+            });
         }
 
         return _heroValidation;

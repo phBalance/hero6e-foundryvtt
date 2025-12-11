@@ -155,9 +155,9 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             if (this._hdcXml) {
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
                     if (this[attribute.name] === undefined) {
-                        console.error(
-                            `${this.xmlTag} HeroItemModCommonModel is missing ${attribute.name} property.  Fix then reload ${this.actor.name}.`,
-                        );
+                        const e = `${this.xmlTag} HeroItemModCommonModel is missing ${attribute.name} property.  Fix then reload ${this.actor.name}.`;
+                        console.error(e);
+                        return e;
                     }
                 }
 
@@ -173,6 +173,7 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
             }
         } catch (e) {
             console.error(e);
+            return e;
         }
     }
 
@@ -652,9 +653,9 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             if (this._hdcXml) {
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
                     if (this[attribute.name] === undefined) {
-                        console.error(
-                            `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`,
-                        );
+                        const e = `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`;
+                        console.error(e);
+                        return e;
                     }
 
                     if (this.ADDER) {
@@ -678,6 +679,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             }
         } catch (e) {
             console.error(e);
+            return e;
         }
     }
 
@@ -1506,12 +1508,15 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
             if (this._hdcXml) {
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
                     if (this[attribute.name] === undefined) {
-                        console.error(`${this.xmlTag} HeroItemCharacteristic is missing ${attribute.name} property.`);
+                        const e = `${this.xmlTag} HeroItemCharacteristic is missing ${attribute.name} property.`;
+                        console.error(e);
+                        return e;
                     }
                 }
             }
         } catch (e) {
             console.error(e);
+            return e;
         }
     }
 }

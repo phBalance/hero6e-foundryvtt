@@ -2862,6 +2862,19 @@ export class HeroSystem6eActor extends Actor {
                     }
                 }
             }
+
+            // DataModel check
+            let dataModelErrorCount = 0;
+            for (const item of this.items) {
+                const e = item.system.debugModelProps();
+                if (e) {
+                    if (dataModelErrorCount++ === 0) {
+                        ui.notifications.error(`${this.name}. ${e}<br>Please report`, { permanent: true });
+                    } else {
+                        // the console.error inside debugModelProps will log the rest
+                    }
+                }
+            }
         } catch (e) {
             console.error(e);
             ui.notifications.error(`${this.name} had errors during upload.`);
@@ -2909,7 +2922,7 @@ export class HeroSystem6eActor extends Actor {
         const mismatchItems = this.items.filter(
             (item) =>
                 (item.system.XMLID === "PERCEPTION" || item.type === "maneuver") &&
-                (item.is5e !== this.is5e || !item.baseInfo),
+                (item.system.is5e !== this.system.is5e || !item.baseInfo),
         );
 
         if (mismatchItems.length > 0) {
@@ -3389,7 +3402,7 @@ export class HeroSystem6eActor extends Actor {
 
         if (_is5e !== undefined && this.system.is5e !== _is5e) {
             if (!squelch(this.id)) {
-                console.error(`${this.name} is5e mismatch`);
+                console.error(`${this.name} is5e mismatch.  Template=${_template}`);
             }
             return this.system.is5e;
         }
