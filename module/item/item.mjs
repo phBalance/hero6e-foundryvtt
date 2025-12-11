@@ -4735,18 +4735,22 @@ export class HeroSystem6eItem extends Item {
                 return true;
             }
 
-            if (this.baseInfo.type.includes("attack")) {
-                return true;
+            if (this.type === "maneuver") {
+                return false;
             }
 
-            if (this.baseInfo.type.includes("to-hit")) {
-                return true;
-            }
-
-            if (this.XMLID === "HANDTOHANDATTACK") {
+            if (this.system.XMLID === "HANDTOHANDATTACK") {
                 // TODO: Collaborate with Peter.
                 // Aaron would like to show the HTH attack, but roll as a STRIKE + HTH
                 return false;
+            }
+
+            if (this.baseInfo.behaviors.includes("attack")) {
+                return true;
+            }
+
+            if (this.baseInfo.behaviors.includes("to-hit")) {
+                return true;
             }
         } catch (e) {
             console.error(e);
