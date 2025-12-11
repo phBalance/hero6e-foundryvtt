@@ -6,6 +6,7 @@
 - Charge clips are now calculated with 4x multiplier when advantaged. [#3268](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3268)
 - Charge clips are now clamped to +1 when non recoverable, boostable, or continuous. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3267](https://github.com/dmdorman/hero6e-foundryvtt/issues/3267)
 - Post segment 12 recoveries no longer clear stunned condition. [#3274](https://github.com/dmdorman/hero6e-foundryvtt/issues/3274)
+- Combatants that attack during their lightning reflexes phase will have their non LR phase skipped. Combatants that are stunned or knocked out will also have their phase skipped. [#2404](https://github.com/dmdorman/hero6e-foundryvtt/issues/2404)
 
 ## Version 4.2.4 20251130
 

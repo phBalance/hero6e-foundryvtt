@@ -629,7 +629,7 @@ export class HeroSystem6eCombat extends Combat {
 
         if (!combatant) return;
         if (!combatant.actor) {
-            console.debug(`${combatant.name} has no actor`);
+            console.error(`${combatant.name} has no actor`);
             return;
         }
 
@@ -637,40 +637,53 @@ export class HeroSystem6eCombat extends Combat {
         // getCombatantByToken seems to get the first combatant in combat.turns that is for our token.
         // This likely causes issues when SPD/LightningReflexes changes.
         const masterCombatant = this.getCombatantByToken(combatant.tokenId);
-        const _segmentNumber = combatant.flags[game.system.id]?.segment || this.segment;
+        const _segmentNumber = this.segment;
 
-        if (
-            !combatant.flags[game.system.id]?.lightningReflexes &&
-            game.combat.combatants.find(
-                (c) => combatant.tokenId === c.tokenId && combatant.flags[game.system.id]?.lightningReflexes,
-            )
-        ) {
-            console.log(
-                `skipping onStartTurn for ${combatant.name} because non lightning reflexes version of combatant`,
-                combatant,
+        // if (
+        //     !combatant.flags[game.system.id]?.lightningReflexes &&
+        //     game.combat.combatants.find(
+        //         (c) => combatant.tokenId === c.tokenId && combatant.flags[game.system.id]?.lightningReflexes,
+        //     )
+        // ) {
+        //     console.log(
+        //         `skipping onStartTurn for ${combatant.name} because non lightning reflexes version of combatant`,
+        //         combatant,
+        //     );
+        //     return;
+        // }
+
+        // Make sure flags are setup
+        combatant.flags[game.system.id] ??= {};
+        combatant.flags[game.system.id].heroHistory ??= {};
+        masterCombatant.flags[game.system.id] ??= {};
+        masterCombatant.flags[game.system.id].heroHistory ??= {};
+
+        const heroHistoryKey = `r${String(this.round).padStart(2, "0")}s${String(_segmentNumber).padStart(2, "0")}`;
+
+        let heroHistoryThisCombatant = combatant.flags[game.system.id].heroHistory[heroHistoryKey];
+        console.warn(heroHistoryKey, heroHistoryThisCombatant);
+
+        // If we have already attacked this segment (lightning reflexes),
+        // then skip this combatant
+        const heroHistoryThisSegment = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
+        if (!heroHistoryThisCombatant && heroHistoryThisSegment?.action) {
+            ui.notifications.info(
+                `Skipping <b>${this.combatant.name}</b> because they have already taken an action [${heroHistoryThisSegment.action.name}] this segment`,
             );
-            return;
+            return this.nextTurn();
         }
 
         // Save some properties for future support for rewinding combat tracker
-        // TODO: Include charges for various items
-        combatant.flags[game.system.id] ??= {};
-        combatant.flags[game.system.id].heroHistory ??= {};
-        if (combatant.actor && this.round && _segmentNumber) {
-            combatant.flags[game.system.id].heroHistory[
-                `r${String(this.round).padStart(2, "0")}s${String(_segmentNumber).padStart(2, "0")}`
-            ] = {
-                end: combatant.actor.system.characteristics.end?.value,
-                stun: combatant.actor.system.characteristics.stun?.value,
-                body: combatant.actor.system.characteristics.body?.value,
-            };
-            const updates = [
-                {
-                    _id: combatant.id,
-                    [`flags.${game.system.id}.heroHistory`]: combatant.flags[game.system.id].heroHistory,
-                },
-            ];
-            this.updateEmbeddedDocuments("Combatant", updates);
+        // TODO: Include charges for various items?
+        try {
+            combatant.flags[game.system.id].heroHistory[heroHistoryKey] ??= {};
+            heroHistoryThisCombatant = combatant.flags[game.system.id].heroHistory[heroHistoryKey];
+            heroHistoryThisCombatant.end = combatant.actor.system.characteristics.end?.value;
+            heroHistoryThisCombatant.stun = combatant.actor.system.characteristics.stun?.value;
+            heroHistoryThisCombatant.body = combatant.actor.system.characteristics.body?.value;
+            await combatant.setFlag(game.system.id, "heroHistory", combatant.flags[game.system.id].heroHistory);
+        } catch (e) {
+            console.error(e);
         }
 
         // Expire Effects
@@ -931,6 +944,18 @@ export class HeroSystem6eCombat extends Combat {
             const effect = combatant.actor.effects.contents.find((o) => o.statuses.has("aborted"));
             await effect.delete();
         }
+
+        // Skip if they are stunned
+        if (combatant.actor.statuses.has("stunned")) {
+            ui.notifications.info(`Skipping <b>${this.combatant.name}</b> because they are Stunned.`);
+            return this.nextTurn();
+        }
+
+        // Skip if they are knockedOut
+        if (combatant.actor.statuses.has("knockedOut")) {
+            ui.notifications.info(`Skipping <b>${this.combatant.name}</b> because they are Knocked Out.`);
+            return this.nextTurn();
+        }
     }
 
     /**
@@ -1130,7 +1155,11 @@ export class HeroSystem6eCombat extends Combat {
                 const showToAll = !combatant.hidden && (combatant.hasPlayerOwner || combatant.actor?.type === "pc");
 
                 // Make sure combatant is visible in combat tracker
-                const recoveryText = await combatant.actor.TakeRecovery({ asAction: false, token: combatant.token });
+                const recoveryText = await combatant.actor.TakeRecovery({
+                    asAction: false,
+                    token: combatant.token,
+                    preventRecoverFromStun: true,
+                });
                 if (recoveryText) {
                     if (showToAll) {
                         content += "<li>" + recoveryText + "</li>";

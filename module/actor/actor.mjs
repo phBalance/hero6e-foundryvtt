@@ -488,16 +488,18 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // Remove STUN condition, unless this was part of a PostSegment12 recovery
-            if (newStun > 0 && options.recoveryAsAction !== false) {
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
-                    active: false,
-                });
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect.id, {
-                    active: false,
-                });
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    active: false,
-                });
+            if (newStun > 0) {
+                if (!options.preventRecoverFromStun) {
+                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
+                        active: false,
+                    });
+                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect.id, {
+                        active: false,
+                    });
+                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                        active: false,
+                    });
+                }
             }
         }
 
@@ -672,7 +674,7 @@ export class HeroSystem6eActor extends Actor {
         return values;
     }
 
-    async TakeRecovery({ asAction, token }) {
+    async TakeRecovery({ asAction, token, preventRecoverFromStun }) {
         if (asAction == undefined) {
             console.error(`TakeRecovery asAction is ${asAction}`, this);
         }
@@ -786,7 +788,7 @@ export class HeroSystem6eActor extends Actor {
                 "system.characteristics.stun.value": newStun,
                 "system.characteristics.end.value": newEnd,
             },
-            { hideChatMessage: true, recoveryAsAction: asAction },
+            { hideChatMessage: true, preventRecoverFromStun },
         );
 
         let content = `${tokenName} <i>Takes a Recovery</i>`;
