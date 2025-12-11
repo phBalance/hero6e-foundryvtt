@@ -33,8 +33,42 @@ function generateMovementMaxCombatDistanceMeters(characteristic) {
 function generateMovementMaxNonCombatDistanceMeters(characteristic) {
     return (token) => {
         const combatMovementInSystemUnits = token.actor?.system.characteristics[characteristic]?.value || 0;
-        const nonCombatMultiplier = 2; // PH: FIXME: This is wrong. Need to look at the actual power that is being used.
-        return convertSystemUnitsToMetres(nonCombatMultiplier * combatMovementInSystemUnits, token.actor.is5e);
+
+        // Assume double movement for nonCombat (x2 multiplier)
+        let extraNonCombatMovement = combatMovementInSystemUnits;
+
+        // Look for powers with nonCombatMultipliers
+        try {
+            const movementEffectsWithImprovedNonCombat = token.actor?.appliedEffects.filter(
+                (ae) =>
+                    ae.changes.find((c) => c.key === `system.characteristics.${characteristic}.max`) &&
+                    ae.parent.findModsByXmlid("IMPROVEDNONCOMBAT"),
+            );
+            for (const ae of movementEffectsWithImprovedNonCombat) {
+                const change = ae.changes.find((c) => c.key === `system.characteristics.${characteristic}.max`);
+                const distance = parseInt(change.value) || 0;
+                const movementPower = ae.parent;
+                if (movementPower.system.ADDER) {
+                    const IMPROVEDNONCOMBAT = movementPower.findModsByXmlid("IMPROVEDNONCOMBAT");
+                    const nonCombatMultiplier = Math.pow(2, IMPROVEDNONCOMBAT.LEVELS + 1);
+                    // Subtract out the default x2 multiplier
+                    const extraMovement = distance * (nonCombatMultiplier - 2);
+                    extraNonCombatMovement += extraMovement;
+                } else {
+                    console.error(
+                        `unable to locate ${characteristic} non-combat movement multiplier details for ${token.name}`,
+                    );
+                }
+            }
+        } catch (e) {
+            console.error(
+                `unable to locate ${characteristic} non-combat movement multiplier details for ${token.name}`,
+                e,
+            );
+        }
+
+        //const nonCombatMultiplier = 2; // PH: FIXME: This is wrong. Need to look at the actual power that is being used.
+        return convertSystemUnitsToMetres(extraNonCombatMovement + combatMovementInSystemUnits, token.actor.is5e);
     };
 }
 

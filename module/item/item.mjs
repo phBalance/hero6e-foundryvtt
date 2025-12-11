@@ -325,6 +325,7 @@ export class HeroSystem6eItem extends Item {
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.LEVELS}`;
                 activeEffect.img = this.baseInfo?.img ?? "icons/svg/upgrade.svg";
                 activeEffect.description = this.system.description;
+                activeEffect.origin = this.uuid;
                 activeEffect.changes = [
                     {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
@@ -359,9 +360,7 @@ export class HeroSystem6eItem extends Item {
 
                 if (activeEffect.update) {
                     await activeEffect.update({
-                        name: activeEffect.name,
-                        changes: activeEffect.changes,
-                        img: activeEffect.img,
+                        activeEffect,
                     });
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -1406,6 +1405,8 @@ export class HeroSystem6eItem extends Item {
 
     async setActive(value) {
         if (this.effects.size > 0) {
+            // Make sure ActiveEffects are current
+            await this.setActiveEffects();
             // multiple ActiveEffects on an item are possible such as FLIGHT with BULKY FOCUS
             const changes = [];
             for (const ae of this.effects) {
@@ -4715,6 +4716,10 @@ export class HeroSystem6eItem extends Item {
 
     get showAttack() {
         try {
+            if (!this.baseInfo) {
+                return false;
+            }
+
             if (this.disabledOIHID) {
                 return false;
             }
@@ -4726,11 +4731,33 @@ export class HeroSystem6eItem extends Item {
             if (this.type === "equipment" && this.system.CARRIED !== true) {
                 return false;
             }
+
+            if (this.system.XMLID === "STRIKE") {
+                return true;
+            }
+
+            if (this.type === "maneuver") {
+                return false;
+            }
+
+            if (this.system.XMLID === "HANDTOHANDATTACK") {
+                // TODO: Collaborate with Peter.
+                // Aaron would like to show the HTH attack, but roll as a STRIKE + HTH
+                return false;
+            }
+
+            if (this.baseInfo.behaviors.includes("attack")) {
+                return true;
+            }
+
+            if (this.baseInfo.behaviors.includes("to-hit")) {
+                return true;
+            }
         } catch (e) {
             console.error(e);
         }
 
-        return true;
+        return false;
     }
 
     get isActive() {
@@ -5379,6 +5406,27 @@ export class HeroSystem6eItem extends Item {
 
         // MOVEMENT only costs endurance when used.  Typically per round.
         if (this.baseInfo?.type.includes("movement")) {
+            end = 0;
+        }
+
+        return end;
+    }
+
+    get endPer1mMovement() {
+        // All begin with all movements costing 1 END per fraction of 10m moved
+        let end = 0.1;
+
+        const increasedEnd = this.findModsByXmlid("INCREASEDEND");
+        if (increasedEnd) {
+            end *= parseInt(increasedEnd.OPTION.replace("x", ""));
+        }
+
+        const reducedEnd =
+            this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
+        if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
+            end = RoundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
+            end = Math.max(1, RoundFavorPlayerDown(end / 2));
+        } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             end = 0;
         }
 

@@ -663,6 +663,12 @@ export class HeroSystem6eCombat extends Combat {
         let heroHistoryThisCombatant = combatant.flags[game.system.id].heroHistory[heroHistoryKey];
         console.warn(heroHistoryKey, heroHistoryThisCombatant);
 
+        // V13 clear movement history and END used for movement
+        if (masterCombatant.token.clearMovementHistory) {
+            await masterCombatant.setFlag(game.system.id, "endUsedForMovement", 0);
+            await masterCombatant.token.clearMovementHistory();
+        }
+
         // If we have already attacked this segment (lightning reflexes),
         // then skip this combatant
         const heroHistoryThisSegment = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
@@ -984,6 +990,20 @@ export class HeroSystem6eCombat extends Combat {
         if (!combatant.actor) {
             console.debug(`${combatant.name} has no actor`);
             return;
+        }
+
+        // Show and clear spend END for movement
+        // END is spent realtime in HeroSystem6eTokenDocument:_onMovementRecorded
+        const endUsedForMovement = combatant.getFlag(game.system.id, "endUsedForMovement") || 0;
+        if (endUsedForMovement > 0) {
+            const content = `${combatant.name} spend ${endUsedForMovement} END for movement this phase.`;
+            ChatMessage.create({
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                author: game.user._id,
+                speaker: ChatMessage.getSpeaker({ actor: combatant.actor, token: combatant.token }),
+                content,
+                whisper: whisperUserTargetsForActor(combatant.actor),
+            });
         }
 
         // At the end of the Segment, any non-Persistent Powers, and any Skill Levels of any type, turn off for STUNNED actors.

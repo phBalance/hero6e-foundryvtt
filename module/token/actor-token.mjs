@@ -203,6 +203,84 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
             await combat.extraCombatants();
         }
     }
+
+    /**
+     * Called when the movement is recorded or cleared.
+     * @protected
+     */
+    _onMovementRecorded() {
+        super._onMovementRecorded();
+
+        // Track END for movement when in combat and it is the active combatant
+        if (game.combat?.combatant?.tokenId === this.id) {
+            const masterCombatant = game.combat.getCombatantByToken(this.combatant.tokenId);
+            const endStart = masterCombatant.getFlag(game.system.id, "endUsedForMovement") || 0;
+            const endCost = this._movementHistoryEndCost;
+            const endDelta = endCost - endStart;
+            masterCombatant.setFlag(game.system.id, "endUsedForMovement", endCost);
+            this.actor.update({
+                [`system.characteristics.end.value`]: this.actor.system.characteristics.end.value - endDelta,
+            });
+        }
+    }
+
+    #movementPossibilities(action) {
+        const movementActiveEffects = this.actor.appliedEffects.filter((ae) =>
+            ae.changes.find((c) => c.key === `system.characteristics.${action.toLowerCase()}.max`),
+        );
+        const possibleMovements = [];
+        for (const ae of movementActiveEffects) {
+            possibleMovements.push({
+                name: ae.name,
+                ae,
+                action: action,
+                distanceUnused:
+                    parseInt(
+                        ae.changes.find((c) => c.key === `system.characteristics.${action.toLowerCase()}.max`).value,
+                    ) || 0,
+                endPer1mMovement: ae.parent.endPer1mMovement,
+            });
+        }
+        const characteristicMax = this.actor.system.characteristics[action.toLowerCase()]?.max;
+        if (characteristicMax) {
+            possibleMovements.push({
+                name: "inherent",
+                action: action,
+                distanceUnused: parseInt(characteristicMax) || 0,
+                endPer1mMovement: 0.1,
+            });
+        }
+        // Use least expensive movements first
+        return possibleMovements.sort(({ endPer1mMovement: a }, { endPer1mMovement: b }) => a - b);
+    }
+
+    get _movementHistoryEndCost() {
+        let endCost = 0;
+        try {
+            const movementCapabilities = {};
+            for (const waypoint of this.movementHistory) {
+                if (waypoint.cost > 0) {
+                    let cost = waypoint.cost;
+                    movementCapabilities[waypoint.action] ??= this.#movementPossibilities(waypoint.action);
+                    for (const capability of movementCapabilities[waypoint.action]) {
+                        const used = Math.max(0, Math.min(cost, capability.distanceUnused));
+                        cost -= used;
+                        endCost += capability.endPer1mMovement;
+                        capability.distanceUnused -= used;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(`Unable to calculate END use of movement for ${this.name}`, e);
+        }
+
+        // Movement rounds up
+        endCost = Math.ceil(endCost);
+
+        console.log(`${this.name} movement cost ${endCost} END.`);
+
+        return endCost;
+    }
 }
 
 export class HeroSystem6eToken extends FoundryVttToken {
