@@ -487,16 +487,19 @@ export class HeroSystem6eActor extends Actor {
                 });
             }
 
+            // Remove STUN condition, unless this was part of a PostSegment12 recovery
             if (newStun > 0) {
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
-                    active: false,
-                });
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect.id, {
-                    active: false,
-                });
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    active: false,
-                });
+                if (!options.preventRecoverFromStun) {
+                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
+                        active: false,
+                    });
+                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect.id, {
+                        active: false,
+                    });
+                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
+                        active: false,
+                    });
+                }
             }
         }
 
@@ -671,7 +674,15 @@ export class HeroSystem6eActor extends Actor {
         return values;
     }
 
-    async TakeRecovery(asAction, token) {
+    async TakeRecovery({ asAction, token, preventRecoverFromStun }) {
+        if (asAction == undefined) {
+            console.error(`TakeRecovery asAction is ${asAction}`, this);
+        }
+
+        if (token == undefined) {
+            console.warn(`TakeRecovery token is ${token}`, this);
+        }
+
         // RECOVERING
         // Characters use REC to regain lost STUN and expended END.
         // This is known as “Recovering” or “taking a Recovery.”
@@ -777,7 +788,7 @@ export class HeroSystem6eActor extends Actor {
                 "system.characteristics.stun.value": newStun,
                 "system.characteristics.end.value": newEnd,
             },
-            { hideChatMessage: true },
+            { hideChatMessage: true, preventRecoverFromStun },
         );
 
         let content = `${tokenName} <i>Takes a Recovery</i>`;
