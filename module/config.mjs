@@ -1075,19 +1075,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Speed",
             base: 2,
             costPerLevel: fixedValueFunction(10),
-            cost: function (characteristic) {
+            cost: function (spdCharacteristicOrItem) {
                 if (
-                    !(characteristic instanceof HeroActorCharacteristic) &&
-                    !(characteristic instanceof HeroSystem6eItem)
+                    !(spdCharacteristicOrItem instanceof HeroActorCharacteristic) &&
+                    !(spdCharacteristicOrItem instanceof HeroSystem6eItem)
                 ) {
-                    console.error(`unexpected datatype`, characteristic);
+                    console.error(`unexpected datatype`, spdCharacteristicOrItem);
                     return 0;
                 }
 
-                // 5e gets partial refund
-                const refund = characteristic.levels > 0 ? +(characteristic.core % 1).toFixed(1) * 10 : 0;
+                const levels = spdCharacteristicOrItem.levels ?? spdCharacteristicOrItem.system.LEVELS;
+                const core =
+                    spdCharacteristicOrItem.core ?? spdCharacteristicOrItem.actor.system.characteristics.spd.core;
 
-                return characteristic.levels * this.costPerLevel() - refund;
+                // 5e gets partial refund
+                const refund = levels > 0 ? +(core % 1).toFixed(1) * 10 : 0;
+
+                return levels * this.costPerLevel() - refund;
             },
             type: ["characteristic"],
             behaviors: ["figured", "figuredDEX"],
