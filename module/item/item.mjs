@@ -569,43 +569,82 @@ export class HeroSystem6eItem extends Item {
                         `You must install the <b>Active Token Effects</b> module for carried lights to work`,
                     );
                 }
-                let activeEffect =
+
+                // REF: https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
+                function generateUniqueLightColor(alphaSeed) {
+                    function splitmix32(a) {
+                        return function () {
+                            a |= 0;
+                            a = (a + 0x9e3779b9) | 0;
+                            let t = a ^ (a >>> 16);
+                            t = Math.imul(t, 0x21f0aaad);
+                            t = t ^ (t >>> 15);
+                            t = Math.imul(t, 0x735a2d97);
+                            return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
+                        };
+                    }
+
+                    function sumAsciiCodes(str) {
+                        let sum = 0;
+                        // Iterate through each character in the string
+                        for (let i = 0; i < str.length; i++) {
+                            // Use charCodeAt(i) to get the code of the character at index i
+                            sum += str.charCodeAt(i);
+                        }
+                        return sum;
+                    }
+
+                    const numericSeed = sumAsciiCodes(alphaSeed);
+
+                    const prng = splitmix32(numericSeed);
+
+                    // Define a minimum value (e.g., 200) to ensure the color is light/whiteish
+                    const min = 0;
+                    // Max value is 255
+                    const max = 50;
+
+                    // Generate random values for R, G, and B within the desired range
+                    const r = Math.floor(prng() * (max - min + 1)) + min;
+                    const g = Math.floor(prng() * (max - min + 1)) + min;
+                    const b = Math.floor(prng() * (max - min + 1)) + min;
+
+                    // return Hex string color
+                    return (
+                        r.toString(16).padStart(2, 0) + g.toString(16).padStart(2, 0) + b.toString(16).padStart(2, 0)
+                    );
+                }
+
+                const activeEffect =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
                     {};
-                if (this.system.active || !activeEffect.update) {
-                    activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
-                    activeEffect.img = "icons/svg/light.svg";
-                    activeEffect.changes = [
-                        {
-                            key: "ATL.light.bright",
-                            value: parseFloat(this.system.QUANTITY),
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                        },
-                    ];
-                    activeEffect.system ??= { XMLID: this.system.XMLID };
-                    if (!activeEffect.update) {
-                        activeEffect.disabled = true;
-                    }
 
-                    if (activeEffect.update) {
-                        await activeEffect.update({
-                            name: activeEffect.name,
-                            changes: activeEffect.changes,
-                            disabled: false,
-                        });
-                    } else {
-                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                    }
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
+                activeEffect.img = "icons/svg/light.svg";
+                activeEffect.changes = [
+                    {
+                        key: "ATL.light.bright",
+                        value: parseFloat(this.system.QUANTITY),
+                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
+                    },
+                    {
+                        key: "ATL.light.color",
+                        value: generateUniqueLightColor(this.uuid),
+                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
+                    },
+                ];
+                activeEffect.system ??= { XMLID: this.system.XMLID };
+                activeEffect.disabled ??= true;
+
+                if (activeEffect.update) {
+                    await activeEffect.update({
+                        name: activeEffect.name,
+                        changes: activeEffect.changes,
+                    });
                 } else {
-                    // Light was turned off?
-                    if (activeEffect?.update) {
-                        await activeEffect.update({
-                            name: activeEffect.name,
-                            disabled: true,
-                        });
-                    }
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
             }
 

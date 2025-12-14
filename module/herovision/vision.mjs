@@ -1,4 +1,5 @@
-import { calculateDistanceBetween } from "./range.mjs";
+import { calculateDistanceBetween } from "../utility/range.mjs";
+import { HeroVisionModeInfraredPerception } from "./vision-modes/infrared-perception2.mjs";
 
 export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSource {
     get isBlinded() {
@@ -78,6 +79,7 @@ export function setPerceptionModes() {
         }
     }
     CONFIG.Canvas.visionModes.heroVision = new HeroVisionMode();
+    CONFIG.Canvas.visionModes.infraredPerception = new HeroVisionModeInfraredPerception();
     // CONFIG.Canvas.visionModes.heroSight = new VisionMode({
     //     id: "heroVision",
     //     label: "Hero Vision",

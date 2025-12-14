@@ -13,8 +13,8 @@ import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
-import { setPerceptionModes } from "./utility/vision.mjs";
-import { HeroPointVisionSource } from "./utility/vision.mjs";
+import { setPerceptionModes } from "./herovision/vision.mjs";
+import { HeroPointVisionSource } from "./herovision/vision.mjs";
 import { EffectsPanel } from "./effects-panel.mjs";
 import { GenericRoller } from "./genericRoller.mjs";
 

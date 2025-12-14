@@ -661,7 +661,7 @@ export class HeroSystem6eCombat extends Combat {
         const heroHistoryKey = `r${String(this.round).padStart(2, "0")}s${String(_segmentNumber).padStart(2, "0")}`;
 
         let heroHistoryThisCombatant = combatant.flags[game.system.id].heroHistory[heroHistoryKey];
-        console.warn(heroHistoryKey, heroHistoryThisCombatant);
+        //console.warn(heroHistoryKey, heroHistoryThisCombatant);
 
         // V13 clear movement history and END used for movement
         if (masterCombatant.token.clearMovementHistory) {
@@ -671,13 +671,13 @@ export class HeroSystem6eCombat extends Combat {
 
         // If we have already attacked this segment (lightning reflexes),
         // then skip this combatant
-        const heroHistoryThisSegment = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
-        if (!heroHistoryThisCombatant && heroHistoryThisSegment?.action) {
-            ui.notifications.info(
-                `Skipping <b>${this.combatant.name}</b> because they have already taken an action [${heroHistoryThisSegment.action.name}] this segment`,
-            );
-            return this.nextTurn();
-        }
+        // const heroHistoryThisSegment = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
+        // if (!heroHistoryThisCombatant && heroHistoryThisSegment?.action) {
+        //     ui.notifications.info(
+        //         `Skipping <b>${this.combatant.name}</b> because they have already taken an action [${heroHistoryThisSegment.action.name}] this segment`,
+        //     );
+        //     return this.nextTurn();
+        // }
 
         // Save some properties for future support for rewinding combat tracker
         // TODO: Include charges for various items?
@@ -952,16 +952,16 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // Skip if they are stunned
-        if (combatant.actor.statuses.has("stunned")) {
-            ui.notifications.info(`Skipping <b>${this.combatant.name}</b> because they are Stunned.`);
-            return this.nextTurn();
-        }
+        // if (combatant.actor.statuses.has("stunned")) {
+        //     ui.notifications.info(`Skipping <b>${this.combatant.name}</b> because they are Stunned.`);
+        //     return this.nextTurn();
+        // }
 
         // Skip if they are knockedOut
-        if (combatant.actor.statuses.has("knockedOut")) {
-            ui.notifications.info(`Skipping <b>${this.combatant.name}</b> because they are Knocked Out.`);
-            return this.nextTurn();
-        }
+        // if (combatant.actor.statuses.has("knockedOut")) {
+        //     ui.notifications.info(`Skipping <b>${this.combatant.name}</b> because they are Knocked Out.`);
+        //     return this.nextTurn();
+        // }
     }
 
     /**
