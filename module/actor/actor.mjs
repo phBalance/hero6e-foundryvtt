@@ -805,6 +805,18 @@ export class HeroSystem6eActor extends Actor {
             content += ".";
         }
 
+        // ENDURANCERESERVE HACK
+        const ENDURANCERESERVE = this.items.find((item) => item.system.XMLID === "ENDURANCERESERVE");
+        if (ENDURANCERESERVE) {
+            const ENDURANCERESERVEREC = ENDURANCERESERVE.findModsByXmlid("ENDURANCERESERVEREC");
+            await ENDURANCERESERVE.update({
+                "system.value": Math.min(
+                    parseInt(ENDURANCERESERVE.system.value) + ENDURANCERESERVEREC.LEVELS,
+                    ENDURANCERESERVE.system.LEVELS,
+                ),
+            });
+        }
+
         const chatData = {
             author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.IC,
@@ -1977,6 +1989,7 @@ export class HeroSystem6eActor extends Actor {
                 1 + // Final save
                 1 + // Restore retained damage
                 1 + // CSL assignment
+                1 + // debugModelProps
                 1; // Not really sure why we need an extra +1
 
             uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess);
@@ -2864,6 +2877,7 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // DataModel check
+            uploadProgressBar.advance(`${this.name}: Processing debugModelProps`, 0);
             let dataModelErrorCount = 0;
             for (const item of this.items) {
                 const e = item.system.debugModelProps();
@@ -2875,6 +2889,7 @@ export class HeroSystem6eActor extends Actor {
                     }
                 }
             }
+            uploadProgressBar.advance(`${this.name}: Processed debugModelProps`, 1);
         } catch (e) {
             console.error(e);
             ui.notifications.error(`${this.name} had errors during upload.`);
