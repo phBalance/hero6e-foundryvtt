@@ -849,8 +849,9 @@ export class HeroSystem6eItem extends Item {
                 await this.system.setChargesAndSave(this.system.chargesMax);
             }
 
-            if (chargeItemModifier.CLIPS && this.system.clips < this.system.clipsMax) {
-                await this.system.setClipsAndSave(this.system.clipsMax);
+            if (chargeItemModifier.CLIPS && this.system.clips !== this.system.clipsMax - 1) {
+                // Resetting to full charges requires the use of 1 clip
+                await this.system.setClipsAndSave(this.system.clipsMax - 1);
             }
 
             if (this.isActive) {
@@ -3611,12 +3612,8 @@ export class HeroSystem6eItem extends Item {
                     result += chargesMax > 1 ? " Charges" : " Charge";
 
                     if (chargeModifier.CLIPS) {
-                        const clipsMax = itemWithChargeModifier.system.clipsMax;
                         const clips = itemWithChargeModifier.system.clips;
-                        if (clips !== clipsMax) {
-                            // PH: FIXME: Why is this not showing max clips all the time?
-                            result += `, ${clips}/${clipsMax} Clips`;
-                        }
+                        result += `, ${clips} Full clip${clips !== 1 ? "s" : ""} remaining`;
                     }
 
                     if (continuing) {
