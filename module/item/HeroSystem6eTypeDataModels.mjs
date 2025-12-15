@@ -1077,7 +1077,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             DISADPOINTS: new StringField(),
 
             _charges: new HeroNumberField({ initial: 0, integer: true }),
-            _clips: new HeroNumberField({ initial: 0, integer: true }),
+            _clips: new HeroNumberField({ initial: 1, integer: true }),
             ablative: new HeroNumberField({ initial: 0, integer: true }), // Store # of times threshold has been exceeded
         };
     }
@@ -1123,9 +1123,10 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
 
         if (!itemWithChargeModifier.findModsByXmlid("CLIPS")) {
             //console.error(`${this.name} has no CLIPS adder`, this);
+            return 0;
         }
 
-        return itemWithChargeModifier.system._clips ?? 0;
+        return itemWithChargeModifier.system._clips;
     }
 
     get clipsMax() {
@@ -1168,7 +1169,8 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             console.error(`${this.name} was unable to find itemWithChargeModifier`, this);
             return;
         }
-        await itemWithChargeModifier.update({ "system._charges": value });
+
+        return itemWithChargeModifier.update({ "system._charges": value });
     }
 
     async setClipsAndSave(value) {
@@ -1185,7 +1187,8 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             console.error(`${this.name} was unable to find itemWithChargeModifier`, this);
             return;
         }
-        await itemWithChargeModifier.update({ "system._clips": value });
+
+        return itemWithChargeModifier.update({ "system._clips": value });
     }
 }
 

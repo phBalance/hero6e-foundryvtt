@@ -1078,14 +1078,20 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
         if (confirmed) {
             // Delete subitems
+            const childDeletePromises = [];
             for (const child of item.childItems) {
+                const child2DeletePromises = [];
                 for (const child2 of child.childItems) {
-                    child2.delete();
+                    child2DeletePromises.push(child2.delete());
                 }
-                child.delete();
-            }
+                await Promise.all(child2DeletePromises);
 
-            item.delete();
+                childDeletePromises.push(child.delete());
+            }
+            await Promise.all(childDeletePromises);
+
+            await item.delete();
+
             this.render();
         }
     }
