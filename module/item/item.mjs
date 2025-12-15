@@ -1801,45 +1801,6 @@ export class HeroSystem6eItem extends Item {
         return false;
     }
 
-    setInitialItemValueAndMax() {
-        let changed;
-
-        // LEVELS by default define the value/max. NOTE: use value/max instead of LEVELS so we can adjust powers.
-        let newValue = parseInt(this.system.LEVELS || 0);
-
-        switch (this.system.XMLID) {
-            case "MENTALDEFENSE":
-                // 5e gets some levels for free
-                if (this.actor?.is5e) {
-                    newValue =
-                        newValue > 0
-                            ? newValue +
-                              RoundFavorPlayerUp(parseInt(this.actor?.system.characteristics.ego.value) / 5 || 0)
-                            : 0;
-                }
-
-                // else use default value
-
-                break;
-
-            default:
-                // use default value
-                break;
-        }
-
-        if (this.system.max != newValue) {
-            this.system.max = newValue;
-            changed = true;
-        }
-
-        if (this.system.value != newValue) {
-            this.system.value = newValue;
-            changed = true;
-        }
-
-        return changed;
-    }
-
     get baseInfo() {
         return this.system.baseInfo;
     }
@@ -2498,6 +2459,17 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "MENTALDEFENSE":
+                {
+                    let mdBonusFor5e = 0;
+                    if (this.actor.is5e) {
+                        mdBonusFor5e = RoundFavorPlayerUp(
+                            parseInt(this.actor.system.characteristics.ego?.value) / 5 || 0,
+                        );
+                    }
+                    description = `${system.ALIAS} ${system.LEVELS + mdBonusFor5e} points`;
+                }
+                break;
+
             case "POWERDEFENSE":
                 description = `${system.ALIAS} ${system.LEVELS} points`;
                 break;
