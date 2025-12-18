@@ -2533,31 +2533,31 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance._d = new Date().getTime();
 
             // Warn about invalid adjustment targets
-            for (const item of this.items.filter((item) => item.baseInfo?.type?.includes("adjustment"))) {
-                const result = item.splitAdjustmentSourceAndTarget();
-                if (!result.valid) {
-                    await ui.notifications.warn(
-                        `${this.name} has an unsupported adjustment target "${item.system.INPUT}" for "${
-                            item.name
-                        }". Use characteristic abbreviations or power names separated by commas for automation support.${
-                            item.system.XMLID === "TRANSFER"
-                                ? ' Source and target lists should be separated by " -> ".'
-                                : ""
-                        }`,
-                        { console: true, permanent: true },
-                    );
-                } else {
-                    const maxAllowedEffects = item.numberOfSimultaneousAdjustmentEffects();
-                    if (
-                        result.reducesArray.length > maxAllowedEffects.maxReduces ||
-                        result.enhancesArray.length > maxAllowedEffects.maxEnhances
-                    ) {
-                        await ui.notifications.warn(
-                            `${this.name} has too many adjustment targets defined for ${item.name}.`,
-                        );
-                    }
-                }
-            }
+            // for (const item of this.items.filter((item) => item.baseInfo?.type?.includes("adjustment"))) {
+            //     const result = item.splitAdjustmentSourceAndTarget();
+            //     if (!result.valid) {
+            //         await ui.notifications.warn(
+            //             `${this.name} has an unsupported adjustment target "${item.system.INPUT}" for "${
+            //                 item.name
+            //             }". Use characteristic abbreviations or power names separated by commas for automation support.${
+            //                 item.system.XMLID === "TRANSFER"
+            //                     ? ' Source and target lists should be separated by " -> ".'
+            //                     : ""
+            //             }`,
+            //             { console: true, permanent: true },
+            //         );
+            //     } else {
+            //         const maxAllowedEffects = item.numberOfSimultaneousAdjustmentEffects();
+            //         if (
+            //             result.reducesArray.length > maxAllowedEffects.maxReduces ||
+            //             result.enhancesArray.length > maxAllowedEffects.maxEnhances
+            //         ) {
+            //             await ui.notifications.warn(
+            //                 `${this.name} has too many adjustment targets defined for ${item.name}.`,
+            //             );
+            //         }
+            //     }
+            // }
 
             uploadProgressBar.advance(`${this.name}: Processed non characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processed all items`, 0);

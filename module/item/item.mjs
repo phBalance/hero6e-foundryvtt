@@ -697,6 +697,34 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Adjustment Powers
+        if (this.baseInfo?.type.includes("adjustment")) {
+            const result = this.splitAdjustmentSourceAndTarget();
+            if (!result.valid) {
+                _heroValidation.push({
+                    property: "INPUT",
+                    message:
+                        this.system.XMLID === "TRANSFER"
+                            ? `Expecting characteristic abbreviations or power names connected by ->`
+                            : `Expecting characteristic abbreviations or power names separated by commas.`,
+                    example: this.system.XMLID === "TRANSFER" ? `STR -> CON` : `STR, CON`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
+                });
+            } else {
+                const maxAllowedEffects = this.numberOfSimultaneousAdjustmentEffects();
+                if (
+                    result.reducesArray.length > maxAllowedEffects.maxReduces ||
+                    result.enhancesArray.length > maxAllowedEffects.maxEnhances
+                ) {
+                    _heroValidation.push({
+                        property: "INPUT",
+                        message: `Has too many adjustment targets defined`,
+                        severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                    });
+                }
+            }
+        }
+
         const e = this.system.debugModelProps();
 
         if (e) {

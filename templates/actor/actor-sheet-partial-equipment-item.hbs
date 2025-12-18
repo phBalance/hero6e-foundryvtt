@@ -1,5 +1,6 @@
 {{#if (filterItem this @root.options.itemFilters.equipment)}}
 <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{actorItemHeroValidationCss this}}"
+    title="{{actorItemHeroValidation this}}"
     data-item-id="{{this._id}}">
 
     <td width = "24px">
