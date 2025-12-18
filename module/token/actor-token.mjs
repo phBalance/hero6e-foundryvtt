@@ -211,6 +211,11 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
     _onMovementRecorded() {
         super._onMovementRecorded();
 
+        // Only owners have permission to perform updates
+        if (!this.isOwner) {
+            return;
+        }
+
         // Track END for movement when in combat and it is the active combatant
         if (game.combat?.combatant?.tokenId === this.id) {
             const masterCombatant = game.combat.getCombatantByToken(this.combatant.tokenId);
