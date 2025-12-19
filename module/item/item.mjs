@@ -3627,13 +3627,13 @@ export class HeroSystem6eItem extends Item {
 
                     result += chargesMax > 1 ? " Charges" : " Charge";
 
+                    if (continuing) {
+                        result += " lasting " + continuing.OPTION_ALIAS;
+                    }
+
                     if (chargeModifier.CLIPS) {
                         const clips = itemWithChargeModifier.system.clips;
                         result += `, ${clips} Full clip${clips !== 1 ? "s" : ""} remaining`;
-                    }
-
-                    if (continuing) {
-                        result += " lasting " + continuing.OPTION_ALIAS;
                     }
                 }
 
