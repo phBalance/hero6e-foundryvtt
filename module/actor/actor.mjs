@@ -547,18 +547,6 @@ export class HeroSystem6eActor extends Actor {
             await this.setNaturalHealing();
         }
 
-        // if (data?.system?.characteristics) {
-        //     const changes = {};
-
-        //     for (const charName of Object.keys(data.system.characteristics)) {
-        //         const charChanges = this.updateRollable(charName);
-
-        //         foundry.utils.mergeObject(changes, charChanges);
-        //     }
-
-        //     await this.update(changes);
-        // }
-
         // Heroic ID
         if (data.system?.heroicIdentity !== undefined) {
             // Toggled on (entering ID)
@@ -598,32 +586,43 @@ export class HeroSystem6eActor extends Actor {
         // }
 
         // 5e figured & calculated characteristics
-        if (this.is5e && data.system) {
+        if (this.is5e && data.system?.characteristics) {
             let _getCharacteristicInfoArrayForActor; // a bit of caching
-            for (const changeKey of Object.keys(data.system)) {
-                if (data.system?.[changeKey]?.LEVELS !== undefined) {
+            const changes = {};
+            for (const changeKey of Object.keys(data.system.characteristics)) {
+                if (data.system.characteristics[changeKey].value !== undefined) {
                     _getCharacteristicInfoArrayForActor ??= getCharacteristicInfoArrayForActor(this);
 
                     for (const char of _getCharacteristicInfoArrayForActor.filter(
                         (o) =>
-                            o.behaviors.includes(`figured${changeKey}`) ||
-                            o.behaviors.includes(`calculated${changeKey}`) ||
+                            o.behaviors.includes(`figured${changeKey.toUpperCase()}`) ||
+                            o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) ||
                             o.key == changeKey,
                     )) {
                         const key = char.key.toLocaleLowerCase();
-                        const core = this.system.characteristics[key].coreInt;
 
-                        await this.update({
-                            [`system.characteristics.${key}.max`]: core,
-                        });
+                        if (char.calculated5eCharacteristic) {
+                            const newValue = char.calculated5eCharacteristic(this);
+                            changes[`system.characteristics.${key}.max`] = newValue;
+                            changes[`system.characteristics.${key}.value`] = newValue;
+                        }
+                        //const core = this.system.characteristics[key].coreInt;
 
-                        this.applyActiveEffects();
+                        // await this.update({
+                        //     [`system.characteristics.${key}.max`]: core,
+                        // });
 
-                        await this.update({
-                            [`system.characteristics.${key}.value`]: this.system.characteristics[key].max,
-                        });
+                        // this.applyActiveEffects();
+
+                        // await this.update({
+                        //     [`system.characteristics.${key}.value`]: this.system.characteristics[key].max,
+                        // });
                     }
                 }
+            }
+
+            if (Object.keys(changes).length > 0) {
+                await this.update(changes);
             }
         }
 
@@ -1531,6 +1530,16 @@ export class HeroSystem6eActor extends Actor {
             console.warn("FullHealth performance concern: this.statuses.clear", end - start);
         }
 
+        // Reset all items
+        for (const item of this.items) {
+            start = Date.now();
+            await item.resetToOriginal();
+            end = Date.now();
+            if (end - start > tDelta) {
+                console.warn(`FullHealth performance concern: ${item.name} resetToOriginal`, end - start);
+            }
+        }
+
         // Remove temporary effects
         start = Date.now();
         for (const ae of this.temporaryEffects) {
@@ -1559,14 +1568,23 @@ export class HeroSystem6eActor extends Actor {
             console.warn("FullHealth performance concern: Remove Maneuver/Martial effects", end - start);
         }
 
-        // Set Characteristics MAX to CORE
+        // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
         const characteristicChangesMax = {};
-        for (const char of Object.keys(this.system.characteristics)) {
-            const core = parseInt(this.system.characteristics[char].core);
-            if (this.system.characteristics[char].max !== core) {
-                this.system.characteristics[char].max = core;
-                characteristicChangesMax[`system.characteristics.${char}.max`] = this.system.characteristics[char].max;
+        for (const charKey of Object.keys(this.system.characteristics)) {
+            const characteristic = this.system.characteristics[charKey];
+            // const calculated5e =
+            //     this.is5e && characteristic.baseInfo.calculated5eCharacteristic
+            //         ? characteristic.baseInfo.calculated5eCharacteristic(this, "max")
+            //         : null;
+            // const figured5e =
+            //     this.is5e && characteristic.baseInfo.figured5eCharacteristic
+            //         ? characteristic.baseInfo.figured5eCharacteristic(this, "max")
+            //         : null;
+            const core = parseInt(characteristic.core);
+            //const newMax = calculated5e ?? figured5e ?? core;
+            if (this.system.characteristics[charKey].max !== core) {
+                characteristicChangesMax[`system.characteristics.${charKey}.max`] = core;
             }
         }
         if (this._id && Object.keys(characteristicChangesMax).length > 0) {
@@ -1577,22 +1595,22 @@ export class HeroSystem6eActor extends Actor {
             console.warn("FullHealth performance concern: Set Characteristics MAX to CORE", end - start);
         }
 
-        start = Date.now();
-        this.applyActiveEffects();
-        end = Date.now();
-        if (end - start > tDelta) {
-            console.warn("FullHealth performance concern: applyActiveEffects", end - start);
-        }
+        // start = Date.now();
+        // this.applyActiveEffects();
+        // end = Date.now();
+        // if (end - start > tDelta) {
+        //     console.warn("FullHealth performance concern: applyActiveEffects", end - start);
+        // }
 
         // Set Characteristics VALUE to MAX
         start = Date.now();
         const characteristicChangesValue = {};
-        for (const char of Object.keys(this.system.characteristics)) {
-            const max = parseInt(this.system.characteristics[char].max);
-            if (this.system.characteristics[char].value !== max) {
-                this.system.characteristics[char].value = max;
-                characteristicChangesValue[`system.characteristics.${char}.value`] =
-                    this.system.characteristics[char].value;
+        for (const charKey of Object.keys(this.system.characteristics)) {
+            const characteristic = this.system.characteristics[charKey];
+            const max = parseInt(this.system.characteristics[charKey].max);
+            if (characteristic.value !== max) {
+                characteristic.value = max;
+                characteristicChangesValue[`system.characteristics.${charKey}.value`] = characteristic.value;
             }
         }
         if (this._id && Object.keys(characteristicChangesValue).length > 0) {
@@ -1604,32 +1622,22 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // 5e calculated LEVELS (shouldn't be necessary, just making sure)
-        start = Date.now();
-        if (this.is5e) {
-            const characteristic5eChangesValue = {};
-            for (const char of ["OCV", "DCV", "OMCV", "DMCV"]) {
-                if (this.system[char] && this.system[char].LEVELS !== 0) {
-                    characteristic5eChangesValue[`system.${char}.LEVELS`] = 0;
-                }
-            }
-            if (this._id && Object.keys(characteristic5eChangesValue).length > 0) {
-                await this.update(characteristic5eChangesValue);
-            }
-        }
-        end = Date.now();
-        if (end - start > tDelta) {
-            console.warn("FullHealth performance concern: 5e calculated LEVELS", end - start);
-        }
-
-        // Reset all items
-        for (const item of this.items) {
-            start = Date.now();
-            await item.resetToOriginal();
-            end = Date.now();
-            if (end - start > tDelta) {
-                console.warn(`FullHealth performance concern: ${item.name} resetToOriginal`, end - start);
-            }
-        }
+        // start = Date.now();
+        // if (this.is5e) {
+        //     const characteristic5eChangesValue = {};
+        //     for (const char of ["OCV", "DCV", "OMCV", "DMCV"]) {
+        //         if (this.system[char] && this.system[char].LEVELS !== 0) {
+        //             characteristic5eChangesValue[`system.${char}.LEVELS`] = 0;
+        //         }
+        //     }
+        //     if (this._id && Object.keys(characteristic5eChangesValue).length > 0) {
+        //         await this.update(characteristic5eChangesValue);
+        //     }
+        // }
+        // end = Date.now();
+        // if (end - start > tDelta) {
+        //     console.warn("FullHealth performance concern: 5e calculated LEVELS", end - start);
+        // }
 
         // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
         // if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
@@ -2533,31 +2541,31 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance._d = new Date().getTime();
 
             // Warn about invalid adjustment targets
-            for (const item of this.items.filter((item) => item.baseInfo?.type?.includes("adjustment"))) {
-                const result = item.splitAdjustmentSourceAndTarget();
-                if (!result.valid) {
-                    await ui.notifications.warn(
-                        `${this.name} has an unsupported adjustment target "${item.system.INPUT}" for "${
-                            item.name
-                        }". Use characteristic abbreviations or power names separated by commas for automation support.${
-                            item.system.XMLID === "TRANSFER"
-                                ? ' Source and target lists should be separated by " -> ".'
-                                : ""
-                        }`,
-                        { console: true, permanent: true },
-                    );
-                } else {
-                    const maxAllowedEffects = item.numberOfSimultaneousAdjustmentEffects();
-                    if (
-                        result.reducesArray.length > maxAllowedEffects.maxReduces ||
-                        result.enhancesArray.length > maxAllowedEffects.maxEnhances
-                    ) {
-                        await ui.notifications.warn(
-                            `${this.name} has too many adjustment targets defined for ${item.name}.`,
-                        );
-                    }
-                }
-            }
+            // for (const item of this.items.filter((item) => item.baseInfo?.type?.includes("adjustment"))) {
+            //     const result = item.splitAdjustmentSourceAndTarget();
+            //     if (!result.valid) {
+            //         await ui.notifications.warn(
+            //             `${this.name} has an unsupported adjustment target "${item.system.INPUT}" for "${
+            //                 item.name
+            //             }". Use characteristic abbreviations or power names separated by commas for automation support.${
+            //                 item.system.XMLID === "TRANSFER"
+            //                     ? ' Source and target lists should be separated by " -> ".'
+            //                     : ""
+            //             }`,
+            //             { console: true, permanent: true },
+            //         );
+            //     } else {
+            //         const maxAllowedEffects = item.numberOfSimultaneousAdjustmentEffects();
+            //         if (
+            //             result.reducesArray.length > maxAllowedEffects.maxReduces ||
+            //             result.enhancesArray.length > maxAllowedEffects.maxEnhances
+            //         ) {
+            //             await ui.notifications.warn(
+            //                 `${this.name} has too many adjustment targets defined for ${item.name}.`,
+            //             );
+            //         }
+            //     }
+            // }
 
             uploadProgressBar.advance(`${this.name}: Processed non characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processed all items`, 0);

@@ -1540,16 +1540,16 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     get core() {
         //console.error(`core is depricated`);
         try {
-            // Some 5e characteristics are calcuated
+            // Some 5e characteristics are calcuated or figured
             if (this.actor.is5e) {
                 if (this.baseInfo?.behaviors.includes("calculated")) {
                     if (this.#baseInfo.calculated5eCharacteristic) {
-                        return this.#baseInfo.calculated5eCharacteristic(this.actor, "core");
+                        return this.#baseInfo.calculated5eCharacteristic(this.actor, "max");
                     }
                 } else if (this.baseInfo?.behaviors.includes("figured")) {
                     return (
                         (this.actor.system[this.KEY].LEVELS || 0) +
-                        this.baseInfo.figured5eCharacteristic(this.actor, "core")
+                        this.baseInfo.figured5eCharacteristic(this.actor, "max")
                     );
                 }
             }

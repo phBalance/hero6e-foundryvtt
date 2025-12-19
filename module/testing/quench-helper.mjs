@@ -61,7 +61,8 @@ export async function deleteQuenchActor({ quench, actor }) {
         quench.tests?.find((t) => t?.state !== "passed") ||
         quench.currentTest?.state === "failed" ||
         quench.suites?.find((s) => s.tests.find((t) => t.state !== "passed")) ||
-        quench.test.parent.suites?.find((s) => s.tests.find((t) => t.state === "failed"))
+        quench.test.parent.suites?.find((s) => s.tests.find((t) => t.state === "failed")) ||
+        quench.test.parent.tests?.find((t) => t.state === "failed")
     ) {
         console.error("skipping deletion of actor because tests failed");
         return;

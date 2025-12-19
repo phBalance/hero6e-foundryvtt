@@ -682,12 +682,16 @@ export class HeroSystem6eCombat extends Combat {
         // Save some properties for future support for rewinding combat tracker
         // TODO: Include charges for various items?
         try {
-            combatant.flags[game.system.id].heroHistory[heroHistoryKey] ??= {};
-            heroHistoryThisCombatant = combatant.flags[game.system.id].heroHistory[heroHistoryKey];
-            heroHistoryThisCombatant.end = combatant.actor.system.characteristics.end?.value;
-            heroHistoryThisCombatant.stun = combatant.actor.system.characteristics.stun?.value;
-            heroHistoryThisCombatant.body = combatant.actor.system.characteristics.body?.value;
-            await combatant.setFlag(game.system.id, "heroHistory", combatant.flags[game.system.id].heroHistory);
+            masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey] ??= {};
+            heroHistoryThisCombatant = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
+            heroHistoryThisCombatant.end = masterCombatant.actor.system.characteristics.end?.value;
+            heroHistoryThisCombatant.stun = masterCombatant.actor.system.characteristics.stun?.value;
+            heroHistoryThisCombatant.body = masterCombatant.actor.system.characteristics.body?.value;
+            await masterCombatant.setFlag(
+                game.system.id,
+                "heroHistory",
+                masterCombatant.flags[game.system.id].heroHistory,
+            );
         } catch (e) {
             console.error(e);
         }
@@ -742,11 +746,23 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // Stop dodges and other maneuvers' active effects that expire automatically
-        const maneuverNextPhaseAes = combatant.actor.effects.filter(
+        const maneuverNextPhaseAes = combatant.actor.temporaryEffects.filter(
             (ae) =>
                 ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect" &&
                 ae.duration.startTime !== game.time.worldTime,
         );
+
+        // Sanity check for older maneuver styles.
+        // TODO: Perhaps use appliedEffects above
+        const sanity1 = combatant.actor.effects.filter(
+            (ae) =>
+                ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect" &&
+                ae.duration.startTime !== game.time.worldTime,
+        );
+        if (sanity1.length > 0) {
+            console.error(`unexpected maneuver flag.type`, sanity1);
+        }
+
         const maneuverNextPhaseTogglePromises = maneuverNextPhaseAes
             .filter((ae) => ae.flags[game.system.id]?.toggle)
             .map((toggleAes) => {
@@ -822,6 +838,7 @@ export class HeroSystem6eCombat extends Combat {
             for (const powerUsingResourcesToContinue of combatant.actor.items.filter(
                 (item) =>
                     item.isActive === true && // Is the power active?
+                    item.type !== "skill" && // Natural skills are always on, but only use resources when used/rolled
                     item.baseInfo && // Do we have baseInfo for this power
                     item.baseInfo.duration !== "instant" && // Is the power non instant
                     ((parseInt(item.end || 0) > 0 && // Does the power use END?
