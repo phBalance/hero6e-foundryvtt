@@ -968,8 +968,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey) {
-                return RoundFavorPlayerUp(actor.system.characteristics.dex[subKey] / 3);
+            calculated5eCharacteristic: function (actor, subKey = "value") {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex[subKey] / 3));
             },
             xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OCV>`,
         },
@@ -998,8 +998,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey) {
-                return RoundFavorPlayerUp(actor.system.characteristics.dex[subKey] / 3);
+            calculated5eCharacteristic: function (actor, subKey = "value") {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex[subKey] / 3));
             },
             xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DCV>`,
         },
@@ -1028,8 +1028,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey) {
-                return RoundFavorPlayerUp(actor.system.characteristics.ego[subKey] / 3);
+            calculated5eCharacteristic: function (actor, subKey = "value") {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego[subKey] / 3));
             },
             xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OMCV>`,
         },
@@ -1058,8 +1058,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey) {
-                return RoundFavorPlayerUp(actor.system.characteristics.ego[subKey] / 3);
+            calculated5eCharacteristic: function (actor, subKey = "value") {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego[subKey] / 3));
             },
 
             xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DMCV>`,

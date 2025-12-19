@@ -3,6 +3,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { calculateStrengthMinimumForItem } from "../utility/damage.mjs";
 import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
@@ -10959,6 +10960,108 @@ export function registerUploadTests(quench) {
                         it("clips", function () {
                             assert.equal(item.system.clipsMax, 128);
                         });
+                    });
+                });
+            });
+
+            describe("5e calculated & figured characteristics", async function () {
+                describe("baseline", async function () {
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: true });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("dex, ocv, dcv", function () {
+                        assert.equal(actor.system.characteristics.dex.value, 10);
+                        assert.equal(actor.system.characteristics.ocv.value, 3);
+                        assert.equal(actor.system.characteristics.dcv.value, 3);
+                    });
+
+                    it("ego, omcv, dmcv", function () {
+                        assert.equal(actor.system.characteristics.ego.value, 10);
+                        assert.equal(actor.system.characteristics.omcv.value, 3);
+                        assert.equal(actor.system.characteristics.dmcv.value, 3);
+                    });
+                });
+
+                describe.only("+DEX +EGO", async function () {
+                    const dexContents = `
+                    <DEX XMLID="DEX" ID="1766170024717" BASECOST="0.0" LEVELS="10" ALIAS="DEX" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                    <NOTES />
+                    </DEX>`;
+                    const egoContents = `<EGO XMLID="EGO" ID="1766174750652" BASECOST="0.0" LEVELS="1" ALIAS="EGO" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                    <NOTES />
+                    </EGO>`;
+
+                    let actor;
+                    let dexItem;
+                    let egoItem;
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: true });
+                        dexItem = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(dexContents, actor), {
+                            parent: actor,
+                        });
+                        egoItem = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(egoContents, actor), {
+                            parent: actor,
+                        });
+                        await dexItem.toggleOn();
+                        await egoItem.toggleOn();
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("calculated", function () {
+                        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(actor);
+                        assert.equal(
+                            _getCharacteristicInfoArrayForActor
+                                .filter((o) => o.behaviors.includes(`calculated`))
+                                .map((o) => o.key)
+                                .join(", "),
+                            "OCV, DCV, OMCV, DMCV",
+                        );
+                    });
+
+                    it("dex", function () {
+                        assert.equal(actor.system.characteristics.dex.value, 20);
+                    });
+                    it("ocv", function () {
+                        assert.equal(actor.system.characteristics.ocv.value, 7);
+                    });
+                    it("dcv", function () {
+                        assert.equal(actor.system.characteristics.dcv.value, 7);
+                    });
+
+                    it("ego", function () {
+                        assert.equal(actor.system.characteristics.ego.value, 11);
+                    });
+                    it("omcv", function () {
+                        assert.equal(actor.system.characteristics.omcv.value, 4);
+                    });
+                    it("dmcv", function () {
+                        assert.equal(actor.system.characteristics.dmcv.value, 4);
+                    });
+
+                    it("figured DEX", function () {
+                        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(actor);
+                        assert.equal(
+                            _getCharacteristicInfoArrayForActor
+                                .filter((o) => o.behaviors.includes(`figuredDEX`))
+                                .map((o) => o.key)
+                                .join(", "),
+                            "SPD",
+                        );
+                    });
+                    it("spd", function () {
+                        assert.equal(actor.system.characteristics.spd.value, 3);
                     });
                 });
             });

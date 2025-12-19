@@ -506,7 +506,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         super._onUpdate(changed, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
 
-        if (this.isOwner) {
+        if (this.isOwner && changed) {
             globalThis.setTimeout(() => this.#updateValueBasedOnMax(changed, options), 1);
         }
     }

@@ -400,9 +400,11 @@ export class HeroSystem6eItem extends Item {
                     const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
                     const newValue =
                         this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax;
-                    await this.actor.update({
-                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: newValue,
-                    });
+                    if (this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value !== newValue) {
+                        await this.actor.update({
+                            [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: newValue,
+                        });
+                    }
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
@@ -1237,6 +1239,9 @@ export class HeroSystem6eItem extends Item {
     async toggleOn(event) {
         const item = this;
 
+        // Make sure activeEffects are properly defined
+        await this.setActiveEffects();
+
         if (item.isActive) {
             console.warn(`${item.name} is already on`);
             return;
@@ -1483,7 +1488,13 @@ export class HeroSystem6eItem extends Item {
             for (const ae of this.effects) {
                 changes.push({ _id: ae.id, disabled: !value });
             }
-            return this.updateEmbeddedDocuments("ActiveEffect", changes);
+            await this.updateEmbeddedDocuments("ActiveEffect", changes);
+            if (this.effects.contents[0].disabled === value) {
+                ui.notifications.error(
+                    `${this.name} failed to update AE.disabled. Suspect a Foundry bug.  Reloading browser should temporarily resolve.`,
+                );
+            }
+            return;
         }
         return this.update({ "system.active": value });
     }
@@ -2046,6 +2057,11 @@ export class HeroSystem6eItem extends Item {
         // if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
         //     return true;
         // }
+
+        // Characteristics can be turned on or off
+        if (this.baseInfo?.type.includes("characteristic")) {
+            return true;
+        }
 
         return false;
     }
