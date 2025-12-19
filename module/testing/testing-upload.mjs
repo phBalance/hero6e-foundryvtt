@@ -9960,7 +9960,10 @@ export function registerUploadTests(quench) {
                         });
 
                         it("description", function () {
-                            assert.equal(item.system.description, "Energy Blast 1d6 (ED), 12 Charges (2 clips; +0)");
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 12 Charges, 1 Full clip remaining (2 clips; +0)",
+                            );
                         });
 
                         it("realCost", function () {
@@ -10015,7 +10018,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED) (5 Active Points); 1 Charge (16 clips; -3/4)",
+                                "Energy Blast 1d6 (ED) (5 Active Points); 1 Charge, 15 Full clips remaining (16 clips; -3/4)",
                             );
                         });
 
@@ -10069,7 +10072,10 @@ export function registerUploadTests(quench) {
                         });
 
                         it("description", function () {
-                            assert.equal(item.system.description, "Energy Blast 1d6 (ED), 12 Charges (8 clips; +1/4)");
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 12 Charges, 7 Full clips remaining (8 clips; +1/4)",
+                            );
                         });
 
                         it("realCost", function () {
@@ -10122,7 +10128,10 @@ export function registerUploadTests(quench) {
                         });
 
                         it("description", function () {
-                            assert.equal(item.system.description, "Energy Blast 1d6 (ED), 8 Charges (256 clips; +3/4)");
+                            assert.equal(
+                                item.system.description,
+                                "Energy Blast 1d6 (ED), 8 Charges, 255 Full clips remaining (256 clips; +3/4)",
+                            );
                         });
 
                         it("realCost", function () {
@@ -10177,7 +10186,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 125 Charges (1024 clips; +1)",
+                                "Energy Blast 1d6 (ED), 125 Charges, 1023 Full clips remaining (1024 clips; +1)",
                             );
                         });
 
@@ -10235,7 +10244,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 125 Charges (1024 clips, 2 Full Phases; +1)",
+                                "Energy Blast 1d6 (ED), 125 Charges, 1023 Full clips remaining (1024 clips, 2 Full Phases; +1)",
                             );
                         });
 
@@ -10293,7 +10302,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 125 Charges (1024 clips, 20 Minutes; +1)",
+                                "Energy Blast 1d6 (ED), 125 Charges, 1023 Full clips remaining (1024 clips, 20 Minutes; +1)",
                             );
                         });
 
@@ -10351,7 +10360,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 250 Charges (256 clips, 1 Hour; +3/4)",
+                                "Energy Blast 1d6 (ED), 250 Charges, 255 Full clips remaining (256 clips, 1 Hour; +3/4)",
                             );
                         });
 
@@ -10411,7 +10420,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 8 Boostable Charges (Boostable, 8 clips; +1/4)",
+                                "Energy Blast 1d6 (ED), 8 Boostable Charges, 7 Full clips remaining (Boostable, 8 clips; +1/4)",
                             );
                         });
 
@@ -10469,7 +10478,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 12 Boostable Charges (Boostable, 16 clips; +1/2)",
+                                "Energy Blast 1d6 (ED), 12 Boostable Charges, 15 Full clips remaining (Boostable, 16 clips; +1/2)",
                             );
                         });
 
@@ -10529,7 +10538,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 12 Boostable Charges (Boostable, 4 clips, 1 Turn; +0)",
+                                "Energy Blast 1d6 (ED), 12 Boostable Charges, 3 Full clips remaining (Boostable, 4 clips, 1 Turn; +0)",
                             );
                         });
 
@@ -10646,7 +10655,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED) (5 Active Points); 3 Recoverable Charges (4 clips, 1 Turn, Recoverable; -3/4)",
+                                "Energy Blast 1d6 (ED) (5 Active Points); 3 Recoverable Charges, 3 Full clips remaining (4 clips, 1 Turn, Recoverable; -3/4)",
                             );
                         });
 
@@ -10705,7 +10714,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Energy Blast 1d6 (ED), 4 Recoverable Charges (32 clips, Recoverable, 2 Full Phases; +1/4)",
+                                "Energy Blast 1d6 (ED), 4 Recoverable Charges, 31 Full clips remaining (32 clips, Recoverable, 2 Full Phases; +1/4)",
                             );
                         });
 
@@ -10932,7 +10941,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                'Darkness to Hearing Group 1" radius, 1 Continuing Charge lasting 1 Hour (1 Hour, 256 clips; +3/4)',
+                                'Darkness to Hearing Group 1" radius, 1 Continuing Charge lasting 1 Hour, 127 Full clips remaining (1 Hour, 256 clips; +3/4)',
                             );
                         });
 
