@@ -3508,8 +3508,7 @@ export function registerFullTests(quench) {
                         );
                     });
 
-                    // PH: FIXME: This doesn't work correctly yet as STR damage shouldn't be added for both the HKA and the MOVEBY
-                    it.skip("should recognize velocity isn't in the double damage limit for move by maneuver with an HKA", function () {
+                    it("should recognize velocity isn't in the double damage limit for move by maneuver with an HKA", function () {
                         // Base: HKA 1d6k (3 DC) => 3DC
                         // Added: STR 45 = +9 DC & STRMINIMUM 12 = -3DC to STR since diff is 33 STR, Move Through (+0 DC halved because it's a killing attack = +0 DC), velocity 30"/5 = 6DC => +12 DC
                         // Base + Added 3DC + 12DC (Double rule partially applies) => 12 DC at 15AP/die = 4d6
@@ -5191,8 +5190,7 @@ export function registerFullTests(quench) {
                     await actor.uploadFromXml(contents);
                 });
 
-                // FIXME: Broken
-                it.skip("should match the cost breakdown of HD", function () {
+                it("should match the cost breakdown of HD", function () {
                     assert.deepEqual(actor.pointsDetail, {
                         characteristics: 160,
                         skill: 40,
@@ -5208,8 +5206,7 @@ export function registerFullTests(quench) {
                     assert.equal(actor.name, "Amadeus");
                 });
 
-                // FIXME: Broken
-                it.skip("realCost", async function () {
+                it("realCost", async function () {
                     assert.equal(actor.realCost, 334);
                 });
 
@@ -5754,6 +5751,7 @@ export function registerFullTests(quench) {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
+                    // FIXME: Broken
                     it.skip("should be the correct number of points", function () {
                         assert.equal(actor.characterPointCost, 299);
                     });

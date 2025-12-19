@@ -9267,64 +9267,61 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            // See issue #2421. Compound powers are not correctly calculating costs.
-            describe.skip("compound power 5e FORCEWALL", function () {
+            describe("compound power 5e FORCEWALL", function () {
                 const contents = `
-
-                <?xml version="1.0" encoding="UTF-16"?>
-                <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
-                    <CHARACTER_INFO CHARACTER_NAME="5e superhero simple" />
-                    <POWERS>
-                        <POWER XMLID="COMPOUNDPOWER" ID="1752119161972" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="64" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <POWER XMLID="FORCEWALL" ID="1752119357777" BASECOST="0.0" LEVELS="10" ALIAS="Force Wall" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="10" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0">
+                    <?xml version="1.0" encoding="UTF-16"?>
+                    <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                        <CHARACTER_INFO CHARACTER_NAME="5e superhero simple" />
+                        <POWERS>
+                            <POWER XMLID="COMPOUNDPOWER" ID="1752119161972" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="64" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                <MODIFIER XMLID="TRANSPARENT" ID="1752119370102" BASECOST="0.0" LEVELS="0" ALIAS="Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <POWER XMLID="FORCEWALL" ID="1752119357777" BASECOST="0.0" LEVELS="10" ALIAS="Force Wall" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="10" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0">
                                     <NOTES />
-                                    <ADDER XMLID="PD" ID="1752119371843" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <MODIFIER XMLID="TRANSPARENT" ID="1752119370102" BASECOST="0.0" LEVELS="0" ALIAS="Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                         <NOTES />
-                                    </ADDER>
-                                </MODIFIER>
-                                <MODIFIER XMLID="REDUCEDEND" ID="1752119378292" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <ADDER XMLID="PD" ID="1752119371843" BASECOST="0.5" LEVELS="0" ALIAS="PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                    </MODIFIER>
+                                    <MODIFIER XMLID="REDUCEDEND" ID="1752119378292" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="RKA" ID="1752119423505" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                     <NOTES />
-                                </MODIFIER>
+                                    <MODIFIER XMLID="CONTINUOUS" ID="1752119432989" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                    <MODIFIER XMLID="DAMAGESHIELD" ID="1752119437515" BASECOST="0.5" LEVELS="0" ALIAS="Damage Shield" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                        <ADDER XMLID="OFFENSIVE" ID="1752119442232" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                    </MODIFIER>
+                                    <MODIFIER XMLID="REDUCEDEND" ID="1752119451612" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                    <MODIFIER XMLID="NOKB" ID="1752119463052" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                    <MODIFIER XMLID="LINKED" ID="1752119471190" BASECOST="-0.25" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FORCEWALL" OPTIONID="FORCEWALL" OPTION_ALIAS="Force Wall" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1752119357777">
+                                        <NOTES />
+                                        <ADDER XMLID="ONLYWHENGREATERATFULL" ID="1752119501255" BASECOST="-0.25" LEVELS="0" ALIAS="Lesser Power can only be used when character uses greater Power at full value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                    </MODIFIER>
+                                </POWER>
                             </POWER>
-                            <POWER XMLID="RKA" ID="1752119423505" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                <MODIFIER XMLID="CONTINUOUS" ID="1752119432989" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                    <NOTES />
-                                </MODIFIER>
-                                <MODIFIER XMLID="DAMAGESHIELD" ID="1752119437515" BASECOST="0.5" LEVELS="0" ALIAS="Damage Shield" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                    <NOTES />
-                                    <ADDER XMLID="OFFENSIVE" ID="1752119442232" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                        <NOTES />
-                                    </ADDER>
-                                </MODIFIER>
-                                <MODIFIER XMLID="REDUCEDEND" ID="1752119451612" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                    <NOTES />
-                                </MODIFIER>
-                                <MODIFIER XMLID="NOKB" ID="1752119463052" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                                    <NOTES />
-                                </MODIFIER>
-                                <MODIFIER XMLID="LINKED" ID="1752119471190" BASECOST="-0.25" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FORCEWALL" OPTIONID="FORCEWALL" OPTION_ALIAS="Force Wall" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1752119357777">
-                                    <NOTES />
-                                    <ADDER XMLID="ONLYWHENGREATERATFULL" ID="1752119501255" BASECOST="-0.25" LEVELS="0" ALIAS="Lesser Power can only be used when character uses greater Power at full value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                        <NOTES />
-                                    </ADDER>
-                                </MODIFIER>
-                            </POWER>
-                        </POWER>
-                    </POWERS>
-                </CHARACTER>
+                        </POWERS>
+                    </CHARACTER>
                 `;
-                let item;
+                let compoundPowerItem;
                 let actor;
                 before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    // item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                    //     parent: actor,
-                    // });
                     await actor.FullHealth();
+
+                    compoundPowerItem = actor.items.find((item) => item.system.XMLID === "COMPOUNDPOWER");
                 });
 
                 after(async function () {
@@ -9332,15 +9329,15 @@ export function registerUploadTests(quench) {
                 });
 
                 it("compound power active points", function () {
-                    assert.equal(item._activePoints, 88);
+                    assert.equal(compoundPowerItem._activePoints, 89);
                 });
 
                 it("compound power realCost", function () {
-                    assert.equal(item._realCost, 70);
+                    assert.equal(compoundPowerItem._realCost, 70);
                 });
 
                 it("compound power characterPoints", function () {
-                    assert.equal(item.system._characterPointCost, 70);
+                    assert.equal(compoundPowerItem.characterPointCost, 70);
                 });
             });
 
