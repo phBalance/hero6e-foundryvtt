@@ -4,6 +4,7 @@ import {
     collectActionDataBeforeToHitOptions,
     rollEffect,
     rollLuck,
+    rollUnluck,
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
@@ -1074,14 +1075,16 @@ export class HeroSystem6eItem extends Item {
         } else if (this.baseInfo.behaviors.includes("dice")) {
             switch (this.system.XMLID) {
                 case "LUCK":
+                    return rollLuck(this);
+
                 case "UNLUCK":
-                    return rollLuck(this, event);
+                    return rollUnluck(this);
 
                 case "DEPENDENCE":
                 case "SUSCEPTIBILITY":
                 default:
                     ui.notifications.warn(`${this.system.XMLID} effect roll is not fully supported`);
-                    return rollEffect(this, event);
+                    return rollEffect(this);
             }
         } else if (this.baseInfo.behaviors.includes("defense")) {
             return this.toggle(event);
