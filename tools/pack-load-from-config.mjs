@@ -18,7 +18,7 @@ async function createItem(itemData, folder) {
 
     // Stick this item in the proper folder
     itemData.folder = folder[0].id;
-    const item = await Item.createDocuments([itemData], {
+    await Item.createDocuments([itemData], {
         pack: folder[0].pack, //"hero6efoundryvttv2packs.hero6ePowers",
     });
 }
