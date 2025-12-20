@@ -4197,34 +4197,36 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 14;
             }
 
-            const intensity = skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTIONID;
-            let intensityValue = 0;
+            // REF: Social complication roll should not include severity #3078
+            // const intensity = skillData.ADDER.find((adder) => adder.XMLID === "EFFECTS")?.OPTIONID;
+            // let intensityValue = 0;
 
-            switch (intensity) {
-                case "MINOR":
-                    intensityValue = 0;
-                    break;
-                case "MAJOR":
-                    intensityValue = 5;
-                    break;
-                case "SEVERE":
-                    intensityValue = 10;
-                    break;
-                default:
-                    console.error(`unknown intensity ${intensity} for SOCIALLIMITATION`);
-            }
+            // switch (intensity) {
+            //     case "MINOR":
+            //         intensityValue = 0;
+            //         break;
+            //     case "MAJOR":
+            //         intensityValue = 5;
+            //         break;
+            //     case "SEVERE":
+            //         intensityValue = 10;
+            //         break;
+            //     default:
+            //         console.error(`unknown intensity ${intensity} for SOCIALLIMITATION`);
+            // }
 
             tags.push({
                 value: rollValue,
                 name: `${occurChance} occurence`,
             });
 
-            tags.push({
-                value: intensityValue,
-                name: `${intensity} intensity`,
-            });
+            // tags.push({
+            //     value: intensityValue,
+            //     name: `${intensity} intensity`,
+            // });
 
-            roll = `${rollValue + intensityValue}-`;
+            //roll = `${rollValue + intensityValue}-`;
+            roll = `${rollValue}-`;
         } else if (skillData.XMLID === "CONTACT") {
             const levels = parseInt(skillData.LEVELS || 1);
             let rollValue;
