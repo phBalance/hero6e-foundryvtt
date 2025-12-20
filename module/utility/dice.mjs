@@ -132,6 +132,7 @@ export class HeroRoller {
         FLASH: "flash",
         EFFECT: "effect",
         LUCK: "luck",
+        UNLUCK: "unluck",
     };
 
     static QUALIFIER = {
@@ -306,6 +307,13 @@ export class HeroRoller {
         return this;
     }
 
+    makeUnluckRoll(apply = true) {
+        if (apply) {
+            this._type = HeroRoller.ROLL_TYPE.UNLUCK;
+        }
+        return this;
+    }
+
     makeEffectRoll(apply = true) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.EFFECT;
@@ -315,7 +323,7 @@ export class HeroRoller {
 
     modifyToStandardEffect(apply = true) {
         if (apply) {
-            if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+            if (this._type === HeroRoller.ROLL_TYPE.LUCK || this._type === HeroRoller.ROLL_TYPE.UNLUCK) {
                 throw new Error(`Doesn't make sense to modifyToStandardEffect for ${this._type} roll`);
             }
 
@@ -364,7 +372,8 @@ export class HeroRoller {
             if (
                 this._type === HeroRoller.ROLL_TYPE.BASIC ||
                 this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
-                this._type === HeroRoller.ROLL_TYPE.LUCK
+                this._type === HeroRoller.ROLL_TYPE.LUCK ||
+                this._type === HeroRoller.ROLL_TYPE.UNLUCK
             ) {
                 throw new Error(`Doesn't make sense to addToHitLocation for ${this._type} roll`);
             }
@@ -461,7 +470,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK || this._type === HeroRoller.ROLL_TYPE.UNLUCK) {
             throw new Error(`Doesn't make sense to addHalfDice for ${this._type} roll`);
         }
 
@@ -492,7 +501,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK || this._type === HeroRoller.ROLL_TYPE.UNLUCK) {
             throw new Error(`Doesn't make sense to addDiceMinus1 for ${this._type} roll`);
         }
 
@@ -523,7 +532,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK || this._type === HeroRoller.ROLL_TYPE.UNLUCK) {
             throw new Error(`Doesn't make sense to addDieMinus1Min1 for ${this._type} roll`);
         }
 
@@ -554,7 +563,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK || this._type === HeroRoller.ROLL_TYPE.UNLUCK) {
             throw new Error(`Doesn't make sense to addNumber for ${this._type} roll`);
         }
 
@@ -590,7 +599,8 @@ export class HeroRoller {
             if (
                 this._type === HeroRoller.ROLL_TYPE.BASIC ||
                 this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
-                this._type === HeroRoller.ROLL_TYPE.LUCK
+                this._type === HeroRoller.ROLL_TYPE.LUCK ||
+                this._type === HeroRoller.ROLL_TYPE.UNLUCK
             ) {
                 throw new Error(`Doesn't make sense to addStunMultiplier for ${this._type} roll`);
             }
@@ -886,14 +896,14 @@ export class HeroRoller {
         throw new Error(`asking for flash from type ${this._type} doesn't make sense`);
     }
     getLuckTerms() {
-        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK || this._type === HeroRoller.ROLL_TYPE.UNLUCK) {
             return this.getCalculatedTerms();
         }
 
         throw new Error(`asking for luck from type ${this._type} doesn't make sense`);
     }
     getLuckTotal() {
-        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK || this._type === HeroRoller.ROLL_TYPE.UNLUCK) {
             return this.getCalculatedTotal();
         }
 
@@ -918,7 +928,8 @@ export class HeroRoller {
         if (
             this._type === HeroRoller.ROLL_TYPE.FLASH ||
             this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
-            this._type === HeroRoller.ROLL_TYPE.LUCK
+            this._type === HeroRoller.ROLL_TYPE.LUCK ||
+            this._type === HeroRoller.ROLL_TYPE.UNLUCK
         ) {
             console.error(`attempting to get baseTerms for roll type ${this._type}`);
         }
@@ -1226,6 +1237,13 @@ export class HeroRoller {
                 // Do nothing as there are no calculated values
                 break;
 
+            case HeroRoller.ROLL_TYPE.UNLUCK:
+                // Unkuck only allows full dice terms
+                if (originalResult > 1) {
+                    return 0;
+                }
+                return 1;
+
             case HeroRoller.ROLL_TYPE.LUCK:
                 // Luck only allows full dice terms
                 if (originalResult <= 5) {
@@ -1526,7 +1544,8 @@ export class HeroRoller {
             const baseTermTooltip =
                 this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
                 this._type === HeroRoller.ROLL_TYPE.FLASH ||
-                this._type === HeroRoller.ROLL_TYPE.LUCK
+                this._type === HeroRoller.ROLL_TYPE.LUCK ||
+                this._type === HeroRoller.ROLL_TYPE.UNLUCK
                     ? ""
                     : `
                     <div class="dice">
@@ -1688,6 +1707,9 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.LUCK:
                 return "of Luck";
 
+            case HeroRoller.ROLL_TYPE.UNLUCK:
+                return "of Unluck";
+
             default:
                 console.error(`unknown base purpose type ${this._type}`);
                 return "";
@@ -1714,6 +1736,7 @@ export class HeroRoller {
                 return "Segments";
 
             case HeroRoller.ROLL_TYPE.LUCK:
+            case HeroRoller.ROLL_TYPE.UNLUCK:
                 return "Points";
 
             default:
@@ -1733,6 +1756,7 @@ export class HeroRoller {
                 this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
                 this._type === HeroRoller.ROLL_TYPE.FLASH ||
                 this._type === HeroRoller.ROLL_TYPE.LUCK ||
+                this._type === HeroRoller.ROLL_TYPE.UNLUCK ||
                 (diceTermMetadata[index].qualifier !== HeroRoller.QUALIFIER.FULL_DIE &&
                     diceTermMetadata[index].qualifier !== HeroRoller.QUALIFIER.NUMBER &&
                     showMinMax)
@@ -2080,12 +2104,21 @@ export class HeroRoller {
                     terms: `[${this.getEffectTerms()}}] Effect`,
                     total: `${this.getEffectTotal()} Effect`,
                 };
+
             case HeroRoller.ROLL_TYPE.LUCK:
                 return {
                     annotatedTerms: `Luck breakdown: [${this.getLuckTerms()}}]`,
                     terms: `[${this.getLuckTerms()}}] Luck`,
                     total: `${this.getLuckTotal()} Luck`,
                 };
+
+            case HeroRoller.ROLL_TYPE.UNLUCK:
+                return {
+                    annotatedTerms: `Unluck breakdown: [${this.getLuckTerms()}}]`,
+                    terms: `[${this.getLuckTerms()}}] Unluck`,
+                    total: `${this.getLuckTotal()} Unluck`,
+                };
+
             default:
                 console.error(`unknown type ${this._type}`);
                 break;

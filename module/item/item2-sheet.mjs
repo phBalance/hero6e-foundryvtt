@@ -94,7 +94,5 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
 
         // Standard UpdateObject
         await super._updateObject(event, formData);
-
-        await this.item._postUpload();
     }
 }

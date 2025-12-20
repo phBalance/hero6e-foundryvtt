@@ -3565,6 +3565,205 @@ export function registerDiceTests(quench) {
                     });
                 });
 
+                describe("Unluck roll", async function () {
+                    it("should throw if asking for inappropriate interpretations", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
+
+                        // Should not be able to use any other term types other than addDice for an unluck roll.
+                        expect(function addDiceMinus1_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDiceMinus1(0);
+                        }).to.not.throw();
+                        expect(function addDiceMinus1() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDiceMinus1(1);
+                        }).to.throw();
+
+                        expect(function addDieMinus1Min1_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDieMinus1Min1(0);
+                        }).to.not.throw();
+                        expect(function addDieMinus1Min1() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDieMinus1Min1(1);
+                        }).to.throw();
+
+                        expect(function addHalfDice_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addHalfDice(0);
+                        }).to.not.throw();
+                        expect(function addHalfDice() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addHalfDice(1);
+                        }).to.throw();
+
+                        expect(function addNumber_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addNumber(0);
+                        }).to.not.throw();
+                        expect(function addNumber() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addNumber(1);
+                        }).to.throw();
+
+                        // Unluck dice don't use STUN multipliers
+                        expect(function addStunMultiplier_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(0);
+                        }).to.not.throw();
+                        expect(function addStunMultiplier() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(1);
+                        }).to.throw();
+
+                        // No hit locations for unluck dice
+                        expect(function addToHitLocation_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(false);
+                        }).to.not.throw();
+                        expect(function addToHitLocation() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(true);
+                        }).to.throw();
+
+                        // Unluck dice don't do BODY
+                        expect(function modifyToDoBody_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(false);
+                        }).to.not.throw();
+                        expect(function modifyToDoBody() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(true);
+                        }).to.throw();
+
+                        // It makes no sense to have a standard effect for unluck dice
+                        expect(function modifyToStandardEffect_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToStandardEffect(false);
+                        }).to.not.throw();
+                        expect(function modifyToStandardEffect() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToStandardEffect(true);
+                        }).to.throw();
+
+                        await roller.roll();
+
+                        // Should only be able to get unluck terms
+                        expect(function () {
+                            return roller.getSuccessTerms();
+                        }).to.throw();
+                        expect(function () {
+                            return roller.getSuccessTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getBodyTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getBodyTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunMultiplierDiceParts();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getAdjustmentTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getAdjustmentTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEntangleTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEntangleTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getFlashTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEffectTotal();
+                        }).to.throw();
+                    });
+
+                    it("should support calculations for dice that roll 1 (count as 1)", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(3);
+
+                        await roller.roll();
+
+                        // Dice rolling 1 count as 1 for unluck, numbers > 1 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([1, 1, 1]);
+                        expect(roller.getLuckTotal()).to.equal(3);
+                    });
+
+                    it("should support calculations for dice that roll 6 (count as 0)", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(3);
+
+                        await roller.roll();
+
+                        // Dice rolling 1 count as 1 for unluck, numbers > 1 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([0, 0, 0]);
+                        expect(roller.getLuckTotal()).to.equal(0);
+                    });
+
+                    it("should support calculations for that roll 5 (count as 0)", async function () {
+                        const TestRollMock = Roll5Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(3);
+
+                        await roller.roll();
+
+                        // Dice rolling 1 count as 1 for unluck, numbers > 1 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([0, 0, 0]);
+                        expect(roller.getLuckTotal()).to.equal(0);
+                    });
+
+                    it("should support calculations with alternating dice rolls", async function () {
+                        const TestRollMock = RollAlternatingLuckAndUnluck;
+                        TestRollMock.generatorInfo.reset();
+
+                        const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(5);
+
+                        await roller.roll();
+
+                        // Dice rolling 1 count as 1 for unluck, numbers > 1 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([0, 1, 0, 1, 0]);
+                        expect(roller.getLuckTotal()).to.equal(2);
+                    });
+
+                    it("should support calculations with ramping dice rolls", async function () {
+                        const TestRollMock = Roll1Through6Mock;
+                        TestRollMock.generatorInfo.reset();
+
+                        const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(14);
+
+                        await roller.roll();
+
+                        // Dice rolling 1 count as 1 for unluck, numbers > 1 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]);
+                        expect(roller.getLuckTotal()).to.equal(3);
+                    });
+                });
+
                 describe("Flavors", async function () {
                     function turnRollToTrueFalsePromise(roller) {
                         // eslint-disable-next-line no-async-promise-executor

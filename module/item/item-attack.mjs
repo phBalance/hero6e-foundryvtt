@@ -1738,10 +1738,7 @@ export async function rollEffect(item) {
 export async function rollLuck(item) {
     const { diceParts } = calculateDicePartsForItem(item, {});
 
-    const luckRoller = new HeroRoller()
-        .modifyTo5e(item.actor.system.is5e)
-        .makeLuckRoll()
-        .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
+    const luckRoller = new HeroRoller().modifyTo5e(item.actor.system.is5e).makeLuckRoll().addDice(diceParts.d6Count);
     await luckRoller.roll();
 
     const cardHtml = await luckRoller.render(`${item.name} Luck Roll`);
@@ -1750,6 +1747,29 @@ export async function rollLuck(item) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: luckRoller.rawRolls(),
+        author: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
+}
+
+export async function rollUnluck(item) {
+    const { diceParts } = calculateDicePartsForItem(item, {});
+
+    const unluckRoller = new HeroRoller()
+        .modifyTo5e(item.actor.system.is5e)
+        .makeUnluckRoll()
+        .addDice(diceParts.d6Count);
+    await unluckRoller.roll();
+
+    const cardHtml = await unluckRoller.render(`${item.name} Unluck Roll`);
+
+    const speaker = ChatMessage.getSpeaker();
+    const chatData = {
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        rolls: unluckRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -2161,7 +2181,6 @@ export async function _onGenericRollerApplyDamage(event) {
     const item = rehydrateAttackItem(damageData.itemJsonStr, actor).item;
 
     actor.system.is5e = item.system.is5e;
-    await actor._postUpload();
 
     if (!damageData.actorUuid) {
         actor.items.set(item.system.XMLID, item);

@@ -148,8 +148,7 @@ export function calculateReduceOrPushRealCost(startingRealCost, desiredEffective
 }
 
 /**
- * Build an item that is based on STR. _postUpload() is not called on it and is the
- * responsibility of the caller.
+ * Build an item that is based on STR.
  *
  * @param {number} effectiveStr
  */

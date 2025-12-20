@@ -585,7 +585,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         }
 
         // Clear all attacks from ADDERs
-        // _postUpload will guess proper attacks
         if (clearAdderAttacks) {
             this.item.system.ADDER = (this.item.system.ADDER || []).filter(
                 (o) => o.XMLID != "ADDER" || !parseFloat(o.BASECOST) == 0,

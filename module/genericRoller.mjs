@@ -161,6 +161,8 @@ export class GenericRoller {
                     // ENTANGLE: "Entangle",
                     // FLASH: "Flash",
                     // EFFECT: "Effect",
+                    LUCK: "Luck",
+                    UNLUCK: "Unluck",
                 },
                 chosen: "NORMAL_PD",
             },
@@ -220,7 +222,6 @@ export class GenericRoller {
             type: "npc",
         });
         tempActor.system.is5e = is5eAttack;
-        //await tempActor._postUpload();
 
         // NOTE: Missing PD vs ED for normal & killing attacks
         // NOTE: No application of damage for anything other than normal and killing attacks
@@ -246,6 +247,8 @@ export class GenericRoller {
             .makeEntangleRoll(damageType === "ENTANGLE")
             .makeFlashRoll(damageType === "FLASH")
             .makeEffectRoll(damageType === "EFFECT")
+            .makeLuckRoll(damageType === "LUCK")
+            .makeUnluckRoll(damageType === "UNLUCK")
             .addToHitLocation(
                 includeHitLocation && userSelection.aim !== "noHitLocation",
                 userSelection.aim,
@@ -268,6 +271,10 @@ export class GenericRoller {
             xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="PD"`);
         } else if (userSelection.damageType === "KILLING_ED") {
             xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="ED"`);
+        } else if (userSelection.damageType === "LUCK") {
+            xml = foundry.utils.deepClone(powers.find((power) => power.key === "LUCK").xml);
+        } else if (userSelection.damageType === "UNLUCK") {
+            xml = foundry.utils.deepClone(powers.find((power) => power.key === "UNLUCK").xml);
         }
 
         let item = null;
@@ -276,7 +283,6 @@ export class GenericRoller {
             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor || tempActor), {
                 parent: actor || tempActor,
             });
-            await item._postUpload();
 
             if (!actor) {
                 tempActor.items.set(item.system.XMLID, item);

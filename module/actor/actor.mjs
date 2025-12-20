@@ -105,10 +105,6 @@ export class HeroSystem6eActor extends Actor {
                 await this.addFreeStuff();
             }
 
-            // for (const item of this.items) {
-            //     await item._postUpload();
-            // }
-
             // REF: https://foundryvtt.wiki/en/development/api/document _preCreate
             // Careful: toObject only returns system props that are part of schema
             // so we merge in the entire system
@@ -2196,9 +2192,6 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
-            // Quench test may need CHARACTERISTICS, which are set in postUpload
-            //await this._postUpload({ render: false });
-
             // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
             // if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
             uploadProgressBar.advance(`${this.name}: Evaluating non HDC items for PCs, NPCs, and Automatons`, 0);
@@ -2697,9 +2690,6 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance.nonItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
 
-            // Set base values to HDC LEVELs and calculate costs of things.
-            //await this._postUpload({ render: false });
-
             // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
             if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
                 for (const flight of this.items.filter((i) => i.system.XMLID === "FLIGHT")) {
@@ -2914,7 +2904,6 @@ export class HeroSystem6eActor extends Actor {
 
     /**
      * Characters get a few things for free that are not in the HDC.
-     * NOTE: None of these methods should call _postUpload as that is done separately during actor creation.
      *
      * @returns
      */
@@ -3265,10 +3254,6 @@ export class HeroSystem6eActor extends Actor {
             changes[`system.characteristics.${key.toLowerCase()}.value`] = value;
         }
         await this.update(changes);
-    }
-
-    async _postUpload() {
-        console.error(`_postUpload is deprecated and should not be called`);
     }
 
     updateRollable(key) {

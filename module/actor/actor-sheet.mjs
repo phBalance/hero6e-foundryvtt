@@ -618,7 +618,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             if (i.system.active) {
                 i.system.active = false;
             }
-            // Remove all active effects, _postUpload will recreate them if necessary
+            // Remove all active effects
             i.effects = [];
         }
 
@@ -913,8 +913,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             effectiveStr: characteristicValue,
             effectiveStrPushedRealPoints: 0,
         });
-        // effectiveAttackItem._postUpload();
-        // effectiveStrengthItem._postUpload();
 
         // Strength use consumes resources. No other characteristic roll does.
         const {
@@ -1440,17 +1438,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         // This typically happens during upload.  Don't save anything in static.
         if (is5e === undefined) {
             return;
-            // const defenseCalculationActor = new HeroSystem6eActor({
-            //     name: "Defense Calculation Actor",
-            //     type: "pc",
-            //     system: { is5e },
-            // });
-            // const attack = (HeroSystemActorSheet.sampleAttacks[attackKey] = new HeroSystem6eItem(
-            //     HeroSystem6eItem.itemDataFromXml(xml, defenseCalculationActor),
-            //     { parent: defenseCalculationActor },
-            // ));
-            // await attack._postUpload();
-            // console.debug(`${attackKey}: Undefined is5e`);
         }
 
         HeroSystemActorSheet.sampleAttacks[defenseCalculationActorKey] ??= new HeroSystem6eActor(
@@ -1468,7 +1455,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 HeroSystem6eItem.itemDataFromXml(xml, defenseCalculationActor),
                 { parent: defenseCalculationActor },
             );
-            //await HeroSystemActorSheet.sampleAttacks[attackKey]._postUpload();
             //console.debug(`${attackKey}: Created`);
         } else {
             //console.debug(`${attackKey}: used cache`);
