@@ -1294,7 +1294,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     async _onActorDescription() {
         let content = `${this.actor.system.CHARACTER?.CHARACTER_INFO?.APPEARANCE || ""}`;
         const perceivable = [];
-        for (let item of this.actor.items) {
+        for (let item of this.actor.items.filter((item) => item.isActive || item.isActivatable() === false)) {
             const p = item.isPerceivable(false); // inobivous is not included
             if (p) {
                 perceivable.push(
