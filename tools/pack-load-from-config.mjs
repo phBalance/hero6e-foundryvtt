@@ -21,9 +21,6 @@ async function createItem(itemData, folder) {
     const item = await Item.createDocuments([itemData], {
         pack: folder[0].pack, //"hero6efoundryvttv2packs.hero6ePowers",
     });
-
-    //console.log(item[0]);
-    await item[0]._postUpload();
 }
 
 //////////////////////////////////////////////////////////////////////////////

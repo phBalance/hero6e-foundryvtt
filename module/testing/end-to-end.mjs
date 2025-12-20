@@ -247,7 +247,6 @@ export class HeroSystem6eEndToEndTest {
 
         const itemData = HeroSystem6eItem.itemDataFromXml(xml, tokenSource.actor);
         const adjustmentItem = await HeroSystem6eItem.create(itemData, { parent: tokenSource.actor });
-        await adjustmentItem._postUpload();
 
         this.log(
             `Added <b>${adjustmentItem.name} ${adjustmentItem.system.INPUT}</b> to <b>${adjustmentItem.actor.name}</b>`,

@@ -2181,7 +2181,6 @@ export async function _onGenericRollerApplyDamage(event) {
     const item = rehydrateAttackItem(damageData.itemJsonStr, actor).item;
 
     actor.system.is5e = item.system.is5e;
-    await actor._postUpload();
 
     if (!damageData.actorUuid) {
         actor.items.set(item.system.XMLID, item);

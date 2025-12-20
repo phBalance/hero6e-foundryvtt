@@ -476,22 +476,3 @@ async function addOtherAttacksManeuversForAutomatonPcNpc(actor) {
         }
     }
 }
-
-// async function rebuildActors(actor) {
-//     try {
-//         if (!actor) return false;
-
-//         // Rebuild all item data
-//         for (const item of actor.items) {
-//             await item._postUpload();
-//         }
-
-//         await actor._postUpload();
-//     } catch (e) {
-//         const msg = `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`;
-//         console.error(msg, e);
-//         if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
-//             await ui.notifications.warn(msg);
-//         }
-//     }
-// }

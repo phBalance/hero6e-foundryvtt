@@ -245,8 +245,6 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                                 pack: pack.metadata.id,
                             });
 
-                            await item._postUpload(); // we can probably skip the await here for a possible performance increase
-
                             // COMPOUNDPOWER is similar to a MULTIPOWER.
                             // MULTIPOWER uses PARENTID references.
                             // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
@@ -299,22 +297,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                                     const parentFolder = pack.contents.find((o) => o.system.ID === system.ID)?.folder;
                                     itemData2.folder = parentFolder?.id;
 
-                                    const item2 = await HeroSystem6eItem.create(itemData2, { pack: pack.metadata.id });
-                                    try {
-                                        await item2._postUpload();
-                                    } catch (e) {
-                                        console.error(e);
-                                        await ui.notifications.error(
-                                            `${this.detailedName()}/${item2.detailedName()} failed to parse. It will not be available to this actor.  Please report.`,
-                                            {
-                                                console: true,
-                                                permanent: true,
-                                            },
-                                        );
-                                        console.error(e);
-                                        await item2.delete();
-                                        continue;
-                                    }
+                                    await HeroSystem6eItem.create(itemData2, { pack: pack.metadata.id });
                                 }
                             }
                         } catch (e) {

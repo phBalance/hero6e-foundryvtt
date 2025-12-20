@@ -283,7 +283,6 @@ export class GenericRoller {
             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor || tempActor), {
                 parent: actor || tempActor,
             });
-            await item._postUpload();
 
             if (!actor) {
                 tempActor.items.set(item.system.XMLID, item);
