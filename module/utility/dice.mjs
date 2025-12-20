@@ -361,7 +361,11 @@ export class HeroRoller {
         alreadyHitLocationSide = "none",
     ) {
         if (useHitLocation) {
-            if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+            if (
+                this._type === HeroRoller.ROLL_TYPE.BASIC ||
+                this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
+                this._type === HeroRoller.ROLL_TYPE.LUCK
+            ) {
                 throw new Error(`Doesn't make sense to addToHitLocation for ${this._type} roll`);
             }
 
@@ -457,7 +461,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
             throw new Error(`Doesn't make sense to addHalfDice for ${this._type} roll`);
         }
 
@@ -488,7 +492,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
             throw new Error(`Doesn't make sense to addDiceMinus1 for ${this._type} roll`);
         }
 
@@ -519,7 +523,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
             throw new Error(`Doesn't make sense to addDieMinus1Min1 for ${this._type} roll`);
         }
 
@@ -550,7 +554,7 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+        if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
             throw new Error(`Doesn't make sense to addNumber for ${this._type} roll`);
         }
 
@@ -583,7 +587,11 @@ export class HeroRoller {
 
     addStunMultiplier(levels) {
         if (levels) {
-            if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+            if (
+                this._type === HeroRoller.ROLL_TYPE.BASIC ||
+                this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
+                this._type === HeroRoller.ROLL_TYPE.LUCK
+            ) {
                 throw new Error(`Doesn't make sense to addStunMultiplier for ${this._type} roll`);
             }
 
@@ -1218,23 +1226,25 @@ export class HeroRoller {
                 // Do nothing as there are no calculated values
                 break;
 
+            case HeroRoller.ROLL_TYPE.LUCK:
+                // Luck only allows full dice terms
+                if (originalResult <= 5) {
+                    return 0;
+                }
+                return 1;
+
             case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.FLASH:
             case HeroRoller.ROLL_TYPE.NORMAL:
-            case HeroRoller.ROLL_TYPE.LUCK:
                 if (this._noBody) {
                     return 0;
                 }
 
-                // constants for entangle are straight body
+                // Constants for entangle are straight body
                 if (this._type === HeroRoller.ROLL_TYPE.ENTANGLE && termQualifier === HeroRoller.QUALIFIER.NUMBER) {
                     return originalResult;
-                } else if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
-                    if (originalResult <= 5) {
-                        return 0;
-                    }
-                    return 1;
                 }
+
                 // Calculate BODY
                 if (termQualifier === HeroRoller.QUALIFIER.HALF_DIE) {
                     if (this._standardEffect) {

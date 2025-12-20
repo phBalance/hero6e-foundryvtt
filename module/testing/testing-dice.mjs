@@ -3372,8 +3372,6 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
 
-                        // PH: FIXME: Should verify it works when removing terms or that those functions throw.
-
                         // Should not be able to use any other term types other than addDice for a Luck roll.
                         expect(function addDiceMinus1_0() {
                             const tempRoller = roller.clone();
