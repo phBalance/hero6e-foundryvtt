@@ -614,11 +614,187 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("success roll", function () {
+                describe("Basic roll", function () {
                     it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock).makeSuccessRoll().addNumber(1);
+
+                        // Basic dice don't use STUN multipliers
+                        expect(function addStunMultiplier_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(0);
+                        }).to.not.throw();
+                        expect(function addStunMultiplier() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(1);
+                        }).to.throw();
+
+                        // No hit locations for basic dice
+                        expect(function addToHitLocation_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(false);
+                        }).to.not.throw();
+                        expect(function addToHitLocation() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(true);
+                        }).to.throw();
+
+                        // Basic dice don't do BODY
+                        expect(function modifyToDoBody_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(false);
+                        }).to.not.throw();
+                        expect(function modifyToDoBody() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(true);
+                        }).to.throw();
+
+                        await roller.roll();
+
+                        expect(function () {
+                            return roller.getStunTerms();
+                        }).to.throw();
+                        expect(function () {
+                            return roller.getStunTotal();
+                        }).to.throw();
+                        expect(function () {
+                            return roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunMultiplierDiceParts();
+                        }).to.throw();
+                        expect(function () {
+                            return roller.getBodyTerms();
+                        }).to.throw();
+                        expect(function () {
+                            return roller.getBodyTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getAdjustmentTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getAdjustmentTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getFlashTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEntangleTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEntangleTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEffectTotal();
+                        }).to.throw();
+                    });
+
+                    it("should handle a 1 pip equation", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeSuccessRoll().addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccessTerms()).deep.to.equal([1]);
+                        expect(roller.getSuccessTotal()).to.equal(1);
+                    });
+
+                    it("should take a 1 term, 1 die equation", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeSuccessRoll().addDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.fixedRollResult]);
+                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.fixedRollResult);
+                    });
+
+                    it("should take a 2 term, 1 die equation", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeSuccessRoll().addDice(1).addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.fixedRollResult, 1]);
+                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.fixedRollResult + 1);
+                    });
+
+                    it("should take a typical attack roll equation", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
+                            .addNumber(11)
+                            .addNumber(9)
+                            .addNumber(-2)
+                            .addNumber(-2)
+                            .addNumber(3)
+                            .addDice(-3);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccessTerms()).deep.to.equal([
+                            11,
+                            9,
+                            -2,
+                            -2,
+                            3,
+                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getSuccessTotal()).deep.to.equal(19 - 3 * TestRollMock.fixedRollResult);
+                    });
+                });
+
+                describe("Success roll", function () {
+                    it("should throw if requesting inappropriate pieces of information", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeSuccessRoll().addNumber(1);
+
+                        // Success dice don't use STUN multipliers
+                        expect(function addStunMultiplier_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(0);
+                        }).to.not.throw();
+                        expect(function addStunMultiplier() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(1);
+                        }).to.throw();
+
+                        // No hit locations for success dice
+                        expect(function addToHitLocation_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(false);
+                        }).to.not.throw();
+                        expect(function addToHitLocation() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(true);
+                        }).to.throw();
+
+                        // Success dice don't do BODY
+                        expect(function modifyToDoBody_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(false);
+                        }).to.not.throw();
+                        expect(function modifyToDoBody() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(true);
+                        }).to.throw();
 
                         await roller.roll();
 
@@ -822,7 +998,7 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("normal roll", function () {
+                describe("Normal roll", function () {
                     it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
@@ -1450,7 +1626,7 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("killing roll", function () {
+                describe("Killing roll", function () {
                     it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
@@ -2682,7 +2858,7 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("adjustment roll", function () {
+                describe("Adjustment roll", function () {
                     it("should throw if asking for inappropriate interpretations", async function () {
                         const TestRollMock = Roll1Mock;
 
@@ -2819,7 +2995,7 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("flash roll", function () {
+                describe("Flash roll", function () {
                     it("should throw if asking for inappropriate interpretations", async function () {
                         const TestRollMock = Roll1Mock;
 
@@ -3190,14 +3366,12 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe.only("Luck roll", async function () {
+                describe("Luck roll", async function () {
                     it("should throw if asking for inappropriate interpretations", async function () {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
 
-                        // PH: FIXME: Should add functions to confirm clone functionality works for all types?
-                        // PH: FIXME: Should add checks against other dice types that don't allow things like stun multipliers etc.
                         // PH: FIXME: Should verify it works when removing terms or that those functions throw.
 
                         // Should not be able to use any other term types other than addDice for a Luck roll.
@@ -3237,6 +3411,7 @@ export function registerDiceTests(quench) {
                             tempRoller.addNumber(1);
                         }).to.throw();
 
+                        // Luck dice don't use STUN multipliers
                         expect(function addStunMultiplier_0() {
                             const tempRoller = roller.clone();
                             tempRoller.addStunMultiplier(0);
@@ -3246,6 +3421,7 @@ export function registerDiceTests(quench) {
                             tempRoller.addStunMultiplier(1);
                         }).to.throw();
 
+                        // No hit locations for luck dice
                         expect(function addToHitLocation_false() {
                             const tempRoller = roller.clone();
                             tempRoller.addToHitLocation(false);
@@ -3255,6 +3431,7 @@ export function registerDiceTests(quench) {
                             tempRoller.addToHitLocation(true);
                         }).to.throw();
 
+                        // Luck dice don't do BODY
                         expect(function modifyToDoBody_false() {
                             const tempRoller = roller.clone();
                             tempRoller.modifyToDoBody(false);
@@ -3264,6 +3441,7 @@ export function registerDiceTests(quench) {
                             tempRoller.modifyToDoBody(true);
                         }).to.throw();
 
+                        // It makes no sense to have a standard effect for luck dice
                         expect(function modifyToStandardEffect_false() {
                             const tempRoller = roller.clone();
                             tempRoller.modifyToStandardEffect(false);

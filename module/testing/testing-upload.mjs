@@ -10995,7 +10995,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe.only("+DEX +EGO", async function () {
+                describe("+DEX +EGO", async function () {
                     const dexContents = `
                     <DEX XMLID="DEX" ID="1766170024717" BASECOST="0.0" LEVELS="10" ALIAS="DEX" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
                     <NOTES />
