@@ -315,6 +315,10 @@ export class HeroRoller {
 
     modifyToStandardEffect(apply = true) {
         if (apply) {
+            if (this._type === HeroRoller.ROLL_TYPE.LUCK) {
+                throw new Error(`Doesn't make sense to modifyToStandardEffect for ${this._type} roll`);
+            }
+
             this._standardEffect = true;
         }
         return this;
@@ -333,7 +337,7 @@ export class HeroRoller {
             if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
                 this._noBody = true;
             } else {
-                console.error(`Doesn't make sense to make non normal attack STUN only`, this);
+                throw new Error(`Doesn't make sense to make non normal attack STUN only`, this);
             }
         }
         return this;
@@ -344,7 +348,7 @@ export class HeroRoller {
             if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
                 this._noBody = false;
             } else {
-                console.error(`Doesn't make sense to make non normal attack BODY/STUN`, this);
+                throw new Error(`Doesn't make sense to make non normal attack BODY/STUN`, this);
             }
         }
         return this;
@@ -357,6 +361,10 @@ export class HeroRoller {
         alreadyHitLocationSide = "none",
     ) {
         if (useHitLocation) {
+            if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+                throw new Error(`Doesn't make sense to addToHitLocation for ${this._type} roll`);
+            }
+
             this._useHitLocation = useHitLocation;
             this._alreadyHitLocation = alreadyHitLocation;
 
@@ -449,6 +457,10 @@ export class HeroRoller {
             return this;
         }
 
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+            throw new Error(`Doesn't make sense to addHalfDice for ${this._type} roll`);
+        }
+
         numHalfDice = this.#prefixFormula(numHalfDice);
 
         this._formulaTerms.push(
@@ -474,6 +486,10 @@ export class HeroRoller {
     addDiceMinus1(numDiceMinusOne, description) {
         if (!numDiceMinusOne) {
             return this;
+        }
+
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+            throw new Error(`Doesn't make sense to addDiceMinus1 for ${this._type} roll`);
         }
 
         numDiceMinusOne = this.#prefixFormula(numDiceMinusOne);
@@ -503,6 +519,10 @@ export class HeroRoller {
             return this;
         }
 
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+            throw new Error(`Doesn't make sense to addDieMinus1Min1 for ${this._type} roll`);
+        }
+
         numDice = this.#prefixFormula(numDice);
 
         this._formulaTerms.push(
@@ -528,6 +548,10 @@ export class HeroRoller {
     addNumber(value, description) {
         if (!value) {
             return this;
+        }
+
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+            throw new Error(`Doesn't make sense to addNumber for ${this._type} roll`);
         }
 
         if (this._formulaTerms.length > 0) {
@@ -559,6 +583,10 @@ export class HeroRoller {
 
     addStunMultiplier(levels) {
         if (levels) {
+            if (this._type === HeroRoller.ROLL_TYPE.SUCCESS || this._type === HeroRoller.ROLL_TYPE.LUCK) {
+                throw new Error(`Doesn't make sense to addStunMultiplier for ${this._type} roll`);
+            }
+
             this._killingAdditionalStunMultiplier += levels;
         }
         return this;

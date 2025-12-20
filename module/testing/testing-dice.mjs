@@ -115,9 +115,29 @@ function buildGenerateLinearRollResultFunction(start, end, step) {
     };
 }
 
+function buildGenerateAlternatingRollResultFunction(first, other) {
+    let result = first;
+
+    return {
+        generate: function generateRoll() {
+            const value = result;
+            result = result === first ? other : first;
+            return value;
+        },
+        reset: function resetRollResult() {
+            result = first;
+        },
+    };
+}
+
 class Roll1Through6Mock extends RollMock {
     static generatorInfo = buildGenerateLinearRollResultFunction(1, 6, 1);
     static DieClass = DynamicDieRoll(Roll1Through6Mock.generatorInfo.generate);
+}
+
+class RollAlternatingLuckAndUnluck extends RollMock {
+    static generatorInfo = buildGenerateAlternatingRollResultFunction(6, 1);
+    static DieClass = DynamicDieRoll(RollAlternatingLuckAndUnluck.generatorInfo.generate);
 }
 
 export function registerDiceTests(quench) {
@@ -194,6 +214,15 @@ export function registerDiceTests(quench) {
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
                         roller.makeEffectRoll(undefined);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.EFFECT);
+
+                        roller.makeLuckRoll(0);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.EFFECT);
+                        roller.makeLuckRoll(false);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.EFFECT);
+                        roller.makeLuckRoll(null);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.EFFECT);
+                        roller.makeLuckRoll(undefined);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.LUCK);
                     });
 
                     it("should be conditional for make functions with negative and default", function () {
@@ -219,6 +248,12 @@ export function registerDiceTests(quench) {
 
                         roller.makeFlashRoll(true);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
+
+                        roller.makeEffectRoll(true);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.EFFECT);
+
+                        roller.makeLuckRoll(true);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.LUCK);
                     });
                 });
 
@@ -3152,6 +3187,203 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getEffectTerms()).to.deep.equal([6, 6, 6, 3, 3]);
                         expect(roller.getEffectTotal()).to.equal(24);
+                    });
+                });
+
+                describe.only("Luck roll", async function () {
+                    it("should throw if asking for inappropriate interpretations", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
+
+                        // PH: FIXME: Should add functions to confirm clone functionality works for all types?
+                        // PH: FIXME: Should add checks against other dice types that don't allow things like stun multipliers etc.
+                        // PH: FIXME: Should verify it works when removing terms or that those functions throw.
+
+                        // Should not be able to use any other term types other than addDice for a Luck roll.
+                        expect(function addDiceMinus1_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDiceMinus1(0);
+                        }).to.not.throw();
+                        expect(function addDiceMinus1() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDiceMinus1(1);
+                        }).to.throw();
+
+                        expect(function addDieMinus1Min1_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDieMinus1Min1(0);
+                        }).to.not.throw();
+                        expect(function addDieMinus1Min1() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addDieMinus1Min1(1);
+                        }).to.throw();
+
+                        expect(function addHalfDice_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addHalfDice(0);
+                        }).to.not.throw();
+                        expect(function addHalfDice() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addHalfDice(1);
+                        }).to.throw();
+
+                        expect(function addNumber_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addNumber(0);
+                        }).to.not.throw();
+                        expect(function addNumber() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addNumber(1);
+                        }).to.throw();
+
+                        expect(function addStunMultiplier_0() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(0);
+                        }).to.not.throw();
+                        expect(function addStunMultiplier() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addStunMultiplier(1);
+                        }).to.throw();
+
+                        expect(function addToHitLocation_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(false);
+                        }).to.not.throw();
+                        expect(function addToHitLocation() {
+                            const tempRoller = roller.clone();
+                            tempRoller.addToHitLocation(true);
+                        }).to.throw();
+
+                        expect(function modifyToDoBody_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(false);
+                        }).to.not.throw();
+                        expect(function modifyToDoBody() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToDoBody(true);
+                        }).to.throw();
+
+                        expect(function modifyToStandardEffect_false() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToStandardEffect(false);
+                        }).to.not.throw();
+                        expect(function modifyToStandardEffect() {
+                            const tempRoller = roller.clone();
+                            tempRoller.modifyToStandardEffect(true);
+                        }).to.throw();
+
+                        await roller.roll();
+
+                        // Should only be able to get luck terms
+                        expect(function () {
+                            return roller.getSuccessTerms();
+                        }).to.throw();
+                        expect(function () {
+                            return roller.getSuccessTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getBodyTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getBodyTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunMultiplier();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getStunMultiplierDiceParts();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getAdjustmentTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getAdjustmentTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEntangleTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEntangleTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getFlashTotal();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(function () {
+                            roller.getEffectTotal();
+                        }).to.throw();
+                    });
+
+                    it("should support calculations for dice that roll 1-5 (count as 0)", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
+
+                        await roller.roll();
+
+                        // Dice rolling 6 count as 1 for luck, numbers <=5 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([0, 0, 0]);
+                        expect(roller.getLuckTotal()).to.equal(0);
+                    });
+
+                    it("should support calculations for dice that roll 6 (count as 1)", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
+
+                        await roller.roll();
+
+                        // Dice rolling 6 count as 1 for luck, numbers <=5 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([1, 1, 1]);
+                        expect(roller.getLuckTotal()).to.equal(3);
+                    });
+
+                    it("should support calculations for that roll 5 (count as 0)", async function () {
+                        const TestRollMock = Roll5Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
+
+                        await roller.roll();
+
+                        // Dice rolling 6 count as 1 for luck, numbers <=5 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([0, 0, 0]);
+                        expect(roller.getLuckTotal()).to.equal(0);
+                    });
+
+                    it("should support calculations with alternating dice rolls", async function () {
+                        const TestRollMock = RollAlternatingLuckAndUnluck;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(5);
+
+                        await roller.roll();
+
+                        // Dice rolling 6 count as 1 for luck, numbers <=5 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([1, 0, 1, 0, 1]);
+                        expect(roller.getLuckTotal()).to.equal(3);
+                    });
+
+                    it("should support calculations with ramping dice rolls", async function () {
+                        const TestRollMock = Roll1Through6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(14);
+
+                        await roller.roll();
+
+                        // Dice rolling 6 count as 1 for luck, numbers <=5 count as 0
+                        expect(roller.getLuckTerms()).to.deep.equal([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0]);
+                        expect(roller.getLuckTotal()).to.equal(2);
                     });
                 });
 
