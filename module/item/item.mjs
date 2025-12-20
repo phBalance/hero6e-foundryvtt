@@ -1654,7 +1654,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Power must be turned on
-        if (this.baseInfo?.behaviors.includes("activatable") && !this.system.active) {
+        if (this.baseInfo?.behaviors.includes("activatable") && !this.isActive) {
             return false;
         }
 
@@ -2060,6 +2060,11 @@ export class HeroSystem6eItem extends Item {
 
         // Characteristics can be turned on or off
         if (this.baseInfo?.type.includes("characteristic")) {
+            return true;
+        }
+
+        // persistent duration
+        if (this.baseInfo?.duration === "persistent") {
             return true;
         }
 
@@ -4332,7 +4337,7 @@ export class HeroSystem6eItem extends Item {
                     (o) => o.system.XMLID === "ENHANCEDPERCEPTION",
                 )) {
                     enhancedPerception.system.checked = true;
-                    if (enhancedPerception.system.active) {
+                    if (enhancedPerception.isActive) {
                         const levels = parseInt(enhancedPerception.system.LEVELS);
                         tags.push({
                             value: levels,

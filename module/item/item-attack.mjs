@@ -304,7 +304,7 @@ export async function processActionToHit(item, formData) {
 
     // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
     const haymakerManeuverActive = item.actor?.items.find(
-        (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "HAYMAKER" && anItem.system.active,
+        (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "HAYMAKER" && anItem.isActive,
     );
     if (haymakerManeuverActive) {
         if (item.type === "martialart" || (item.type === "maneuver" && item.system.XMLID !== "STRIKE")) {
@@ -1789,7 +1789,7 @@ export async function _onRollDamage(event) {
         (item) =>
             item.type === "maneuver" &&
             item.system.XMLID === "HAYMAKER" &&
-            (item.system.active || item.actor?.statuses.has("haymaker") || action.system.statuses.includes("haymaker")),
+            (item.isActive || item.actor?.statuses.has("haymaker") || action.system.statuses.includes("haymaker")),
     );
 
     // Coerce type to boolean
