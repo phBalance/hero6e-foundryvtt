@@ -3364,6 +3364,7 @@ export function registerDiceTests(quench) {
 
                     it("should support calculations with alternating dice rolls", async function () {
                         const TestRollMock = RollAlternatingLuckAndUnluck;
+                        TestRollMock.generatorInfo.reset();
 
                         const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(5);
 
@@ -3376,6 +3377,7 @@ export function registerDiceTests(quench) {
 
                     it("should support calculations with ramping dice rolls", async function () {
                         const TestRollMock = Roll1Through6Mock;
+                        TestRollMock.generatorInfo.reset();
 
                         const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(14);
 
