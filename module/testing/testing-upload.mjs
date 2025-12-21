@@ -11071,6 +11071,55 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            // See #3078
+            describe("SOCIALLIMITATION - make sure OCCUR and EFFECTS don't add", async function () {
+                const contents = `
+                    <DISAD XMLID="SOCIALLIMITATION" ID="1704506737954" BASECOST="0.0" LEVELS="0" ALIAS="Social Limitation" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                        <ADDER XMLID="OCCUR" ID="1704506848422" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="EFFECTS" ID="1704506848428" BASECOST="0.0" LEVELS="0" ALIAS="Effects of Restrictions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINOR" OPTIONID="MINOR" OPTION_ALIAS="Minor" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </DISAD>
+                `;
+                let item;
+
+                before(async function () {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = true;
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Social Limitation:  (Occasionally; Minor)");
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.realCost, 5);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.activePoints, 5);
+                });
+
+                it("roll", function () {
+                    assert.equal(item.system.roll, "8-");
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
