@@ -57,7 +57,7 @@ export class HeroSystem6eActor extends Actor {
                 displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
             };
 
-            if (this.type != "npc") {
+            if (this.type !== "npc") {
                 prototypeToken = {
                     ...prototypeToken,
                     actorLink: true,
@@ -1585,6 +1585,8 @@ export class HeroSystem6eActor extends Actor {
         }
         if (this._id && Object.keys(characteristicChangesMax).length > 0) {
             await this.update(characteristicChangesMax);
+        } else if (!this._id && Object.keys(characteristicChangesMax).length > 0) {
+            foundry.utils.mergeObject(this, characteristicChangesMax);
         }
         end = Date.now();
         if (end - start > tDelta) {
@@ -1611,6 +1613,8 @@ export class HeroSystem6eActor extends Actor {
         }
         if (this._id && Object.keys(characteristicChangesValue).length > 0) {
             await this.update(characteristicChangesValue);
+        } else if (!this._id && Object.keys(characteristicChangesValue).length > 0) {
+            foundry.utils.mergeObject(this, characteristicChangesValue);
         }
         end = Date.now();
         if (end - start > tDelta) {
