@@ -1270,7 +1270,7 @@ export function registerDamageFunctionTests(quench) {
                 });
             });
 
-            describe.only("5e - Killing Strike", function () {
+            describe("5e - Killing Strike", function () {
                 const contents = `
                     <MANEUVER XMLID="MANEUVER" ID="1724519971623" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="4" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
                         <NOTES />
