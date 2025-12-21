@@ -1145,7 +1145,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
                 if (char.actor.is5e) {
-                    return `5e figured STR/5${char.actor.hasCharacteristic("STUN") ? " and /3 again" : ""}`;
+                    // Automatons and things that have bought no STUN have a different figured formula
+                    return `5e figured STR/5${!char.actor.hasCharacteristic("STUN") ? " and /3 again" : ""}`;
                 }
                 return null;
             },
@@ -1186,7 +1187,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
                 if (char.actor.is5e) {
-                    return `5e figured CON/5${char.actor.hasCharacteristic("STUN") ? " and /3 again" : ""}`;
+                    // Automatons and things that have bought no STUN have a different figured formula
+                    return `5e figured CON/5${!char.actor.hasCharacteristic("STUN") ? " and /3 again" : ""}`;
                 }
                 return null;
             },
