@@ -708,9 +708,9 @@ export class HeroSystem6eItem extends Item {
                     property: "INPUT",
                     message:
                         this.system.XMLID === "TRANSFER"
-                            ? `Expecting characteristic abbreviations or power names connected by ->`
+                            ? `Expecting characteristic abbreviations or power names connected by " -> ", " to ", or " TO "`
                             : `Expecting characteristic abbreviations or power names separated by commas.`,
-                    example: this.system.XMLID === "TRANSFER" ? `STR -> CON` : `STR, CON`,
+                    example: this.system.XMLID === "TRANSFER" ? `STR, CON -> STR, CON` : `STR, CON`,
                     severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
                 });
             } else {
@@ -4377,7 +4377,7 @@ export class HeroSystem6eItem extends Item {
             (this.system.XMLID === "TRANSFER" && mustBeStrict)
                 ? adjustmentSourcesStrict
                 : adjustmentSourcesPermissive;
-        let validList = Object.keys(validator({ actor: this.actor }));
+        const validList = Object.keys(validator({ actor: this.actor }));
 
         // Simple Healing
         if (this.system.XMLID === "HEALING") {
@@ -4417,7 +4417,15 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.XMLID === "TRANSFER") {
             // Should be something like "STR,CON -> DEX,SPD"
-            const splitSourcesAndTargets = this.system.INPUT ? this.system.INPUT.split(" -> ") : [];
+            let splitSourcesAndTargets;
+            if (!this.system.INPUT) {
+                splitSourcesAndTargets = [];
+            } else {
+                splitSourcesAndTargets = this.system.INPUT.split(" -> ");
+                if (splitSourcesAndTargets.length !== 2) {
+                    splitSourcesAndTargets = this.system.INPUT.split(/ to /i);
+                }
+            }
 
             valid =
                 this._areAllAdjustmentTargetsInListValid(splitSourcesAndTargets[0], false) &&
@@ -4456,11 +4464,11 @@ export class HeroSystem6eItem extends Item {
         if (!mod) return 1;
 
         switch (mod.BASECOST) {
-            case "0.5":
+            case 0.5:
                 return 2;
-            case "1.0":
+            case 1.0:
                 return 4;
-            case "2.0":
+            case 2.0:
                 // All of a type. Assume this is just infinite (pick a really big number).
                 return 10000;
             default:
@@ -4890,11 +4898,7 @@ export class HeroSystem6eItem extends Item {
                 cost = RoundFavorPlayerDown(cost / 5.0);
             }
         }
-        // else if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
-        //     cost = cost - this.parentItem.system.BASECOST;
-        // }
 
-        // PH: FIXME: Don't think this is right. This method is only called from hbs files ...
         return RoundFavorPlayerDown(cost) + costSuffix;
     }
 
