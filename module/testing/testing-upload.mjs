@@ -11073,8 +11073,9 @@ export function registerUploadTests(quench) {
             });
 
             // See #3078
-            describe("SOCIALLIMITATION - make sure OCCUR and EFFECTS don't add", async function () {
-                const contents = `
+            describe("SOCIALLIMITATION", async function () {
+                describe("not add effects to occur (8-)", async function () {
+                    const contents = `
                     <DISAD XMLID="SOCIALLIMITATION" ID="1704506737954" BASECOST="0.0" LEVELS="0" ALIAS="Social Limitation" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                         <NOTES />
                         <ADDER XMLID="OCCUR" ID="1704506848422" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -11085,39 +11086,88 @@ export function registerUploadTests(quench) {
                         </ADDER>
                     </DISAD>
                 `;
-                let item;
+                    let item;
 
-                before(async function () {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    actor.system.is5e = true;
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        parent: actor,
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
                     });
 
-                    actor.items.set(item.system.XMLID, item);
+                    it("description", function () {
+                        assert.equal(item.system.description, "Social Limitation:  (Occasionally; Minor)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 5);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 5);
+                    });
+
+                    it("roll", function () {
+                        assert.equal(item.system.roll, "8-");
+                    });
                 });
 
-                it("description", function () {
-                    assert.equal(item.system.description, "Social Limitation:  (Occasionally; Minor)");
-                });
+                describe("not add effects to occur (8-)", async function () {
+                    const contents = `
+                    <DISAD XMLID="SOCIALLIMITATION" ID="1766288720828" BASECOST="0.0" LEVELS="0" ALIAS="Social Limitation" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="test test">
+                        <NOTES />
+                        <ADDER XMLID="OCCUR" ID="1766288722915" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="EFFECTS" ID="1766288722921" BASECOST="10.0" LEVELS="0" ALIAS="Effects of Restrictions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEVERE" OPTIONID="SEVERE" OPTION_ALIAS="Severe" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </DISAD>
+                    `;
+                    let item;
 
-                it("realCost", function () {
-                    assert.equal(item.realCost, 5);
-                });
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
 
-                it("activePoints", function () {
-                    assert.equal(item.activePoints, 5);
-                });
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
 
-                it("roll", function () {
-                    assert.equal(item.system.roll, "8-");
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Social Limitation: test test (Occasionally; Severe)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 15);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 15);
+                    });
+
+                    it("roll", function () {
+                        assert.equal(item.system.roll, "8-");
+                    });
                 });
             });
         },
