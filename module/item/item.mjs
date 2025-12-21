@@ -3240,6 +3240,7 @@ export class HeroSystem6eItem extends Item {
                 case "SCIENCE_SKILL":
                     break;
 
+                case "SOCIALLIMITATION":
                 case "VULNERABILITY":
                     // Vulnerability:  Mental (Common)
                     description += `${system.INPUT}`;
