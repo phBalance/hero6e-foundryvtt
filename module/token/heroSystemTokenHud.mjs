@@ -67,7 +67,6 @@ function generateMovementMaxNonCombatDistanceMeters(characteristic) {
             );
         }
 
-        //const nonCombatMultiplier = 2; // PH: FIXME: This is wrong. Need to look at the actual power that is being used.
         return convertSystemUnitsToMetres(extraNonCombatMovement + combatMovementInSystemUnits, token.actor.is5e);
     };
 }

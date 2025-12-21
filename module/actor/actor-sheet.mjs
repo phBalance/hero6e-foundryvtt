@@ -849,7 +849,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         speaker.alias = actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             rolls: heroRoller.rawRolls(),
             author: game.user._id,
             content: cardHtml,
@@ -888,7 +888,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         speaker.alias = this.actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             rolls: characteristicRoller.rawRolls(),
             author: game.user._id,
             content: cardHtml,
@@ -968,7 +968,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         speaker.alias = this.actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             rolls: characteristicRoller.rawRolls(),
             author: game.user._id,
             content: cardHtml,
