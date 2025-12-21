@@ -13835,6 +13835,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // AOE related
+            key: "TWODIMENSIONAL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="TWODIMENSIONAL" ID="1765690578792" BASECOST="-0.25" LEVELS="0" ALIAS="Two-Dimensional" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "TWOHANDED",
             behaviors: ["adder"],
@@ -14807,6 +14818,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOESNOTWORKONSOMEDAMAGE" ID="1737210056942" BASECOST="-0.75" LEVELS="0" ALIAS="Does Not Work On Some Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="[Common attack]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DOUBLEENDCOST",
+            behaviors: ["modifier"],
+            dcAffecting: fixedValueFunction(true),
+            costPerLevel: fixedValueFunction(0),
+            xml: `<MODIFIER XMLID="DOUBLEENDCOST" ID="1764547146527" BASECOST="-0.5" LEVELS="0" ALIAS="Double Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -16114,11 +16135,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // Adjustment related
             key: "VARIABLEEFFECT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="VARIABLEEFFECT" ID="1759024606902" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Characteristics" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // TRANSFER related
+            key: "VARIABLEEFFECT2",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(true),
+            xml: `<MODIFIER XMLID="VARIABLEEFFECT2" ID="1766281443255" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect (To)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="to [two powers] simultaneously" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
