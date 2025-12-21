@@ -1542,10 +1542,7 @@ export class HeroRoller {
             const baseFormulaPurpose = this.#buildFormulaBasePurpose();
 
             const baseTermTooltip =
-                this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
-                this._type === HeroRoller.ROLL_TYPE.FLASH ||
-                this._type === HeroRoller.ROLL_TYPE.LUCK ||
-                this._type === HeroRoller.ROLL_TYPE.UNLUCK
+                this._type === HeroRoller.ROLL_TYPE.ENTANGLE || this._type === HeroRoller.ROLL_TYPE.FLASH
                     ? ""
                     : `
                     <div class="dice">
