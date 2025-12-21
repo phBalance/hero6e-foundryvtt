@@ -2035,9 +2035,13 @@ export class HeroSystem6eItem extends Item {
         }
 
         // NOTE: item._id can be null in the case of a temporary/effective item.
-        const actorEffects = this.actor.effects.find((o) => o.origin === this.actor.items.get(this._id)?.uuid);
-        if (actorEffects) {
-            return true;
+        if (this.actor) {
+            const actorEffects = this.actor.effects.find((o) => o.origin === this.actor.items.get(this._id)?.uuid);
+            if (actorEffects) {
+                return true;
+            }
+        } else {
+            console.error(`${this.name} has no actor`);
         }
 
         // Careful isActivatableManeuver doesn't stand alone, it only handles specific cases.

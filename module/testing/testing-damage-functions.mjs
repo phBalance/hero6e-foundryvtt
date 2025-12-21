@@ -1,11 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
-
 import { addDiceParts, calculateDicePartsFromDcForItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
@@ -1246,22 +1244,20 @@ export function registerDamageFunctionTests(quench) {
                     </MANEUVER>
                 `;
                 let item;
+                let actor;
                 before(async function () {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    //TODO: previousDoubleDamageLimitSetting?
+                    actor = await createQuenchActor({ quench: this, actor, is5e: false });
                     actor.system.is5e = false;
 
-                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                    item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
-                    item.type = "maneuver";
                     await actor.FullHealth();
-                    actor.items.set(item.system.XMLID, item);
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("6e Killing Strike damage", function () {
@@ -1274,7 +1270,7 @@ export function registerDamageFunctionTests(quench) {
                 });
             });
 
-            describe("5e - Killing Strike", function () {
+            describe.only("5e - Killing Strike", function () {
                 const contents = `
                     <MANEUVER XMLID="MANEUVER" ID="1724519971623" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="4" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
                         <NOTES />
@@ -1288,7 +1284,7 @@ export function registerDamageFunctionTests(quench) {
 
                     const actor = new HeroSystem6eActor(
                         {
-                            name: "Quench Actor",
+                            name: "Quench Actor 5e - Killing Strike",
                             type: "pc",
                         },
                         {},
@@ -1299,8 +1295,8 @@ export function registerDamageFunctionTests(quench) {
                         parent: actor,
                     });
                     item.type = "maneuver";
-                    await actor.FullHealth();
                     actor.items.set(item.system.XMLID, item);
+                    await actor.FullHealth();
                 });
 
                 after(async function () {
