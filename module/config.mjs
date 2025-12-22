@@ -842,7 +842,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             notes: function (char) {
@@ -867,7 +866,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["base2"],
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<DEX XMLID="DEX" ID="1712447975671" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DEX>`,
@@ -888,7 +886,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["vehicle", "base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<CON XMLID="CON" ID="1712377266422" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></CON>`,
@@ -909,7 +906,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["vehicle", "base2"],
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<INT XMLID="INT" ID="1712377270415" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></INT>`,
@@ -928,7 +924,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["automaton", "vehicle", "base2", "computer"],
             ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2", "computer"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<EGO XMLID="EGO" ID="1712377272129" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></EGO>`,
@@ -949,7 +944,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["vehicle", "base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             xml: `<PRE XMLID="PRE" ID="1712377273912" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></PRE>`,
@@ -965,7 +959,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
-        ignoreFor: ["vehicle", "base2", "computer", "ai"],
         ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
         base: 10,
         cost: function (characteristicOrPower) {
@@ -998,7 +991,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["base2"],
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1029,7 +1021,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["base2"],
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1060,7 +1051,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["automaton", "vehicle", "base2"],
             ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1091,7 +1081,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["automaton", "vehicle", "base2"],
             ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1141,7 +1130,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["base2"],
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1172,7 +1160,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["computer", "ai"]),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
@@ -1215,7 +1202,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["computer", "ai"]),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
@@ -1258,7 +1244,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["vehicle", "base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1292,7 +1277,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["vehicle", "base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1323,7 +1307,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<BODY XMLID="BODY" ID="1712377268646" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></BODY>`,
@@ -1344,16 +1327,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["vehicle", "base2", "computer", "ai"],
             ignoreForActor: function (actor) {
-                const alwaysIgnore = this.ignoreFor.includes(actor.type);
+                const alwaysIgnore = ["vehicle", "base2", "computer", "ai"].includes(actor.type);
                 if (alwaysIgnore) {
                     return true;
                 }
 
-                // Automatons have stupid rules. They have STUN unless they have certain levels
-                // of powers.
-                if (actor.type === "automaton") {
+                // The Automaton power presents awkwardly in HDC. A character has STUN unless they have certain levels
+                // of the AUTOMATON powers.
+                if (["automaton", "pc", "npc"].includes(actor.type)) {
                     const hasStun1 = !!actor.items.find(
                         (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
                     ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
@@ -1400,7 +1382,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "computer", "npc", "pc", "vehicle"],
             ignoreForActor: staticIgnoreForActorFunction(["ai", "automaton", "computer", "npc", "pc", "vehicle"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1423,7 +1404,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
-        ignoreFor: ["ai", "automaton", "computer", "npc", "pc"],
         ignoreForActor: staticIgnoreForActorFunction(["ai", "automaton", "computer", "npc", "pc"]),
         baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         xml: `<DEF XMLID="DEF" ID="1744343837380" BASECOST="0.0" LEVELS="0" ALIAS="DEF" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"></DEF>`,
@@ -1441,7 +1421,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc"],
             ignoreForActor: staticIgnoreForActorFunction(["ai", "automaton", "base2", "computer", "npc", "pc"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -1466,7 +1445,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1492,7 +1470,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1518,7 +1495,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1544,7 +1520,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1570,7 +1545,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1596,7 +1570,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1622,7 +1595,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1648,7 +1620,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1674,7 +1645,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1700,7 +1670,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"], // Everything until supported
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -1728,7 +1697,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.STANDARD,
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
-        ignoreFor: ["base2", "computer", "ai"],
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
         maneuverDesc: {
             phase: "1/2",
@@ -1755,7 +1723,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -1783,7 +1750,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "0",
@@ -1812,7 +1778,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -1841,7 +1806,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -1870,7 +1834,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -1899,7 +1862,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -1928,7 +1890,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -1956,7 +1917,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -1985,7 +1945,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2025,7 +1984,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2 †",
@@ -2064,7 +2022,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "instant",
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2 *",
@@ -2092,7 +2049,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2119,7 +2075,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.SELF,
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
-        ignoreFor: ["base2", "computer", "ai"],
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
         maneuverDesc: {
             phase: "1/2",
@@ -2146,7 +2101,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2 †",
@@ -2186,7 +2140,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2 †",
@@ -2226,7 +2179,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all possible
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1",
@@ -2256,7 +2208,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all possible.
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2286,7 +2237,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2314,7 +2264,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
-        ignoreFor: ["base2", "computer", "ai"],
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
         maneuverDesc: {
             phase: "1",
@@ -2341,7 +2290,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2370,7 +2318,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1",
@@ -2400,7 +2347,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1",
@@ -2428,7 +2374,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2457,7 +2402,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1",
@@ -2486,7 +2430,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2 †",
@@ -2515,7 +2458,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2544,7 +2486,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2583,7 +2524,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.NO_RANGE,
         costEnd: false,
         target: "target's dcv",
-        ignoreFor: ["base2", "computer", "ai"],
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
         maneuverDesc: {
             phase: "1",
@@ -2610,7 +2550,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2639,7 +2578,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.NO_RANGE,
             costEnd: false,
             target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1/2",
@@ -2670,7 +2608,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(20),
-            ignoreFor: ["pc", "npc", "automaton", "vehicle", "base2", "computer", "ai"], // There aren't really any LEVELS or a .value for this power, no need to show on CHARACTERISTICS tab //
+            // There aren't really any LEVELS or a .value for this power, no need to show on CHARACTERISTICS tab
             ignoreForActor: staticIgnoreForActorFunction([
                 "pc",
                 "npc",
@@ -2697,7 +2635,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             img: "icons/svg/wing.svg",
@@ -2718,7 +2655,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "Target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"],
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -2744,7 +2680,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "Target’s DCV",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
-            ignoreFor: ["ai", "automaton", "base2", "computer", "npc", "pc", "vehicle"],
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
                 "automaton",
@@ -2769,7 +2704,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: fixedValueFunction(2),
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             img: `systems/hero6efoundryvttv2/icons/movement/rocket.svg`,
@@ -2787,7 +2721,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
         costPerLevel: fixedValueFunction(1),
-        ignoreFor: ["base2", "computer", "ai"],
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
         baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
         img: `systems/hero6efoundryvttv2/icons/movement/hang-glider.svg`,
@@ -2806,7 +2739,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
@@ -2839,7 +2771,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             img: "icons/svg/walk.svg",
@@ -2862,7 +2793,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             img: "icons/svg/whale.svg",
@@ -2888,7 +2818,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             costEnd: true,
             costPerLevel: fixedValueFunction(1 / 2),
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             img: `systems/hero6efoundryvttv2/icons/movement/grapple-hook.svg`,
@@ -2909,7 +2838,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             img: "icons/svg/teleport.svg",
@@ -2929,7 +2857,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
-            ignoreFor: ["base2", "computer", "ai"],
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             img: "icons/svg/burrow.svg",
