@@ -128,51 +128,31 @@ export function getPowerInfo(options) {
                     }
                 }
             }
+        } else {
+            // This XMLIDs not yet in config.mjs. We should have most of them so this is significant enough to fix.
+            console.error(
+                `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Unable to find power entry.`,
+            );
         }
-
-        // FIXME: There are plenty of XMLIDs not yet in config.mjs
-        //  else {
-        //     console.error(
-        //         `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Unable to find power entry.`,
-        //     );
-        // }
     }
 
     return powerInfo;
 }
 
 function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
+    // NOTE: CUSTOM characteristics are ignored in config.mjs until supported.
     return (power) =>
-        (power.type?.includes("characteristic") || power.type?.includes("movement")) &&
-        !power.ignoreFor?.includes(actor?.type) &&
-        (!power.onlyFor || power.onlyFor.includes(actor?.type)) &&
-        !power.key.match(/^CUSTOM[0-9]+.*/); // Ignore CUSTOM characteristics until supported.
+        (power.type.includes("characteristic") || power.type.includes("movement")) && !power.ignoreForActor(actor);
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {
     if (!actor) {
         console.error("getCharacteristicInfoArrayForActor missing actor", this);
     }
+
     const isCharOrMovePowerForActor = _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor);
     const powerList = actor?.system?.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-
-    let powers = powerList.filter(isCharOrMovePowerForActor);
-    const AUTOMATON =
-        actor.type === "automaton" ||
-        !!actor.items.find(
-            (power) =>
-                power.system.XMLID === "AUTOMATON" &&
-                (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
-        );
-    if (AUTOMATON && powers.find((o) => o.key === "STUN")) {
-        if (["pc", "npc"].includes(actor.type)) {
-            console.debug(`${actor.name} has the wrong actor type ${actor.type}`, actor);
-        }
-
-        // TODO: change actor type to AUTOMATON or whatever is appropriate?
-        powers = powers.filter((o) => o.key !== "STUN");
-    }
-
+    const powers = powerList.filter(isCharOrMovePowerForActor);
     return powers;
 }
 

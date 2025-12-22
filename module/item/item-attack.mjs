@@ -2567,40 +2567,62 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         damageDetail.body = 0;
     }
 
-    // AUTOMATION powers related to STUN
-    const CANNOTBESTUNNED = token.actor.items.find(
-        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
-    );
-    const NOSTUN1 = token.actor.items.find((o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1"); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
-    const NOSTUN2 = token.actor.items.find((o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2"); //Takes No STUN
-    if (NOSTUN1 && damageDetail.stun > 0) {
-        defenseTags.push({
-            name: "TAKES NO STUN",
-            value: "immune",
-            resistant: false,
-            title: "Ignore the STUN damage from any attack; loses abilities when takes BODY",
-        });
-        damageDetail.effects = damageDetail.effects + "Takes No STUN (loses abilities when takes BODY); ";
-        damageDetail.stun = 0;
-    }
-    if (NOSTUN2 && damageDetail.stun > 0) {
-        defenseTags.push({
-            name: "TAKES NO STUN",
-            value: "immune",
-            resistant: false,
-            title: "Ignore the STUN damage from any attack",
-        });
-        damageDetail.effects = damageDetail.effects + "Takes No STUN; ";
-        damageDetail.stun = 0;
+    // A number of actor types (Base, Vehicle) don't have STUN. Other actor types (e.g. automaton, npc, pc) sometimes don't have
+    // STUN. Consider these cases and eliminate the STUN portion of things if it's one of these cases but provide information why.
+    if (damageDetail.stun > 0) {
+        const hasStun1 = !!token.actor.items.find(
+            (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
+        ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
+        const hasStun2 = !!token.actor.items.find(
+            (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
+        ); // Takes No STUN
+        const hasStunCharacteristic = !!getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === "STUN");
+
+        if (hasStun1) {
+            defenseTags.push({
+                name: "TAKES NO STUN",
+                value: "immune",
+                resistant: false,
+                title: "Automaton ignores the STUN damage from any attack; loses abilities when takes BODY",
+            });
+
+            damageDetail.effects = damageDetail.effects + "Takes No STUN (loses abilities when takes BODY); ";
+            damageDetail.stun = 0;
+        } else if (hasStun2) {
+            defenseTags.push({
+                name: "TAKES NO STUN",
+                value: "immune",
+                resistant: false,
+                title: "Automaton ignores the STUN damage from any attack",
+            });
+
+            damageDetail.effects = damageDetail.effects + "Takes No STUN; ";
+            damageDetail.stun = 0;
+        } else if (!hasStunCharacteristic) {
+            // Vehicle and Bases have no STUN characteristic
+            defenseTags.push({
+                name: "TAKES NO STUN",
+                value: "immune",
+                resistant: false,
+                title: "Actor type ignores the STUN damage from any attack",
+            });
+
+            damageDetail.effects = damageDetail.effects + "Takes No STUN; ";
+            damageDetail.stun = 0;
+        }
     }
 
+    // Could they be stunned?
+    // See if there was any STUN done (i.e. 0 STUN attack can't STUN someone with zero or negative CON)
     // See if token has CON.  Notice we check raw actor type from config, not current actor props as
     // this token may have originally been a PC, and changed to a BASE.
-    const hasCON = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === "CON");
-
     // check if target is stunned.  Must have CON
-    if (game.settings.get(HEROSYS.module, "stunned") && hasCON) {
+    const hasCon = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === "CON");
+    if (damageDetail.stun > 0 && game.settings.get(HEROSYS.module, "stunned") && hasCon) {
         // determine if target was Stunned
+        const CANNOTBESTUNNED = token.actor.items.find(
+            (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
+        );
         if (damageDetail.stun > token.actor.system.characteristics.con.value && !CANNOTBESTUNNED) {
             damageDetail.effects = damageDetail.effects + "inflicts Stunned; ";
 
@@ -2609,7 +2631,6 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
             // all: "PCs and NPCs (end, stun, body)"
             if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
-                //token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
                 await token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
                     overlay: false, // Would like to know if they are prone, and the contrast isn't great.
                     active: true,

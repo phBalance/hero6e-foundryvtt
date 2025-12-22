@@ -63,10 +63,8 @@ export function adjustmentSourcesStrict({ actor }) {
     const powerList = actor.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(
         (power) =>
-            (power.type?.includes("characteristic") || power.type?.includes("movement")) &&
-            !power.ignoreFor?.includes(actor.type) &&
-            !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
-            (!power.onlyFor || power.onlyFor.includes(actor.type)),
+            (power.type.includes("characteristic") || power.type.includes("movement")) &&
+            !power.ignoreForActor?.includes(actor),
     );
 
     // Attack powers

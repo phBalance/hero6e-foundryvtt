@@ -1,9 +1,10 @@
+import { registerAutomatonTests } from "./testing-automaton.mjs";
 import { registerDamageFunctionTests } from "./testing-damage-functions.mjs";
-import { registerUploadTests } from "./testing-upload.mjs";
 import { registerDefenseTests } from "./testing-defense.mjs";
-import { registerFullTests } from "./testing-full.mjs";
 import { registerDiceTests } from "./testing-dice.mjs";
 import { registerEverythingLadLass } from "./testing-everything-lad-lass.mjs";
+import { registerFullTests } from "./testing-full.mjs";
+import { registerUploadTests } from "./testing-upload.mjs";
 import { registerGlobalSetup, registerGlobalTeardown } from "./quench-helper.mjs";
 
 Hooks.once("ready", async function () {
@@ -22,13 +23,16 @@ Hooks.once("ready", async function () {
 
 Hooks.on("quenchReady", async (quench) => {
     registerGlobalSetup(quench);
+
+    registerAutomatonTests(quench);
     registerDamageFunctionTests(quench);
     registerDefenseTests(quench);
-    registerUploadTests(quench);
-    registerFullTests(quench);
-    registerEverythingLadLass(quench);
     registerDiceTests(quench);
+    registerEverythingLadLass(quench);
+    registerFullTests(quench);
     registerMainTests(quench);
+    registerUploadTests(quench);
+
     registerGlobalTeardown(quench);
 });
 
