@@ -100,7 +100,29 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN"), true);
+                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.true;
+                    });
+
+                    it.only("should work the same", async function () {
+                        CONFIG.HERO.powers5e
+                            .filter((power) => power.type.includes("characteristic") || power.type.includes("movement"))
+                            .forEach((power) => {
+                                if (power.ignoreFor?.includes(actor.type) !== power.ignoreForActor?.(actor)) {
+                                    debugger;
+                                }
+                                expect(power.ignoreFor?.includes(actor.type)).to.equal(power.ignoreForActor?.(actor));
+                            });
+
+                        CONFIG.HERO.powers6e
+                            .filter(
+                                (power) => power.type?.includes("characteristic") || power.type?.includes("movement"),
+                            )
+                            .forEach((power) => {
+                                if (power.ignoreFor?.includes(actor.type) !== power.ignoreForActor?.(actor)) {
+                                    debugger;
+                                }
+                                expect(power.ignoreFor?.includes(actor.type)).to.equal(power.ignoreForActor?.(actor));
+                            });
                     });
                 });
 
@@ -195,7 +217,7 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN"), false);
+                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
                     });
                 });
 
@@ -290,7 +312,7 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN"), false);
+                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
                     });
                 });
             });

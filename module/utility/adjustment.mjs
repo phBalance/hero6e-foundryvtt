@@ -65,8 +65,7 @@ export function adjustmentSourcesStrict({ actor }) {
         (power) =>
             (power.type?.includes("characteristic") || power.type?.includes("movement")) &&
             !power.ignoreFor?.includes(actor.type) &&
-            !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
-            (!power.onlyFor || power.onlyFor.includes(actor.type)),
+            !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e"),
     );
 
     // Attack powers

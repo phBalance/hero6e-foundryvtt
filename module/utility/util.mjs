@@ -142,11 +142,10 @@ export function getPowerInfo(options) {
 }
 
 function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
+    // NOTE: CUSTOM characteristics are ignored in config.mjs until supported.
     return (power) =>
-        (power.type?.includes("characteristic") || power.type?.includes("movement")) &&
-        !power.ignoreFor?.includes(actor?.type) &&
-        (!power.onlyFor || power.onlyFor.includes(actor?.type)) &&
-        !power.key.match(/^CUSTOM[0-9]+.*/); // Ignore CUSTOM characteristics until supported.
+        (power.type.includes("characteristic") || power.type.includes("movement")) &&
+        (!power.ignoreFor.includes(actor.type) || !power.ignoreForActor(actor));
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {

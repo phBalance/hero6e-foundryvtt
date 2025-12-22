@@ -2674,7 +2674,6 @@ export function registerUploadTests(quench) {
                 });
 
                 describe("5e", async function () {
-                    this.timeout(2000000);
                     const contents = `
                     <POWER XMLID="ENDURANCERESERVE" ID="1752369250791" BASECOST="0.0" LEVELS="20" ALIAS="Endurance Reserve" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         <NOTES />
