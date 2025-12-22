@@ -8,7 +8,7 @@ export function registerVehicleTests(quench) {
         (context) => {
             const { before, describe, expect, it } = context;
 
-            describe.only("Vehicle Characteristics", function () {
+            describe("Vehicle Characteristics", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
                 this.timeout(20000);
 
