@@ -1721,6 +1721,7 @@ export class HeroCharacteristicsModel extends foundry.abstract.DataModel {
             tunneling: new EmbeddedDataField(HeroActorCharacteristic),
 
             basesize: new EmbeddedDataField(HeroActorCharacteristic),
+            def: new EmbeddedDataField(HeroActorCharacteristic), // 5e Base and Vehicles
             size: new EmbeddedDataField(HeroActorCharacteristic), // Vehicle
         };
     }
@@ -1777,6 +1778,7 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
             LEAPING: new EmbeddedDataField(HeroItemCharacteristic),
 
             BASESIZE: new EmbeddedDataField(HeroItemCharacteristic),
+            DEF: new EmbeddedDataField(HeroItemCharacteristic), // 5e Base and Vehicle
             SIZE: new EmbeddedDataField(HeroItemCharacteristic), // vehicle
             hap: new SchemaField({
                 value: new HeroNumberField({ integer: true, nullable: true }),
