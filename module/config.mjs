@@ -1373,7 +1373,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             figured5eCharacteristic: function (actor) {
                 return (
-                    actor.system.characteristics.body.base +
+                    actor.system.characteristics.body.basePlusLevels +
                     RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 2) +
                     actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(2) +
                     RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 2) +
