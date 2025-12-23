@@ -1284,7 +1284,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 20,
             costPerLevel: fixedValueFunction(1 / 5),
             type: ["characteristic"],
-            behaviors: ["figured", "recalcCON"],
+            behaviors: ["figured", "figuredCON"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1298,9 +1298,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             figured5eCharacteristic: function (actor) {
+                // 5e figured 2 x CON
                 return (
-                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
-                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
+                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels * 2) +
+                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(0.5)
                 );
             },
             xml: `<END XMLID="END" ID="1712377283848" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></END>`,
