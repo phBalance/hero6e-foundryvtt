@@ -660,6 +660,24 @@ function standardBaseEffectDiceParts(item /* , options */) {
     return defaultPowerDicePartsBundle(item, diceParts);
 }
 
+/**
+ * Luck and Unluck can't have partial dice
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns
+ */
+function luckAndUnluckBaseEffectDiceParts(item /* , options */) {
+    const diceParts = {
+        dc: item.dcRaw,
+        d6Count: parseInt(item.system?.LEVELS || 0),
+        d6Less1DieCount: 0,
+        halfDieCount: 0,
+        constant: 0,
+    };
+
+    return defaultPowerDicePartsBundle(item, diceParts);
+}
+
 function characteristicBaseEffectDiceParts(item /* , options */) {
     const d6Count = parseInt(item.system?.LEVELS || 0);
     const halfDieCount = item.findModsByXmlid("PLUSONEHALFDIE") ? 1 : 0;
@@ -7033,7 +7051,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
-            baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            baseEffectDicePartsBundle: luckAndUnluckBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="LUCK" ID="1709333951260" BASECOST="0.0" LEVELS="1" ALIAS="Luck" POSITION="57" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -8909,7 +8927,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
-            baseEffectDicePartsBundle: standardBaseEffectDiceParts,
+            baseEffectDicePartsBundle: luckAndUnluckBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
             xml: `<DISAD XMLID="UNLUCK" ID="1709445762298" BASECOST="0.0" LEVELS="1" ALIAS="Unluck: 1d6" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
