@@ -3569,7 +3569,7 @@ export function registerDiceTests(quench) {
                     it("should throw if asking for inappropriate interpretations", async function () {
                         const TestRollMock = Roll1Mock;
 
-                        const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(3);
+                        const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(3);
 
                         // Should not be able to use any other term types other than addDice for an unluck roll.
                         expect(function addDiceMinus1_0() {

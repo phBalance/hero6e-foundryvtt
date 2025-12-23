@@ -4652,13 +4652,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (baseAttackItem.system.XMLID === "HANDTOHANDATTACK") {
-            // This should no longer be possible to reach for 5e now that Hand-to-hand attacks are not independent attacks. However,
-            // in 6e advantaged (and hence all HAs) are the base attack.
-            if (baseAttackItem.is5e) {
-                ui.notifications.error(
-                    `${this.detailedName()} has baseItem ${baseAttackItem.detailedName()}. Please report.`,
-                );
-            }
+            ui.notifications.error(
+                `${this.detailedName()} has baseItem ${baseAttackItem.detailedName()}. Please report.`,
+            );
 
             return "PD";
         }

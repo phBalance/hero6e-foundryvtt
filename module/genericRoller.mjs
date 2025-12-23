@@ -223,16 +223,16 @@ export class GenericRoller {
         });
         tempActor.system.is5e = is5eAttack;
 
-        // NOTE: Missing PD vs ED for normal & killing attacks
         // NOTE: No application of damage for anything other than normal and killing attacks
 
-        // Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
+        // Only normal and killing attacks support hit locations
+        const damageTypeSupportsHitLocation =
+            includeHitLocation && (damageType === "NORMAL" || damageType === "KILLING");
+
+        // Luck and unluck don't support partial dice (full dice or nothing)
         const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
-            .addDice(Math.clamp(userSelection.dice, 0, 999), "DICE")
-            .addHalfDice(userSelection.dicePlus === "PLUSHALFDIE" ? 1 : 0, "PLUSHALFDIE")
-            .addDiceMinus1(userSelection.dicePlus === "PLUSDIEMINUSONE" ? 1 : 0, "PLUSDIEMINUSONE")
-            .addNumber(userSelection.dicePlus === "PLUSONEPIP" ? 1 : 0, "PLUSONEPIP")
             .modifyTo5e(is5eAttack)
+
             .makeNormalRoll(damageType === "NORMAL")
             .makeKillingRoll(
                 damageType === "KILLING",
@@ -244,13 +244,30 @@ export class GenericRoller {
                     : undefined,
             )
             .makeAdjustmentRoll(damageType === "ADJUSTMENT")
+            .makeEffectRoll(damageType === "EFFECT")
             .makeEntangleRoll(damageType === "ENTANGLE")
             .makeFlashRoll(damageType === "FLASH")
-            .makeEffectRoll(damageType === "EFFECT")
             .makeLuckRoll(damageType === "LUCK")
             .makeUnluckRoll(damageType === "UNLUCK")
+
+            .addDice(Math.clamp(userSelection.dice, 0, 999), "DICE")
+            .addHalfDice(
+                userSelection.dicePlus === "PLUSHALFDIE" && !(damageType === "LUCK" || damageType === "UNLUCK") ? 1 : 0,
+                "PLUSHALFDIE",
+            )
+            .addDiceMinus1(
+                userSelection.dicePlus === "PLUSDIEMINUSONE" && !(damageType === "LUCK" || damageType === "UNLUCK")
+                    ? 1
+                    : 0,
+                "PLUSDIEMINUSONE",
+            )
+            .addNumber(
+                userSelection.dicePlus === "PLUSONEPIP" && !(damageType === "LUCK" || damageType === "UNLUCK") ? 1 : 0,
+                "PLUSONEPIP",
+            )
+
             .addToHitLocation(
-                includeHitLocation && userSelection.aim !== "noHitLocation",
+                damageTypeSupportsHitLocation && userSelection.aim !== "noHitLocation",
                 userSelection.aim,
                 includeHitLocation && game.settings.get(HEROSYS.module, "hitLocTracking") === "all",
                 userSelection.aim === "none" ? "none" : userSelection.aimSide, // Can't just select a side to hit as that doesn't have a penalty

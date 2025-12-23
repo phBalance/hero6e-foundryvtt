@@ -1738,7 +1738,7 @@ export async function rollEffect(item) {
 export async function rollLuck(item) {
     const { diceParts } = calculateDicePartsForItem(item, {});
 
-    const luckRoller = new HeroRoller().modifyTo5e(item.actor.system.is5e).makeLuckRoll().addDice(diceParts.d6Count);
+    const luckRoller = new HeroRoller().makeLuckRoll().addDice(diceParts.d6Count);
     await luckRoller.roll();
 
     const cardHtml = await luckRoller.render(`${item.name} Luck Roll`);
@@ -1758,10 +1758,7 @@ export async function rollLuck(item) {
 export async function rollUnluck(item) {
     const { diceParts } = calculateDicePartsForItem(item, {});
 
-    const unluckRoller = new HeroRoller()
-        .modifyTo5e(item.actor.system.is5e)
-        .makeUnluckRoll()
-        .addDice(diceParts.d6Count);
+    const unluckRoller = new HeroRoller().makeUnluckRoll().addDice(diceParts.d6Count);
     await unluckRoller.roll();
 
     const cardHtml = await unluckRoller.render(`${item.name} Unluck Roll`);

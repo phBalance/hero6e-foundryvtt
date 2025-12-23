@@ -9,20 +9,20 @@ export class HeroTokenRuler extends FoundryTokenRuler {
 
     _getSegmentStyle(waypoint) {
         const style = super._getSegmentStyle(waypoint);
-        this.#speedValueStyle(style, waypoint);
+        this.#setSpeedColor(style, waypoint);
         return style;
     }
 
     _getGridHighlightStyle(waypoint, offset) {
         const style = super._getGridHighlightStyle(waypoint, offset);
-        this.#speedValueStyle(style, waypoint);
+        this.#setSpeedColor(style, waypoint);
         return style;
     }
 
     /**
      *  Adjusts the grid or segment style based on the token's movement characteristics.
      */
-    #speedValueStyle(style, waypoint) {
+    #setSpeedColor(style, waypoint) {
         const gridToMeterMultiplier = gridUnitsToMeters();
         const movementCostInMeters = waypoint.measurement.cost * gridToMeterMultiplier;
 

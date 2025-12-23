@@ -579,7 +579,6 @@ export class HeroSystem6eActor extends Actor {
 
             // Check for any figuredCharacteristic dependencies.
             const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
-            const changes = {};
             for (const char of _getCharacteristicInfoArrayForActor.filter((o) =>
                 o.behaviors.includes(`figured${charKey.toUpperCase()}`),
             )) {
@@ -597,9 +596,6 @@ export class HeroSystem6eActor extends Actor {
                         ),
                     });
                 }
-            }
-            if (Object.keys(changes).length > 0) {
-                await this.update(changes);
             }
         }
 
