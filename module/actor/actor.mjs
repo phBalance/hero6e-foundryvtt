@@ -2510,9 +2510,10 @@ export class HeroSystem6eActor extends Actor {
                 // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
                 const item = this.items.find((i) => i.id === resourceData.id);
                 if (item) {
+                    // Notice if charges or clips is lower than before we take the min #3302
                     await item.update({
-                        "system._charges": Math.min(item.system._charges, resourceData._charges),
-                        "system._clips": Math.min(item.system._clips, resourceData._clips),
+                        "system._charges": Math.min(item.system.chargesMax, resourceData._charges),
+                        "system._clips": Math.min(item.system.clipsMax, resourceData._clips),
                         "system.ablative": Math.max(item.system.ablative, resourceData.ablative),
                     });
                 } else {
@@ -2576,9 +2577,6 @@ export class HeroSystem6eActor extends Actor {
 
             uploadProgressBar.advance(`${this.name}: Processed non characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processed all items`, 0);
-
-            // Full Health (not needed?  Issues with retained values)
-            //await this.FullHealth();
 
             uploadPerformance.invalidTargets = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
@@ -2732,35 +2730,6 @@ export class HeroSystem6eActor extends Actor {
             this.system.characteristics.spd ??= {
                 core: 3,
             };
-
-            // duplicate ID can be a problem (moved into parser above)
-            // for (const item of this.items) {
-            //     if (item.system.ID) {
-            //         // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
-            //         const dups = this.items.filter((i) => i.system.ID == item.system.ID);
-            //         if (dups.length > 1) {
-            //             // Try to give duplicate items a new ID
-            //             for (const dupItem of dups.splice(1)) {
-            //                 if (dupItem.childItems.length === 0) {
-            //                     await dupItem.update({
-            //                         // [`system.idDuplicate`]: dupItem.system.ID,
-            //                         [`system.ID`]: new Date().getTime(),
-            //                         [`system.error`]: [
-            //                             ...(dupItem.system.error || []),
-            //                             "Duplicate ID, created new one",
-            //                         ],
-            //                     });
-            //                     ui.notifications.warn(`Created new internal ID reference for <b>${item.name}</b>.`);
-            //                 } else {
-            //                     ui.notifications.warn(
-            //                         `Duplicate ID reference for <b>${item.name}</b> may cause problems.`,
-            //                         { permanent: true },
-            //                     );
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
 
             uploadPerformance.postUpload2 = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
