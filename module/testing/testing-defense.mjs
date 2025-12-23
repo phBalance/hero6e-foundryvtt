@@ -12,7 +12,6 @@ export function registerDefenseTests(quench) {
                 let actor;
                 beforeEach(async function () {
                     actor = await createQuenchActor({ quench: this, is5e: true });
-                    await actor.FullHealth();
                 });
 
                 afterEach(async function () {

@@ -98,7 +98,6 @@ export function registerFullTests(quench) {
 
                 before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    await actor.FullHealth();
                 });
 
                 after(async function () {
@@ -366,7 +365,6 @@ export function registerFullTests(quench) {
                 let actor;
                 before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    await actor.FullHealth();
                 });
 
                 after(async function () {
@@ -1047,7 +1045,6 @@ export function registerFullTests(quench) {
 
                 before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    await actor.FullHealth();
                 });
 
                 after(async function () {
@@ -1733,7 +1730,6 @@ export function registerFullTests(quench) {
                     previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
                     actor = await createQuenchActor({ quench: this, contents, is5e: false });
-                    await actor.FullHealth();
                 });
 
                 after(async function () {
@@ -2105,7 +2101,6 @@ export function registerFullTests(quench) {
                     previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
                     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    await actor.FullHealth();
                 });
 
                 afterEach(async function () {
@@ -5729,7 +5724,6 @@ export function registerFullTests(quench) {
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                        await actor.FullHealth();
                     });
 
                     after(async function () {
@@ -6205,7 +6199,6 @@ export function registerFullTests(quench) {
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                        await actor.FullHealth();
                     });
 
                     after(async function () {
@@ -7102,7 +7095,6 @@ export function registerFullTests(quench) {
 
                 before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    await actor.FullHealth();
                 });
 
                 after(async function () {

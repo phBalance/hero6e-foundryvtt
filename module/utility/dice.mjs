@@ -1238,7 +1238,7 @@ export class HeroRoller {
                 break;
 
             case HeroRoller.ROLL_TYPE.UNLUCK:
-                // Unkuck only allows full dice terms
+                // Unluck only allows full dice terms
                 if (originalResult > 1) {
                     return 0;
                 }
