@@ -192,7 +192,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the correct ED cost", function () {
-                        expect(actor.system.characteristics.size.realCost).to.equal(3);
+                        expect(actor.system.characteristics.ed.realCost).to.equal(3);
                     });
 
                     it("should NOT have the STUN characteristic", function () {
