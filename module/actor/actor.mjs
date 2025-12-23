@@ -852,7 +852,7 @@ export class HeroSystem6eActor extends Actor {
                     img: `icons/svg/downgrade.svg`,
                     changes: [
                         {
-                            key: "system.characteristics.dcv.value",
+                            key: "system.characteristics.dcv.max",
                             value: 0.5,
                             mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
@@ -1244,7 +1244,7 @@ export class HeroSystem6eActor extends Actor {
             // an OCV bonus to the attacker this isn't quite right but we always add it last so that it's not halved if
             // the defenders DCV is halved. Note that we are not affecting the attacker OCV which could be halved: this is not perfect.
             sizeActiveEffect.changes.push({
-                key: "system.characteristics.dcv.value",
+                key: "system.characteristics.dcv.max",
                 value: _sizeDetails.dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: this.is5e
@@ -1253,7 +1253,7 @@ export class HeroSystem6eActor extends Actor {
             });
 
             sizeActiveEffect.changes.push({
-                key: "system.characteristics.str.value",
+                key: "system.characteristics.str.max",
                 value: _sizeDetails.str,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
@@ -1265,7 +1265,7 @@ export class HeroSystem6eActor extends Actor {
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             sizeActiveEffect.changes.push({
-                key: "system.characteristics.body.value",
+                key: "system.characteristics.body.max",
                 value: _sizeDetails.body,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
@@ -1353,55 +1353,55 @@ export class HeroSystem6eActor extends Actor {
                 img: `systems/${HEROSYS.module}/icons/encumbered.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: dcvDex,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.dex.value",
+                        key: "system.characteristics.dex.max",
                         value: dcvDex,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.running.value",
+                        key: "system.characteristics.running.max",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.swimming.value",
+                        key: "system.characteristics.swimming.max",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.leaping.value",
+                        key: "system.characteristics.leaping.max",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.flight.value",
+                        key: "system.characteristics.flight.max",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.swinging.value",
+                        key: "system.characteristics.swinging.max",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.teleportation.value",
+                        key: "system.characteristics.teleportation.max",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
-                        key: "system.characteristics.tunneling.value",
+                        key: "system.characteristics.tunneling.max",
                         value: move,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
@@ -1468,37 +1468,37 @@ export class HeroSystem6eActor extends Actor {
                 img: `systems/${HEROSYS.module}/icons/encumbered.svg`,
                 changes: [
                     {
-                        key: "system.characteristics.dcv.value",
+                        key: "system.characteristics.dcv.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.running.value",
+                        key: "system.characteristics.running.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.leaping.value",
+                        key: "system.characteristics.leaping.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.swimming.value",
+                        key: "system.characteristics.swimming.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.swinging.value",
+                        key: "system.characteristics.swinging.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
-                        key: "system.characteristics.tunneling.value",
+                        key: "system.characteristics.tunneling.max",
                         value: 0.5,
                         mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,

@@ -9,6 +9,7 @@
 - **Combatants that attack during their lightning reflexes phase will have their non LR phase skipped. Combatants that are stunned or knocked out will also have their phase skipped. [#2404](https://github.com/dmdorman/hero6e-foundryvtt/issues/2404)**
 - Improved support for non-combat and vertical movement in FoundryVTT v13. [#3234](https://github.com/dmdorman/hero6e-foundryvtt/issues/3234) [#3240](https://github.com/dmdorman/hero6e-foundryvtt/issues/3240)
 - Luck and unluck have been added to the generic damage roller using the counting 6s or 1s method.
+- Vehicle loading now works and they no longer gain BODY when taking damage. [#3352](https://github.com/dmdorman/hero6e-foundryvtt/issues/3352) [#3354](https://github.com/dmdorman/hero6e-foundryvtt/issues/3354)
 
 ## Version 4.2.4 20251130
 
