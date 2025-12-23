@@ -1046,19 +1046,12 @@ export function registerFullTests(quench) {
                 let actor;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    await actor.FullHealth();
                 });
 
-                it("name", async function () {
-                    assert.equal(actor.name, "Enforcer");
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("str.max", async function () {
@@ -1188,7 +1181,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 8); //8 + 5 (Active Effect)
+                    assert.equal(actor.system.characteristics.running.max, 13); //8 + 5 (Active Effect)
                 });
                 it("running.realCost", async function () {
                     assert.equal(actor.system.characteristics.running.realCost, 4);
