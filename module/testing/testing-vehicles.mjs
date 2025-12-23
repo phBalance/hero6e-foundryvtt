@@ -1,4 +1,4 @@
-import { createQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
@@ -6,7 +6,7 @@ export function registerVehicleTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.actor.vehicle",
         (context) => {
-            const { before, describe, expect, it } = context;
+            const { after, before, describe, expect, it } = context;
 
             describe("Vehicle Characteristics", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
@@ -85,6 +85,10 @@ export function registerVehicleTests(quench) {
                     let actor;
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "vehicle" });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("should have the SIZE characteristic", function () {
@@ -385,6 +389,10 @@ export function registerVehicleTests(quench) {
                     let actor;
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "vehicle" });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("should have the SIZE characteristic", function () {

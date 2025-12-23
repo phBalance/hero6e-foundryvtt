@@ -1,4 +1,4 @@
-import { createQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
@@ -6,7 +6,7 @@ export function registerAutomatonTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.actor.automaton",
         (context) => {
-            const { before, describe, expect, it } = context;
+            const { after, before, describe, expect, it } = context;
 
             describe("Automaton Characteristics", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
@@ -100,6 +100,10 @@ export function registerAutomatonTests(quench) {
                     let actor;
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "automaton" });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("should have the STUN characteristic", function () {
@@ -197,6 +201,10 @@ export function registerAutomatonTests(quench) {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "automaton" });
                     });
 
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
                     it("should NOT have the STUN characteristic", function () {
                         expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
                     });
@@ -290,6 +298,10 @@ export function registerAutomatonTests(quench) {
                     let actor;
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "automaton" });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("should NOT have the STUN characteristic", function () {
@@ -394,6 +406,10 @@ export function registerAutomatonTests(quench) {
                     let actor;
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("should NOT have the STUN characteristic", function () {
