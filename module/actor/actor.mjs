@@ -499,6 +499,9 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Mark as defeated in combat tracker (automaton)
+        // PH: FIXME: This is not correct for 5e (for instance could buy "cannot bleed" AUTOMATON power) _unless_ they have
+        //            the STUN1 or STUN2 OPTIONID for the AUTOMATON power.
+        //            6e seems to follow the same rules.
         if (data.system?.characteristics?.body?.value <= 0) {
             const AUTOMATON = this.items.find((o) => o.system.XMLID === "AUTOMATON");
             if (AUTOMATON) {
@@ -1575,18 +1578,11 @@ export class HeroSystem6eActor extends Actor {
         // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
         const characteristicChangesMax = {};
-        for (const charKey of Object.keys(this.system.characteristics)) {
+        for (const charKey of getCharacteristicInfoArrayForActor(this).map((infoArray) =>
+            infoArray.key.toLowerCase(),
+        )) {
             const characteristic = this.system.characteristics[charKey];
-            // const calculated5e =
-            //     this.is5e && characteristic.baseInfo.calculated5eCharacteristic
-            //         ? characteristic.baseInfo.calculated5eCharacteristic(this, "max")
-            //         : null;
-            // const figured5e =
-            //     this.is5e && characteristic.baseInfo.figured5eCharacteristic
-            //         ? characteristic.baseInfo.figured5eCharacteristic(this, "max")
-            //         : null;
             const basePlusLevels = parseInt(characteristic.basePlusLevels);
-            //const newMax = calculated5e ?? figured5e ?? core;
             if (this.system.characteristics[charKey].max !== basePlusLevels) {
                 characteristicChangesMax[`system.characteristics.${charKey}.max`] = basePlusLevels;
             }
