@@ -1560,41 +1560,41 @@ async function _rollApplyKnockback(token, knockbackDice) {
     )) {
         damageData.VulnDesc ??= [];
         damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
-        if (vuln.system.MODIFIER) {
-            for (const modifier of vuln.system.MODIFIER || []) {
-                switch (modifier.OPTIONID) {
-                    case "HALFSTUN":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 0.5;
-                        break;
-                    case "TWICESTUN":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 1;
-                        break;
-                    case "HALFBODY":
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 0.5;
-                        break;
-                    case "TWICEBODY":
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 1;
-                        break;
-                    case "HALFEFFECT":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 0.5;
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 0.5;
-                        break;
-                    case "TWICEEFFECT":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 1;
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 1;
-                        break;
+        // There can only be 1 vulnerability modifier (or if blank a default HALFSTUN)
+        const modifier = vuln.modifiers[0];
+        if (modifier) {
+            switch (modifier.OPTIONID) {
+                case "HALFSTUN":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 0.5;
+                    break;
+                case "TWICESTUN":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 1;
+                    break;
+                case "HALFBODY":
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 0.5;
+                    break;
+                case "TWICEBODY":
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 1;
+                    break;
+                case "HALFEFFECT":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 0.5;
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 0.5;
+                    break;
+                case "TWICEEFFECT":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 1;
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 1;
+                    break;
 
-                    default:
-                        console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
-                }
+                default:
+                    console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
             }
         } else {
             // DEFAULT VULNERABILITY isi 1.5 STUN
@@ -2470,41 +2470,41 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     )) {
         damageData.VulnDesc ??= [];
         damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
-        if (vuln.system.MODIFIER) {
-            for (const modifier of vuln.system.MODIFIER || []) {
-                switch (modifier.OPTIONID) {
-                    case "HALFSTUN":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 0.5;
-                        break;
-                    case "TWICESTUN":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 1;
-                        break;
-                    case "HALFBODY":
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 0.5;
-                        break;
-                    case "TWICEBODY":
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 1;
-                        break;
-                    case "HALFEFFECT":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 0.5;
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 0.5;
-                        break;
-                    case "TWICEEFFECT":
-                        damageData.vulnStunMultiplier ??= 1;
-                        damageData.vulnStunMultiplier += 1;
-                        damageData.vulnBodyMultiplier ??= 1;
-                        damageData.vulnBodyMultiplier += 1;
-                        break;
+        // There can only be 1 vulnerability modifier (or if blank a default HALFSTUN)
+        const modifier = vuln.modifiers[0];
+        if (modifier) {
+            switch (modifier.OPTIONID) {
+                case "HALFSTUN":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 0.5;
+                    break;
+                case "TWICESTUN":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 1;
+                    break;
+                case "HALFBODY":
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 0.5;
+                    break;
+                case "TWICEBODY":
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 1;
+                    break;
+                case "HALFEFFECT":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 0.5;
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 0.5;
+                    break;
+                case "TWICEEFFECT":
+                    damageData.vulnStunMultiplier ??= 1;
+                    damageData.vulnStunMultiplier += 1;
+                    damageData.vulnBodyMultiplier ??= 1;
+                    damageData.vulnBodyMultiplier += 1;
+                    break;
 
-                    default:
-                        console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
-                }
+                default:
+                    console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
             }
         } else {
             // DEFAULT VULNERABILITY isi 1.5 STUN
