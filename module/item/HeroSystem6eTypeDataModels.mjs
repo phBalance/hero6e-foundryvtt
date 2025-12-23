@@ -1538,33 +1538,39 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     }
 
     get core() {
-        //console.error(`core is depricated`);
-        try {
-            // Some 5e characteristics are calcuated or figured
-            if (this.actor.is5e) {
-                if (this.baseInfo?.behaviors.includes("calculated")) {
-                    if (this.#baseInfo.calculated5eCharacteristic) {
-                        return this.#baseInfo.calculated5eCharacteristic(this.actor, "max");
-                    }
-                } else if (this.baseInfo?.behaviors.includes("figured")) {
-                    return (
-                        (this.actor.system[this.KEY].LEVELS || 0) +
-                        this.baseInfo.figured5eCharacteristic(this.actor, "max")
-                    );
-                }
-            }
-            return parseInt(this.item?.LEVELS || 0) + this.base;
-        } catch (e) {
-            console.error(e);
-        }
+        console.error("The 'core' characteristic attribut is depricated");
         return 0;
+        // core is base or calculated
+        // try {
+        //     // Some 5e characteristics are calcuated or figured
+        //     if (this.actor.is5e) {
+        //         if (this.baseInfo?.behaviors.includes("calculated")) {
+        //             if (this.#baseInfo.calculated5eCharacteristic) {
+        //                 return this.#baseInfo.calculated5eCharacteristic(this.actor, "core");
+        //             }
+        //         } else if (this.baseInfo?.behaviors.includes("figured")) {
+        //             return (
+        //                 (this.actor.system[this.KEY].LEVELS || 0) +
+        //                 this.baseInfo.figured5eCharacteristic(this.actor, "core")
+        //             );
+        //         }
+        //     }
+        //     //return parseInt(this.item?.LEVELS || 0) + this.base;
+        //     return this.base;
+        // } catch (e) {
+        //     console.error(e);
+        // }
+        // return 0;
     }
 
-    get coreInt() {
-        return Math.floor(this.core);
+    get baseInt() {
+        // Only expected to be used for 5e SPD as we need the integer version
+        return Math.floor(this.base);
     }
 
     get base() {
+        // base is the starting points you get for free
+
         // KLUGE OVERRIDEs
         if (this.actor.type === "base2") {
             if (this.key === "body") {
@@ -1572,7 +1578,48 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
             }
         }
 
-        return this.baseInfo?.base || 0;
+        // Some 5e characteristics are calcuated or figured
+        if (this.actor.is5e) {
+            if (this.baseInfo?.behaviors.includes("calculated")) {
+                if (this.#baseInfo.calculated5eCharacteristic) {
+                    return this.#baseInfo.calculated5eCharacteristic(this.actor);
+                }
+            } else if (this.baseInfo?.behaviors.includes("figured")) {
+                return this.baseInfo.figured5eCharacteristic(this.actor);
+            }
+        }
+
+        // Not every actor will have all characteristics
+        // return null when this characteristic isn't valid
+
+        return this.baseInfo?.base ?? null;
+    }
+
+    get basePlusLevels() {
+        // Need to add in LEVELS
+        try {
+            return this.base + (this.item?.LEVELS ?? 0);
+        } catch (e) {
+            console.error(e);
+        }
+        return 0;
+    }
+
+    get baseItemsContributingToFiguredCharacteristics() {
+        return this.actor.items.filter((item) => item.system.XMLID === this.KEY && !item.findModsByXmlid("NOFIGURED"));
+    }
+
+    baseSumFiguredCharacteristicsFromItems(divisor) {
+        // Each item is rounded seperately
+        try {
+            const powersWithThisCharacteristic = this.baseItemsContributingToFiguredCharacteristics;
+            return powersWithThisCharacteristic.reduce((accumulator, currentItem) => {
+                return accumulator + RoundFavorPlayerUp(currentItem.system.LEVELS / divisor);
+            }, 0);
+        } catch (e) {
+            console.error(e);
+        }
+        return 0;
     }
 
     get realCost() {

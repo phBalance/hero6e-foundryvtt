@@ -1428,6 +1428,7 @@ WARNING: Read the changelog for this version before deciding to update.
 - "Combat Luck" added to defenses. [#85](https://github.com/dmdorman/hero6e-foundryvtt/issues/85)
 - Attacks with Alternate Combat Values are auto created property. [#93](https://github.com/dmdorman/hero6e-foundryvtt/issues/93)
 - Attacks will use selected targets, show hit/miss, and hit targets will follow thru to damage cards. [#79](https://github.com/dmdorman/hero6e-foundryvtt/issues/79) [#92](https://github.com/dmdorman/hero6e-foundryvtt/issues/92)
+- Improved 5e calculated and figured characteristics [#3345](https://github.com/dmdorman/hero6e-foundryvtt/issues/3345) [#708](https://github.com/dmdorman/hero6e-foundryvtt/issues/708)
 
 ## Version 2.1.5-alpha
 

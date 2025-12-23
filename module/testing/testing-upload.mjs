@@ -8703,25 +8703,25 @@ export function registerUploadTests(quench) {
 
                         it("does increase STR", function () {
                             assert.equal(
-                                actor.system.characteristics.str.core + 25,
+                                actor.system.characteristics.str.base + 25,
                                 actor.system.characteristics.str.max,
                             );
                             assert.equal(
-                                actor.system.characteristics.str.core + 25,
+                                actor.system.characteristics.str.base + 25,
                                 actor.system.characteristics.str.value,
                             );
                         });
 
                         it("does increase ED and PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core + 5, actor.system.characteristics.pd.max);
-                            assert.equal(actor.system.characteristics.ed.core + 5, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.pd.base + 5, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.ed.base + 5, actor.system.characteristics.ed.max);
 
                             assert.equal(
-                                actor.system.characteristics.pd.core + 5,
+                                actor.system.characteristics.pd.base + 5,
                                 actor.system.characteristics.pd.value,
                             );
                             assert.equal(
-                                actor.system.characteristics.ed.core + 5,
+                                actor.system.characteristics.ed.base + 5,
                                 actor.system.characteristics.ed.value,
                             );
                         });
@@ -8775,8 +8775,8 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does not increase STR", function () {
-                            assert.equal(actor.system.characteristics.str.core, actor.system.characteristics.str.max);
-                            assert.equal(actor.system.characteristics.str.core, actor.system.characteristics.str.value);
+                            assert.equal(actor.system.characteristics.str.base, actor.system.characteristics.str.max);
+                            assert.equal(actor.system.characteristics.str.base, actor.system.characteristics.str.value);
                         });
                     });
 
@@ -8828,14 +8828,14 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does not increase PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.max);
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.value);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.value);
                         });
 
                         it("does increase ED", function () {
-                            assert.equal(actor.system.characteristics.ed.core + 5, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.ed.base + 5, actor.system.characteristics.ed.max);
                             assert.equal(
-                                actor.system.characteristics.ed.core + 5,
+                                actor.system.characteristics.ed.base + 5,
                                 actor.system.characteristics.ed.value,
                             );
                         });
@@ -8889,16 +8889,16 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does increase PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core + 5, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.pd.base + 5, actor.system.characteristics.pd.max);
                             assert.equal(
-                                actor.system.characteristics.pd.core + 5,
+                                actor.system.characteristics.pd.base + 5,
                                 actor.system.characteristics.pd.value,
                             );
                         });
 
                         it("does not increase ED", function () {
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.max);
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.value);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.value);
                         });
                     });
 
@@ -8950,13 +8950,13 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does not increase PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.max);
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.value);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.value);
                         });
 
                         it("does not increase ED", function () {
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.max);
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.value);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.value);
                         });
                     });
                 });
@@ -9008,25 +9008,25 @@ export function registerUploadTests(quench) {
 
                         it("does increase STR", function () {
                             assert.equal(
-                                actor.system.characteristics.str.core + 25,
+                                actor.system.characteristics.str.base + 25,
                                 actor.system.characteristics.str.max,
                             );
                             assert.equal(
-                                actor.system.characteristics.str.core + 25,
+                                actor.system.characteristics.str.base + 25,
                                 actor.system.characteristics.str.value,
                             );
                         });
 
                         it("does increase ED and PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core + 5, actor.system.characteristics.pd.max);
-                            assert.equal(actor.system.characteristics.ed.core + 5, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.pd.base + 5, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.ed.base + 5, actor.system.characteristics.ed.max);
 
                             assert.equal(
-                                actor.system.characteristics.pd.core + 5,
+                                actor.system.characteristics.pd.base + 5,
                                 actor.system.characteristics.pd.value,
                             );
                             assert.equal(
-                                actor.system.characteristics.ed.core + 5,
+                                actor.system.characteristics.ed.base + 5,
                                 actor.system.characteristics.ed.value,
                             );
                         });
@@ -9080,8 +9080,8 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does not increase STR", function () {
-                            assert.equal(actor.system.characteristics.str.core, actor.system.characteristics.str.max);
-                            assert.equal(actor.system.characteristics.str.core, actor.system.characteristics.str.value);
+                            assert.equal(actor.system.characteristics.str.base, actor.system.characteristics.str.max);
+                            assert.equal(actor.system.characteristics.str.base, actor.system.characteristics.str.value);
                         });
                     });
 
@@ -9133,14 +9133,14 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does not increase PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.max);
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.value);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.value);
                         });
 
                         it("does increase ED", function () {
-                            assert.equal(actor.system.characteristics.ed.core + 5, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.ed.base + 5, actor.system.characteristics.ed.max);
                             assert.equal(
-                                actor.system.characteristics.ed.core + 5,
+                                actor.system.characteristics.ed.base + 5,
                                 actor.system.characteristics.ed.value,
                             );
                         });
@@ -9194,16 +9194,16 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does increase PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core + 5, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.pd.base + 5, actor.system.characteristics.pd.max);
                             assert.equal(
-                                actor.system.characteristics.pd.core + 5,
+                                actor.system.characteristics.pd.base + 5,
                                 actor.system.characteristics.pd.value,
                             );
                         });
 
                         it("does not increase ED", function () {
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.max);
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.value);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.value);
                         });
                     });
 
@@ -9255,13 +9255,13 @@ export function registerUploadTests(quench) {
                         });
 
                         it("does not increase PD", function () {
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.max);
-                            assert.equal(actor.system.characteristics.pd.core, actor.system.characteristics.pd.value);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.max);
+                            assert.equal(actor.system.characteristics.pd.base, actor.system.characteristics.pd.value);
                         });
 
                         it("does not increase ED", function () {
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.max);
-                            assert.equal(actor.system.characteristics.ed.core, actor.system.characteristics.ed.value);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.max);
+                            assert.equal(actor.system.characteristics.ed.base, actor.system.characteristics.ed.value);
                         });
                     });
                 });

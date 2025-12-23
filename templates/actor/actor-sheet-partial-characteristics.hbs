@@ -3,7 +3,7 @@
         <tr>
             <th class="sticky" title="{{localize 'ActorSheet.ValueTitle'}}">{{localize "ActorSheet.Value"}}</th>
             <th class="sticky" title="{{localize 'ActorSheet.MaxTitle'}}">{{localize "ActorSheet.Max"}}</th>
-            <th class="sticky" title="{{localize 'ActorSheet.CoreTitle'}}">{{localize "ActorSheet.Core"}}</th>
+            <th class="sticky" title="{{localize 'ActorSheet.BaseTitle'}}">{{localize "ActorSheet.Base"}}</th>
             <th class="sticky" title="{{localize 'ActorSheet.LevelsTitle'}}">{{localize "ActorSheet.Levels"}}</th>
             <th class="sticky" title="{{localize 'ActorSheet.CharTitle'}}">{{localize "ActorSheet.Char"}}</th>
             <th class="sticky" title="{{localize 'ActorSheet.BaseTitle'}}">{{localize "ActorSheet.Base"}}</th>
@@ -27,21 +27,21 @@
                 <td data-tooltip="{{{characteristic.maxTitle}}}"
                     class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
                     <input name="system.characteristics.{{characteristic.key}}.max" type="number"
-                        class="{{#if (gt characteristic.max characteristic.core)}}over-max{{/if}}{{#if (lt characteristic.max characteristic.coreInt)}}under-max{{/if}}"
+                        class="{{#if (gt characteristic.max characteristic.basePlusLevels)}}over-max{{/if}}{{#if (lt characteristic.max characteristic.baseInt)}}under-max{{/if}}"
                         value="{{characteristic.max}}" data-dtype="Number" {{#if
                         characteristic.maxTitle}}disabled{{/if}}>
                 </td>
 
-                {{!-- core --}}
+                {{!-- base --}}
                 <td>
-                    {{#unless (eq characteristic.core null)}}
-                        {{characteristic.core}}
+                    {{#unless (eq characteristic.base null)}}
+                        {{characteristic.base}}
                     {{/unless}}
                 </td>
 
                 {{!-- levels --}}
                 <td>
-                    {{#unless (eq characteristic.core null)}}
+                    {{#unless (eq characteristic.base null)}}
                     <input name="system.{{characteristic.KEY}}.LEVELS" type="number"
                         value="{{characteristic.levels}}" data-dtype="Number" 
                         {{#if (and (eq @root/system.is5e true) (includes characteristic.baseInfo.behaviors "calculated"))}}disabled{{/if}}>
@@ -69,10 +69,10 @@
                     {{/if}}
                 </td>
 
-                <td class="{{#if (and characteristic.characteristicMax (gt characteristic.core characteristic.characteristicMax) )}}characteristic-max{{/if}}" 
-                    {{#if (and characteristic.characteristicMax (gt characteristic.core characteristic.characteristicMax) )}}title="{{characteristic.core}} exceeds Characteristic Maximum of {{characteristic.characteristicMax}}. Costs double for excess."{{/if}}
+                <td class="{{#if (and characteristic.characteristicMax (gt characteristic.basePlusLevels characteristic.characteristicMax) )}}characteristic-max{{/if}}" 
+                    {{#if (and characteristic.characteristicMax (gt characteristic.basePlusLevels characteristic.characteristicMax) )}}title="{{characteristic.basePlusLevels}} exceeds Characteristic Maximum of {{characteristic.characteristicMax}}. Costs double for excess."{{/if}}
                     {{#if characteristic.costTitle}}title="{{characteristic.costTitle}}" {{/if}}>
-                    {{#unless (eq characteristic.core null)}}
+                    {{#unless (eq characteristic.base null)}}
                     {{characteristic.realCost}}
                     {{/unless}}
                 </td>

@@ -999,8 +999,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey = "value") {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex[subKey] / 3));
+            calculated5eCharacteristic: function (actor) {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex.value / 3));
             },
             xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OCV>`,
         },
@@ -1029,8 +1029,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey = "value") {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex[subKey] / 3));
+            calculated5eCharacteristic: function (actor) {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex.value / 3));
             },
             xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DCV>`,
         },
@@ -1059,8 +1059,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey = "value") {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego[subKey] / 3));
+            calculated5eCharacteristic: function (actor) {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego.value / 3));
             },
             xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OMCV>`,
         },
@@ -1089,8 +1089,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            calculated5eCharacteristic: function (actor, subKey = "value") {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego[subKey] / 3));
+            calculated5eCharacteristic: function (actor) {
+                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego.value / 3));
             },
 
             xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DMCV>`,
@@ -1116,11 +1116,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 const levels = spdCharacteristicOrItem.levels ?? spdCharacteristicOrItem.system.LEVELS;
-                const core =
-                    spdCharacteristicOrItem.core ?? spdCharacteristicOrItem.actor.system.characteristics.spd.core;
+                const base =
+                    spdCharacteristicOrItem.base ?? spdCharacteristicOrItem.actor.system.characteristics.spd.base;
 
                 // 5e gets partial refund
-                const refund = levels > 0 ? +(core % 1).toFixed(1) * 10 : 0;
+                const refund = levels > 0 ? +(base % 1).toFixed(1) * 10 : 0;
 
                 return levels * this.costPerLevel() - refund;
             },
@@ -1138,8 +1138,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            figured5eCharacteristic: function (actor, subKey) {
-                return 1 + Number((actor.system.characteristics.dex[subKey] / 10).toFixed(1));
+            figured5eCharacteristic: function (actor) {
+                return (
+                    1 +
+                    Number((actor.system.characteristics.dex.basePlusLevels / 10).toFixed(1)) +
+                    Number(actor.system.characteristics.dex.baseSumFiguredCharacteristicsFromItems(10).toFixed(1))
+                );
             },
 
             xml: `<SPD XMLID="SPD" ID="1712377280539" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></SPD>`,
@@ -1181,8 +1185,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            figured5eCharacteristic: function (actor, subKey) {
-                return RoundFavorPlayerUp(actor.system.characteristics.str[subKey] / 5);
+            figured5eCharacteristic: function (actor) {
+                return (
+                    RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
+                    actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(5)
+                );
             },
             xml: `<PD XMLID="PD" ID="1712377277205" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></PD>`,
         },
@@ -1223,8 +1230,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            figured5eCharacteristic: function (actor, subKey) {
-                return RoundFavorPlayerUp(actor.system.characteristics.con[subKey] / 5);
+            figured5eCharacteristic: function (actor) {
+                return (
+                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
+                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
+                );
             },
             xml: `<ED XMLID="ED" ID="1712377278856" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></ED>`,
         },
@@ -1252,10 +1262,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            figured5eCharacteristic: function (actor, subKey) {
+            figured5eCharacteristic: function (actor) {
                 return (
-                    RoundFavorPlayerUp(actor.system.characteristics.str[subKey] / 5) +
-                    RoundFavorPlayerUp(actor.system.characteristics.con[subKey] / 5)
+                    RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
+                    actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(5) +
+                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
+                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
             xml: `<REC XMLID="REC" ID="1712377282168" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></REC>`,
@@ -1285,8 +1297,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            figured5eCharacteristic: function (actor, subKey) {
-                return actor.system.characteristics.con[subKey] * 2;
+            figured5eCharacteristic: function (actor) {
+                return (
+                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
+                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
+                );
             },
             xml: `<END XMLID="END" ID="1712377283848" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></END>`,
         },
@@ -1322,7 +1337,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 20,
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["characteristic"],
-            behaviors: ["figured"],
+            behaviors: ["figured", "figuredSTR", "figuredCON"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1355,11 +1370,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
-            figured5eCharacteristic: function (actor, subKey) {
+            figured5eCharacteristic: function (actor) {
                 return (
-                    actor.system.characteristics.body[subKey] +
-                    RoundFavorPlayerUp(actor.system.characteristics.str[subKey] / 2) +
-                    RoundFavorPlayerUp(actor.system.characteristics.con[subKey] / 2)
+                    actor.system.characteristics.body.base +
+                    RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 2) +
+                    actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(2) +
+                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 2) +
+                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(2)
                 );
             },
             xml: `<STUN XMLID="STUN" ID="1712377285547" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></STUN>`,
@@ -2746,10 +2763,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     char.actor.is5e,
                 )} forward, ${Math.max(0, Math.round(char.value / 2))}${getSystemDisplayUnits(char.actor.is5e)} upward`;
             },
-            figured5eCharacteristic: function (actor, subKey) {
+            figured5eCharacteristic: function (actor) {
                 // STR/2.5 = free meters of leaping
                 // Div by 2 again to get inches to match HD
-                return Math.floor(actor.system.characteristics.str[subKey] / 2.5 / 2);
+                // LEAPING is technically not a figured characteristic, behaves a bit more like a calculated but with LEVELS
+                // You can end up with .5 remainders for a half inch
+                return Math.floor(actor.system.characteristics.str.value / 2.5) / 2;
             },
             img: "icons/svg/jump.svg",
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></LEAPING>`,
@@ -5939,12 +5958,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 switch (options.attackDefenseVs) {
                     case "PD":
                         value = parseInt(actorItemDefense.system.PDLEVELS) || 0;
-                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.pd.core) || 0;
+                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.pd.base) || 0;
                         break;
 
                     case "ED":
                         value = parseInt(actorItemDefense.system.EDLEVELS) || 0;
-                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.ed.core) || 0;
+                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.ed.base) || 0;
                         break;
 
                     case "MD":
