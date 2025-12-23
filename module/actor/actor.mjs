@@ -2416,6 +2416,20 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
+            // If a skill was previously marked as EVERYMAN, but now isn't we
+            // need to remove the EVERYMAN value as for some reason HDC doesn't
+            // specifically include EVERYMAN="No".  Seems like a HD bug.
+            for (const item of itemsToUpdate.filter((item) => !item.system.EVERYMAN)) {
+                const itemExisting = this.items.find((o) => o.id === item._id);
+                if (itemExisting.system.EVERYMAN) {
+                    // HDC didn't reference EVERYMAN
+                    // so we will specify it as null (false)
+                    // so the update below will set the expected value
+                    console.warn(`Adding EVERYMAN to ${item.name} skill`);
+                    item.system.EVERYMAN = null;
+                }
+            }
+
             // update existing document, overwriting any MODIFIERS, etc
             await this.updateEmbeddedDocuments("Item", itemsToUpdate);
 
