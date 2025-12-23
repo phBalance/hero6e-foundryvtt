@@ -248,6 +248,7 @@ async function migrateTo4_2_0(actor) {
 async function migrateTo4_2_5(actor) {
     try {
         await replaceFreeStuffWithProperEdition(actor);
+        await migrateCharges(actor);
     } catch (e) {
         console.error(e);
     }
@@ -264,6 +265,24 @@ async function replaceFreeStuffWithProperEdition(actor) {
     if (mismatchItem) {
         // Add perception and maneuvers (also removes all mismatched free items)
         await actor.addFreeStuff();
+    }
+}
+
+async function migrateCharges(actor) {
+    // Check for any items with charges
+    // Note that item.migrateData is used to gain access to the older data model object
+    const items = actor.items.filter((item) => item.system._charges);
+
+    for (const item of items) {
+        // Force update via diff:false.
+        // The item.migrateData makes it look like no updates are needed.
+        await item.update(
+            {
+                [`system._charges`]: item.system._charges,
+                [`system._clips`]: item.system._clips,
+            },
+            { diff: false },
+        );
     }
 }
 

@@ -5896,13 +5896,18 @@ export class HeroSystem6eItem extends Item {
         return combatSkillLevelsForAttack(this);
     }
 
-    // static migrateDataSafe(source) {
-    //     if (["misc", "attack", "movement"].includes(source.type)) {
-    //         console.warn(`${source.name} type changed from "${source.type}" to "power"`, source);
-    //         source.type = "power";
-    //     }
-    //     return super.migrateData(source);
-    // }
+    static migrateData(source) {
+        // We used to store charge data as a object.
+        // This has changed and we would like to salvage the current charges & clips.
+        // A migration script re-writes this data and we should eventually be
+        // able to remove this (Dec 23 2025 / migrateTo4_2_5)
+        if (source.system?.charges?.max && !source.system._charges) {
+            console.warn(`${source.name} has depricated charges object`);
+            source.system._charges ??= source.system.charges.value;
+            source.system._clips ??= source.system.charges.clips;
+        }
+        return super.migrateData(source);
+    }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
