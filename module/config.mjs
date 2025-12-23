@@ -707,8 +707,16 @@ function pdEdCostPerLevel(itemOrActor) {
             power.system.XMLID === "AUTOMATON" &&
             (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
     );
+    if (isAutomatonWithNoStun) {
+        return 3;
+    }
 
-    return isAutomatonWithNoStun ? 3 : 1;
+    // Vehicles in 6e have PD and ED that is resistant. Consequently the cost is different.
+    if (actor.type === "vehicle") {
+        return 3 / 2;
+    }
+
+    return 1;
 }
 
 /**
