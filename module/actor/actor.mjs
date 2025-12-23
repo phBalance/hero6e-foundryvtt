@@ -499,6 +499,9 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Mark as defeated in combat tracker (automaton)
+        // PH: FIXME: This is not correct for 5e (for instance could buy "cannot bleed" AUTOMATON power) _unless_ they have
+        //            the STUN1 or STUN2 OPTIONID for the AUTOMATON power.
+        //            6e seems to follow the same rules.
         if (data.system?.characteristics?.body?.value <= 0) {
             const AUTOMATON = this.items.find((o) => o.system.XMLID === "AUTOMATON");
             if (AUTOMATON) {
@@ -1237,12 +1240,16 @@ export class HeroSystem6eActor extends Actor {
             };
             sizeActiveEffect.changes = [];
 
-            // TODO: This is a DCV penalty to the base/vehicle in 5e and an OCV bonus to the attacker in 6e
+            // FIXME: This is a DCV penalty to the base/vehicle in 5e and an OCV bonus to the attacker in 6e. Because it's
+            // an OCV bonus to the attacker this isn't quite right but we always add it last so that it's not halved if
+            // the defenders DCV is halved. Note that we are not affecting the attacker OCV which could be halved: this is not perfect.
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.dcv.value",
                 value: _sizeDetails.dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                priority: this.is5e
+                    ? CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD
+                    : CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE, // 6e don't allow this to be halved - see note above
             });
 
             sizeActiveEffect.changes.push({
@@ -1575,18 +1582,11 @@ export class HeroSystem6eActor extends Actor {
         // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
         const characteristicChangesMax = {};
-        for (const charKey of Object.keys(this.system.characteristics)) {
+        for (const charKey of getCharacteristicInfoArrayForActor(this).map((infoArray) =>
+            infoArray.key.toLowerCase(),
+        )) {
             const characteristic = this.system.characteristics[charKey];
-            // const calculated5e =
-            //     this.is5e && characteristic.baseInfo.calculated5eCharacteristic
-            //         ? characteristic.baseInfo.calculated5eCharacteristic(this, "max")
-            //         : null;
-            // const figured5e =
-            //     this.is5e && characteristic.baseInfo.figured5eCharacteristic
-            //         ? characteristic.baseInfo.figured5eCharacteristic(this, "max")
-            //         : null;
             const basePlusLevels = parseInt(characteristic.basePlusLevels);
-            //const newMax = calculated5e ?? figured5e ?? core;
             if (this.system.characteristics[charKey].max !== basePlusLevels) {
                 characteristicChangesMax[`system.characteristics.${charKey}.max`] = basePlusLevels;
             }

@@ -2743,24 +2743,24 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
     // all: "PCs and NPCs (end, stun, body)"
     if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
-        let changes = {
+        const changes = {
             "system.characteristics.body.value": token.actor.system.characteristics.body.value - damageDetail.body,
         };
 
         // See if token has STUN.  Notice we check raw actor type from config, not current actor props as
         // this token may have originally been a PC, and changed to a BASE.
         const hasSTUN = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === "STUN");
-
         if (hasSTUN) {
             changes["system.characteristics.stun.value"] =
                 token.actor.system.characteristics.stun?.value - damageDetail.stun;
         }
+
         await token.actor.update(changes);
     }
 
     const damageChatMessage = ChatMessage.create(chatData);
 
-    // Absorption happens after damage is taken unless the GM allows it. This system doesn't allow that.
+    // Absorption happens after damage is taken unless the GM allows it. This system doesn't allow GM choice.
     const absorptionItems = token.actor.items.filter((item) => item.system.XMLID === "ABSORPTION");
     if (absorptionItems) {
         await _performAbsorptionForToken(token, absorptionItems, damageDetail, item);

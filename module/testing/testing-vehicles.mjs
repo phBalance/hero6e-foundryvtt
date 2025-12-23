@@ -34,7 +34,7 @@ export function registerVehicleTests(quench) {
                             <SIZE XMLID="SIZE" ID="1764554705399" BASECOST="0.0" LEVELS="8" ALIAS="Size" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                               <NOTES />
                             </SIZE>
-                            <STR XMLID="STR" ID="1764554705302" BASECOST="0.0" LEVELS="-50" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <STR XMLID="STR" ID="1764554705302" BASECOST="0.0" LEVELS="5" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                               <NOTES />
                             </STR>
                             <DEX XMLID="DEX" ID="1764554705479" BASECOST="0.0" LEVELS="-10" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
@@ -104,11 +104,11 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the correct STR characteristic value", function () {
-                        expect(actor.system.characteristics.str.value).to.equal(0);
+                        expect(actor.system.characteristics.str.value).to.equal(55);
                     });
 
                     it("should have the correct STR cost", function () {
-                        expect(actor.system.characteristics.str.realCost).to.equal(-50);
+                        expect(actor.system.characteristics.str.realCost).to.equal(5);
                     });
 
                     it("should have the DEX characteristic", function () {
@@ -164,7 +164,9 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the correct DCV characteristic value", function () {
-                        expect(actor.system.characteristics.dcv.value).to.equal(7);
+                        // NOTE: Different from HD because we make size a DCV penalty to the big vehicle
+                        //       rather than an OCV bonus to the attacker.
+                        expect(actor.system.characteristics.dcv.value).to.equal(2);
                     });
 
                     it("should have the correct DCV cost", function () {
@@ -192,7 +194,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the correct ED cost", function () {
-                        expect(actor.system.characteristics.size.realCost).to.equal(3);
+                        expect(actor.system.characteristics.ed.realCost).to.equal(3);
                     });
 
                     it("should NOT have the STUN characteristic", function () {
