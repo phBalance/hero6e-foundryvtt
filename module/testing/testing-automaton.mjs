@@ -9,7 +9,7 @@ export function registerAutomatonTests(quench) {
             const { before, describe, expect, it } = context;
 
             describe("Automaton Characteristics", function () {
-                // The default timeout tends to die with multiple actors being created at the same time.
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
                 this.timeout(20000);
 
                 describe("5e - Cannot Be Stunned", async function () {

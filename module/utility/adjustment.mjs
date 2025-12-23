@@ -64,7 +64,7 @@ export function adjustmentSourcesStrict({ actor }) {
     const powers = powerList.filter(
         (power) =>
             (power.type.includes("characteristic") || power.type.includes("movement")) &&
-            !power.ignoreForActor?.includes(actor),
+            !power.ignoreForActor?.(actor),
     );
 
     // Attack powers
