@@ -450,7 +450,7 @@ export async function performAdjustment(
     // characteristics and always exist as properties, we need to check that they actually
     // have been bought or naturally exist (core > 0).
     const targetCharacteristic =
-        targetActor.system.characteristics?.[potentialCharacteristic]?.core > 0
+        targetActor.system.characteristics?.[potentialCharacteristic]?.base > 0
             ? targetActor.system.characteristics?.[potentialCharacteristic]
             : undefined;
 
@@ -502,13 +502,6 @@ export async function performAdjustment(
             );
         }
     }
-
-    // const targetValuePath =
-    //     targetCharacteristic != null ? `system.characteristics.${potentialCharacteristic}.value` : `system.value`;
-
-    // const targetStartingValue = targetCharacteristic != null ? targetCharacteristic.value : targetPower.system.value;
-    // const targetStartingMax = targetCharacteristic != null ? targetCharacteristic.max : targetPower.system.max;
-    //const targetStartingCore = targetCharacteristic != null ? targetCharacteristic.core : targetPower.system.core;
 
     existingEffect =
         existingEffect ||

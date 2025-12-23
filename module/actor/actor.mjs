@@ -93,11 +93,10 @@ export class HeroSystem6eActor extends Actor {
 
             // Characteristic defaults
             for (const charBaseInfo of getCharacteristicInfoArrayForActor(this)) {
-                // Using core to account for 5e calculated/figured characteristics
-                const core = this.system.characteristics[charBaseInfo.key.toLowerCase()]?.core || 0;
+                const base = this.system.characteristics[charBaseInfo.key.toLowerCase()]?.base || 0;
                 this.updateSource({
-                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: core,
-                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: core,
+                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: base,
+                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: base,
                 });
             }
 
@@ -450,7 +449,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async _onUpdate(data, options, userId) {
-        super._onUpdate(data, options, userId);
+        await super._onUpdate(data, options, userId);
 
         // Only owners have permission to perform updates
         if (!this.isOwner) {
@@ -563,23 +562,43 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // 5e calculated characteristics
-        // if (this.is5e && data.system?.characteristics?.dex?.value) {
-        //     await this.update({
-        //         "system.characteristics.ocv.max": this.characteristics.ocv.core,
-        //         "system.characteristics.ocv.value": this.characteristics.ocv.core,
-        //         "system.characteristics.dcv.max": this.characteristics.dcv.core,
-        //         "system.characteristics.dcv.value": this.characteristics.dcv.core,
-        //     });
-        // }
-        // if (this.is5e && data.system?.characteristics?.ego?.value) {
-        //     await this.update({
-        //         "system.characteristics.omcv.max": this.characteristics.omcv.core,
-        //         "system.characteristics.omcv.value": this.characteristics.omcv.core,
-        //         "system.characteristics.dmcv.max": this.characteristics.dmcv.core,
-        //         "system.characteristics.dmcv.value": this.characteristics.dmcv.core,
-        //     });
-        // }
+        // If LEVELS were change, update MAX and VALUE
+        // TODO: This can mess up adjustment powers as they fade
+        if (JSON.stringify(data?.system)?.includes(`"LEVELS":`)) {
+            const charKey = Object.keys(data.system)[0].toLowerCase();
+            const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
+            await this.update({
+                [`system.characteristics.${charKey}.max`]: basePlusLevels,
+            });
+            await this.update({
+                [`system.characteristics.${charKey}.value`]: this.system.characteristics[charKey].max,
+            });
+
+            // Check for any figuredCharacteristic dependencies.
+            const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
+            const changes = {};
+            for (const char of _getCharacteristicInfoArrayForActor.filter((o) =>
+                o.behaviors.includes(`figured${charKey.toUpperCase()}`),
+            )) {
+                const key = char.key.toLocaleLowerCase();
+
+                if (char.figured5eCharacteristic) {
+                    const newValue = char.figured5eCharacteristic(this);
+                    // Intentionally making 2 update calls to allow for AEs to kick in for value
+                    // TODO: May break adjustment powers
+                    await this.update({ [`system.characteristics.${key}.max`]: newValue });
+                    await this.update({
+                        [`system.characteristics.${key}.value`]: Math.min(
+                            newValue,
+                            this.system.characteristics[key].max,
+                        ),
+                    });
+                }
+            }
+            if (Object.keys(changes).length > 0) {
+                await this.update(changes);
+            }
+        }
 
         // 5e figured & calculated characteristics
         if (this.is5e && data.system?.characteristics) {
@@ -602,17 +621,6 @@ export class HeroSystem6eActor extends Actor {
                             changes[`system.characteristics.${key}.max`] = newValue;
                             changes[`system.characteristics.${key}.value`] = newValue;
                         }
-                        //const core = this.system.characteristics[key].coreInt;
-
-                        // await this.update({
-                        //     [`system.characteristics.${key}.max`]: core,
-                        // });
-
-                        // this.applyActiveEffects();
-
-                        // await this.update({
-                        //     [`system.characteristics.${key}.value`]: this.system.characteristics[key].max,
-                        // });
                     }
                 }
             }
@@ -1577,10 +1585,10 @@ export class HeroSystem6eActor extends Actor {
             //     this.is5e && characteristic.baseInfo.figured5eCharacteristic
             //         ? characteristic.baseInfo.figured5eCharacteristic(this, "max")
             //         : null;
-            const core = parseInt(characteristic.core);
+            const basePlusLevels = parseInt(characteristic.basePlusLevels);
             //const newMax = calculated5e ?? figured5e ?? core;
-            if (this.system.characteristics[charKey].max !== core) {
-                characteristicChangesMax[`system.characteristics.${charKey}.max`] = core;
+            if (this.system.characteristics[charKey].max !== basePlusLevels) {
+                characteristicChangesMax[`system.characteristics.${charKey}.max`] = basePlusLevels;
             }
         }
         if (this._id && Object.keys(characteristicChangesMax).length > 0) {
@@ -1637,14 +1645,6 @@ export class HeroSystem6eActor extends Actor {
         // end = Date.now();
         // if (end - start > tDelta) {
         //     console.warn("FullHealth performance concern: 5e calculated LEVELS", end - start);
-        // }
-
-        // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
-        // if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
-        //     for (const flight of this.items.filter((i) => i.system.XMLID === "FLIGHT")) {
-        //         flight.system.active = false;
-        //         await flight.toggle();
-        //     }
         // }
 
         // We just cleared encumbrance, check if it applies again
@@ -2695,7 +2695,7 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance._d = new Date().getTime();
 
             // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
-            if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.core === 0) {
+            if (this.system.characteristics?.running?.value === 0 && this.system.characteristics?.running?.base === 0) {
                 for (const flight of this.items.filter((i) => i.system.XMLID === "FLIGHT")) {
                     await flight.toggle();
                 }
@@ -3253,7 +3253,6 @@ export class HeroSystem6eActor extends Actor {
             }
 
             const value = parseInt(this.system[KEY].LEVELS || 0) + parseInt(char.baseInfo.base || 0);
-            changes[`system.characteristics.${key.toLowerCase()}.core`] = value;
             changes[`system.characteristics.${key.toLowerCase()}.max`] = value;
             changes[`system.characteristics.${key.toLowerCase()}.value`] = value;
         }

@@ -909,7 +909,10 @@ export class HeroSystem6eItem extends Item {
         // turn off items that use END, Charges, MP, etc
 
         if (this.type !== "maneuver") {
-            if (this.end > 0 || (this.system.chargeItemModifier && this.parentItem?.system.XMLID !== "MULTIPOWER")) {
+            if (
+                (this.end > 0 && this.system.XMLID !== "STR") ||
+                (this.system.chargeItemModifier && this.parentItem?.system.XMLID !== "MULTIPOWER")
+            ) {
                 if (this.isActivatable()) {
                     if (this.isActive) {
                         // Was calling this.toggle(), but was slow and showed extra chatMessages during upload
