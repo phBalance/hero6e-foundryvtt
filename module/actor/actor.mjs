@@ -1240,12 +1240,16 @@ export class HeroSystem6eActor extends Actor {
             };
             sizeActiveEffect.changes = [];
 
-            // TODO: This is a DCV penalty to the base/vehicle in 5e and an OCV bonus to the attacker in 6e
+            // FIXME: This is a DCV penalty to the base/vehicle in 5e and an OCV bonus to the attacker in 6e. Because it's
+            // an OCV bonus to the attacker this isn't quite right but we always add it last so that it's not halved if
+            // the defenders DCV is halved. Note that we are not affecting the attacker OCV which could be halved: this is not perfect.
             sizeActiveEffect.changes.push({
                 key: "system.characteristics.dcv.value",
                 value: _sizeDetails.dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                priority: this.is5e
+                    ? CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD
+                    : CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE, // 6e don't allow this to be halved - see note above
             });
 
             sizeActiveEffect.changes.push({

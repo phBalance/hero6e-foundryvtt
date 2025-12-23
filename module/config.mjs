@@ -6740,7 +6740,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         key: "system.characteristics.dcv.max",
                         value: -details.dcv,
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                        priority: HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE, // Intentionally not being halved
                     },
                     {
                         key: "system.characteristics.con.max",
