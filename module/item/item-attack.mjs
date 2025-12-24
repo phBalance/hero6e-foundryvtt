@@ -2598,22 +2598,13 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
         // PH: FIXME: Need to handle all the damage types properly. Need to extract a function for that.
 
-        if (ablationType === "BODYONLY") {
-            if (remainingDamage.body > defense) {
-                await ablativeDefenseObj.item.update({
-                    "system.ablative.timesThresholdExceeded":
-                        ablativeDefenseObj.item.system.ablative.timesThresholdExceeded + 1,
-                });
-            }
-        } else if (ablationType === "BODYORSTUN") {
-            if (remainingDamage.body > defense || remainingDamage.stun > defense) {
-                await ablativeDefenseObj.item.update({
-                    "system.ablative.timesThresholdExceeded":
-                        ablativeDefenseObj.item.system.ablative.timesThresholdExceeded + 1,
-                });
-            }
-        } else {
-            console.error(`${ablativeDefenseObj.item.detailedName()}: unknown ablative type ${ablationType}`);
+        if (
+            (ablationType === "BODYONLY" && remainingDamage.body > defense) ||
+            (ablationType === "BODYORSTUN" && (remainingDamage.body > defense || remainingDamage.stun > defense))
+        ) {
+            await ablativeDefenseObj.item.update({
+                "system.ablative": ablativeDefenseObj.item.system.ablative + 1,
+            });
         }
 
         remainingDamage.stun -= defense;
