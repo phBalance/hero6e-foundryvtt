@@ -3637,11 +3637,11 @@ export class HeroSystem6eItem extends Item {
             case "ABLATIVE":
                 {
                     const tresholdRoll =
-                        this.system.ablative.timesThresholdExceeded === 0
+                        this.system.ablative === 0
                             ? "Full Protection"
-                            : this.system.ablative.timesThresholdExceeded > 8
+                            : this.system.ablative > 8
                               ? "No Protection"
-                              : `Partial Protection w/ Activation Roll ${16 - this.system.ablative.timesThresholdExceeded}-`;
+                              : `Partial Protection w/ Activation Roll ${16 - this.system.ablative}-`;
                     result += `, ${modifier.ALIAS} (${tresholdRoll}) ${modifier.OPTION_ALIAS}`;
                 }
 
@@ -6447,7 +6447,7 @@ export async function rollAblativeActivationCheck(item) {
     let cardHtml;
     let rawRolls;
     let succeeded;
-    const thresholdExceeded = item.system.ablative.timesThresholdExceeded;
+    const thresholdExceeded = item.system.ablative;
     if (thresholdExceeded > 0 && thresholdExceeded < 9) {
         const successValue = 16 - thresholdExceeded;
 
