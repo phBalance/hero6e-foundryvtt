@@ -196,7 +196,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     let _ocv = mental ? "omcv" : "ocv";
                     let _dcv = mental ? "dmcv" : "dcv";
                     entry.cslChoices = { [_ocv]: _ocv };
-                    if (csl.item.system.OPTION != "SINGLE") {
+                    if (csl.item.system.OPTIONID !== "SINGLE" && csl.item.system.OPTIONID !== "SINGLESINGLE") {
                         entry.cslChoices[_dcv] = _dcv;
                         entry.cslChoices.dc = "dc";
                     }
