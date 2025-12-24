@@ -15,7 +15,7 @@ import {
     maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
-import { squelch } from "./utility/util.mjs";
+import { squelch, hdcTextNumberToNumeric } from "./utility/util.mjs";
 import { HeroActorCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 import * as heroEncounter from "./utility/encounter/encounter.mjs";
 
@@ -14876,6 +14876,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Cap out at +1 by faking the base cost of the CHARGES modifier BASECOST
                 return chargesBaseCost - (totalCost - Math.min(1, totalCost));
+            },
+            heroValidation: function (modifier) {
+                const validations = [];
+
+                // OPTION_ALIAS > OPTIONID
+                const OPTIONID = hdcTextNumberToNumeric(modifier.OPTIONID);
+                const OPTION_ALIAS = parseInt(modifier.OPTION_ALIAS) || 0;
+                if (OPTION_ALIAS > OPTIONID) {
+                    validations.push({
+                        property: "OPTION_ALIAS",
+                        message: `CHARGES OPTION_ALIAS should be equal to or less than ${OPTIONID}`,
+                        //example: `OPTION_ALIAS should be equal to or less than ${OPTIONID}`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                        modifierID: modifier.ID,
+                    });
+                }
+                return validations;
             },
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,

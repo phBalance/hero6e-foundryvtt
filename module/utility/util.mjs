@@ -529,3 +529,47 @@ export function squelch(id) {
     globalThis[game.system.id].squelch[_id] = Date.now();
     return false;
 }
+
+export function hdcTextNumberToNumeric(textNumber) {
+    switch (textNumber) {
+        case "ONE":
+            return 1;
+        case "TWO":
+            return 2;
+        case "THREE":
+            return 3;
+        case "FOUR":
+            return 4;
+        case "SIX":
+            return 6;
+        case "EIGHT":
+            return 8;
+        case "TWELVE":
+            return 12;
+        case "SIXTEEN":
+            return 16;
+        case "THIRTYTWO":
+            return 32;
+        case "SIXTYFOUR":
+            return 64;
+        case "ONETWENTYFIVE":
+            return 125;
+        case "TWOFIFTY":
+            return 250;
+        case "FIVEHUNDRED":
+            return 500;
+        case "ONETHOUSAND":
+            return 1000;
+        case "TWOTHOUSAND":
+            return 2000;
+        case "FOURTHOUSAND":
+            return 4000;
+        case "EIGHTTHOUSAND":
+            return 8000;
+        case "SIXTEENTHOUSAND":
+            return 16000;
+        default:
+            console.error(`${textNumber} is unhandled`);
+            return 0;
+    }
+}

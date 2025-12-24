@@ -697,6 +697,11 @@ export class HeroSystem6eItem extends Item {
                 if (v) {
                     _heroValidation.push(...v.map((m) => ({ ...m, itemId: this.id })));
                 }
+
+                for (const modifier of this.modifiers.filter((m) => m.baseInfo.heroValidation)) {
+                    const v2 = modifier.baseInfo.heroValidation(modifier);
+                    _heroValidation.push(...v2.map((m) => ({ ...m, itemId: this.id })));
+                }
             }
         }
 
