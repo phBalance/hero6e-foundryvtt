@@ -41,9 +41,6 @@ export function combatSkillLevelsForAttack(item) {
             }
         }
 
-        // Takes 2 CLS for +1 DC
-        detail.dc = Math.floor(detail.dc / 2);
-
         // Add to result summary
         results.details.push(detail);
         for (const key of ["ocv", "dcv", "omcv", "dmcv", "dc"]) {
@@ -524,21 +521,37 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     }
 
     // Combat Skill Levels. These are added is added in without consideration of advantages in 5e but not in 6e.
+    // The interpretation of the rules is that you can accumulate DC levels across different CSLs rather than then having to all be from the
+    // same CSL.
     // PH: TODO: 5E Superheroic: Each 2 CSLs modify the killing attack BODY roll by +1 (cannot exceed the max possible roll). Obviously no +1/2 DC.
     // PH: TODO: 5E Superheroic: Each 2 CSLs modify the normal attack STUN roll by +3 (cannot exceed the max possible roll). Obviously no +1/2 DC.
     // PH: TODO: THE ABOVE 2 NEED NEW HERO ROLLER FUNCTIONALITY.
+    let dcSum = 0;
     for (const cslDetail of combatSkillLevelsForAttack(item).details) {
         if (cslDetail.dc > 0) {
-            // CSLs in 5e ignore advantages (FRed pg 407). In 6e they care about it.
-            const alteredCslDc = item.is5e ? cslDetail.dc * (1 + item._advantagesAffectingDc) : cslDetail.dc;
-            const cslDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredCslDc);
-            const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, cslDiceParts);
-            addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, cslDiceParts);
-            addedDamageBundle.tags.push({
-                value: `+${formula}`,
-                name: cslDetail.item.name,
-                title: `${cslDetail.dc.signedStringHero()}DC -> ${formula}`,
-            });
+            // Takes 2 CLS for +1 DC
+            dcSum += cslDetail.dc;
+            if (dcSum > 1) {
+                const actualDcEffect = Math.floor(dcSum / 2);
+                dcSum -= 2 * actualDcEffect;
+
+                // CSLs in 5e ignore advantages (FRed pg 407). In 6e they care about it.
+                const alteredCslDc = item.is5e ? actualDcEffect * (1 + item._advantagesAffectingDc) : actualDcEffect;
+                const cslDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredCslDc);
+                const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, cslDiceParts);
+                addedDamageBundle.diceParts = addDiceParts(baseAttackItem, addedDamageBundle.diceParts, cslDiceParts);
+                addedDamageBundle.tags.push({
+                    value: `+${formula}`,
+                    name: cslDetail.item.name,
+                    title: `${actualDcEffect.signedStringHero()}DC -> ${formula}`,
+                });
+            } else {
+                addedDamageBundle.tags.push({
+                    value: `+0d6`,
+                    name: cslDetail.item.name,
+                    title: `Insufficient accumulated CSLs w/ DC so far -> +0d6`,
+                });
+            }
         }
     }
 
