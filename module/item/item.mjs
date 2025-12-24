@@ -5818,8 +5818,14 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Custom ADDER (if any defined, then base response solely custom adders)
-        if (this.adders.find((a) => a.targetId)) {
-            if (this.adders.find((a) => a.targetId === attackItem.id)) {
+        // Assumption is custom ADDERS with a targetId prop is CSL
+        const customCslAdders = this.adders.filter((a) => a.XMLID === "ADDER" && a.targetId);
+        if (customCslAdders) {
+            // We need the id of the attack, which could be the effectiveItem
+            // TODO: Can't use this for temporary items (like in some Quench tests?)
+            const lookingForId =
+                attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
+            if (customCslAdders.find((a) => a.targetId === lookingForId)) {
                 return true;
             }
             return false;
