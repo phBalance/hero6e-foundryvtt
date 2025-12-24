@@ -505,11 +505,11 @@ export class ItemAttackFormApplication extends FormApplication {
             })
             .map(([uuid]) => fromUuidSync(uuid))
             .forEach((hthAttack) => {
-                // Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
+                // 5e only: Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
+                // 6e only: PH: FIXME: the HA becomes the base attack item.
                 // PH: FIXME: Need to consider STRMINIMUM
-                // PH: FIXME: Might be nice to have a warning displayed
                 const haBaseCost = hthAttack._basePoints;
-                if (haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+                if (hthAttack.is5e && haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
                     // Endurance advantages and limitations don't apply to strength
                     // Invisible Power Effects does not transfer to STR if on the HTH Attack
                     const ignoreAdvantagesForHthAttack = ["INCREASEDEND", "REDUCEDEND", "INVISIBLE"];
@@ -518,6 +518,14 @@ export class ItemAttackFormApplication extends FormApplication {
                     // PH: FIXME: AoE gets the radius built from the HA not based on the effective item
                     effectiveItem.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
                     strengthItem?.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+                } else if (hthAttack.is5e) {
+                    ui.notifications.warn(
+                        `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
+                    );
+                } else if (!hthAttack.is5e && hthAttack.advantages.length > 0) {
+                    ui.notifications.warn(
+                        `6e Advantaged Hand-to-Hand Attacks not supported. Advantages for ${hthAttack.detailedName()} are not applied.`,
+                    );
                 }
 
                 effectiveItem.system._active.linkedAssociated ??= [];
