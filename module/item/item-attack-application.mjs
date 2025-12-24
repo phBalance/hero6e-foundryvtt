@@ -196,6 +196,16 @@ export class ItemAttackFormApplication extends FormApplication {
                         csl: [],
                     };
 
+                    // Filter physical or mental choices based on the CSL type
+                    // PH: FIXME: Don't we need to do this on updates as well as the attack could have changed type based on weapon?
+                    if (this.data.originalItem.baseInfo.type.includes("mental")) {
+                        delete entry.cslChoices.ocv;
+                        delete entry.cslChoices.dcv;
+                    } else {
+                        delete entry.cslChoices.omcv;
+                        delete entry.cslChoices.dmcv;
+                    }
+
                     // CSL radioBoxes names
                     for (let c = 0; c < parseInt(csl.item.system.LEVELS || 0); c++) {
                         entry.csl.push({
