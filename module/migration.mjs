@@ -207,7 +207,7 @@ export async function migrateWorld() {
         "4.2.5",
         lastMigration,
         getAllActorsInGame(),
-        "Ensure perception & maneuvers are proper edition",
+        "Edition migration, Charges, Overall SKILL LEVELS",
         async (actor) => await migrateTo4_2_5(actor),
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.5`, "background: #1111FF; color: #FFFFFF");
@@ -249,6 +249,7 @@ async function migrateTo4_2_5(actor) {
     try {
         await replaceFreeStuffWithProperEdition(actor);
         await migrateCharges(actor);
+        await refreshSkillLevelsOverall(actor);
     } catch (e) {
         console.error(e);
     }
@@ -283,6 +284,25 @@ async function migrateCharges(actor) {
             },
             { diff: false },
         );
+    }
+}
+
+async function refreshSkillLevelsOverall(actor) {
+    // SKILL_LEVELS (4.2.5) has an OVERALL that acts like a CSL.  Need the csl prop array built.
+
+    const overallSkillLevelItems = actor.items.filter(
+        (item) => item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
+    );
+
+    for (const item of overallSkillLevelItems) {
+        const LEVELS = item.system.LEVELS;
+        if (item.system.csl.length !== LEVELS) {
+            const csl = new Array(LEVELS);
+            for (let idx = 0; idx < csl.length; idx++) {
+                csl[idx] = this.system.csl?.[idx] || Object.keys(this.cslChoices)[0];
+            }
+            await item.update({ [`system.csl`]: csl });
+        }
     }
 }
 

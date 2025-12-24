@@ -229,9 +229,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
 
-        // Roll handlers, click handlers, etc. would go here.
-        html.find(".rollable").click(this._onSheetAction.bind(this));
-
         // Active Effects
         html.find(".effect-create").click(this._onEffectCreate.bind(this));
         html.find(".effect-delete").click(this._onEffectDelete.bind(this));
@@ -438,28 +435,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         }
     }
 
-    /**
-     * Handle mouse click events for character sheet actions
-     * @param {MouseEvent} event    The originating click event
-     * @private
-     */
-    _onSheetAction(event) {
-        event.preventDefault();
-        const button = event.currentTarget;
-        switch (button.dataset.action) {
-            case "hit-roll":
-                return Dialog.confirm({
-                    title: `${game.i18n.localize("DND5E.CurrencyConvert")}`,
-                    content: `<p>${game.i18n.localize("DND5E.CurrencyConvertHint")}</p>`,
-                    yes: () => this.actor.convertCurrency(),
-                });
-            case "rollDeathSave":
-                return this.actor.rollDeathSave({ event });
-            case "rollInitiative":
-                return this.actor.rollInitiative({ createCombatants: true });
-        }
-    }
-
     async _updateObject(event, formData) {
         event.preventDefault();
 
@@ -490,20 +465,24 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         await super._updateObject(event, formData);
 
         // OPTION_ALIAS may need updating
-        let clearAdderAttacks = false; // Clear all attacks and infer new attacks when OPTIONID is changed
-        if (this.item.baseInfo?.editOptions?.choices && expandedData.system.OPTIONID) {
-            const choiceSelected = this.item.baseInfo.editOptions.choices.find(
-                (o) => o.OPTIONID === expandedData.system.OPTIONID,
-            );
-            // only update OPTION and OPTION_ALIAS when OPTION has changed.
-            // This allows for custom OPTION_ALIAS text for things like DEADLYBLOW.
-            if (this.item.system.OPTION != choiceSelected.OPTION) {
-                this.item.system.OPTION = choiceSelected.OPTION;
-                this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
-                this.item.system.BASECOST = choiceSelected.BASECOST || this.item.system.BASECOST;
-                clearAdderAttacks = true;
-            }
-        }
+        // let clearAdderAttacks = false; // Clear all attacks and infer new attacks when OPTIONID is changed
+        // if (this.item.baseInfo?.editOptions?.choices && expandedData.system.OPTIONID) {
+        //     const choiceSelected = this.item.baseInfo.editOptions.choices.find(
+        //         (o) => o.OPTIONID === expandedData.system.OPTIONID,
+        //     );
+        //     if (!choiceSelected) {
+        //         console.error(`Unhandled OPTIONID ${expandedData.system.OPTIONID}`);
+        //     } else {
+        //         // only update OPTION and OPTION_ALIAS when OPTION has changed.
+        //         // This allows for custom OPTION_ALIAS text for things like DEADLYBLOW.
+        //         if (this.item.system.OPTION != choiceSelected.OPTION) {
+        //             this.item.system.OPTION = choiceSelected.OPTION;
+        //             this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
+        //             this.item.system.BASECOST = choiceSelected.BASECOST || this.item.system.BASECOST;
+        //             clearAdderAttacks = true;
+        //         }
+        //     }
+        // }
 
         // ALIAS should match name
         //this.item.system.ALIAS = this.item.name;
@@ -543,8 +522,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
 
         // Turn attack toggles into adders
         if (expandedData.attacks) {
-            this.item.system.ADDER ??= [];
-
             // Loop thru all the attacks that were checkboxes on the sheet
             for (const [attackId, checked] of Object.entries(expandedData.attacks)) {
                 const attackItem = this.actor.items.find((o) => o.id === attackId);
@@ -572,24 +549,29 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     };
 
                     await this.item.update({ [`system.ADDER`]: [...this.item.system.ADDER, newAdder] });
-                }
-
-                // Delete custom adders that matches attack name
-                if (adder && !checked) {
+                } else if (adder && !checked) {
+                    // Delete custom adders that matches attack name
                     //this.item.system.ADDER = this.item.system.ADDER.filter((o) => o.targetId != attackItem.id);
                     await this.item.update({
-                        [`system.ADDER`]: this.item.system.ADDER.filter((o) => o.targetId != attackItem.id),
+                        [`system.ADDER`]: foundry.utils.deepClone(
+                            this.item.system.ADDER.filter((o) => o.targetId !== attackItem.id),
+                        ),
                     });
                 }
             }
         }
 
         // Clear all attacks from ADDERs
-        if (clearAdderAttacks) {
-            this.item.system.ADDER = (this.item.system.ADDER || []).filter(
-                (o) => o.XMLID != "ADDER" || !parseFloat(o.BASECOST) == 0,
-            );
-        }
+        // DEBUG: 5e uses SINGLESINGLE OPTIONID which isn't currently handled properly.
+        // commenting out the clear attacks until we have a better solution.
+        // if (clearAdderAttacks) {
+        //     // this.item.system.ADDER = (this.item.system.ADDER || []).filter(
+        //     //     (o) => o.XMLID != "ADDER" || !parseFloat(o.BASECOST) == 0,
+        //     // );
+        //     await this.item.update({
+        //         [`system.ADDER`]: [],
+        //     });
+        // }
 
         // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
         // Generally rely on HBS to enforce valid combinations.

@@ -843,7 +843,7 @@ export class HeroSystem6eItem extends Item {
             console.error(`We are updating system.active instead of the effect.disabled`);
         }
 
-        super._onUpdate(changed, options, userId);
+        await super._onUpdate(changed, options, userId);
 
         if (!this.isOwner) {
             //console.log(`Skipping _onUpdate because this client is not an owner of ${this.actor.name}:${this.name}`);
@@ -5818,8 +5818,14 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Custom ADDER (if any defined, then base response solely custom adders)
-        if (this.adders.find((a) => a.targetId)) {
-            if (this.adders.find((a) => a.targetId === attackItem.id)) {
+        // Assumption is custom ADDERS with a targetId prop is CSL
+        const customCslAdders = this.adders.filter((a) => a.XMLID === "ADDER" && a.targetId);
+        if (customCslAdders.length > 0) {
+            // We need the id of the attack, which could be the effectiveItem
+            // TODO: Can't use this for temporary items (like in some Quench tests?)
+            const lookingForId =
+                attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
+            if (customCslAdders.find((a) => a.targetId === lookingForId)) {
                 return true;
             }
             return false;
@@ -5829,6 +5835,11 @@ export class HeroSystem6eItem extends Item {
         // Note that we don't bother verifying Mental/Physical, nor ADDER that may associate wth a different attackItem
         if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
             return this.parentItem?.id === attackItem.parentItem?.id;
+        }
+
+        // SKILL_LEVELS (OVERALL the 5e 10pt or 6e 12pt)
+        if (this.system.OPTIONID === "OVERALL") {
+            return true;
         }
 
         // With All Attacks
