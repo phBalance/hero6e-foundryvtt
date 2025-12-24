@@ -465,24 +465,24 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         await super._updateObject(event, formData);
 
         // OPTION_ALIAS may need updating
-        let clearAdderAttacks = false; // Clear all attacks and infer new attacks when OPTIONID is changed
-        if (this.item.baseInfo?.editOptions?.choices && expandedData.system.OPTIONID) {
-            const choiceSelected = this.item.baseInfo.editOptions.choices.find(
-                (o) => o.OPTIONID === expandedData.system.OPTIONID,
-            );
-            if (!choiceSelected) {
-                console.error(`Unhandled OPTIONID ${expandedData.system.OPTIONID}`);
-            } else {
-                // only update OPTION and OPTION_ALIAS when OPTION has changed.
-                // This allows for custom OPTION_ALIAS text for things like DEADLYBLOW.
-                if (this.item.system.OPTION != choiceSelected.OPTION) {
-                    this.item.system.OPTION = choiceSelected.OPTION;
-                    this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
-                    this.item.system.BASECOST = choiceSelected.BASECOST || this.item.system.BASECOST;
-                    clearAdderAttacks = true;
-                }
-            }
-        }
+        // let clearAdderAttacks = false; // Clear all attacks and infer new attacks when OPTIONID is changed
+        // if (this.item.baseInfo?.editOptions?.choices && expandedData.system.OPTIONID) {
+        //     const choiceSelected = this.item.baseInfo.editOptions.choices.find(
+        //         (o) => o.OPTIONID === expandedData.system.OPTIONID,
+        //     );
+        //     if (!choiceSelected) {
+        //         console.error(`Unhandled OPTIONID ${expandedData.system.OPTIONID}`);
+        //     } else {
+        //         // only update OPTION and OPTION_ALIAS when OPTION has changed.
+        //         // This allows for custom OPTION_ALIAS text for things like DEADLYBLOW.
+        //         if (this.item.system.OPTION != choiceSelected.OPTION) {
+        //             this.item.system.OPTION = choiceSelected.OPTION;
+        //             this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
+        //             this.item.system.BASECOST = choiceSelected.BASECOST || this.item.system.BASECOST;
+        //             clearAdderAttacks = true;
+        //         }
+        //     }
+        // }
 
         // ALIAS should match name
         //this.item.system.ALIAS = this.item.name;
