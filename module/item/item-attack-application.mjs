@@ -801,25 +801,6 @@ export class ItemAttackFormApplication extends FormApplication {
         this.render();
     }
 
-    async _updateCsl(event, formData) {
-        const item = this.data.effectiveItem;
-        // Combat Skill Levels (update SKILL if changed)
-        const csls = combatSkillLevelsForAttack(item).details;
-        for (const key of Object.keys(formData).filter((o) => o.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/))) {
-            const value = formData[key];
-            const itemId = key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[1];
-            const idx = parseInt(key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[2]);
-            for (const csl of csls) {
-                if (csl.item.id === itemId && csl.item.system.csl[idx] != value) {
-                    csl.item.system.csl[idx] = value;
-                    await csl.item.update({
-                        "system.csl": csl.item.system.csl,
-                    });
-                }
-            }
-        }
-    }
-
     /**
      *
      * 5e is a hex based system with defined AOE templates. The first hex is the target hex (even though it's only a 0.5" radius).

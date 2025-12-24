@@ -843,7 +843,7 @@ export class HeroSystem6eItem extends Item {
             console.error(`We are updating system.active instead of the effect.disabled`);
         }
 
-        super._onUpdate(changed, options, userId);
+        await super._onUpdate(changed, options, userId);
 
         if (!this.isOwner) {
             //console.log(`Skipping _onUpdate because this client is not an owner of ${this.actor.name}:${this.name}`);
@@ -5820,7 +5820,7 @@ export class HeroSystem6eItem extends Item {
         // Custom ADDER (if any defined, then base response solely custom adders)
         // Assumption is custom ADDERS with a targetId prop is CSL
         const customCslAdders = this.adders.filter((a) => a.XMLID === "ADDER" && a.targetId);
-        if (customCslAdders) {
+        if (customCslAdders.length > 0) {
             // We need the id of the attack, which could be the effectiveItem
             // TODO: Can't use this for temporary items (like in some Quench tests?)
             const lookingForId =
@@ -5837,9 +5837,15 @@ export class HeroSystem6eItem extends Item {
             return this.parentItem?.id === attackItem.parentItem?.id;
         }
 
+        // SKILL_LEVELS (OVERALL the 5e 10pt or 6e 12pt)
+        if (this.system.OPTIONID === "OVERALL") {
+            return true;
+        }
+
         // With All Attacks
         if (
             this.system.OPTIONID === "ALL" ||
+            this.system.OPTIONID === "OVERALL" || // SKILL_LEVELS (OVERALL the 5e 10pt or 6e 12pt)
             (this.system.OPTIONID === "BROAD" && this.system.XMLID === "MENTAL_COMBAT_LEVELS")
         ) {
             // only 6e has MENTAL_COMBAT_LEVELS

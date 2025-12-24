@@ -4117,7 +4117,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SKILL_LEVELS",
             type: ["skill"],
-            behaviors: [],
+            behaviors: ["activatable", "csl"],
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
