@@ -5845,7 +5845,6 @@ export class HeroSystem6eItem extends Item {
         // With All Attacks
         if (
             this.system.OPTIONID === "ALL" ||
-            this.system.OPTIONID === "OVERALL" || // SKILL_LEVELS (OVERALL the 5e 10pt or 6e 12pt)
             (this.system.OPTIONID === "BROAD" && this.system.XMLID === "MENTAL_COMBAT_LEVELS")
         ) {
             // only 6e has MENTAL_COMBAT_LEVELS
