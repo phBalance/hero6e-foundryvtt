@@ -299,7 +299,7 @@ async function refreshSkillLevelsOverall(actor) {
         if (item.system.csl.length !== LEVELS) {
             const csl = new Array(LEVELS);
             for (let idx = 0; idx < csl.length; idx++) {
-                csl[idx] = this.system.csl?.[idx] || Object.keys(this.cslChoices)[0];
+                csl[idx] = item.system.csl?.[idx] || Object.keys(item.cslChoices)[0];
             }
             await item.update({ [`system.csl`]: csl });
         }

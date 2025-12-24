@@ -5794,11 +5794,39 @@ export class HeroSystem6eItem extends Item {
         return this.baseInfo?.behaviors.includes("csl");
     }
 
+    /**
+     * Must only be called on CSLs or SKILL_LEVELS.
+     * NOTE: Probably still wrong for 5e as we're not filtering for mental configurations (e.g. HTH and mental).
+     *
+     * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcv, dmcv, dc)
+     */
     get cslChoices() {
-        if (this.system.XMLID === "MENTAL_COMBAT_LEVELS") {
-            return { omcv: "omcv", dmcv: "dmcv", dc: "dc" };
+        const isSkillLevel = this.system.XMLID === "SKILL_LEVELS";
+        if (isSkillLevel) {
+            if (this.system.OPTIONID === "OVERALL") {
+                return { ocv: "ocv", omcv: "omcv", dcv: "dcv", dmcv: "dmcv", dc: "dc" };
+            } else {
+                return {};
+            }
         }
-        return { ocv: "ocv", dcv: "dcv", dc: "dc" };
+
+        const combatUses = {};
+        const isMental = this.system.XMLID === "MENTAL_COMBAT_LEVELS";
+        const _ocv = isMental ? "omcv" : "ocv";
+        const _dcv = isMental ? "dmcv" : "dcv";
+        combatUses[_ocv] = _ocv;
+
+        // Certain CSLs only have OCV/OMCV as an option.
+        if (
+            this.system.OPTIONID !== "SINGLE" &&
+            this.system.OPTIONID !== "SINGLESINGLE" &&
+            this.system.OPTIONID !== "SINGLESTRIKE"
+        ) {
+            combatUses[_dcv] = _dcv;
+            combatUses.dc = "dc";
+        }
+
+        return combatUses;
     }
 
     get csls() {

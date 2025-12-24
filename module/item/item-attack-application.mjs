@@ -189,20 +189,24 @@ export class ItemAttackFormApplication extends FormApplication {
             const csls = combatSkillLevelsForAttack(this.data.originalItem).details;
             this.data.csls = undefined;
             for (const csl of csls) {
-                let entry = {};
                 if (csl && csl.item) {
-                    entry.cslSkill = csl.item;
-                    let mental = csl.item.system.XMLID === "MENTAL_COMBAT_LEVELS";
-                    let _ocv = mental ? "omcv" : "ocv";
-                    let _dcv = mental ? "dmcv" : "dcv";
-                    entry.cslChoices = { [_ocv]: _ocv };
-                    if (csl.item.system.OPTIONID !== "SINGLE" && csl.item.system.OPTIONID !== "SINGLESINGLE") {
-                        entry.cslChoices[_dcv] = _dcv;
-                        entry.cslChoices.dc = "dc";
+                    const entry = {
+                        cslSkill: csl.item,
+                        cslChoices: csl.item.cslChoices,
+                        csl: [],
+                    };
+
+                    // Filter physical or mental choices based on the CSL type
+                    // PH: FIXME: Don't we need to do this on updates as well as the attack could have changed type based on weapon?
+                    if (this.data.originalItem.baseInfo.type.includes("mental")) {
+                        delete entry.cslChoices.ocv;
+                        delete entry.cslChoices.dcv;
+                    } else {
+                        delete entry.cslChoices.omcv;
+                        delete entry.cslChoices.dmcv;
                     }
 
                     // CSL radioBoxes names
-                    entry.csl = [];
                     for (let c = 0; c < parseInt(csl.item.system.LEVELS || 0); c++) {
                         entry.csl.push({
                             name: `${csl.item.id}.system.csl.${c}`,

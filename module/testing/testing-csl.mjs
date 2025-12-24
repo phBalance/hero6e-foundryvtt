@@ -1,0 +1,549 @@
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+
+export function registerCslTests(quench) {
+    quench.registerBatch(
+        "hero6efoundryvttv2.item.csl",
+        (context) => {
+            const { after, before, describe, expect, it } = context;
+
+            describe("Combat Skill Levels (CSL & SL)", function () {
+                describe("cslChoices function", async function () {
+                    describe("5e", async function () {
+                        const contents = `
+                            <?xml version="1.0" encoding="UTF-16"?>
+                            <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                            <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                            <CHARACTER_INFO CHARACTER_NAME="TEST 5e CSLs" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                                <BACKGROUND />
+                                <PERSONALITY />
+                                <QUOTE />
+                                <TACTICS />
+                                <CAMPAIGN_USE />
+                                <APPEARANCE />
+                                <NOTES1 />
+                                <NOTES2 />
+                                <NOTES3 />
+                                <NOTES4 />
+                                <NOTES5 />
+                            </CHARACTER_INFO>
+                            <CHARACTERISTICS>
+                                <STR XMLID="STR" ID="1766530675632" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </STR>
+                                <DEX XMLID="DEX" ID="1766530675402" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </DEX>
+                                <CON XMLID="CON" ID="1766530675312" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </CON>
+                                <BODY XMLID="BODY" ID="1766530675632" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </BODY>
+                                <INT XMLID="INT" ID="1766530675225" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </INT>
+                                <EGO XMLID="EGO" ID="1766530676081" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </EGO>
+                                <PRE XMLID="PRE" ID="1766530675874" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </PRE>
+                                <COM XMLID="COM" ID="1766530675755" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </COM>
+                                <PD XMLID="PD" ID="1766530675297" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </PD>
+                                <ED XMLID="ED" ID="1766530675389" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </ED>
+                                <SPD XMLID="SPD" ID="1766530675628" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </SPD>
+                                <REC XMLID="REC" ID="1766530675552" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </REC>
+                                <END XMLID="END" ID="1766530676091" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </END>
+                                <STUN XMLID="STUN" ID="1766530675416" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </STUN>
+                                <RUNNING XMLID="RUNNING" ID="1766530675560" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </RUNNING>
+                                <SWIMMING XMLID="SWIMMING" ID="1766530675755" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </SWIMMING>
+                                <LEAPING XMLID="LEAPING" ID="1766530675894" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </LEAPING>
+                            </CHARACTERISTICS>
+                            <SKILLS>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1766531567248" BASECOST="0.0" LEVELS="0" ALIAS="CSLs" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530693138" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLESINGLE" OPTIONID="SINGLESINGLE" OPTION_ALIAS="with any single attack with one specific weapon" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                    <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530697066" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530703345" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLESTRIKE" OPTIONID="SINGLESTRIKE" OPTION_ALIAS="with any single Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530709609" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STRIKE" OPTIONID="STRIKE" OPTION_ALIAS="with any Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530718850" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with any three maneuvers or a tight group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530726521" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MARTIAL" OPTIONID="MARTIAL" OPTION_ALIAS="with Martial Maneuvers" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530733513" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MAGIC" OPTIONID="MAGIC" OPTION_ALIAS="with Magic" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530739690" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with a broadly-defined category of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530745617" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHDCV" OPTIONID="HTHDCV" OPTION_ALIAS="DCV with HTH or Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530753770" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DECV" OPTIONID="DECV" OPTION_ALIAS="DECV versus all Mental Powers and attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530761961" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTH" OPTIONID="HTH" OPTION_ALIAS="with HTH Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530769146" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="with Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530776817" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTAL" OPTIONID="MENTAL" OPTION_ALIAS="with Mental Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530785177" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DCV" OPTIONID="DCV" OPTION_ALIAS="with DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530791249" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOOCV" OPTIONID="TWOOCV" OPTION_ALIAS="OCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530802081" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWODCV" OPTIONID="TWODCV" OPTION_ALIAS="DCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530808010" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHRANGED" OPTIONID="HTHRANGED" OPTION_ALIAS="with HTH and Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530817810" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHMENTAL" OPTIONID="HTHMENTAL" OPTION_ALIAS="with HTH and Mental Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530826562" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTALRANGED" OPTIONID="MENTALRANGED" OPTION_ALIAS="with Mental and Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530832753" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="SKILL_LEVELS" ID="1766530843073" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OVERALL" OPTIONID="OVERALL" OPTION_ALIAS="Overall" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="SKILL_LEVELS" ID="1766596963832" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONCOMBAT" OPTIONID="NONCOMBAT" OPTION_ALIAS="with all non-combat Skills" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                            </SKILLS>
+                            <PERKS />
+                            <TALENTS />
+                            <MARTIALARTS />
+                            <POWERS />
+                            <DISADVANTAGES />
+                            <EQUIPMENT />
+                            </CHARACTER>
+                        `;
+
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        describe("CSLs (Physical and Mental)", function () {
+                            it("should return correct choices for SINGLESINGLE CSL", function () {
+                                const singleSingleCsl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "COMBAT_LEVELS" &&
+                                        item.system.OPTIONID === "SINGLESINGLE",
+                                );
+                                expect(!!singleSingleCsl).to.be.true;
+
+                                // SINGLESINGLE should only have OCV, no DCV or DC
+                                const choices = singleSingleCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for SINGLE CSL", function () {
+                                const singleCsl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "SINGLE",
+                                );
+                                expect(!!singleCsl).to.be.true;
+
+                                // SINGLE should only have OCV, no DCV or DC
+                                const choices = singleCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for SINGLESTRIKE CSL", function () {
+                                const singleCsl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "COMBAT_LEVELS" &&
+                                        item.system.OPTIONID === "SINGLESTRIKE",
+                                );
+                                expect(!!singleCsl).to.be.true;
+
+                                // SINGLE should only have OCV, no DCV or DC
+                                const choices = singleCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for DCV CSL", function () {
+                                const dcvCsl = actor.items.find(
+                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "DCV",
+                                );
+                                expect(!!dcvCsl).to.be.true;
+
+                                // DCV CSL should have OCV, DCV, and DC
+                                const choices = dcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for ALL CSL", function () {
+                                const allCsl = actor.items.find(
+                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "ALL",
+                                );
+                                expect(!!allCsl).to.be.true;
+
+                                // ALL CSL should have OCV, DCV, and DC
+                                const choices = allCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+                        });
+
+                        describe("SLs", function () {
+                            it("should return correct choices for OVERALL Skill Levels", function () {
+                                const overallSl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
+                                );
+                                expect(!!overallSl).to.be.true;
+
+                                const choices = overallSl.cslChoices;
+                                // OVERALL Skill Levels should have all combat values
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for NONCOMBAT Skill Levels", function () {
+                                const NonCombatSl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "NONCOMBAT",
+                                );
+                                expect(!!NonCombatSl).to.be.true;
+
+                                // Only OVERALL Skill Levels should have all combat values
+                                const choices = NonCombatSl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("omcv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+                        });
+                    });
+
+                    describe("6e", async function () {
+                        const contents = `
+                            <?xml version="1.0" encoding="UTF-16"?>
+                            <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
+                            <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                            <CHARACTER_INFO CHARACTER_NAME="TEST 6e CSLs" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                                <BACKGROUND />
+                                <PERSONALITY />
+                                <QUOTE />
+                                <TACTICS />
+                                <CAMPAIGN_USE />
+                                <APPEARANCE />
+                                <NOTES1 />
+                                <NOTES2 />
+                                <NOTES3 />
+                                <NOTES4 />
+                                <NOTES5 />
+                            </CHARACTER_INFO>
+                            <CHARACTERISTICS>
+                                <STR XMLID="STR" ID="1766602873976" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </STR>
+                                <DEX XMLID="DEX" ID="1766602873466" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </DEX>
+                                <CON XMLID="CON" ID="1766602873756" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </CON>
+                                <INT XMLID="INT" ID="1766602873575" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </INT>
+                                <EGO XMLID="EGO" ID="1766602873777" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </EGO>
+                                <PRE XMLID="PRE" ID="1766602873884" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </PRE>
+                                <OCV XMLID="OCV" ID="1766602874109" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </OCV>
+                                <DCV XMLID="DCV" ID="1766602873488" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </DCV>
+                                <OMCV XMLID="OMCV" ID="1766602873355" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </OMCV>
+                                <DMCV XMLID="DMCV" ID="1766602873724" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </DMCV>
+                                <SPD XMLID="SPD" ID="1766602873826" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </SPD>
+                                <PD XMLID="PD" ID="1766602873901" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </PD>
+                                <ED XMLID="ED" ID="1766602873652" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </ED>
+                                <REC XMLID="REC" ID="1766602874131" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </REC>
+                                <END XMLID="END" ID="1766602873516" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </END>
+                                <BODY XMLID="BODY" ID="1766602873927" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </BODY>
+                                <STUN XMLID="STUN" ID="1766602873712" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </STUN>
+                                <RUNNING XMLID="RUNNING" ID="1766602873625" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </RUNNING>
+                                <SWIMMING XMLID="SWIMMING" ID="1766602873315" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </SWIMMING>
+                                <LEAPING XMLID="LEAPING" ID="1766602874001" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </LEAPING>
+                            </CHARACTERISTICS>
+                            <SKILLS>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1766603793329" BASECOST="0.0" LEVELS="0" ALIAS="Physical CSLs" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                    <NOTES />
+                                </LIST>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602895580" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602901059" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with a small group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602907059" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with a large group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602913067" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTH" OPTIONID="HTH" OPTION_ALIAS="with HTH Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602919051" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="with Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602924379" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1766603841563" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1766603844397" BASECOST="0.0" LEVELS="0" ALIAS="Mental CSLs" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1766602956499" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with a single Mental Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603844397" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1766602960891" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with a group of Mental Powers" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603844397" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1766602966531" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with all Mental Powers" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603844397" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1766603883799" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1766603885850" BASECOST="0.0" LEVELS="0" ALIAS="Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <SKILL XMLID="SKILL_LEVELS" ID="1766602988187" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OVERALL" OPTIONID="OVERALL" OPTION_ALIAS="Overall" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603885850" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="SKILL_LEVELS" ID="1766602994556" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLEMOVEMENT" OPTIONID="SINGLEMOVEMENT" OPTION_ALIAS="with one mode of Movement" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603885850" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                                </SKILL>
+                            </SKILLS>
+                            <PERKS />
+                            <TALENTS />
+                            <MARTIALARTS />
+                            <POWERS />
+                            <DISADVANTAGES />
+                            <EQUIPMENT />
+                            </CHARACTER>
+                        `;
+
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        describe("Physical CSL", function () {
+                            it("should return correct choices for Physical SINGLE CSL", function () {
+                                const singleCsl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "SINGLE",
+                                );
+                                expect(!!singleCsl).to.be.true;
+
+                                // Physical SINGLE should only have OCV, no DCV or DC
+                                const choices = singleCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for Physical TIGHT CSL", function () {
+                                const tightCsl = actor.items.find(
+                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "TIGHT",
+                                );
+                                expect(!!tightCsl).to.be.true;
+
+                                // Physical TIGHT should have OCV, DCV, and DC
+                                const choices = tightCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for Physical ALL CSL", function () {
+                                const allCsl = actor.items.find(
+                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "ALL",
+                                );
+                                expect(!!allCsl).to.be.true;
+
+                                // Physical ALL should have OCV, DCV, and DC
+                                const choices = allCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+                        });
+
+                        describe("Mental CSL", function () {
+                            it("should return correct choices for Mental SINGLE CSL", function () {
+                                const mentalSingleCsl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "MENTAL_COMBAT_LEVELS" &&
+                                        item.system.OPTIONID === "SINGLE",
+                                );
+                                expect(!!mentalSingleCsl).to.be.true;
+
+                                // Mental SINGLE should only have OMCV, no DMCV or DC
+                                const choices = mentalSingleCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for Mental BROAD CSL", function () {
+                                const mentalBroadCsl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "MENTAL_COMBAT_LEVELS" &&
+                                        item.system.OPTIONID === "BROAD",
+                                );
+                                expect(!!mentalBroadCsl).to.be.true;
+
+                                // Mental BROAD should have OMCV, DMCV, and DC
+                                const choices = mentalBroadCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+                        });
+
+                        describe("Skill Levels", function () {
+                            it("should return correct choices for OVERALL Skill Levels", function () {
+                                const overallSl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
+                                );
+                                expect(!!overallSl).to.be.true;
+
+                                // OVERALL Skill Levels should have all combat values
+                                const choices = overallSl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return empty choices for non-OVERALL Skill Levels", function () {
+                                const movementSl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "SKILL_LEVELS" &&
+                                        item.system.OPTIONID === "SINGLEMOVEMENT",
+                                );
+                                expect(!!movementSl).to.be.true;
+
+                                // Non-OVERALL Skill Levels should return empty object
+                                const choices = movementSl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                            });
+                        });
+                    });
+                });
+            });
+        },
+        { displayName: "HERO: Combat Skill Levels" },
+    );
+}
