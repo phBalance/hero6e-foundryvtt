@@ -1,5 +1,5 @@
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { getPowerInfo, squelch } from "../utility/util.mjs";
+import { getPowerInfo, squelch, hdcTextNumberToNumeric } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import {
@@ -1104,7 +1104,12 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             //console.error(`${this.name} has no CHARGE modifier`, this);
             return 0;
         }
-        return parseInt(this.item.system.chargeModifier.OPTION_ALIAS) || 0;
+
+        // OPTION_ALIAS is a free form text field.
+        // OPTIONID is a word that we will convert to a number.
+        const OPTIONID = hdcTextNumberToNumeric(this.item.system.chargeModifier.OPTIONID);
+        const OPTION_ALIAS = parseInt(this.item.system.chargeModifier.OPTION_ALIAS) || 0;
+        return Math.min(OPTIONID, OPTION_ALIAS);
     }
 
     get clips() {
