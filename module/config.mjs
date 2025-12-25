@@ -1205,7 +1205,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreForActor: staticIgnoreForActorFunction(["computer", "ai"]),
+            ignoreForActor: staticIgnoreForActorFunction(["ai", "computer"]),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
@@ -1231,6 +1231,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             base: fixedValueFunction(0),
             behaviors: ["defense", "figured", "figuredSTR"],
+            ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
                 return (
                     RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
@@ -1251,7 +1252,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            ignoreForActor: staticIgnoreForActorFunction(["computer", "ai"]),
+            ignoreForActor: staticIgnoreForActorFunction(["ai", "computer"]),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
@@ -1277,6 +1278,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             base: fixedValueFunction(0),
             behaviors: ["defense", "figured", "figuredCON"],
+            ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
                 return (
                     RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
