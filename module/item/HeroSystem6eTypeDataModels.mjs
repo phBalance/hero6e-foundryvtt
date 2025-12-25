@@ -1416,7 +1416,7 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
     }
 
     get description() {
-        return `${this.LEVELS + this.#baseInfo.base} ${this.baseInfo?.name}`;
+        return `${this.LEVELS + this.#baseInfo.base(this.actor)} ${this.baseInfo?.name}`;
     }
 
     // Allows HeroItemCharacteristic to be accessed like an item.
@@ -1457,29 +1457,8 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     }
 
     get core() {
-        console.error("The 'core' characteristic attribut is depricated");
+        console.error("The 'core' characteristic attribute is deprecated");
         return 0;
-        // core is base or calculated
-        // try {
-        //     // Some 5e characteristics are calcuated or figured
-        //     if (this.actor.is5e) {
-        //         if (this.baseInfo?.behaviors.includes("calculated")) {
-        //             if (this.#baseInfo.calculated5eCharacteristic) {
-        //                 return this.#baseInfo.calculated5eCharacteristic(this.actor, "core");
-        //             }
-        //         } else if (this.baseInfo?.behaviors.includes("figured")) {
-        //             return (
-        //                 (this.actor.system[this.KEY].LEVELS || 0) +
-        //                 this.baseInfo.figured5eCharacteristic(this.actor, "core")
-        //             );
-        //         }
-        //     }
-        //     //return parseInt(this.item?.LEVELS || 0) + this.base;
-        //     return this.base;
-        // } catch (e) {
-        //     console.error(e);
-        // }
-        // return 0;
     }
 
     get baseInt() {
@@ -1511,7 +1490,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         // Not every actor will have all characteristics
         // return null when this characteristic isn't valid
 
-        return this.baseInfo?.base ?? null;
+        return this.baseInfo.base?.(this.actor) ?? null;
     }
 
     get basePlusLevels() {
