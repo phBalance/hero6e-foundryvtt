@@ -2421,7 +2421,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     // Some defenses require a roll not just to activate, but on each use: 6e EVERYPHASE, 5e ACTIVATIONROLL, and 5e & 6e ABLATIVE
-    token.actor.items
+    const activatableDefenses = token.actor.items
         .filter(
             (o) =>
                 o.isActive &&
@@ -2431,42 +2431,43 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
                 o.baseInfo.behaviors.includes("defense"),
         )
         .filter((defense) => !ignoreDefenseIds.includes(defense.id))
-        .filter((defense) => getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null)
-        .forEach(async (defense) => {
-            const rar = defense.findModsByXmlid("EVERYPHASE") || defense.findModsByXmlid("ACTIVATIONROLL");
-            let rarSuccess = true;
-            if (rar) {
-                rarSuccess = await rollRequiresASkillRollCheck(defense);
-            }
+        .filter((defense) => getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null);
 
-            const ablative = defense.findModsByXmlid("ABLATIVE");
-            let ablativeActivated = true;
-            if (rarSuccess && ablative) {
-                ablativeActivated = await rollAblativeActivationCheck(defense);
-            }
+    for (const defense of activatableDefenses) {
+        const rar = defense.findModsByXmlid("EVERYPHASE") || defense.findModsByXmlid("ACTIVATIONROLL");
+        let rarSuccess = true;
+        if (rar) {
+            rarSuccess = await rollRequiresASkillRollCheck(defense);
+        }
 
-            if (!(rarSuccess && ablativeActivated)) {
-                ignoreDefenseIds.push(defense.id);
-            }
-        });
+        const ablative = defense.findModsByXmlid("ABLATIVE");
+        let ablativeActivated = true;
+        if (rarSuccess && ablative) {
+            ablativeActivated = await rollAblativeActivationCheck(defense);
+        }
+
+        if (!rarSuccess || !ablativeActivated) {
+            ignoreDefenseIds.push(defense.id);
+        }
+    }
 
     // -------------------------------------------------
     // determine active defenses
     // -------------------------------------------------
-    let ablativeDefenseObj = "";
+    let defense = "";
 
     // New Defense Stuff
     const { defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, defenseTags } =
         getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
 
     if (damageNegationValue > 0) {
-        ablativeDefenseObj += "Damage Negation " + damageNegationValue + "DC(s); ";
+        defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }
 
-    ablativeDefenseObj = ablativeDefenseObj + defenseValue + " normal; " + resistantValue + " resistant";
+    defense = defense + defenseValue + " normal; " + resistantValue + " resistant";
 
     if (damageReductionValue > 0) {
-        ablativeDefenseObj += "; damage reduction " + damageReductionValue + "%";
+        defense += "; damage reduction " + damageReductionValue + "%";
     }
 
     damageData.defenseValue = defenseValue;
@@ -2559,25 +2560,20 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting();
 
     if (isTransform) {
-        return _onApplyTransformationToSpecificToken(
-            item,
-            token,
-            damageDetail,
-            ablativeDefenseObj,
-            defenseTags,
-            action,
-        );
+        return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
     } else if (isAdjustment) {
-        return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, ablativeDefenseObj, defenseTags, action);
+        return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
     } else if (isSenseAffecting) {
         return _onApplySenseAffectingToSpecificToken(item, token, damageDetail);
     }
 
-    // PH: FIXME: Need to consider damage before damage negation for ablative?
+    // PH: FIXME: Need to consider damage before damage negation for ablative? Check rules.
 
-    // Were one or more of the defenses ablative? If so, check if they get ablated. Ablative defenses must apply first with the lowest ablative defense first.
+    // Were one or more of the activated defenses ablative? If so, check if they get ablated.
+    // Ablative defenses must apply first with the lowest ablative defense first.
     const remainingDamage = { stun: damageDetail.stunDamage, body: damageDetail.bodyDamage };
-    const ablativeDefensesObj = defenseTags
+    const ablativeDefensesObj = foundry.utils
+        .deepClone(defenseTags)
         .map((defenseTag) => {
             return {
                 item: token.actor.items.find((item) => item.id === defenseTag.defenseItemId),
@@ -2585,30 +2581,31 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             };
         })
         .filter((defenseObj) => defenseObj.item?.findModsByXmlid("ABLATIVE"))
-        .sort((defenseA, defenseB) => defenseA - defenseB);
+        .sort((defenseA, defenseB) => defenseA.defenseTag.value - defenseB.defenseTag.value);
 
-    // PH: FIXME: Fix sorting
-
-    for (ablativeDefenseObj of ablativeDefensesObj) {
+    for (const ablativeDefenseObj of ablativeDefensesObj) {
         const defenseTags = getItemDefenseVsAttack(ablativeDefenseObj.item, item, {});
-        const defense = defenseTags
+        const ablativeDefense = foundry.utils
+            .deepClone(defenseTags)
             .filter((defenseTag) => defenseTag.operation === "add")
             .reduce((accum, defenseTag) => accum + defenseTag.value, 0);
-        const ablationType = ablativeDefenseObj.item.system.ablative.thresholdDefenseType;
+        const ablationType = ablativeDefenseObj.item.ablativeType;
 
-        // PH: FIXME: Need to handle all the damage types properly. Need to extract a function for that.
+        // PH: FIXME: Need to handle all the damage tag operations properly. Need to extract a function for that.
 
+        // Did the remaining damage exceed this item's capacity to absorb damage? If so, ablate it.
         if (
-            (ablationType === "BODYONLY" && remainingDamage.body > defense) ||
-            (ablationType === "BODYORSTUN" && (remainingDamage.body > defense || remainingDamage.stun > defense))
+            (ablationType === "BODYONLY" && remainingDamage.body > ablativeDefense) ||
+            (ablationType === "BODYORSTUN" &&
+                (remainingDamage.body > ablativeDefense || remainingDamage.stun > ablativeDefense))
         ) {
             await ablativeDefenseObj.item.update({
                 "system.ablative": ablativeDefenseObj.item.system.ablative + 1,
             });
         }
 
-        remainingDamage.stun -= defense;
-        remainingDamage.body -= defense;
+        remainingDamage.stun = Math.max(0, remainingDamage.stun - ablativeDefense);
+        remainingDamage.body = Math.max(0, remainingDamage.body - ablativeDefense);
     }
 
     // AUTOMATION immune to mental powers
@@ -2762,7 +2759,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         effects: effectsFinal,
 
         // defense
-        defense: ablativeDefenseObj,
+        defense: defense,
         damageNegationValue: damageNegationValue,
         ignoreDefenseIdsJson: JSON.stringify(ignoreDefenseIds),
 

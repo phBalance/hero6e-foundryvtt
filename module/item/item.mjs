@@ -1568,6 +1568,15 @@ export class HeroSystem6eItem extends Item {
         return !!this.findModsByXmlid("ABLATIVE");
     }
 
+    /**
+     * Only valid if called on an ablative defense.
+     *
+     * @returns {string} - BODYONLY or BODYORSTUN
+     */
+    get ablativeType() {
+        return this.findModsByXmlid("ABLATIVE").OPTIONID;
+    }
+
     async resetAblativeDefense() {
         return this.update({
             "system.ablative": 0,
