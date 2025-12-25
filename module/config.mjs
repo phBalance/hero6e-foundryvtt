@@ -473,6 +473,17 @@ function validatePowers() {
     }
     numViolations += powersWithoutTypeProperty.length;
 
+    // All characteristics have a base function
+    const characteristicsWithoutBaseFunction = this.filter(
+        (power) =>
+            (power.type.includes("characteristic") || power.type.includes("movement")) &&
+            typeof power.base !== "function",
+    );
+    if (characteristicsWithoutBaseFunction.length > 0) {
+        console.warn(`Characteristics without base function: `, characteristicsWithoutBaseFunction);
+    }
+    numViolations += characteristicsWithoutBaseFunction.length;
+
     // Has XML property, other than things which don't exist in HDCs and a few characteristics (but we catch all charaacteristics due to simple check)
     const powersWithoutXmlProperty = this.filter((power) => !power.xml)
         .filter((power) => !power.type.includes("characteristic"))
@@ -860,7 +871,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STR",
             name: "Strength",
-            base: 10,
+            base: fixedValueFunction(10),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
@@ -884,7 +895,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DEX",
             name: "Dexterity",
-            base: 10,
+            base: fixedValueFunction(10),
             costPerLevel: fixedValueFunction(2),
             type: ["characteristic"],
             behaviors: ["success"],
@@ -904,7 +915,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CON",
             name: "Constitution",
-            base: 10,
+            base: fixedValueFunction(10),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success", "defense"],
@@ -924,7 +935,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INT",
             name: "Intelligence",
-            base: 10,
+            base: fixedValueFunction(10),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
@@ -942,7 +953,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EGO",
             name: "Ego",
-            base: 10,
+            base: fixedValueFunction(10),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
@@ -962,7 +973,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PRE",
             name: "Presence",
-            base: 10,
+            base: fixedValueFunction(10),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
@@ -979,6 +990,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "COM",
         name: "Comeliness",
+        base: fixedValueFunction(10),
         type: ["characteristic"],
         behaviors: ["success"],
         duration: "persistent",
@@ -986,7 +998,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
         ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
-        base: 10,
         cost: function (characteristicOrPower) {
             // This could be a natural characteristic or a power
             const levels = characteristicOrPower.levels ?? characteristicOrPower.system.LEVELS;
@@ -1009,7 +1020,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "OCV",
             name: "Offensive Combat Value",
-            base: 3,
+            base: fixedValueFunction(3),
             costPerLevel: fixedValueFunction(5),
             type: ["characteristic"],
             behaviors: ["calculated", "calculatedDEX"],
@@ -1039,7 +1050,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DCV",
             name: "Defensive Combat Value",
-            base: 3,
+            base: fixedValueFunction(3),
             costPerLevel: fixedValueFunction(5),
             type: ["characteristic"],
             behaviors: ["defense", "calculated", "calculatedDEX"],
@@ -1069,7 +1080,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "OMCV",
             name: "Offensive Mental Combat Value",
-            base: 3,
+            base: fixedValueFunction(3),
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
             behaviors: ["calculated", "calculatedEGO"],
@@ -1099,7 +1110,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DMCV",
             name: "Defensive Mental Combat Value",
-            base: 3,
+            base: fixedValueFunction(3),
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
             behaviors: ["defense", "calculated", "calculatedEGO"],
@@ -1130,7 +1141,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SPD",
             name: "Speed",
-            base: 2,
+            base: fixedValueFunction(2),
             costPerLevel: fixedValueFunction(10),
             cost: function (spdCharacteristicOrItem) {
                 if (
@@ -1175,14 +1186,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<SPD XMLID="SPD" ID="1712377280539" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></SPD>`,
         },
         {
-            base: 0,
+            base: fixedValueFunction(0),
         },
     );
     addPower(
         {
             key: "PD",
             name: "Physical Defense",
-            base: 2,
+            base: fixedValueFunction(2),
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
             behaviors: ["defense", "figured", "figuredSTR"],
@@ -1220,14 +1231,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<PD XMLID="PD" ID="1712377277205" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></PD>`,
         },
         {
-            base: 0,
+            base: fixedValueFunction(0),
         },
     );
     addPower(
         {
             key: "ED",
             name: "Energy Defense",
-            base: 2,
+            base: fixedValueFunction(2),
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
             behaviors: ["defense", "figured", "figuredCON"],
@@ -1265,14 +1276,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<ED XMLID="ED" ID="1712377278856" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></ED>`,
         },
         {
-            base: 0,
+            base: fixedValueFunction(0),
         },
     );
     addPower(
         {
             key: "REC",
             name: "Recovery",
-            base: 4,
+            base: fixedValueFunction(4),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["figured", "figuredSTR", "figuredCON"],
@@ -1299,7 +1310,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<REC XMLID="REC" ID="1712377282168" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></REC>`,
         },
         {
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(2),
         },
     );
@@ -1307,7 +1318,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "END",
             name: "Endurance",
-            base: 20,
+            base: fixedValueFunction(20),
             costPerLevel: fixedValueFunction(1 / 5),
             type: ["characteristic"],
             behaviors: ["figured", "figuredCON"],
@@ -1333,7 +1344,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<END XMLID="END" ID="1712377283848" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></END>`,
         },
         {
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(1 / 2),
         },
     );
@@ -1341,7 +1352,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BODY",
             name: "Body",
-            base: 10,
+            base: fixedValueFunction(10),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: [],
@@ -1361,7 +1372,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STUN",
             name: "Stun",
-            base: 20,
+            base: fixedValueFunction(20),
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["characteristic"],
             behaviors: ["figured", "figuredSTR", "figuredCON"],
@@ -1409,7 +1420,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<STUN XMLID="STUN" ID="1712377285547" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></STUN>`,
         },
         {
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(1),
         },
     );
@@ -1419,7 +1430,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BASESIZE",
             name: "Base Size",
             type: ["characteristic"],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(2),
             behaviors: [],
             duration: "persistent",
@@ -1441,7 +1452,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "DEF",
         name: "Defense",
         type: ["characteristic"],
-        base: 2,
+        base: fixedValueFunction(2),
         costPerLevel: fixedValueFunction(3),
         behaviors: [],
         duration: "persistent",
@@ -1458,7 +1469,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SIZE",
             name: "Vehicle Size",
             type: ["characteristic"],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5),
             behaviors: [],
             duration: "persistent",
@@ -1482,7 +1493,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CUSTOM1",
             name: "Custom Characteristic 1",
             type: ["characteristic"],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             behaviors: [],
             duration: "persistent",
@@ -1507,7 +1518,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CUSTOM2",
             name: "Custom Characteristic 2",
             type: ["characteristic"],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             behaviors: [],
             duration: "persistent",
@@ -1533,7 +1544,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 3",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -1558,7 +1569,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 4",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -1583,7 +1594,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 5",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -1608,7 +1619,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 6",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -1633,7 +1644,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 7",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -1658,7 +1669,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 8",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -1683,7 +1694,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 9",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -1708,7 +1719,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 10",
             type: ["characteristic"],
             behaviors: [],
-            base: 0,
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
@@ -2646,6 +2657,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EXTRADIMENSIONALMOVEMENT",
             type: ["movement"],
             behaviors: ["activatable"],
+            base: fixedValueFunction(0),
             perceivability: "inobvious",
             duration: "instant",
             target: "self only",
@@ -2674,6 +2686,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FLIGHT",
             type: ["movement"],
             behaviors: ["activatable"],
+            base: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -2693,6 +2706,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FIXEDLOCATION",
             type: ["movement"],
             behaviors: ["activatable"],
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
@@ -2718,6 +2732,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FLOATINGLOCATION",
             type: ["movement"],
             behaviors: ["activatable"],
+            base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
@@ -2743,6 +2758,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FTL",
             type: ["movement"],
             behaviors: ["activatable"],
+            base: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -2760,6 +2776,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "GLIDING",
         type: ["movement"],
         behaviors: ["activatable"],
+        base: fixedValueFunction(0),
         duration: "constant",
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
@@ -2775,7 +2792,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LEAPING",
             name: "Leaping",
-            base: 4,
+            base: fixedValueFunction(4), // FIXME: Wrong for vehicles
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["movement"],
             behaviors: ["activatable", "figured", "figuredSTR"],
@@ -2801,7 +2818,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></LEAPING>`,
         },
         {
-            base: 2,
+            base: fixedValueFunction(2), // FIXME: Wrong for vehicles
             costPerLevel: fixedValueFunction(1),
         },
     );
@@ -2809,7 +2826,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RUNNING",
-            base: 12,
+            base: fixedValueFunction(12),
             costPerLevel: fixedValueFunction(1),
             type: ["movement"],
             behaviors: ["activatable"],
@@ -2823,7 +2840,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<RUNNING XMLID="RUNNING" ID="1709334005554" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="72" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></RUNNING>`,
         },
         {
-            base: 6,
+            base: fixedValueFunction(6),
             costPerLevel: fixedValueFunction(2),
         },
     );
@@ -2831,7 +2848,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "SWIMMING",
-            base: 4,
+            base: fixedValueFunction(4),
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["movement"],
             behaviors: ["activatable"],
@@ -2845,13 +2862,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<SWIMMING XMLID="SWIMMING" ID="1709334019357" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="77" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></SWIMMING>`,
         },
         {
-            base: 2,
+            base: fixedValueFunction(2),
             costPerLevel: fixedValueFunction(1),
         },
     );
     addPower(
         {
             key: "SWINGING",
+            base: fixedValueFunction(0),
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
@@ -2877,6 +2895,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TELEPORTATION",
+            base: fixedValueFunction(0),
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "instant",
@@ -2896,6 +2915,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TUNNELING",
+            base: fixedValueFunction(0),
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
