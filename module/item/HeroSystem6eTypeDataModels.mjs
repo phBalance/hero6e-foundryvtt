@@ -1357,9 +1357,6 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
             _hdcXml: new StringField(),
             is5e: new BooleanField({ initial: null, nullable: true }),
             xmlTag: new StringField(),
-            // value: new HeroNumberField({ integer: true }),
-            // core: new HeroNumberField({ integer: true }),
-            // max: new HeroNumberField({ integer: true }),
         };
     }
 
@@ -1456,11 +1453,6 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return this.actor.system[this.KEY]?.LEVELS || 0;
     }
 
-    get core() {
-        console.error("The 'core' characteristic attribute is deprecated");
-        return 0;
-    }
-
     get baseInt() {
         // Only expected to be used for 5e SPD as we need the integer version
         return Math.floor(this.base);
@@ -1489,12 +1481,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
 
     get basePlusLevels() {
         // Need to add in LEVELS
-        try {
-            return this.base + (this.item?.LEVELS ?? 0);
-        } catch (e) {
-            console.error(e);
-        }
-        return 0;
+        return (this.base ?? 0) + (this.item?.LEVELS ?? 0);
     }
 
     get baseItemsContributingToFiguredCharacteristics() {
