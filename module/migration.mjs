@@ -289,20 +289,27 @@ async function migrateCharges(actor) {
 
 async function refreshSkillLevelsOverall(actor) {
     // SKILL_LEVELS (4.2.5) has an OVERALL that acts like a CSL.  Need the csl prop array built.
+    try {
+        const overallSkillLevelItems = actor.items.filter(
+            (item) => item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
+        );
 
-    const overallSkillLevelItems = actor.items.filter(
-        (item) => item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
-    );
-
-    for (const item of overallSkillLevelItems) {
-        const LEVELS = item.system.LEVELS;
-        if (item.system.csl.length !== LEVELS) {
-            const csl = new Array(LEVELS);
-            for (let idx = 0; idx < csl.length; idx++) {
-                csl[idx] = item.system.csl?.[idx] || Object.keys(item.cslChoices)[0];
+        for (const item of overallSkillLevelItems) {
+            try {
+                const LEVELS = item.system.LEVELS;
+                if (item.system.csl.length !== LEVELS) {
+                    const csl = new Array(LEVELS);
+                    for (let idx = 0; idx < csl.length; idx++) {
+                        csl[idx] = item.system.csl?.[idx] || Object.keys(item.cslChoices)[0];
+                    }
+                    await item.update({ [`system.csl`]: csl });
+                }
+            } catch (e) {
+                console.error(e, item);
             }
-            await item.update({ [`system.csl`]: csl });
         }
+    } catch (e) {
+        console.error(e, actor);
     }
 }
 
