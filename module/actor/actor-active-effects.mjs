@@ -1,5 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
+import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
 export class HeroSystem6eActorActiveEffectsSystemData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
@@ -510,27 +511,28 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     // KLUGE: Set VALUE to MAX for now. We need a better solution.
                     actorChanges[`system.characteristics.${key}.value`] = actor.system.characteristics[key].max;
 
-                    //let value = parseFloat(change.value) || 0;
+                    // 5e figured characteristic
+                    if (actor.is5e) {
+                        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(actor);
+                        for (const char of _getCharacteristicInfoArrayForActor.filter((o) =>
+                            o.behaviors.includes(`figured${key.toUpperCase()}`),
+                        )) {
+                            const key = char.key.toLocaleLowerCase();
 
-                    // Disabled the effect so back out any changes
-                    // if (data.disabled) {
-                    //     value = -value;
-                    // }
-
-                    // if (value > 0) {
-                    //     // Increase value, but don't exceed MAX
-                    //     const oldValue = actor.system.characteristics[key].value;
-                    //     const newValue = Math.min(oldValue, actor.system.characteristics[key].max) + value;
-                    //     console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
-                    //     actorChanges[`system.characteristics.${key}.value`] = newValue;
-                    // }
-                    // if (value < 0) {
-                    //     // Decrease value, but not below MAX
-                    //     const oldValue = actor.system.characteristics[key].value;
-                    //     const newValue = Math.max(oldValue, actor.system.characteristics[key].max) + value;
-                    //     console.log(`${key}.value updated from ${oldValue} to ${newValue}`);
-                    //     actorChanges[`system.characteristics.${key}.value`] = newValue;
-                    // }
+                            if (char.figured5eCharacteristic) {
+                                const newValue = char.figured5eCharacteristic(actor);
+                                // Intentionally making 2 update calls to allow for AEs to kick in for value
+                                // TODO: May break adjustment powers
+                                await actor.update({ [`system.characteristics.${key}.max`]: newValue });
+                                await actor.update({
+                                    [`system.characteristics.${key}.value`]: Math.min(
+                                        newValue,
+                                        actor.system.characteristics[key].max,
+                                    ),
+                                });
+                            }
+                        }
+                    }
                 }
             }
         }
