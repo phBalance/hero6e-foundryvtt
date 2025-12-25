@@ -487,7 +487,7 @@ export function registerVehicleTests(quench) {
                         expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
                     });
 
-                    it("should have 0m of leaping", function () {
+                    it('should have 0" of leaping', function () {
                         expect(actor.system.characteristics.leaping.value).to.equal(0);
                     });
 
