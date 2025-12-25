@@ -565,17 +565,21 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // If LEVELS were change, update MAX and VALUE
+        // If LEVELS were changed, update MAX and VALUE
         // TODO: This can mess up adjustment powers as they fade
         if (JSON.stringify(data?.system)?.includes(`"LEVELS":`)) {
             const charKey = Object.keys(data.system)[0].toLowerCase();
-            const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
-            await this.update({
-                [`system.characteristics.${charKey}.max`]: basePlusLevels,
-            });
-            await this.update({
-                [`system.characteristics.${charKey}.value`]: this.system.characteristics[charKey].max,
-            });
+            if (this.system.characteristics[charKey]) {
+                const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
+                await this.update({
+                    [`system.characteristics.${charKey}.max`]: basePlusLevels,
+                });
+                await this.update({
+                    [`system.characteristics.${charKey}.value`]: this.system.characteristics[charKey].max,
+                });
+            } else {
+                console.error(`Unhandled characteristic key ${charKey}`, data);
+            }
 
             // Check for any figuredCharacteristic dependencies.
             const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
