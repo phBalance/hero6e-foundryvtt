@@ -1466,16 +1466,10 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return Math.floor(this.base);
     }
 
+    /**
+     * base is the starting points you get for free
+     */
     get base() {
-        // base is the starting points you get for free
-
-        // KLUGE OVERRIDEs
-        if (this.actor.type === "base2") {
-            if (this.key === "body") {
-                return 2;
-            }
-        }
-
         // Some 5e characteristics are calcuated or figured
         if (this.actor.is5e) {
             if (this.baseInfo?.behaviors.includes("calculated")) {

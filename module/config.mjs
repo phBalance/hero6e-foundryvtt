@@ -1162,7 +1162,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return levels * this.costPerLevel() - refund;
             },
             type: ["characteristic"],
-            behaviors: ["figured", "figuredDEX"],
+            behaviors: [],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1175,6 +1175,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            xml: `<SPD XMLID="SPD" ID="1712377280539" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></SPD>`,
+        },
+        {
+            base: fixedValueFunction(0),
+            behaviors: ["figured", "figuredDEX"],
             figured5eCharacteristic: function (actor) {
                 return (
                     1 +
@@ -1186,11 +1191,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     )
                 );
             },
-
-            xml: `<SPD XMLID="SPD" ID="1712377280539" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></SPD>`,
-        },
-        {
-            base: fixedValueFunction(0),
         },
     );
     addPower(
@@ -1200,7 +1200,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(2),
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
-            behaviors: ["defense", "figured", "figuredSTR"],
+            behaviors: ["defense"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1226,16 +1226,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            xml: `<PD XMLID="PD" ID="1712377277205" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></PD>`,
+        },
+        {
+            base: fixedValueFunction(0),
+            behaviors: ["defense", "figured", "figuredSTR"],
             figured5eCharacteristic: function (actor) {
                 return (
                     RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
                     actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
-            xml: `<PD XMLID="PD" ID="1712377277205" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></PD>`,
-        },
-        {
-            base: fixedValueFunction(0),
         },
     );
     addPower(
@@ -1245,7 +1246,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(2),
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
-            behaviors: ["defense", "figured", "figuredCON"],
+            behaviors: ["defense"],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1271,16 +1272,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            xml: `<ED XMLID="ED" ID="1712377278856" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></ED>`,
+        },
+        {
+            base: fixedValueFunction(0),
+            behaviors: ["defense", "figured", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 return (
                     RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
-            xml: `<ED XMLID="ED" ID="1712377278856" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></ED>`,
-        },
-        {
-            base: fixedValueFunction(0),
         },
     );
     addPower(
@@ -1290,7 +1292,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(4),
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
-            behaviors: ["figured", "figuredSTR", "figuredCON"],
+            behaviors: [],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1303,6 +1305,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            xml: `<REC XMLID="REC" ID="1712377282168" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></REC>`,
+        },
+        {
+            base: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(2),
+            behaviors: ["figured", "figuredSTR", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 return (
                     RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
@@ -1311,11 +1319,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
-            xml: `<REC XMLID="REC" ID="1712377282168" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></REC>`,
-        },
-        {
-            base: fixedValueFunction(0),
-            costPerLevel: fixedValueFunction(2),
         },
     );
     addPower(
@@ -1325,7 +1328,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(20),
             costPerLevel: fixedValueFunction(1 / 5),
             type: ["characteristic"],
-            behaviors: ["figured", "figuredCON"],
+            behaviors: [],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1338,6 +1341,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            xml: `<END XMLID="END" ID="1712377283848" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></END>`,
+        },
+        {
+            base: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1 / 2),
+            behaviors: ["figured", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 // 5e figured 2 x CON
                 return (
@@ -1345,18 +1354,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(0.5)
                 );
             },
-            xml: `<END XMLID="END" ID="1712377283848" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></END>`,
-        },
-        {
-            base: fixedValueFunction(0),
-            costPerLevel: fixedValueFunction(1 / 2),
         },
     );
     addPower(
         {
             key: "BODY",
             name: "Body",
-            base: fixedValueFunction(10),
+            base: function (actor) {
+                if (actor.type === "base2") {
+                    return 2;
+                }
+
+                return 10;
+            },
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: [],
@@ -1379,7 +1389,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(20),
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["characteristic"],
-            behaviors: ["figured", "figuredSTR", "figuredCON"],
+            behaviors: [],
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -1412,6 +1422,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return null;
             },
+            xml: `<STUN XMLID="STUN" ID="1712377285547" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></STUN>`,
+        },
+        {
+            base: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1),
+            behaviors: ["figured", "figuredSTR", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 return (
                     actor.system.characteristics.body.basePlusLevels +
@@ -1421,11 +1437,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(2)
                 );
             },
-            xml: `<STUN XMLID="STUN" ID="1712377285547" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></STUN>`,
-        },
-        {
-            base: fixedValueFunction(0),
-            costPerLevel: fixedValueFunction(1),
         },
     );
 
@@ -2796,10 +2807,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LEAPING",
             name: "Leaping",
-            base: fixedValueFunction(4), // FIXME: Wrong for vehicles
+            base: function (actor) {
+                if (actor.type === "vehicle") {
+                    return 0;
+                }
+
+                return 4;
+            },
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["movement"],
-            behaviors: ["activatable", "figured", "figuredSTR"],
+            behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
@@ -2811,6 +2828,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     char.actor.is5e,
                 )} forward, ${Math.max(0, Math.round(char.value / 2))}${getSystemDisplayUnits(char.actor.is5e)} upward`;
             },
+            img: "icons/svg/jump.svg",
+            xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></LEAPING>`,
+        },
+        {
+            behaviors: ["activatable", "figured", "figuredSTR"],
+            base: function (actor) {
+                if (actor.type === "vehicle") {
+                    return 0;
+                }
+
+                return 2;
+            },
+            costPerLevel: fixedValueFunction(1),
             figured5eCharacteristic: function (actor) {
                 // STR/2.5 = free meters of leaping
                 // Div by 2 again to get inches to match HD
@@ -2818,12 +2848,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // You can end up with .5 remainders for a half inch
                 return Math.floor(actor.system.characteristics.str.value / 2.5) / 2;
             },
-            img: "icons/svg/jump.svg",
-            xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></LEAPING>`,
-        },
-        {
-            base: fixedValueFunction(2), // FIXME: Wrong for vehicles
-            costPerLevel: fixedValueFunction(1),
         },
     );
 
