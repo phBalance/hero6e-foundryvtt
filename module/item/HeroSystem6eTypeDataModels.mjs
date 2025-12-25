@@ -1611,7 +1611,12 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     }
 
     get baseItemsContributingToFiguredCharacteristics() {
-        return this.actor.items.filter((item) => item.system.XMLID === this.KEY && !item.findModsByXmlid("NOFIGURED"));
+        return this.actor.items.filter(
+            (item) =>
+                item.system.XMLID === this.KEY &&
+                !item.findModsByXmlid("NOFIGURED") &&
+                item.effects.find((e) => e.disabled === false),
+        );
     }
 
     baseSumFiguredCharacteristicsFromItems(divisor) {

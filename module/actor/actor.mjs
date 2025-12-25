@@ -567,39 +567,43 @@ export class HeroSystem6eActor extends Actor {
 
         // If LEVELS were changed, update MAX and VALUE
         // TODO: This can mess up adjustment powers as they fade
-        if (JSON.stringify(data?.system)?.includes(`"LEVELS":`)) {
-            const charKey = Object.keys(data.system)[0].toLowerCase();
-            if (this.system.characteristics[charKey]) {
-                const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
-                await this.update({
-                    [`system.characteristics.${charKey}.max`]: basePlusLevels,
-                });
-                await this.update({
-                    [`system.characteristics.${charKey}.value`]: this.system.characteristics[charKey].max,
-                });
-
-                // Check for any figuredCharacteristic dependencies.
-                const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
-                for (const char of _getCharacteristicInfoArrayForActor.filter((o) =>
-                    o.behaviors.includes(`figured${charKey.toUpperCase()}`),
-                )) {
-                    const key = char.key.toLocaleLowerCase();
-
-                    if (char.figured5eCharacteristic) {
-                        const newValue = char.figured5eCharacteristic(this);
-                        // Intentionally making 2 update calls to allow for AEs to kick in for value
-                        // TODO: May break adjustment powers
-                        await this.update({ [`system.characteristics.${key}.max`]: newValue });
+        if (data.system) {
+            for (const charKEY of Object.keys(data.system)) {
+                if (data.system[charKEY].LEVELS != null) {
+                    const charKey = charKEY.toLowerCase();
+                    if (this.system.characteristics[charKey]) {
+                        const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
                         await this.update({
-                            [`system.characteristics.${key}.value`]: Math.min(
-                                newValue,
-                                this.system.characteristics[key].max,
-                            ),
+                            [`system.characteristics.${charKey}.max`]: basePlusLevels,
                         });
+                        await this.update({
+                            [`system.characteristics.${charKey}.value`]: this.system.characteristics[charKey].max,
+                        });
+
+                        // Check for any figuredCharacteristic dependencies.
+                        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
+                        for (const char of _getCharacteristicInfoArrayForActor.filter((o) =>
+                            o.behaviors.includes(`figured${charKey.toUpperCase()}`),
+                        )) {
+                            const key = char.key.toLocaleLowerCase();
+
+                            if (char.figured5eCharacteristic) {
+                                const newValue = char.figured5eCharacteristic(this);
+                                // Intentionally making 2 update calls to allow for AEs to kick in for value
+                                // TODO: May break adjustment powers
+                                await this.update({ [`system.characteristics.${key}.max`]: newValue });
+                                await this.update({
+                                    [`system.characteristics.${key}.value`]: Math.min(
+                                        newValue,
+                                        this.system.characteristics[key].max,
+                                    ),
+                                });
+                            }
+                        }
+                    } else {
+                        console.error(`Unhandled characteristic key ${charKey}`, data);
                     }
                 }
-            } else {
-                console.error(`Unhandled characteristic key ${charKey}`, data);
             }
         }
 
