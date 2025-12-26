@@ -230,16 +230,6 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
     }
 }
 
-// export class HeroSystem6eCharges extends foundry.abstract.DataModel {
-//     static defineSchema() {
-//         // Note that the return is just a simple object
-//         return {
-//             value: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-//             clips: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-//         };
-//     }
-// }
-
 export class HeroAdderModelCommon extends HeroItemModCommonModel {
     static defineSchema() {
         return {
@@ -315,13 +305,6 @@ export class HeroAdderModel extends HeroAdderModelCommon {
 }
 
 class HeroModifierModelCommon extends HeroItemModCommonModel {
-    static defineSchema() {
-        return {
-            ...super.defineSchema(),
-            charges: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-        };
-    }
-
     get cost() {
         let _cost = 0;
         // Custom costs calculations
@@ -443,73 +426,6 @@ class HeroPowerModel extends HeroItemModCommonModel {
         return _cost;
     }
 }
-
-// export class HeroSystem6eItemCharges extends foundry.abstract.DataModel {
-//     // constructor(data, context) {
-//     //     super(data, context);
-
-//     //     // set initial value
-//     //     const CHARGES = this.parent.MODIFIER.find((m) => m.XMLID === "CHARGES");
-//     //     if (!CHARGES && data.value !== undefined) {
-//     //         this.value = undefined;
-//     //     }
-//     //     if (data.value === undefined) {
-//     //         if (CHARGES) {
-//     //             this.value = parseInt(CHARGES.OPTION_ALIAS);
-//     //             this.clips = Math.pow(2, parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 0));
-//     //         }
-//     //     }
-//     // }
-
-//     static defineSchema() {
-//         // Note that the return is just a simple object
-//         return {
-//             value: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-//             clips: new HeroNumberField({ integer: true, min: 0, initial: 0, nullable: false }),
-//         };
-//     }
-
-//     // get CHARGES() {
-//     //     return this.item.modifiers.find((m) => m.XMLID === "CHARGES");
-//     // }
-
-//     get _item() {
-//         if (this.parent.parent instanceof HeroSystem6eItem) {
-//             return this.parent.parent;
-//         }
-//         return null;
-//     }
-
-//     // get recoverable() {
-//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "RECOVERABLE");
-//     // }
-
-//     // get continuing() {
-//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "CONTINUING")?.OPTIONID;
-//     // }
-
-//     // get boostable() {
-//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "BOOSTABLE");
-//     // }
-//     // get fuel() {
-//     //     return !!this.CHARGES?.ADDER.find((o) => o.XMLID === "FUEL");
-//     // }
-
-//     // get max() {
-//     //     if (this.CHARGES) {
-//     //         return parseInt(this.CHARGES?.OPTION_ALIAS);
-//     //     }
-//     //     return null;
-//     // }
-
-//     // get CLIPS() {
-//     //     return this.CHARGES?.ADDER?.find((o) => o.XMLID === "CLIPS");
-//     // }
-
-//     // get clipsMax() {
-//     //     return Math.pow(2, this.CLIPS?.LEVELS || 0);
-//     // }
-// }
 
 export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeDataModel {
     get description() {
@@ -1004,7 +920,6 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             value: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE
             //max: new HeroNumberField({ integer: true }), // ENEDURANCERESERVE (use LEVELS instead)
             active: new BooleanField({ initial: true, nullable: true }), // is power,skill,equipment active (consider renaming)
-            //charges: new EmbeddedDataField(HeroSystem6eItemCharges),
             collapse: new BooleanField({ initial: false }), // TODO: Make collapsing items per use, not part of DB
             csl: new ArrayField(new StringField()), // Combat Skill levels
             checked: new BooleanField({ initial: false }), // DEADLYBLOW
@@ -1233,7 +1148,6 @@ export class HeroSystem6eItemSkill extends HeroSystem6eItemTypeDataModelProps {
             TEXT: new StringField(),
             TYPE: new StringField(),
             NATIVE_TONGUE: new BooleanField({ initial: null, nullable: true }),
-            //charges: new EmbeddedDataField(HeroSystem6eItemCharges), // unusual, but possible
             active: new BooleanField({ initial: true, nullable: true }), // should be part of  HeroSystem6eItemTypeDataModelProps and not needed here
         };
     }

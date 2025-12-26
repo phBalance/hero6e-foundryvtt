@@ -5894,10 +5894,22 @@ export class HeroSystem6eItem extends Item {
         // A migration script re-writes this data and we should eventually be
         // able to remove this (Dec 23 2025 / migrateTo4_2_5)
         if (source.system?.charges?.max && !source.system._charges) {
-            console.warn(`${source.name} has depricated charges object`);
-            source.system._charges ??= source.system.charges.value;
-            source.system._clips ??= source.system.charges.clips;
+            console.log(`${source.name} has deprecated charges object. Migrating.`);
+
+            // Move system.charges.value to .system._charges
+            if (!this._addDataFieldMigration(source, "system.charges.value", "system._charges")) {
+                console.error(`Unable to migrate "system.charges.value: for ${source.name}/${source._id}`);
+            }
+
+            // Move system.charges.clips to .system._clips
+            if (!this._addDataFieldMigration(source, "system.charges.clips", "system._clips")) {
+                console.error(`Unable to migrate "system.charges.clips: for ${source.name}/${source._id}`);
+            }
+
+            // Delete the now migrated system.charges object
+            foundry.utils.deleteProperty(source, "system.charges");
         }
+
         return super.migrateData(source);
     }
 }
