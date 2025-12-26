@@ -2717,7 +2717,7 @@ export class HeroSystem6eActor extends Actor {
             // for (const item of this.items) {
             //     if (
             //         item.system.end > 0 ||
-            //         (item.system.charges.max > 0 && !item.parentItem?.system.XMLID === "MULTIPOWER")
+            //         (item.system.numCharges.max > 0 && !item.parentItem?.system.XMLID === "MULTIPOWER")
             //     ) {
             //         item.system.active = false;
             //         if (this.id) {

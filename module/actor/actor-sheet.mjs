@@ -660,7 +660,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                             ui.notifications.warn(
                                 `Adding <b>${chargesMax}</b> charges to <b>${existingItem.name}</b> instead of a new item.`,
                             );
-                            await existingItem.system.setChargesAndSave(existingItem.system.charges + chargesMax);
+                            await existingItem.system.setChargesAndSave(existingItem.system.numCharges + chargesMax);
                         } else {
                             console.error(`Unable to locate chargeItemModifier`, existingItem);
                         }

@@ -1082,7 +1082,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
         };
     }
 
-    get charges() {
+    get numCharges() {
         // Charges with a MP are typically on the parentItem not the slot
         // so we use a helper to get the right one.
         if (!this.item.system.chargeModifier) {

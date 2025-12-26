@@ -1334,7 +1334,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("charges", function () {
-                    assert.equal(item.system.charges, 8);
+                    assert.equal(item.system.numCharges, 8);
                 });
 
                 it("chargesRecoverable", function () {
@@ -1386,7 +1386,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("charges", function () {
-                    assert.equal(item.system.charges, 0);
+                    assert.equal(item.system.numCharges, 0);
                 });
 
                 it("doesn't use strength", function () {

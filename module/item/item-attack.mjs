@@ -3928,7 +3928,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     if (useResources && resourcesRequired.totalCharges > 0) {
         const chargeUsingItemsWithInsufficientCharges = resourcesRequired.individualResourceUsage
             .filter((usage) => {
-                const startingCharges = parseInt(usage.item.system.charges || 0);
+                const startingCharges = usage.item.system.numCharges;
 
                 return usage.charges > startingCharges;
             })
@@ -4082,7 +4082,7 @@ function calculateRequiredResourcesToUseForSingleItem(item, options) {
  * @returns number
  */
 function calculateRequiredCharges(item, boostableChargesToUse) {
-    const startingCharges = parseInt(item.system.charges || 0);
+    const startingCharges = item.system.numCharges;
     const maximumCharges = item.system.chargesMax || 0;
     let chargesToUse = 0;
 
@@ -4359,10 +4359,9 @@ async function spendResourcesToUse(
                 resourcesUsedDescriptions.push(`${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`);
 
                 if (canSpendCharges) {
-                    const startingCharges = parseInt(usage.item.system.charges || 0);
+                    const startingCharges = usage.item.system.numCharges;
 
                     await usage.item.system.setChargesAndSave(startingCharges - chargesToSpend);
-                    //await usage.item.update({ "system.charges.value": startingCharges - chargesToSpend });
                 }
             });
     }
