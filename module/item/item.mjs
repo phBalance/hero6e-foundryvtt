@@ -658,7 +658,7 @@ export class HeroSystem6eItem extends Item {
             if (
                 this.isActivatable() &&
                 this.system.active === undefined &&
-                this.system.charges === undefined &&
+                this.system.chargesMax > 0 &&
                 !this.end &&
                 this.parentItem?.system.XMLID === "MULTIPOWER"
             ) {
@@ -778,20 +778,6 @@ export class HeroSystem6eItem extends Item {
         return _pslPenaltyType;
     }
 
-    setMovement() {
-        // MOVEMENT
-        if (this.baseInfo?.type.includes("movement")) {
-            // Movement power typically default to active
-            if (
-                !this.system.charges?.value &&
-                this.parentItem?.system.XMLID !== "MULTIPOWER" &&
-                !this.baseInfo?.behaviors.includes("defaultoff")
-            ) {
-                this.system.active ??= true;
-            }
-        }
-    }
-
     setCarried() {
         if (this.system.CARRIED && this.system.active === undefined && this.end === 0) {
             this.system.active ??= true;
@@ -895,10 +881,9 @@ export class HeroSystem6eItem extends Item {
      */
     async resetToOriginal() {
         // Reset charges
-        //this.setCharges({});
         const chargeItemModifier = this.system.chargeItemModifier;
         if (chargeItemModifier) {
-            if (this.system.charges < this.system.chargesMax) {
+            if (this.system.numCharges < this.system.chargesMax) {
                 await this.system.setChargesAndSave(this.system.chargesMax);
             }
 
@@ -951,43 +936,6 @@ export class HeroSystem6eItem extends Item {
             }
             ``;
         }
-
-        // Turn off all maneuvers
-        // if (this.type === "maneuver") {
-        //     if (this.system.active) {
-        //         this.system.active = false;
-        //         if (this.id) {
-        //             await this.update({ [`system.active`]: this.system.active });
-        //         }
-        //     }
-        // }
-
-        // Remove temporary effects that have an origin.
-        // Actor items with built in effects should have no origin and we want to keep those (POWER STR +30 for example)
-        // this.effects.map(async (effect) => {
-        //     if (effect.origin) {
-        //         await effect.delete();
-        //     } else {
-        //         // Some effects like purchasing characteristics, should remain
-        //         // unless they are part of a multipower
-        //         if (effect.parent?.parentItem?.system?.XMLID === "MULIPOWER") {
-        //             await effect.update({ disabled: true });
-        //         } else {
-        //             // Otherwise turn it on if it has no charges and uses no endurance
-        //             if (!effect.parent?.end && effect.parent?.system.charges === undefined) {
-        //                 await effect.update({ disabled: false });
-        //             }
-        //         }
-        //     }
-        // });
-
-        // if (["ENDURANCERESERVE"].includes(this.system.XMLID)) {
-        //     if (this.id) {
-        //         await this.update({ ["system.value"]: this.system.LEVELS });
-        //     } else {
-        //         this.system.value = this.system.LEVELS;
-        //     }
-        // }
 
         if (this.type === "maneuver" && this.system.active) {
             await this.update({ ["system.active"]: false });
@@ -1654,7 +1602,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Reload the clip to 1 less clip that should be at full charges.
-        const previousCharges = this.system.charges;
+        const previousCharges = this.system.numCharges;
         await this.system.setChargesAndSave(this.system.chargesMax);
         await this.system.setClipsAndSave(this.system.clips - 1);
 
@@ -1662,7 +1610,7 @@ export class HeroSystem6eItem extends Item {
             author: game.user._id,
             speaker: ChatMessage.getSpeaker({ token: token, actor: this.actor }),
             style: CONST.CHAT_MESSAGE_STYLES.IC,
-            content: `Change clips on <b>${this.name}</b>. ${(token ?? this.actor).name} drops the clip with ${previousCharges} charges. Reloading with a new clip with ${this.system.charges} charges. ${this.system.clips} clip(s) remain.`,
+            content: `Change clips on <b>${this.name}</b>. ${(token ?? this.actor).name} drops the clip with ${previousCharges} charges. Reloading with a new clip with ${this.system.numCharges} charges. ${this.system.clips} clip(s) remain.`,
             whisper: whisperUserTargetsForActor(this.actor),
         };
         await ChatMessage.create(chatData);
@@ -3634,7 +3582,7 @@ export class HeroSystem6eItem extends Item {
                     }
 
                     const chargesMax = itemWithChargeModifier.system.chargesMax;
-                    const charges = itemWithChargeModifier.system.charges;
+                    const charges = itemWithChargeModifier.system.numCharges;
                     if (charges !== chargesMax) {
                         result += `${charges}/`;
                     }
@@ -5964,10 +5912,22 @@ export class HeroSystem6eItem extends Item {
         // A migration script re-writes this data and we should eventually be
         // able to remove this (Dec 23 2025 / migrateTo4_2_5)
         if (source.system?.charges?.max && !source.system._charges) {
-            console.warn(`${source.name} has depricated charges object`);
-            source.system._charges ??= source.system.charges.value;
-            source.system._clips ??= source.system.charges.clips;
+            console.log(`${source.name} has deprecated charges object. Migrating.`);
+
+            // Move system.charges.value to .system._charges
+            if (!this._addDataFieldMigration(source, "system.charges.value", "system._charges")) {
+                console.error(`Unable to migrate "system.charges.value: for ${source.name}/${source._id}`);
+            }
+
+            // Move system.charges.clips to .system._clips
+            if (!this._addDataFieldMigration(source, "system.charges.clips", "system._clips")) {
+                console.error(`Unable to migrate "system.charges.clips: for ${source.name}/${source._id}`);
+            }
+
+            // Delete the now migrated system.charges object
+            foundry.utils.deleteProperty(source, "system.charges");
         }
+
         return super.migrateData(source);
     }
 }

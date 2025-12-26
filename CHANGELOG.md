@@ -4,7 +4,7 @@
 
 - Reworked charges for power frameworks. Charges on a MultiPower reserve for "all slots" now correctly share the charges amongst all the slots. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3167)
 - Charge clips are now calculated with 4x multiplier when advantaged. [#3268](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3167](https://github.com/dmdorman/hero6e-foundryvtt/issues/3268)
-- Charge clips are now clamped to +1 when non recoverable, boostable, or continuous. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3267](https://github.com/dmdorman/hero6e-foundryvtt/issues/3267)
+- Charge advantage cost now clamped to +1 when non recoverable, boostable, or continuous. [#3226](https://github.com/dmdorman/hero6e-foundryvtt/issues/3226) [#3267](https://github.com/dmdorman/hero6e-foundryvtt/issues/3267)
 - Post segment 12 recoveries no longer clear stunned condition. [#3274](https://github.com/dmdorman/hero6e-foundryvtt/issues/3274)
 - Improved support for non-combat and vertical movement in FoundryVTT v13. [#3234](https://github.com/dmdorman/hero6e-foundryvtt/issues/3234) [#3240](https://github.com/dmdorman/hero6e-foundryvtt/issues/3240)
 - Luck and unluck have been added to the generic damage roller using the counting 6s or 1s method.

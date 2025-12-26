@@ -260,7 +260,7 @@ export class HeroRuler extends FoundryVttRuler {
                                 );
 
                                 let content = "";
-                                const charges = movementPower.chargeModifier ? movementPower.system.charges : 0;
+                                const charges = movementPower.chargeModifier ? movementPower.system.numCharges : 0;
                                 if (charges && movementPower.chargeModifier && !combatant.flags.dragRuler?.spentEnd) {
                                     if (charges === 0) {
                                         ui.notifications.error(
@@ -269,7 +269,7 @@ export class HeroRuler extends FoundryVttRuler {
                                         content += `${token.name} has no charges left and should not be moving. `;
                                     } else {
                                         await movementPower.system.setChargesAndSave(charges - 1);
-                                        content += `${token.name} spent one charge of ${movementPower.name} (${movementPower.system.charges} charges remain). `;
+                                        content += `${token.name} spent one charge of ${movementPower.name} (${movementPower.system.numCharges} charges remain). `;
                                     }
                                 }
 

@@ -580,8 +580,8 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         }
 
         // CHARGES
-        if (expandedData.system?.charges) {
-            await this.item.system.setChargesAndSave(expandedData.system.charges);
+        if (expandedData.system?.numCharges) {
+            await this.item.system.setChargesAndSave(expandedData.system.numCharges);
         }
 
         // CLIPS
