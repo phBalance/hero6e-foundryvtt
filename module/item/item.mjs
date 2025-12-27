@@ -312,7 +312,11 @@ export class HeroSystem6eItem extends Item {
 
     async setActiveEffects() {
         try {
-            if (!this.id) {
+            // If there is no actor for this item, then this item is most likely in the Items collection and we can ignore active effects for it.
+            if (!this.actor) {
+                console.warn(`Skipping setActiveEffects because there is no actor`, this);
+                return;
+            } else if (!this.id) {
                 console.warn(`Skipping setActiveEffects because there is no item.id`, this);
                 return;
             }
