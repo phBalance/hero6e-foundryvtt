@@ -171,7 +171,14 @@ function itemHasBehaviours(item, ...desiredBehaviourArgs) {
         // Unfortunately handlebars seems to pass metadata in the last argument as an object. We use only strings.
         // Rare occurance where a 5e item (SUPPRESS) is in a 6e actor, we don't allow this, but you never know,
         // and we want to make sure the Actor sheet opens.
-        if (typeof desiredbehaviour === "string" && item.baseInfo?.behaviors.includes(desiredbehaviour)) {
+        if (typeof desiredbehaviour !== "string") {
+            continue;
+        }
+
+        if (
+            (item.system.XMLID !== "MANEUVER" && item.baseInfo?.behaviors.includes(desiredbehaviour)) ||
+            (item.system.XMLID === "MANEUVER" && item.baseInfo?.behaviorsByItem(item).includes(desiredbehaviour))
+        ) {
             return true;
         }
     }
