@@ -1,7 +1,13 @@
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
-//import { getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 import { HeroItemCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
+
+// Signal to migration code that this object has changed and needs to be persisted to the DB
+const needToPersistToDb = "persistMigrationToDb";
+const needToCommitMigrationToDbField = `flags.${needToPersistToDb}`;
+export function tagObjectForPersistence(source) {
+    foundry.utils.setProperty(source, needToCommitMigrationToDbField, true);
+}
 
 function getAllActorsInGame() {
     return [
@@ -198,7 +204,7 @@ export async function migrateWorld() {
         "4.2.0",
         lastMigration,
         getAllActorsInGame(),
-        "Coerce is5e===undefined to boolean value",
+        "coerce is5e===undefined to boolean value",
         async (actor) => await migrateTo4_2_0(actor),
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.0`, "background: #1111FF; color: #FFFFFF");
@@ -207,10 +213,33 @@ export async function migrateWorld() {
         "4.2.5",
         lastMigration,
         getAllActorsInGame(),
-        "Edition migration, Charges, Overall SKILL LEVELS",
+        "edition migration and Overall SKILL LEVELS",
         async (actor) => await migrateTo4_2_5(actor),
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.5`, "background: #1111FF; color: #FFFFFF");
+
+    // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
+    await migrateToVersion(
+        game.system.version,
+        lastMigration,
+        getAllActorsInGame(),
+        "commit actor object migration",
+        async (actor) => await commitActorAndItemMigrateDataChangesByActor(actor),
+    );
+
+    // Migrate items
+    await migrateToVersion(
+        game.system.version,
+        lastMigration,
+        Array.from(game.items),
+        "commit items collection object migration",
+        async (item) => await commitItemsCollectionMigrateDataChanges(item),
+    );
+
+    console.log(
+        `%c Took ${Date.now() - _start}ms to finalize object migration to version ${game.system.version}`,
+        "background: #1111FF; color: #FFFFFF",
+    );
 
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 
@@ -231,6 +260,46 @@ export async function migrateWorld() {
         }
     } catch (e) {
         console.error(e);
+    }
+}
+
+/**
+ * Check if needToPersistToDb has been set for Actor or Item objects. If so, persist.
+ */
+async function commitActorAndItemMigrateDataChangesByActor(actor) {
+    const promises = [];
+
+    const actorUpdates = [];
+    const itemUpdates = [];
+
+    if (actor.flags[needToPersistToDb]) {
+        const { _id, system, flags } = actor.toObject();
+        delete flags[needToPersistToDb];
+        actorUpdates.push({ _id, "==system": system, "==flags": flags });
+    }
+    promises.push(Actor.implementation.updateDocuments(actorUpdates));
+
+    for (const item of actor.items) {
+        if (item.flags[needToPersistToDb]) {
+            const { _id, system, flags } = item.toObject();
+            delete flags[needToPersistToDb];
+            itemUpdates.push({ _id, "==system": system, "==flags": flags });
+        }
+    }
+
+    promises.push(Item.implementation.updateDocuments(itemUpdates, { parent: actor }));
+
+    return Promise.all(promises);
+}
+
+/**
+ * Check if needToPersistToDb has been set for Item objects in the Items collection
+ */
+async function commitItemsCollectionMigrateDataChanges(item) {
+    if (item.flags[needToPersistToDb]) {
+        const { system, flags } = item.toObject();
+        delete flags[needToPersistToDb];
+        await item.update({ "==system": system, "==flags": flags }, { parent: null });
     }
 }
 

@@ -14,7 +14,6 @@ import {
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
-//import { onActiveEffectToggle } from "../utility/effects.mjs";
 import {
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
@@ -42,6 +41,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
+import { tagObjectForPersistence } from "../migration.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -5930,6 +5930,9 @@ export class HeroSystem6eItem extends Item {
 
             // Delete the now migrated system.charges object
             foundry.utils.deleteProperty(source, "system.charges");
+
+            // Signal to migration code that this object has changed and needs to be persisted to the DB
+            tagObjectForPersistence(source);
         }
 
         return super.migrateData(source);
