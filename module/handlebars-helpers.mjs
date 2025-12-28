@@ -236,6 +236,7 @@ function calculated5eCharacteristic(actor, characteristic) {
 
 function figured5eCharacteristic(actor, characteristic) {
     try {
+        // Return the raw unrounded values. It works because SPD is the only non rounded value.
         return characteristic.baseInfo.figured5eCharacteristic(actor, "core");
     } catch (e) {
         console.error(e);

@@ -1546,6 +1546,19 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return 0;
     }
 
+    baseSumFiguredCharacteristicsNoRoundingFromItems(divisor) {
+        // Each item is rounded seperately
+        try {
+            const powersWithThisCharacteristic = this.baseItemsContributingToFiguredCharacteristics;
+            return powersWithThisCharacteristic.reduce((accumulator, currentItem) => {
+                return accumulator + currentItem.system.LEVELS / divisor;
+            }, 0);
+        } catch (e) {
+            console.error(e);
+        }
+        return 0;
+    }
+
     get realCost() {
         if (this.baseInfo?.cost) {
             return this.baseInfo.cost(this);

@@ -861,23 +861,6 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-
-        // Update figured characteristics when associated characteristic is toggled
-        // if (this.baseInfo?.behaviors.includes("figured")) {
-        //     if (this.baseInfo.figured5eCharacteristic) {
-        //         const charKey = this.system.XMLID.toLowerCase();
-        //         const newValue = this.baseInfo.figured5eCharacteristic(this);
-        //         // Intentionally making 2 update calls to allow for AEs to kick in for value
-        //         // TODO: May break adjustment powers
-        //         await this.update({ [`system.characteristics.${charKey}.max`]: newValue });
-        //         await this.update({
-        //             [`system.characteristics.${charKey}.value`]: Math.min(
-        //                 newValue,
-        //                 this.system.characteristics[charKey].max,
-        //             ),
-        //         });
-        //     }
-        // }
     }
 
     /**

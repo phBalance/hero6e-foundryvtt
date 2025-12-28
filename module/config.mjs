@@ -1168,7 +1168,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return (
                     1 +
                     Number((actor.system.characteristics.dex.basePlusLevels / 10).toFixed(1)) +
-                    Number(actor.system.characteristics.dex.baseSumFiguredCharacteristicsFromItems(10).toFixed(1))
+                    Number(
+                        actor.system.characteristics.dex
+                            .baseSumFiguredCharacteristicsNoRoundingFromItems(10)
+                            .toFixed(1),
+                    )
                 );
             },
 

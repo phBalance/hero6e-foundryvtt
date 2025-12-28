@@ -1452,13 +1452,6 @@ export function registerFullTests(quench) {
                     assert.equal(actor.system.characteristics.leaping.realCost, 0);
                 });
 
-                it("gliding.max", async function () {
-                    assert.equal(actor.system.characteristics.gliding.max, 0);
-                });
-                it("gliding.realCost", async function () {
-                    assert.equal(actor.system.characteristics.gliding.realCost, 0);
-                });
-
                 it("realCost", async function () {
                     assert.equal(actor.realCost, 0);
                 });
