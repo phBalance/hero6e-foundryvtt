@@ -2532,7 +2532,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const nnd = avad.adders.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
         if (nnd && damageData.defenseAvad > 0) {
             // render card
-            let speaker = ChatMessage.getSpeaker({ actor: item.actor });
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
             const chatData = {
                 author: game.user._id,
@@ -2592,6 +2592,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const ablationType = ablativeDefenseObj.item.ablativeType;
 
         // PH: FIXME: Need to handle all the damage tag operations properly. Need to extract a function for that.
+        // PH: FIXME: Doesn't handle AP and the like which should effectively reduce the defense of the object.
 
         // Did the remaining damage exceed this item's capacity to absorb damage? If so, ablate it.
         if (
@@ -2602,6 +2603,16 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             await ablativeDefenseObj.item.update({
                 "system.ablative": ablativeDefenseObj.item.system.ablative + 1,
             });
+
+            const speaker = ChatMessage.getSpeaker({ actor: ablativeDefenseObj.item.actor });
+
+            const chatData = {
+                author: game.user._id,
+                content: `${ablativeDefenseObj.item.name} ablative defense exceeded by attack from ${item.name}.`,
+                speaker: speaker,
+            };
+
+            await ChatMessage.create(chatData);
         }
 
         remainingDamage.stun = Math.max(0, remainingDamage.stun - ablativeDefense);
