@@ -3794,6 +3794,14 @@ async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMul
             });
         }
 
+        if (knockbackMultiplier !== 1) {
+            knockbackTags.push({
+                value: `${knockbackMultiplier}x to base KB`,
+                name: "attack has Knockback Multiplier",
+                title: "Knockback Multiplier",
+            });
+        }
+
         // Calculate the knockback considering:
         // - the knockback multiplier is a calculation to the attacker's advantage (so round up)
         knockbackRoller = new HeroRoller()
