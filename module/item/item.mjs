@@ -5898,6 +5898,7 @@ export class HeroSystem6eItem extends Item {
         // This has changed and we would like to salvage the current charges & clips.
         // A migration script re-writes this data and we should eventually be
         // able to remove this (Dec 23 2025 / migrateTo4_2_5)
+        // SEE: migration.mjs:commitActorAndItemMigrateDataChangesByActor
         if (source.system?.charges?.max && !source.system._charges) {
             console.log(`${source.name} has deprecated charges object. Migrating.`);
 
@@ -5911,7 +5912,9 @@ export class HeroSystem6eItem extends Item {
                 console.error(`Unable to migrate "system.charges.clips: for ${source.name}/${source._id}`);
             }
 
-            // Delete the now migrated system.charges object
+            // Delete the now migrated system.charges object.
+            // This is the data that needs removed from that database. No longer needed as we migrated
+            // important values to _charges and _clips.
             foundry.utils.deleteProperty(source, "system.charges");
 
             // Signal to migration code that this object has changed and needs to be persisted to the DB

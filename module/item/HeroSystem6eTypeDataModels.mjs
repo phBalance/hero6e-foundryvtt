@@ -926,6 +926,10 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             CARRIED: new BooleanField({ nullable: true }), // Typically for equipment; extending to include VPP
             FILE_ASSOCIATION: new StringField({ nullable: true }), // Follower file association in HDC
             errors: new ArrayField(new StringField()), // During upload we sometimes put stuff in here for debugging
+
+            _charges: new HeroNumberField({ initial: 0, integer: true }),
+            _clips: new HeroNumberField({ initial: 1, integer: true }),
+            ablative: new HeroNumberField({ initial: 0, integer: true }), // Store # of times threshold has been exceeded
         };
     }
 }
@@ -990,10 +994,6 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             // Perk
             BASEPOINTS: new StringField(),
             DISADPOINTS: new StringField(),
-
-            _charges: new HeroNumberField({ initial: 0, integer: true }),
-            _clips: new HeroNumberField({ initial: 1, integer: true }),
-            ablative: new HeroNumberField({ initial: 0, integer: true }), // Store # of times threshold has been exceeded
         };
     }
 

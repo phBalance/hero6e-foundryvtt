@@ -4,8 +4,10 @@ import { HeroItemCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 
 // Signal to migration code that this object has changed and needs to be persisted to the DB
 const needToPersistToDb = "persistMigrationToDb";
-const needToCommitMigrationToDbField = `flags.${needToPersistToDb}`;
+
 export function tagObjectForPersistence(source) {
+    // Notice that this value is never saved to the database
+    const needToCommitMigrationToDbField = `flags.${game.system.id || "hero6efoundryvttv2"}.${needToPersistToDb}`;
     foundry.utils.setProperty(source, needToCommitMigrationToDbField, true);
 }
 
@@ -82,6 +84,11 @@ async function migrateToVersion(migratesToVersion, lastMigration, queue, queueTy
 }
 
 export async function migrateWorld() {
+    // Only the primary GM should be running migrations
+    if (!game.users.activeGM?.isSelf) {
+        return;
+    }
+
     const lastMigration = game.settings.get(game.system.id, "lastMigration");
 
     // NOTE: If there has never been a migration then the lastMigration is "1.0.0". We don't need to give a warning in this case
@@ -265,6 +272,7 @@ export async function migrateWorld() {
 
 /**
  * Check if needToPersistToDb has been set for Actor or Item objects. If so, persist.
+ * REF: https://discord.com/channels/170995199584108546/811676497965613117/1437162678224162836
  */
 async function commitActorAndItemMigrateDataChangesByActor(actor) {
     const promises = [];
@@ -272,17 +280,17 @@ async function commitActorAndItemMigrateDataChangesByActor(actor) {
     const actorUpdates = [];
     const itemUpdates = [];
 
-    if (actor.flags[needToPersistToDb]) {
+    if (actor.flags[game.system.id]?.[needToPersistToDb]) {
         const { _id, system, flags } = actor.toObject();
-        delete flags[needToPersistToDb];
+        delete flags[game.system.id][needToPersistToDb];
         actorUpdates.push({ _id, "==system": system, "==flags": flags });
     }
     promises.push(Actor.implementation.updateDocuments(actorUpdates));
 
     for (const item of actor.items) {
-        if (item.flags[needToPersistToDb]) {
+        if (item.flags[game.system.id]?.[needToPersistToDb]) {
             const { _id, system, flags } = item.toObject();
-            delete flags[needToPersistToDb];
+            delete flags[game.system.id][needToPersistToDb];
             itemUpdates.push({ _id, "==system": system, "==flags": flags });
         }
     }
@@ -293,13 +301,14 @@ async function commitActorAndItemMigrateDataChangesByActor(actor) {
 }
 
 /**
- * Check if needToPersistToDb has been set for Item objects in the Items collection
+ * Check if needToPersistToDb has been set for Item objects in the Items collection.
+ * These are items in the sidebar and have no associated actor.
  */
 async function commitItemsCollectionMigrateDataChanges(item) {
-    if (item.flags[needToPersistToDb]) {
+    if (item.flags[game.system.id]?.[needToPersistToDb]) {
         const { system, flags } = item.toObject();
-        delete flags[needToPersistToDb];
-        await item.update({ "==system": system, "==flags": flags }, { parent: null });
+        delete flags[game.system.id][needToPersistToDb];
+        await item.update({ "==system": system, "==flags": flags });
     }
 }
 
