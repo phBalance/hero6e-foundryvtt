@@ -4645,7 +4645,7 @@ export class HeroSystem6eItem extends Item {
             return "-";
         }
 
-        console.warn(`Unable to determine defense for ${this.name}`);
+        console.warn(`Unable to determine defense for ${this.detailedName()}`);
         return "-"; // Default
     }
 
