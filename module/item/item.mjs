@@ -3640,7 +3640,7 @@ export class HeroSystem6eItem extends Item {
                             ? "Full Protection"
                             : this.system.ablative > 8
                               ? "No Protection"
-                              : `Partial Protection w/ Activation Roll ${16 - this.system.ablative}-`;
+                              : `Partial Protection with Activation Roll ${16 - this.system.ablative}-`;
                     result += `, ${modifier.ALIAS} (${tresholdRoll}) ${modifier.OPTION_ALIAS}`;
                 }
 
@@ -6486,7 +6486,7 @@ export async function rollAblativeActivationCheck(item) {
         cardHtml = await ablativeActivationRoller.render(flavor);
     } else if (thresholdExceeded === 0) {
         // Defense has not yet been ablated so it always works.
-        cardHtml = `Unablated ${item.name} auto activation`;
+        cardHtml = `Unablated ${item.name} guaranteed activation`;
         succeeded = true;
     } else {
         // Defense has been fully ablated so it never works.
