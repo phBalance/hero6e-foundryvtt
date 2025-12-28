@@ -9,7 +9,8 @@
 - Improved support for non-combat and vertical movement in FoundryVTT v13. [#3234](https://github.com/dmdorman/hero6e-foundryvtt/issues/3234) [#3240](https://github.com/dmdorman/hero6e-foundryvtt/issues/3240)
 - Luck and unluck have been added to the generic damage roller using the counting 6s or 1s method.
 - Vehicle loading now works and they no longer gain BODY when taking damage. [#3352](https://github.com/dmdorman/hero6e-foundryvtt/issues/3352) [#3354](https://github.com/dmdorman/hero6e-foundryvtt/issues/3354)
-- Improved CSL support [#3265](https://github.com/dmdorman/hero6e-foundryvtt/issues/3265)
+- Improved CSL support. [#3265](https://github.com/dmdorman/hero6e-foundryvtt/issues/3265)
+- Improved 5e figured and calculated characteristics. [#3345](https://github.com/dmdorman/hero6e-foundryvtt/issues/3345)
 
 ## Version 4.2.4 20251130
 

@@ -1,6 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
-import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
 export class HeroSystem6eActorActiveEffectsSystemData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
@@ -513,25 +512,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
                     // 5e figured characteristic
                     if (actor.is5e) {
-                        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(actor);
-                        for (const char of _getCharacteristicInfoArrayForActor.filter((o) =>
-                            o.behaviors.includes(`figured${key.toUpperCase()}`),
-                        )) {
-                            const key = char.key.toLocaleLowerCase();
-
-                            if (char.figured5eCharacteristic) {
-                                const newValue = char.figured5eCharacteristic(actor);
-                                // Intentionally making 2 update calls to allow for AEs to kick in for value
-                                // TODO: May break adjustment powers
-                                await actor.update({ [`system.characteristics.${key}.max`]: newValue });
-                                await actor.update({
-                                    [`system.characteristics.${key}.value`]: Math.min(
-                                        newValue,
-                                        actor.system.characteristics[key].max,
-                                    ),
-                                });
-                            }
-                        }
+                        await actor.updateFiguredCharacteristicDependencies(key.toUpperCase());
                     }
                 }
             }

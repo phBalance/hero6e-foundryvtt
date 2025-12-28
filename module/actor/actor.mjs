@@ -581,25 +581,7 @@ export class HeroSystem6eActor extends Actor {
                         });
 
                         // Check for any figuredCharacteristic dependencies.
-                        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
-                        for (const char of _getCharacteristicInfoArrayForActor.filter((o) =>
-                            o.behaviors.includes(`figured${charKey.toUpperCase()}`),
-                        )) {
-                            const key = char.key.toLocaleLowerCase();
-
-                            if (char.figured5eCharacteristic) {
-                                const newValue = char.figured5eCharacteristic(this);
-                                // Intentionally making 2 update calls to allow for AEs to kick in for value
-                                // TODO: May break adjustment powers
-                                await this.update({ [`system.characteristics.${key}.max`]: newValue });
-                                await this.update({
-                                    [`system.characteristics.${key}.value`]: Math.min(
-                                        newValue,
-                                        this.system.characteristics[key].max,
-                                    ),
-                                });
-                            }
-                        }
+                        await this.updateFiguredCharacteristicDependencies(charKey);
                     } else {
                         console.error(`Unhandled characteristic key ${charKey}`, data);
                     }
@@ -682,6 +664,34 @@ export class HeroSystem6eActor extends Actor {
                   `STR+${values.str}, KB-${values.kbResistance}, BODY+${values.body}`
                 : "";
         return values;
+    }
+
+    // Check for any figuredCharacteristic dependencies of the changedCharKey.
+    async updateFiguredCharacteristicDependencies(changedCharKey) {
+        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
+        for (const charPowerInfo of _getCharacteristicInfoArrayForActor.filter((o) =>
+            o.behaviors.includes(`figured${changedCharKey.toUpperCase()}`),
+        )) {
+            const key = charPowerInfo.key.toLocaleLowerCase();
+
+            if (charPowerInfo.figured5eCharacteristic) {
+                const levels = this.system[charPowerInfo.key].LEVELS;
+                if (levels == null) {
+                    console.error(`${this.name} has ${key}.LEVELS that is ${levels}`);
+                }
+
+                // Kludge: we only need to floor SPD as everything is prerounded. If we don't round then
+                //         committing to the database will kindly round to an integer for us.
+                const newValue = Math.floor(charPowerInfo.figured5eCharacteristic(this) + (levels ?? 0));
+
+                // Intentionally making 2 update calls to allow for AEs to kick in for value
+                // TODO: May break adjustment powers
+                await this.update({ [`system.characteristics.${key}.max`]: newValue });
+                await this.update({
+                    [`system.characteristics.${key}.value`]: newValue,
+                });
+            }
+        }
     }
 
     async TakeRecovery({ asAction, token, preventRecoverFromStun }) {
