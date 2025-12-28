@@ -565,7 +565,7 @@ Hooks.once("ready", async function () {
     const lastMigration = game.settings.get(game.system.id, "lastMigration");
 
     if (foundry.utils.isNewerVersion(game.system.version.replace("-alpha", ""), lastMigration)) {
-        migrateWorld();
+        await migrateWorld();
 
         // Update lastMigration
         await game.settings.set(game.system.id, "lastMigration", game.system.version.replace("-alpha", ""));

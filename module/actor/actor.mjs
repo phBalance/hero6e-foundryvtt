@@ -13,6 +13,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
 //import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
+//import { tagObjectForPersistence } from "../migration.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -589,7 +590,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // 5e figured & calculated characteristics
+        // 5e calculated characteristics
         if (this.is5e && data.system?.characteristics) {
             let _getCharacteristicInfoArrayForActor; // a bit of caching
             const changes = {};
@@ -598,10 +599,7 @@ export class HeroSystem6eActor extends Actor {
                     _getCharacteristicInfoArrayForActor ??= getCharacteristicInfoArrayForActor(this);
 
                     for (const char of _getCharacteristicInfoArrayForActor.filter(
-                        (o) =>
-                            o.behaviors.includes(`figured${changeKey.toUpperCase()}`) ||
-                            o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) ||
-                            o.key == changeKey,
+                        (o) => o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) || o.key == changeKey,
                     )) {
                         const key = char.key.toLocaleLowerCase();
 
@@ -684,11 +682,11 @@ export class HeroSystem6eActor extends Actor {
                 //         committing to the database will kindly round to an integer for us.
                 const newValue = Math.floor(charPowerInfo.figured5eCharacteristic(this) + (levels ?? 0));
 
-                // Intentionally making 2 update calls to allow for AEs to kick in for value
+                // Intentionally making 2 update calls to allow for AEs to kick in for max so we can set value to match
                 // TODO: May break adjustment powers
                 await this.update({ [`system.characteristics.${key}.max`]: newValue });
                 await this.update({
-                    [`system.characteristics.${key}.value`]: newValue,
+                    [`system.characteristics.${key}.value`]: this.system.characteristics[key].max,
                 });
             }
         }
@@ -3872,8 +3870,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     // static migrateData(source) {
-    //     console.log(source);
-    //     debugger;
+    //     tagObjectForPersistence(source);
     //     return super.migrateData(source);
     // }
 }
