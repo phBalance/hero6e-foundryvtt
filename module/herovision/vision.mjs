@@ -80,28 +80,10 @@ export function setPerceptionModes() {
     }
     CONFIG.Canvas.visionModes.heroVision = new HeroVisionMode();
     CONFIG.Canvas.visionModes.infraredPerception = new HeroVisionModeInfraredPerception();
-    // CONFIG.Canvas.visionModes.heroSight = new VisionMode({
-    //     id: "heroVision",
-    //     label: "Hero Vision",
-    //     canvas: {
-    //         shader: ColorAdjustmentsSamplerShader,
-    //         //uniforms: { enable: true, contrast: 0, saturation: -1.0, brightness: 0 },
-    //         uniforms: { brightness: 0, contrast: 0, darknessLevel: 0, saturation: -1 },
-    //     },
-    //     lighting: {
-    //         levels: {
-    //             // from core-bundled darkvision mode: maybe restore?
-    //             //[VisionMode.LIGHTING_LEVELS.DIM]: VisionMode.LIGHTING_LEVELS.BRIGHT,
-    //         },
-    //         background: { visibility: VisionMode.LIGHTING_VISIBILITY.REQUIRED },
-    //     },
-    //     vision: {
-    //         darkness: { adaptive: false },
-    //         defaults: { contrast: 0, saturation: -1, brightness: 0.1 },
-    //     },
-    // });
-    // Hero Generic Sense
 
+    /**
+     * Hero Generic Sense
+     */
     class HeroDetectionSightMode extends FoundryVttDetectionMode {
         constructor() {
             super({
