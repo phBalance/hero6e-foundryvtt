@@ -22,6 +22,7 @@ export default [
                 Actor: "readonly",
                 Actors: "readonly",
                 ActorSheet: "readonly",
+                AmplificationBackgroundVisionShader: "readonly",
                 Application: "readonly",
                 canvas: "readonly",
                 ChatMessage: "readonly",
