@@ -257,12 +257,13 @@ export class Attack {
         return true;
     }
 
+    // PH: FIXME: Remove this
     static getRangeModifier(item, range) {
         const actor = item.actor;
 
-        if (item.system.range === "self") {
+        if (item.system.rangeForItem(item) === CONFIG.HERO.RANGE_TYPES.SELF) {
             // TODO: Should not be able to use this on anyone else. Should add a check.
-            console.log("item.system.range === self && range:", range);
+            console.log("item.system.rangeForItem(item) === self && range:", range);
             return 0;
         }
 
@@ -274,7 +275,7 @@ export class Attack {
 
         // There are no range penalties if this is a line of sight power or it has been bought with
         // no range modifiers.
-        if (!(item.system.range === "los" || noRangeModifiers || normalRange)) {
+        if (!(item.system.rangeForItem(item) === "los" || noRangeModifiers || normalRange)) {
             const factor = actor.system.is5e ? 4 : 8;
 
             let rangePenalty = -Math.ceil(Math.log2(range / factor)) * 2;
@@ -292,6 +293,7 @@ export class Attack {
         return 0;
     }
 
+    // PH: FIXME: Remove this
     static getTargetInfo(item, targetedToken, options, system) {
         // these are the targeting data used for the attack(s)
         const target = {
@@ -323,6 +325,7 @@ export class Attack {
         return attack;
     }
 
+    // PH: FIXME: Remove this
     static getHaymakerAttackInfo(item, targetedTokens, options, system) {
         const attack = Attack.getAttackInfo(item, targetedTokens, options, system);
         return attack;
@@ -376,6 +379,7 @@ export class Attack {
         return maneuver;
     }
 
+    // PH: FIXME: Remove this
     static getHaymakerManeuverInfo(item, targetedTokens, options, system) {
         const attacks = [Attack.getHaymakerAttackInfo(item, targetedTokens, options, system)];
         return {
@@ -387,6 +391,7 @@ export class Attack {
         };
     }
 
+    // PH: FIXME: Remove this
     static getManeuverInfo(item, targetedTokens, options, system) {
         const isMultipleAttack = item.system.XMLID === "MULTIPLEATTACK";
         const isHaymakerAttack = item.system.XMLID === "HAYMAKER";
@@ -409,6 +414,7 @@ export class Attack {
         };
     }
 
+    // PH: FIXME: Remove this
     static getCurrentManeuverInfo(maneuver, options, system) {
         if (options?.execute !== undefined && maneuver.isMultipleAttack) {
             let lastAttackHit = true;

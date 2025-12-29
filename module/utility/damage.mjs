@@ -246,8 +246,8 @@ export function isRangedCombatManeuver(item) {
     return (
         item.type === "maneuver" &&
         // PH: FIXME: should add CATEGORY to match martial maneuvers
-        item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
-        item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
+        item.system.rangeForItem(item) !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
+        item.system.rangeForItem(item) !== CONFIG.HERO.RANGE_TYPES.SELF
     );
 }
 
@@ -255,7 +255,8 @@ export function isHthCombatManeuver(item) {
     return (
         item.type === "maneuver" &&
         // PH: FIXME: should add CATEGORY to match martial maneuvers
-        (item.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE || item.system.range === CONFIG.HERO.RANGE_TYPES.SELF)
+        (item.system.rangeForItem(item) === CONFIG.HERO.RANGE_TYPES.NO_RANGE ||
+            item.system.rangeForItem(item) === CONFIG.HERO.RANGE_TYPES.SELF)
     );
 }
 
@@ -267,8 +268,8 @@ export function isHthMartialManeuver(item) {
     return item.type === "martialart" && isManeuverHthCategory(item);
 }
 
+// NOTE: HD has a bug where custom martial maneuvers have CATEGORY of "Hand to Hand" (note lower case)
 export function isManeuverHthCategory(item) {
-    // NOTE: HD has a bug where custom martial maneuvers have CATEGORY of "Hand to Hand" (note lower case)
     return item.system.CATEGORY === "Hand To Hand" || item.system.CATEGORY === "Hand to Hand";
 }
 

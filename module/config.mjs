@@ -11,6 +11,7 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 import {
     characteristicValueToDiceParts,
     dicePartsToFullyQualifiedEffectFormula,
+    isRangedMartialManeuver,
     maneuverBaseEffectDicePartsBundle,
     maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
@@ -534,19 +535,19 @@ function validatePowers() {
     numViolations += powersWithDurationThatIsUppercase.length;
 
     // Has range property and is not framework/compound/adder/modifier
-    const powersWithoutRangeProperty = this.filter(
+    const powersWithoutRangeForItemFunction = this.filter(
         (power) =>
             !(
                 power.behaviors.includes("adder") ||
                 power.behaviors.includes("modifier") ||
                 power.type.includes("framework") ||
                 power.type.includes("compound")
-            ) && !power.range,
+            ) && !(power.rangeForItem && typeof power.rangeForItem === "function"),
     );
-    if (powersWithoutRangeProperty.length > 0) {
-        console.warn(`Powers without range property: `, powersWithoutRangeProperty);
+    if (powersWithoutRangeForItemFunction.length > 0) {
+        console.warn(`Powers without range property: `, powersWithoutRangeForItemFunction);
     }
-    numViolations += powersWithoutRangeProperty.length;
+    numViolations += powersWithoutRangeForItemFunction.length;
 
     // A power (not modifier or adder) without duration property?
     const powersWithoutDurationProperty = this.filter(
@@ -792,7 +793,7 @@ function pdEdCostPerLevel(itemOrActor) {
  *        "telescopicBuiltIn" - this sense is telescopic
  *
  * @property {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
- * @property {HERO.RANGE_TYPES} range - The range of the power
+ * @property {Function(HeroSystem6eItem) => HERO.RANGE_TYPES} rangeForItem - The range of the power base on the item as many martial arts share the same XMLID
  * @property {boolean} [costEnd] - If the power costs endurance to use. true if it does, false or undefined if it doesn't
  */
 
@@ -893,7 +894,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
@@ -917,7 +918,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
@@ -937,7 +938,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success", "defense"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
@@ -957,7 +958,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
@@ -975,7 +976,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2", "computer"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
@@ -995,7 +996,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
@@ -1011,7 +1012,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["success"],
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
         cost: function (characteristicOrPower) {
@@ -1042,7 +1043,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["calculated", "calculatedDEX"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1072,7 +1073,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["defense", "calculated", "calculatedDEX"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1102,7 +1103,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["calculated", "calculatedEGO"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1132,7 +1133,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["defense", "calculated", "calculatedEGO"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1181,7 +1182,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1219,7 +1220,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["defense"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["ai", "computer"]),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -1266,7 +1267,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["defense"],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["ai", "computer"]),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -1313,7 +1314,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1349,7 +1350,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1390,7 +1391,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1410,7 +1411,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: function (actor) {
                 const alwaysIgnore = ["vehicle", "base2", "computer", "ai"].includes(actor.type);
@@ -1468,7 +1469,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["ai", "automaton", "computer", "npc", "pc", "vehicle"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1490,7 +1491,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         ignoreForActor: staticIgnoreForActorFunction(["ai", "automaton", "computer", "npc", "pc"]),
         baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1507,7 +1508,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction(["ai", "automaton", "base2", "computer", "npc", "pc"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -1531,7 +1532,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1556,7 +1557,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1581,7 +1582,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1606,7 +1607,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1631,7 +1632,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1656,7 +1657,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1681,7 +1682,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1706,7 +1707,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1731,7 +1732,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1756,7 +1757,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -1782,7 +1783,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
         duration: "instant",
-        range: HERO.RANGE_TYPES.STANDARD,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -1808,7 +1809,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -1835,7 +1836,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -1863,7 +1864,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -1891,7 +1892,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -1919,7 +1920,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -1947,7 +1948,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -1975,7 +1976,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2002,7 +2003,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2030,7 +2031,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2069,7 +2070,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2108,7 +2109,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Haymaker",
             costPerLevel: fixedValueFunction(0),
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
@@ -2134,7 +2135,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2160,7 +2161,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
         duration: "instant",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2186,7 +2187,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2225,7 +2226,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2264,7 +2265,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all possible
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE), // TODO: Not correct for all possible
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2293,7 +2294,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all possible.
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE), // TODO: Not correct for all possible.
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2322,7 +2323,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2349,7 +2350,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
         duration: "instant",
-        range: HERO.RANGE_TYPES.NO_RANGE, // TODO: Not correct for all
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE), // TODO: Not correct for all
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2375,7 +2376,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2403,7 +2404,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2432,7 +2433,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2459,7 +2460,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2487,7 +2488,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2515,7 +2516,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2543,7 +2544,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2571,7 +2572,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2609,7 +2610,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
         duration: "instant",
-        range: HERO.RANGE_TYPES.NO_RANGE,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
         target: "target's dcv",
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2635,7 +2636,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2663,7 +2664,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2694,7 +2695,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "inobvious",
             duration: "instant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(20),
             // There aren't really any LEVELS or a .value for this power, no need to show on CHARACTERISTICS tab
@@ -2722,7 +2723,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2744,7 +2745,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -2770,7 +2771,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             ignoreForActor: staticIgnoreForActorFunction([
                 "ai",
@@ -2794,7 +2795,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(2),
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2812,7 +2813,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         base: fixedValueFunction(0),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         costPerLevel: fixedValueFunction(1),
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2837,7 +2838,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -2884,7 +2885,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -2906,7 +2907,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -2926,7 +2927,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             rangeText: function (item) {
                 // The maximum length of the swingline
                 let distanceInMetres = item.basePointsPlusAdders * 10;
@@ -2952,7 +2953,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "instant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2972,7 +2973,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2995,7 +2996,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="ACROBATICS" BASECOST="3.0" LEVELS="0" ALIAS="Acrobatics" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3009,7 +3010,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="ACTING" ID="1709161468976" BASECOST="3.0" LEVELS="0" ALIAS="Acting" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3023,7 +3024,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="ANALYZE" ID="1709161469684" BASECOST="3.0" LEVELS="0" ALIAS="Analyze" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Agility Skills" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3038,7 +3039,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             categorized: true,
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             cost: function (skill) {
                 // 6e Cost: 2 Character Points for a category,
@@ -3075,7 +3076,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         categorized: true,
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="ARMORSMITH" ID="1763826715627" BASECOST="3.0" LEVELS="0" ALIAS="Armorsmith" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -3087,7 +3088,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="AUTOFIRE_SKILLS" ID="1709161475889" BASECOST="5.0" LEVELS="0" ALIAS="Autofire Skills" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ACCURATE" OPTIONID="ACCURATE" OPTION_ALIAS="Accurate Sprayfire" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
@@ -3102,7 +3103,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="BREAKFALL" ID="1709161478362" BASECOST="3.0" LEVELS="0" ALIAS="Breakfall" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3116,7 +3117,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="BRIBERY" ID="1709161479206" BASECOST="3.0" LEVELS="0" ALIAS="Bribery" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3130,7 +3131,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="BUGGING" ID="1709161479965" BASECOST="3.0" LEVELS="0" ALIAS="Bugging" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3144,7 +3145,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="BUREAUCRATICS" ID="1709161480723" BASECOST="3.0" LEVELS="0" ALIAS="Bureaucratics" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3159,7 +3160,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CHARM" ID="1709161481624" BASECOST="3.0" LEVELS="0" ALIAS="Charm" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3173,7 +3174,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CLIMBING" ID="1709161482605" BASECOST="3.0" LEVELS="0" ALIAS="Climbing" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3187,7 +3188,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="COMBAT_DRIVING" ID="1709161483399" BASECOST="3.0" LEVELS="0" ALIAS="Combat Driving" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3202,7 +3203,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             costEnd: false,
             refreshAttackDialogWhenChanged: true,
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
                 showAttacks: true,
                 editableOption_ALIAS: true,
@@ -3314,7 +3315,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="COMBAT_PILOTING" ID="1709161484209" BASECOST="3.0" LEVELS="0" ALIAS="Combat Piloting" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3328,7 +3329,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="COMPUTER_PROGRAMMING" ID="1709161488163" BASECOST="3.0" LEVELS="0" ALIAS="Computer Programming" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3342,7 +3343,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CONCEALMENT" ID="1709161490757" BASECOST="3.0" LEVELS="0" ALIAS="Concealment" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3356,7 +3357,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CONTORTIONIST" ID="1709161491534" BASECOST="3.0" LEVELS="0" ALIAS="Contortionist" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3370,7 +3371,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CONVERSATION" ID="1709161492343" BASECOST="3.0" LEVELS="0" ALIAS="Conversation" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3384,7 +3385,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CRAMMING" ID="1709161493162" BASECOST="5.0" LEVELS="0" ALIAS="Cramming" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
@@ -3398,7 +3399,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CRIMINOLOGY" ID="1709161494054" BASECOST="3.0" LEVELS="0" ALIAS="Criminology" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3412,7 +3413,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CRYPTOGRAPHY" ID="1709161496416" BASECOST="3.0" LEVELS="0" ALIAS="Cryptography" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3426,7 +3427,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="CUSTOMSKILL" ID="1709161497972" BASECOST="0.0" LEVELS="1" ALIAS="Custom Skill" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" ROLL="0"></SKILL>`,
         },
@@ -3441,7 +3442,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="DEDUCTION" ID="1709161500786" BASECOST="3.0" LEVELS="0" ALIAS="Deduction" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3455,7 +3456,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="DEFENSE_MANEUVER" ID="1709161501659" BASECOST="3.0" LEVELS="0" ALIAS="Defense Maneuver" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="I" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
@@ -3469,7 +3470,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="DEMOLITIONS" ID="1709161503996" BASECOST="3.0" LEVELS="0" ALIAS="Demolitions" POSITION="24" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3483,7 +3484,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="DISGUISE" ID="1709161504988" BASECOST="3.0" LEVELS="0" ALIAS="Disguise" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3498,7 +3499,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="ELECTRONICS" ID="1709161505775" BASECOST="3.0" LEVELS="0" ALIAS="Electronics" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3513,7 +3514,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="FAST_DRAW" ID="1709161506592" BASECOST="3.0" LEVELS="0" ALIAS="Fast Draw" POSITION="27" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3526,7 +3527,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="FEINT" ID="1763826725179" BASECOST="3.0" LEVELS="0" ALIAS="Feint" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -3538,7 +3539,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="FORENSIC_MEDICINE" ID="1709161509009" BASECOST="3.0" LEVELS="0" ALIAS="Forensic Medicine" POSITION="28" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3559,7 +3560,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             categorized: true,
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="FORGERY" ID="1709161509923" BASECOST="0.0" LEVELS="0" ALIAS="Forgery" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3575,7 +3576,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             categorized: true,
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="GAMBLING" ID="1709161511974" BASECOST="0.0" LEVELS="0" ALIAS="Gambling" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3590,7 +3591,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="HIGH_SOCIETY" ID="1709161513798" BASECOST="3.0" LEVELS="0" ALIAS="High Society" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3603,7 +3604,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="HOIST" ID="1763826732484" BASECOST="3.0" LEVELS="0" ALIAS="Hoist" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -3615,7 +3616,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="INSTRUCTOR" ID="1763826734980" BASECOST="3.0" LEVELS="0" ALIAS="Instructor" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -3627,7 +3628,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="INTERROGATION" ID="1709161516272" BASECOST="3.0" LEVELS="0" ALIAS="Interrogation" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3641,7 +3642,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="INVENTOR" ID="1709161517097" BASECOST="3.0" LEVELS="0" ALIAS="Inventor" POSITION="33" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3655,7 +3656,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             xml: `<SKILL XMLID="KNOWLEDGE_SKILL" ID="1709161518105" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="34" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General"></SKILL>`,
@@ -3671,7 +3672,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="LANGUAGES" ID="1709161520791" BASECOST="1.0" LEVELS="0" ALIAS="Language" POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASIC" OPTIONID="BASIC" OPTION_ALIAS="basic conversation" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" FAMILIARITY="No" PROFICIENCY="No" NATIVE_TONGUE="No"></SKILL>`,
         },
@@ -3685,7 +3686,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="LIPREADING" ID="1709161523279" BASECOST="3.0" LEVELS="0" ALIAS="Lipreading" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3699,7 +3700,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="LOCKPICKING" ID="1709161524481" BASECOST="3.0" LEVELS="0" ALIAS="Lockpicking" POSITION="37" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3714,7 +3715,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="MECHANICS" ID="1709161525362" BASECOST="3.0" LEVELS="0" ALIAS="Mechanics" POSITION="38" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3727,7 +3728,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "csl"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             refreshAttackDialogWhenChanged: true,
             editOptions: {
@@ -3779,7 +3780,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="MIMICRY" ID="1709161528926" BASECOST="3.0" LEVELS="0" ALIAS="Mimicry" POSITION="40" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3794,7 +3795,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Musical Instrument Familiarity",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="MIF" ID="1762890667798" BASECOST="0.0" LEVELS="0" ALIAS="Musical Instrument Familiarity" POSITION="40" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1732469522885" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3810,7 +3811,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             categorized: true,
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="NAVIGATION" ID="1709161529843" BASECOST="0.0" LEVELS="0" ALIAS="Navigation" POSITION="41" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3823,7 +3824,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<POWER XMLID="NEGATIVECOMBATSKILLLEVELS" ID="1763830401211" BASECOST="0.0" LEVELS="1" ALIAS="Negative Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="DCV" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
@@ -3834,7 +3835,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<POWER XMLID="NEGATIVEPENALTYSKILLLEVELS" ID="1763830404491" BASECOST="0.0" LEVELS="1" ALIAS="Negative Penalty Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="[a single attack]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Hit Location modifiers" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
@@ -3845,7 +3846,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<POWER XMLID="NEGATIVESKILLLEVELS" ID="1763830407179" BASECOST="0.0" LEVELS="1" ALIAS="Negative Skill Levels" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="[any one Skill]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
@@ -3858,7 +3859,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="ORATORY" ID="1709161532182" BASECOST="3.0" LEVELS="0" ALIAS="Oratory" POSITION="42" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3872,7 +3873,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="PARACHUTING" ID="1763827772291" BASECOST="3.0" LEVELS="0" ALIAS="Parachuting" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -3884,7 +3885,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="PARAMEDICS" ID="1709161533283" BASECOST="3.0" LEVELS="0" ALIAS="Paramedics" POSITION="43" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -3897,7 +3898,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             editOptions: {
                 showAttacks: true,
@@ -4019,7 +4020,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
         },
         {},
@@ -4032,7 +4033,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="PERSUASION" ID="1763827781395" BASECOST="3.0" LEVELS="0" ALIAS="Persuasion" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4046,7 +4047,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="POISONING" ID="1763827783123" BASECOST="3.0" LEVELS="0" ALIAS="Poisoning" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4060,7 +4061,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="POWERSKILL" ID="1709161537007" BASECOST="3.0" LEVELS="0" ALIAS="Power" POSITION="45" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4074,7 +4075,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="PROFESSIONAL_SKILL" ID="1709161539381" BASECOST="2.0" LEVELS="0" ALIAS="PS" POSITION="46" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4089,7 +4090,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="RAPID_ATTACK_HTH" ID="1709161541446" BASECOST="10.0" LEVELS="0" ALIAS="Rapid Attack" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
@@ -4102,7 +4103,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="RAPID_ATTACK_RANGED" ID="1763827789995" BASECOST="5.0" LEVELS="0" ALIAS="Rapid Attack (Ranged)" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
     });
@@ -4113,7 +4114,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="RESEARCH" ID="1763827791931" BASECOST="3.0" LEVELS="0" ALIAS="Research" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -4125,7 +4126,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="RIDING" ID="1709161542264" BASECOST="3.0" LEVELS="0" ALIAS="Riding" POSITION="48" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4140,7 +4141,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="SCIENCE_SKILL" ID="1709161543124" BASECOST="2.0" LEVELS="0" ALIAS="Science Skill" POSITION="49" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4154,7 +4155,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="SECURITY_SYSTEMS" ID="1709161545330" BASECOST="3.0" LEVELS="0" ALIAS="Security Systems" POSITION="50" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4167,7 +4168,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="SEDUCTION" ID="1763827795667" BASECOST="3.0" LEVELS="0" ALIAS="Seduction" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -4179,7 +4180,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="SHADOWING" ID="1709161547363" BASECOST="3.0" LEVELS="0" ALIAS="Shadowing" POSITION="51" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4192,7 +4193,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "csl"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
@@ -4255,7 +4256,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="SLEIGHT_OF_HAND" ID="1709161550467" BASECOST="3.0" LEVELS="0" ALIAS="Sleight Of Hand" POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4268,7 +4269,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="SPELL" ID="1763827799555" BASECOST="3.0" LEVELS="0" ALIAS="Spell" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
     });
@@ -4280,7 +4281,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="STEALTH" ID="1709161551292" BASECOST="3.0" LEVELS="0" ALIAS="Stealth" POSITION="54" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4294,7 +4295,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="STREETWISE" ID="1709161552070" BASECOST="3.0" LEVELS="0" ALIAS="Streetwise" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4315,7 +4316,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             categorized: true,
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="SURVIVAL" ID="1709161552845" BASECOST="0.0" LEVELS="0" ALIAS="Survival" POSITION="56" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4329,7 +4330,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="SYSTEMS_OPERATION" ID="1709161555044" BASECOST="3.0" LEVELS="0" ALIAS="Systems Operation" POSITION="57" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4344,7 +4345,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="TACTICS" ID="1709161557125" BASECOST="3.0" LEVELS="0" ALIAS="Tactics" POSITION="58" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4358,7 +4359,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="TEAMWORK" ID="1709161558462" BASECOST="3.0" LEVELS="0" ALIAS="Teamwork" POSITION="59" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4372,7 +4373,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="TRACKING" ID="1709161559355" BASECOST="3.0" LEVELS="0" ALIAS="Tracking" POSITION="60" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4386,7 +4387,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="TRADING" ID="1709161560240" BASECOST="3.0" LEVELS="0" ALIAS="Trading" POSITION="61" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4411,7 +4412,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // },
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             editOptions: {
                 hideLEVELS: true,
@@ -4428,7 +4429,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="TWO_WEAPON_FIGHTING_HTH" ID="1709161562189" BASECOST="10.0" LEVELS="0" ALIAS="Two-Weapon Fighting" POSITION="62" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
@@ -4441,7 +4442,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(2),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<SKILL XMLID="TWO_WEAPON_FIGHTING_RANGED" ID="1763827806075" BASECOST="10.0" LEVELS="0" ALIAS="Two-Weapon Fighting (Ranged)" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
     });
@@ -4454,7 +4455,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SKILL XMLID="VENTRILOQUISM" ID="1709161563244" BASECOST="3.0" LEVELS="0" ALIAS="Ventriloquism" POSITION="63" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
@@ -4469,7 +4470,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             editOptions: {
                 hideLEVELS: true,
@@ -4505,7 +4506,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             categorized: true,
             xml: `<SKILL XMLID="WEAPONSMITH" ID="1709161565889" BASECOST="0.0" LEVELS="0" ALIAS="Weaponsmith" POSITION="65" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
@@ -4521,7 +4522,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<JACK_OF_ALL_TRADES XMLID="JACK_OF_ALL_TRADES" ID="1746307778979" BASECOST="3.0" LEVELS="0" ALIAS="Jack of All Trades" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></JACK_OF_ALL_TRADES>`,
         },
@@ -4535,7 +4536,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<LINGUIST XMLID="LINGUIST" ID="1746307779950" BASECOST="3.0" LEVELS="0" ALIAS="Linguist" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></LINGUIST>`,
         },
@@ -4549,7 +4550,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SCHOLAR XMLID="SCHOLAR" ID="1746307781015" BASECOST="3.0" LEVELS="0" ALIAS="Scholar" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></SCHOLAR>`,
         },
@@ -4563,7 +4564,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<SCIENTIST XMLID="SCIENTIST" ID="1746305916782" BASECOST="3.0" LEVELS="0" ALIAS="Scientist" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></SCIENTIST>`,
         },
@@ -4577,7 +4578,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TRAVELER XMLID="TRAVELER" ID="1746307782150" BASECOST="3.0" LEVELS="0" ALIAS="Traveler" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></TRAVELER>`,
         },
@@ -4723,7 +4724,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             xml: `<PERK XMLID="ACCESS" ID="1709161411911" BASECOST="0.0" LEVELS="3" ALIAS="Access" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
@@ -4735,7 +4736,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["perk"],
         behaviors: [],
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         costPerLevel: function (item) {
             if (item.system.OPTIONID === "NORMAL") {
@@ -4752,7 +4753,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             xml: `<PERK XMLID="ANONYMITY" ID="1709161415388" BASECOST="3.0" LEVELS="0" ALIAS="Anonymity" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
@@ -4766,7 +4767,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             xml: `<PERK XMLID="COMPUTER_LINK" ID="1709161418315" BASECOST="3.0" LEVELS="0" ALIAS="Computer Link" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
@@ -4779,7 +4780,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: ["success"],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1), // TODO: Not correct .. needs function
             xml: `<PERK XMLID="CONTACT" ID="1709161420959" BASECOST="0.0" LEVELS="1" ALIAS="Contact" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1710994081842" NAME=""></PERK>`,
@@ -4792,7 +4793,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
             xml: `<PERK XMLID="CUSTOMPERK" ID="1709161423608" BASECOST="0.0" LEVELS="1" ALIAS="Custom Perk" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" ROLL="0"></PERK>`,
@@ -4806,7 +4807,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
             xml: `<PERK XMLID="DEEP_COVER" ID="1709161426121" BASECOST="2.0" LEVELS="0" ALIAS="Deep Cover" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
@@ -4820,7 +4821,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         name: "False Identity",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
         xml: `<PERK XMLID="FALSEIDENTITY" ID="1709164911446" BASECOST="1.0" LEVELS="0" ALIAS="False Identity" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
@@ -4831,7 +4832,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
             xml: `<PERK XMLID="FAVOR" ID="1709161428760" BASECOST="1.0" LEVELS="0" ALIAS="Favor" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1710994081842" NAME=""></PERK>`,
@@ -4855,7 +4856,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             name: "Follower",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<PERK XMLID="FOLLOWER" ID="1709161431234" BASECOST="0.0" LEVELS="0" ALIAS="Follower" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" NUMBER="1" BASEPOINTS="0" DISADPOINTS="0"></PERK>`,
         },
@@ -4868,7 +4869,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<PERK XMLID="FRINGE_BENEFIT" ID="1712005548112" BASECOST="0.0" LEVELS="0" ALIAS="Fringe Benefit" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
         },
@@ -4881,7 +4882,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<PERK XMLID="GROUNDS" ID="1759002590086" BASECOST="0.0" LEVELS="0" ALIAS="Grounds (x1 Base Size)" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
         },
@@ -4894,7 +4895,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<PERK XMLID="LOCATION" ID="1759002587083" BASECOST="0.0" LEVELS="0" ALIAS="Location" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CITY" OPTIONID="CITY" OPTION_ALIAS="City" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
         },
@@ -4908,7 +4909,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<PERK XMLID="MONEY" ID="1709161436493" BASECOST="5.0" LEVELS="0" ALIAS="Money" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="WELL_OFF" OPTIONID="WELL_OFF" OPTION_ALIAS="Well Off" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
         },
@@ -4922,7 +4923,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             name: "Positive Reputation",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
             // The minimum cost for the Positive Reputation Perk is 1 Character Point per
@@ -4940,7 +4941,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             name: "Resource Points",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<PERK XMLID="RESOURCE_POOL" ID="1709161452229" BASECOST="0.0" LEVELS="0" ALIAS="Resource Points" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EQUIPMENT" OPTIONID="EQUIPMENT" OPTION_ALIAS="Equipment Points" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" FREE_POINTS="0"></PERK>`,
         },
@@ -4954,7 +4955,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(1 / 5),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<PERK XMLID="VEHICLE_BASE" ID="1709161454715" BASECOST="0.0" LEVELS="0" ALIAS="Vehicles &amp; Bases" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" NUMBER="2" BASEPOINTS="4" DISADPOINTS="0"></PERK>`,
         },
@@ -4970,7 +4971,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="ABSOLUTE_RANGE_SENSE" ID="1709159935812" BASECOST="3.0" LEVELS="0" ALIAS="Absolute Range Sense" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -4983,7 +4984,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="ABSOLUTE_TIME_SENSE" ID="1709159936859" BASECOST="3.0" LEVELS="0" ALIAS="Absolute Time Sense" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -4996,7 +4997,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="AMBIDEXTERITY" ID="1709159937654" BASECOST="1.0" LEVELS="0" ALIAS="Ambidexterity" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LEVEL1" OPTIONID="LEVEL1" OPTION_ALIAS="-2 Off Hand penalty" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5009,7 +5010,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="ANIMALFRIENDSHIP" ID="1709159938402" BASECOST="20.0" LEVELS="0" ALIAS="Animal Friendship" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5023,7 +5024,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         name: "Beast Speech",
         duration: "instant",
         target: "dmcv",
-        range: HERO.RANGE_TYPES.NO_RANGE,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
         costPerLevel: fixedValueFunction(0),
         xml: `<TALENT XMLID="BEASTSPEECH" ID="1709164944911" BASECOST="15.0" LEVELS="0" ALIAS="Beast Speech" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5035,7 +5036,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         name: "Berserk Fury",
         duration: "instant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true,
         costPerLevel: fixedValueFunction(0),
         xml: `<TALENT XMLID="BERSERKFURY" ID="1709164947152" BASECOST="16.0" LEVELS="0" ALIAS="Berserk Fury" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5046,7 +5047,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(0),
             xml: `<TALENT XMLID="BUMP_OF_DIRECTION" ID="1709159939134" BASECOST="3.0" LEVELS="0" ALIAS="Bump Of Direction" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5061,7 +5062,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         name: "Combat Archery",
         xml: `<TALENT XMLID="COMBATARCHERY" ID="1709164949036" BASECOST="8.0" LEVELS="0" ALIAS="Combat Archery" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5075,7 +5076,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Combat Luck",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(6),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -5109,7 +5110,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="COMBATREADY" ID="1709164954018" BASECOST="3.0" LEVELS="0" ALIAS="Combat Ready" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5119,7 +5120,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["success"],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             xml: `<TALENT XMLID="COMBAT_SENSE" ID="1712005986871" BASECOST="15.0" LEVELS="0" ALIAS="Combat Sense" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT"></TALENT>`,
@@ -5132,7 +5133,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="COMBATSHOOTING" ID="1709164957755" BASECOST="8.0" LEVELS="0" ALIAS="Combat Shooting" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5143,7 +5144,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="COMBATSPELLCASTING" ID="1709164958686" BASECOST="6.0" LEVELS="0" ALIAS="Combat Spellcasting" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="[single spell]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5154,7 +5155,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "instant",
         target: "target's dcv",
-        range: HERO.RANGE_TYPES.NO_RANGE,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
         xml: `<TALENT XMLID="CRIPPLINGBLOW" ID="1709164962720" BASECOST="16.0" LEVELS="0" ALIAS="Crippling Blow" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5165,7 +5166,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="CUSTOMTALENT" ID="1709159957885" BASECOST="0.0" LEVELS="5" ALIAS="Custom Talent" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" ROLL="11"></TALENT>`,
         },
@@ -5178,7 +5179,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["success"],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             xml: `<TALENT XMLID="DANGER_SENSE" ID="1712006288952" BASECOST="15.0" LEVELS="0" ALIAS="Danger Sense" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5192,7 +5193,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             name: "Deadly Blow",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             editOptions: {
                 editableOption_ALIAS: true,
@@ -5272,7 +5273,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="DIVINEFAVOR" ID="1709164973071" BASECOST="10.0" LEVELS="0" ALIAS="Divine Favor" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5283,7 +5284,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="DOUBLE_JOINTED" ID="1709159984537" BASECOST="4.0" LEVELS="0" ALIAS="Double Jointed" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5297,7 +5298,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="EIDETIC_MEMORY" ID="1709159985473" BASECOST="5.0" LEVELS="0" ALIAS="Eidetic Memory" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5310,7 +5311,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="ENVIRONMENTAL_MOVEMENT" ID="1709159986372" BASECOST="3.0" LEVELS="0" ALIAS="Environmental Movement" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="no penalties on"></TALENT>`,
         },
@@ -5323,7 +5324,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "instant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="EVASIVE" ID="1709164979197" BASECOST="18.0" LEVELS="0" ALIAS="Evasive" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5334,7 +5335,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="FTLPILOT" ID="1709164980297" BASECOST="4.0" LEVELS="0" ALIAS="FTL Pilot" POSITION="24" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5345,7 +5346,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="FASCINATION" ID="1709164981287" BASECOST="10.0" LEVELS="0" ALIAS="Fascination" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5356,7 +5357,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="FEARLESS" ID="1709164983473" BASECOST="14.0" LEVELS="0" ALIAS="Fearless" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5367,7 +5368,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "instant",
         target: "target's dcv",
-        range: HERO.RANGE_TYPES.NO_RANGE,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
         xml: `<TALENT XMLID="FOLLOWTHROUGHATTACK" ID="1709164984595" BASECOST="10.0" LEVELS="0" ALIAS="Follow-Through Attack" POSITION="27" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5379,7 +5380,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         name: "Hotshot Pilot",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="HOTSHOTPILOT" ID="1709164985624" BASECOST="24.0" LEVELS="0" ALIAS="Hotshot Pilot" POSITION="28" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STARHERO" OPTIONID="STARHERO" OPTION_ALIAS="Star Hero" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5390,7 +5391,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="INSPIRE" ID="1709164986910" BASECOST="11.0" LEVELS="0" ALIAS="Inspire" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5401,7 +5402,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="LATENTPSIONIC" ID="1709164987906" BASECOST="5.0" LEVELS="0" ALIAS="Latent Psionic" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5412,7 +5413,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="LIGHTNING_CALCULATOR" ID="1709159991424" BASECOST="3.0" LEVELS="0" ALIAS="Lightning Calculator" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5439,7 +5440,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return levels * this.costPerLevel(); // ALL ACTIONS
             },
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="LIGHTNING_REFLEXES_ALL" ID="1709159992355" BASECOST="0.0" LEVELS="1" ALIAS="Lightning Reflexes" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="All Actions" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5454,7 +5455,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(1),
         name: "Lightning Reflexes",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="LIGHTNING_REFLEXES_SINGLE" ID="1709164999711" BASECOST="0.0" LEVELS="1" ALIAS="Lightning Reflexes: +1 DEX to act first with Single Action" POSITION="33" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Single Action"></TALENT>`,
     });
@@ -5465,7 +5466,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="LIGHTSLEEP" ID="1709160000741" BASECOST="3.0" LEVELS="0" ALIAS="Lightsleep" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5479,7 +5480,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="MAGESIGHT" ID="1709165001978" BASECOST="5.0" LEVELS="0" ALIAS="Magesight" POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="NOGROUP"></TALENT>`,
     });
@@ -5490,7 +5491,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="MOUNTEDWARRIOR" ID="1709165004554" BASECOST="4.0" LEVELS="0" ALIAS="Mounted Warrior" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTH" OPTIONID="HTH" OPTION_ALIAS="HTH Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5502,7 +5503,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="OFFHANDDEFENSE" ID="1709160002394" BASECOST="2.0" LEVELS="0" ALIAS="Off-Hand Defense" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5516,7 +5517,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="PERFECT_PITCH" ID="1709160003293" BASECOST="3.0" LEVELS="0" ALIAS="Perfect Pitch" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5530,7 +5531,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(1),
         duration: "instant",
         target: "self only",
-        range: HERO.RANGE_TYPES.STANDARD,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
         costEnd: false,
         xml: `<TALENT XMLID="RAPIDARCHERY" ID="1709165008178" BASECOST="4.0" LEVELS="0" ALIAS="Rapid Archery" POSITION="38" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5541,7 +5542,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(1),
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="RAPIDHEALING" ID="1709165009140" BASECOST="5.0" LEVELS="0" ALIAS="Rapid Healing" POSITION="39" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5552,7 +5553,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="RESISTANCE" ID="1709160004117" BASECOST="0.0" LEVELS="1" ALIAS="Resistance (+1 to roll)" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
@@ -5566,7 +5567,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         duration: "instant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         xml: `<TALENT XMLID="SHAPECHANGING" ID="1709165011068" BASECOST="18.0" LEVELS="0" ALIAS="Shapechanging" POSITION="41" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="[one pre-defined 300-point form]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
@@ -5578,7 +5579,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             duration: "instant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
@@ -5593,7 +5594,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         costPerLevel: fixedValueFunction(1),
         xml: `<TALENT XMLID="SKILLMASTER" ID="1709165014218" BASECOST="6.0" LEVELS="0" ALIAS="Skill Master" POSITION="43" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="+3 with [single skill]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5604,7 +5605,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(2),
             xml: `<TALENT XMLID="SPEED_READING" ID="1709160005725" BASECOST="2.0" LEVELS="1" ALIAS="Speed Reading (x10)" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5616,7 +5617,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         costPerLevel: fixedValueFunction(2),
         xml: `<TALENT XMLID="SPELLAUGMENTATION" ID="1709165017535" BASECOST="12.0" LEVELS="0" ALIAS="Spell Augmentation" POSITION="45" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5627,7 +5628,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
@@ -5651,7 +5652,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["activatable"],
         duration: "constant",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true,
         costPerLevel: fixedValueFunction(0),
         xml: `<TALENT XMLID="TRACKLESSSTRIDE" ID="1709165018596" BASECOST="2.0" LEVELS="0" ALIAS="Trackless Stride" POSITION="46" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5662,7 +5663,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["activatable"],
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         costPerLevel: fixedValueFunction(0),
         xml: `<TALENT XMLID="TURNUNDEAD" ID="1709165019594" BASECOST="12.0" LEVELS="0" ALIAS="Turn Undead (+0 PRE)" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
@@ -5674,7 +5675,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             xml: `<TALENT XMLID="UNIVERSAL_TRANSLATOR" ID="1709160010042" BASECOST="20.0" LEVELS="0" ALIAS="Universal Translator" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT"></TALENT>`,
@@ -5688,7 +5689,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [""],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             editOptions: {
                 showAttacks: true,
@@ -5746,7 +5747,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<WELL_CONNECTED XMLID="WELL_CONNECTED" ID="1710994081842" BASECOST="3.0" LEVELS="0" ALIAS="Well-Connected" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></WELL_CONNECTED>`,
         },
@@ -5763,7 +5764,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(1),
@@ -5800,7 +5801,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
             usesStrength: false,
             hasNoDefense: true,
@@ -5820,7 +5821,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["activatable", "defense"],
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costPerLevel: fixedValueFunction(3 / 2),
         defenseTagVsAttack: function (...args) {
             return HERO.powers6e.find((o) => o.key === "FORCEFIELD").defenseTagVsAttack(...args);
@@ -5837,7 +5838,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="AUTOMATON" ID="1709333784244" BASECOST="15.0" LEVELS="0" ALIAS="Automaton" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CANNOTBESTUNNED" OPTIONID="CANNOTBESTUNNED" OPTION_ALIAS="Cannot Be Stunned" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -5853,7 +5854,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "Target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(0),
@@ -5914,7 +5915,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             costPerLevel: fixedValueFunction(1),
             duration: "constant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="CLAIRSENTIENCE" ID="1711932894754" BASECOST="20.0" LEVELS="0" ALIAS="Clairsentience" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -5928,7 +5929,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 3),
             defenseTagVsAttack: function () {
@@ -5947,7 +5948,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="CUSTOMPOWER" ID="1711932960992" BASECOST="1.0" LEVELS="1" ALIAS="Custom Power" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" DOESBODY="No" DOESDAMAGE="No" DOESKNOCKBACK="No" KILLING="No" DEFENSE="NONE" END="Yes" VISIBLE="Yes" RANGE="SELF" DURATION="INSTANT" TARGET="SELFONLY" ENDCOLUMNOUTPUT="" USECUSTOMENDCOLUMN="No"></POWER>`,
         },
@@ -5963,7 +5964,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
@@ -6001,7 +6002,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             afterDefenses: true,
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -6048,7 +6049,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             //perceivability: "obvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 2),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -6132,7 +6133,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return is5e ? 10 : 5;
             },
             duration: "constant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -6155,7 +6156,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(4),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -6218,7 +6219,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="DESOLIDIFICATION" ID="1709333876708" BASECOST="40.0" LEVELS="0" ALIAS="Desolidification" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -6233,7 +6234,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(3),
@@ -6252,7 +6253,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="DOESNOTBLEED" ID="1709333885275" BASECOST="15.0" LEVELS="0" ALIAS="Does Not Bleed" POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -6266,7 +6267,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(10),
@@ -6274,7 +6275,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="DRAIN" ID="1711933555522" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
-        { range: HERO.RANGE_TYPES.NO_RANGE },
+        { rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE) },
     );
     addPower(
         {
@@ -6284,7 +6285,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 5),
             cost: function (item) {
@@ -6309,7 +6310,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
-            range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(10),
@@ -6329,7 +6330,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 4),
             basePoints: function (item) {
@@ -6360,7 +6361,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(2 / 3),
             cost: function (adderLikeItem) {
@@ -6387,7 +6388,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
             usesStrength: false,
@@ -6406,7 +6407,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             nonDmgEffect: true,
@@ -6475,7 +6476,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(0),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -6490,7 +6491,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["success"],
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costPerLevel: fixedValueFunction(5),
         baseEffectDicePartsBundle: standardBaseEffectDiceParts,
         xml: `<POWER XMLID="FINDWEAKNESS" ID="1709342622694" BASECOST="10.0" LEVELS="0" ALIAS="Find Weakness" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -6503,7 +6504,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             costPerLevel: function (item) {
@@ -6529,7 +6530,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
                 editableOption_ALIAS: true,
                 choices: [
@@ -6594,7 +6595,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent",
             perceivability: "inobvious",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(3 / 2),
             cost: function (item) {
@@ -6645,7 +6646,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["defense", "standard"],
             behaviors: ["to-hit", "defense", "activatable"],
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(3 / 2), // LEVELS are the sum of rPD and rED
@@ -6682,7 +6683,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(5),
             details: function (item) {
@@ -6958,7 +6959,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack"],
             behaviors: [],
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -6976,7 +6977,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "target's dcv",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
             usesStrength: false,
             hasNoDefense: true,
@@ -6993,7 +6994,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack"],
             behaviors: ["to-hit", "dice"],
             duration: "instant",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
             usesStrength: true,
@@ -7013,7 +7014,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "area (see text)",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
@@ -7031,7 +7032,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "Special",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
@@ -7051,7 +7052,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -7081,7 +7082,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         perceivability: "imperceptible",
         duration: "persistent",
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
         costPerLevel: fixedValueFunction(1),
         defenseTagVsAttack: function () {
@@ -7100,7 +7101,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             defenseTagVsAttack: function () {
                 // Only vs AVAD, which is poorly supported
@@ -7119,7 +7120,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -7137,7 +7138,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "defense"],
             perceivability: "imperceptible",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             duration: "persistent",
             costPerLevel: fixedValueFunction(1),
@@ -7173,7 +7174,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
-            range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -7191,7 +7192,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
-            range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -7209,7 +7210,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "dmcv",
-            range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -7226,7 +7227,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "constant",
             target: "dmcv",
-            range: HERO.RANGE_TYPES.SPECIAL,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SPECIAL),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -7245,7 +7246,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "inobvious",
             duration: "instant",
             target: "target’s OCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -7265,7 +7266,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1 / 5),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -7280,7 +7281,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["special"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             cost: function (/* item */) {
@@ -7325,7 +7326,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["automaton"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(0),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -7340,7 +7341,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(0),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -7354,7 +7355,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(0),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -7370,7 +7371,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "DMCV",
-            range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(0),
@@ -7400,7 +7401,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -7429,7 +7430,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "instant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(2 / 3),
@@ -7454,7 +7455,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
@@ -7483,7 +7484,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
             usesStrength: false,
@@ -7512,7 +7513,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="SHAPESHIFT" ID="1711935061472" BASECOST="8.0" LEVELS="0" ALIAS="Shape Shift" POSITION="73" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -7527,7 +7528,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(6),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
@@ -7555,7 +7556,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             defenseTagVsAttack: function () {
@@ -7575,7 +7576,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["to-hit", "dice"],
             duration: "constant",
             target: "target's DCV",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -7591,7 +7592,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "instant",
             target: "n/a",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1 / 5),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="SUMMON" ID="1709334017073" BASECOST="0.0" LEVELS="1" ALIAS="Summon" POSITION="76" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -7605,7 +7606,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         perceivability: "obvious",
         duration: "constant",
         target: "target’s DCV",
-        range: HERO.RANGE_TYPES.STANDARD,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
         costEnd: true,
         usesStrength: false,
         costPerLevel: fixedValueFunction(5),
@@ -7622,7 +7623,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "constant",
             target: "target’s DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(3 / 2),
@@ -7650,7 +7651,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
-            range: HERO.RANGE_TYPES.LINE_OF_SIGHT,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -7667,7 +7668,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         perceivability: "obvious",
         duration: "instant",
         target: "target's DCV",
-        range: HERO.RANGE_TYPES.NO_RANGE,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: true,
         usesStrength: false,
         costPerLevel: fixedValueFunction(15),
@@ -7683,7 +7684,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "target's DCV",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: function (item) {
                 // item appears to be an adder in some cases
                 switch (item.system?.OPTIONID || item.OPTIONID) {
@@ -7720,7 +7721,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["non-hd", "to-hit", "dice"],
             perceivability: "obvious",
             duration: "instant",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
             usesStrength: false, // Doesn't stack with itself.
@@ -7739,7 +7740,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["martial"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(4),
             xml: `<EXTRADC XMLID="EXTRADC" ID="1753421156333" BASECOST="0.0" LEVELS="4" ALIAS="+4 HTH Damage Class(es)" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1754267038115" NAME=""></EXTRADC>`,
         },
@@ -7797,7 +7798,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: function (item) {
+                // Attacks have a range other than self
+                if (
+                    maneuverHasBindTrait(item) ||
+                    maneuverHasBlockTrait(item) ||
+                    maneuverHasCrushTrait(item) ||
+                    maneuverHasDisarmTrait(item) ||
+                    maneuverHasFlashEffectTrait(item) ||
+                    maneuverHasGrabTrait(item) ||
+                    maneuverHasKillingDamageTrait(item) ||
+                    maneuverHasNormalDamageTrait(item) ||
+                    maneuverHasNoNormalDefenseDamageTrait(item) ||
+                    maneuverHasShoveTrait(item) ||
+                    maneuverHasStrikeTrait(item) ||
+                    maneuverHasTargetFallsTrait(item)
+                ) {
+                    // Is this a HTH or a Ranged martial maneuver?
+                    return isRangedMartialManeuver(item) ? HERO.RANGE_TYPES.STANDARD : HERO.RANGE_TYPES.NO_RANGE;
+                }
+
+                return HERO.RANGE_TYPES.SELF;
+            },
             costEnd: true,
             usesStrength: false, // TODO: Not all of these are attacks
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
@@ -7813,7 +7835,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["martial"],
             behaviors: [],
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(4),
             xml: `<RANGEDDC XMLID="RANGEDDC" ID="1753421165484" BASECOST="0.0" LEVELS="4" ALIAS="+4 Ranged Damage Class(es)" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1754267038115" NAME=""></RANGEDDC>`,
         },
@@ -7827,7 +7849,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             categorized: true,
             xml: `<WEAPON_ELEMENT XMLID="WEAPON_ELEMENT" ID="1752445619294" BASECOST="0.0" LEVELS="0" ALIAS="Weapon Element" POSITION="60" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></WEAPON_ELEMENT>`,
         },
@@ -7851,7 +7873,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="ACTIVESONAR" ID="1763830302787" BASECOST="15.0" LEVELS="0" ALIAS="Active Sonar" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="HEARINGGROUP"></POWER>`,
         },
@@ -7873,7 +7895,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="ADJACENT" ID="1763928030882" BASECOST="3.0" LEVELS="0" ALIAS="Adjacent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -7886,7 +7908,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="ADJACENTFIXED" ID="1763928033816" BASECOST="2.0" LEVELS="0" ALIAS="Adjacent (Fixed Perception Point)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -7899,7 +7921,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="ANALYZESENSE" ID="1763830729736" BASECOST="5.0" LEVELS="0" ALIAS="Analyze" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -7912,7 +7934,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["sense"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="ANALYZESENSE" ID="1763945053136" BASECOST="10.0" LEVELS="0" ALIAS="Analyze" POSITION="114" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -7926,7 +7948,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="CONCEALED" ID="1763830728871" BASECOST="0.0" LEVELS="1" ALIAS="Concealed (-1 with Detect PER Rolls)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
@@ -7939,7 +7961,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["sense"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="CONCEALED" ID="1763945879583" BASECOST="0.0" LEVELS="1" ALIAS="Concealed" POSITION="117" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="fasdfasdf" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -7953,7 +7975,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="DETECT" ID="1763830937329" BASECOST="3.0" LEVELS="0" ALIAS="Detect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
@@ -7966,7 +7988,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "240DegreeArcBuiltIn"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="DETECT" ID="1763940907865" BASECOST="3.0" LEVELS="0" ALIAS="Detect" POSITION="67" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="A Single Thing" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="UNUSUALGROUP" ACTIVE="Yes"></POWER>`,
         },
@@ -7981,7 +8003,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="DIMENSIONALSINGLE" ID="1764444031070" BASECOST="5.0" LEVELS="0" ALIAS="Perceive into a single other dimension" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -7994,7 +8016,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="DIMENSIONALSINGLE" ID="1763927019696" BASECOST="10.0" LEVELS="0" ALIAS="Perceive into a single other dimension" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -8007,7 +8029,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="DIMENSIONALGROUP" ID="1712025456851" BASECOST="10.0" LEVELS="0" ALIAS="Perceive into a related group of dimensions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -8020,7 +8042,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="DIMENSIONALGROUP" ID="1763927025440" BASECOST="20.0" LEVELS="0" ALIAS="Perceive into a related group of dimensions" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTALGROUP" OPTIONID="MENTALGROUP" OPTION_ALIAS="Mental Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -8033,7 +8055,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="DIMENSIONALALL" ID="1764444047959" BASECOST="15.0" LEVELS="0" ALIAS="Perceive into any dimension" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -8046,7 +8068,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="DIMENSIONALALL" ID="1763927030679" BASECOST="25.0" LEVELS="0" ALIAS="Perceive into any dimension" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -8059,7 +8081,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<ADDER XMLID="DISCRIMINATORY" ID="1763830727860" BASECOST="5.0" LEVELS="0" ALIAS="Discriminatory" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -8072,7 +8094,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
             xml: `<POWER XMLID="DISCRIMINATORY" ID="1763945795072" BASECOST="10.0" LEVELS="0" ALIAS="Discriminatory" POSITION="85" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -8086,7 +8108,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: function (item) {
                 if (item.system.OPTIONID === "ALL") {
                     return 3;
@@ -8107,7 +8129,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             duration: "persistent", // Enhanced Senses are typically persistent
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(3),
             xml: `<ADDER XMLID="EXTRA" ID="1764044787192" BASECOST="5.0" LEVELS="0" ALIAS="Each Extra Thing or Class of Things" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -8122,7 +8144,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="HRRP" ID="1763830936069" BASECOST="3.0" LEVELS="0" ALIAS="High Range Radio Perception" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8142,7 +8164,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="HRRP" ID="1764443819286" BASECOST="12.0" LEVELS="0" ALIAS="High Range Radio Perception" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="RADIOGROUP"></POWER>`,
         },
         {},
@@ -8156,7 +8178,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="INCREASEDARC240" ID="1763928452159" BASECOST="2.0" LEVELS="0" ALIAS="Increased Arc Of Perception (240 Degrees)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8169,7 +8191,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="INCREASEDARC240" ID="1763927380183" BASECOST="10.0" LEVELS="0" ALIAS="Increased Arc Of Perception (240 Degrees)" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8182,7 +8204,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="INCREASEDARC360" ID="1763830726980" BASECOST="5.0" LEVELS="0" ALIAS="Increased Arc Of Perception (360 Degrees)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8195,7 +8217,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="INCREASEDARC360" ID="1763943009288" BASECOST="25.0" LEVELS="0" ALIAS="Increased Arc Of Perception (360 Degrees)" POSITION="79" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8208,7 +8230,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8226,7 +8248,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8245,7 +8267,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="MAKEASENSE" ID="1763830722531" BASECOST="2.0" LEVELS="0" ALIAS="Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8260,7 +8282,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             senseGroup: "mental",
             senseType: "passive",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="MENTALAWARENESS" ID="1763830933329" BASECOST="3.0" LEVELS="0" ALIAS="Mental Awareness" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8275,7 +8297,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             senseGroup: "mental",
             senseType: "passive",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="MENTALAWARENESS" ID="1763940919976" BASECOST="5.0" LEVELS="0" ALIAS="Mental Awareness" POSITION="71" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="MENTALGROUP"></POWER>`,
         },
         {},
@@ -8288,7 +8310,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(3),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="MICROSCOPIC" ID="1763830725963" BASECOST="0.0" LEVELS="1" ALIAS="Microscopic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8301,7 +8323,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(5),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="MICROSCOPIC" ID="1763943150208" BASECOST="0.0" LEVELS="1" ALIAS="Microscopic" POSITION="79" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8315,7 +8337,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8334,7 +8356,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8351,7 +8373,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["adder"],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<ADDER XMLID="NRAYPERCEPTION" ID="1763830931005" BASECOST="5.0" LEVELS="0" ALIAS="N-Ray Perception" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
     });
     addPower(undefined, {
@@ -8360,7 +8382,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<POWER XMLID="NRAYPERCEPTION" ID="1763941699736" BASECOST="10.0" LEVELS="0" ALIAS="N-Ray Perception" POSITION="72" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="SIGHTGROUP"></POWER>`,
     });
 
@@ -8372,7 +8394,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="PARTIALLYPENETRATIVE" ID="1737917249842" BASECOST="5.0" LEVELS="0" ALIAS="Partially Penetrative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         undefined,
@@ -8385,7 +8407,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="PENETRATIVE" ID="1737574847298" BASECOST="10.0" LEVELS="0" ALIAS="Penetrative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         undefined,
@@ -8397,7 +8419,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(5),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="PHYSICAL" ID="1738019507454" BASECOST="0.0" LEVELS="1" ALIAS="Physical DCs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         undefined,
@@ -8410,7 +8432,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="RADAR" ID="1762134830241" BASECOST="5.0" LEVELS="0" ALIAS="Radar" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8423,7 +8445,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="RADAR" ID="1763940928672" BASECOST="15.0" LEVELS="0" ALIAS="Radar" POSITION="72" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="RADIOGROUP"></POWER>`,
         },
         {},
@@ -8436,7 +8458,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="RADIOPERCEIVETRANSMIT" ID="1762134831344" BASECOST="3.0" LEVELS="0" ALIAS="Radio Perception/Transmission" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8456,7 +8478,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="RADIOPERCEIVETRANSMIT" ID="1763940931864" BASECOST="10.0" LEVELS="0" ALIAS="Radio Perception/Transmission" POSITION="73" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="RADIOGROUP"></POWER>`,
         },
         {},
@@ -8469,7 +8491,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="RADIOPERCEPTION" ID="1762134832412" BASECOST="3.0" LEVELS="0" ALIAS="Radio Perception" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8482,7 +8504,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="RADIOPERCEPTION" ID="1763940935057" BASECOST="8.0" LEVELS="0" ALIAS="Radio Perception" POSITION="74" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="RADIOGROUP"></POWER>`,
         },
         {},
@@ -8495,7 +8517,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             xml: `<ADDER XMLID="RANGE" ID="1763944625584" BASECOST="5.0" LEVELS="0" ALIAS="Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8508,7 +8530,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.STANDARD,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             xml: `<POWER XMLID="RANGE" ID="1746309807411" BASECOST="10.0" LEVELS="0" ALIAS="Range" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMELLGROUP" OPTIONID="SMELLGROUP" OPTION_ALIAS="Smell/Taste Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8521,7 +8543,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(3),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="RAPID" ID="1763830631952" BASECOST="0.0" LEVELS="1" ALIAS="Rapid" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8534,7 +8556,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(3),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="RAPID" ID="1763829793931" BASECOST="0.0" LEVELS="1" ALIAS="Rapid" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8548,7 +8570,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="SPATIALAWARENESS" ID="1762134801878" BASECOST="5.0" LEVELS="0" ALIAS="Spatial Awareness" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8561,7 +8583,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="SPATIALAWARENESS" ID="1763940939009" BASECOST="32.0" LEVELS="0" ALIAS="Spatial Awareness" POSITION="75" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="UNUSUALGROUP"></POWER>`,
         },
         {
@@ -8577,7 +8599,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="TARGETINGSENSE" ID="1763830715168" BASECOST="10.0" LEVELS="0" ALIAS="Targeting" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8590,7 +8612,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="TARGETINGSENSE" ID="1765683750863" BASECOST="10.0" LEVELS="0" ALIAS="Targeting" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMALHEARING" OPTIONID="NORMALHEARING" OPTION_ALIAS="Normal Hearing" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1765665248447" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8603,7 +8625,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="TELESCOPIC" ID="1763830718230" BASECOST="0.0" LEVELS="1" ALIAS="Telescopic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8616,7 +8638,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="TELESCOPIC" ID="1763943753376" BASECOST="0.0" LEVELS="1" ALIAS="Telescopic" POSITION="83" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8629,7 +8651,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="TRACKINGSENSE" ID="1763830720386" BASECOST="5.0" LEVELS="0" ALIAS="Tracking" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8642,7 +8664,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="TRACKINGSENSE" ID="1586662531588" BASECOST="10.0" LEVELS="0" ALIAS="Tracking" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMELLGROUP" OPTIONID="SMELLGROUP" OPTION_ALIAS="Smell/Taste Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Scent" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8655,7 +8677,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<ADDER XMLID="TRANSMIT" ID="1763830721657" BASECOST="2.0" LEVELS="0" ALIAS="Transmit" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -8668,7 +8690,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="TRANSMIT" ID="1763943946200" BASECOST="5.0" LEVELS="0" ALIAS="Transmit" POSITION="84" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -8682,7 +8704,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8700,7 +8722,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8718,7 +8740,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8736,7 +8758,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
@@ -8756,7 +8778,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="ACCIDENTALCHANGE" ID="1709445721979" BASECOST="0.0" LEVELS="0" ALIAS="Accidental Change" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8769,7 +8791,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="GENERICDISADVANTAGE" ID="1709445725246" BASECOST="0.0" LEVELS="0" ALIAS="Custom Complication" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8785,7 +8807,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5), // NOTE: Doesn't use LEVELS but this helps our DC calculations
             unusualDicePerDc: true,
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             baseEffectDicePartsBundle: (item) => {
                 let numDice = 0;
 
@@ -8819,7 +8841,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="DEPENDENTNPC" ID="1709445730914" BASECOST="0.0" LEVELS="0" ALIAS="Dependent NPC" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8831,7 +8853,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="DISTINCTIVEFEATURES" ID="1709445733944" BASECOST="0.0" LEVELS="0" ALIAS="Distinctive Features" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8844,7 +8866,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             target: "self only",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="ENRAGED" ID="1709445736756" BASECOST="0.0" LEVELS="0" ALIAS="Enraged" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8858,7 +8880,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Hunted",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="HUNTED" ID="1709445739393" BASECOST="0.0" LEVELS="0" ALIAS="Hunted" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8870,7 +8892,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0), // TODO: needs function
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<DISAD XMLID="MONEYDISAD" ID="1709445487703" BASECOST="0.0" LEVELS="0" ALIAS="Money" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
     });
 
@@ -8883,7 +8905,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<ADDER XMLID="NCM" ID="1763056887996" BASECOST="20.0" LEVELS="0" ALIAS="Normal Characteristic Maxima" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
     addPower(undefined, {
@@ -8892,7 +8914,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<ADDER XMLID="NCM10" ID="1762923975066" BASECOST="15.0" LEVELS="0" ALIAS="Age:  10-" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
     addPower(undefined, {
@@ -8901,7 +8923,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<ADDER XMLID="NCM10NICE" ID="1762923975067" BASECOST="15.0" LEVELS="0" ALIAS="Age:  10-" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
     addPower(undefined, {
@@ -8910,7 +8932,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<ADDER XMLID="NCM40" ID="1762923975064" BASECOST="5.0" LEVELS="0" ALIAS="Age:  40+" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
     addPower(undefined, {
@@ -8919,7 +8941,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
-        range: HERO.RANGE_TYPES.SELF,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         xml: `<ADDER XMLID="NCM60" ID="1762923975065" BASECOST="10.0" LEVELS="0" ALIAS="Age:  60+" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
 
@@ -8931,7 +8953,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Physical Limitation",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="PHYSICALLIMITATION" ID="1709445747301" BASECOST="0.0" LEVELS="0" ALIAS="Physical Complication" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8944,7 +8966,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Psychological Limitation",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="PSYCHOLOGICALLIMITATION" ID="1709445750394" BASECOST="0.0" LEVELS="0" ALIAS="Psychological Complication" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8958,7 +8980,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Negative Reputation",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="REPUTATION" ID="1738534326877" BASECOST="0.0" LEVELS="0" ALIAS="Negative Reputation" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
             <ADDER XMLID="RECOGNIZED" ID="1738534824035" BASECOST="5.0" LEVELS="0" ALIAS="Recognized" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SOMETIMES" OPTIONID="SOMETIMES" OPTION_ALIAS="Infrequently" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
             </ADDER>
@@ -8974,7 +8996,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Rivalry",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="RIVALRY" ID="1709445753501" BASECOST="0.0" LEVELS="0" ALIAS="Rivalry" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -8988,7 +9010,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Social Limitation",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="SOCIALLIMITATION" ID="1709445756212" BASECOST="0.0" LEVELS="0" ALIAS="Social Complication" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -9000,7 +9022,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["dice"],
             name: "Susceptibility",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5), // NOTE: Doesn't use LEVELS but this helps our DC calculations
@@ -9039,7 +9061,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["dice"],
             name: "Unluck",
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             usesStrength: false,
             costPerLevel: fixedValueFunction(5),
@@ -9057,7 +9079,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
-            range: HERO.RANGE_TYPES.SELF,
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<DISAD XMLID="VULNERABILITY" ID="1709445765160" BASECOST="0.0" LEVELS="0" ALIAS="Vulnerability" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
         },
         {},
@@ -16964,21 +16986,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 })();
-
-// For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
-// Turns out this is actually correct BASECOST can be 0, and COSTPERLEVEL is calculated.
-// Some MODIFIERS (like EXPANDEDEFFECT) base a BASECOST -0.5 with LEVELS=2 and CostPerLevel 0.5, making them appear to be limitations, but actually advantages.
-// Plan is to remove ModifierOverride and add them to the powers list as modifiers.
-// HERO.ModifierOverride = {
-//     //CONTINUOUSCONCENTRATION: { dcAffecting: fixedValueFunction(false), BASECOST: -0.25 },
-//     //DEFBONUS: { dcAffecting: fixedValueFunction(false), BASECOST: 2 },
-// };
-
-// HERO.ModifierOverride5e = {
-//     // ARMORPIERCING: {
-//     //     BASECOST: 0.5,
-//     // },
-// };
 
 // Valid Power Options (found these in Custom Power)
 HERO.ValidPowerOptions = {
