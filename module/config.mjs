@@ -2848,6 +2848,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Div by 2 again to get inches to match HD
                 // LEAPING is technically not a figured characteristic, behaves a bit more like a calculated but with LEVELS
                 // You can end up with .5 remainders for a half inch
+
+                //  Vehicles all start with Leaping 0"; they do not get any
+                // "free" inches of Leaping from their STR.
+                if (actor.type === "vehicle") {
+                    return 0;
+                }
                 return Math.floor(actor.system.characteristics.str.value / 2.5) / 2;
             },
         },
