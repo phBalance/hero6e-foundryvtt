@@ -6,6 +6,7 @@ import { registerDefenseTests } from "./testing-defense.mjs";
 import { registerDiceTests } from "./testing-dice.mjs";
 import { registerEverythingLadLass } from "./testing-everything-lad-lass.mjs";
 import { registerFullTests } from "./testing-full.mjs";
+import { registerManeuverTests } from "./testing-maneuvers.mjs";
 import { registerUploadTests } from "./testing-upload.mjs";
 import { registerVehicleTests } from "./testing-vehicles.mjs";
 import { registerGlobalSetup, registerGlobalTeardown } from "./quench-helper.mjs";
@@ -36,6 +37,7 @@ Hooks.on("quenchReady", async (quench) => {
     registerEverythingLadLass(quench);
     registerFullTests(quench);
     registerMainTests(quench);
+    registerManeuverTests(quench);
     registerUploadTests(quench);
     registerVehicleTests(quench);
 

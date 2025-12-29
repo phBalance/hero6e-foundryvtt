@@ -280,6 +280,14 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     },
                 ],
             },
+            clubWeaponEffect: {
+                id: "club-weapon",
+                name: "Club Weapon",
+                flags: {
+                    [`${game.system.id}.type`]: "maneuver",
+                },
+                img: `systems/${module}/icons/spiked-club.svg`,
+            },
             desolidificationEffect: {
                 id: "desolidification",
                 name: game.i18n.localize("EFFECT.StatusDesolidification"),

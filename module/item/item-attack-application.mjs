@@ -272,12 +272,13 @@ export class ItemAttackFormApplication extends FormApplication {
                         .filter((item) => {
                             // If a ranged maneuver, list all ranged weapons. Otherwise, it's a martial art
                             // and list all HTH or ranged weapons depending on the martial maneuver type
+                            const itemRange = item.system.rangeForItem(item);
                             return (
                                 item.baseInfo.type.includes("attack") &&
                                 (isRangedCombatManeuver(this.data.originalItem)
-                                    ? item.system.range !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
-                                      item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF
-                                    : item.system.range !== CONFIG.HERO.RANGE_TYPES.SELF) &&
+                                    ? itemRange !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
+                                      itemRange !== CONFIG.HERO.RANGE_TYPES.SELF
+                                    : itemRange !== CONFIG.HERO.RANGE_TYPES.SELF) &&
                                 !item.system.XMLID.startsWith("__") // No internal placeholder powers/items
                             );
                         })
