@@ -102,6 +102,15 @@ export function maneuverHasAttackerFallsTrait(item) {
 }
 
 /**
+ * Things which have the "Crush" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasBindTrait(item) {
+    const maneuverHasBindTrait = item.system.EFFECT?.search(/bind/i) > -1;
+    return maneuverHasBindTrait;
+}
+
+/**
  * Things which have the "block" trait in their effect. Need to be careful that we're not triggering on
  * the "Must Follow Block" trait in their effect.
  * @returns {boolean}
@@ -110,6 +119,24 @@ export function maneuverHasBlockTrait(item) {
     const maneuverHasBlockTrait =
         item.system.EFFECT?.search(/block/i) > -1 && !(item.system.EFFECT?.search(/follow block/i) > -1);
     return maneuverHasBlockTrait;
+}
+
+/**
+ * Things which have the "Crush" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasCrushTrait(item) {
+    const maneuverHasCrushTrait = item.system.EFFECT?.search(/crush/i) > -1;
+    return maneuverHasCrushTrait;
+}
+
+/**
+ * Things which have the "disarm" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasDisarmTrait(item) {
+    const maneuverHasDisarmTrait = item.system.EFFECT?.search(/disarm/i) > -1;
+    return !!maneuverHasDisarmTrait;
 }
 
 /**
@@ -125,7 +152,7 @@ export function maneuverHasDodgeTrait(item) {
  * Things which have the "flash dc" trait in their effect.
  * @returns {boolean}
  */
-export function maneuverHasFlashTrait(item) {
+export function maneuverHasFlashEffectTrait(item) {
     const maneuverHasFlashTrait = item.system.EFFECT?.search(/\[FLASHDC\]/i) > -1;
     return !!maneuverHasFlashTrait;
 }
@@ -140,12 +167,77 @@ export function maneuverHasGrabTrait(item) {
 }
 
 /**
+ * Things which have the "killing" damage trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasKillingDamageTrait(item) {
+    const maneuverHasKillingTrait = item.system.EFFECT?.search(/\[KILLINGDC\]/i) > -1;
+    return !!maneuverHasKillingTrait;
+}
+
+/**
+ * Things which have the "NND" damage trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasNoNormalDefenseDamageTrait(item) {
+    const maneuverHasNNDTrait = item.system.EFFECT?.search(/\[NNDDC\]/i) > -1;
+    return !!maneuverHasNNDTrait;
+}
+
+/**
+ * Things which have the "normal" damage trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasNormalDamageTrait(item) {
+    const maneuverHasNormalTrait = item.system.EFFECT?.search(/\[NORMALDC\]/i) > -1;
+    return !!maneuverHasNormalTrait;
+}
+
+/**
  * Things which have the "Target Falls" trait in their effect.
  * @returns {boolean}
  */
 export function maneuverHasTargetFallsTrait(item) {
     const maneuverHasTargetFallsTrait = item.system.EFFECT?.search(/target falls/i) > -1;
     return !!maneuverHasTargetFallsTrait;
+}
+
+/**
+ * Things which have the "to resist Shove" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasRootTrait(item) {
+    const maneuverHasRootTrait = item.system.EFFECT?.search(/to resist Shove/i) > -1;
+    return !!maneuverHasRootTrait;
+}
+
+/**
+ * Things which have the "shove" trait in their effect. Need to be careful that we're not triggering on
+ * the "to resist Shove" (i.e. maneuverHasRootTrait) trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasShoveTrait(item) {
+    const maneuverHasShoveTrait =
+        item.system.EFFECT?.search(/shove/i) > -1 && !(item.system.EFFECT?.search(/to resist Shove/i) > -1);
+    return maneuverHasShoveTrait;
+}
+
+/**
+ * Things which have the "Strike" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasStrikeTrait(item) {
+    const maneuverHasStrikeTrait = item.system.EFFECT?.search(/strike/i) > -1;
+    return !!maneuverHasStrikeTrait;
+}
+
+/**
+ * Things which have the "velocity" trait in their effect.
+ * @returns {boolean}
+ */
+export function maneuverHasVelocityTrait(item) {
+    const maneuverHasVelocityTrait = item.system.EFFECT?.search(/v\/(\d+)/i) > -1;
+    return !!maneuverHasVelocityTrait;
 }
 
 /**
@@ -235,6 +327,13 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name];
+    } else if (item.system.XMLID === "CLUBWEAPON") {
+        activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name;
+        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.img;
+        activeEffect.flags = buildManeuverNextPhaseFlags(item);
+        activeEffect.duration ??= {};
+        activeEffect.duration.startTime = game.time.worldTime;
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name];
     } else if (
         item.system.XMLID === "COVER" ||
         item.system.XMLID === "HIPSHOT" ||

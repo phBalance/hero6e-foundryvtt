@@ -15,6 +15,22 @@ import {
     maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
+import {
+    maneuverHasBindTrait,
+    maneuverHasBlockTrait,
+    maneuverHasCrushTrait,
+    maneuverHasDisarmTrait,
+    maneuverHasDodgeTrait,
+    maneuverHasFlashEffectTrait,
+    maneuverHasGrabTrait,
+    maneuverHasKillingDamageTrait,
+    maneuverHasNormalDamageTrait,
+    maneuverHasNoNormalDefenseDamageTrait,
+    maneuverHasShoveTrait,
+    maneuverHasStrikeTrait,
+    maneuverHasTargetFallsTrait,
+    maneuverHasVelocityTrait,
+} from "./item/maneuver.mjs";
 import { squelch, hdcTextNumberToNumeric } from "./utility/util.mjs";
 import { HeroActorCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 import * as heroEncounter from "./utility/encounter/encounter.mjs";
@@ -1870,7 +1886,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLUBWEAPON",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver", "activate"],
+            behaviors: ["non-hd", "optional-maneuver", "activatable"],
             name: "Club Weapon",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -7735,6 +7751,50 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MANEUVER",
             type: ["martial", "attack"], // TODO: Not all of these are attacks
             behaviors: ["to-hit", "dice"], // TODO: Not all of these are attacks or do damage
+            behaviorsByItem: function (item) {
+                // Unfortunately there are lots of behaviors that are possible from a MANEUVER. Build them dynamically.
+                const behaviors = [];
+
+                // Do you dodge with this maneuver?
+                if (maneuverHasDodgeTrait(item)) {
+                    behaviors.push("activable");
+                }
+
+                // Do you roll to hit with this maneuver?
+                if (
+                    maneuverHasBindTrait(item) ||
+                    maneuverHasBlockTrait(item) ||
+                    maneuverHasCrushTrait(item) ||
+                    maneuverHasDisarmTrait(item) ||
+                    maneuverHasFlashEffectTrait(item) ||
+                    maneuverHasGrabTrait(item) ||
+                    maneuverHasKillingDamageTrait(item) ||
+                    maneuverHasNormalDamageTrait(item) ||
+                    maneuverHasNoNormalDefenseDamageTrait(item) ||
+                    maneuverHasShoveTrait(item) ||
+                    maneuverHasStrikeTrait(item) ||
+                    maneuverHasTargetFallsTrait(item)
+                ) {
+                    behaviors.push("to-hit");
+                }
+
+                // Is there some kind of damage/effect roll with this manuever?
+                if (
+                    maneuverHasCrushTrait(item) ||
+                    maneuverHasDisarmTrait(item) ||
+                    maneuverHasFlashEffectTrait(item) ||
+                    maneuverHasGrabTrait(item) ||
+                    maneuverHasKillingDamageTrait(item) ||
+                    maneuverHasNormalDamageTrait(item) ||
+                    maneuverHasNoNormalDefenseDamageTrait(item) ||
+                    maneuverHasStrikeTrait(item) ||
+                    maneuverHasVelocityTrait(item)
+                ) {
+                    behaviors.push("dice");
+                }
+
+                return behaviors;
+            },
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
