@@ -3849,8 +3849,15 @@ export class HeroSystem6eActor extends Actor {
     static migrateData(source) {
         // Many of these items should have been done during specific version migrations.
         // If migration is interrupted it may have been skipped.
+        // SEE: migration.mjs:commitActorAndItemMigrateDataChangesByActor
 
-        // 4.0.26 migration
+        this.migrateData_4_0_26(source);
+        this.migrateData_4_1_13(source);
+
+        return super.migrateData(source);
+    }
+
+    static migrateData_4_0_26(source) {
         // Delete strength placeholder as we need many of them so will be creating them on the fly.
         const _removeStrengthPlaceholderAndCreateActiveProperty = source?.items?.find(
             (item) => item.system.ALIAS === "__InternalStrengthPlaceholder",
@@ -3859,8 +3866,9 @@ export class HeroSystem6eActor extends Actor {
             source.items = source.items.filter((item) => item.system.ALIAS !== "__InternalStrengthPlaceholder");
             tagObjectForPersistence(source);
         }
+    }
 
-        // 4.1.13 migration
+    static migrateData_4_1_13(source) {
         // We no longer need __InternalManeuverPlaceholderWeapon as we now have effective attack items. Delete
         // it from all actors.
         const _removePlaceholderWeaponItem = source?.items?.find(
@@ -3870,7 +3878,5 @@ export class HeroSystem6eActor extends Actor {
             source.items = source.items.filter((item) => item.name !== "__InternalManeuverPlaceholderWeapon");
             tagObjectForPersistence(source);
         }
-
-        return super.migrateData(source);
     }
 }
