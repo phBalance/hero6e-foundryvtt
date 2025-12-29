@@ -5930,6 +5930,17 @@ export class HeroSystem6eItem extends Item {
     }
 
     static migrateData(source) {
+        // Many of these items should have been done during specific version migrations.
+        // If migration is interrupted or ITEM is on sidebar it may have been skipped.
+
+        // 4.0.26 migration
+        // Remove the isHeroic property as it is now calculated on the fly
+        if (source.system?.isHeroic !== undefined) {
+            delete source.system.isHeroic;
+            tagObjectForPersistence(source);
+        }
+
+        // 4.2.5 migration
         // We used to store charge data as a object.
         // This has changed and we would like to salvage the current charges & clips.
         // A migration script re-writes this data and we should eventually be

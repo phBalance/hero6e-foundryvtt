@@ -3852,10 +3852,10 @@ export class HeroSystem6eActor extends Actor {
 
         // 4.0.26 migration
         // Delete strength placeholder as we need many of them so will be creating them on the fly.
-        const _removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicProperty = source?.items.find(
+        const _removeStrengthPlaceholderAndCreateActiveProperty = source?.items?.find(
             (item) => item.system.ALIAS === "__InternalStrengthPlaceholder",
         );
-        if (_removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicProperty) {
+        if (_removeStrengthPlaceholderAndCreateActiveProperty) {
             source.items = source.items.filter((item) => item.system.ALIAS !== "__InternalStrengthPlaceholder");
             tagObjectForPersistence(source);
         }
@@ -3863,7 +3863,7 @@ export class HeroSystem6eActor extends Actor {
         // 4.1.13 migration
         // We no longer need __InternalManeuverPlaceholderWeapon as we now have effective attack items. Delete
         // it from all actors.
-        const _removePlaceholderWeaponItem = source?.items.find(
+        const _removePlaceholderWeaponItem = source?.items?.find(
             (item) => item.name === "__InternalManeuverPlaceholderWeapon",
         );
         if (_removePlaceholderWeaponItem) {
