@@ -3042,6 +3042,10 @@ export class HeroSystem6eItem extends Item {
                 description = `${system.ALIAS} (${system.OPTION_ALIAS})`;
                 break;
 
+            case "LACKOFWEAKNESS":
+                description = `${system.ALIAS} (-${system.LEVELS}) for ${system.INPUT}`;
+                break;
+
             case "FINDWEAKNESS":
                 {
                     const { roll } = this._getNonCharacteristicsBasedRollComponents(system);
@@ -3223,6 +3227,9 @@ export class HeroSystem6eItem extends Item {
                 case "PROFESSIONAL_SKILL":
                 case "KNOWLEDGE_SKILL":
                 case "SCIENCE_SKILL":
+                    break;
+
+                case "LACKOFWEAKNESS":
                     break;
 
                 case "SOCIALLIMITATION":
