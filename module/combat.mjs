@@ -1032,7 +1032,10 @@ export class HeroSystem6eCombat extends Combat {
             for (let _combatant of this.combatants) {
                 if (_combatant?.actor?.statuses.has("stunned") || _combatant?.actor?.statuses.has("knockedout")) {
                     for (const item of _combatant.actor.getActiveConstantItems()) {
-                        await item.toggle();
+                        // Skills, talents ect are Constant, but they may not be toggleable
+                        if (item.isActivatable()) {
+                            await item.toggleOff();
+                        }
                     }
                 }
             }
