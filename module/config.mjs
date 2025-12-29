@@ -11,6 +11,7 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 import {
     characteristicValueToDiceParts,
     dicePartsToFullyQualifiedEffectFormula,
+    isRangedMartialManeuver,
     maneuverBaseEffectDicePartsBundle,
     maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
@@ -7797,7 +7798,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             costPerLevel: fixedValueFunction(0),
             target: "self only",
-            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            rangeForItem: function (item) {
+                // Attacks have a range other than self
+                if (
+                    maneuverHasBindTrait(item) ||
+                    maneuverHasBlockTrait(item) ||
+                    maneuverHasCrushTrait(item) ||
+                    maneuverHasDisarmTrait(item) ||
+                    maneuverHasFlashEffectTrait(item) ||
+                    maneuverHasGrabTrait(item) ||
+                    maneuverHasKillingDamageTrait(item) ||
+                    maneuverHasNormalDamageTrait(item) ||
+                    maneuverHasNoNormalDefenseDamageTrait(item) ||
+                    maneuverHasShoveTrait(item) ||
+                    maneuverHasStrikeTrait(item) ||
+                    maneuverHasTargetFallsTrait(item)
+                ) {
+                    // Is this a HTH or a Ranged martial maneuver?
+                    return isRangedMartialManeuver(item) ? HERO.RANGE_TYPES.STANDARD : HERO.RANGE_TYPES.NO_RANGE;
+                }
+
+                return HERO.RANGE_TYPES.SELF;
+            },
             costEnd: true,
             usesStrength: false, // TODO: Not all of these are attacks
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,

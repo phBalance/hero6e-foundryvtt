@@ -30,6 +30,7 @@ import {
     getExtraMartialDcsOrZero,
     getManeuverEffect,
     getManueverEffectWithPlaceholdersReplaced,
+    isManeuverHthCategory,
     isManeuverThatDoesReplaceableDamageType,
     isRangedMartialManeuver,
 } from "../utility/damage.mjs";
@@ -5909,17 +5910,13 @@ export class HeroSystem6eItem extends Item {
         // HTH
         if (
             this.system.OPTIONID === "HTH" &&
-            (attackItem.system.rangeForItem(attackItem) === HERO.RANGE_TYPES.NO_RANGE ||
-                attackItem.system.CATEGORY === "Hand To Hand")
+            (attackItem.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE || isManeuverHthCategory(attackItem))
         ) {
             return true;
         }
 
         // RANGED
-        if (
-            this.system.OPTIONID === "RANGED" &&
-            attackItem.system.rangeForItem(attackItem) === HERO.RANGE_TYPES.STANDARD
-        ) {
+        if (this.system.OPTIONID === "RANGED" && attackItem.system.range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
             return true;
         }
 
