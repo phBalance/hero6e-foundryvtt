@@ -13,7 +13,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
 //import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
-//import { tagObjectForPersistence } from "../migration.mjs";
+import { tagObjectForPersistence } from "../migration.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -3846,8 +3846,37 @@ export class HeroSystem6eActor extends Actor {
         return results;
     }
 
-    // static migrateData(source) {
-    //     tagObjectForPersistence(source);
-    //     return super.migrateData(source);
-    // }
+    static migrateData(source) {
+        // Many of these items should have been done during specific version migrations.
+        // If migration is interrupted it may have been skipped.
+        // SEE: migration.mjs:commitActorAndItemMigrateDataChangesByActor
+
+        this.migrateData_4_0_26(source);
+        this.migrateData_4_1_13(source);
+
+        return super.migrateData(source);
+    }
+
+    static migrateData_4_0_26(source) {
+        // Delete strength placeholder as we need many of them so will be creating them on the fly.
+        const _removeStrengthPlaceholderAndCreateActiveProperty = source?.items?.find(
+            (item) => item.system.ALIAS === "__InternalStrengthPlaceholder",
+        );
+        if (_removeStrengthPlaceholderAndCreateActiveProperty) {
+            source.items = source.items.filter((item) => item.system.ALIAS !== "__InternalStrengthPlaceholder");
+            tagObjectForPersistence(source);
+        }
+    }
+
+    static migrateData_4_1_13(source) {
+        // We no longer need __InternalManeuverPlaceholderWeapon as we now have effective attack items. Delete
+        // it from all actors.
+        const _removePlaceholderWeaponItem = source?.items?.find(
+            (item) => item.name === "__InternalManeuverPlaceholderWeapon",
+        );
+        if (_removePlaceholderWeaponItem) {
+            source.items = source.items.filter((item) => item.name !== "__InternalManeuverPlaceholderWeapon");
+            tagObjectForPersistence(source);
+        }
+    }
 }

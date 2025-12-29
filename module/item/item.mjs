@@ -5937,11 +5937,30 @@ export class HeroSystem6eItem extends Item {
     }
 
     static migrateData(source) {
+        // Many of these items should have been done during specific version migrations.
+        // If migration is interrupted or ITEM is on sidebar (actorless) it may have been skipped.
+        // SEE: migration.mjs:commitActorAndItemMigrateDataChangesByActor
+
+        this.migrateData_4_0_26(source);
+        this.migrateData_4_2_5(source);
+
+        return super.migrateData(source);
+    }
+
+    static migrateData_4_0_26(source) {
+        // Remove the isHeroic property as it is now calculated on the fly
+        if (source.system?.isHeroic !== undefined) {
+            delete source.system.isHeroic;
+            tagObjectForPersistence(source);
+        }
+    }
+
+    static migrateData_4_2_5(source) {
+        // 4.2.5 migration
         // We used to store charge data as a object.
         // This has changed and we would like to salvage the current charges & clips.
         // A migration script re-writes this data and we should eventually be
         // able to remove this (Dec 23 2025 / migrateTo4_2_5)
-        // SEE: migration.mjs:commitActorAndItemMigrateDataChangesByActor
         if (source.system?.charges?.max && !source.system._charges) {
             console.log(`${source.name} has deprecated charges object. Migrating.`);
 
@@ -5963,8 +5982,6 @@ export class HeroSystem6eItem extends Item {
             // Signal to migration code that this object has changed and needs to be persisted to the DB
             tagObjectForPersistence(source);
         }
-
-        return super.migrateData(source);
     }
 }
 
