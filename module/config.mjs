@@ -10244,6 +10244,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // IMAGES related
+            key: "DECREASEDPERROLL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="DECREASEDPERROLL" ID="1767000406168" BASECOST="0.0" LEVELS="1" ALIAS="+/-1 to PER Rolls" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_ELEMENT related
             key: "DEFAULTELEMENT",
             behaviors: ["adder"],
@@ -11264,6 +11275,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="HOWITZERS" ID="1759094997080" BASECOST="1.0" LEVELS="0" ALIAS="Howitzers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WINDOWOFOPPORTUNITY related
+            key: "HOWLONG",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HOWLONG" ID="1767000501402" BASECOST="-2.0" LEVELS="0" ALIAS="How Long" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEGMENT" OPTIONID="SEGMENT" OPTION_ALIAS="window remains open for 1 Segment" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="No" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // WINDOWOFOPPORTUNITY related
+            key: "HOWOFTEN",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="HOWOFTEN" ID="1767000501383" BASECOST="-2.0" LEVELS="0" ALIAS="How Often" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MONTH" OPTIONID="MONTH" OPTION_ALIAS="once per Month" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="No" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -14588,6 +14621,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "ALTEREDSHAPE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ALTEREDSHAPE" ID="1767000514617" BASECOST="0.0" LEVELS="0" ALIAS="Altered Shape" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CONE" OPTIONID="CONE" OPTION_ALIAS="Cone" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // Typically part of SIDEEFFECTS
             key: "ALWAYSOCCURS",
             behaviors: ["modifier"],
@@ -14848,11 +14891,31 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "CANBEMISSILEDEFLECTED",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="CANBEMISSILEDEFLECTED" ID="1767000509402" BASECOST="-0.25" LEVELS="0" ALIAS="Can Be Missile Deflected" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "CANNOTATTACK",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTATTACK" ID="1700709064472" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Attack Through Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMUNICATE" OPTIONID="COMMUNICATE" OPTION_ALIAS="neither the character nor his target can use the link to attack each other mentally, but they can communicate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CANNOTBEUSEDWITHMPA",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="CANNOTBEUSEDWITHMPA" ID="1767000521234" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Be Used With Multiple-Power Attacks" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -15148,6 +15211,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "DIFFICULTTOALTER",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="DIFFICULTTOALTER" ID="1767000435166" BASECOST="-0.25" LEVELS="0" ALIAS="Difficult to Alter" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALF" OPTIONID="HALF" OPTION_ALIAS="simple changes take a Half Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "DIFFICULTTODISPEL",
             behaviors: ["modifier"],
             cost: (modifier /* , item */) => {
@@ -15226,6 +15299,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOUBLEKB" ID="1735589197028" BASECOST="0.75" LEVELS="0" ALIAS="Double Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOTIMES" OPTIONID="TWOTIMES" OPTION_ALIAS="2x KB" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DROPPED",
+            behaviors: ["modifier"],
+            dcAffecting: fixedValueFunction(true),
+            costPerLevel: fixedValueFunction(0),
+            xml: `<MODIFIER XMLID="DROPPED" ID="1767000444603" BASECOST="-0.5" LEVELS="0" ALIAS="Dropped" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -15518,6 +15601,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INDIRECT" ID="1760248513216" BASECOST="0.25" LEVELS="0" ALIAS="Indirect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CHARACTERINDIRECT" OPTIONID="CHARACTERINDIRECT" OPTION_ALIAS="Source Point is the Character, path is indirect, but the same with every use" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "INSTANT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="INSTANT" ID="1767000542433" BASECOST="-0.5" LEVELS="0" ALIAS="Instant" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -15843,6 +15936,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "NONCOMBATACCELERATION",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="NONCOMBATACCELERATION" ID="1762138607072" BASECOST="1.0" LEVELS="0" ALIAS="Noncombat acceleration/deceleration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "NONONCOMBAT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -15853,11 +15956,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "NONCOMBATACCELERATION",
+            key: "NONSELECTIVETARGET",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="NONCOMBATACCELERATION" ID="1762138607072" BASECOST="1.0" LEVELS="0" ALIAS="Noncombat acceleration/deceleration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+            xml: `<MODIFIER XMLID="NONSELECTIVETARGET" ID="1767000562554" BASECOST="-0.25" LEVELS="0" ALIAS="Nonselective Target" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -16052,6 +16155,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYTHROUGHOTHERS" ID="1755906478205" BASECOST="-0.5" LEVELS="0" ALIAS="Only Through The Senses Of Others" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ONLYTOCREATELIGHT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ONLYTOCREATELIGHT" ID="1767000555587" BASECOST="-1.0" LEVELS="0" ALIAS="Only To Create Light" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -16413,6 +16526,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "SETEFFECT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="SETEFFECT" ID="1767000456766" BASECOST="-1.0" LEVELS="0" ALIAS="Set Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "SFXONLY",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -16748,6 +16871,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VULNERABLE" ID="1737906231719" BASECOST="-0.5" LEVELS="0" ALIAS="Vulnerable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Gravity" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "WINDOWOFOPPORTUNITY",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="WINDOWOFOPPORTUNITY" ID="1767000501368" BASECOST="0.0" LEVELS="0" ALIAS="Window Of Opportunity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
