@@ -1094,8 +1094,7 @@ export class HeroSystem6eCombat extends Combat {
         }
         super._onEndRound();
 
-        // Make really sure we only call at the end of the round
-        if (this.current.round > 1 && this.current.turn === 0) {
+        if (this.current.round > 1) {
             await this.PostSegment12();
         }
     }
