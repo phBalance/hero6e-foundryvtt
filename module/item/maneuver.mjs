@@ -328,15 +328,12 @@ export async function activateManeuver(item) {
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name];
     } else if (item.system.XMLID === "CLUBWEAPON") {
-        activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name;
-        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.img;
+        activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name;
+        activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
-        activeEffect.changes = foundry.utils.deepClone(
-            HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.changes,
-        );
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name];
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name];
     } else if (
         item.system.XMLID === "COVER" ||
         item.system.XMLID === "HIPSHOT" ||
