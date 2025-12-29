@@ -387,6 +387,22 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
             remainingRangePenalty += braceOffsets;
             attackHeroRoller.addNumber(braceOffsets, "Brace modifier");
         }
+
+        // If we have half range penalty modifier, the halving, as with all Hero System calculations, must happen after all additions and subtractions.
+        const hasHalfRangePenalty = !!item.findModsByXmlid("HALFRANGEMODIFIER");
+        if (hasHalfRangePenalty) {
+            const halvedRangePenaltyOffset = Math.abs(
+                remainingRangePenalty - RoundFavorPlayerDown(remainingRangePenalty / 2),
+            );
+
+            attackHeroRoller.addNumber(
+                halvedRangePenaltyOffset,
+                "Half range modifier",
+                `Range penalty halved: ${remainingRangePenalty} -> ${remainingRangePenalty + halvedRangePenaltyOffset}`,
+            );
+
+            remainingRangePenalty += halvedRangePenaltyOffset;
+        }
     }
 }
 
