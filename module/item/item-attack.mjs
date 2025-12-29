@@ -11,7 +11,12 @@ import {
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { HeroSystem6eItem, rollRequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
+import {
+    HeroSystem6eItem,
+    RequiresACharacteristicRollCheck,
+    rollRequiresASkillRollCheck,
+    rollAblativeActivationCheck,
+} from "../item/item.mjs";
 import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
@@ -2415,24 +2420,34 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         return;
     }
 
-    // Some defenses require a roll not just to activate, but on each use: 6e EVERYPHASE & 5e ACTIVATIONROLL
-    const defenseEveryPhase = token.actor.items.filter(
-        (o) =>
-            o.isActive &&
-            (o.findModsByXmlid("EVERYPHASE") || o.findModsByXmlid("ACTIVATIONROLL")) &&
-            o.baseInfo.behaviors.includes("defense"),
-    );
+    // Some defenses require a roll not just to activate, but on each use: 6e EVERYPHASE, 5e ACTIVATIONROLL, and 5e & 6e ABLATIVE
+    const activatableDefenses = token.actor.items
+        .filter(
+            (o) =>
+                o.isActive &&
+                (o.findModsByXmlid("EVERYPHASE") ||
+                    o.findModsByXmlid("ACTIVATIONROLL") ||
+                    o.findModsByXmlid("ABLATIVE")) &&
+                o.baseInfo.behaviors.includes("defense"),
+        )
+        .filter((defense) => !ignoreDefenseIds.includes(defense.id))
+        .filter((defense) => getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null);
 
-    for (const defense of defenseEveryPhase) {
-        if (!ignoreDefenseIds.includes(defense.id)) {
-            if (getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null) {
-                const success = await rollRequiresASkillRollCheck(defense);
-                if (!success) {
-                    ignoreDefenseIds.push(defense.id);
-                }
-            } else {
-                console.log(`requiresASkillRollCheck was not made for ${defense.name}`, defense, item);
-            }
+    for (const defense of activatableDefenses) {
+        const rar = defense.findModsByXmlid("EVERYPHASE") || defense.findModsByXmlid("ACTIVATIONROLL");
+        let rarSuccess = true;
+        if (rar) {
+            rarSuccess = await rollRequiresASkillRollCheck(defense);
+        }
+
+        const ablative = defense.findModsByXmlid("ABLATIVE");
+        let ablativeActivated = true;
+        if (rarSuccess && ablative) {
+            ablativeActivated = await rollAblativeActivationCheck(defense);
+        }
+
+        if (!rarSuccess || !ablativeActivated) {
+            ignoreDefenseIds.push(defense.id);
         }
     }
 
@@ -2517,7 +2532,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const nnd = avad.adders.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
         if (nnd && damageData.defenseAvad > 0) {
             // render card
-            let speaker = ChatMessage.getSpeaker({ actor: item.actor });
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
             const chatData = {
                 author: game.user._id,
@@ -2551,6 +2566,10 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     } else if (isSenseAffecting) {
         return _onApplySenseAffectingToSpecificToken(item, token, damageDetail);
     }
+
+    // Ablate defenses in the defenseTags, if appropriate.
+    // PH: FIXME: Need to consider damage before damage negation for ablative? Check rules.
+    await ablateDefenses(item, { stun: damageDetail.stunDamage, body: damageDetail.bodyDamage }, defenseTags, token);
 
     // AUTOMATION immune to mental powers
     if (item.effectiveAttackItem.system.class === "mental" && token?.actor?.type === "automaton") {
@@ -2764,6 +2783,87 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     return damageChatMessage;
+}
+
+/**
+ * Ablate defenses. These must be done in order of "weakest" (ya that's the books' term) first. If a defense gets
+ * pierced then provide a chat card to indicate that it was and adjust the ablative defense to track number of times
+ * the defense has been pierced.
+ *
+ * @param {HeroSystem6eItem} attackItem
+ * @param {Object} remainingDamage - used and consumed by this function.
+ * @param {number} remainingDamage.stun
+ * @param {number} remainingDamage.body
+ * @param {Object[]} defenseTags
+ */
+async function ablateDefenses(attackItem, remainingDamage, defenseTags, targetToken) {
+    // Were one or more of the activated defenses ablative? If so, check if they get ablated.
+    // Ablative defenses must apply first with the lowest ablative defense first.
+    const ablativeDefenseObjs = foundry.utils
+        .deepClone(defenseTags)
+        .map((defenseTag) => {
+            return {
+                item: targetToken.actor.items.find((item) => item.id === defenseTag.defenseItemId),
+                defenseTag: defenseTag,
+            };
+        })
+        .filter((defenseObj) => defenseObj.item?.findModsByXmlid("ABLATIVE"))
+        .sort((defenseA, defenseB) => {
+            // If the defense level is the same, consider ablative defenses that can be exeeded by BODY or STUN
+            // to be the "weaker" defense when compared to ablative defenses of the name nominal defensive value
+            // that can be exceed by only BODY and thus should come first per FRed pg. 115 despite no explicit calling it out.
+            if (defenseA.defenseTag.value === defenseB.defenseTag.value) {
+                const defenseABodyAndStun = defenseA.item.ablativeType;
+                const defenseBBodyAndStun = defenseB.item.ablativeType;
+
+                if (defenseABodyAndStun === "BODYORSTUN" && defenseBBodyAndStun !== "BODYORSTUN") {
+                    // A is weaker.
+                    return -1;
+                } else if (defenseABodyAndStun !== "BODYORSTUN" && defenseBBodyAndStun === "BODYORSTUN") {
+                    // B is weaker.
+                    return 1;
+                }
+            }
+
+            // Otherwise just sort based on defense value
+            return defenseA.defenseTag.value - defenseB.defenseTag.value;
+        });
+
+    for (const ablativeDefenseObj of ablativeDefenseObjs) {
+        const defenseTags = getItemDefenseVsAttack(ablativeDefenseObj.item, attackItem, {});
+        const ablativeDefense = foundry.utils
+            .deepClone(defenseTags)
+            .filter((defenseTag) => defenseTag.operation === "add")
+            .reduce((accum, defenseTag) => accum + defenseTag.value, 0);
+        const ablationType = ablativeDefenseObj.item.ablativeType;
+
+        // PH: FIXME: Need to handle all the damage tag operations properly. Need to extract a function for that.
+        // PH: FIXME: Doesn't handle AP and the like which should effectively reduce the defense of the object.
+
+        // Did the remaining damage exceed this item's capacity to absorb damage? If so, ablate it.
+        if (
+            (ablationType === "BODYONLY" && remainingDamage.body > ablativeDefense) ||
+            (ablationType === "BODYORSTUN" &&
+                (remainingDamage.body > ablativeDefense || remainingDamage.stun > ablativeDefense))
+        ) {
+            await ablativeDefenseObj.item.update({
+                "system.ablative": ablativeDefenseObj.item.system.ablative + 1,
+            });
+
+            const speaker = ChatMessage.getSpeaker({ actor: ablativeDefenseObj.item.actor });
+
+            const chatData = {
+                author: game.user._id,
+                content: `${ablativeDefenseObj.item.name} ablative defense exceeded by attack from ${attackItem.name}.`,
+                speaker: speaker,
+            };
+
+            await ChatMessage.create(chatData);
+        }
+
+        remainingDamage.stun = Math.max(0, remainingDamage.stun - ablativeDefense);
+        remainingDamage.body = Math.max(0, remainingDamage.body - ablativeDefense);
+    }
 }
 
 export async function _onApplyEntangleToSpecificToken(item, token, originalRoll) {

@@ -1959,10 +1959,10 @@ export class HeroSystem6eActor extends Actor {
                 resources: this.items
                     .filter(
                         (item) =>
-                            item.system.chargeItemModifier &&
-                            (item.system._charges !== item.system.chargesMax ||
-                                item.system._clips !== item.system.clipsMax ||
-                                item.system.ablative > 0),
+                            (item.system.chargeItemModifier &&
+                                (item.system._charges !== item.system.chargesMax ||
+                                    item.system._clips !== item.system.clipsMax)) ||
+                            item.system.ablative > 0,
                     )
                     .map((o) => ({
                         id: o.id,
@@ -2521,7 +2521,7 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: FullHealth complete`, 1);
 
             // retainValuesOnUpload Charges
-            uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges`, 0);
+            uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges and ablative`, 0);
             for (const resourceData of retainValuesOnUpload.resources) {
                 // Careful: the HDC ID is intially a string, but coerced to Number in dataModel thus ==
                 const item = this.items.find((i) => i.id === resourceData.id);
