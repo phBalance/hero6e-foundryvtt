@@ -459,7 +459,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get range() {
-        let range = this.baseInfo?.range;
+        let range = this.baseInfo?.rangeForItem(this.item);
         try {
             if (!range) {
                 // This should never happen, missing something from CONFIG.mjs?  Perhaps with super old actors?

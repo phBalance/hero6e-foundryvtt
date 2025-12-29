@@ -761,7 +761,7 @@ export class HeroSystem6eItem extends Item {
     get pslRangePenaltyOffsetItems() {
         const psls = this.actor.items.filter(
             (pslItem) =>
-                pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range &&
+                pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.rangeForItem(this) &&
                 (pslItem.system.OPTIONID === "ALL" ||
                     pslItem.adders.find(
                         (adder) => adder.ALIAS.toLowerCase().trim() === this.name.toLowerCase().trim(),
@@ -1117,7 +1117,7 @@ export class HeroSystem6eItem extends Item {
         if (typeof this.baseInfo?.rangeText === "function") {
             content += ` ${this.baseInfo.rangeText(this)}${getSystemDisplayUnits(this.is5e)}.`;
         } else {
-            switch (this.system.range) {
+            switch (this.system.rangeForItem(this)) {
                 case CONFIG.HERO.RANGE_TYPES.SELF: {
                     if (!this.baseInfo?.type.includes("skill")) {
                         content += " Self.";
@@ -1171,8 +1171,8 @@ export class HeroSystem6eItem extends Item {
                         break;
                     }
                     console.error("Unhandled range", this.baseInfo);
-                    if (this.baseInfo?.range?.toLowerCase()) {
-                        content += ` ${this.baseInfo?.range?.toLowerCase()}`;
+                    if (this.baseInfo?.rangeForItem(this)?.toLowerCase()) {
+                        content += ` ${this.baseInfo?.rangeForItem(this).toLowerCase()}`;
                     }
                     break;
             }
@@ -5907,16 +5907,19 @@ export class HeroSystem6eItem extends Item {
         }
 
         // HTH
-        // Basic Strike martial arts has a range of "Self" which seems incorrect #3228
         if (
             this.system.OPTIONID === "HTH" &&
-            (attackItem.system.range === "No Range" || attackItem.system.CATEGORY === "Hand To Hand")
+            (attackItem.system.rangeForItem(attackItem) === HERO.RANGE_TYPES.NO_RANGE ||
+                attackItem.system.CATEGORY === "Hand To Hand")
         ) {
             return true;
         }
 
         // RANGED
-        if (this.system.OPTIONID === "RANGED" && attackItem.system.range === "Standard") {
+        if (
+            this.system.OPTIONID === "RANGED" &&
+            attackItem.system.rangeForItem(attackItem) === HERO.RANGE_TYPES.STANDARD
+        ) {
             return true;
         }
 
