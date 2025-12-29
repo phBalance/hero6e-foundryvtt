@@ -7,7 +7,7 @@ import {
     getFullyQualifiedEffectFormulaFromItem,
     combatSkillLevelsForAttack,
 } from "../utility/damage.mjs";
-import { maneuverHasFlashTrait, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 // XML parsing is expensive when done frequently during actions like loading characters.
@@ -690,7 +690,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     get noHitLocations() {
         if (["maneuver", "martialart"].includes(this.item.type)) {
             // Flash doesn't have a hit location
-            if (maneuverHasFlashTrait(this.item)) {
+            if (maneuverHasFlashEffectTrait(this.item)) {
                 return true;
             }
 
