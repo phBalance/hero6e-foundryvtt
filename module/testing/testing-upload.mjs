@@ -10967,6 +10967,59 @@ export function registerUploadTests(quench) {
                         });
                     });
                 });
+
+                // See bug #3419
+                describe("skill with charges", async function () {
+                    const contents = `
+                        <SKILL XMLID="ACTING" ID="1728919831806" BASECOST="3.0" LEVELS="0" ALIAS="Acting" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Charges Roll" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="CHARGES" ID="1728919897581" BASECOST="-0.75" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIX" OPTIONID="SIX" OPTION_ALIAS="6" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </SKILL>
+                    `;
+                    let item;
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, is5e: true });
+                        item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Acting 11- (3 Active Points); 6 Charges (-3/4)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 3);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.LEVELS, 0);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.end, 0);
+                    });
+
+                    it("charges", function () {
+                        assert.equal(item.system.chargesMax, 6);
+                    });
+
+                    it("clips", function () {
+                        assert.equal(item.system.clipsMax, 0);
+                    });
+                });
             });
 
             describe("5e calculated & figured characteristics", async function () {
