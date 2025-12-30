@@ -6407,13 +6407,13 @@ export function registerFullTests(quench) {
                 // This is 10 active points with 1.25 of limitations so 4 real points and .4 character points.
                 // Make sure we're clamping costs at 1.
                 it("LIFESUPPORT points", function () {
-                    assert.equal(lifeSupportItem._characterPointCost, 1);
+                    assert.equal(lifeSupportItem.characterPointCost, 1);
                 });
 
                 // This is 6 active points with 0.5 limitation so 4 real points and .4 character points.
                 // Make sure we're clamping costs at 1.
                 it("INFRAREDPERCEPTION points", function () {
-                    assert.equal(infraredPerceptionItem._characterPointCost, 1);
+                    assert.equal(infraredPerceptionItem.characterPointCost, 1);
                 });
             });
 

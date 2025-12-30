@@ -1084,8 +1084,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     async chat() {
-        //this.getUpdateItemDescription();
-
         let content = `<div class="item-chat">`;
 
         // Part of a framework (is there a PARENTID?)
@@ -3564,12 +3562,19 @@ export class HeroSystem6eItem extends Item {
             description += ` Real Cost ${this.realCost}`;
         }
 
+        // Cleanup punctuation
         description = (description || "")
             .replace(";,", ";")
             .replace("; ,", ";")
             .replace("; ;", ";")
             .replace(/;$/, "") // Remove ";" at the end of the description string
             .trim();
+
+        // 5 point doubling rule note
+        if (system.QUANTITY != null && system.QUANTITY > 1) {
+            description += ` (x${system.QUANTITY} number of items)`;
+        }
+
         return description;
     }
 
@@ -4942,7 +4947,21 @@ export class HeroSystem6eItem extends Item {
         if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
             return 0;
         }
-        return this._characterPointCost;
+
+        const cpCost = this._characterPointCost;
+
+        // Consider the 5 point doubling cost
+        const quantity = this.system.QUANTITY;
+        let doublingsCost = 0;
+        if (quantity != null && quantity > 1) {
+            const doublings = Math.ceil(Math.log(quantity) / Math.log(2));
+
+            // The cost is always the cheaper of buying multiple quantities or paying the 5pt doubling cost.
+            // We're multiplying, so remember to round.
+            doublingsCost = RoundFavorPlayerDown(Math.min(5 * doublings, cpCost * (quantity - 1)));
+        }
+
+        return cpCost + doublingsCost;
     }
 
     get realCost() {
@@ -5394,7 +5413,7 @@ export class HeroSystem6eItem extends Item {
         return null;
     }
 
-    // Real Points are sometimes refferred to as CharacterPoints
+    // Real Points are sometimes referred to as Character Points in HD, but they should not be as they are distinct.
     get _characterPointCost() {
         // VPP parent?
         if (this.parentItem?.system.XMLID === "VPP" || this.parentItem?.parentItem?.system.XMLID === "VPP") {
