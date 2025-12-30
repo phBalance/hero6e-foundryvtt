@@ -11132,16 +11132,16 @@ export function registerUploadTests(quench) {
             describe("SOCIALLIMITATION", async function () {
                 describe("not add effects to occur (8-)", async function () {
                     const contents = `
-                    <DISAD XMLID="SOCIALLIMITATION" ID="1704506737954" BASECOST="0.0" LEVELS="0" ALIAS="Social Limitation" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                        <NOTES />
-                        <ADDER XMLID="OCCUR" ID="1704506848422" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                        <DISAD XMLID="SOCIALLIMITATION" ID="1704506737954" BASECOST="0.0" LEVELS="0" ALIAS="Social Limitation" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                             <NOTES />
-                        </ADDER>
-                        <ADDER XMLID="EFFECTS" ID="1704506848428" BASECOST="0.0" LEVELS="0" ALIAS="Effects of Restrictions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINOR" OPTIONID="MINOR" OPTION_ALIAS="Minor" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                            <NOTES />
-                        </ADDER>
-                    </DISAD>
-                `;
+                            <ADDER XMLID="OCCUR" ID="1704506848422" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="EFFECTS" ID="1704506848428" BASECOST="0.0" LEVELS="0" ALIAS="Effects of Restrictions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINOR" OPTIONID="MINOR" OPTION_ALIAS="Minor" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                        </DISAD>
+                    `;
                     let item;
 
                     before(async function () {
@@ -11180,15 +11180,15 @@ export function registerUploadTests(quench) {
 
                 describe("not add effects to occur (8-)", async function () {
                     const contents = `
-                    <DISAD XMLID="SOCIALLIMITATION" ID="1766288720828" BASECOST="0.0" LEVELS="0" ALIAS="Social Limitation" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="test test">
-                        <NOTES />
-                        <ADDER XMLID="OCCUR" ID="1766288722915" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                        <DISAD XMLID="SOCIALLIMITATION" ID="1766288720828" BASECOST="0.0" LEVELS="0" ALIAS="Social Limitation" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="test test">
                             <NOTES />
-                        </ADDER>
-                        <ADDER XMLID="EFFECTS" ID="1766288722921" BASECOST="10.0" LEVELS="0" ALIAS="Effects of Restrictions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEVERE" OPTIONID="SEVERE" OPTION_ALIAS="Severe" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                            <NOTES />
-                        </ADDER>
-                    </DISAD>
+                            <ADDER XMLID="OCCUR" ID="1766288722915" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="(Occasionally" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="EFFECTS" ID="1766288722921" BASECOST="10.0" LEVELS="0" ALIAS="Effects of Restrictions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEVERE" OPTIONID="SEVERE" OPTION_ALIAS="Severe" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                        </DISAD>
                     `;
                     let item;
 
@@ -11223,6 +11223,297 @@ export function registerUploadTests(quench) {
 
                     it("roll", function () {
                         assert.equal(item.system.roll, "8-");
+                    });
+                });
+            });
+
+            // See #3420
+            describe("Doubling rule", async function () {
+                describe("quanity 2 - real cost is more than 5 points", async function () {
+                    const contents = `
+                        <POWER XMLID="FLASHDEFENSE" ID="1767132259344" BASECOST="0.0" LEVELS="12" ALIAS="Flash Defense" POSITION="152" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="6 RC x 2" QUANTITY="2" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="FOCUS" ID="1767132300758" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Hearing Group Flash Defense (12 points) (12 Active Points); OAF (-1) (x2 number of items)",
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 11);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 6);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 12);
+                    });
+                });
+
+                describe("quantity 3 - real cost is more than 5 points", async function () {
+                    const contents = `
+                        <POWER XMLID="FLASHDEFENSE" ID="1767132318720" BASECOST="0.0" LEVELS="12" ALIAS="Flash Defense" POSITION="153" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="6 RC x 3" QUANTITY="3" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="FOCUS" ID="1767132334345" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Hearing Group Flash Defense (12 points) (12 Active Points); OAF (-1) (x3 number of items)",
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 16);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 6);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 12);
+                    });
+                });
+
+                describe("quantity 4 - real cost is more than 5 points", async function () {
+                    const contents = `
+                        <POWER XMLID="FLASHDEFENSE" ID="1767133147741" BASECOST="0.0" LEVELS="12" ALIAS="Flash Defense" POSITION="154" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="6 RC x 4" QUANTITY="4" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="FOCUS" ID="1767133151703" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Hearing Group Flash Defense (12 points) (12 Active Points); OAF (-1) (x4 number of items)",
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 16);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 6);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 12);
+                    });
+                });
+
+                describe("quantity 16 - real cost is more than 5 points", async function () {
+                    const contents = `
+                        <POWER XMLID="FLASHDEFENSE" ID="1767132362923" BASECOST="0.0" LEVELS="12" ALIAS="Flash Defense" POSITION="155" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="6 RC x 16" QUANTITY="16" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="FOCUS" ID="1767132366321" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Hearing Group Flash Defense (12 points) (12 Active Points); OAF (-1) (x16 number of items)",
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 26);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 6);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 12);
+                    });
+                });
+
+                describe("quantity 3 - real cost is less than 5 points", async function () {
+                    const contents = `
+                        <POWER XMLID="FLASHDEFENSE" ID="1767132121953" BASECOST="0.0" LEVELS="8" ALIAS="Flash Defense" POSITION="150" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="4 RC x 3" QUANTITY="3" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="FOCUS" ID="1767132125729" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Hearing Group Flash Defense (8 points) (8 Active Points); OAF (-1) (x3 number of items)",
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 12);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 4);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 8);
+                    });
+                });
+
+                describe("quantity 8 - real cost is less than 5 points", async function () {
+                    const contents = `
+                        <POWER XMLID="FLASHDEFENSE" ID="1767132205473" BASECOST="0.0" LEVELS="8" ALIAS="Flash Defense" POSITION="151" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="4 RC x 7" QUANTITY="7" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="FOCUS" ID="1767132232163" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Hearing Group Flash Defense (8 points) (8 Active Points); OAF (-1) (x7 number of items)",
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 19);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 4);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 8);
                     });
                 });
             });
