@@ -4,6 +4,7 @@
 
 - Ablative defenses now supported. [#231](https://github.com/dmdorman/hero6e-foundryvtt/issues/231)
 - Half range modifier implemented. [#3369](https://github.com/dmdorman/hero6e-foundryvtt/issues/3369)
+- Non power items can have charges. [#3418](https://github.com/dmdorman/hero6e-foundryvtt/issues/3418)
 
 ## Version 4.2.6 20251228
 
