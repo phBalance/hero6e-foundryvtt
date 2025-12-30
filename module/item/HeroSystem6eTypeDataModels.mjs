@@ -1087,7 +1087,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             POINTS: new StringField(),
             POWDLEVELS: new HeroNumberField({ integer: true }),
             PRE: new StringField(),
-            QUANTITY: new StringField(),
+            QUANTITY: new HeroNumberField({ integer: true }),
             RANGE: new StringField(),
             STR: new StringField(),
             TARGET: new StringField(),

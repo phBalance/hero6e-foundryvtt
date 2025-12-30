@@ -1084,8 +1084,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     async chat() {
-        //this.getUpdateItemDescription();
-
         let content = `<div class="item-chat">`;
 
         // Part of a framework (is there a PARENTID?)
@@ -3564,12 +3562,19 @@ export class HeroSystem6eItem extends Item {
             description += ` Real Cost ${this.realCost}`;
         }
 
+        // Cleanup punctuation
         description = (description || "")
             .replace(";,", ";")
             .replace("; ,", ";")
             .replace("; ;", ";")
             .replace(/;$/, "") // Remove ";" at the end of the description string
             .trim();
+
+        // 5 point doubling rule note
+        if (system.QUANTITY !== 1) {
+            description += ` (x${system.QUANTITY} number of items)`;
+        }
+
         return description;
     }
 
