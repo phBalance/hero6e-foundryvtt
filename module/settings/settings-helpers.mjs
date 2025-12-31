@@ -548,3 +548,15 @@ function handleOverrideCanAct(event) {
 
     return false;
 }
+
+/**
+ *
+ * @param {string} settingKey
+ * @param {any} newValue
+ * @returns {any} - the settingKey's value before applying newValue
+ */
+export async function getAndSetGameSetting(settingKey, newValue) {
+    const presentValue = game.settings.get(game.system.id, settingKey);
+    await game.settings.set(HEROSYS.module, settingKey, newValue);
+    return presentValue;
+}

@@ -1,11 +1,12 @@
-import { HEROSYS } from "../herosystem6e.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import {
     combatSkillLevelsForAttack,
     getEffectFormulaFromItem,
     getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 export function registerFullTests(quench) {
     quench.registerBatch(
@@ -1720,14 +1721,15 @@ export function registerFullTests(quench) {
                 let actor;
                 let previousDoubleDamageLimitSetting;
                 before(async function () {
-                    previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                    previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
+
                     actor = await createQuenchActor({ quench: this, contents, is5e: false });
                 });
 
                 after(async function () {
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     await deleteQuenchActor({ quench: this, actor });
+
+                    await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                 });
 
                 it("Killing Strike damage", async function () {
@@ -2091,14 +2093,15 @@ export function registerFullTests(quench) {
                 let previousSetting;
 
                 beforeEach(async function () {
-                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
                 });
 
                 afterEach(async function () {
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
                     await deleteQuenchActor({ quench: this, actor });
+
+                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
                 // Verify the cost of powers
@@ -2478,8 +2481,7 @@ export function registerFullTests(quench) {
                 let sacrificeStrikeItem;
 
                 beforeEach(async function () {
-                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                     actor = new HeroSystem6eActor(
                         {
@@ -2507,7 +2509,7 @@ export function registerFullTests(quench) {
                 });
 
                 afterEach(async function () {
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
                 // Verify the cost of powers
@@ -3029,8 +3031,7 @@ export function registerFullTests(quench) {
                 let eightDcTransform;
 
                 beforeEach(async function () {
-                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                     actor = new HeroSystem6eActor(
                         {
@@ -3063,7 +3064,7 @@ export function registerFullTests(quench) {
                 });
 
                 afterEach(async function () {
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
                 // Verify the cost of powers
@@ -3359,8 +3360,7 @@ export function registerFullTests(quench) {
                 let customMartialFourDcManeuverItem;
 
                 beforeEach(async function () {
-                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                     actor = new HeroSystem6eActor(
                         {
@@ -3387,7 +3387,7 @@ export function registerFullTests(quench) {
                 });
 
                 afterEach(async function () {
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
                 describe("straight forward martial maneuvers with weapons", function () {
@@ -3640,8 +3640,7 @@ export function registerFullTests(quench) {
                 });
 
                 beforeEach(async function () {
-                    previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                     actor = new HeroSystem6eActor(
                         {
@@ -3655,7 +3654,7 @@ export function registerFullTests(quench) {
                 });
 
                 afterEach(async function () {
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
                 it("should recognize MA - Basic Shot with RKA and RANGEDDC", function () {
@@ -4851,12 +4850,11 @@ export function registerFullTests(quench) {
                     let previousSetting;
 
                     beforeEach(async function () {
-                        previousSetting = await game.settings.get(HEROSYS.module, "DoubleDamageLimit");
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
                     });
 
                     afterEach(async function () {
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousSetting);
+                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                     });
 
                     it("should limit total damage for the Big Sword HKA", function () {
