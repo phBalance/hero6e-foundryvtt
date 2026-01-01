@@ -557,6 +557,6 @@ function handleOverrideCanAct(event) {
  */
 export async function getAndSetGameSetting(settingKey, newValue) {
     const presentValue = game.settings.get(game.system.id, settingKey);
-    await game.settings.set(HEROSYS.module, settingKey, newValue);
+    await game.settings.set(game.system.id, settingKey, newValue);
     return presentValue;
 }
