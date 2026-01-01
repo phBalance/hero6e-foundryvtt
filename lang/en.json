@@ -91,6 +91,18 @@
         "Roll": "Roll",
         "SendToChat": "Send to chat",
         "TACTICS": "TACTICS",
+        "Tabs": {
+            "attacks": "Attacks",
+            "defenses": "Defenses",
+            "movements": "Movements",
+            "martial-arts": "MartialArts",
+            "skills": "Skills",
+            "maneuvers": "Maneuvers",
+            "powers": "Powers",
+            "equipment": "Equipment",
+            "other": "Other",
+            "analysis": "Analysis"
+        },
         "Talent": "Talent",
         "Type": "Type",
         "Value": "Current",

@@ -2,29 +2,34 @@
     display: none;
 }
 
-.upload-button:not(.is-owner) > span {
+label.upload-button:not(.is-owner) > span {
     color: #4b4a44;
 }
 
-.upload-button.is-owner {
+label.upload-button.is-owner {
     &:hover,
     &:focus {
-        outline: none;
-        box-shadow: 0 0 5px red;
+        outline: var(--color-warm-2);
+        background: var(--color-warm-2);
+        color: var(--color-light-1);
     }
 }
 
-.upload-button {
+label.upload-button {
     height: 30px;
     margin: 3px 5px;
-    background: rgb(255 255 240 / 80%);
-    border: 1px solid #b5b3a4;
+    background: rgb(0 0 0 / 10%);
+    border: 1px solid var(--color-dark-5);
     border-radius: 3px;
     font-size: 14px;
     line-height: 28px;
     font-family: Signika, sans-serif;
     align-content: center;
     text-align: center;
+    color: var(--button-text-color);
+    cursor: var(--cursor-pointer);
+    transition: 0.5s;
+    padding: 0 8px;
 
     &:disabled {
         color: #4b4a44;
@@ -34,9 +39,4 @@
     & > i {
         margin-right: 3px;
     }
-}
-
-form .upload-button {
-    background: rgb(0 0 0 / 10%);
-    border: 2px groove #f0f0e0;
 }
