@@ -4797,8 +4797,11 @@ export function registerFullTests(quench) {
 
                 let bigSwordItem;
                 let littleSwordItem;
+                let previousSetting;
 
                 before(async function () {
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
+
                     actor = new HeroSystem6eActor(
                         {
                             name: "Quench Actor",
@@ -4812,6 +4815,10 @@ export function registerFullTests(quench) {
                     littleSwordItem = actor.items.find(
                         (item) => item.system.XMLID === "HKA" && item.name === "Little Sword",
                     );
+                });
+
+                after(async function () {
+                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
                 describe("Big Sword Killing Attack", function () {
@@ -4849,11 +4856,11 @@ export function registerFullTests(quench) {
                 describe("Big and Little Sword Killing Attacks with damage doubling rules", function () {
                     let previousSetting;
 
-                    beforeEach(async function () {
+                    before(async function () {
                         previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
                     });
 
-                    afterEach(async function () {
+                    after(async function () {
                         await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                     });
 
