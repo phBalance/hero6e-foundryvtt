@@ -1959,6 +1959,8 @@ export function registerFullTests(quench) {
             });
 
             describe("5e - base vs added DCs", function () {
+                this.timeout(20000);
+
                 const contents = `
                 <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -2064,19 +2066,19 @@ export function registerFullTests(quench) {
                         </MANEUVER>
                     </MARTIALARTS>
                     <POWERS>
-                        <POWER XMLID="HKA" ID="1735338119256" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <POWER XMLID="HKA" ID="1767244553838" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="1d6+1" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
-                            <ADDER XMLID="PLUSONEHALFDIE" ID="1735338266616" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <ADDER XMLID="PLUSONEPIP" ID="1767244669362" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
                                 <NOTES />
                             </ADDER>
-                        </POWER>
-                        <POWER XMLID="HKA" ID="1735338133849" BASECOST="0.0" LEVELS="0" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <ADDER XMLID="MINUSONEPIP" ID="1735338276494" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <MODIFIER XMLID="STRMINIMUM" ID="1767244659818" BASECOST="-0.25" LEVELS="0" ALIAS="STR Minimum" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1-5" OPTIONID="1-5" OPTION_ALIAS="1-5" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </ADDER>
+                            </MODIFIER>
+                            <MODIFIER XMLID="REALWEAPON" ID="1767244653846" BASECOST="-0.25" LEVELS="0" ALIAS="Real Weapon" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
                         </POWER>
-                        <POWER XMLID="HKA" ID="1735338147368" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <POWER XMLID="HKA" ID="1735338147368" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="2d6-1" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
                             <ADDER XMLID="MINUSONEPIP" ID="1735338293092" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
                                 <NOTES />
@@ -2091,11 +2093,21 @@ export function registerFullTests(quench) {
 
                 let actor;
                 let previousSetting;
+                let hka5DcItem;
+                let hka4DcItem;
 
                 beforeEach(async function () {
                     previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
+
+                    hka5DcItem = actor.items.find(
+                        (item) => item.system.XMLID === "HKA" && item.system.NAME === "2d6-1",
+                    );
+
+                    hka4DcItem = actor.items.find(
+                        (item) => item.system.XMLID === "HKA" && item.system.NAME === "1d6+1",
+                    );
                 });
 
                 afterEach(async function () {
@@ -2106,13 +2118,14 @@ export function registerFullTests(quench) {
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.characterPointCost, 303);
+                    assert.equal(actor.characterPointCost, 281);
                 });
+
                 it("should match the cost breakdown of HD", function () {
                     assert.deepEqual(actor.pointsDetail, {
                         characteristics: 60,
                         martialart: 65,
-                        power: 60,
+                        power: 38,
                         skill: 88,
                         talent: 30,
                     });
@@ -2171,8 +2184,31 @@ export function registerFullTests(quench) {
                         );
                     });
 
-                    // TODO: move through with weapon
-                    // TODO: move by with weapon
+                    it("should not add STR to damage twice for Move By (not subject to doubling rule)", function () {
+                        // Base DCs: 2d6-1K HKA Weapon (5DC) => 5DC Killing
+                        // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 -> +4DC) + velocity (10"/5 -> +2DC) => +6DC
+                        // Base + Added = 5DC + 6DC (doubling rule does not apply) = 11 DC. HKA is 15AP/die => 4d6-1K
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(
+                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                { effectiveStr: 20, velocity: 10, maWeaponItem: hka5DcItem },
+                            ),
+                            "4d6-1K",
+                        );
+                    });
+
+                    it("should not add STR to damage twice for Move By (not subject to doubling rule)", function () {
+                        // Base DCs: 1d6+1K HKA Weapon (4DC) => 4DC Killing
+                        // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 with 5 STR minimum -> +3DC) + velocity (10"/5 -> +2DC) => +5DC
+                        // Base + Added = 4DC + 5DC (doubling rule does not apply) = 9 DC. HKA is 15AP/die => 3d6K
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(
+                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                { effectiveStr: 20, velocity: 10, maWeaponItem: hka4DcItem },
+                            ),
+                            "3d6K",
+                        );
+                    });
                 });
 
                 describe("Martial Arts", function () {
@@ -2220,6 +2256,10 @@ export function registerFullTests(quench) {
                             "29d6",
                         );
                     });
+
+                    it.skip("should have the correct damage for Martial Strike with 0 STR", function () {});
+
+                    it.skip("should have the correct damage for Martial Strike with -10 STR", function () {});
                 });
 
                 describe("Maneuvers with CSLs", function () {
@@ -2431,34 +2471,43 @@ export function registerFullTests(quench) {
                     </MARTIALARTS>
                     <POWERS>
                         <POWER XMLID="HKA" ID="1735338119256" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA1" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <ADDER XMLID="PLUSONEHALFDIE" ID="1735341333479" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
                             <NOTES />
-                        </ADDER>
+                            <ADDER XMLID="PLUSONEHALFDIE" ID="1735341333479" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
                         </POWER>
                         <POWER XMLID="HKA" ID="1735338133849" BASECOST="0.0" LEVELS="0" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA2" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <ADDER XMLID="MINUSONEPIP" ID="1735341346922" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
                             <NOTES />
-                        </ADDER>
+                            <ADDER XMLID="MINUSONEPIP" ID="1735341346922" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
                         </POWER>
                         <POWER XMLID="HKA" ID="1735338147368" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA3" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <ADDER XMLID="MINUSONEPIP" ID="1735341355413" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
                             <NOTES />
-                        </ADDER>
+                            <ADDER XMLID="MINUSONEPIP" ID="1735341355413" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
                         </POWER>
                         <POWER XMLID="HKA" ID="1735504607262" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Hand-To-Hand" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="HKA3" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <ADDER XMLID="PLUSONEPIP" ID="1735504900458" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
                             <NOTES />
-                        </ADDER>
+                            <ADDER XMLID="PLUSONEPIP" ID="1735504900458" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
                         </POWER>
-                        <POWER XMLID="HANDTOHANDATTACK" ID="1735510411182" BASECOST="0.0" LEVELS="14" ALIAS="Hand-To-Hand Attack" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <MODIFIER XMLID="HANDTOHANDATTACK" ID="1735510801302" BASECOST="-0.5" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <POWER XMLID="HANDTOHANDATTACK" ID="1735510411182" BASECOST="0.0" LEVELS="14" ALIAS="Hand-To-Hand Attack" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="14d6 no STR minimum" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
-                        </MODIFIER>
+                            <MODIFIER XMLID="HANDTOHANDATTACK" ID="1735510801302" BASECOST="-0.5" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                        <POWER XMLID="HANDTOHANDATTACK" ID="1767290302543" BASECOST="0.0" LEVELS="5" ALIAS="Hand-To-Hand Attack" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="5d6 STR minimum" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="HANDTOHANDATTACK" ID="1767290382469" BASECOST="-0.5" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="STRMINIMUM" ID="1767290382477" BASECOST="-0.5" LEVELS="0" ALIAS="STR Minimum" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="6-14" OPTIONID="6-14" OPTION_ALIAS="10" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
                         </POWER>
                     </POWERS>
                     <DISADVANTAGES />
@@ -2469,7 +2518,8 @@ export function registerFullTests(quench) {
 
                 let actor;
                 let previousSetting;
-                let hthAttack;
+                let hthAttack14d6NoStrMinimum;
+                let hthAttack5d6StrMinimum;
                 let strikeItem;
                 let moveByItem;
                 let moveThroughItem;
@@ -2493,7 +2543,13 @@ export function registerFullTests(quench) {
 
                     await actor.uploadFromXml(contents);
 
-                    hthAttack = actor.items.find((item) => item.system.XMLID === "HANDTOHANDATTACK");
+                    hthAttack14d6NoStrMinimum = actor.items.find(
+                        (item) =>
+                            item.system.XMLID === "HANDTOHANDATTACK" && item.system.NAME === "14d6 no STR minimum",
+                    );
+                    hthAttack5d6StrMinimum = actor.items.find(
+                        (item) => item.system.XMLID === "HANDTOHANDATTACK" && item.system.NAME === "5d6 STR minimum",
+                    );
 
                     strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
                     moveByItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
@@ -2514,14 +2570,14 @@ export function registerFullTests(quench) {
 
                 // Verify the cost of powers
                 it("should match the overall cost of HD", function () {
-                    assert.equal(actor.characterPointCost, 260);
+                    assert.equal(actor.characterPointCost, 272);
                 });
 
                 it("should match the cost breakdown of HD", function () {
                     assert.deepEqual(actor.pointsDetail, {
                         characteristics: 0,
                         martialart: 30,
-                        power: 142,
+                        power: 154,
                         skill: 88,
                     });
                 });
@@ -2544,7 +2600,7 @@ export function registerFullTests(quench) {
                     });
 
                     // Martial maneuvers use 0 END
-                    describe("Flying Dodge Martial Art Maneuver", function () {
+                    describe("FLYING DODGE Martial Art Maneuver", function () {
                         it("should use 0 END", function () {
                             const blockCombatManeuver = actor.items.find(
                                 (item) => item.system.XMLID === "MANEUVER" && item.name === "Flying Dodge",
@@ -2555,21 +2611,59 @@ export function registerFullTests(quench) {
                 });
 
                 describe("basic maneuver with HTH attack", function () {
-                    beforeEach(function () {
-                        // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                    });
-
                     afterEach(function () {
                         // Remove the HTH attack
                         delete strikeItem.system._active.linkedAssociated;
                     });
 
                     it("should have the correct damage for a strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
                         // Added DCs: Strike 0DC =>  +0 DC
-                        // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 16d6
+                        // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. STR is 5AP/die => 16d6
+
+                        // Add the HTH attack
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+
                         assert.equal(getEffectFormulaFromItem(strikeItem, {}), "16d6");
+                    });
+
+                    it("should have damage for a strike with HTH w/ STR minimum", function () {
+                        // Base DCs: STR (STR 10 => +2DC), HA Damage +5 DC (w/ STR 10 minimum => +3d6) => 5 DC
+                        // Added DCs: Strike 0DC =>  +0 DC
+                        // Base + Added = 5DC + 0DC (doubling rule does not apply) = 5 DC. STR is 5AP/die => 5d6
+
+                        // Add the HTH attack
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack5d6StrMinimum }];
+
+                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "5d6");
+                    });
+
+                    it.skip("should have damage for a strike with multiple HTH attacks", function () {
+                        assert.equal(true, false);
+                    });
+
+                    it.skip("should have damage for a strike with multiple HTH attacks that each have STR minima", function () {
+                        assert.equal(true, false);
+                    });
+
+                    it.skip("should have damage for a strike with an advantaged HTH attack with not too much STR", function () {
+                        assert.equal(true, false);
+                    });
+
+                    it.skip("should have damage for a strike with an advantaged HTH attack with too much STR", function () {
+                        assert.equal(true, false);
+                    });
+
+                    it.skip("should have damage for a strike with HTH when there is advantaged STR", function () {
+                        assert.equal(true, false);
+                    });
+
+                    it.skip("should have damage for a strike with an advantaged HTH when there is advantaged STR", function () {
+                        assert.equal(true, false);
+                    });
+
+                    it.skip("should have damage for a strike with an advantaged HTH when there is differently advantaged STR", function () {
+                        assert.equal(true, false);
                     });
                 });
 
@@ -2585,7 +2679,7 @@ export function registerFullTests(quench) {
                 describe("Haymaker with HTH", function () {
                     beforeEach(function () {
                         // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
                     });
 
                     afterEach(function () {
@@ -2645,7 +2739,7 @@ export function registerFullTests(quench) {
                 describe("MANEUVER with Velocity with HTH", function () {
                     beforeEach(function () {
                         // Add the HTH attack
-                        moveByItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        moveByItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
                     });
 
                     afterEach(function () {
@@ -2679,11 +2773,11 @@ export function registerFullTests(quench) {
                 describe("Martial Arts", function () {
                     beforeEach(function () {
                         // Add the HTH attack
-                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
                     });
 
                     afterEach(function () {
@@ -2775,11 +2869,11 @@ export function registerFullTests(quench) {
 
                     beforeEach(function () {
                         // Add the HTH attack
-                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack }];
-                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
                     });
 
                     afterEach(function () {
@@ -2830,6 +2924,24 @@ export function registerFullTests(quench) {
                     });
                 });
 
+                describe("Martial Arts with HTH", function () {
+                    afterEach(function () {
+                        // Remove the HTH attack
+                        delete strikeItem.system._active.linkedAssociated;
+                    });
+
+                    it.skip("should have the correct damage for a strike with HTH that has STR minimum and 0 effective STR", function () {
+                        // Base DCs: STR (STR 10 => +2DC), HA Damage +5 DC (w/ STR 10 minimum => +3d6) => 3 DC
+                        // Added DCs: Martial Strike 2DC (but there is 0 STR being applied so cannot double) =>  +0 DC
+                        // Base + Added = 3DC + 0DC (doubling rule not allowed) = 3 DC. STR is 5AP/die => 3d6
+
+                        // Add the HTH attack
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack5d6StrMinimum }];
+
+                        assert.equal(getEffectFormulaFromItem(martialStrikeItem, {}), "3d6");
+                    });
+                });
+
                 describe("Underwater", function () {
                     let previousStatuses;
 
@@ -2839,7 +2951,7 @@ export function registerFullTests(quench) {
                         actor.statuses = new Set(["underwater"]);
 
                         // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack }];
+                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
                     });
 
                     afterEach(function () {
