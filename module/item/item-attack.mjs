@@ -334,52 +334,62 @@ export async function processActionToHit(item, formData) {
     });
 }
 
-function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
-    if (item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
-        // TODO: Should not be able to use this on anyone else. Should add a check well before here (in dialog).
+/**
+ * Compute and add range penalties based on the range, attack item, and actor into the provided attackHeroRoller
+ *
+ * @param {Number} distance
+ * @param {HeroSystem6eItem} attackItem
+ * @param {HeroSystem6eActor} actor
+ * @param {HeroRoller} attackHeroRoller
+ *
+ * @returns Number - Remaining range penalty. Should be a number that is negative or 0.
+ */
+export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRoller) {
+    // PH: FIXME: This is different between AoE and single target. Can we combine?
+    const baseRangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
+    let remainingRangePenalty = baseRangePenalty;
+
+    if (attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
+        // TODO: Should not be able to use this on anyone else. Should add this check well before here (in to hit dialog).
     }
 
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
-    //       in case the system has calculated it incorrectly.
+    //       in case the system has calculated it incorrectly. Should add this check well before here (in to hit dialog).
 
-    const noRangeModifiers = !!item.effectiveAttackItem.findModsByXmlid("NORANGEMODIFIER");
-    const normalRange = !!item.effectiveAttackItem.findModsByXmlid("NORMALRANGE");
+    const noRangeModifiers = !!attackItem.effectiveAttackItem.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!attackItem.effectiveAttackItem.findModsByXmlid("NORMALRANGE");
 
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
         !(
-            item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
-            item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
             noRangeModifiers ||
             normalRange
         )
     ) {
-        // PH: FIXME: This is different between AoE and single target. Can we combine?
-        const baseRangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
-        let remainingRangePenalty = baseRangePenalty;
-
         attackHeroRoller.addNumber(
             baseRangePenalty,
-            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor.is5e)}${getSystemDisplayUnits(item.actor.is5e)})`,
+            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, attackItem.actor.is5e)}${getSystemDisplayUnits(attackItem.actor.is5e)})`,
         );
 
         // PENALTY_SKILL_LEVELS (range)
         // PH: FIXME: PSLs for maneuver and PSLs for a weapon. What kind of stacking is possible?
-        for (const pslItem of item.effectiveAttackItem.pslRangePenaltyOffsetItems) {
+        for (const pslItem of attackItem.effectiveAttackItem.pslRangePenaltyOffsetItems) {
             const pslOffsets = Math.min(parseInt(pslItem.system.LEVELS), -remainingRangePenalty);
             remainingRangePenalty += pslOffsets;
             attackHeroRoller.addNumber(pslOffsets, "Penalty Skill Levels");
         }
 
         // Some maneuvers have a built in RANGE value (like PSLs). These are only possible from the maneuver item.
-        const maneuverRangeOffset = parseInt(item.system.RANGE || 0);
+        const maneuverRangeOffset = parseInt(attackItem.system.RANGE || 0);
         const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
         remainingRangePenalty += maneuverRangeOffsets;
         attackHeroRoller.addNumber(maneuverRangeOffsets, "Maneuver bonus");
 
         // Brace (+2 OCV only to offset the Range Modifier)
-        const braceManeuver = item.actor.items.find(
+        const braceManeuver = attackItem.actor.items.find(
             (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
         );
         if (braceManeuver) {
@@ -389,10 +399,11 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
         }
 
         // If we have half range penalty modifier, the halving, as with all Hero System calculations, must happen after all additions and subtractions.
-        const hasHalfRangePenalty = !!item.findModsByXmlid("HALFRANGEMODIFIER");
+        const hasHalfRangePenalty = !!attackItem.findModsByXmlid("HALFRANGEMODIFIER");
         if (hasHalfRangePenalty) {
+            // Round in favour of the player (given the range penalty is a negative or 0 that means rounding up)
             const halvedRangePenaltyOffset = Math.abs(
-                remainingRangePenalty - RoundFavorPlayerDown(remainingRangePenalty / 2),
+                remainingRangePenalty - RoundFavorPlayerUp(remainingRangePenalty / 2),
             );
 
             attackHeroRoller.addNumber(
@@ -404,6 +415,8 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
             remainingRangePenalty += halvedRangePenaltyOffset;
         }
     }
+
+    return remainingRangePenalty;
 }
 
 export async function doAoeActionToHit(action, options) {
