@@ -1,5 +1,15 @@
-// FIXME: 6e performs calculations to 1 decimal point and that's what this operates with.
-//        Unfortunately, 5e performs calculations to 2 decimal points. This does not.
+// Rounding rules for cost calculations. We do not limit rounding to 1 because something
+// may or may not be used for a cost calculation. That minimum cost is handled elsewhere.
+//
+// See FRed. pg 7 and 6e Vol 1 pg 12. Both require rounding to 1 decimal point.
+// NOTE: Fraction rounding for advantages/limitations does not follow these rules.
+
+// PH: FIXME: These functions assume positive numbers and don't work with negative numbers.
+// PH: FIXME: The Round* functions don't follow our naming convention.
+
+export function numberToOneDecimalPlace(number) {
+    return Math.trunc(number * 10) / 10;
+}
 
 export function RoundFavorPlayerDown(number) {
     // ROUND-OFFS AND MINIMUM COST
