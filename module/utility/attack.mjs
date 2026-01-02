@@ -261,9 +261,9 @@ export class Attack {
     static getRangeModifier(item, range) {
         const actor = item.actor;
 
-        if (item.system.rangeForItem(item) === CONFIG.HERO.RANGE_TYPES.SELF) {
+        if (item.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
             // TODO: Should not be able to use this on anyone else. Should add a check.
-            console.log("item.system.rangeForItem(item) === self && range:", range);
+            console.log("item.rangeForItem === self && range:", range);
             return 0;
         }
 
@@ -275,7 +275,7 @@ export class Attack {
 
         // There are no range penalties if this is a line of sight power or it has been bought with
         // no range modifiers.
-        if (!(item.system.rangeForItem(item) === "los" || noRangeModifiers || normalRange)) {
+        if (!(item.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT || noRangeModifiers || normalRange)) {
             const factor = actor.system.is5e ? 4 : 8;
 
             let rangePenalty = -Math.ceil(Math.log2(range / factor)) * 2;

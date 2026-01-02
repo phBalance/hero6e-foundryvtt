@@ -335,7 +335,7 @@ export async function processActionToHit(item, formData) {
 }
 
 function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
-    if (item.effectiveAttackItem.system.rangeForItem(item.effectiveAttackItem) === CONFIG.HERO.RANGE_TYPES.SELF) {
+    if (item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
         // TODO: Should not be able to use this on anyone else. Should add a check well before here (in dialog).
     }
 
@@ -349,10 +349,8 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
     // no range modifiers.
     if (
         !(
-            item.effectiveAttackItem.system.rangeForItem(item.effectiveAttackItem) ===
-                CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
-            item.effectiveAttackItem.system.rangeForItem(item.effectiveAttackItem) ===
-                CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
             noRangeModifiers ||
             normalRange
         )
