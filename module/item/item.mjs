@@ -762,7 +762,7 @@ export class HeroSystem6eItem extends Item {
     get pslRangePenaltyOffsetItems() {
         const psls = this.actor.items.filter(
             (pslItem) =>
-                pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.rangeForItem(this) &&
+                pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range &&
                 (pslItem.system.OPTIONID === "ALL" ||
                     pslItem.adders.find(
                         (adder) => adder.ALIAS.toLowerCase().trim() === this.name.toLowerCase().trim(),
@@ -1116,7 +1116,7 @@ export class HeroSystem6eItem extends Item {
         if (typeof this.baseInfo?.rangeText === "function") {
             content += ` ${this.baseInfo.rangeText(this)}${getSystemDisplayUnits(this.is5e)}.`;
         } else {
-            switch (this.system.rangeForItem(this)) {
+            switch (this.rangeForItem) {
                 case CONFIG.HERO.RANGE_TYPES.SELF: {
                     if (!this.baseInfo?.type.includes("skill")) {
                         content += " Self.";
@@ -1170,8 +1170,8 @@ export class HeroSystem6eItem extends Item {
                         break;
                     }
                     console.error("Unhandled range", this.baseInfo);
-                    if (this.baseInfo?.rangeForItem(this)?.toLowerCase()) {
-                        content += ` ${this.baseInfo?.rangeForItem(this).toLowerCase()}`;
+                    if (this.rangeForItem?.toLowerCase()) {
+                        content += ` ${this.rangeForItem.toLowerCase()}`;
                     }
                     break;
             }
@@ -5544,6 +5544,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         return _duration;
+    }
+
+    get rangeForItem() {
+        return this.baseInfo?.rangeForItem(this);
     }
 
     /**
