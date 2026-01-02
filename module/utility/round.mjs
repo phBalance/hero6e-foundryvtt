@@ -11,7 +11,7 @@ export function numberToOneDecimalPlace(number) {
     return Math.trunc(number * 10) / 10;
 }
 
-export function RoundFavorPlayerDown(number) {
+export function roundFavorPlayerDown(number) {
     // ROUND-OFFS AND MINIMUM COST
     // Whenever something in the rules requires multiplication or
     // division, handle round-offs as follows: results ending in .1 to .4
@@ -35,7 +35,7 @@ export function RoundFavorPlayerDown(number) {
     return Math.ceil(number);
 }
 
-export function RoundFavorPlayerUp(number) {
+export function roundFavorPlayerUp(number) {
     // ROUND-OFFS AND MINIMUM COST
     // Whenever something in the rules requires multiplication or
     // division, handle round-offs as follows: results ending in .1 to .4

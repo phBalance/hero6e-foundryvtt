@@ -1,4 +1,4 @@
-import { numberToOneDecimalPlace, RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
+import { numberToOneDecimalPlace, roundFavorPlayerDown, roundFavorPlayerUp } from "../utility/round.mjs";
 
 export function registerHeroMathTests(quench) {
     quench.registerBatch(
@@ -71,23 +71,23 @@ export function registerHeroMathTests(quench) {
             });
 
             describe("Hero Rounding", function () {
-                describe("RoundFavorPlayerUp", function () {
+                describe("roundFavorPlayerUp", function () {
                     it("should round 0.5 to 1", function () {
-                        expect(RoundFavorPlayerUp(0.5)).to.equal(1);
+                        expect(roundFavorPlayerUp(0.5)).to.equal(1);
                     });
 
                     it("should round 10000000.5 to 10000001", function () {
-                        expect(RoundFavorPlayerUp(10000000.5)).to.equal(10000001);
+                        expect(roundFavorPlayerUp(10000000.5)).to.equal(10000001);
                     });
                 });
 
-                describe("RoundFavorPlayerDown", function () {
+                describe("roundFavorPlayerDown", function () {
                     it("should round 0.5 to 0", function () {
-                        expect(RoundFavorPlayerDown(0.5)).to.equal(0);
+                        expect(roundFavorPlayerDown(0.5)).to.equal(0);
                     });
 
                     it("should round 10000000.5 to 10000000", function () {
-                        expect(RoundFavorPlayerDown(10000000.5)).to.equal(10000000);
+                        expect(roundFavorPlayerDown(10000000.5)).to.equal(10000000);
                     });
                 });
             });

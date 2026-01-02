@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerDown, roundFavorPlayerUp } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
     calculateStrengthMinimumForItem,
@@ -403,7 +403,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
         if (hasHalfRangePenalty) {
             // Round in favour of the player (given the range penalty is a negative or 0 that means rounding up)
             const halvedRangePenaltyOffset = Math.abs(
-                remainingRangePenalty - RoundFavorPlayerUp(remainingRangePenalty / 2),
+                remainingRangePenalty - roundFavorPlayerUp(remainingRangePenalty / 2),
             );
 
             attackHeroRoller.addNumber(
@@ -570,7 +570,7 @@ export async function doAoeActionToHit(action, options) {
         await facingHeroRoller.roll();
         const facingRollResult = facingHeroRoller.getBasicTotal();
 
-        const moveDistance = RoundFavorPlayerDown(Math.min(distance / 2, item.actor.system.is5e ? missBy : missBy * 2));
+        const moveDistance = roundFavorPlayerDown(Math.min(distance / 2, item.actor.system.is5e ? missBy : missBy * 2));
         hitRollText = `AoE origin MISSED by ${missBy}. Move AoE origin ${
             moveDistance + getSystemDisplayUnits(item.actor.is5e)
         } in the <b>${facingRollResult}</b> direction.`;
@@ -942,7 +942,7 @@ async function doSingleTargetActionToHit(action, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        let targetDefenseValue = RoundFavorPlayerUp(
+        let targetDefenseValue = roundFavorPlayerUp(
             target.actor?.system.characteristics[toHitChar.toLowerCase()]?.value,
         );
 
@@ -3709,8 +3709,8 @@ async function _calcDamage(damageRoller, item, options) {
         body = body - (options.defenseValue || 0) - (options.resistantValue || 0);
     }
 
-    stun = RoundFavorPlayerDown(stun < 0 ? 0 : stun);
-    body = RoundFavorPlayerDown(body < 0 ? 0 : body);
+    stun = roundFavorPlayerDown(stun < 0 ? 0 : stun);
+    body = roundFavorPlayerDown(body < 0 ? 0 : body);
 
     let hitLocText = "";
     if (useHitLocations) {
@@ -3720,11 +3720,11 @@ async function _calcDamage(damageRoller, item, options) {
         if (isKillingAttack) {
             // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
             // Location : [x Stun, x N Stun, x Body, OCV modifier]
-            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
+            body = roundFavorPlayerDown(body * hitLocationBodyMultiplier);
         } else {
             // stun attacks apply N STUN hit location and BODY multiplier after defenses have been subtracted
-            stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
-            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
+            stun = roundFavorPlayerDown(stun * hitLocationStunMultiplier);
+            body = roundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
         if (damageRoller.getHitLocation().item || damageRoller.getHitLocation().activeEffect) {
             hitLocText = `Hit ${hitLocation}`;
@@ -3735,8 +3735,8 @@ async function _calcDamage(damageRoller, item, options) {
 
     // apply damage reduction
     if (options.damageReductionValue > 0) {
-        stun = RoundFavorPlayerDown(stun * (1 - options.damageReductionValue / 100));
-        body = RoundFavorPlayerDown(body * (1 - options.damageReductionValue / 100));
+        stun = roundFavorPlayerDown(stun * (1 - options.damageReductionValue / 100));
+        body = roundFavorPlayerDown(body * (1 - options.damageReductionValue / 100));
     }
 
     // Penetrating attack minimum damage
@@ -3776,8 +3776,8 @@ async function _calcDamage(damageRoller, item, options) {
         }
     }
 
-    stun = RoundFavorPlayerDown(stun);
-    body = RoundFavorPlayerDown(body);
+    stun = roundFavorPlayerDown(stun);
+    body = roundFavorPlayerDown(body);
 
     damageDetail.body = body;
     damageDetail.stun = stun;
@@ -3937,7 +3937,7 @@ async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMul
             .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
             .addNumber(
-                RoundFavorPlayerUp(bodyForKbCalculations * knockbackMultiplier),
+                roundFavorPlayerUp(bodyForKbCalculations * knockbackMultiplier),
                 `Max potential knockback (${bodyForKbCalculations} BODY x ${knockbackMultiplier})`,
             )
             .addNumber(-parseInt(knockbackResistanceValue), "Knockback resistance")

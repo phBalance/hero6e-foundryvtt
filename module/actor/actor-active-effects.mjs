@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { RoundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerUp } from "../utility/round.mjs";
 
 export class HeroSystem6eActorActiveEffectsSystemData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
@@ -467,7 +467,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 update = current && delta;
                 break;
             case "number":
-                update = RoundFavorPlayerUp(current * delta);
+                update = roundFavorPlayerUp(current * delta);
                 break;
         }
         changes[change.key] = update;

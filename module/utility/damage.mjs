@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { RoundFavorPlayerUp } from "./round.mjs";
+import { roundFavorPlayerUp } from "./round.mjs";
 import { getSystemDisplayUnits } from "./units.mjs";
 import { squelch } from "./util.mjs";
 
@@ -1165,7 +1165,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         if (str >= 0) {
             const strBeforeManeuver = str;
             const divisor = parseInt(strMatch[1]);
-            str = RoundFavorPlayerUp(str / divisor);
+            str = roundFavorPlayerUp(str / divisor);
 
             // NOTE: intentionally using fractional DC here.
             const strDiceParts = calculateDicePartsFromDcForItem(actorStrengthItem, (strBeforeManeuver - str) / 5);

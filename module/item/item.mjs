@@ -20,7 +20,7 @@ import {
     whisperUserTargetsForActor,
     getCharacteristicInfoArrayForActor,
 } from "../utility/util.mjs";
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerDown, roundFavorPlayerUp } from "../utility/round.mjs";
 import {
     buildStrengthItem,
     calculateApPerDieForItem,
@@ -1877,7 +1877,7 @@ export class HeroSystem6eItem extends Item {
                 if (aoeModifier.XMLID === "AOE") {
                     switch (aoeModifier.OPTIONID) {
                         case "CONE":
-                            levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
+                            levels = roundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
                             break;
 
                         case "HEX":
@@ -1885,12 +1885,12 @@ export class HeroSystem6eItem extends Item {
                             break;
 
                         case "LINE":
-                            levels = RoundFavorPlayerUp((2 * activePointsWithoutAoeAdvantage) / 5);
+                            levels = roundFavorPlayerUp((2 * activePointsWithoutAoeAdvantage) / 5);
                             break;
 
                         case "ANY":
                         case "RADIUS":
-                            levels = Math.max(1, RoundFavorPlayerUp(activePointsWithoutAoeAdvantage / 10));
+                            levels = Math.max(1, roundFavorPlayerUp(activePointsWithoutAoeAdvantage / 10));
                             break;
 
                         default:
@@ -2373,7 +2373,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // 6e has a CONTROLCOST adder; 5e is half of pool
-        return this.findModsByXmlid("CONTROLCOST")?.LEVELS || RoundFavorPlayerDown(this.system.LEVELS / 2);
+        return this.findModsByXmlid("CONTROLCOST")?.LEVELS || roundFavorPlayerDown(this.system.LEVELS / 2);
     }
 
     get vppSlotted() {
@@ -2430,7 +2430,7 @@ export class HeroSystem6eItem extends Item {
         // NOTE: When we push we are altering the actual active points, via LEVELS and modifiers, so we have to back it out.
         const unpushedActivePoints =
             activePoints - (this.system._active?.pushedRealPoints || 0) * (1 + this._limitationCost);
-        const endCost = RoundFavorPlayerDown(unpushedActivePoints / endUnitSize);
+        const endCost = roundFavorPlayerDown(unpushedActivePoints / endUnitSize);
 
         return Math.max(1, endCost);
     }
@@ -2501,7 +2501,7 @@ export class HeroSystem6eItem extends Item {
                 {
                     let mdBonusFor5e = 0;
                     if (this.actor.is5e) {
-                        mdBonusFor5e = RoundFavorPlayerUp(
+                        mdBonusFor5e = roundFavorPlayerUp(
                             parseInt(this.actor.system.characteristics.ego?.value) / 5 || 0,
                         );
                     }
@@ -2682,7 +2682,7 @@ export class HeroSystem6eItem extends Item {
                     }
 
                     // Since it's only an approximation, just show whole numbers.
-                    lightYearsPerTimePeriod = RoundFavorPlayerUp(lightYearsPerTimePeriod);
+                    lightYearsPerTimePeriod = roundFavorPlayerUp(lightYearsPerTimePeriod);
 
                     description = `${system.ALIAS} (${lightYearsPerTimePeriod} Light Year(s)/${timePeriod})`;
                 }
@@ -4900,17 +4900,17 @@ export class HeroSystem6eItem extends Item {
             // Fixed
             if (this.system.ULTRA_SLOT) {
                 costSuffix = this.actor?.system.is5e ? "u" : "f";
-                cost = RoundFavorPlayerDown(cost / 10.0);
+                cost = roundFavorPlayerDown(cost / 10.0);
             }
 
             // Variable
             else {
                 costSuffix = this.actor?.system.is5e ? "m" : "v";
-                cost = RoundFavorPlayerDown(cost / 5.0);
+                cost = roundFavorPlayerDown(cost / 5.0);
             }
         }
 
-        return RoundFavorPlayerDown(cost) + costSuffix;
+        return roundFavorPlayerDown(cost) + costSuffix;
     }
 
     /**
@@ -4918,7 +4918,7 @@ export class HeroSystem6eItem extends Item {
      * However, be aware that HD keep the actual point cost expressed in 1 or 2 decimal points (based on 5e or 6e)
      */
     get activePointCostForDisplay() {
-        return RoundFavorPlayerUp(this._activePoints);
+        return roundFavorPlayerUp(this._activePoints);
     }
 
     /**
@@ -4926,7 +4926,7 @@ export class HeroSystem6eItem extends Item {
      * However, be aware that HD keep the actual point cost expressed in 1 or 2 decimal points (based on 5e or 6e)
      */
     get realPointCostForDisplay() {
-        return RoundFavorPlayerUp(this._realCost);
+        return roundFavorPlayerUp(this._realCost);
     }
 
     /**
@@ -4936,7 +4936,7 @@ export class HeroSystem6eItem extends Item {
     get characterPointCostForDisplay() {
         const cost = this.characterPointCost || parseFloat(this.characterPointCost);
 
-        return RoundFavorPlayerUp(cost);
+        return roundFavorPlayerUp(cost);
     }
 
     get activePoints() {
@@ -4958,7 +4958,7 @@ export class HeroSystem6eItem extends Item {
 
             // The cost is always the cheaper of buying multiple quantities or paying the 5pt doubling cost.
             // We're multiplying, so remember to round.
-            doublingsCost = RoundFavorPlayerDown(Math.min(5 * doublings, cpCost * (quantity - 1)));
+            doublingsCost = roundFavorPlayerDown(Math.min(5 * doublings, cpCost * (quantity - 1)));
         }
 
         return cpCost + doublingsCost;
@@ -5023,7 +5023,7 @@ export class HeroSystem6eItem extends Item {
             cost = cost - this.parentItem.system.BASECOST;
         }
 
-        return RoundFavorPlayerDown(cost) + costSuffix;
+        return roundFavorPlayerDown(cost) + costSuffix;
     }
 
     /// Get Levels with AID/DRAIN Active Effects
@@ -5269,7 +5269,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCosts !== 1) {
-            ap = RoundFavorPlayerDown(ap * advantageCosts);
+            ap = roundFavorPlayerDown(ap * advantageCosts);
         }
 
         ap = Math.max(this.baseInfo?.minimumCost || 0, ap);
@@ -5282,7 +5282,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsWithoutEnd !== 1) {
-            return RoundFavorPlayerDown(baseCostWithoutEnd * advantageCostsWithoutEnd);
+            return roundFavorPlayerDown(baseCostWithoutEnd * advantageCostsWithoutEnd);
         } else {
             return baseCostWithoutEnd;
         }
@@ -5294,7 +5294,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsWithoutAoe !== 1) {
-            return RoundFavorPlayerDown(baseCostWithoutAoe * advantageCostsWithoutAoe);
+            return roundFavorPlayerDown(baseCostWithoutAoe * advantageCostsWithoutAoe);
         } else {
             return baseCostWithoutAoe;
         }
@@ -5306,7 +5306,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsWithoutExclusions !== 1) {
-            return RoundFavorPlayerDown(baseCostWithoutExclusions * advantageCostsWithoutExclusions);
+            return roundFavorPlayerDown(baseCostWithoutExclusions * advantageCostsWithoutExclusions);
         } else {
             return baseCostWithoutExclusions;
         }
@@ -5351,7 +5351,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsAffectingDc !== 1) {
-            return RoundFavorPlayerDown(dcRaw);
+            return roundFavorPlayerDown(dcRaw);
         } else {
             return dcRaw;
         }
@@ -5398,7 +5398,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we divide (FRed pg 7, 6e vol 1 pg 12)
         if (_limitationCost !== 0) {
-            _cost = RoundFavorPlayerDown(_cost / (1 + _limitationCost));
+            _cost = roundFavorPlayerDown(_cost / (1 + _limitationCost));
         }
 
         return _cost;
@@ -5428,7 +5428,7 @@ export class HeroSystem6eItem extends Item {
                 (Math.max(this.elementalControl.system.BASECOST * 2, this.activePoints) -
                     this.elementalControl.system.BASECOST) /
                 (1 + this._limitationCost);
-            return RoundFavorPlayerDown(cp);
+            return roundFavorPlayerDown(cp);
         }
 
         let _cost = this._realCost;
@@ -5441,12 +5441,12 @@ export class HeroSystem6eItem extends Item {
             ) {
                 // Fixed with minimum cost of 1
                 if (this.system.ULTRA_SLOT || this.parentItem?.system.ULTRA_SLOT) {
-                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 10.0));
+                    _cost = Math.max(1.0, roundFavorPlayerDown(_cost / 10.0));
                 }
 
                 // Variable with minimum cost of 1
                 else {
-                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 5.0));
+                    _cost = Math.max(1.0, roundFavorPlayerDown(_cost / 5.0));
                 }
             }
         }
@@ -5469,8 +5469,8 @@ export class HeroSystem6eItem extends Item {
         const reducedEnd =
             this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
         if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
-            end = RoundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
-            end = Math.max(1, RoundFavorPlayerDown(end / 2));
+            end = roundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
+            end = Math.max(1, roundFavorPlayerDown(end / 2));
         } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             end = 0;
         }
@@ -5488,7 +5488,7 @@ export class HeroSystem6eItem extends Item {
         } else {
             // Full endurance cost unless it's purchased with half endurance
             if (costsEnd.OPTIONID === "HALFEND") {
-                end = RoundFavorPlayerDown(end / 2);
+                end = roundFavorPlayerDown(end / 2);
             }
         }
 
@@ -5518,8 +5518,8 @@ export class HeroSystem6eItem extends Item {
         const reducedEnd =
             this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
         if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
-            end = RoundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
-            end = Math.max(1, RoundFavorPlayerDown(end / 2));
+            end = roundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
+            end = Math.max(1, roundFavorPlayerDown(end / 2));
         } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             end = 0;
         }
