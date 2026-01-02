@@ -272,7 +272,7 @@ export class ItemAttackFormApplication extends FormApplication {
                         .filter((item) => {
                             // If a ranged maneuver, list all ranged weapons. Otherwise, it's a martial art
                             // and list all HTH or ranged weapons depending on the martial maneuver type
-                            const itemRange = item.system.rangeForItem(item);
+                            const itemRange = item.rangeForItem;
                             return (
                                 item.baseInfo.type.includes("attack") &&
                                 (isRangedCombatManeuver(this.data.originalItem)
