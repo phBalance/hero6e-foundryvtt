@@ -18,7 +18,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         classes: ["herosystem6e", "actor-sheet-v2"],
         position: {
             width: 700,
-            height: "auto",
+            height: 700,
+        },
+        actions: {
+            roll: HeroSystemActorSheetV2.#onRoll,
         },
         //tag: "form", // The default is "div"
         window: {
@@ -356,5 +359,86 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             //console.debug(`${attackKey}: used cache`);
         }
         return HeroSystemActorSheetV2.sampleAttacks[attackKey];
+    }
+
+    async _onFirstRender(context, options) {
+        await super._onFirstRender(context, options);
+
+        // General right click on row
+        this._createContextMenu(this._getDocumentListContextOptions, "[data-document-uuid]", {
+            hookName: "getDocumentListContextOptions",
+            parentClassHooks: false,
+            fixed: true,
+        });
+
+        // Same menu but for the specific vertical ellipsis control
+        this._createContextMenu(this._getDocumentListContextOptions, '[data-action="documentListContext"]', {
+            hookName: "getDocumentListContextOptions",
+            parentClassHooks: false,
+            fixed: true,
+            eventName: "click",
+        });
+    }
+
+    _getDocumentListContextOptions() {
+        // name is auto-localized
+        return [
+            {
+                name: "Edit",
+                icon: '<i class="fa-solid fa-fw fa-edit"></i>',
+                condition: () => this.actor.isOwner,
+                callback: async (target) => {
+                    const document = this._getEmbeddedDocument(target);
+                    await document.sheet.render({ force: true });
+                },
+            },
+            {
+                name: "Share",
+                icon: '<i class="fa-solid fa-fw fa-share-from-square"></i>',
+                callback: async (target) => {
+                    const document = this._getEmbeddedDocument(target);
+                    await document.chat();
+                    // await DrawSteelChatMessage.create({
+                    //     content: `@Embed[${document.uuid} caption=false]`,
+                    //     speaker: DrawSteelChatMessage.getSpeaker({ actor: this.actor }),
+                    //     title: document.name,
+                    //     flags: {
+                    //         core: { canPopout: true },
+                    //     },
+                    // });
+                },
+            },
+            {
+                name: "Delete",
+                icon: '<i class="fa-solid fa-fw fa-trash"></i>',
+                condition: () => this.actor.isOwner,
+                callback: async (target) => {
+                    const document = this._getEmbeddedDocument(target);
+                    await document.deleteDialog();
+                },
+            },
+        ];
+    }
+
+    _getEmbeddedDocument(target) {
+        const documentUuid = target.closest("[data-document-uuid]").dataset.documentUuid;
+
+        // fromUuidSync doesn't allow  retrieving embedded compendium documents, so manually retrieving each child document from the base document.
+        const { collection, embedded, documentId } = foundry.utils.parseUuid(documentUuid);
+        let document = collection.get(documentId);
+        while (document && embedded.length > 1) {
+            const [embeddedName, embeddedId] = embedded.splice(0, 2);
+            document = document.getEmbeddedDocument(embeddedName, embeddedId);
+        }
+
+        return document;
+    }
+
+    static async #onRoll(event, target) {
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("Unable to locate roll item");
+        }
+        await item.roll();
     }
 }

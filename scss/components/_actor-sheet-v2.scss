@@ -1,7 +1,15 @@
+.herosystem6e.actor-sheet-v2 {
+    min-height: 310px;
+    min-width: 500px;
+}
+
 /* Setup Grid with header, navbar and left sidebar */
 .herosystem6e.actor-sheet-v2 section.window-content {
     display: grid;
-    grid-template: "sidebar header" max-content "sidebar nav" max-content "sidebar content" 1fr / 100px minmax(0, 1fr);
+    grid-template:
+        "sidebar header" 75px
+        "sidebar nav" max-content
+        "sidebar content" 1fr / 100px 1fr;
     overflow: hidden;
     padding: 5px;
     gap: 2px;
@@ -130,24 +138,12 @@
 
 /* Attacks */
 .herosystem6e.actor-sheet-v2 .window-content section.tab.attacks {
-    table {
-        border-collapse: separate;
-        border-radius: 5px;
-        margin: 0;
-        overflow: auto hidden;
-
-        th,
-        td {
-            padding: 0;
-        }
-    }
-
     .item-list-container {
-        // margin: 10px 0;
+        //margin: 10px 0;
 
         .item-row,
         .item-header {
-            // display: flex;
+            display: flex;
             align-items: center;
             text-align: center;
         }
@@ -156,12 +152,8 @@
             color: var(--table-header-text-color);
             background-color: var(--herosystem-table-header-bg-color);
             border-radius: 5px 5px 0 0;
-
-            .item-column {
-                position: sticky;
-                top: 0;
-                background-color: var(--herosystem-table-header-bg-color);
-            }
+            position: sticky;
+            top: 0;
 
             .item-name {
                 font-weight: bold;
@@ -170,41 +162,45 @@
         }
 
         .item-name {
-            // flex: 1;
-            // display: flex;
+            flex: 1;
+            display: flex;
             align-items: center;
             text-align: left;
             padding: 5px 0 5px 5px;
         }
 
-        // .item-ocv,
-        // .item-dcv,
-        // .item-end {
-        //     width: 26px;
-        // }
+        .item-column {
+            width: 50px;
+        }
 
-        // .item-offdef {
-        //     width: 60px;
-        // }
+        .item-ocv,
+        .item-dcv,
+        .item-end {
+            width: 30px;
+        }
 
-        // .item-dmg {
-        //     width: 45px;
-        // }
+        .item-offdef {
+            width: 70px;
+        }
 
-        // .item-res {
-        //     width: 105px;
-        // }
+        .item-dmg {
+            width: 45px;
+        }
 
-        // .item-aoe {
-        //     width: 75px;
-        // }
+        .item-res {
+            width: 105px;
+        }
 
-        // .item-controls {
-        //     // display: flex;
-        //     width: 40px;
-        //     justify-content: space-evenly;
-        //     font-size: var(--font-size-16);
-        // }
+        .item-aoe {
+            width: 75px;
+        }
+
+        .item-controls {
+            // display: flex;
+            width: 40px;
+            justify-content: space-evenly;
+            font-size: var(--font-size-16);
+        }
 
         .item-list {
             // list-style: none;
