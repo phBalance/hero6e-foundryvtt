@@ -20,6 +20,7 @@ import { GenericRoller } from "./genericRoller.mjs";
 
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
+import { HeroSystemActorSheetV2 } from "./actor/actor-sheet-v2.mjs";
 import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
 import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./token/actor-token.mjs";
 import {
@@ -242,6 +243,10 @@ Hooks.once("init", async function () {
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheet, {
         makeDefault: true,
     });
+    FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
+        makeDefault: false,
+    });
+
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
         makeDefault: false,
     });
@@ -303,6 +308,7 @@ Hooks.once("init", async function () {
     foundryVttLoadTemplates(templatePaths);
 
     ItemVppConfig.initializeTemplate();
+    HeroSystemActorSheetV2.initializeTemplate();
 
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;

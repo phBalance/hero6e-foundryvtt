@@ -5,3 +5,11 @@ $c-failure: red;
 $c-warning: orangered;
 $c-hit: $c-success;
 $c-miss: $c-failure;
+
+.herosystem6e {
+    --herosystem-table-header-bg-color: #b2b1aa;
+}
+
+.herosystem6e.theme-dark {
+    --herosystem-table-header-bg-color: var(--color-cool-4);
+}

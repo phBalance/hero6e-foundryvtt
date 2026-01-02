@@ -220,7 +220,11 @@ function actorHeroValidationCssByItemType(actor, itemType) {
 }
 
 function hasCharacteristic(actor, characteristic) {
-    return getCharacteristicInfoArrayForActor(actor).find((o) => o.key === characteristic);
+    if (actor) {
+        return getCharacteristicInfoArrayForActor(actor).find((o) => o.key === characteristic);
+    }
+    console.error("No actor provided");
+    return false;
 }
 
 function notEqual(value1, value2) {
