@@ -6649,6 +6649,178 @@ export function cloneToEffectiveAttackItem({
 }
 
 /**
+ *
+ * @param {Object} effectiveObjectParameters
+ * @param {HeroSystem6eItem} effectiveObjectParameters.originalItem
+ * @param {Number} effectiveObjectParameters.effectiveRealCost
+ * @param {Number} effectiveObjectParameters.pushedRealPoints
+ * @param {Number} effectiveObjectParameters.effectiveStr
+ * @param {Number} effectiveObjectParameters.effectiveStrPushedRealPoints
+ * @param {String} effectiveObjectParameters.maWeaponId
+ * @param {HeroSystem6eItem[]} effectiveObjectParameters.hthAttackItems
+ * @param {HeroSystem6eItem[]} effectiveObjectParameters.nakedAdvantagesItems
+ * @param {Object} effectiveObjectParameters.autofire
+ * @param {Number} effectiveObjectParameters.autofire.shots
+ * @param {Number} effectiveObjectParameters.autofire.maxShots
+ *
+ * @returns
+ */
+export function buildEffectiveObject(effectiveObjectParameters) {
+    const { effectiveItem, strengthItem } = cloneToEffectiveAttackItem({
+        originalItem: effectiveObjectParameters.originalItem,
+        effectiveRealCost: effectiveObjectParameters.effectiveRealCost,
+        pushedRealPoints: effectiveObjectParameters.pushedRealPoints,
+        effectiveStr: effectiveObjectParameters.effectiveStr,
+        effectiveStrPushedRealPoints: effectiveObjectParameters.effectiveStrPushedRealPoints,
+    });
+
+    // How many shots for this attack (aka autofire)
+    effectiveItem.system._active.autofire = effectiveObjectParameters.autofire;
+
+    // Martial Arts weapon being used?
+    if (effectiveObjectParameters.maWeaponId) {
+        effectiveItem.system._active.maWeaponItem = effectiveObjectParameters.originalItem.actor.items.find(
+            (item) => item.id === effectiveObjectParameters.maWeaponId,
+        );
+
+        if (effectiveItem.system._active.maWeaponItem) {
+            effectiveItem.system._active.linkedAssociated ??= [];
+            effectiveItem.system._active.linkedAssociated.push({
+                item: effectiveItem.system._active.maWeaponItem,
+                uuid: effectiveItem.system._active.maWeaponItem.uuid,
+            });
+        }
+    }
+
+    // Active points for the base item. For maneuvers this could be STR or a weapon.
+    const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem.baseInfo.baseEffectDicePartsBundle(
+        effectiveItem,
+        {},
+    ).baseAttackItem._activePoints;
+
+    // Add any checked & appropriate Hand-to-Hand Attack advantages into the base item
+    let hthAttackDisabledDueToStrength = false;
+    Object.entries(effectiveObjectParameters.hthAttackItems)
+        .filter((_, index, array) => {
+            // If there is no strength item or effective strength is less than 3 then we don't have enough
+            // strength applied to allow HTH Attacks
+            // PH: FIXME: Should look at strengthItem's actual strength
+            // PH: FIXME: Need to consider real weapons w/ STRMINIMUM
+            if (!strengthItem || effectiveObjectParameters.effectiveStr < 3) {
+                if (array[index][1]._canUseForAttack) {
+                    hthAttackDisabledDueToStrength = true;
+                }
+
+                array[index][1]._canUseForAttack = false;
+                array[index][1].reasonForCantUse = "Must use at least 3 (½d6) STR to add a hand-to-hand attack";
+
+                return false;
+            }
+
+            array[index][1].reasonForCantUse = "";
+
+            if (!array[index][1]._canUseForAttack) {
+                return false;
+            }
+
+            return true;
+        })
+        .map(([uuid]) => fromUuidSync(uuid))
+        .forEach((hthAttack) => {
+            // 5e only: Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
+            // 6e only: PH: FIXME: the HA becomes the base attack item.
+            // PH: FIXME: Need to consider STRMINIMUM
+            const haBaseCost = hthAttack._basePoints;
+            if (hthAttack.is5e && haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+                // Endurance advantages and limitations don't apply to strength
+                // Invisible Power Effects does not transfer to STR if on the HTH Attack
+                const ignoreAdvantagesForHthAttack = ["INCREASEDEND", "REDUCEDEND", "INVISIBLE"];
+
+                // PH: FIXME: AoE gets an increased radius based on STR used (so effectively double the radius)
+                // PH: FIXME: AoE gets the radius built from the HA not based on the effective item
+                effectiveItem.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+                strengthItem?.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+            } else if (hthAttack.is5e) {
+                ui.notifications.warn(
+                    `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
+                );
+            } else if (!hthAttack.is5e && hthAttack.advantages.length > 0) {
+                ui.notifications.warn(
+                    `6e Advantaged Hand-to-Hand Attacks not supported. Advantages for ${hthAttack.detailedName()} are not applied.`,
+                );
+            }
+
+            effectiveItem.system._active.linkedAssociated ??= [];
+            effectiveItem.system._active.linkedAssociated.push({
+                item: hthAttack,
+                uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+            });
+        });
+    if (hthAttackDisabledDueToStrength) {
+        ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
+    }
+
+    // Add any Naked Advantages into the base item
+    // PH: FIXME: Typically the NA should reduce the duration of the power to instant although it can be bought up. Should consider modification of duration
+    // PH: FIXME: Need to implement endurance usage. A REDUCE END NA will reduce the base attack's END use but otherwise the NA endurance usage is paid separately.
+    let nakedAdvantagesDisabledDueToActivePoints = false;
+    Object.entries(effectiveObjectParameters.nakedAdvantagesItems)
+        .map(([uuid], index, array) => {
+            const naItem = fromUuidSync(uuid);
+
+            // Item the NA is being applied to must not exceed the AP of the NA was designed against.
+            // TODO: This implies that one cannot push with a NA. Is this correct?
+            const naEffectiveAgainstAp = parseInt(naItem.system.LEVELS || 0);
+
+            // 5e and 6e have different rules as far as applying multiple naked advantages. 6e states that the effect of the first NA counts
+            // as a part of the power's AP for the purposes of adding a 2nd NA. 5e (FRed) does not have this rule.
+            const effectiveItemApForNaComparison = naItem.is5e
+                ? effectiveItemActivePointsBeforeHthAndNaAdvantages
+                : effectiveItem._activePoints;
+            if (naEffectiveAgainstAp < effectiveItemApForNaComparison) {
+                if (array[index][1]._canUseForAttack) {
+                    nakedAdvantagesDisabledDueToActivePoints = true;
+                }
+
+                array[index][1]._canUseForAttack = false;
+                array[index][1].reasonForCantUse =
+                    `${naItem.detailedName()} is effective against ${naEffectiveAgainstAp} AP but the base attack is ${effectiveItemActivePointsBeforeHthAndNaAdvantages} AP`;
+
+                return undefined;
+            }
+
+            array[index][1].reasonForCantUse = "";
+
+            if (!array[index][1]._canUseForAttack) {
+                return undefined;
+            }
+
+            effectiveItem.copyItemAdvantages(naItem, []);
+            effectiveItem.system._active.linkedEnd ??= [];
+            effectiveItem.system._active.linkedEnd.push({
+                item: naItem,
+                uuid: uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+            });
+
+            strengthItem?.copyItemAdvantages(naItem, []);
+
+            // PH: FIXME: active points from NA should be automatically adjusted to reflect the AP in the effective item (i.e. 30 AP effective item
+            //            shouldn't have to pay full END for NA that can affect up to 90 AP - it should just be dipped down to 30 AP)
+
+            return naItem;
+        })
+        .filter(Boolean);
+
+    if (nakedAdvantagesDisabledDueToActivePoints) {
+        ui.notifications.warn(
+            `Naked Advantages must be able to apply at least as many active points as the base attack${effectiveItem.is5e ? "" : " and other naked advantages"}`,
+        );
+    }
+
+    return effectiveItem;
+}
+
+/**
  * FTL levels start at 0 (1 LY/Y) but don't behave quite right.
  * @param {Number} levels
  * @returns
