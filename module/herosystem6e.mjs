@@ -245,6 +245,12 @@ Hooks.once("init", async function () {
     });
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
         makeDefault: false,
+        themes: {
+            "": "Default",
+            light: "Light",
+            dark: "Dark",
+            hc: "High Contrast",
+        },
     });
 
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
