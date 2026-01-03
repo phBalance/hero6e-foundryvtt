@@ -12624,6 +12624,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // EXTRATIME related
+            key: "NOOTHERACTIONS",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NOOTHERACTIONS" ID="1737922655047" BASECOST="-0.25" LEVELS="0" ALIAS="Character May Take No Other Actions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TELEPORTATION related
             key: "NORELATIVEVELOCITY",
             behaviors: ["adder"],
@@ -12690,17 +12701,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            // EXTRATIME related
-            key: "NOOTHERACTIONS",
-            behaviors: ["adder"],
-            type: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: `<ADDER XMLID="NOOTHERACTIONS" ID="1737922655047" BASECOST="-0.25" LEVELS="0" ALIAS="Character May Take No Other Actions" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
-        },
-        {},
-    );
-    addPower(
-        {
             // MEGASCALE related
             key: "NOSCALE",
             behaviors: ["adder"],
@@ -12718,6 +12718,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="NOTALL" ID="1762136059318" BASECOST="-5.0" LEVELS="0" ALIAS="(Known Only To A Small Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // SOCIALLIMITATION related
+            key: "NOTINSOME",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NOTINSOME" ID="1767400331512" BASECOST="-5.0" LEVELS="0" ALIAS="Not Limiting In Some Cultures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
