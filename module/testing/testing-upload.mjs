@@ -1,8 +1,9 @@
-import { HEROSYS } from "../herosystem6e.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
+import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { calculateStrengthMinimumForItem } from "../utility/damage.mjs";
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
 export function registerUploadTests(quench) {
@@ -6812,13 +6813,10 @@ export function registerUploadTests(quench) {
                         </MANEUVER>
                     `;
                     let item;
+                    let previousDoubleDamageLimitSetting;
 
                     before(async function () {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
 
                         const actor = new HeroSystem6eActor(
                             {
@@ -6840,8 +6838,11 @@ export function registerUploadTests(quench) {
 
                         actor.items.set(item.system.XMLID, item);
 
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                         await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -6872,13 +6873,10 @@ export function registerUploadTests(quench) {
                     </MANEUVER>
                 `;
                     let item;
+                    let previousDoubleDamageLimitSetting;
 
                     before(async function () {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                         const actor = new HeroSystem6eActor(
                             {
@@ -6898,8 +6896,10 @@ export function registerUploadTests(quench) {
                         );
 
                         actor.items.set(item.system.XMLID, item);
+                    });
 
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    after(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -6947,35 +6947,6 @@ export function registerUploadTests(quench) {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
-                    // before(async function() {
-                    //     const previousDoubleDamageLimitSetting = await game.settings.set(
-                    //         HEROSYS.module,
-                    //         "DoubleDamageLimit",
-                    //     );
-                    //     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
-
-                    //     const actor = new HeroSystem6eActor(
-                    //         {
-                    //             name: "Quench Actor",
-                    //             type: "pc",
-                    //         },
-                    //         {},
-                    //     );
-                    //     actor.system.is5e = true;
-
-                    //     item = new HeroSystem6eItem(
-                    //         {
-                    //             ...HeroSystem6eItem.itemDataFromXml(contents, actor),
-                    //             type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
-                    //         },
-                    //         { parent: actor },
-                    //     );
-
-                    //     actor.items.set(item.system.XMLID, item);
-
-                    //     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
-                    // });
-
                     it("description", function () {
                         assert.equal(item.system.description, "1/2 Phase, -1 OCV, +1 DCV, Disarm; 20 STR to Disarm");
                     });
@@ -7008,13 +6979,10 @@ export function registerUploadTests(quench) {
                         </MANEUVER>
                     `;
                     let item;
+                    let previousDoubleDamageLimitSetting;
 
                     before(async function () {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
 
                         const actor = new HeroSystem6eActor(
                             {
@@ -7035,8 +7003,10 @@ export function registerUploadTests(quench) {
                         );
 
                         actor.items.set(item.system.XMLID, item);
+                    });
 
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    after(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -7070,8 +7040,7 @@ export function registerUploadTests(quench) {
                     let actor;
                     let previousDoubleDamageLimitSetting;
                     before(async function () {
-                        previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         await actor.update({ "system.characteristics.dex.max ": 15 });
@@ -7082,8 +7051,9 @@ export function registerUploadTests(quench) {
                     });
 
                     after(async function () {
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                         await deleteQuenchActor({ quench: this, actor });
+
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -11515,6 +11485,73 @@ export function registerUploadTests(quench) {
                     it("activePoints", function () {
                         assert.equal(item.activePoints, 8);
                     });
+                });
+            });
+
+            describe("LIFESUPPORT - #3428", function () {
+                const contents = `
+                        <POWER XMLID="LIFESUPPORT" ID="1765665220842" BASECOST="0.0" LEVELS="0" ALIAS="Life Support" POSITION="18" MULTIPLIER="1.0" GRAPHIC="rads" COLOR="0 255 255" SFX="Air/Wind" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1765665248447" NAME="Bubble Of Air" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="SELFCONTAINEDBREATHING" ID="1765771256803" BASECOST="10.0" LEVELS="0" ALIAS="Self-Contained Breathing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="COSTSEND" ID="1765771256809" BASECOST="-0.5" LEVELS="0" ALIAS="Costs Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EVERYPHASE" OPTIONID="EVERYPHASE" OPTION_ALIAS="Costs END Every Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="INCREASEDEND" ID="1765771256835" BASECOST="-0.5" LEVELS="0" ALIAS="Increased Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2X" OPTIONID="2X" OPTION_ALIAS="x2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="GESTURES" ID="1765771256816" BASECOST="-0.25" LEVELS="0" ALIAS="Gestures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BOTHHAND" ID="1765771256811" BASECOST="-0.25" LEVELS="0" ALIAS="Requires both hands" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <MODIFIER XMLID="THROUGHOUT" ID="1765771256812" BASECOST="1.0" LEVELS="0" ALIAS="Requires Gestures throughout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                </MODIFIER>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                let item;
+
+                before(async function () {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = true;
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Life Support (Self-Contained Breathing) (10 Active Points); Gestures (Requires both hands; Requires Gestures throughout, -1), Costs Endurance (Costs END Every Phase; -1/2), Increased Endurance Cost (x2 END; -1/2)",
+                    );
+                });
+
+                it("character point cost", function () {
+                    assert.equal(item.characterPointCost, 3);
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.realCost, 3);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.activePoints, 10);
+                });
+
+                it("end", function () {
+                    assert.equal(item.end, 2);
                 });
             });
         },

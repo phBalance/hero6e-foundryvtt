@@ -1,4 +1,4 @@
-import { RoundFavorPlayerDown } from "./round.mjs";
+import { roundFavorPlayerDown } from "./round.mjs";
 
 /**
  * A note about units
@@ -94,8 +94,8 @@ export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres,
     }
 
     const roundedDistanceInMetres = is5e
-        ? RoundFavorPlayerDown(distanceInMetres / 2)
-        : RoundFavorPlayerDown(distanceInMetres);
+        ? roundFavorPlayerDown(distanceInMetres / 2)
+        : roundFavorPlayerDown(distanceInMetres);
 
     return roundedDistanceInMetres;
 }
@@ -132,11 +132,15 @@ export function gridUnitsToMeters() {
         distanceMultiplier = 2;
     } else if (units === "km") {
         distanceMultiplier = 1000;
+    } else if (units === "ft") {
+        distanceMultiplier = 0.3048;
     } else if (units === "miles") {
         distanceMultiplier = 1609.34;
     } else {
         // Not sure what the units might be. Guess meters.
-        ui.notifications.error(`Unknown units (${units}) for canvas. Expecting m, ", km, or miles.`);
+        ui.notifications.error(
+            `Scene "${game.scenes.current.name}" has unknown grid units (${units}). Fix your scene grid to be m, ", km, ft, or miles.`,
+        );
         distanceMultiplier = 1;
     }
 

@@ -1,6 +1,6 @@
 import { createDefenseProfile } from "./utility/defense.mjs";
 import * as heroDice from "./utility/dice.mjs";
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "./utility/round.mjs";
+import { roundFavorPlayerDown, roundFavorPlayerUp } from "./utility/round.mjs";
 import {
     convertHexesToSystemUnits,
     getRoundedUpDistanceInSystemUnits,
@@ -35,6 +35,17 @@ import {
 import { squelch, hdcTextNumberToNumeric } from "./utility/util.mjs";
 import { HeroActorCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 import * as heroEncounter from "./utility/encounter/encounter.mjs";
+
+/**
+ * Function to use with the filter function. Will exclude compound powers and framework powers.
+ *
+ * @param {HeroSystem6eItem} item
+ *
+ * @returns boolean
+ */
+export function filterIgnoreCompoundAndFrameworkItems(item) {
+    return !(item.baseInfo.type.includes("compound") || item.baseInfo.type.includes("framework"));
+}
 
 export const HERO = { heroDice, heroEncounter };
 
@@ -1054,7 +1065,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex.value / 3));
+                return Math.max(0, roundFavorPlayerUp(actor.system.characteristics.dex.value / 3));
             },
             xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OCV>`,
         },
@@ -1084,7 +1095,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.dex.value / 3));
+                return Math.max(0, roundFavorPlayerUp(actor.system.characteristics.dex.value / 3));
             },
             xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DCV>`,
         },
@@ -1114,7 +1125,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego.value / 3));
+                return Math.max(0, roundFavorPlayerUp(actor.system.characteristics.ego.value / 3));
             },
             xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OMCV>`,
         },
@@ -1144,7 +1155,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, RoundFavorPlayerUp(actor.system.characteristics.ego.value / 3));
+                return Math.max(0, roundFavorPlayerUp(actor.system.characteristics.ego.value / 3));
             },
 
             xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DMCV>`,
@@ -1251,7 +1262,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
                 return (
-                    RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
+                    roundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
                     actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
@@ -1298,7 +1309,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
                 return (
-                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
+                    roundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
@@ -1332,9 +1343,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["figured", "figuredSTR", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 return (
-                    RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
+                    roundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 5) +
                     actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(5) +
-                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
+                    roundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 5) +
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
@@ -1369,7 +1380,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             figured5eCharacteristic: function (actor) {
                 // 5e figured 2 x CON
                 return (
-                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels * 2) +
+                    roundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels * 2) +
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(0.5)
                 );
             },
@@ -1450,9 +1461,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             figured5eCharacteristic: function (actor) {
                 return (
                     actor.system.characteristics.body.basePlusLevels +
-                    RoundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 2) +
+                    roundFavorPlayerUp(actor.system.characteristics.str.basePlusLevels / 2) +
                     actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(2) +
-                    RoundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 2) +
+                    roundFavorPlayerUp(actor.system.characteristics.con.basePlusLevels / 2) +
                     actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(2)
                 );
             },
@@ -4609,7 +4620,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 for (const child of item.childItems) {
                     const childRatioAp = child.activePoints / activePointsForEntireCompoundPower;
                     const childRatioEcBaseCost = item.elementalControl.system.BASECOST * childRatioAp;
-                    cpEc += RoundFavorPlayerDown(
+                    cpEc += roundFavorPlayerDown(
                         (Math.max(childRatioEcBaseCost * 2, child.activePoints) - childRatioEcBaseCost) /
                             (1 + child._limitationCost),
                     );
@@ -4618,6 +4629,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             realCost: function (item) {
                 return item.childItems.reduce((accumulator, currentValue) => accumulator + currentValue.realCost, 0);
+            },
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a COMPOUNDPOWER.`);
+                return HERO.RANGE_TYPES.SELF;
             },
             xml: `<POWER XMLID="COMPOUNDPOWER" ID="1763927770583" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -4632,6 +4647,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
             costEnd: false,
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a DIFFERINGMODIFIER.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<POWER XMLID="DIFFERINGMODIFIER" ID="1763927833232" BASECOST="0.0" LEVELS="1" ALIAS="Differing Modifiers" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -4644,6 +4663,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(1),
         costEnd: false,
         isContainer: true,
+        rangeForItem: function () {
+            console.error(`rangeForItem invoked for a ELEMENTAL_CONTROL.`);
+            return HERO.RANGE_TYPES.SELF;
+        },
         xml: `<ELEMENTAL_CONTROL XMLID="GENERIC_OBJECT" ID="1763928737811" BASECOST="5.0" LEVELS="0" ALIAS="Elemental Control" POSITION="109" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></ELEMENTAL_CONTROL>`,
     });
 
@@ -4655,6 +4678,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             costEnd: false,
             isContainer: true,
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a LIST.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<LIST XMLID="GENERIC_OBJECT" ID="1760312857170" BASECOST="0.0" LEVELS="0" ALIAS="Disad List" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></LIST>`,
         },
         {},
@@ -4683,6 +4710,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 return validations;
             },
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a MULTIPOWER.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<MULTIPOWER XMLID="GENERIC_OBJECT" ID="1763928841940" BASECOST="5.0" LEVELS="0" ALIAS="Multipower" POSITION="109" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></MULTIPOWER>`,
         },
         {},
@@ -4700,17 +4731,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const poolCost = parseInt(item.system.LEVELS);
                 let controlCost =
                     Math.ceil(parseInt(item.findModsByXmlid("CONTROLCOST")?.LEVELS || 0) / 2) ||
-                    RoundFavorPlayerDown(poolCost / 2);
+                    roundFavorPlayerDown(poolCost / 2);
                 const _limitationCost = item._limitationCost;
 
                 if (_limitationCost !== 0) {
-                    controlCost = RoundFavorPlayerDown(controlCost / (1 + _limitationCost));
+                    controlCost = roundFavorPlayerDown(controlCost / (1 + _limitationCost));
                 }
 
                 return poolCost + controlCost;
             },
             costEnd: false,
             isContainer: true,
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a VPP.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<VPP XMLID="GENERIC_OBJECT" ID="1753583376594" BASECOST="0.0" LEVELS="20" ALIAS="Variable Power Pool" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></VPP>`,
         },
         {},
@@ -4852,7 +4887,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Followers for +5 CP (twice as many for +5 CP, four times as
                 // many for +10 CP, and so on)
                 const doublingCost = Math.log2(number, 2) * 5;
-                return RoundFavorPlayerDown(basePoints / 5 + doublingCost);
+                return roundFavorPlayerDown(basePoints / 5 + doublingCost);
             },
             name: "Follower",
             target: "self only",
@@ -7152,7 +7187,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     // 5e gets a bonus
                     if (actorItemDefense.actor?.is5e) {
-                        const bonus = RoundFavorPlayerUp(
+                        const bonus = roundFavorPlayerUp(
                             parseInt(actorItemDefense.actor.system.characteristics.ego.value) / 5 || 0,
                         );
                         value += bonus;
@@ -7289,7 +7324,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             activePoints: function (item) {
                 const _levels = parseInt(item.system?.LEVELS || 0);
-                return RoundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
+                return roundFavorPlayerDown(_levels * (1 + item._advantageCost) - _levels);
             },
             realCost: function (item) {
                 // Real Cost = Active Cost / (1 + total value of all Limitations)
@@ -15866,6 +15901,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // MINDCONTROL related
+            key: "LITERAL",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="LITERAL" ID="1767417218968" BASECOST="-0.25" LEVELS="0" ALIAS="Literal Interpretation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        undefined,
+    );
+
+    addPower(
+        {
             key: "LIMITEDTYPES",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -16836,6 +16883,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // GESTURES related
             key: "THROUGHOUT",
             behaviors: ["modifier"],
+            cost: function (modifierModel /*, item */) {
+                // This has no cost itself; it's a 2x cost multiplier. Just pretend the cost of this modifier is
+                // the cost of its parent with any additional adders that it may have.
+                const parentsAdders = modifierModel.parent.adders;
+                let parentsAddersCosts = 0;
+                for (const adder of parentsAdders) {
+                    parentsAddersCosts += adder.cost;
+                }
+
+                return modifierModel.parent.BASECOST + parentsAddersCosts;
+            },
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="THROUGHOUT" ID="1762104990480" BASECOST="1.0" LEVELS="0" ALIAS="Requires Gestures throughout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,

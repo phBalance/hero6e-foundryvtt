@@ -10,7 +10,7 @@ import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
-import { RoundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerUp } from "../utility/round.mjs";
 
 // v13 has namespaced these. When we remove this backwards compatibility then the eslint exception can be cleaned up.
 const FoundryVttTextEditor = foundry.applications.ux?.TextEditor.implementation || TextEditor;
@@ -995,7 +995,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         const element = event.currentTarget.closest("button");
         const dataset = element.dataset;
         const characteristicValue = this.actor.system.characteristics[dataset.label].value;
-        const halfCharacteristicValue = RoundFavorPlayerUp(+(Math.round(characteristicValue / 2 + "e+2") + "e-2")); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
+        const halfCharacteristicValue = roundFavorPlayerUp(+(Math.round(characteristicValue / 2 + "e+2") + "e-2")); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
         await this._onPrimaryCharacteristicRoll(
             event,
             halfCharacteristicValue,

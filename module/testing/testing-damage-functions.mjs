@@ -1,9 +1,10 @@
-import { HEROSYS } from "../herosystem6e.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
+import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { addDiceParts, calculateDicePartsFromDcForItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
 export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
@@ -1279,8 +1280,7 @@ export function registerDamageFunctionTests(quench) {
                 let previousDoubleDamageLimitSetting;
                 let item;
                 before(async function () {
-                    previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                    previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                     const actor = new HeroSystem6eActor(
                         {
@@ -1300,7 +1300,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 after(async function () {
-                    await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                 });
 
                 it("5e Killing Strike damage", function () {

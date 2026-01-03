@@ -1,6 +1,13 @@
-import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { dehydrateAttackItem, getTokenEducatedGuess, rehydrateAttackItem } from "../item/item-attack.mjs";
+import { HeroRoller } from "./dice.mjs";
 import { calculateDistanceBetween } from "./range.mjs";
+
+import { HeroSystem6eActor } from "../actor/actor.mjs";
+import {
+    addRangeIntoToHitRoll,
+    dehydrateAttackItem,
+    getTokenEducatedGuess,
+    rehydrateAttackItem,
+} from "../item/item-attack.mjs";
 
 // PH: FIXME: Need to confirm this will work with v12
 const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
@@ -257,43 +264,6 @@ export class Attack {
         return true;
     }
 
-    // PH: FIXME: Remove this
-    static getRangeModifier(item, range) {
-        const actor = item.actor;
-
-        if (item.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
-            // TODO: Should not be able to use this on anyone else. Should add a check.
-            console.log("item.rangeForItem === self && range:", range);
-            return 0;
-        }
-
-        // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
-        //       in case the system has calculated it incorrectly.
-
-        const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
-        const normalRange = !!item.findModsByXmlid("NORMALRANGE");
-
-        // There are no range penalties if this is a line of sight power or it has been bought with
-        // no range modifiers.
-        if (!(item.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT || noRangeModifiers || normalRange)) {
-            const factor = actor.system.is5e ? 4 : 8;
-
-            let rangePenalty = -Math.ceil(Math.log2(range / factor)) * 2;
-            rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
-
-            // Brace (+2 OCV only to offset the Range Modifier)
-            const braceManeuver = item.actor.items.find(
-                (item) => item.type == "maneuver" && item.name === "Brace" && item.system.active,
-            );
-            if (braceManeuver) {
-                //TODO: ???
-            }
-            return Math.floor(rangePenalty);
-        }
-        return 0;
-    }
-
-    // PH: FIXME: Remove this
     static getTargetInfo(item, targetedToken, options, system) {
         // these are the targeting data used for the attack(s)
         const target = {
@@ -305,7 +275,11 @@ export class Attack {
         target.range = calculateDistanceBetween(system.attackerToken, targetedToken).distance;
         if (item) {
             target.cvModifiers.push(
-                Attack.makeCvModifier(Attack.getRangeModifier(item, target.range), "RANGE", "Range Mod"),
+                Attack.makeCvModifier(
+                    addRangeIntoToHitRoll(target.range, item, item.actor, new HeroRoller()),
+                    "RANGE",
+                    "Range Mod",
+                ),
             );
         }
         return target;
