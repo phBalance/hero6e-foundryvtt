@@ -5547,7 +5547,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     get rangeForItem() {
-        return this.baseInfo?.rangeForItem(this);
+        const baseInfo = this.baseInfo;
+        if (!baseInfo || !baseInfo.rangeForItem) {
+            console.error(`rangeForItem called for ${this.detailedName()} without baseInfo or rangeForItem`);
+            return CONFIG.HERO.RANGE_TYPES.SELF;
+        }
+
+        return baseInfo.rangeForItem(this);
     }
 
     /**
