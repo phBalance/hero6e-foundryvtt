@@ -732,6 +732,17 @@ export class HeroSystem6eActor extends Actor {
         const speaker = ChatMessage.getSpeaker({ actor: this, token });
         const tokenName = token?.name || this.name;
 
+        if (!asAction && this.statuses.has("knockedOut")) {
+            if (this.system.characteristics.stun?.value <= -31) {
+                return `${tokenName} is knockedOut for "a long time" and does not get a recovery (untracked).`;
+            }
+            if (this.system.characteristics.stun?.value <= -30) {
+                return `${tokenName} is knockedOut and only gets a recovery once per minute (untracked).`;
+            }
+            // stun.value <=-20 (Post-Segment 12 only)
+            // stun.value <=-10 (Every Phase and Post-Segment 12)
+        }
+
         // Bases don't get/need a recovery
         if (this.type === "base2") {
             console.log(`${token?.name || this.name} has type ${this.type} and does not get/need a recovery.`);
@@ -740,7 +751,7 @@ export class HeroSystem6eActor extends Actor {
                     `${token?.name || this.name} has type ${this.type} and does not get/need a recovery.`,
                 );
             }
-            return `${tokenName} does not get a recovery.`;
+            return `${tokenName} is a BASE and does not get a recovery.`;
         }
 
         // Catchall for no stun or end (shouldn't be needed as base type check above should be sufficient)
@@ -751,13 +762,13 @@ export class HeroSystem6eActor extends Actor {
                     `${token?.name || this.name} has no STUN or END thus does not get/need a recovery.`,
                 );
             }
-            return `${tokenName} does not get a recovery.`;
+            return `${tokenName} has no STUN or END characteristic and does not get a recovery.`;
         }
 
         // A character who holds their breath does not get to Recover (even
         // on Post-Segment 12)
         if (this.statuses.has("holdingBreath")) {
-            const content = `${tokenName} <i>is holding their breath</i>.`;
+            const content = `${tokenName} <i>is holding their breath</i> and does not get a recovery.`;
             if (asAction) {
                 const chatData = {
                     author: game.user._id,
@@ -794,12 +805,15 @@ export class HeroSystem6eActor extends Actor {
         if (newStun > chars.stun.max) {
             newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)); // possible > MAX (which is OKish)
         }
-        let deltaStun = newStun - parseInt(chars.stun.value);
+        const deltaStun = newStun - parseInt(chars.stun.value);
 
         if (newEnd > chars.end.max) {
             newEnd = Math.max(chars.end.max, parseInt(chars.end.value)); // possible > MAX (which is OKish)
         }
-        let deltaEnd = newEnd - parseInt(chars.end.value);
+
+        // Ignore negative deltaEnd values.
+        // It seems like END should be set to 0 when you are KO'd, but haven't found such a rule.
+        const deltaEnd = Math.max(0, newEnd - parseInt(chars.end.value));
 
         await this.update(
             {
@@ -809,13 +823,13 @@ export class HeroSystem6eActor extends Actor {
             { hideChatMessage: true, preventRecoverFromStun },
         );
 
-        let content = `${tokenName} <i>Takes a Recovery</i>`;
+        let content = `${tokenName} ${this.system.characteristics.stun?.value <= 0 ? "is knockedOut, " : ""}${asAction ? `<i>Takes a Recovery</i>` : "gets a recovery"}`;
         if (rec <= 0) {
             content += ` [REC=${chars.rec.value}]`;
         }
         if (deltaEnd || deltaStun) {
             if (chars.stun.value <= 0 && newStun > 0) {
-                content += `, gaining ${deltaStun} stun and endurance set to ${newStun}.`;
+                content += `, recovers from knockedOut, gaining ${deltaStun} stun and endurance set to ${newStun}.`;
             } else {
                 content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
             }
@@ -824,15 +838,25 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // ENDURANCERESERVE HACK
-        const ENDURANCERESERVE = this.items.find((item) => item.system.XMLID === "ENDURANCERESERVE");
-        if (ENDURANCERESERVE) {
-            const ENDURANCERESERVEREC = ENDURANCERESERVE.findModsByXmlid("ENDURANCERESERVEREC");
-            await ENDURANCERESERVE.update({
-                "system.value": Math.min(
-                    parseInt(ENDURANCERESERVE.system.value) + ENDURANCERESERVEREC.LEVELS,
+        if (asAction && !this.inCombat) {
+            const ENDURANCERESERVE = this.items.find((item) => item.system.XMLID === "ENDURANCERESERVE");
+            if (ENDURANCERESERVE) {
+                const ENDURANCERESERVEREC = ENDURANCERESERVE.findModsByXmlid("ENDURANCERESERVEREC");
+                const newValue = Math.min(
                     ENDURANCERESERVE.system.LEVELS,
-                ),
-            });
+                    ENDURANCERESERVE.system.value + parseInt(ENDURANCERESERVEREC.LEVELS),
+                );
+                if (newValue > ENDURANCERESERVE.system.value) {
+                    const delta = newValue - ENDURANCERESERVE.system.value;
+                    await ENDURANCERESERVE.update({
+                        "system.value": Math.min(
+                            parseInt(ENDURANCERESERVE.system.value) + ENDURANCERESERVEREC.LEVELS,
+                            ENDURANCERESERVE.system.LEVELS,
+                        ),
+                    });
+                    content += ` ${ENDURANCERESERVE.name} +${delta} END</li>`;
+                }
+            }
         }
 
         const chatData = {

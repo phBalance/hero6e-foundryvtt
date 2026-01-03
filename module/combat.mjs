@@ -1162,7 +1162,7 @@ export class HeroSystem6eCombat extends Combat {
         content += "<ul>";
         contentHidden += "<ul>";
         let hasHidden = false;
-        for (const combatant of this.getUniqueCombatants().filter((o) => !o.isDefeated)) {
+        for (const combatant of this.getUniqueCombatants().filter((o) => !o.isDefeated && !o.hasPlayerOwner)) {
             const actor = combatant.actor;
 
             // Make sure we have a valid actor
@@ -1185,12 +1185,12 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "npcOnly" && actor.type == "npc") ||
                 (automation === "pcEndOnly" && actor.type === "pc")
             ) {
-                if (combatant.actor.statuses.has("knockedOut")) {
-                    if (combatant.actor.system.characteristics.stun?.value < -20) {
-                        console.log(`${combatant.name} is knockedOut. Skipping PostSegment12 recovery.`);
-                        continue;
-                    }
-                }
+                // if (combatant.actor.statuses.has("knockedOut")) {
+                //     if (combatant.actor.system.characteristics.stun?.value < -20) {
+                //         console.log(`${combatant.name} is knockedOut. Skipping PostSegment12 recovery.`);
+                //         continue;
+                //     }
+                // }
 
                 const showToAll = !combatant.hidden && (combatant.hasPlayerOwner || combatant.actor?.type === "pc");
 
@@ -1214,7 +1214,7 @@ export class HeroSystem6eCombat extends Combat {
                     const ENDURANCERESERVEREC = item.findModsByXmlid("ENDURANCERESERVEREC");
                     if (ENDURANCERESERVEREC) {
                         const newValue = Math.min(
-                            item.system.max,
+                            item.system.LEVELS,
                             item.system.value + parseInt(ENDURANCERESERVEREC.LEVELS),
                         );
                         if (newValue > item.system.value) {
@@ -1224,9 +1224,10 @@ export class HeroSystem6eCombat extends Combat {
                             });
 
                             if (showToAll) {
-                                content += "<li>" + `${combatant.token.name} ${item.name} +${delta}` + "</li>";
+                                content += "<li>" + `${combatant.token.name}: ${item.name} +${delta} END` + "</li>";
                             } else {
-                                contentHidden += "<li>" + `${combatant.token.name} ${item.name} +${delta}` + "</li>";
+                                contentHidden +=
+                                    "<li>" + `${combatant.token.name}: ${item.name} +${delta} END` + "</li>";
                             }
                         }
                     }

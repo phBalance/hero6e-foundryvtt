@@ -1273,7 +1273,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     }
 
     async _onRecovery() {
-        this.actor.TakeRecovery({ asAction: true });
+        this.actor.TakeRecovery({ asAction: true, token: this.token });
     }
 
     async _onPresenceAttack() {

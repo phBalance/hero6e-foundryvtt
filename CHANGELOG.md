@@ -7,6 +7,7 @@
 - Non power items can have charges. [#3418](https://github.com/dmdorman/hero6e-foundryvtt/issues/3418)
 - Costs now include the 5 point doubling rule. [#3420](https://github.com/dmdorman/hero6e-foundryvtt/issues/3420)
 - Added ft as a supported scene grid unit size.
+- Fixed ENDURANCE RESERVE recoveries. [#3439](https://github.com/dmdorman/hero6e-foundryvtt/issues/3439)
 
 ## Version 4.2.6 20251228
 
