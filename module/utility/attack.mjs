@@ -86,6 +86,21 @@ export class Attack {
             });
         }
 
+        if (cvModifier.cvMod.dmcv) {
+            const dmcv = cvModifier.cvMod.dmcv;
+            if (dmcv < 0) {
+                icon = "icons/svg/downgrade.svg";
+            }
+            name += `${comma ? "," : ""} ${dmcv.signedStringHero()} DMCV`;
+            comma = true;
+            changes.push({
+                key: `system.characteristics.dmcv.value`,
+                value: dmcv,
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+            });
+        }
+
         // todo: this disallows setting the dcv to x0
         if (cvModifier.cvMod.dcvMultiplier && cvModifier.cvMod.dcvMultiplier !== 1) {
             const dcvMultiplier = cvModifier.cvMod.dcvMultiplier;
@@ -181,7 +196,7 @@ export class Attack {
         return cvModifier;
     }
 
-    static makeCvModifierFromItem(item, system, ocv, dcv, dc, dcvMultiplier) {
+    static makeCvModifierFromItem(item, system, ocv, omcv, dcv, dmcv, dc, dcvMultiplier) {
         if (!item) {
             console.log("no item");
         }
@@ -194,7 +209,9 @@ export class Attack {
         // arguments passed in override the item default
         const cvMod = {
             ocv: ocv ?? item.system.cvModifiers.ocv,
+            omcv: omcv ?? item.system.cvModifiers.omcv,
             dcv: dcv ?? item.system.cvModifiers.dcv,
+            dmcv: dmcv ?? item.system.cvModifiers.dmcv,
             dc: dc ?? item.system.cvModifiers.dc,
             dcvMultiplier: dcvMultiplier ?? item.system.cvModifiers.dcvMultiplier,
         };
