@@ -11259,6 +11259,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // UOO related
+            key: "GRANTORPAYSEND",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="GRANTORPAYSEND" ID="1764073515707" BASECOST="-0.25" LEVELS="0" ALIAS="Grantor pays the END whenever the power is used" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "GRENADELAUNCHERS",
             behaviors: ["adder"],
@@ -14811,6 +14822,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // TRANSFORM related
+            key: "ALLORNOTHING",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ALLORNOTHING" ID="1764594003100" BASECOST="-0.5" LEVELS="0" ALIAS="All Or Nothing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "ALTEREDSHAPE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -15374,6 +15396,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "DELAYEDEFFECT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="DELAYEDEFFECT" ID="1764073515655" BASECOST="0.25" LEVELS="0" ALIAS="Delayed Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "DELAYEDRETURNRATE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -15718,6 +15750,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // TRANSFORM related
+            key: "IMPROVEDTARGETGROUP",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(1 / 4),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="IMPROVEDTARGETGROUP" ID="1764594003040" BASECOST="0.25" LEVELS="0" ALIAS="Improved Results Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        undefined,
+    );
+    addPower(
+        {
             key: "INACCURATE",
             behaviors: ["modifier"],
             dcAffecting: fixedValueFunction(true),
@@ -15876,6 +15919,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDRANGE" ID="1746303340671" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // TRANSFORM related
+            key: "LIMITEDTARGET",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="LIMITEDTARGET" ID="1764594003046" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Target" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SLIGHTLY" OPTIONID="SLIGHTLY" OPTION_ALIAS="([Slightly Limited]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -17036,14 +17090,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // TRANSFER related
+        key: "VARIABLEEFFECT2",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(true),
+        xml: `<MODIFIER XMLID="VARIABLEEFFECT2" ID="1766281443255" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect (To)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="to [two powers] simultaneously" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
     addPower(
         {
-            // TRANSFER related
-            key: "VARIABLEEFFECT2",
+            // TRANSFORM related
+            key: "VARIABLEHEALINGMETHOD",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
-            xml: `<MODIFIER XMLID="VARIABLEEFFECT2" ID="1766281443255" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect (To)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="to [two powers] simultaneously" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+            xml: `<MODIFIER XMLID="VARIABLEHEALINGMETHOD" ID="1764594003039" BASECOST="0.25" LEVELS="0" ALIAS="Variable Healing Method" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
