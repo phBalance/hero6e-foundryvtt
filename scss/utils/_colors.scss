@@ -13,3 +13,22 @@ $c-miss: $c-failure;
 .herosystem6e.theme-dark {
     --herosystem-table-header-bg-color: var(--color-cool-4);
 }
+
+// ref: https://venngage.com/tools/accessible-color-palette-generator
+.herosystem6e.theme-hc {
+    --herosystem-table-header-bg-color: black;
+    --table-header-text-color: white;
+    --background: #f6f5f7;
+
+    // button {
+    //     --button-background-color: inherit;
+    // }
+
+    // input {
+    //     --input-background-color: inherit;
+    // }
+
+    img.item-image {
+        filter: brightness(0.1);
+    }
+}

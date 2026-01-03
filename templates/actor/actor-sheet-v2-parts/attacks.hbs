@@ -1,10 +1,9 @@
 {{! Attacks Tab }}
-<section 
-    class="tab attacks {{tab.cssClass}}" 
-    data-group="primary" 
+<section
+    class="tab attacks {{tab.cssClass}}"
+    data-group="primary"
     data-tab="attacks"
 >
-
     <section class="item-list-container">
         <div class="item-header">
             <div class="item-column item-name">{{localize "ActorSheet.Name"}}</div>
@@ -17,12 +16,13 @@
             <div class="item-column item-aoe">{{localize "ActorSheet.Aoe"}}</div>
             <div class="item-column item-controls"></div>
         </div>
+
         <ol class="item-list abilities-list">
             {{#each items as |item|}}
                 <li class="item attack draggable expandable-document" data-document-uuid="{{this.uuid}}">
                     <div class="item-row">
                         <div class="item-column item-name rollable" data-action="roll">
-                            {{!-- <img class="item-image" src="{{this.img}}" alt="{{this.name}}"> --}}
+                            <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
                             <div class="name">
                                 <div class="label">{{this.name}}</div>
                                 <div class="keywords">{{this.system.XMLID}}</div>
@@ -31,14 +31,14 @@
                         <div class="item-column item-ocv" data-tooltip="{{{item.system.ocvDetails.tooltip}}}">
                             {{item.system.ocvDetails.value}}
                         </div>
-                        <div  class="item-column item-dcv" data-tooltip="{{{item.system.dcvDetails.tooltip}}}">
+                        <div class="item-column item-dcv" data-tooltip="{{{item.system.dcvDetails.tooltip}}}">
                             {{item.system.dcvDetails.value}}
                         </div>
                         <div class="item-column item-offdef">
                             {{item.attacksWith}} vs {{item.defendsWith}}
                         </div>
                         <div class="item-column item-dmg">
-                            {{item.system.damage}}
+                            <span>{{item.system.damage}}</span>
                         </div>
                         <div class="item-column item-res">
                             {{item.attackDefenseVs}}
@@ -58,9 +58,13 @@
                             <a class="fa-solid fa-angle-{{ifThen abilityContext.expanded "down" "right"}}" data-action="toggleDocumentDescription"></a>
                         </div>
                     </div>
+                    <div class="item-description">
+                        <div class="item-description-content">
+                            {{{itemFullDescription item}}}
+                        </div>
+                    </div>
                 </li>
             {{/each}}
         </ol>
     </section>
-        
 </section>

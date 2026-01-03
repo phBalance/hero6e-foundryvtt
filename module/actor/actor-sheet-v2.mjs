@@ -17,7 +17,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // },
         classes: ["herosystem6e", "actor-sheet-v2"],
         position: {
-            width: 700,
+            width: 800,
             height: 700,
         },
         actions: {
@@ -377,6 +377,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             parentClassHooks: false,
             fixed: true,
             eventName: "click",
+        });
+
+        this.element.querySelectorAll('[data-action="toggleDocumentDescription"]').forEach((el) => {
+            el.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+                ev.target.closest("li").classList.toggle("expanded");
+            });
         });
     }
 
