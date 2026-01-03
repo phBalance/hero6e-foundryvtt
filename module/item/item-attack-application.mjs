@@ -1,14 +1,16 @@
+import { HEROSYS } from "../herosystem6e.mjs";
+import { filterIgnoreCompoundAndFrameworkItems } from "../config.mjs";
+
+import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
+import { cloneToEffectiveAttackItem } from "../item/item.mjs";
+import { Attack } from "../utility/attack.mjs";
 import {
     calculateReduceOrPushRealCost,
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     isRangedCombatManeuver,
 } from "../utility/damage.mjs";
-import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
-import { cloneToEffectiveAttackItem } from "../item/item.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits, gridUnitsToMeters } from "../utility/units.mjs";
-import { HEROSYS } from "../herosystem6e.mjs";
-import { Attack } from "../utility/attack.mjs";
 
 /**
  * 5e HEX type and NORMAL are convered to RADIUS
@@ -269,6 +271,7 @@ export class ItemAttackFormApplication extends FormApplication {
                         description: "Use no weapon",
                     },
                     ...this.data.originalItem.actor.items
+                        .filter(filterIgnoreCompoundAndFrameworkItems)
                         .filter((item) => {
                             // If a ranged maneuver, list all ranged weapons. Otherwise, it's a martial art
                             // and list all HTH or ranged weapons depending on the martial maneuver type

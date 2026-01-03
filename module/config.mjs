@@ -36,6 +36,17 @@ import { squelch, hdcTextNumberToNumeric } from "./utility/util.mjs";
 import { HeroActorCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 import * as heroEncounter from "./utility/encounter/encounter.mjs";
 
+/**
+ * Function to use with the filter function. Will exclude compound powers and framework powers.
+ *
+ * @param {HeroSystem6eItem} item
+ *
+ * @returns boolean
+ */
+export function filterIgnoreCompoundAndFrameworkItems(item) {
+    return !(item.baseInfo.type.includes("compound") || item.baseInfo.type.includes("framework"));
+}
+
 export const HERO = { heroDice, heroEncounter };
 
 HERO.folderColors = {
@@ -4619,6 +4630,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             realCost: function (item) {
                 return item.childItems.reduce((accumulator, currentValue) => accumulator + currentValue.realCost, 0);
             },
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a COMPOUNDPOWER.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<POWER XMLID="COMPOUNDPOWER" ID="1763927770583" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -4632,6 +4647,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
             costEnd: false,
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a DIFFERINGMODIFIER.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<POWER XMLID="DIFFERINGMODIFIER" ID="1763927833232" BASECOST="0.0" LEVELS="1" ALIAS="Differing Modifiers" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
@@ -4644,6 +4663,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(1),
         costEnd: false,
         isContainer: true,
+        rangeForItem: function () {
+            console.error(`rangeForItem invoked for a ELEMENTAL_CONTROL.`);
+            return HERO.RANGE_TYPES.SELF;
+        },
         xml: `<ELEMENTAL_CONTROL XMLID="GENERIC_OBJECT" ID="1763928737811" BASECOST="5.0" LEVELS="0" ALIAS="Elemental Control" POSITION="109" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></ELEMENTAL_CONTROL>`,
     });
 
@@ -4655,6 +4678,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             costEnd: false,
             isContainer: true,
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a LIST.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<LIST XMLID="GENERIC_OBJECT" ID="1760312857170" BASECOST="0.0" LEVELS="0" ALIAS="Disad List" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></LIST>`,
         },
         {},
@@ -4682,6 +4709,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 return validations;
+            },
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a MULTIPOWER.`);
+                return HERO.RANGE_TYPES.SELF;
             },
             xml: `<MULTIPOWER XMLID="GENERIC_OBJECT" ID="1763928841940" BASECOST="5.0" LEVELS="0" ALIAS="Multipower" POSITION="109" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></MULTIPOWER>`,
         },
@@ -4711,6 +4742,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             costEnd: false,
             isContainer: true,
+            rangeForItem: function () {
+                console.error(`rangeForItem invoked for a VPP.`);
+                return HERO.RANGE_TYPES.SELF;
+            },
             xml: `<VPP XMLID="GENERIC_OBJECT" ID="1753583376594" BASECOST="0.0" LEVELS="20" ALIAS="Variable Power Pool" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1"></VPP>`,
         },
         {},
