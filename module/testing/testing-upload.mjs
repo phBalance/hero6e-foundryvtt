@@ -1,8 +1,9 @@
-import { HEROSYS } from "../herosystem6e.mjs";
+import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
+import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { calculateStrengthMinimumForItem } from "../utility/damage.mjs";
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
 export function registerUploadTests(quench) {
@@ -6812,13 +6813,10 @@ export function registerUploadTests(quench) {
                         </MANEUVER>
                     `;
                     let item;
+                    let previousDoubleDamageLimitSetting;
 
                     before(async function () {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
 
                         const actor = new HeroSystem6eActor(
                             {
@@ -6840,8 +6838,11 @@ export function registerUploadTests(quench) {
 
                         actor.items.set(item.system.XMLID, item);
 
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                         await actor.FullHealth();
+                    });
+
+                    after(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -6872,13 +6873,10 @@ export function registerUploadTests(quench) {
                     </MANEUVER>
                 `;
                     let item;
+                    let previousDoubleDamageLimitSetting;
 
                     before(async function () {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                         const actor = new HeroSystem6eActor(
                             {
@@ -6898,8 +6896,10 @@ export function registerUploadTests(quench) {
                         );
 
                         actor.items.set(item.system.XMLID, item);
+                    });
 
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    after(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -6947,35 +6947,6 @@ export function registerUploadTests(quench) {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
-                    // before(async function() {
-                    //     const previousDoubleDamageLimitSetting = await game.settings.set(
-                    //         HEROSYS.module,
-                    //         "DoubleDamageLimit",
-                    //     );
-                    //     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", true);
-
-                    //     const actor = new HeroSystem6eActor(
-                    //         {
-                    //             name: "Quench Actor",
-                    //             type: "pc",
-                    //         },
-                    //         {},
-                    //     );
-                    //     actor.system.is5e = true;
-
-                    //     item = new HeroSystem6eItem(
-                    //         {
-                    //             ...HeroSystem6eItem.itemDataFromXml(contents, actor),
-                    //             type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
-                    //         },
-                    //         { parent: actor },
-                    //     );
-
-                    //     actor.items.set(item.system.XMLID, item);
-
-                    //     await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
-                    // });
-
                     it("description", function () {
                         assert.equal(item.system.description, "1/2 Phase, -1 OCV, +1 DCV, Disarm; 20 STR to Disarm");
                     });
@@ -7008,13 +6979,10 @@ export function registerUploadTests(quench) {
                         </MANEUVER>
                     `;
                     let item;
+                    let previousDoubleDamageLimitSetting;
 
                     before(async function () {
-                        const previousDoubleDamageLimitSetting = await game.settings.set(
-                            HEROSYS.module,
-                            "DoubleDamageLimit",
-                        );
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
 
                         const actor = new HeroSystem6eActor(
                             {
@@ -7035,8 +7003,10 @@ export function registerUploadTests(quench) {
                         );
 
                         actor.items.set(item.system.XMLID, item);
+                    });
 
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    after(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {
@@ -7070,8 +7040,7 @@ export function registerUploadTests(quench) {
                     let actor;
                     let previousDoubleDamageLimitSetting;
                     before(async function () {
-                        previousDoubleDamageLimitSetting = await game.settings.set(HEROSYS.module, "DoubleDamageLimit");
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", false);
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
                         actor = await createQuenchActor({ quench: this, is5e: false });
                         await actor.update({ "system.characteristics.dex.max ": 15 });
@@ -7082,8 +7051,9 @@ export function registerUploadTests(quench) {
                     });
 
                     after(async function () {
-                        await game.settings.set(HEROSYS.module, "DoubleDamageLimit", previousDoubleDamageLimitSetting);
                         await deleteQuenchActor({ quench: this, actor });
+
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
                     });
 
                     it("description", function () {

@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { RoundFavorPlayerUp } from "./round.mjs";
+import { roundFavorPlayerUp } from "./round.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -265,7 +265,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
                     tag.options.strikethrough = true;
                     tag.name2 = tag.name.replace(/i\d+/, "");
                     //tag.valueText2 = tag.valueText;
-                    tag.value2 = RoundFavorPlayerUp(tag.value / 2);
+                    tag.value2 = roundFavorPlayerUp(tag.value / 2);
                 }
             }
         }

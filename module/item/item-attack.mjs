@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerDown, roundFavorPlayerUp } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
     calculateStrengthMinimumForItem,
@@ -334,52 +334,62 @@ export async function processActionToHit(item, formData) {
     });
 }
 
-function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
-    if (item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
-        // TODO: Should not be able to use this on anyone else. Should add a check well before here (in dialog).
+/**
+ * Compute and add range penalties based on the range, attack item, and actor into the provided attackHeroRoller
+ *
+ * @param {Number} distance
+ * @param {HeroSystem6eItem} attackItem
+ * @param {HeroSystem6eActor} actor
+ * @param {HeroRoller} attackHeroRoller
+ *
+ * @returns Number - Remaining range penalty. Should be a number that is negative or 0.
+ */
+export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRoller) {
+    // PH: FIXME: This is different between AoE and single target. Can we combine?
+    const baseRangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
+    let remainingRangePenalty = baseRangePenalty;
+
+    if (attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
+        // TODO: Should not be able to use this on anyone else. Should add this check well before here (in to hit dialog).
     }
 
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
-    //       in case the system has calculated it incorrectly.
+    //       in case the system has calculated it incorrectly. Should add this check well before here (in to hit dialog).
 
-    const noRangeModifiers = !!item.effectiveAttackItem.findModsByXmlid("NORANGEMODIFIER");
-    const normalRange = !!item.effectiveAttackItem.findModsByXmlid("NORMALRANGE");
+    const noRangeModifiers = !!attackItem.effectiveAttackItem.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!attackItem.effectiveAttackItem.findModsByXmlid("NORMALRANGE");
 
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
         !(
-            item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
-            item.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
             noRangeModifiers ||
             normalRange
         )
     ) {
-        // PH: FIXME: This is different between AoE and single target. Can we combine?
-        const baseRangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
-        let remainingRangePenalty = baseRangePenalty;
-
         attackHeroRoller.addNumber(
             baseRangePenalty,
-            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, item.actor.is5e)}${getSystemDisplayUnits(item.actor.is5e)})`,
+            `Range penalty (${getRoundedDownDistanceInSystemUnits(distance, attackItem.actor.is5e)}${getSystemDisplayUnits(attackItem.actor.is5e)})`,
         );
 
         // PENALTY_SKILL_LEVELS (range)
         // PH: FIXME: PSLs for maneuver and PSLs for a weapon. What kind of stacking is possible?
-        for (const pslItem of item.effectiveAttackItem.pslRangePenaltyOffsetItems) {
+        for (const pslItem of attackItem.effectiveAttackItem.pslRangePenaltyOffsetItems) {
             const pslOffsets = Math.min(parseInt(pslItem.system.LEVELS), -remainingRangePenalty);
             remainingRangePenalty += pslOffsets;
             attackHeroRoller.addNumber(pslOffsets, "Penalty Skill Levels");
         }
 
         // Some maneuvers have a built in RANGE value (like PSLs). These are only possible from the maneuver item.
-        const maneuverRangeOffset = parseInt(item.system.RANGE || 0);
+        const maneuverRangeOffset = parseInt(attackItem.system.RANGE || 0);
         const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
         remainingRangePenalty += maneuverRangeOffsets;
         attackHeroRoller.addNumber(maneuverRangeOffsets, "Maneuver bonus");
 
         // Brace (+2 OCV only to offset the Range Modifier)
-        const braceManeuver = item.actor.items.find(
+        const braceManeuver = attackItem.actor.items.find(
             (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
         );
         if (braceManeuver) {
@@ -389,10 +399,11 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
         }
 
         // If we have half range penalty modifier, the halving, as with all Hero System calculations, must happen after all additions and subtractions.
-        const hasHalfRangePenalty = !!item.findModsByXmlid("HALFRANGEMODIFIER");
+        const hasHalfRangePenalty = !!attackItem.findModsByXmlid("HALFRANGEMODIFIER");
         if (hasHalfRangePenalty) {
+            // Round in favour of the player (given the range penalty is a negative or 0 that means rounding up)
             const halvedRangePenaltyOffset = Math.abs(
-                remainingRangePenalty - RoundFavorPlayerDown(remainingRangePenalty / 2),
+                remainingRangePenalty - roundFavorPlayerUp(remainingRangePenalty / 2),
             );
 
             attackHeroRoller.addNumber(
@@ -404,6 +415,92 @@ function addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller) {
             remainingRangePenalty += halvedRangePenaltyOffset;
         }
     }
+
+    return remainingRangePenalty;
+}
+
+// PH: FIXME: Duplicated between AoE and single target?
+
+async function addCslsIntoToHitRoll(action, attackHeroRoller) {
+    const cvModifiers = action.current.cvModifiers;
+    const item = action.system.currentItem;
+    let dcv = parseInt(item.system.dcv || 0);
+
+    const skillLevelMods = {};
+    for (const csl of combatSkillLevelsForAttack(item).details) {
+        // Requires A Roll?
+        if (!(await rollRequiresASkillRollCheck(csl.item))) {
+            continue;
+        }
+
+        const id = csl.item.id;
+        skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, omcv: 0, dcv: 0, dmcv: 0, dc: 0 };
+        const cvMod = skillLevelMods[id];
+        action.system.item[id] = csl.item;
+
+        cvMod.dc += csl.dc;
+        if (csl.ocv || csl.omcv > 0) {
+            cvMod.ocv += csl.ocv || csl.omcv;
+        }
+        dcv += csl.dcv || csl.dmcv;
+        cvMod.dcv += csl.dcv || csl.dmcv;
+    }
+
+    const dmcv = parseInt(item.effectiveAttackItem.system.dmcv || 0);
+    if (dmcv !== 0) {
+        // Make sure we don't already have this activeEffect
+        // PH: FIXME: how can we have a uuid given this is an effective attack item?
+        let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
+        if (!prevActiveEffect) {
+            // Estimate of how many seconds the DCV penalty lasts (until next phase).
+            // In combat.mjs#_onStartTurn we remove this AE for exact timing.
+            let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
+            let _dcvText = "DMCV";
+            let _dcvValue = dmcv;
+
+            const activeEffect = {
+                label: `${item.name} ${_dcvValue.signedStringHero()} ${_dcvText}`,
+                icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
+                changes: [
+                    {
+                        key: `system.characteristics.${_dcvText.toLowerCase()}.value`,
+                        value: _dcvValue,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                    },
+                ],
+                origin: item.uuid, // PH: FIXME: how can we have a uuid given this is an effective attack item?
+                duration: {
+                    seconds: seconds,
+                },
+                flags: {
+                    [game.system.id]: {
+                        nextPhase: true,
+                    },
+                },
+            };
+            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        }
+    }
+
+    Object.keys(skillLevelMods).forEach((key) => {
+        const cvMod = Attack.makeCvModifierFromItem(
+            action.system.item[key],
+            action.system,
+            skillLevelMods[key].ocv,
+            skillLevelMods[key].dcv,
+            skillLevelMods[key].dc,
+        );
+        cvModifiers.push(cvMod);
+    });
+
+    cvModifiers.forEach((cvModifier) => {
+        if (cvModifier.cvMod.ocv) {
+            attackHeroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
+        }
+    });
+
+    Attack.makeActionActiveEffects(action);
 }
 
 export async function doAoeActionToHit(action, options) {
@@ -455,81 +552,11 @@ export async function doAoeActionToHit(action, options) {
         dcvTargetNumber = 3;
     }
 
+    // Range modifiers
     addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
 
-    let dcv = parseInt(item.system.dcv || 0);
-
-    const cvModifiers = action.current.cvModifiers;
-
     // Combat Skill Levels
-    const skillLevelMods = {};
-    for (const csl of combatSkillLevelsForAttack(item).details) {
-        const id = csl.item.id;
-        skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
-        const cvMod = skillLevelMods[id];
-        action.system.item[id] = csl.item;
-
-        cvMod.dc += csl.dc;
-        if (csl.ocv || csl.omcv > 0) {
-            cvMod.ocv += csl.ocv || csl.omcv;
-        }
-        dcv += csl.dcv;
-        cvMod.dcv += csl.dcv;
-    }
-
-    let dmcv = parseInt(item.system.dmcv || 0);
-    if (dmcv != 0) {
-        // Make sure we don't already have this activeEffect
-        let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
-        if (!prevActiveEffect) {
-            // Estimate of how many seconds the DCV penalty lasts (until next phase).
-            // In combat.js#_onStartTurn we remove this AE for exact timing.
-            let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
-            let _dcvText = "DMCV";
-            let _dcvValue = dmcv;
-
-            const activeEffect = {
-                label: `${item.name} ${_dcvValue.signedStringHero()} ${_dcvText}`,
-                icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
-                changes: [
-                    {
-                        key: `system.characteristics.${_dcvText.toLowerCase()}.value`,
-                        value: _dcvValue,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                ],
-                origin: item.uuid,
-                duration: {
-                    seconds: seconds,
-                },
-                flags: {
-                    [game.system.id]: {
-                        nextPhase: true,
-                    },
-                },
-            };
-            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-        }
-    }
-
-    Object.keys(skillLevelMods).forEach((key) => {
-        const cvMod = Attack.makeCvModifierFromItem(
-            action.system.item[key],
-            action.system,
-            skillLevelMods[key].ocv,
-            skillLevelMods[key].dcv,
-            skillLevelMods[key].dc,
-        );
-        cvModifiers.push(cvMod);
-    });
-
-    cvModifiers.forEach((cvModifier) => {
-        if (cvModifier.cvMod.ocv) {
-            attackHeroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
-        }
-    });
-    Attack.makeActionActiveEffects(action);
+    await addCslsIntoToHitRoll(action, attackHeroRoller);
 
     // This is the actual roll to hit. In order to provide for a die roll
     // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
@@ -557,7 +584,7 @@ export async function doAoeActionToHit(action, options) {
         await facingHeroRoller.roll();
         const facingRollResult = facingHeroRoller.getBasicTotal();
 
-        const moveDistance = RoundFavorPlayerDown(Math.min(distance / 2, item.actor.system.is5e ? missBy : missBy * 2));
+        const moveDistance = roundFavorPlayerDown(Math.min(distance / 2, item.actor.system.is5e ? missBy : missBy * 2));
         hitRollText = `AoE origin MISSED by ${missBy}. Move AoE origin ${
             moveDistance + getSystemDisplayUnits(item.actor.is5e)
         } in the <b>${facingRollResult}</b> direction.`;
@@ -750,7 +777,11 @@ async function doSingleTargetActionToHit(action, options) {
     const target = isAoE ? aoeTemplate : targets[0];
     const distance = token ? calculateDistanceBetween(token, target).distance : 0;
 
+    // Range modifiers
     addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
+
+    // Combat Skill Levels
+    await addCslsIntoToHitRoll(action, attackHeroRoller);
 
     // Mind Scan
     if (parseInt(options.mindScanMinds)) {
@@ -758,87 +789,6 @@ async function doSingleTargetActionToHit(action, options) {
     }
     if (parseInt(options.mindScanFamiliar)) {
         attackHeroRoller.addNumber(parseInt(options.mindScanFamiliar), "Mind Familiarity");
-    }
-
-    let dcv = parseInt(item.system.dcv || 0);
-
-    const cvModifiers = action.current.cvModifiers;
-
-    // Combat Skill Levels
-    const skillLevelMods = {};
-    for (const csl of combatSkillLevelsForAttack(item).details) {
-        // Requires A Roll?
-        if (!(await rollRequiresASkillRollCheck(csl.item))) {
-            continue;
-        }
-
-        const id = csl.item.id;
-        skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
-        const cvMod = skillLevelMods[id];
-        action.system.item[id] = csl.item;
-
-        cvMod.dc += csl.dc;
-        if (csl.ocv || csl.omcv > 0) {
-            cvMod.ocv += csl.ocv || csl.omcv;
-        }
-        dcv += csl.dcv;
-        cvMod.dcv += csl.dcv;
-    }
-
-    const dmcv = parseInt(item.effectiveAttackItem.system.dmcv || 0);
-    if (dmcv !== 0) {
-        // Make sure we don't already have this activeEffect
-        // PH: FIXME: how can we have a uuid given this is an effective attack item?
-        let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
-        if (!prevActiveEffect) {
-            // Estimate of how many seconds the DCV penalty lasts (until next phase).
-            // In combat.mjs#_onStartTurn we remove this AE for exact timing.
-            let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
-            let _dcvText = "DMCV";
-            let _dcvValue = dmcv;
-
-            const activeEffect = {
-                label: `${item.name} ${_dcvValue.signedStringHero()} ${_dcvText}`,
-                icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
-                changes: [
-                    {
-                        key: `system.characteristics.${_dcvText.toLowerCase()}.value`,
-                        value: _dcvValue,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                ],
-                origin: item.uuid, // PH: FIXME: how can we have a uuid given this is an effective attack item?
-                duration: {
-                    seconds: seconds,
-                },
-                flags: {
-                    [game.system.id]: {
-                        // PH: FIXME: how can we have a uuid given this is an effective attack item?
-                        nextPhase: true,
-                    },
-                },
-            };
-            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-        }
-    }
-
-    Object.keys(skillLevelMods).forEach((key) => {
-        const cvMod = Attack.makeCvModifierFromItem(
-            action.system.item[key],
-            action.system,
-            skillLevelMods[key].ocv,
-            skillLevelMods[key].dcv,
-            skillLevelMods[key].dc,
-        );
-        cvModifiers.push(cvMod);
-    });
-
-    // PH: FIXME: this should be part of a generic removal/addition of DCV based on the maneuver ()
-    // Haymaker -5 DCV
-    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
-    if (haymakerManeuver) {
-        dcv -= 5;
     }
 
     // STRMINIMUM
@@ -851,12 +801,6 @@ async function doSingleTargetActionToHit(action, options) {
             attackHeroRoller.addNumber(Math.floor(extraStr / 5), strMinimumModifier.ALIAS);
         }
     }
-
-    cvModifiers
-        .filter((cvModifier) => cvModifier.cvMod.ocv)
-        .forEach((cvModifier) => attackHeroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name));
-
-    Attack.makeActionActiveEffects(action);
 
     // Called shot penalties
     const noHitLocationsPower = !!item.effectiveAttackItem.system.noHitLocations;
@@ -929,7 +873,7 @@ async function doSingleTargetActionToHit(action, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        let targetDefenseValue = RoundFavorPlayerUp(
+        let targetDefenseValue = roundFavorPlayerUp(
             target.actor?.system.characteristics[toHitChar.toLowerCase()]?.value,
         );
 
@@ -3696,8 +3640,8 @@ async function _calcDamage(damageRoller, item, options) {
         body = body - (options.defenseValue || 0) - (options.resistantValue || 0);
     }
 
-    stun = RoundFavorPlayerDown(stun < 0 ? 0 : stun);
-    body = RoundFavorPlayerDown(body < 0 ? 0 : body);
+    stun = roundFavorPlayerDown(stun < 0 ? 0 : stun);
+    body = roundFavorPlayerDown(body < 0 ? 0 : body);
 
     let hitLocText = "";
     if (useHitLocations) {
@@ -3707,11 +3651,11 @@ async function _calcDamage(damageRoller, item, options) {
         if (isKillingAttack) {
             // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
             // Location : [x Stun, x N Stun, x Body, OCV modifier]
-            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
+            body = roundFavorPlayerDown(body * hitLocationBodyMultiplier);
         } else {
             // stun attacks apply N STUN hit location and BODY multiplier after defenses have been subtracted
-            stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
-            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
+            stun = roundFavorPlayerDown(stun * hitLocationStunMultiplier);
+            body = roundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
         if (damageRoller.getHitLocation().item || damageRoller.getHitLocation().activeEffect) {
             hitLocText = `Hit ${hitLocation}`;
@@ -3722,8 +3666,8 @@ async function _calcDamage(damageRoller, item, options) {
 
     // apply damage reduction
     if (options.damageReductionValue > 0) {
-        stun = RoundFavorPlayerDown(stun * (1 - options.damageReductionValue / 100));
-        body = RoundFavorPlayerDown(body * (1 - options.damageReductionValue / 100));
+        stun = roundFavorPlayerDown(stun * (1 - options.damageReductionValue / 100));
+        body = roundFavorPlayerDown(body * (1 - options.damageReductionValue / 100));
     }
 
     // Penetrating attack minimum damage
@@ -3763,8 +3707,8 @@ async function _calcDamage(damageRoller, item, options) {
         }
     }
 
-    stun = RoundFavorPlayerDown(stun);
-    body = RoundFavorPlayerDown(body);
+    stun = roundFavorPlayerDown(stun);
+    body = roundFavorPlayerDown(body);
 
     damageDetail.body = body;
     damageDetail.stun = stun;
@@ -3924,7 +3868,7 @@ async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMul
             .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
             .addNumber(
-                RoundFavorPlayerUp(bodyForKbCalculations * knockbackMultiplier),
+                roundFavorPlayerUp(bodyForKbCalculations * knockbackMultiplier),
                 `Max potential knockback (${bodyForKbCalculations} BODY x ${knockbackMultiplier})`,
             )
             .addNumber(-parseInt(knockbackResistanceValue), "Knockback resistance")

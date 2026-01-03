@@ -1,4 +1,4 @@
-import { RoundFavorPlayerDown } from "./round.mjs";
+import { roundFavorPlayerDown } from "./round.mjs";
 
 /**
  * A note about units
@@ -94,8 +94,8 @@ export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres,
     }
 
     const roundedDistanceInMetres = is5e
-        ? RoundFavorPlayerDown(distanceInMetres / 2)
-        : RoundFavorPlayerDown(distanceInMetres);
+        ? roundFavorPlayerDown(distanceInMetres / 2)
+        : roundFavorPlayerDown(distanceInMetres);
 
     return roundedDistanceInMetres;
 }

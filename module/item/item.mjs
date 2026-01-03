@@ -20,7 +20,7 @@ import {
     whisperUserTargetsForActor,
     getCharacteristicInfoArrayForActor,
 } from "../utility/util.mjs";
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerDown, roundFavorPlayerUp } from "../utility/round.mjs";
 import {
     buildStrengthItem,
     calculateApPerDieForItem,
@@ -1877,7 +1877,7 @@ export class HeroSystem6eItem extends Item {
                 if (aoeModifier.XMLID === "AOE") {
                     switch (aoeModifier.OPTIONID) {
                         case "CONE":
-                            levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
+                            levels = roundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
                             break;
 
                         case "HEX":
@@ -1885,12 +1885,12 @@ export class HeroSystem6eItem extends Item {
                             break;
 
                         case "LINE":
-                            levels = RoundFavorPlayerUp((2 * activePointsWithoutAoeAdvantage) / 5);
+                            levels = roundFavorPlayerUp((2 * activePointsWithoutAoeAdvantage) / 5);
                             break;
 
                         case "ANY":
                         case "RADIUS":
-                            levels = Math.max(1, RoundFavorPlayerUp(activePointsWithoutAoeAdvantage / 10));
+                            levels = Math.max(1, roundFavorPlayerUp(activePointsWithoutAoeAdvantage / 10));
                             break;
 
                         default:
@@ -2373,7 +2373,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // 6e has a CONTROLCOST adder; 5e is half of pool
-        return this.findModsByXmlid("CONTROLCOST")?.LEVELS || RoundFavorPlayerDown(this.system.LEVELS / 2);
+        return this.findModsByXmlid("CONTROLCOST")?.LEVELS || roundFavorPlayerDown(this.system.LEVELS / 2);
     }
 
     get vppSlotted() {
@@ -2430,7 +2430,7 @@ export class HeroSystem6eItem extends Item {
         // NOTE: When we push we are altering the actual active points, via LEVELS and modifiers, so we have to back it out.
         const unpushedActivePoints =
             activePoints - (this.system._active?.pushedRealPoints || 0) * (1 + this._limitationCost);
-        const endCost = RoundFavorPlayerDown(unpushedActivePoints / endUnitSize);
+        const endCost = roundFavorPlayerDown(unpushedActivePoints / endUnitSize);
 
         return Math.max(1, endCost);
     }
@@ -2501,7 +2501,7 @@ export class HeroSystem6eItem extends Item {
                 {
                     let mdBonusFor5e = 0;
                     if (this.actor.is5e) {
-                        mdBonusFor5e = RoundFavorPlayerUp(
+                        mdBonusFor5e = roundFavorPlayerUp(
                             parseInt(this.actor.system.characteristics.ego?.value) / 5 || 0,
                         );
                     }
@@ -2682,7 +2682,7 @@ export class HeroSystem6eItem extends Item {
                     }
 
                     // Since it's only an approximation, just show whole numbers.
-                    lightYearsPerTimePeriod = RoundFavorPlayerUp(lightYearsPerTimePeriod);
+                    lightYearsPerTimePeriod = roundFavorPlayerUp(lightYearsPerTimePeriod);
 
                     description = `${system.ALIAS} (${lightYearsPerTimePeriod} Light Year(s)/${timePeriod})`;
                 }
@@ -4900,17 +4900,17 @@ export class HeroSystem6eItem extends Item {
             // Fixed
             if (this.system.ULTRA_SLOT) {
                 costSuffix = this.actor?.system.is5e ? "u" : "f";
-                cost = RoundFavorPlayerDown(cost / 10.0);
+                cost = roundFavorPlayerDown(cost / 10.0);
             }
 
             // Variable
             else {
                 costSuffix = this.actor?.system.is5e ? "m" : "v";
-                cost = RoundFavorPlayerDown(cost / 5.0);
+                cost = roundFavorPlayerDown(cost / 5.0);
             }
         }
 
-        return RoundFavorPlayerDown(cost) + costSuffix;
+        return roundFavorPlayerDown(cost) + costSuffix;
     }
 
     /**
@@ -4918,7 +4918,7 @@ export class HeroSystem6eItem extends Item {
      * However, be aware that HD keep the actual point cost expressed in 1 or 2 decimal points (based on 5e or 6e)
      */
     get activePointCostForDisplay() {
-        return RoundFavorPlayerUp(this._activePoints);
+        return roundFavorPlayerUp(this._activePoints);
     }
 
     /**
@@ -4926,7 +4926,7 @@ export class HeroSystem6eItem extends Item {
      * However, be aware that HD keep the actual point cost expressed in 1 or 2 decimal points (based on 5e or 6e)
      */
     get realPointCostForDisplay() {
-        return RoundFavorPlayerUp(this._realCost);
+        return roundFavorPlayerUp(this._realCost);
     }
 
     /**
@@ -4936,7 +4936,7 @@ export class HeroSystem6eItem extends Item {
     get characterPointCostForDisplay() {
         const cost = this.characterPointCost || parseFloat(this.characterPointCost);
 
-        return RoundFavorPlayerUp(cost);
+        return roundFavorPlayerUp(cost);
     }
 
     get activePoints() {
@@ -4958,7 +4958,7 @@ export class HeroSystem6eItem extends Item {
 
             // The cost is always the cheaper of buying multiple quantities or paying the 5pt doubling cost.
             // We're multiplying, so remember to round.
-            doublingsCost = RoundFavorPlayerDown(Math.min(5 * doublings, cpCost * (quantity - 1)));
+            doublingsCost = roundFavorPlayerDown(Math.min(5 * doublings, cpCost * (quantity - 1)));
         }
 
         return cpCost + doublingsCost;
@@ -5023,7 +5023,7 @@ export class HeroSystem6eItem extends Item {
             cost = cost - this.parentItem.system.BASECOST;
         }
 
-        return RoundFavorPlayerDown(cost) + costSuffix;
+        return roundFavorPlayerDown(cost) + costSuffix;
     }
 
     /// Get Levels with AID/DRAIN Active Effects
@@ -5269,7 +5269,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCosts !== 1) {
-            ap = RoundFavorPlayerDown(ap * advantageCosts);
+            ap = roundFavorPlayerDown(ap * advantageCosts);
         }
 
         ap = Math.max(this.baseInfo?.minimumCost || 0, ap);
@@ -5282,7 +5282,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsWithoutEnd !== 1) {
-            return RoundFavorPlayerDown(baseCostWithoutEnd * advantageCostsWithoutEnd);
+            return roundFavorPlayerDown(baseCostWithoutEnd * advantageCostsWithoutEnd);
         } else {
             return baseCostWithoutEnd;
         }
@@ -5294,7 +5294,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsWithoutAoe !== 1) {
-            return RoundFavorPlayerDown(baseCostWithoutAoe * advantageCostsWithoutAoe);
+            return roundFavorPlayerDown(baseCostWithoutAoe * advantageCostsWithoutAoe);
         } else {
             return baseCostWithoutAoe;
         }
@@ -5306,7 +5306,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsWithoutExclusions !== 1) {
-            return RoundFavorPlayerDown(baseCostWithoutExclusions * advantageCostsWithoutExclusions);
+            return roundFavorPlayerDown(baseCostWithoutExclusions * advantageCostsWithoutExclusions);
         } else {
             return baseCostWithoutExclusions;
         }
@@ -5351,7 +5351,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
         if (advantageCostsAffectingDc !== 1) {
-            return RoundFavorPlayerDown(dcRaw);
+            return roundFavorPlayerDown(dcRaw);
         } else {
             return dcRaw;
         }
@@ -5398,7 +5398,7 @@ export class HeroSystem6eItem extends Item {
 
         // We must round only if we divide (FRed pg 7, 6e vol 1 pg 12)
         if (_limitationCost !== 0) {
-            _cost = RoundFavorPlayerDown(_cost / (1 + _limitationCost));
+            _cost = roundFavorPlayerDown(_cost / (1 + _limitationCost));
         }
 
         return _cost;
@@ -5428,7 +5428,7 @@ export class HeroSystem6eItem extends Item {
                 (Math.max(this.elementalControl.system.BASECOST * 2, this.activePoints) -
                     this.elementalControl.system.BASECOST) /
                 (1 + this._limitationCost);
-            return RoundFavorPlayerDown(cp);
+            return roundFavorPlayerDown(cp);
         }
 
         let _cost = this._realCost;
@@ -5441,12 +5441,12 @@ export class HeroSystem6eItem extends Item {
             ) {
                 // Fixed with minimum cost of 1
                 if (this.system.ULTRA_SLOT || this.parentItem?.system.ULTRA_SLOT) {
-                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 10.0));
+                    _cost = Math.max(1.0, roundFavorPlayerDown(_cost / 10.0));
                 }
 
                 // Variable with minimum cost of 1
                 else {
-                    _cost = Math.max(1.0, RoundFavorPlayerDown(_cost / 5.0));
+                    _cost = Math.max(1.0, roundFavorPlayerDown(_cost / 5.0));
                 }
             }
         }
@@ -5469,8 +5469,8 @@ export class HeroSystem6eItem extends Item {
         const reducedEnd =
             this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
         if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
-            end = RoundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
-            end = Math.max(1, RoundFavorPlayerDown(end / 2));
+            end = roundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
+            end = Math.max(1, roundFavorPlayerDown(end / 2));
         } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             end = 0;
         }
@@ -5488,7 +5488,7 @@ export class HeroSystem6eItem extends Item {
         } else {
             // Full endurance cost unless it's purchased with half endurance
             if (costsEnd.OPTIONID === "HALFEND") {
-                end = RoundFavorPlayerDown(end / 2);
+                end = roundFavorPlayerDown(end / 2);
             }
         }
 
@@ -5518,8 +5518,8 @@ export class HeroSystem6eItem extends Item {
         const reducedEnd =
             this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
         if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
-            end = RoundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
-            end = Math.max(1, RoundFavorPlayerDown(end / 2));
+            end = roundFavorPlayerDown((this.system._activePointsWithoutEndMods || this.activePoints) / 10);
+            end = Math.max(1, roundFavorPlayerDown(end / 2));
         } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             end = 0;
         }
@@ -6646,6 +6646,178 @@ export function cloneToEffectiveAttackItem({
         effectiveItem,
         strengthItem,
     };
+}
+
+/**
+ *
+ * @param {Object} effectiveObjectParameters
+ * @param {HeroSystem6eItem} effectiveObjectParameters.originalItem
+ * @param {Number} effectiveObjectParameters.effectiveRealCost
+ * @param {Number} effectiveObjectParameters.pushedRealPoints
+ * @param {Number} effectiveObjectParameters.effectiveStr
+ * @param {Number} effectiveObjectParameters.effectiveStrPushedRealPoints
+ * @param {String} effectiveObjectParameters.maWeaponId
+ * @param {HeroSystem6eItem[]} effectiveObjectParameters.hthAttackItems
+ * @param {HeroSystem6eItem[]} effectiveObjectParameters.nakedAdvantagesItems
+ * @param {Object} effectiveObjectParameters.autofire
+ * @param {Number} effectiveObjectParameters.autofire.shots
+ * @param {Number} effectiveObjectParameters.autofire.maxShots
+ *
+ * @returns
+ */
+export function buildEffectiveObject(effectiveObjectParameters) {
+    const { effectiveItem, strengthItem } = cloneToEffectiveAttackItem({
+        originalItem: effectiveObjectParameters.originalItem,
+        effectiveRealCost: effectiveObjectParameters.effectiveRealCost,
+        pushedRealPoints: effectiveObjectParameters.pushedRealPoints,
+        effectiveStr: effectiveObjectParameters.effectiveStr,
+        effectiveStrPushedRealPoints: effectiveObjectParameters.effectiveStrPushedRealPoints,
+    });
+
+    // How many shots for this attack (aka autofire)
+    effectiveItem.system._active.autofire = effectiveObjectParameters.autofire;
+
+    // Martial Arts weapon being used?
+    if (effectiveObjectParameters.maWeaponId) {
+        effectiveItem.system._active.maWeaponItem = effectiveObjectParameters.originalItem.actor.items.find(
+            (item) => item.id === effectiveObjectParameters.maWeaponId,
+        );
+
+        if (effectiveItem.system._active.maWeaponItem) {
+            effectiveItem.system._active.linkedAssociated ??= [];
+            effectiveItem.system._active.linkedAssociated.push({
+                item: effectiveItem.system._active.maWeaponItem,
+                uuid: effectiveItem.system._active.maWeaponItem.uuid,
+            });
+        }
+    }
+
+    // Active points for the base item. For maneuvers this could be STR or a weapon.
+    const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem.baseInfo.baseEffectDicePartsBundle(
+        effectiveItem,
+        {},
+    ).baseAttackItem._activePoints;
+
+    // Add any checked & appropriate Hand-to-Hand Attack advantages into the base item
+    let hthAttackDisabledDueToStrength = false;
+    Object.entries(effectiveObjectParameters.hthAttackItems)
+        .filter((_, index, array) => {
+            // If there is no strength item or effective strength is less than 3 then we don't have enough
+            // strength applied to allow HTH Attacks
+            // PH: FIXME: Should look at strengthItem's actual strength
+            // PH: FIXME: Need to consider real weapons w/ STRMINIMUM
+            if (!strengthItem || effectiveObjectParameters.effectiveStr < 3) {
+                if (array[index][1]._canUseForAttack) {
+                    hthAttackDisabledDueToStrength = true;
+                }
+
+                array[index][1]._canUseForAttack = false;
+                array[index][1].reasonForCantUse = "Must use at least 3 (½d6) STR to add a hand-to-hand attack";
+
+                return false;
+            }
+
+            array[index][1].reasonForCantUse = "";
+
+            if (!array[index][1]._canUseForAttack) {
+                return false;
+            }
+
+            return true;
+        })
+        .map(([uuid]) => fromUuidSync(uuid))
+        .forEach((hthAttack) => {
+            // 5e only: Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
+            // 6e only: PH: FIXME: the HA becomes the base attack item.
+            // PH: FIXME: Need to consider STRMINIMUM
+            const haBaseCost = hthAttack._basePoints;
+            if (hthAttack.is5e && haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+                // Endurance advantages and limitations don't apply to strength
+                // Invisible Power Effects does not transfer to STR if on the HTH Attack
+                const ignoreAdvantagesForHthAttack = ["INCREASEDEND", "REDUCEDEND", "INVISIBLE"];
+
+                // PH: FIXME: AoE gets an increased radius based on STR used (so effectively double the radius)
+                // PH: FIXME: AoE gets the radius built from the HA not based on the effective item
+                effectiveItem.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+                strengthItem?.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
+            } else if (hthAttack.is5e) {
+                ui.notifications.warn(
+                    `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
+                );
+            } else if (!hthAttack.is5e && hthAttack.advantages.length > 0) {
+                ui.notifications.warn(
+                    `6e Advantaged Hand-to-Hand Attacks not supported. Advantages for ${hthAttack.detailedName()} are not applied.`,
+                );
+            }
+
+            effectiveItem.system._active.linkedAssociated ??= [];
+            effectiveItem.system._active.linkedAssociated.push({
+                item: hthAttack,
+                uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+            });
+        });
+    if (hthAttackDisabledDueToStrength) {
+        ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
+    }
+
+    // Add any Naked Advantages into the base item
+    // PH: FIXME: Typically the NA should reduce the duration of the power to instant although it can be bought up. Should consider modification of duration
+    // PH: FIXME: Need to implement endurance usage. A REDUCE END NA will reduce the base attack's END use but otherwise the NA endurance usage is paid separately.
+    let nakedAdvantagesDisabledDueToActivePoints = false;
+    Object.entries(effectiveObjectParameters.nakedAdvantagesItems)
+        .map(([uuid], index, array) => {
+            const naItem = fromUuidSync(uuid);
+
+            // Item the NA is being applied to must not exceed the AP of the NA was designed against.
+            // TODO: This implies that one cannot push with a NA. Is this correct?
+            const naEffectiveAgainstAp = parseInt(naItem.system.LEVELS || 0);
+
+            // 5e and 6e have different rules as far as applying multiple naked advantages. 6e states that the effect of the first NA counts
+            // as a part of the power's AP for the purposes of adding a 2nd NA. 5e (FRed) does not have this rule.
+            const effectiveItemApForNaComparison = naItem.is5e
+                ? effectiveItemActivePointsBeforeHthAndNaAdvantages
+                : effectiveItem._activePoints;
+            if (naEffectiveAgainstAp < effectiveItemApForNaComparison) {
+                if (array[index][1]._canUseForAttack) {
+                    nakedAdvantagesDisabledDueToActivePoints = true;
+                }
+
+                array[index][1]._canUseForAttack = false;
+                array[index][1].reasonForCantUse =
+                    `${naItem.detailedName()} is effective against ${naEffectiveAgainstAp} AP but the base attack is ${effectiveItemActivePointsBeforeHthAndNaAdvantages} AP`;
+
+                return undefined;
+            }
+
+            array[index][1].reasonForCantUse = "";
+
+            if (!array[index][1]._canUseForAttack) {
+                return undefined;
+            }
+
+            effectiveItem.copyItemAdvantages(naItem, []);
+            effectiveItem.system._active.linkedEnd ??= [];
+            effectiveItem.system._active.linkedEnd.push({
+                item: naItem,
+                uuid: uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+            });
+
+            strengthItem?.copyItemAdvantages(naItem, []);
+
+            // PH: FIXME: active points from NA should be automatically adjusted to reflect the AP in the effective item (i.e. 30 AP effective item
+            //            shouldn't have to pay full END for NA that can affect up to 90 AP - it should just be dipped down to 30 AP)
+
+            return naItem;
+        })
+        .filter(Boolean);
+
+    if (nakedAdvantagesDisabledDueToActivePoints) {
+        ui.notifications.warn(
+            `Naked Advantages must be able to apply at least as many active points as the base attack${effectiveItem.is5e ? "" : " and other naked advantages"}`,
+        );
+    }
+
+    return effectiveItem;
 }
 
 /**
