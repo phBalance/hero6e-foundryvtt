@@ -330,7 +330,7 @@ class HeroModifierModelCommon extends HeroItemModCommonModel {
             _cost += adder.cost;
         }
 
-        // Some MODIFIERs have MODIFIERs (CONTINUOUSCONCENTRATION & ACTIVATEONLY)
+        // Some MODIFIERs have MODIFIERs (CONTINUOUSCONCENTRATION, ACTIVATEONLY, etc.)
         for (const modifier of this.modifiers) {
             _cost += modifier.cost;
         }

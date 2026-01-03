@@ -16836,6 +16836,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // GESTURES related
             key: "THROUGHOUT",
             behaviors: ["modifier"],
+            cost: function (modifierModel /*, item */) {
+                // This has no cost itself; it's a 2x cost multiplier. Just pretend the cost of this modifier is
+                // the cost of its parent with any additional adders that it may have.
+                const parentsAdders = modifierModel.parent.adders;
+                let parentsAddersCosts = 0;
+                for (const adder of parentsAdders) {
+                    parentsAddersCosts += adder.cost;
+                }
+
+                return modifierModel.parent.BASECOST + parentsAddersCosts;
+            },
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="THROUGHOUT" ID="1762104990480" BASECOST="1.0" LEVELS="0" ALIAS="Requires Gestures throughout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
