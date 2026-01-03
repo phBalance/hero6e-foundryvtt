@@ -15866,6 +15866,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // MINDCONTROL related
+            key: "LITERAL",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="LITERAL" ID="1767417218968" BASECOST="-0.25" LEVELS="0" ALIAS="Literal Interpretation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        undefined,
+    );
+
+    addPower(
+        {
             key: "LIMITEDTYPES",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
