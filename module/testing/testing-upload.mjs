@@ -11518,7 +11518,7 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe.only("LIFESUPPORT - #3428", function () {
+            describe("LIFESUPPORT - #3428", function () {
                 const contents = `
                         <POWER XMLID="LIFESUPPORT" ID="1765665220842" BASECOST="0.0" LEVELS="0" ALIAS="Life Support" POSITION="18" MULTIPLIER="1.0" GRAPHIC="rads" COLOR="0 255 255" SFX="Air/Wind" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1765665248447" NAME="Bubble Of Air" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
@@ -11581,7 +11581,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("end", function () {
-                    assert.equal(item.system.end, 2);
+                    assert.equal(item.end, 2);
                 });
             });
         },
