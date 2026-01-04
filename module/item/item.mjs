@@ -1399,53 +1399,31 @@ export class HeroSystem6eItem extends Item {
         await this.setActive(true);
     }
 
-    async toggleOff() {
+    async toggleOff(options = {}) {
         const item = this;
-        // Let GM know power was deactivated
-        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-        speaker["alias"] = item.actor.name;
 
-        const chatData = {
-            author: game.user._id,
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-            content: `Turned off ${item.name}`,
-            whisper: whisperUserTargetsForActor(item.actor),
-            speaker,
-        };
-        await ChatMessage.create(chatData);
+        if (!this.isActive) {
+            console.warn(`${item.detailedName()} is alredy off`);
+        }
 
-        // Toggle status effect off based on power
-        // if (this.system.XMLID === "INVISIBILITY") {
-        //     // Remove Invisibility status effect
-        //     if (this.actor.statuses.has("invisible")) {
-        //         await this.actor.toggleStatusEffect(
-        //             HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
-        //             {
-        //                 active: false,
-        //             },
-        //         );
-        //         // await this.actor.removeActiveEffect(
-        //         //     HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
-        //         // );
-        //     }
-        // } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
-        //     if (this.actor.statuses.has("fly")) {
-        //         await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
-        //             active: false,
-        //         });
-        //         //await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
-        //     }
-        // } else if (this.system.XMLID === "DESOLIDIFICATION") {
-        //     await this.actor.toggleStatusEffect(
-        //         HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
-        //         {
-        //             active: false,
-        //         },
-        //     );
-        //     // await this.actor.removeActiveEffect(
-        //     //     HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect,
-        //     // );
-        // }
+        if (!this.isActivatable) {
+            console.warn(`${item.detailedName()} is not activatable, probably shouldn't be calling toggleOff`);
+        }
+
+        if (!options.silent) {
+            // Let GM know power was deactivated
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+            speaker["alias"] = item.actor.name;
+
+            const chatData = {
+                author: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                content: `Turned off ${item.name}`,
+                whisper: whisperUserTargetsForActor(item.actor),
+                speaker,
+            };
+            await ChatMessage.create(chatData);
+        }
 
         await this.setActive(false);
     }

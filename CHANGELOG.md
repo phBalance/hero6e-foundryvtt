@@ -8,6 +8,7 @@
 - Costs now include the 5 point doubling rule. [#3420](https://github.com/dmdorman/hero6e-foundryvtt/issues/3420)
 - Added ft as a supported scene grid unit size.
 - Fixed ENDURANCE RESERVE recoveries. [#3439](https://github.com/dmdorman/hero6e-foundryvtt/issues/3439)
+- Fixed issue when uploading HDC files over different a different actor with Active Effects and deleting old items. [#3425](https://github.com/dmdorman/hero6e-foundryvtt/issues/3425)
 
 ## Version 4.2.6 20251228
 
