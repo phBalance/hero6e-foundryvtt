@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.2.7 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.7 20260103 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Ablative defenses now supported. [#231](https://github.com/dmdorman/hero6e-foundryvtt/issues/231)
 - Half range modifier implemented. [#3369](https://github.com/dmdorman/hero6e-foundryvtt/issues/3369)
