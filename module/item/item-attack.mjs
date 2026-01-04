@@ -702,9 +702,9 @@ async function doSingleTargetActionToHit(action, options) {
     const itemData = item.effectiveAttackItem.system;
 
     const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.attacksWith]?.value);
-    if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.uses.toUpperCase())) {
+    if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.attacksWith.toUpperCase())) {
         ui.notifications.warn(
-            `<b>${item.actor.name}</b> does not have <b>${itemData.uses.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
+            `<b>${item.actor.name}</b> does not have <b>${itemData.attacksWith.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
         );
     }
 
@@ -1485,52 +1485,11 @@ async function _rollApplyKnockback(token, knockbackDice) {
     damageData.targetToken = token;
 
     // VULNERABILITY
-    for (const vuln of conditionalDefenses.filter(
-        (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
-    )) {
-        damageData.VulnDesc ??= [];
-        damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
-        // There can only be 1 vulnerability modifier (or if blank a default HALFSTUN)
-        const modifier = vuln.modifiers[0];
-        if (modifier) {
-            switch (modifier.OPTIONID) {
-                case "HALFSTUN":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 0.5;
-                    break;
-                case "TWICESTUN":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 1;
-                    break;
-                case "HALFBODY":
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 0.5;
-                    break;
-                case "TWICEBODY":
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 1;
-                    break;
-                case "HALFEFFECT":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 0.5;
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 0.5;
-                    break;
-                case "TWICEEFFECT":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 1;
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 1;
-                    break;
-
-                default:
-                    console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
-            }
-        } else {
-            // DEFAULT VULNERABILITY isi 1.5 STUN
-            damageData.vulnStunMultiplier = 1.5;
-        }
-    }
+    ({
+        vulnStunMultiplier: damageData.vulnStunMultiplier,
+        vulnBodyMultiplier: damageData.vulnBodyMultiplier,
+        vulnDesc: damageData.VulnDesc,
+    } = determineVulerabilityToAttack(conditionalDefenses, ignoreDefenseIds));
 
     const damageDetail = await _calcDamage(damageRoller, knockbackAttackItem, damageData);
     damageDetail.effects = `${damageDetail.effects || ""} Prone`.replace("; ", "").trim();
@@ -2117,6 +2076,60 @@ export async function _onGenericRollerApplyDamage(event) {
 }
 
 /**
+ *
+ * @param {HeroSystem6eItem[]} conditionalDefenses
+ * @param {string[]} ignoreDefenseIds
+ *
+ * @returns {Object} - BODY multiplier, STUN multiplier, and array of vulnerability descriptions
+ */
+function determineVulerabilityToAttack(conditionalDefenses, ignoreDefenseIds) {
+    const vulnDesc = [];
+    let vulnStunMultiplier = 1;
+    let vulnBodyMultiplier = 1;
+
+    for (const vuln of conditionalDefenses.filter(
+        (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
+    )) {
+        vulnDesc.push(vuln.conditionalDefenseShortDescription);
+
+        // There can only be 1 vulnerability modifier (or if blank a default HALFSTUN)
+        const modifier = vuln.modifiers[0];
+        if (modifier) {
+            switch (modifier.OPTIONID) {
+                case "HALFSTUN":
+                    vulnStunMultiplier += 0.5;
+                    break;
+                case "TWICESTUN":
+                    vulnStunMultiplier += 1;
+                    break;
+                case "HALFBODY":
+                    vulnBodyMultiplier += 0.5;
+                    break;
+                case "TWICEBODY":
+                    vulnBodyMultiplier += 1;
+                    break;
+                case "HALFEFFECT":
+                    vulnStunMultiplier += 0.5;
+                    vulnBodyMultiplier += 0.5;
+                    break;
+                case "TWICEEFFECT":
+                    vulnStunMultiplier += 1;
+                    vulnBodyMultiplier += 1;
+                    break;
+
+                default:
+                    console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
+            }
+        } else {
+            // Default VULNERABILITY is 1.5x STUN
+            vulnStunMultiplier += 0.5;
+        }
+    }
+
+    return { vulnBodyMultiplier, vulnStunMultiplier, vulnDesc };
+}
+
+/**
  * Event handler for when the Apply Damage button is clicked on item-damage-card.hbs Notice the chatListeners function in this file.
  */
 export async function _onApplyDamage(event, actorParam, itemParam) {
@@ -2405,52 +2418,11 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     damageData.targetToken = token;
 
     // VULNERABILITY
-    for (const vuln of conditionalDefenses.filter(
-        (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
-    )) {
-        damageData.VulnDesc ??= [];
-        damageData.VulnDesc.push(vuln.conditionalDefenseShortDescription);
-        // There can only be 1 vulnerability modifier (or if blank a default HALFSTUN)
-        const modifier = vuln.modifiers[0];
-        if (modifier) {
-            switch (modifier.OPTIONID) {
-                case "HALFSTUN":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 0.5;
-                    break;
-                case "TWICESTUN":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 1;
-                    break;
-                case "HALFBODY":
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 0.5;
-                    break;
-                case "TWICEBODY":
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 1;
-                    break;
-                case "HALFEFFECT":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 0.5;
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 0.5;
-                    break;
-                case "TWICEEFFECT":
-                    damageData.vulnStunMultiplier ??= 1;
-                    damageData.vulnStunMultiplier += 1;
-                    damageData.vulnBodyMultiplier ??= 1;
-                    damageData.vulnBodyMultiplier += 1;
-                    break;
-
-                default:
-                    console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
-            }
-        } else {
-            // DEFAULT VULNERABILITY isi 1.5 STUN
-            damageData.vulnStunMultiplier = 1.5;
-        }
-    }
+    ({
+        vulnStunMultiplier: damageData.vulnStunMultiplier,
+        vulnBodyMultiplier: damageData.vulnBodyMultiplier,
+        vulnDesc: damageData.VulnDesc,
+    } = determineVulerabilityToAttack(conditionalDefenses, ignoreDefenseIds));
 
     // AVAD All or Nothing
     if (avad) {
