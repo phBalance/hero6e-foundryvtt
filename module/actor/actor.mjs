@@ -1984,14 +1984,14 @@ export class HeroSystem6eActor extends Actor {
             const heroJson = {};
             HeroSystem6eActor._xmlToJsonNode(heroJson, xml.children);
 
-            // Need count of maneuvers for progress bar
-            const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+            // Need count of maneuvers for progress bar (might be switching betwen 5/6e so an estimate)
+            const powerListTentative = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
             const freeStuffFilter = (power) =>
                 (!(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
                     power.type.includes("maneuver")) ||
                 power.key === "PERCEPTION" || // Perception
                 power.key === "__STRENGTHDAMAGE"; // Weapon placeholder (this is a dirty hack to count it so we can filter on it later)
-            const freeStuffCount = powerList.filter(freeStuffFilter).length;
+            const freeStuffCount = powerListTentative.filter(freeStuffFilter).length;
 
             const xmlItemsToProcess =
                 1 + // Delete existing effects
@@ -2029,14 +2029,6 @@ export class HeroSystem6eActor extends Actor {
                 });
             }
 
-            // Remove all existing effects
-            uploadProgressBar.advance(`${this.name}: Removing existing effects`, 0);
-            await this.deleteEmbeddedDocuments(
-                "ActiveEffect",
-                this.effects.map((o) => o.id),
-            );
-            uploadProgressBar.advance(`${this.name}: Removed existing effects`, 1);
-
             // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
             const characterName = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
@@ -2059,44 +2051,6 @@ export class HeroSystem6eActor extends Actor {
             }
 
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /// Reset system properties to defaults
-            const _actor = new HeroSystem6eActor(
-                {
-                    name: "Test Actor",
-                    type: this.type,
-                    system: {
-                        is5e: this.is5e,
-                    },
-                },
-                {},
-            );
-            const _system = _actor.system;
-
-            // remove any system properties that are not part of system.json
-            uploadProgressBar.advance(`${this.name}: Removing unnecessary system fields`, 0);
-
-            const systemFieldChanges = {};
-            const schemaKeys = Object.keys(_system);
-            for (const key of Object.keys(this.system)) {
-                if (!schemaKeys.includes(key)) {
-                    systemFieldChanges[`system.-=${key}`] = null;
-                }
-            }
-            for (const key of Object.keys(this.system.characteristics)) {
-                if (!Object.keys(_system.characteristics).includes(key)) {
-                    systemFieldChanges[`system.characteristics.-=${key}`] = null;
-                }
-            }
-            if (Object.keys(systemFieldChanges).length > 0) {
-                await this.update(systemFieldChanges);
-            }
-
-            uploadProgressBar.advance(`${this.name}: Removed unnecessary system fields`, 1);
-            uploadPerformance.resetToDefault = new Date().getTime() - uploadPerformance._d;
-            uploadPerformance._d = new Date().getTime();
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /// WE ARE DONE RESETTING TOKEN PROPS
             /// NOW LOAD THE HDC STUFF
 
             let promiseArray = [];
@@ -2185,6 +2139,14 @@ export class HeroSystem6eActor extends Actor {
                 changes = {};
             }
 
+            // Remove all temporary effects
+            uploadProgressBar.advance(`${this.name}: Removing temporaryEffects effects`, 0);
+            await this.deleteEmbeddedDocuments(
+                "ActiveEffect",
+                this.temporaryEffects.map((o) => o.id),
+            );
+            uploadProgressBar.advance(`${this.name}: Removed temporaryEffects effects`, 1);
+
             // CHARACTERISTICS
             if (heroJson.CHARACTER?.CHARACTERISTICS) {
                 const changesNormal = {};
@@ -2206,7 +2168,10 @@ export class HeroSystem6eActor extends Actor {
                 delete heroJson.CHARACTER.CHARACTERISTICS;
 
                 if (this.id) {
+                    // Update normal values first
                     await this.update(changesNormal);
+
+                    // Then any figured or calculated characteristis
                     await this.update(changesFiguredOrCalculated);
                 }
             }
@@ -2860,6 +2825,11 @@ export class HeroSystem6eActor extends Actor {
                         console.log(
                             `Deleting ${itemsToDelete.length} items because they were not present in the HDC file.`,
                         );
+                        // Toggle them off first as sometimes deleteing items with AE's don'e run the cleanup code.
+                        // FoundryVTT 13 bug?
+                        for (const item of itemsToDelete) {
+                            await item.toggleOff({ silent: true });
+                        }
                         await this.deleteEmbeddedDocuments(
                             "Item",
                             itemsToDelete.map((o) => o.id),
