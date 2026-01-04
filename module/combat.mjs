@@ -1195,41 +1195,36 @@ export class HeroSystem6eCombat extends Combat {
                 const showToAll = !combatant.hidden && (combatant.hasPlayerOwner || combatant.actor?.type === "pc");
 
                 // Make sure combatant is visible in combat tracker
-                const recoveryText = await combatant.actor.TakeRecovery({
+                let recoveryText = await combatant.actor.TakeRecovery({
                     asAction: false,
                     token: combatant.token,
                     preventRecoverFromStun: true,
                 });
+
+                // END RESERVE
+                for (const endReserveItem of actor.items.filter((o) => o.system.XMLID === "ENDURANCERESERVE")) {
+                    const ENDURANCERESERVEREC = endReserveItem.findModsByXmlid("ENDURANCERESERVEREC");
+                    if (ENDURANCERESERVEREC) {
+                        const newValue = Math.min(
+                            endReserveItem.system.LEVELS,
+                            endReserveItem.system.value + parseInt(ENDURANCERESERVEREC.LEVELS),
+                        );
+                        if (newValue > endReserveItem.system.value) {
+                            const delta = newValue - endReserveItem.system.value;
+                            await endReserveItem.update({
+                                "system.value": newValue,
+                            });
+                            recoveryText += `${endReserveItem.name} +${delta} END`;
+                        }
+                    }
+                }
+
                 if (recoveryText) {
                     if (showToAll) {
                         content += "<li>" + recoveryText + "</li>";
                     } else {
                         hasHidden = true;
                         contentHidden += "<li>" + recoveryText + "</li>";
-                    }
-                }
-
-                // END RESERVE
-                for (const item of actor.items.filter((o) => o.system.XMLID === "ENDURANCERESERVE")) {
-                    const ENDURANCERESERVEREC = item.findModsByXmlid("ENDURANCERESERVEREC");
-                    if (ENDURANCERESERVEREC) {
-                        const newValue = Math.min(
-                            item.system.LEVELS,
-                            item.system.value + parseInt(ENDURANCERESERVEREC.LEVELS),
-                        );
-                        if (newValue > item.system.value) {
-                            const delta = newValue - item.system.value;
-                            await item.update({
-                                "system.value": newValue,
-                            });
-
-                            if (showToAll) {
-                                content += "<li>" + `${combatant.token.name}: ${item.name} +${delta} END` + "</li>";
-                            } else {
-                                contentHidden +=
-                                    "<li>" + `${combatant.token.name}: ${item.name} +${delta} END` + "</li>";
-                            }
-                        }
                     }
                 }
             }

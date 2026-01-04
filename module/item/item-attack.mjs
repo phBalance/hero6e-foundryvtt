@@ -701,14 +701,14 @@ async function doSingleTargetActionToHit(action, options) {
 
     const itemData = item.effectiveAttackItem.system;
 
-    const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.uses]?.value);
+    const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.attacksWith]?.value);
     if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.uses.toUpperCase())) {
         ui.notifications.warn(
             `<b>${item.actor.name}</b> does not have <b>${itemData.uses.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
         );
     }
 
-    const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
+    const toHitChar = CONFIG.HERO.defendsWith[itemData.defendsWith];
 
     const adjustment = getPowerInfo({
         item: item.effectiveAttackItem,
@@ -726,7 +726,7 @@ async function doSingleTargetActionToHit(action, options) {
     const attackHeroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
-        .addNumber(hitCharacteristic, itemData.uses)
+        .addNumber(hitCharacteristic, itemData.attacksWith)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");

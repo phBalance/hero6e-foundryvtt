@@ -876,7 +876,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         const boecv = this.item.findModsByXmlid("BOECV");
         if (boecv) {
             // 5e TELEKINESIS is dcv (REF: FRED pg 231)
-            if (this.is5e && this.system.XMLID === "TELEKINESIS") {
+            if (this.item.is5e && this.item.system.XMLID === "TELEKINESIS") {
                 return "dcv";
             }
 
