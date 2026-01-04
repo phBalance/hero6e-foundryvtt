@@ -419,12 +419,8 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
     return remainingRangePenalty;
 }
 
-// PH: FIXME: Duplicated between AoE and single target?
-
 async function addCslsIntoToHitRoll(action, attackHeroRoller) {
-    const cvModifiers = action.current.cvModifiers;
     const item = action.system.currentItem;
-    let dcv = parseInt(item.system.dcv || 0);
 
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item).details) {
@@ -439,56 +435,21 @@ async function addCslsIntoToHitRoll(action, attackHeroRoller) {
         action.system.item[id] = csl.item;
 
         cvMod.dc += csl.dc;
-        if (csl.ocv || csl.omcv > 0) {
-            cvMod.ocv += csl.ocv || csl.omcv;
-        }
-        dcv += csl.dcv || csl.dmcv;
-        cvMod.dcv += csl.dcv || csl.dmcv;
+        cvMod.ocv += csl.ocv;
+        cvMod.omcv += csl.omcv;
+        cvMod.dcv += csl.dcv;
+        cvMod.dmcv += csl.dmcv;
     }
 
-    const dmcv = parseInt(item.effectiveAttackItem.system.dmcv || 0);
-    if (dmcv !== 0) {
-        // Make sure we don't already have this activeEffect
-        // PH: FIXME: how can we have a uuid given this is an effective attack item?
-        let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
-        if (!prevActiveEffect) {
-            // Estimate of how many seconds the DCV penalty lasts (until next phase).
-            // In combat.mjs#_onStartTurn we remove this AE for exact timing.
-            let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
-            let _dcvText = "DMCV";
-            let _dcvValue = dmcv;
-
-            const activeEffect = {
-                label: `${item.name} ${_dcvValue.signedStringHero()} ${_dcvText}`,
-                icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
-                changes: [
-                    {
-                        key: `system.characteristics.${_dcvText.toLowerCase()}.value`,
-                        value: _dcvValue,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                ],
-                origin: item.uuid, // PH: FIXME: how can we have a uuid given this is an effective attack item?
-                duration: {
-                    seconds: seconds,
-                },
-                flags: {
-                    [game.system.id]: {
-                        nextPhase: true,
-                    },
-                },
-            };
-            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-        }
-    }
-
+    const cvModifiers = action.current.cvModifiers;
     Object.keys(skillLevelMods).forEach((key) => {
         const cvMod = Attack.makeCvModifierFromItem(
             action.system.item[key],
             action.system,
             skillLevelMods[key].ocv,
+            skillLevelMods[key].omcv,
             skillLevelMods[key].dcv,
+            skillLevelMods[key].dmcv,
             skillLevelMods[key].dc,
         );
         cvModifiers.push(cvMod);
@@ -497,6 +458,10 @@ async function addCslsIntoToHitRoll(action, attackHeroRoller) {
     cvModifiers.forEach((cvModifier) => {
         if (cvModifier.cvMod.ocv) {
             attackHeroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
+        }
+
+        if (cvModifier.cvMod.omcv) {
+            attackHeroRoller.addNumber(cvModifier.cvMod.omcv, cvModifier.name);
         }
     });
 
