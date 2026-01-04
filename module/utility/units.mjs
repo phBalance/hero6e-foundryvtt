@@ -1,4 +1,5 @@
 import { roundFavorPlayerDown } from "./round.mjs";
+import { squelch } from "./util.mjs";
 
 /**
  * A note about units
@@ -138,9 +139,11 @@ export function gridUnitsToMeters() {
         distanceMultiplier = 1609.34;
     } else {
         // Not sure what the units might be. Guess meters.
-        ui.notifications.error(
-            `Scene "${game.scenes.current.name}" has unknown grid units (${units}). Fix your scene grid to be m, ", km, ft, or miles.`,
-        );
+        if (!squelch(game.scenes?.current?.name || "scene")) {
+            ui.notifications.error(
+                `Scene "${game.scenes?.current?.name}" has unknown grid units (${units}). Fix your scene grid to be m, ", km, ft, or miles.`,
+            );
+        }
         distanceMultiplier = 1;
     }
 

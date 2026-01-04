@@ -517,12 +517,12 @@ export function gmActive() {
     return !!game.users.filter((u) => u.active && u.isGM).length;
 }
 
-export function squelch(id) {
+export function squelch(id, options = { timeout: 1000 }) {
     const _id = id ? id.toString() : "undefined";
     globalThis[game.system.id] ??= {};
     globalThis[game.system.id].squelch ??= {};
     if (globalThis[game.system.id].squelch[_id]) {
-        if (Date.now() - globalThis[game.system.id].squelch[_id] < 100) {
+        if (Date.now() - globalThis[game.system.id].squelch[_id] < options.timeout) {
             return true;
         }
     }
