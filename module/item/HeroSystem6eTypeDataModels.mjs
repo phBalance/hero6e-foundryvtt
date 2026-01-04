@@ -819,7 +819,12 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         // Alternate Combat Value (uses OMCV against DCV)
         const acv = this.item.findModsByXmlid("ACV");
         if (acv) {
-            _uses = (acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || _uses).toLowerCase();
+            const acvUses = (acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || _uses).toLowerCase();
+            if (!["ocv", "omcv"].includes(acvUses)) {
+                console.error(`${this.item?.detailedName()} has unhandled uses "${acvUses}"`);
+                return _uses;
+            }
+            return acvUses;
         }
 
         return _uses;
@@ -835,7 +840,12 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         // Alternate Combat Value (uses OMCV against DCV)
         const acv = this.item.findModsByXmlid("ACV");
         if (acv) {
-            _targets = (acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] || _targets).toLowerCase();
+            const acvTargets = (acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] || _targets).toLowerCase();
+            if (!["dcv", "dmcv"].includes(acvTargets)) {
+                console.error(`${this.item?.detailedName()} has unhandled target "${acvTargets}"`);
+                return _targets;
+            }
+            return acvTargets;
         }
 
         return _targets;
