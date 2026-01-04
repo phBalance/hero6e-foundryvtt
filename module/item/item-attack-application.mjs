@@ -200,7 +200,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
                     // Filter physical or mental choices based on the CSL type
                     // PH: FIXME: Don't we need to do this on updates as well as the attack could have changed type based on weapon?
-                    if (this.data.originalItem.baseInfo.type.includes("mental")) {
+                    if (this.data.originalItem.system.attacksWith === "omcv") {
                         delete entry.cslChoices.ocv;
                         delete entry.cslChoices.dcv;
                     } else {

@@ -5884,13 +5884,13 @@ export class HeroSystem6eItem extends Item {
 
             switch (this.system.XMLID) {
                 case "COMBAT_LEVELS":
-                    if (attackItem.baseInfo.type.includes("mental") && !this.is5e) {
+                    if (attackItem.system.attacksWith === "omcv" && !this.is5e) {
                         return false;
                     }
                     return true;
 
                 case "MENTAL_COMBAT_LEVELS":
-                    if (attackItem.baseInfo.type.includes("mental")) {
+                    if (attackItem.system.attacksWith === "omcv") {
                         return true;
                     }
                     return false;
@@ -5905,13 +5905,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Mental vs Physical
-        if (
-            ["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) &&
-            attackItem.baseInfo.type.includes("mental")
-        ) {
+        if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.system.attacksWith === "omcv") {
             return false;
         }
-        if (["MENTAL_COMBAT_LEVELS"].includes(this.system.XMLID) && !attackItem.baseInfo.type.includes("mental")) {
+        if (["MENTAL_COMBAT_LEVELS"].includes(this.system.XMLID) && attackItem.system.attacksWith === "ocv") {
             return false;
         }
 

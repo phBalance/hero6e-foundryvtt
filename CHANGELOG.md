@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.2.7 20260103 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.2.8 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed crash when opening character sheets with ACV. [#3465](https://github.com/dmdorman/hero6e-foundryvtt/issues/3465)
+
+## Version 4.2.7 20260103
 
 - Ablative defenses now supported. [#231](https://github.com/dmdorman/hero6e-foundryvtt/issues/231)
 - Half range modifier implemented. [#3369](https://github.com/dmdorman/hero6e-foundryvtt/issues/3369)

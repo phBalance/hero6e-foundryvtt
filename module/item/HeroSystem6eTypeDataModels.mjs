@@ -821,19 +821,25 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
             _attacksWith = "omcv";
         }
 
-        // Alternate Combat Value (uses OMCV against DCV)
-        const acv = this.item.findModsByXmlid("ACV");
+        // Alternate Combat Value (e.g. uses OMCV against DCV)
 
         // 6e uses Altnernate Combat Value modifier
+        const acv = this.item.findModsByXmlid("ACV");
         if (acv) {
-            switch (acv.system.OPTIONID) {
+            switch (acv.OPTIONID) {
                 case "MENTALOCV": // uses OCV against DMCV
                 case "MENTALOCVDCV": //uses OCV against DCV
+                case "NONMENTALDMCV": // uses OCV against DMCV
                     return "ocv";
+
                 case "MENTALDCV": // uses OMCV against DCV
+                case "NONMENTALOMCVDMCV": // uses OMCV against DMCV
+                case "NONMENTALOMCV": // uses OMCV against DCV
                     return "omcv";
             }
+
             console.error(`${this.item?.detailedName()} has unhandled ACV OPTIONID "${acv.system.OPTIONID}"`);
+
             return _attacksWith;
         }
 
@@ -861,21 +867,27 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         // 6e uses Alternate Combat Value (uses OMCV against DCV)
         const acv = this.item.findModsByXmlid("ACV");
         if (acv) {
-            switch (acv.system.OPTIONID) {
+            switch (acv.OPTIONID) {
                 case "MENTALOCV": // uses OCV against DMCV
+                case "NONMENTALOMCVDMCV": // uses OMCV against DMCV
+                case "NONMENTALDMCV": // uses OCV against DMCV
                     return "dmcv";
+
                 case "MENTALDCV": // uses OMCV against DCV
-                case "MENTALOCVDCV": //uses OCV against DCV
-                    return "dmcv";
+                case "MENTALOCVDCV": // uses OCV against DCV
+                case "NONMENTALOMCV": // uses OMCV against DCV
+                    return "dcv";
             }
+
             console.error(`${this.item?.detailedName()} has unhandled ACV OPTIONID "${acv.system.OPTIONID}"`);
+
             return _defendsWith;
         }
 
         // 5e uses Based on Ego Combat Value modifier
         const boecv = this.item.findModsByXmlid("BOECV");
         if (boecv) {
-            // 5e TELEKINESIS is dcv (REF: FRED pg 231)
+            // 5e TELEKINESIS is DCV (REF: FRED pg 231)
             if (this.item.is5e && this.item.system.XMLID === "TELEKINESIS") {
                 return "dcv";
             }
