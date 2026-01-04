@@ -143,7 +143,7 @@ export function registerDefenseTests(quench) {
                                 },
                                 {},
                             );
-                            actor.system.is5e = true;
+                            actor.system.is5e = false;
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
@@ -203,7 +203,7 @@ export function registerDefenseTests(quench) {
                                 },
                                 {},
                             );
-                            actor.system.is5e = true;
+                            actor.system.is5e = false;
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
@@ -263,7 +263,7 @@ export function registerDefenseTests(quench) {
                                 },
                                 {},
                             );
-                            actor.system.is5e = true;
+                            actor.system.is5e = false;
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
@@ -325,7 +325,7 @@ export function registerDefenseTests(quench) {
                                 },
                                 {},
                             );
-                            actor.system.is5e = true;
+                            actor.system.is5e = false;
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
@@ -385,7 +385,7 @@ export function registerDefenseTests(quench) {
                                 },
                                 {},
                             );
-                            actor.system.is5e = true;
+                            actor.system.is5e = false;
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
@@ -445,7 +445,7 @@ export function registerDefenseTests(quench) {
                                 },
                                 {},
                             );
-                            actor.system.is5e = true;
+                            actor.system.is5e = false;
 
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
@@ -546,6 +546,66 @@ export function registerDefenseTests(quench) {
 
                     it("should defend with", function () {
                         assert.equal(item.system.defendsWith, "dmcv");
+                    });
+                });
+
+                describe("OMCV vs DCV (Telekinesis exception)", function () {
+                    const contents = `
+                        <POWER XMLID="TELEKINESIS" ID="1767554249144" BASECOST="0.0" LEVELS="20" ALIAS="Telekinesis" POSITION="166" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="BOECV" ID="1767554606427" BASECOST="1.0" LEVELS="0" ALIAS="Based On EGO Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTAL" OPTIONID="MENTAL" OPTION_ALIAS="Mental Defense applies" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            'Telekinesis (20 STR) Throw 16", Based On EGO Combat Value (Mental Defense applies; +1)',
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 60);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 60);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 60);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.end, 6);
+                    });
+
+                    it("should attack with", function () {
+                        assert.equal(item.system.attacksWith, "omcv");
+                    });
+
+                    it("should defend with", function () {
+                        assert.equal(item.system.defendsWith, "dcv");
                     });
                 });
             });
