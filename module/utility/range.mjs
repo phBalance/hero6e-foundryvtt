@@ -1,6 +1,6 @@
 import { getRoundedFavorPlayerDownDistanceInSystemUnits, gridUnitsToMeters } from "./units.mjs";
 import HeroSystem6eMeasuredTemplate from "../measuretemplate.mjs";
-import { roundFavorPlayerDown } from "./round.mjs";
+import { roundFavorPlayerTowardsZero } from "./round.mjs";
 
 /**
  * Calculate range based on a provided distance in metres. Range penalties are essentially
@@ -47,7 +47,9 @@ export function calculateDistanceBetween(origin, target) {
     }
 
     const distanceMeasurePath = canvas.grid.measurePath(path);
-    const originalMeasureDistanceMeters = roundFavorPlayerDown(distanceMeasurePath.distance * gridUnitsToMeters());
+    const originalMeasureDistanceMeters = roundFavorPlayerTowardsZero(
+        distanceMeasurePath.distance * gridUnitsToMeters(),
+    );
 
     // We don't yet support measuring 3D distance between a token and a template volume, so we
     // return the original distance

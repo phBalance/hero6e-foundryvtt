@@ -1,7 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { dehydrateAttackItem } from "./item-attack.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
-import { roundFavorPlayerDown } from "../utility/round.mjs";
+import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 
 /**
  * Maneuvers have some rules of their own that should be considered.
@@ -259,7 +259,7 @@ export async function activateManeuver(item) {
         const v = calculateVelocityInSystemUnits(item.actor, null, null);
         const sign = match[1];
         const divisor = parseInt(match[2]);
-        ocvTrait = roundFavorPlayerDown(v / divisor) * (sign === "-" ? -1 : 1);
+        ocvTrait = roundFavorPlayerTowardsZero(v / divisor) * (sign === "-" ? -1 : 1);
     }
 
     // Catch All

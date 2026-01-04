@@ -1,4 +1,8 @@
-import { numberToOneDecimalPlace, roundFavorPlayerDown, roundFavorPlayerUp } from "../utility/round.mjs";
+import {
+    numberToOneDecimalPlace,
+    roundFavorPlayerTowardsZero,
+    roundFavorPlayerAwayFromZero,
+} from "../utility/round.mjs";
 
 export function registerHeroMathTests(quench) {
     quench.registerBatch(
@@ -116,23 +120,71 @@ export function registerHeroMathTests(quench) {
             });
 
             describe("Hero Rounding", function () {
-                describe("roundFavorPlayerUp", function () {
+                describe("roundFavorPlayerAwayFromZero", function () {
+                    it("should round 0.0 to 0", function () {
+                        expect(roundFavorPlayerAwayFromZero(0.0)).to.equal(0);
+                    });
+
+                    it("should round 0.01 to 0", function () {
+                        expect(roundFavorPlayerAwayFromZero(0.01)).to.equal(0);
+                    });
+
+                    it("should round 0.499 to 0", function () {
+                        expect(roundFavorPlayerAwayFromZero(0.499)).to.equal(0);
+                    });
+
                     it("should round 0.5 to 1", function () {
-                        expect(roundFavorPlayerUp(0.5)).to.equal(1);
+                        expect(roundFavorPlayerAwayFromZero(0.5)).to.equal(1);
+                    });
+
+                    it("should round 0.501 to 1", function () {
+                        expect(roundFavorPlayerAwayFromZero(0.501)).to.equal(1);
+                    });
+
+                    it("should round 0.599 to 1", function () {
+                        expect(roundFavorPlayerAwayFromZero(0.599)).to.equal(1);
+                    });
+
+                    it("should round 0.999 to 1", function () {
+                        expect(roundFavorPlayerAwayFromZero(0.999)).to.equal(1);
                     });
 
                     it("should round 10000000.5 to 10000001", function () {
-                        expect(roundFavorPlayerUp(10000000.5)).to.equal(10000001);
+                        expect(roundFavorPlayerAwayFromZero(10000000.5)).to.equal(10000001);
                     });
                 });
 
-                describe("roundFavorPlayerDown", function () {
+                describe("roundFavorPlayerTowardsZero", function () {
+                    it("should round 0.0 to 0", function () {
+                        expect(roundFavorPlayerTowardsZero(0.0)).to.equal(0);
+                    });
+
+                    it("should round 0.01 to 0", function () {
+                        expect(roundFavorPlayerTowardsZero(0.01)).to.equal(0);
+                    });
+
+                    it("should round 0.499 to 0", function () {
+                        expect(roundFavorPlayerTowardsZero(0.499)).to.equal(0);
+                    });
+
                     it("should round 0.5 to 0", function () {
-                        expect(roundFavorPlayerDown(0.5)).to.equal(0);
+                        expect(roundFavorPlayerTowardsZero(0.5)).to.equal(0);
+                    });
+
+                    it("should round 0.501 to 0", function () {
+                        expect(roundFavorPlayerTowardsZero(0.501)).to.equal(0);
+                    });
+
+                    it("should round 0.599 to 0", function () {
+                        expect(roundFavorPlayerTowardsZero(0.599)).to.equal(0);
+                    });
+
+                    it("should round 0.999 to 1", function () {
+                        expect(roundFavorPlayerTowardsZero(0.999)).to.equal(1);
                     });
 
                     it("should round 10000000.5 to 10000000", function () {
-                        expect(roundFavorPlayerDown(10000000.5)).to.equal(10000000);
+                        expect(roundFavorPlayerTowardsZero(10000000.5)).to.equal(10000000);
                     });
                 });
             });

@@ -8,7 +8,7 @@ import {
     combatSkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.mjs";
-import { roundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
 // XML parsing is expensive when done frequently during actions like loading characters.
 // Use this for storing the parsed value and then clear it out after 10 seconds.
@@ -72,7 +72,7 @@ const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, S
 
 class HeroNumberField extends foundry.data.fields.NumberField {
     _applyChangeMultiply(value, delta) {
-        return roundFavorPlayerUp(value * delta);
+        return roundFavorPlayerAwayFromZero(value * delta);
     }
 }
 
@@ -1558,7 +1558,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         try {
             const powersWithThisCharacteristic = this.baseItemsContributingToFiguredCharacteristics;
             return powersWithThisCharacteristic.reduce((accumulator, currentItem) => {
-                return accumulator + roundFavorPlayerUp(currentItem.system.LEVELS / divisor);
+                return accumulator + roundFavorPlayerAwayFromZero(currentItem.system.LEVELS / divisor);
             }, 0);
         } catch (e) {
             console.error(e);

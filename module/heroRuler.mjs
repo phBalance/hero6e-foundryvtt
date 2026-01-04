@@ -2,7 +2,7 @@ import { HEROSYS } from "./herosystem6e.mjs";
 import { getSystemDisplayUnits } from "./utility/units.mjs";
 import { calculateRangePenaltyFromDistanceInMetres } from "./utility/range.mjs";
 import { whisperUserTargetsForActor } from "./utility/util.mjs";
-import { roundFavorPlayerDown } from "./utility/round.mjs";
+import { roundFavorPlayerTowardsZero } from "./utility/round.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttRuler = foundry.canvas?.interaction?.Ruler || Ruler;
@@ -253,7 +253,7 @@ export class HeroRuler extends FoundryVttRuler {
                                 // Maximum Endurance
                                 const MaximumEndurance = Math.max(
                                     1,
-                                    roundFavorPlayerDown(
+                                    roundFavorPlayerTowardsZero(
                                         (movementPower?.activePoints || this.getRanges(token)[1].range) /
                                             DistancePerEnd,
                                     ),
