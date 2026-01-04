@@ -501,7 +501,7 @@ export async function doAoeActionToHit(action, options) {
     const attackHeroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
-        .addNumber(hitCharacteristic, item.getAttacksWith)
+        .addNumber(hitCharacteristic, item.system.uses)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");

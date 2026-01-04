@@ -2091,13 +2091,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     get attacksWith() {
-        if (this.baseInfo.type.includes("mental")) return "omcv";
-        return "ocv";
+        console.error(`Deprecated`);
+        return this.system.uses;
     }
 
     get defendsWith() {
-        if (this.baseInfo.type.includes("mental")) return "dmcv";
-        return "dcv";
+        console.error(`Deprecated`);
+        return this.system.targets;
     }
 
     getAllChildren() {
