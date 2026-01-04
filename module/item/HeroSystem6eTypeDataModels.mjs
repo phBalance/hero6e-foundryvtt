@@ -788,11 +788,11 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     };
 
     get ocvDetails() {
-        return this.#genericDetails(this.uses);
+        return this.#genericDetails(this.attacksWith);
     }
 
     get dcvDetails() {
-        return this.#genericDetails(this.targets);
+        return this.#genericDetails(this.defendsWith);
     }
 
     get damage() {
@@ -810,45 +810,81 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get uses() {
-        let _uses = "ocv";
+        console.error("deprecated");
+        return this.attacksWith;
+    }
+
+    get attacksWith() {
+        let _attacksWith = "ocv";
 
         if (this.baseInfo.type.includes("mental")) {
-            _uses = "omcv";
+            _attacksWith = "omcv";
         }
 
         // Alternate Combat Value (uses OMCV against DCV)
         const acv = this.item.findModsByXmlid("ACV");
+
+        // 6e uses Altnernate Combat Value modifier
         if (acv) {
-            const acvUses = (acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || _uses).toLowerCase();
-            if (!["ocv", "omcv"].includes(acvUses)) {
-                console.error(`${this.item?.detailedName()} has unhandled uses "${acvUses}"`);
-                return _uses;
+            switch (acv.system.OPTIONID) {
+                case "MENTALOCV": // uses OCV against DMCV
+                case "MENTALOCVDCV": //uses OCV against DCV
+                    return "ocv";
+                case "MENTALDCV": // uses OMCV against DCV
+                    return "omcv";
             }
-            return acvUses;
+            console.error(`${this.item?.detailedName()} has unhandled ACV OPTIONID "${acv.system.OPTIONID}"`);
+            return _attacksWith;
         }
 
-        return _uses;
+        // 5e uses Based on Ego Combat Value modifier
+        const boecv = this.item.findModsByXmlid("BOECV");
+        if (boecv) {
+            return "omcv";
+        }
+
+        return _attacksWith;
     }
 
     get targets() {
-        let _targets = "dcv";
+        console.error("deprecated");
+        return this.defendsWith;
+    }
+
+    get defendsWith() {
+        let _defendsWith = "dcv";
 
         if (this.baseInfo.type.includes("mental")) {
-            _targets = "dmcv";
+            _defendsWith = "dmcv";
         }
 
-        // Alternate Combat Value (uses OMCV against DCV)
+        // 6e uses Alternate Combat Value (uses OMCV against DCV)
         const acv = this.item.findModsByXmlid("ACV");
         if (acv) {
-            const acvTargets = (acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] || _targets).toLowerCase();
-            if (!["dcv", "dmcv"].includes(acvTargets)) {
-                console.error(`${this.item?.detailedName()} has unhandled target "${acvTargets}"`);
-                return _targets;
+            switch (acv.system.OPTIONID) {
+                case "MENTALOCV": // uses OCV against DMCV
+                    return "dmcv";
+                case "MENTALDCV": // uses OMCV against DCV
+                case "MENTALOCVDCV": //uses OCV against DCV
+                    return "dmcv";
             }
-            return acvTargets;
+            console.error(`${this.item?.detailedName()} has unhandled ACV OPTIONID "${acv.system.OPTIONID}"`);
+            return _defendsWith;
         }
 
-        return _targets;
+        // 5e uses Based on Ego Combat Value modifier
+        const boecv = this.item.findModsByXmlid("BOECV");
+        if (boecv) {
+            // 5e TELEKINESIS is dcv (REF: FRED pg 231)
+            if (this.is5e && this.system.XMLID === "TELEKINESIS") {
+                return "dcv";
+            }
+
+            // Everything else: When you use EGO to attack, you defend with EGO (pg FRED pg 374)
+            return "dmcv";
+        }
+
+        return _defendsWith;
     }
 
     get ocv() {

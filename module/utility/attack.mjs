@@ -79,7 +79,7 @@ export class Attack {
             name += `${comma ? "," : ""} ${dcv.signedStringHero()} DCV`;
             comma = true;
             changes.push({
-                key: `system.characteristics.dcv.value`,
+                key: `system.characteristics.dcv.max`,
                 value: dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
@@ -94,7 +94,7 @@ export class Attack {
             name += `${comma ? "," : ""} ${dmcv.signedStringHero()} DMCV`;
             comma = true;
             changes.push({
-                key: `system.characteristics.dmcv.value`,
+                key: `system.characteristics.dmcv.max`,
                 value: dmcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,

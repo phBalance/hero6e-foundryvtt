@@ -1995,7 +1995,6 @@ export class HeroSystem6eActor extends Actor {
 
             const xmlItemsToProcess =
                 1 + // Delete existing effects
-                1 + // Remove unnecessary system fields
                 1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
                 (heroJson.CHARACTER.DISADVANTAGES?.length || 0) +
                 (heroJson.CHARACTER.EQUIPMENT?.length || 0) +
@@ -2827,14 +2826,17 @@ export class HeroSystem6eActor extends Actor {
                         );
                         // Toggle them off first as sometimes deleteing items with AE's don'e run the cleanup code.
                         // FoundryVTT 13 bug?
+                        const toggleOffPromises = [];
                         for (const item of itemsToDelete) {
-                            await item.toggleOff({ silent: true });
+                            toggleOffPromises.push(item.toggleOff({ silent: true }));
                         }
+                        await Promise.all(toggleOffPromises);
                         await this.deleteEmbeddedDocuments(
                             "Item",
                             itemsToDelete.map((o) => o.id),
                         );
                     } else {
+                        // Fire and forget (no await on this ChatMessage)
                         ChatMessage.create({
                             style: CONST.CHAT_MESSAGE_STYLES.IC,
                             author: game.user._id,

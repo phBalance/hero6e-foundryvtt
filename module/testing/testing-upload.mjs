@@ -11038,8 +11038,8 @@ export function registerUploadTests(quench) {
                         egoItem = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(egoContents, actor), {
                             parent: actor,
                         });
-                        await dexItem.toggleOn();
-                        await egoItem.toggleOn();
+                        await dexItem.turnOn();
+                        await egoItem.turnOn();
                         await actor.FullHealth();
                     });
 

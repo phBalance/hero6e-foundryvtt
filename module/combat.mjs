@@ -1034,7 +1034,7 @@ export class HeroSystem6eCombat extends Combat {
                     for (const item of _combatant.actor.getActiveConstantItems()) {
                         // Skills, talents ect are Constant, but they may not be toggleable
                         if (item.isActivatable()) {
-                            await item.toggleOff();
+                            await item.turnOff();
                         }
                     }
                 }
@@ -1162,7 +1162,7 @@ export class HeroSystem6eCombat extends Combat {
         content += "<ul>";
         contentHidden += "<ul>";
         let hasHidden = false;
-        for (const combatant of this.getUniqueCombatants().filter((o) => !o.isDefeated && !o.hasPlayerOwner)) {
+        for (const combatant of this.getUniqueCombatants().filter((o) => !o.isDefeated || o.hasPlayerOwner)) {
             const actor = combatant.actor;
 
             // Make sure we have a valid actor

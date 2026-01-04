@@ -1207,7 +1207,7 @@ export class HeroSystem6eItem extends Item {
         ChatMessage.create(chatData);
     }
 
-    async toggleOn(event) {
+    async turnOn(event) {
         const item = this;
 
         // Make sure activeEffects are properly defined
@@ -1399,11 +1399,12 @@ export class HeroSystem6eItem extends Item {
         await this.setActive(true);
     }
 
-    async toggleOff(options = {}) {
+    async turnOff(options = {}) {
         const item = this;
 
         if (!this.isActive) {
             console.warn(`${item.detailedName()} is alredy off`);
+            return;
         }
 
         if (!this.isActivatable) {
@@ -1457,9 +1458,9 @@ export class HeroSystem6eItem extends Item {
         let item = this;
 
         if (!item.isActive) {
-            await this.toggleOn(event);
+            await this.turnOn(event);
         } else {
-            await this.toggleOff();
+            await this.turnOff();
         }
 
         // AARON: How much of the rest of this code do we really need?
@@ -2092,12 +2093,12 @@ export class HeroSystem6eItem extends Item {
 
     get attacksWith() {
         console.error(`Deprecated`);
-        return this.system.uses;
+        return this.system.attacksWith;
     }
 
     get defendsWith() {
         console.error(`Deprecated`);
-        return this.system.targets;
+        return this.system.defendsWith;
     }
 
     getAllChildren() {
