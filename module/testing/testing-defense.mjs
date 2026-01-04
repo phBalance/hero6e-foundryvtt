@@ -122,7 +122,7 @@ export function registerDefenseTests(quench) {
             });
 
             // See bug #3465
-            describe.only("ACV (Alternative Combat Value)", function () {
+            describe("ACV (Alternative Combat Value)", function () {
                 describe("For Non-Mental Powers", function () {
                     describe("OMCV vs DCV", function () {
                         const contents = `
@@ -484,6 +484,68 @@ export function registerDefenseTests(quench) {
                         it("should defend with", function () {
                             assert.equal(item.system.defendsWith, "dcv");
                         });
+                    });
+                });
+            });
+
+            describe("BOECV (Based on EGO Combat Value", function () {
+                describe("OMCV vs DMCV", function () {
+                    const contents = `
+                        <POWER XMLID="DRAIN" ID="1767549550225" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="163" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Mental Drain - OMCV vs DMCV" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="BOECV" ID="1767549766137" BASECOST="1.0" LEVELS="0" ALIAS="Based On EGO Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTAL" OPTIONID="MENTAL" OPTION_ALIAS="Mental Defense applies" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Drain BODY 1d6, Based On EGO Combat Value (Mental Defense applies; +1)",
+                        );
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(item.characterPointCost, 20);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.realCost, 20);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.activePoints, 20);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.end, 2);
+                    });
+
+                    it("should attack with", function () {
+                        assert.equal(item.system.attacksWith, "omcv");
+                    });
+
+                    it("should defend with", function () {
+                        assert.equal(item.system.defendsWith, "dmcv");
                     });
                 });
             });
