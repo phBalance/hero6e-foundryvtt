@@ -2,7 +2,7 @@
 
 Forked from Hero System 6e (Unofficial)
 
-This system is for playing the sixth edition of the Hero System using FoundryVTT.
+This system is for playing the sixth and fifth edition of the Hero System using FoundryVTT.
 
 HERO SystemTM ® is DOJ, Inc.'s trademark for its roleplaying system.
 HERO System Copyright © 1984, 1989, 2002, 2009 by DOJ, Inc. d/b/a Hero Games. All rights
@@ -24,7 +24,6 @@ This system is a work in progress. The following features are supported
 - A proper Turn/Phase/Segment initiative tracking system
 - A character sheet that you can upload a .HDC file to
 - Attack automation
-- Support for [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
 
 ### Character Sheet
 
@@ -176,21 +175,19 @@ return ChatMessage.create(chatData);
 The following modules have been successfully tested for compatibility. They are also recommended.
 
 - [Dice So Nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice)
-- [Drag Ruler](https://foundryvtt.com/packages/drag-ruler). NOTE: This module requires [socketlib](https://foundryvtt.com/packages/socketlib).
-- [Simple Calendar](https://github.com/vigoren/foundryvtt-simple-calendar)
-- [About Face](https://foundryvtt.com/packages/about-face)
 - [Bar Brawl](https://foundryvtt.com/packages/barbrawl)
 - [Tokenizer](https://foundryvtt.com/packages/vtta-tokenizer/)
 - [Active Token Effects](https://foundryvtt.com/packages/ATL). Used for automation of carried lights.
 
 ## 5th Edition Support
 
-This is a 6E framework, however 5E is very similar to 6E and with a few minor changes you may be able to play a 5E game. A 5E character is detected when you upload a HDC file using one of the 5E Hero Designer character templates.
+This is a 6E framework, however 5E is well supported. A 5E character is detected when you upload a HDC file using one of the 5E Hero Designer character templates. Under settings you will find a "default edition" setting to select 5E/6E, which helps the system select the appropriate ruleset to use. The subtle differences in some powers has been accounted for. You can use inches for your scene grids.
 
 ## Frequently Asked Questions and GM suggestions
 
 1. The Actor Sheet doesn't match HD.
    - Try uploading the HDC file again.
+   - Try clicking the "Full Health" button on the actor sheet.
 2. How do you set a toggle power to default to off after HDC upload?
    - In HD set "Totaling Options" to "Do not add to Totals".
 3. How do you get automation to determine hit or miss?
