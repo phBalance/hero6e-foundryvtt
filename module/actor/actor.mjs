@@ -1995,7 +1995,6 @@ export class HeroSystem6eActor extends Actor {
 
             const xmlItemsToProcess =
                 1 + // Delete existing effects
-                1 + // Remove unnecessary system fields
                 1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
                 (heroJson.CHARACTER.DISADVANTAGES?.length || 0) +
                 (heroJson.CHARACTER.EQUIPMENT?.length || 0) +
@@ -2030,7 +2029,10 @@ export class HeroSystem6eActor extends Actor {
             }
 
             // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
-            const characterName = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
+            const characterName =
+                heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME ||
+                options?.file?.name?.replace(/\.hdc$/i, "") ||
+                this.name;
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
             this.name = characterName;
@@ -2827,14 +2829,17 @@ export class HeroSystem6eActor extends Actor {
                         );
                         // Toggle them off first as sometimes deleteing items with AE's don'e run the cleanup code.
                         // FoundryVTT 13 bug?
+                        const turnOffPromises = [];
                         for (const item of itemsToDelete) {
-                            await item.toggleOff({ silent: true });
+                            turnOffPromises.push(item.turnOff({ silent: true }));
                         }
+                        await Promise.all(turnOffPromises);
                         await this.deleteEmbeddedDocuments(
                             "Item",
                             itemsToDelete.map((o) => o.id),
                         );
                     } else {
+                        // Fire and forget (no await on this ChatMessage)
                         ChatMessage.create({
                             style: CONST.CHAT_MESSAGE_STYLES.IC,
                             author: game.user._id,
@@ -2870,6 +2875,10 @@ export class HeroSystem6eActor extends Actor {
                     "uploadingError",
                     e.stack.replace(/http(s)?:[/[a-z0-9_.-:()]+\//gi, ""),
                 );
+
+                // Make sure we show the error we just posted to DB.
+                // Needed for when the delete extra items has an error.
+                await this.setFlag(game.system.id, "uploading", true);
             }
         }
     }
