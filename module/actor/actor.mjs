@@ -10,7 +10,7 @@ import {
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { roundFavorPlayerDown, roundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
 //import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
@@ -1328,7 +1328,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Is actor encumbered?
         let dcvDex = 0;
-        const maxStrengthPct = roundFavorPlayerDown((100 * encumbrance) / strLiftKg);
+        const maxStrengthPct = roundFavorPlayerTowardsZero((100 * encumbrance) / strLiftKg);
         if (maxStrengthPct >= 90) {
             dcvDex = -5;
         } else if (maxStrengthPct >= 75) {
@@ -1763,13 +1763,13 @@ export class HeroSystem6eActor extends Actor {
         switch (key.toLowerCase()) {
             // Physical Defense (PD) STR/5, STR/5 and an extra /3 if the right type of automaton
             case "pd":
-                return roundFavorPlayerUp(
+                return roundFavorPlayerAwayFromZero(
                     base + Math.round((charBase("STR") + _str) / 5) / (isAutomatonWithNoStun ? 3 : 1),
                 );
 
             // Energy Defense (ED) CON/5, CON/5 and /3 if the right type of automaton
             case "ed":
-                return roundFavorPlayerUp(
+                return roundFavorPlayerAwayFromZero(
                     base + Math.round((charBase("CON") + _con) / 5) / (isAutomatonWithNoStun ? 3 : 1),
                 );
 
@@ -3418,7 +3418,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     get _characterPointsForDisplay() {
-        return roundFavorPlayerDown(this._characterPoints);
+        return roundFavorPlayerTowardsZero(this._characterPoints);
     }
 
     get _activePoints() {
@@ -3426,7 +3426,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     get _activePointsForDisplay() {
-        return roundFavorPlayerDown(this._activePoints);
+        return roundFavorPlayerTowardsZero(this._activePoints);
     }
 
     get _cslItems() {
@@ -3792,7 +3792,7 @@ export class HeroSystem6eActor extends Actor {
         ) {
             const bodyPerMonth = Math.max(1, parseInt(this.system.characteristics.rec.value));
             const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
-            const daysForOneBody = roundFavorPlayerUp(30 / bodyPerMonth);
+            const daysForOneBody = roundFavorPlayerAwayFromZero(30 / bodyPerMonth);
             const activeEffect = {
                 name: `Natural Body Healing (${bodyPerMonth}/month; ${daysForOneBody} days to get 1 body)`,
                 id: "naturalBodyHealing",

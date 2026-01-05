@@ -1,4 +1,4 @@
-import { roundFavorPlayerDown } from "./round.mjs";
+import { roundFavorPlayerTowardsZero } from "./round.mjs";
 import { squelch } from "./util.mjs";
 
 /**
@@ -95,8 +95,8 @@ export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres,
     }
 
     const roundedDistanceInMetres = is5e
-        ? roundFavorPlayerDown(distanceInMetres / 2)
-        : roundFavorPlayerDown(distanceInMetres);
+        ? roundFavorPlayerTowardsZero(distanceInMetres / 2)
+        : roundFavorPlayerTowardsZero(distanceInMetres);
 
     return roundedDistanceInMetres;
 }

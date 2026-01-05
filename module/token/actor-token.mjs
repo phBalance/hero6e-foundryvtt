@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { roundFavorPlayerUp } from "../utility/round.mjs";
+import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttTokenDocument = foundry.appv1?.sheets?.TokenDocument || TokenDocument;
@@ -69,7 +69,7 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
         if (this.actor && this.actor.system.characteristics.int) {
             //9 + (INT/5)
-            const perRoll = 9 + roundFavorPlayerUp(parseInt(this.actor.system.characteristics.int.value) / 5);
+            const perRoll = 9 + roundFavorPlayerAwayFromZero(parseInt(this.actor.system.characteristics.int.value) / 5);
             const pwr = perRoll / 2 + 2;
             maxRange = Math.floor(Math.max(maxRange, Math.pow(2, pwr)));
         }

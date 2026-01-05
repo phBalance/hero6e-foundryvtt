@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { roundFavorPlayerUp } from "./round.mjs";
+import { roundFavorPlayerAwayFromZero } from "./round.mjs";
 import { getSystemDisplayUnits } from "./units.mjs";
 import { squelch } from "./util.mjs";
 
@@ -500,8 +500,10 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
         });
     }
 
-    // Add in STR if it isn't the base damage type
+    // Add in STR if it isn't the base damage type. We want to consider the original item as it could be a maneuver.
     if (baseAttackItem.system.usesStrength) {
+        // PH: FIXME: We want to consider the original item as it could be a maneuver.
+
         addStrengthToBundle(baseAttackItem, options, addedDamageBundle, true);
     }
 
@@ -1098,13 +1100,12 @@ export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
 }
 
 function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage) {
-    const baseEffectiveStrength = effectiveStrength(item, options);
-
-    // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage.
     if (!item.system._active) {
         console.error(`Missing _active`, item, options, dicePartsBundle, strengthAddsToDamage, this);
     }
 
+    // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage.
+    const baseEffectiveStrength = effectiveStrength(item, options);
     let actorStrengthItem = item.system._active.effectiveStrItem;
     if (!actorStrengthItem) {
         actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor, `STR used with ${item.name}`);
@@ -1165,7 +1166,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         if (str >= 0) {
             const strBeforeManeuver = str;
             const divisor = parseInt(strMatch[1]);
-            str = roundFavorPlayerUp(str / divisor);
+            str = roundFavorPlayerAwayFromZero(str / divisor);
 
             // NOTE: intentionally using fractional DC here.
             const strDiceParts = calculateDicePartsFromDcForItem(actorStrengthItem, (strBeforeManeuver - str) / 5);
@@ -1218,6 +1219,32 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
                     hthAttackDiceParts.dc =
                         (hthAttackDiceParts.dc / (1 + hthAttack._advantagesAffectingDc)) *
                         (1 + actorStrengthItem._advantagesAffectingDc);
+
+                    // PH: FIXME: Need to add a bunch of test cases for this stuff.
+                    // if (hthAttack.is5e) {
+                    //     // 5e rules state that STR adds to HTHATTACKs without considering advantages on the HTHATTACK.
+                    //     // See FRed pg 408
+                    //     // xxx;
+
+                    //     non advantaged STR with non advantaged HTH (probably already have this)
+                    //     non advantaged STR with advantaged HTH
+                    //     advantaged STR with non advantaged HTH
+                    //     advantaged STR with advantaged HTH
+                    // tests with double damage limit if appropriate
+                    // tests with STR and Move Through/movement with STR
+                    // moveby with multiple HTH attacks (to show the bug with moveby STR calculation pulled out multiple times doesn't happen)
+
+                    // } else {
+                    //     // 6e rules state that STR adds to HTHATTACKs in the normal way.
+                    //     non advantaged STR with non advantaged HTH
+                    //     non advantaged STR with advantaged HTH
+                    //     advantaged STR with non advantaged HTH
+                    //     advantaged STR with advantaged HTH
+                    // tests with double damage limit if appropriate
+                    // tests with STR and Move Through/movement with STR
+                    // moveby with multiple HTH attacks (to show the bug with moveby STR calculation pulled out multiple times doesn't happen)
+
+                    // }
 
                     baseDicePartsBundle.diceParts = addDiceParts(
                         item,
