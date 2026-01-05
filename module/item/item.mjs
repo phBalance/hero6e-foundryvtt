@@ -5844,23 +5844,62 @@ export class HeroSystem6eItem extends Item {
         return _csls;
     }
 
+    /**
+     * Get all valid custom adders related to CSLs
+     * @returns HeroAdderModel[]
+     */
+    get customCslAdders() {
+        const customCslAdders =
+            this.adders.filter(
+                (adder) => adder.XMLID === "ADDER" && adder.targetId && adder.BASECOST === 0 && adder.ALIAS,
+            ) || [];
+
+        return customCslAdders;
+    }
+
+    /**
+     * Typically custom adders put into a CSL just point to an item. However, we also allow
+     * frameworks to be pointed to. If any of the adders point to a framework, expand it out
+     * to all of the slots of that framework.
+     * Return the expanded array of items that are valid for this CSL.
+     *
+     * @param {HeroAdderModel} customCslAdders
+     */
+    get customCslAddersToAllowedItems() {
+        const allowedItems = this.customCslAdders
+            .map((customCslAdder) => {
+                return this.actor?.items.find((item) => item.id === customCslAdder.targetId);
+            })
+            .map((matchingItem) => {
+                const isFrameworkItem = matchingItem.baseInfo?.type.includes("framework");
+                if (isFrameworkItem) {
+                    // All children
+                    return matchingItem.childItems;
+                }
+
+                return matchingItem;
+            })
+            .filter(Boolean)
+            .flat();
+
+        return allowedItems;
+    }
+
+    /**
+     * Is the attack item listed in one of this item's (which must be a CSL) custom adders? If so, true else false.
+     *
+     * @param {HeroSystem6eItem} attackItem
+     * @returns boolean
+     */
+    isAttackItemInCslAllowList(attackItem) {
+        const lookingForId = attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
+        const attackMatchesCustomAdder = !!this.customCslAddersToAllowedItems.find((item) => item.id === lookingForId);
+        return attackMatchesCustomAdder;
+    }
+
     cslAppliesTo(attackItem) {
         if (!this.isCsl) {
             console.error("This is not a CSL", this, attackItem);
-            return [];
-        }
-
-        // Custom ADDER (if any defined, then base response solely custom adders)
-        // Assumption is custom ADDERS with a targetId prop is CSL
-        const customCslAdders = this.adders.filter((a) => a.XMLID === "ADDER" && a.targetId);
-        if (customCslAdders.length > 0) {
-            // We need the id of the attack, which could be the effectiveItem
-            // TODO: Can't use this for temporary items (like in some Quench tests?)
-            const lookingForId =
-                attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
-            if (customCslAdders.find((a) => a.targetId === lookingForId)) {
-                return true;
-            }
             return false;
         }
 
@@ -5870,31 +5909,102 @@ export class HeroSystem6eItem extends Item {
             return this.parentItem?.id === attackItem.parentItem?.id;
         }
 
-        // SKILL_LEVELS (OVERALL the 5e 10pt or 6e 12pt)
-        if (this.system.OPTIONID === "OVERALL") {
-            return true;
+        // SKILL_LEVELS: OVERALL, the 5e 10pt or 6e 12pt, work for any kind of attack but no other form does.
+        if (this.system.XMLID === "SKILL_LEVELS") {
+            if (this.system.OPTIONID === "OVERALL") {
+                return true;
+            }
+
+            return false;
         }
+
+        // The rest of the CSL types are very different between 5e and 6e.
+        if (this.is5e) {
+        } else {
+            // 6e
+            switch (this.system.XMLID) {
+                case "COMBAT_LEVELS":
+                    // 6e CSLs are only good for non mental attacks
+                    if (attackItem.system.attacksWith === "omcv") {
+                        return false;
+                    }
+
+                    if (this.system.OPTIONID === "ALL") {
+                        // The ALL level doesn't have to list the supported attacks - everything that is
+                        // a non mental combat attack is supported.
+                        return true;
+                    } else if (this.system.OPTIONID === "RANGED") {
+                        // Ranged attacks only
+                        const range = attackItem.system.range;
+                        if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
+                            return false;
+                        }
+
+                        return true;
+                    } else if (this.system.OPTIONID === "HTH") {
+                        // HTH attacks only
+                        const range = attackItem.system.range;
+                        if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    // The other types of CSLs support a limited number of attacks. We have to check that its
+                    // in the allow list.
+                    return this.isAttackItemInCslAllowList(attackItem);
+
+                case "MENTAL_COMBAT_LEVELS":
+                    // 6e MCSLs are only good for mental attacks
+                    if (attackItem.system.attacksWith !== "omcv") {
+                        return false;
+                    }
+
+                    // The BROAD level doesn't have to list the supported attacks - everything that is
+                    // a mental combat attack is supported.
+                    if (this.system.OPTIONID === "BROAD") {
+                        return true;
+                    }
+
+                    // The other types of MCSLs support a limited number of attacks. We have to check that its
+                    // in the allow list.
+                    return this.isAttackItemInCslAllowList(attackItem);
+            }
+        }
+
+        console.error(`Unhandled CSL ${this.detailedName()}`);
+        return false;
 
         // With All Attacks
         if (
             this.system.OPTIONID === "ALL" ||
             (this.system.OPTIONID === "BROAD" && this.system.XMLID === "MENTAL_COMBAT_LEVELS")
         ) {
-            // only 6e has MENTAL_COMBAT_LEVELS
-
             switch (this.system.XMLID) {
                 case "COMBAT_LEVELS":
-                    if (attackItem.system.attacksWith === "omcv" && !this.is5e) {
-                        return false;
+                    if (!this.is5e) {
+                        // 6e has MENTAL_COMBAT_LEVELS
+                        if (attackItem.system.attacksWith === "omcv") {
+                            return false;
+                        }
+
+                        return true;
+                    } else {
+                        return false; // PH: FIXME: Not correct.
                     }
-                    return true;
 
                 case "MENTAL_COMBAT_LEVELS":
-                    if (attackItem.system.attacksWith === "omcv") {
-                        return true;
+                    if (!this.is5e) {
+                        if (attackItem.system.attacksWith === "omcv") {
+                            return true;
+                        }
+                        return false;
+                    } else {
+                        return false; // PH: FIXME: Not correct.
                     }
-                    return false;
             }
+
             console.error("unhandled CSL XMLID", this.system.XMLID);
             return false;
         }

@@ -3459,10 +3459,11 @@ export class HeroSystem6eActor extends Actor {
         return this.items
             .filter(
                 (o) =>
-                    o.rollsToHit() &&
-                    (!o.baseInfo.behaviors.includes("optional-maneuver") ||
-                        game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
-                    !o.system.XMLID.startsWith("__"),
+                    (o.rollsToHit() &&
+                        (!o.baseInfo.behaviors.includes("optional-maneuver") ||
+                            game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
+                        !o.system.XMLID.startsWith("__")) ||
+                    o.baseInfo.type.includes("framework"), // CSL custom adders can specify a framework to indicate all of the framework's children are included.
             )
             .sort((a, b) => a.name.localeCompare(b.name))
             .sort(_sortCslItems);
