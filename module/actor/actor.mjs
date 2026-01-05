@@ -2743,17 +2743,28 @@ export class HeroSystem6eActor extends Actor {
 
             uploadProgressBar.advance(`${this.name}: Assign targetId for Combat Skill Levels CSL`, 1);
             for (const csl of this.allCslSkills) {
-                const _ADDER = Array.from(csl.system.ADDER);
+                const _ADDER = foundry.utils.deepClone(csl.system._source.ADDER);
                 for (const customAdder of _ADDER.filter((a) => a.XMLID === "ADDER")) {
                     const targetId = this._cslItems.find((item) =>
                         `${item.name}${item.system.ALIAS}${item.system.XMLID}`.match(
                             new RegExp(customAdder.ALIAS, "i"),
                         ),
                     )?.id;
-                    if (targetId) {
-                        customAdder.updateSource({ targetId });
+
+                    if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
+                        console.warn(
+                            `Failed to match custom adder ${customAdder.ALIAS} for CSL ${csl.detailedName()}.`,
+                        );
                     }
+
+                    customAdder.targetId = targetId;
                 }
+
+                // NOTE: When updating arrays, we seem to have to make sure that the array being sent is an Object. If it has _source
+                //       (i.e. not a pure Object) things will get weird. At the time of writing this, we're not sure why
+                //       but if we do send a _source property then we need to make sure that it has been updated too. Weird!
+                //       To make sure we're using an Object we deepClone the _source.ADDER, but won't the objects of the array have
+                //       _source as well... so we're not sure why this voodoo works.
                 await csl.update({ [`system.ADDER`]: _ADDER });
             }
             uploadProgressBar.advance(`${this.name}: Processed CSL`, 0);
