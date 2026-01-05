@@ -403,7 +403,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
         if (hasHalfRangePenalty) {
             // Round in favour of the player (given the range penalty is a negative or 0 that means rounding up)
             const halvedRangePenaltyOffset = Math.abs(
-                remainingRangePenalty - roundFavorPlayerAwayFromZero(remainingRangePenalty / 2),
+                remainingRangePenalty - roundFavorPlayerTowardsZero(remainingRangePenalty / 2),
             );
 
             attackHeroRoller.addNumber(
