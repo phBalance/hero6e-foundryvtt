@@ -5918,8 +5918,84 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
+        // PH: FIXME: Move these
+        function usesOmcv(attackItem) {
+            return attackItem.attacksWith === "omcv";
+        }
+
+        function isRangedNonMental(attackItem) {
+            const range = attackItem.system.range;
+            if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
+                return false;
+            }
+
+            return !usesOmcv(attackItem);
+        }
+
+        function isHthNonMental(attackItem) {
+            const range = attackItem.system.range;
+            if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
+                return true;
+            }
+
+            return !usesOmcv(attackItem);
+        }
+
+        function isMartialManeuver(attackItem) {
+            return attackItem.type === "martialart";
+        }
+
         // The rest of the CSL types are very different between 5e and 6e.
         if (this.is5e) {
+            if (this.system.XMLID !== "COMBAT_LEVELS") {
+                // Only CSLs
+                return false;
+            }
+
+            // Many CSL types do not require listing of allow items. Check if it's one of those.
+            switch (this.system.OPTIONID) {
+                case "ALL":
+                    return true;
+
+                case "MENTALRANGED":
+                    return usesOmcv(attackItem) || isRangedNonMental(attackItem);
+
+                case "HTHMENTAL":
+                    return usesOmcv(attackItem) || isHthNonMental(attackItem);
+
+                case "HTHRANGED":
+                    return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
+
+                case "TWODCV":
+                    return xxx;
+                case "TWOOCV":
+                    return xxx;
+                case "DCV":
+                    return xxx;
+
+                case "MENTAL":
+                    return usesOmcv(attackItem);
+
+                case "RANGED":
+                    return isRangedNonMental(attackItem);
+
+                case "HTH":
+                    return isHthNonMental(attackItem);
+
+                case "DECV":
+                    return xxx;
+                case "HTHDCV":
+                    return xxx;
+
+                case "MARTIAL":
+                    return isMartialManeuver(attackItem);
+            }
+
+            // PH: FIXME: Catch all unknown OPTIONIDs
+
+            // The other types of CSLs support a limited number of attacks. We have to check that its
+            // in the allow list.
+            return this.isAttackItemInCslAllowList(attackItem);
         } else {
             // 6e
             switch (this.system.XMLID) {
@@ -5934,22 +6010,12 @@ export class HeroSystem6eItem extends Item {
                         // a non mental combat attack is supported.
                         return true;
                     } else if (this.system.OPTIONID === "RANGED") {
-                        // Ranged attacks only
-                        const range = attackItem.system.range;
-                        if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
-                            return false;
-                        }
-
-                        return true;
+                        return isRangedNonMental(attackItem);
                     } else if (this.system.OPTIONID === "HTH") {
-                        // HTH attacks only
-                        const range = attackItem.system.range;
-                        if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
-                            return true;
-                        }
-
-                        return false;
+                        return isHthNonMental(attackItem);
                     }
+
+                    // PH: FIXME: Catch all unknown OPTIONIDs
 
                     // The other types of CSLs support a limited number of attacks. We have to check that its
                     // in the allow list.
@@ -5966,6 +6032,8 @@ export class HeroSystem6eItem extends Item {
                     if (this.system.OPTIONID === "BROAD") {
                         return true;
                     }
+
+                    // PH: FIXME: Catch all unknown OPTIONIDs
 
                     // The other types of MCSLs support a limited number of attacks. We have to check that its
                     // in the allow list.
