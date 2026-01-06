@@ -3347,6 +3347,33 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         return 0;
                 }
             },
+            activeEffect: function (item) {
+                // CSL at the +1 DCV level applies against all HTH and Ranged attacks. This is just a +1 DCV.
+                const optionId = item.system.OPTIONID;
+                if (optionId === "DCV" || optionId === "DECV") {
+                    const affectedCharacteristic = optionId === "DCV" ? "dcv" : "dmcv";
+                    const ae = {
+                        changes: [
+                            {
+                                key: `system.characteristics.${affectedCharacteristic}.max`,
+                                value: item.system.LEVELS,
+                                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                            },
+                        ],
+                        img: "icons/svg/upgrade.svg",
+                        name: `${item.system.ALIAS || item.system.XMLID || item.name}: ${item.system.XMLID} +${item.system.LEVELS} ${item.system.OPTIONID} `,
+                        system: {
+                            XMLID: "COMBAT_LEVELS",
+                        },
+                        transfer: true,
+                    };
+
+                    return ae;
+                }
+
+                return null;
+            },
         },
     );
     addPower(

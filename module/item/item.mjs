@@ -482,21 +482,23 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // Generic activeEffect (preferred; so far just GROWTH)
+            // Generic activeEffect (preferred; so far just GROWTH, 5e COMBAT_LEVELS)
             if (this.baseInfo?.activeEffect) {
                 const activeEffect = this.baseInfo?.activeEffect(this);
-                const currentAE =
-                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
-                    this.effects.find((ae) => !ae.system.XMLID) ??
-                    {};
-                if (currentAE) {
-                    if (currentAE.update) {
-                        await currentAE.update({
-                            name: activeEffect.name,
-                            changes: activeEffect.changes,
-                        });
-                    } else {
-                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                if (activeEffect) {
+                    const currentAE =
+                        this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                        this.effects.find((ae) => !ae.system.XMLID) ??
+                        {};
+                    if (currentAE) {
+                        if (currentAE.update) {
+                            await currentAE.update({
+                                name: activeEffect.name,
+                                changes: activeEffect.changes,
+                            });
+                        } else {
+                            await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                        }
                     }
                 }
             }
@@ -5868,6 +5870,7 @@ export class HeroSystem6eItem extends Item {
             .map((customCslAdder) => {
                 return this.actor?.items.find((item) => item.id === customCslAdder.targetId);
             })
+            .filter(Boolean)
             .map((matchingItem) => {
                 const isFrameworkItem = matchingItem.baseInfo?.type.includes("framework");
                 if (isFrameworkItem) {
@@ -6029,13 +6032,11 @@ export class HeroSystem6eItem extends Item {
                     return true; // PH: FIXME: To be implemented
                     return xxx;
 
-                // PH: FIXME: DCV and DECV should have a permanent AE added
                 case "DCV":
-                    return true; // PH: FIXME: To be implemented
-                    return xxx;
+                    return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
+
                 case "DECV":
-                    return true; // PH: FIXME: To be implemented
-                    return xxx;
+                    return usesOmcv(attackItem);
 
                 default:
                 // Drop through and be handled outside the switch

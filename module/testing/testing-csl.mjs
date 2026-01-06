@@ -545,8 +545,8 @@ export function registerCslTests(quench) {
                     });
                 });
 
-                describe.only("Applicability To Attack - cslAppliesTo", function () {
-                    describe("5e", async function () {
+                describe("Applicability To Attack - cslAppliesTo", function () {
+                    describe.only("5e", async function () {
                         const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
                             <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -687,7 +687,7 @@ export function registerCslTests(quench) {
                                     <SKILL XMLID="COMBAT_LEVELS" ID="1766530745617" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHDCV" OPTIONID="HTHDCV" OPTION_ALIAS="DCV with HTH or Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="HTH or Ranged DCV CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                                     <NOTES />
                                     </SKILL>
-                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530753770" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DECV" OPTIONID="DECV" OPTION_ALIAS="DECV versus all Mental Powers and attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="Mental DCV CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530753770" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DECV" OPTIONID="DECV" OPTION_ALIAS="DECV versus all Mental Powers and attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="DECV CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                                     <NOTES />
                                     </SKILL>
                                     <SKILL XMLID="COMBAT_LEVELS" ID="1766530761961" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTH" OPTIONID="HTH" OPTION_ALIAS="with HTH Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="HTH CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
@@ -875,6 +875,8 @@ export function registerCslTests(quench) {
                         let hthAndMentalOcvCsl;
                         let rangedAndMentalDcvCsl;
                         let rangedAndMentalOcvCsl;
+                        let dcvCsl;
+                        let decvCsl;
                         let allCsl;
 
                         let overallSl;
@@ -924,6 +926,9 @@ export function registerCslTests(quench) {
                             multipowerBroadGroupOfAttacksCsl = actor.items.find(
                                 (item) => item.name === "Multipower Broad CSL",
                             );
+
+                            dcvCsl = actor.items.find((item) => item.name === "DCV CSL");
+                            decvCsl = actor.items.find((item) => item.name === "DECV CSL");
 
                             hthAndRangedDcvCsl = actor.items.find((item) => item.name === "HTH and Ranged DCV CSL");
                             hthAndRangedOcvCsl = actor.items.find((item) => item.name === "HTH and Ranged OCV CSL");
@@ -1054,7 +1059,41 @@ export function registerCslTests(quench) {
                             it.skip("should Ranged combat");
                             it.skip("should Mental combat");
 
-                            it.skip("should DCV");
+                            it("should have raised the actor's DCV by 1 - dcvCsl", function () {
+                                expect(actor.system.characteristics.dcv.value).to.equal(4);
+                            });
+
+                            describe.only("DCV CSL should be an affect effect that can be turned off", function () {
+                                before(async function () {
+                                    await dcvCsl.turnOff();
+                                });
+
+                                after(async function () {
+                                    await dcvCsl.turnOn();
+                                });
+
+                                it("should reduce the actor's DCV by 1 when disabled", function () {
+                                    expect(actor.system.characteristics.dcv.value).to.equal(3);
+                                });
+                            });
+
+                            it("should have raised the actor's DMCV by 1 - dcvCsl", function () {
+                                expect(actor.system.characteristics.dmcv.value).to.equal(4);
+                            });
+
+                            describe.only("DECV CSL should be an affect effect that can be turned off", function () {
+                                before(async function () {
+                                    await decvCsl.turnOff();
+                                });
+
+                                after(async function () {
+                                    await decvCsl.turnOn();
+                                });
+
+                                it("should reduce the actor's DECV by 1 when disabled", function () {
+                                    expect(actor.system.characteristics.dmcv.value).to.equal(3);
+                                });
+                            });
 
                             it("should apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
                                 expect(hthAndRangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
