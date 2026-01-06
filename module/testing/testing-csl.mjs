@@ -545,8 +545,8 @@ export function registerCslTests(quench) {
                     });
                 });
 
-                describe("Applicability To Attack - cslAppliesTo", function () {
-                    describe.only("5e", async function () {
+                describe.only("Applicability To Attack - cslAppliesTo", function () {
+                    describe("5e", async function () {
                         const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
                             <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -729,7 +729,7 @@ export function registerCslTests(quench) {
                                     <SKILL XMLID="COMBAT_LEVELS" ID="1766530826562" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTALRANGED" OPTIONID="MENTALRANGED" OPTION_ALIAS="with Mental and Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="Mental and Ranged CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                                     <NOTES />
                                     </SKILL>
-                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530832753" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="All SL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530832753" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="All CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                                     <NOTES />
                                     </SKILL>
                                     <LIST XMLID="GENERIC_OBJECT" ID="1767656203782" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="27" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
@@ -875,6 +875,7 @@ export function registerCslTests(quench) {
                         let hthAndMentalOcvCsl;
                         let rangedAndMentalDcvCsl;
                         let rangedAndMentalOcvCsl;
+                        let allCsl;
 
                         let overallSl;
                         let nonOverallSl;
@@ -934,6 +935,8 @@ export function registerCslTests(quench) {
                             rangedAndMentalOcvCsl = actor.items.find(
                                 (item) => item.name === "Mental and Ranged OCV CSL",
                             );
+
+                            allCsl = actor.items.find((item) => item.name === "All CSL");
 
                             overallSl = actor.items.find((item) => item.name === "Overall SL");
                             nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
@@ -1117,7 +1120,13 @@ export function registerCslTests(quench) {
                                 expect(rangedAndMentalOcvCsl.cslAppliesTo(basicStrike)).to.be.false;
                             });
 
-                            it.skip("should all combat");
+                            it("should apply CSL to all combat types - allCsl", function () {
+                                expect(allCsl.cslAppliesTo(strike)).to.be.true;
+                                expect(allCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                expect(allCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                                expect(allCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                expect(allCsl.cslAppliesTo(basicShot)).to.be.true;
+                            });
                         });
 
                         describe("SLs", function () {
@@ -1576,6 +1585,17 @@ export function registerCslTests(quench) {
                             it("should not apply CSL to HTH for ranged CSL", function () {
                                 expect(rangedCsl.cslAppliesTo(strike)).to.be.false;
                                 expect(rangedCsl.cslAppliesTo(counterstrike)).to.be.false;
+                            });
+
+                            it("should apply CSL to all non mental attacks", function () {
+                                expect(allAttacksCsl.cslAppliesTo(strike)).to.be.true;
+                                expect(allAttacksCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                expect(allAttacksCsl.cslAppliesTo(basicShot)).to.be.true;
+                                expect(allAttacksCsl.cslAppliesTo(aoeDrain)).to.be.true;
+                            });
+
+                            it("should not apply CSL to all mental attacks", function () {
+                                expect(allAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
                             });
                         });
 

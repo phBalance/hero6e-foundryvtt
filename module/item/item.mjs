@@ -5905,18 +5905,18 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Uses OPTION_ALIAS (free text) to get an array of the recognized types of this CSL.
-        const _twoCvTypes = Object.keys(CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES)
+        const twoCvTypes = Object.keys(CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES)
             .map((cvType) => (this.system.OPTION_ALIAS.toLowerCase().includes(cvType) ? cvType : ""))
             .filter(Boolean);
 
-        if (_twoCvTypes.length != 2) {
+        if (twoCvTypes.length !== 2) {
             console.warn(
                 `Unknown 5e CSL TWOOCV/TWODCV type "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.detailedName()}`,
                 this,
             );
         }
 
-        return _twoCvTypes;
+        return twoCvTypes;
     }
 
     cslAppliesTo(attackItem) {
