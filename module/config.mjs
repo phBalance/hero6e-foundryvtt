@@ -435,6 +435,7 @@ HERO.mindScanChoices = [
     },
 ];
 
+// NOTE: Expecting strings to be lower case
 HERO.PENALTY_SKILL_LEVELS_TYPES = Object.freeze({
     // Range Skill Levels (RSLs), which off set the
     // Range Modifier (they have no value at pointblank
@@ -457,6 +458,18 @@ HERO.PENALTY_SKILL_LEVELS_TYPES = Object.freeze({
 
     // armor penalties to DCV
     armor: "armor",
+});
+
+// NOTE: Expecting strings to be lower case
+HERO.CSL_TWO_CV_LEVELS_TYPES = Object.freeze({
+    // Non mental hand-to-hand attacks
+    hth: "hth",
+
+    // Non mental ranged attacks
+    ranged: "ranged",
+
+    // Any "mental" (omcv) attack
+    mental: "mental",
 });
 
 // TODO: This could be created from powers.
@@ -3280,6 +3293,24 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<SKILL XMLID="COMBAT_LEVELS" ID="1709161485197" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
         {
+            heroValidation: function (item) {
+                const validations = [];
+
+                // TWODCV/TWOOCV type specified correctly?
+                if (
+                    (item.system.OPTIONID === "TWODCV" || item.system.OPTIONID === "TWOOCV") &&
+                    !item.csl5eCslTwoDcvOcvTypes
+                ) {
+                    validations.push({
+                        property: "OPTION_ALIAS",
+                        message: `Expecting two of these words [${Object.keys(HERO.CSL_TWO_CV_LEVELS_TYPES).join(", ")}].`,
+                        example: `DCV with HTH and Ranged combat`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                return validations;
+            },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "SINGLESINGLE":
@@ -3965,7 +3996,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Attack specified
                 if (item.system.OPTIONID !== "ALL") {
-                    //item.system.ADDER ??= [];
                     const firstValidAttack = item.adders.find(
                         (adder) =>
                             adder.ALIAS &&

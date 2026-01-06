@@ -744,6 +744,15 @@ export function registerCslTests(quench) {
                                     <SKILL XMLID="SKILL_LEVELS" ID="1766596963832" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONCOMBAT" OPTIONID="NONCOMBAT" OPTION_ALIAS="with all non-combat Skills" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1767656205625" NAME="Non Overall SL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                                     <NOTES />
                                     </SKILL>
+                                    <LIST XMLID="GENERIC_OBJECT" ID="1767719435899" BASECOST="0.0" LEVELS="0" ALIAS="Intentionally Invalid CSLs" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                    <NOTES />
+                                    </LIST>
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1767719020911" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="33" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOOCV" OPTIONID="TWOOCV" OPTION_ALIAS="OCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1767719435899" NAME="Didn't mention OCV with Mental, HTH, or Ranged" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                    <NOTES />
+                                    </SKILL>
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1767719058575" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="34" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWODCV" OPTIONID="TWODCV" OPTION_ALIAS="DCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1767719435899" NAME="Didn't mention DCV with Mental, HTH, or Ranged" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                    <NOTES />
+                                    </SKILL>
                                 </SKILLS>
                                 <PERKS />
                                 <TALENTS />
@@ -805,20 +814,29 @@ export function registerCslTests(quench) {
                                         </MODIFIER>
                                     </POWER>
                                     <LIST XMLID="GENERIC_OBJECT" ID="1767635677110" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                     <NOTES />
+                                        <NOTES />
                                     </LIST>
-                                    <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1767635680604" BASECOST="15.0" LEVELS="0" ALIAS="Multipower" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Drain Multipower" QUANTITY="1">
+                                    <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1767635680604" BASECOST="20.0" LEVELS="0" ALIAS="Multipower" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Drain Multipower" QUANTITY="1">
                                         <NOTES />
                                     </MULTIPOWER>
                                     <POWER XMLID="DRAIN" ID="1767635208815" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1767635680604" ULTRA_SLOT="Yes" NAME="Single Target Drain BODY" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                         <NOTES />
+                                        <MODIFIER XMLID="RANGED" ID="1767725464775" BASECOST="0.5" LEVELS="0" ALIAS="Ranged" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="Ranged" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                            <NOTES />
+                                        </MODIFIER>
                                     </POWER>
                                     <POWER XMLID="DRAIN" ID="1767635393915" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1767635680604" ULTRA_SLOT="Yes" NAME="Single Target Drain STUN" INPUT="STUN" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                         <NOTES />
+                                        <MODIFIER XMLID="RANGED" ID="1767725476849" BASECOST="0.5" LEVELS="0" ALIAS="Ranged" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="Ranged" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                            <NOTES />
+                                        </MODIFIER>
                                     </POWER>
                                     <POWER XMLID="DRAIN" ID="1767658676224" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1767635680604" ULTRA_SLOT="Yes" NAME="AoE Drain STUN" INPUT="STUN" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                         <NOTES />
                                         <MODIFIER XMLID="AOE" ID="1767658695502" BASECOST="0.5" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEX" OPTIONID="HEX" OPTION_ALIAS="One Hex" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                            <NOTES />
+                                        </MODIFIER>
+                                        <MODIFIER XMLID="RANGED" ID="1767725476849" BASECOST="0.5" LEVELS="0" ALIAS="Ranged" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="Ranged" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                             <NOTES />
                                         </MODIFIER>
                                     </POWER>
@@ -851,9 +869,18 @@ export function registerCslTests(quench) {
                         let martialManeuversCsl;
                         let magicSubsetCsl;
                         let multipowerBroadGroupOfAttacksCsl;
+                        let hthAndRangedDcvCsl;
+                        let hthAndRangedOcvCsl;
+                        let hthAndMentalDcvCsl;
+                        let hthAndMentalOcvCsl;
+                        let rangedAndMentalDcvCsl;
+                        let rangedAndMentalOcvCsl;
 
                         let overallSl;
                         let nonOverallSl;
+
+                        let invalidTwoDcvCsl;
+                        let invalidTwoOcvCsl;
 
                         before(async function () {
                             actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
@@ -897,8 +924,26 @@ export function registerCslTests(quench) {
                                 (item) => item.name === "Multipower Broad CSL",
                             );
 
+                            hthAndRangedDcvCsl = actor.items.find((item) => item.name === "HTH and Ranged DCV CSL");
+                            hthAndRangedOcvCsl = actor.items.find((item) => item.name === "HTH and Ranged OCV CSL");
+                            hthAndMentalDcvCsl = actor.items.find((item) => item.name === "HTH and Mental DCV CSL");
+                            hthAndMentalOcvCsl = actor.items.find((item) => item.name === "HTH and Mental OCV CSL");
+                            rangedAndMentalDcvCsl = actor.items.find(
+                                (item) => item.name === "Ranged and Mental DCV CSL",
+                            );
+                            rangedAndMentalOcvCsl = actor.items.find(
+                                (item) => item.name === "Mental and Ranged OCV CSL",
+                            );
+
                             overallSl = actor.items.find((item) => item.name === "Overall SL");
                             nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
+
+                            invalidTwoDcvCsl = actor.items.find(
+                                (item) => item.name === "Didn't mention DCV with Mental, HTH, or Ranged",
+                            );
+                            invalidTwoOcvCsl = actor.items.find(
+                                (item) => item.name === "Didn't mention OCV with Mental, HTH, or Ranged",
+                            );
                         });
 
                         after(async function () {
@@ -1008,9 +1053,69 @@ export function registerCslTests(quench) {
 
                             it.skip("should DCV");
 
-                            it.skip("should HTH and Ranged combat");
-                            it.skip("should HTH and Mental combat");
-                            it.skip("should Ranged and Mental combat");
+                            it("should apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
+                                expect(hthAndRangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                expect(hthAndRangedDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                expect(hthAndRangedDcvCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                            });
+
+                            it("should not apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
+                                expect(hthAndRangedDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                expect(hthAndRangedDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                            });
+
+                            it("should apply CSL to DCV HTH and Mental combat - hthAndMentalDcvCsl", function () {
+                                expect(hthAndMentalDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                expect(hthAndMentalDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                expect(hthAndMentalDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                            });
+
+                            it("should not apply CSL to DCV HTH and Mental combat - hthAndMentalDcvCsl", function () {
+                                expect(hthAndMentalDcvCsl.cslAppliesTo(basicShot)).to.be.false;
+                                expect(hthAndMentalDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                            });
+
+                            it("should apply CSL to DCV Ranged and Mental combat - rangedAndMentalDcvCsl", function () {
+                                expect(rangedAndMentalDcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                expect(rangedAndMentalDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                            });
+
+                            it("should not apply CSL to DCV Ranged and Mental combat - rangedAndMentalDcvCsl", function () {
+                                expect(rangedAndMentalDcvCsl.cslAppliesTo(strike)).to.be.false;
+                                expect(rangedAndMentalDcvCsl.cslAppliesTo(basicStrike)).to.be.false;
+                            });
+
+                            it("should apply CSL to OCV HTH and Ranged combat - hthAndRangedOcvCsl", function () {
+                                expect(hthAndRangedOcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                expect(hthAndRangedOcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                expect(hthAndRangedOcvCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                            });
+
+                            it("should not apply CSL to OCV HTH and Ranged combat - hthAndRangedOcvCsl", function () {
+                                expect(hthAndRangedOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                expect(hthAndRangedOcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                            });
+
+                            it("should apply CSL to OCV HTH and Mental combat - hthAndMentalOcvCsl", function () {
+                                expect(hthAndMentalOcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                expect(hthAndMentalOcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                expect(hthAndMentalOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                            });
+
+                            it("should not apply CSL to OCV HTH and Mental combat - hthAndMentalOcvCsl", function () {
+                                expect(hthAndMentalOcvCsl.cslAppliesTo(basicShot)).to.be.false;
+                                expect(hthAndMentalOcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                            });
+
+                            it("should apply CSL to OCV Ranged and Mental combat - rangedAndMentalOcvCsl", function () {
+                                expect(rangedAndMentalOcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                expect(rangedAndMentalOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                            });
+
+                            it("should not apply CSL to OCV Ranged and Mental combat - rangedAndMentalOcvCsl", function () {
+                                expect(rangedAndMentalOcvCsl.cslAppliesTo(strike)).to.be.false;
+                                expect(rangedAndMentalOcvCsl.cslAppliesTo(basicStrike)).to.be.false;
+                            });
 
                             it.skip("should all combat");
                         });
@@ -1044,6 +1149,40 @@ export function registerCslTests(quench) {
                                 expect(nonOverallSl.cslAppliesTo(basicShot)).to.be.false;
                                 expect(nonOverallSl.cslAppliesTo(defensiveShot)).to.be.false;
                                 expect(nonOverallSl.cslAppliesTo(offensiveRangedDisarm)).to.be.false;
+                            });
+                        });
+
+                        describe("Invalid TWODCV/TWOOCV CSLs", function () {
+                            it("should recognize correctly specified TWODCV", function () {
+                                expect(hthAndRangedDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(hthAndRangedDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+
+                                expect(hthAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(hthAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+
+                                expect(rangedAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(rangedAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                            });
+
+                            it("should recognize incorrectly specified TWODCV", function () {
+                                expect(invalidTwoDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(invalidTwoDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(0);
+                            });
+
+                            it("should recognize correctly specified TWOOCV", function () {
+                                expect(hthAndRangedOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(hthAndRangedOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+
+                                expect(hthAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(hthAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+
+                                expect(rangedAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(rangedAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                            });
+
+                            it("should recognize incorrectly specified TWOOCV", function () {
+                                expect(invalidTwoOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
+                                expect(invalidTwoOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(0);
                             });
                         });
                     });

@@ -30,7 +30,6 @@ import {
     getExtraMartialDcsOrZero,
     getManeuverEffect,
     getManueverEffectWithPlaceholdersReplaced,
-    isManeuverHthCategory,
     isManeuverThatDoesReplaceableDamageType,
     isRangedMartialManeuver,
 } from "../utility/damage.mjs";
@@ -746,7 +745,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         const e = this.system.debugModelProps();
-
         if (e) {
             _heroValidation.push({
                 //property:
@@ -5897,12 +5895,43 @@ export class HeroSystem6eItem extends Item {
         return attackMatchesCustomAdder;
     }
 
+    get csl5eCslTwoDcvOcvTypes() {
+        if (
+            !this.is5e ||
+            this.system.XMLID !== "COMBAT_LEVELS" ||
+            !(this.system.OPTIONID === "TWOOCV" || this.system.OPTIONID === "TWODCV")
+        ) {
+            return [];
+        }
+
+        // Uses OPTION_ALIAS (free text) to get an array of the recognized types of this CSL.
+        const _twoCvTypes = Object.keys(CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES)
+            .map((cvType) => (this.system.OPTION_ALIAS.toLowerCase().includes(cvType) ? cvType : ""))
+            .filter(Boolean);
+
+        if (_twoCvTypes.length != 2) {
+            console.warn(
+                `Unknown 5e CSL TWOOCV/TWODCV type "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.detailedName()}`,
+                this,
+            );
+        }
+
+        return _twoCvTypes;
+    }
+
     cslAppliesTo(attackItem) {
         if (!this.isCsl) {
             console.error("This is not a CSL", this, attackItem);
             return false;
         }
 
+        // PH: FIXME: This was here before. How does WEAPON_MASTER fit in?
+        // // Mental vs Physical
+        // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.system.attacksWith === "omcv") {
+        //     return false;
+        // }
+
+        // PH: FIXME: Do we have to work this? Should be in _csl...
         // CSL associated with same compound power
         // Note that we don't bother verifying Mental/Physical, nor ADDER that may associate wth a different attackItem
         if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
@@ -5918,27 +5947,22 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        // PH: FIXME: Move these
+        // PH: FIXME: Move these functions elsewhere
         function usesOmcv(attackItem) {
-            return attackItem.attacksWith === "omcv";
+            return attackItem.system.attacksWith === "omcv";
+        }
+
+        function isRanged(attackItem) {
+            const range = attackItem.system.range;
+            return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
         }
 
         function isRangedNonMental(attackItem) {
-            const range = attackItem.system.range;
-            if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
-                return false;
-            }
-
-            return !usesOmcv(attackItem);
+            return isRanged(attackItem) && !usesOmcv(attackItem);
         }
 
         function isHthNonMental(attackItem) {
-            const range = attackItem.system.range;
-            if (range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
-                return true;
-            }
-
-            return !usesOmcv(attackItem);
+            return !isRanged(attackItem) && !usesOmcv(attackItem);
         }
 
         function isMartialManeuver(attackItem) {
@@ -5966,13 +5990,6 @@ export class HeroSystem6eItem extends Item {
                 case "HTHRANGED":
                     return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
 
-                case "TWODCV":
-                    return xxx;
-                case "TWOOCV":
-                    return xxx;
-                case "DCV":
-                    return xxx;
-
                 case "MENTAL":
                     return usesOmcv(attackItem);
 
@@ -5982,20 +5999,64 @@ export class HeroSystem6eItem extends Item {
                 case "HTH":
                     return isHthNonMental(attackItem);
 
-                case "DECV":
-                    return xxx;
-                case "HTHDCV":
-                    return xxx;
-
                 case "MARTIAL":
                     return isMartialManeuver(attackItem);
-            }
 
-            // PH: FIXME: Catch all unknown OPTIONIDs
+                // PH: FIXME: We should make sure these two offer the appropriate options (no ocv/omcv)
+                case "TWODCV":
+                case "TWOOCV": {
+                    for (const type of this.csl5eCslTwoDcvOcvTypes) {
+                        if (type === CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES.hth) {
+                            if (isHthNonMental(attackItem)) {
+                                return true;
+                            }
+                        } else if (type === CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES.ranged) {
+                            if (isRangedNonMental(attackItem)) {
+                                return true;
+                            }
+                        } else if (type === CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES.mental) {
+                            if (usesOmcv(attackItem)) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    // This attack does not appear to be in the supported types for this CSL
+                    return false;
+                }
+
+                case "HTHDCV":
+                    return true; // PH: FIXME: To be implemented
+                    return xxx;
+
+                // PH: FIXME: DCV and DECV should have a permanent AE added
+                case "DCV":
+                    return true; // PH: FIXME: To be implemented
+                    return xxx;
+                case "DECV":
+                    return true; // PH: FIXME: To be implemented
+                    return xxx;
+
+                default:
+                // Drop through and be handled outside the switch
+            }
 
             // The other types of CSLs support a limited number of attacks. We have to check that its
             // in the allow list.
-            return this.isAttackItemInCslAllowList(attackItem);
+            if (
+                this.system.OPTIONID === "BROAD" ||
+                this.system.OPTIONID === "MAGIC" ||
+                this.system.OPTIONID === "TIGHT" ||
+                this.system.OPTIONID === "STRIKE" ||
+                this.system.OPTIONID === "SINGLESTRIKE" ||
+                this.system.OPTIONID === "SINGLE" ||
+                this.system.OPTIONID === "SINGLESINGLE"
+            ) {
+                return this.isAttackItemInCslAllowList(attackItem);
+            } else {
+                console.error(`Unhandled CSL ${this.detailedName()}`);
+                return false;
+            }
         } else {
             // 6e
             switch (this.system.XMLID) {
@@ -6015,14 +6076,21 @@ export class HeroSystem6eItem extends Item {
                         return isHthNonMental(attackItem);
                     }
 
-                    // PH: FIXME: Catch all unknown OPTIONIDs
-
                     // The other types of CSLs support a limited number of attacks. We have to check that its
                     // in the allow list.
-                    return this.isAttackItemInCslAllowList(attackItem);
+                    if (
+                        this.system.OPTIONID === "SINGLE" ||
+                        this.system.OPTIONID === "TIGHT" ||
+                        this.system.OPTIONID === "BROAD"
+                    ) {
+                        return this.isAttackItemInCslAllowList(attackItem);
+                    } else {
+                        console.error(`Unhandled CSL ${this.detailedName()}`);
+                        return false;
+                    }
 
                 case "MENTAL_COMBAT_LEVELS":
-                    // 6e MCSLs are only good for mental attacks
+                    // 6e MCSLs are only good for "mental" attacks
                     if (attackItem.system.attacksWith !== "omcv") {
                         return false;
                     }
@@ -6033,84 +6101,54 @@ export class HeroSystem6eItem extends Item {
                         return true;
                     }
 
-                    // PH: FIXME: Catch all unknown OPTIONIDs
-
                     // The other types of MCSLs support a limited number of attacks. We have to check that its
                     // in the allow list.
-                    return this.isAttackItemInCslAllowList(attackItem);
-            }
-        }
-
-        console.error(`Unhandled CSL ${this.detailedName()}`);
-        return false;
-
-        // With All Attacks
-        if (
-            this.system.OPTIONID === "ALL" ||
-            (this.system.OPTIONID === "BROAD" && this.system.XMLID === "MENTAL_COMBAT_LEVELS")
-        ) {
-            switch (this.system.XMLID) {
-                case "COMBAT_LEVELS":
-                    if (!this.is5e) {
-                        // 6e has MENTAL_COMBAT_LEVELS
-                        if (attackItem.system.attacksWith === "omcv") {
-                            return false;
-                        }
-
-                        return true;
+                    if (this.system.OPTIONID === "SINGLE" || this.system.OPTIONID === "TIGHT") {
+                        return this.isAttackItemInCslAllowList(attackItem);
                     } else {
-                        return false; // PH: FIXME: Not correct.
-                    }
-
-                case "MENTAL_COMBAT_LEVELS":
-                    if (!this.is5e) {
-                        if (attackItem.system.attacksWith === "omcv") {
-                            return true;
-                        }
+                        console.error(`Unhandled MCSL ${this.detailedName()}`);
                         return false;
-                    } else {
-                        return false; // PH: FIXME: Not correct.
                     }
             }
-
-            console.error("unhandled CSL XMLID", this.system.XMLID);
-            return false;
         }
 
-        // 5e with HTH and Mental Combat (treated as ALL)
-        if (this.system.OPTIONID === "HTHMENTAL") {
-            return true;
-        }
+        console.error(`Unhandled CSL ${this.detailedName()}/${this.is5e}`);
 
-        // Mental vs Physical
-        if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.system.attacksWith === "omcv") {
-            return false;
-        }
-        if (["MENTAL_COMBAT_LEVELS"].includes(this.system.XMLID) && attackItem.system.attacksWith === "ocv") {
-            return false;
-        }
+        // PH: FIXME: THis is the previous stuff ... should be removed
+        // // 5e with HTH and Mental Combat (treated as ALL)
+        // if (this.system.OPTIONID === "HTHMENTAL") {
+        //     return true;
+        // }
 
-        // HTH
-        if (
-            this.system.OPTIONID === "HTH" &&
-            (attackItem.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE || isManeuverHthCategory(attackItem))
-        ) {
-            return true;
-        }
+        // // Mental vs Physical
+        // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.system.attacksWith === "omcv") {
+        //     return false;
+        // }
+        // if (["MENTAL_COMBAT_LEVELS"].includes(this.system.XMLID) && attackItem.system.attacksWith === "ocv") {
+        //     return false;
+        // }
 
-        // RANGED
-        if (this.system.OPTIONID === "RANGED" && attackItem.system.range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
-            return true;
-        }
+        // // HTH
+        // if (
+        //     this.system.OPTIONID === "HTH" &&
+        //     (attackItem.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE || isManeuverHthCategory(attackItem))
+        // ) {
+        //     return true;
+        // }
 
-        // 5e only: +1 DCV against all attacks (HTH and Ranged)
-        // — no matter how many opponents attack a
-        // character in a given Segment, or with how many
-        // diff erent attacks, a 5-point DCV CSL provides +1
-        // DCV versus all of them.
-        if (this.system.OPTIONID === "DCV") {
-            return true;
-        }
+        // // RANGED
+        // if (this.system.OPTIONID === "RANGED" && attackItem.system.range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
+        //     return true;
+        // }
+
+        // // 5e only: +1 DCV against all attacks (HTH and Ranged)
+        // // — no matter how many opponents attack a
+        // // character in a given Segment, or with how many
+        // // diff erent attacks, a 5-point DCV CSL provides +1
+        // // DCV versus all of them.
+        // if (this.system.OPTIONID === "DCV") {
+        //     return true;
+        // }
 
         return false;
     }
