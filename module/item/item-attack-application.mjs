@@ -208,6 +208,11 @@ export class ItemAttackFormApplication extends FormApplication {
                         delete entry.cslChoices.dmcv;
                     }
 
+                    // If there are now no choices left, skip this CSL.
+                    if (Object.keys(entry.cslChoices).length === 0) {
+                        continue;
+                    }
+
                     // CSL radioBoxes names
                     for (let c = 0; c < parseInt(csl.item.system.LEVELS || 0); c++) {
                         entry.csl.push({
