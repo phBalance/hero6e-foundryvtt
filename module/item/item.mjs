@@ -6029,8 +6029,7 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 case "HTHDCV":
-                    return true; // PH: FIXME: To be implemented
-                    return xxx;
+                    return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
 
                 case "DCV":
                     return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
@@ -6042,7 +6041,7 @@ export class HeroSystem6eItem extends Item {
                 // Drop through and be handled outside the switch
             }
 
-            // The other types of CSLs support a limited number of attacks. We have to check that its
+            // The other types of CSLs support a limited number of attacks. We have to check that attackItem
             // in the allow list.
             if (
                 this.system.OPTIONID === "BROAD" ||
@@ -6097,12 +6096,12 @@ export class HeroSystem6eItem extends Item {
                     }
 
                     // The BROAD level doesn't have to list the supported attacks - everything that is
-                    // a mental combat attack is supported.
+                    // a mental attack is supported. This is similar to CSL's "ALL".
                     if (this.system.OPTIONID === "BROAD") {
                         return true;
                     }
 
-                    // The other types of MCSLs support a limited number of attacks. We have to check that its
+                    // The other types of MCSLs support a limited number of attacks. We have to check that attackItem
                     // in the allow list.
                     if (this.system.OPTIONID === "SINGLE" || this.system.OPTIONID === "TIGHT") {
                         return this.isAttackItemInCslAllowList(attackItem);
@@ -6139,15 +6138,6 @@ export class HeroSystem6eItem extends Item {
 
         // // RANGED
         // if (this.system.OPTIONID === "RANGED" && attackItem.system.range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
-        //     return true;
-        // }
-
-        // // 5e only: +1 DCV against all attacks (HTH and Ranged)
-        // // — no matter how many opponents attack a
-        // // character in a given Segment, or with how many
-        // // diff erent attacks, a 5-point DCV CSL provides +1
-        // // DCV versus all of them.
-        // if (this.system.OPTIONID === "DCV") {
         //     return true;
         // }
 

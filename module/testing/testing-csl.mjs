@@ -869,6 +869,10 @@ export function registerCslTests(quench) {
                         let martialManeuversCsl;
                         let magicSubsetCsl;
                         let multipowerBroadGroupOfAttacksCsl;
+
+                        let hthCsl;
+                        let rangedCsl;
+                        let mentalCsl;
                         let hthAndRangedDcvCsl;
                         let hthAndRangedOcvCsl;
                         let hthAndMentalDcvCsl;
@@ -926,6 +930,10 @@ export function registerCslTests(quench) {
                             multipowerBroadGroupOfAttacksCsl = actor.items.find(
                                 (item) => item.name === "Multipower Broad CSL",
                             );
+
+                            hthCsl = actor.items.find((item) => item.name === "HTH CSL");
+                            rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
+                            mentalCsl = actor.items.find((item) => item.name === "Mental CSL");
 
                             dcvCsl = actor.items.find((item) => item.name === "DCV CSL");
                             decvCsl = actor.items.find((item) => item.name === "DECV CSL");
@@ -1050,20 +1058,55 @@ export function registerCslTests(quench) {
                                     .true;
                             });
 
-                            it.skip("should DCV with HTH combat");
+                            it.skip("should DCV with HTH combat - ", function () {
+                                expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                            });
                             it.skip("should DCV with Ranged combat");
 
-                            it.skip("should DECV vs mental powers");
+                            it("should apply CSL for HTH combat - hthCsl", function () {
+                                expect(hthCsl.cslAppliesTo(strike)).to.be.true;
+                                expect(hthCsl.cslAppliesTo(basicStrike)).to.be.true;
+                            });
 
-                            it.skip("should HTH combat");
-                            it.skip("should Ranged combat");
-                            it.skip("should Mental combat");
+                            it("should not apply CSL for HTH combat - hthCsl", function () {
+                                expect(hthCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                expect(hthCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                expect(hthCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                expect(hthCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
+                                expect(hthCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                            });
+
+                            it("should apply CSL for Ranged combat - rangedCsl", function () {
+                                expect(rangedCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                                expect(rangedCsl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
+                                expect(rangedCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                            });
+
+                            it("should not apply CSL for Ranged combat - rangedCsl", function () {
+                                expect(rangedCsl.cslAppliesTo(strike)).to.be.false;
+                                expect(rangedCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                expect(rangedCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                expect(rangedCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                            });
+
+                            it("should apply CSL for Mental combat - mentalCsl", function () {
+                                expect(mentalCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                expect(mentalCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                            });
+
+                            it("should not apply CSL for Mental combat - mentalCsl", function () {
+                                expect(mentalCsl.cslAppliesTo(strike)).to.be.false;
+                                expect(mentalCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                expect(mentalCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                expect(mentalCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
+                                expect(mentalCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                            });
 
                             it("should have raised the actor's DCV by 1 - dcvCsl", function () {
                                 expect(actor.system.characteristics.dcv.value).to.equal(4);
                             });
 
-                            describe.only("DCV CSL should be an affect effect that can be turned off", function () {
+                            describe("DCV CSL should be an affect effect that can be turned off", function () {
                                 before(async function () {
                                     await dcvCsl.turnOff();
                                 });
@@ -1073,6 +1116,7 @@ export function registerCslTests(quench) {
                                 });
 
                                 it("should reduce the actor's DCV by 1 when disabled", function () {
+                                    // PH: FIXME: This test is flakey. See #3467 for instance.
                                     expect(actor.system.characteristics.dcv.value).to.equal(3);
                                 });
                             });
@@ -1081,7 +1125,7 @@ export function registerCslTests(quench) {
                                 expect(actor.system.characteristics.dmcv.value).to.equal(4);
                             });
 
-                            describe.only("DECV CSL should be an affect effect that can be turned off", function () {
+                            describe("DECV CSL should be an affect effect that can be turned off", function () {
                                 before(async function () {
                                     await decvCsl.turnOff();
                                 });
@@ -1091,6 +1135,7 @@ export function registerCslTests(quench) {
                                 });
 
                                 it("should reduce the actor's DECV by 1 when disabled", function () {
+                                    // PH: FIXME: This test is flakey. See #3467 for instance.
                                     expect(actor.system.characteristics.dmcv.value).to.equal(3);
                                 });
                             });
