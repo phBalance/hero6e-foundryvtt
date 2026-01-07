@@ -601,6 +601,33 @@ export async function doAoeActionToHit(action, options) {
     await ChatMessage.create(chatData);
 }
 
+/**
+ * Figure in all defensive calculations to determine what the defender's defensive CV is against
+ * this particular attack.
+ *
+ * @param {Object} defendingTarget - Actor being attacked
+ * @param {HeroSystem6eActor} attackingActor - Actor that is attacking
+ * @param {HeroSystem6eItem} attackItem
+ */
+function determineDefensiveValueAgainstAttack(defendingTarget, attackingActor, attackItem) {
+    const defensiveCharacteristic = attackItem.system.defendsWith;
+    let targetDefenseValue = roundFavorPlayerAwayFromZero(
+        defendingTarget.actor?.system.characteristics[defensiveCharacteristic]?.value,
+    );
+
+    // Bases have no DCV.  DCV=3; 0 if adjacent
+    if (isNaN(targetDefenseValue) || defendingTarget.actor.type === "base2") {
+        const attackerToken = attackingActor.token || attackingActor.getActiveTokens()[0];
+        if (!defendingTarget.actor || calculateDistanceBetween(attackerToken, defendingTarget).distance > 2) {
+            targetDefenseValue = 3;
+        } else {
+            targetDefenseValue = 0;
+        }
+    }
+
+    return targetDefenseValue;
+}
+
 /// ChatMessage showing Attack To Hit
 /// opened after selecting 'Roll to Hit'
 /// uses ../templates/chat/item-toHit-card.hbs
@@ -840,20 +867,7 @@ async function doSingleTargetActionToHit(action, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        let targetDefenseValue = roundFavorPlayerAwayFromZero(
-            target.actor?.system.characteristics[toHitChar.toLowerCase()]?.value,
-        );
-
-        // Bases have no DCV.  DCV=3; 0 if adjacent
-        // Mind Scan defers DMCV so use 3 for now
-        if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
-            const _token = actor.token || actor.getActiveTokens()[0];
-            if (!target.actor || calculateDistanceBetween(_token, target).distance > 2) {
-                targetDefenseValue = 3;
-            } else {
-                targetDefenseValue = 0;
-            }
-        }
+        const targetDefenseValue = determineDefensiveValueAgainstAttack(target, actor, item.effectiveAttackItem);
 
         // Mind scan typically has just 1 target, but could have more. Use same roll for all targets.
         const targetHeroRoller = aoeAlwaysHit || options.mindScanMinds ? attackHeroRoller : attackHeroRoller.clone();
