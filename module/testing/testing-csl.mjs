@@ -546,7 +546,7 @@ export function registerCslTests(quench) {
                 });
 
                 describe("Applicability To Attack - cslAppliesTo", function () {
-                    describe.only("5e", async function () {
+                    describe("5e", async function () {
                         const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
                             <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -645,8 +645,14 @@ export function registerCslTests(quench) {
                                         <NOTES />
                                     </ADDER>
                                     </SKILL>
-                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530709609" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STRIKE" OPTIONID="STRIKE" OPTION_ALIAS="with any Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                    <NOTES />
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530709609" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STRIKE" OPTIONID="STRIKE" OPTION_ALIAS="with any Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="Any Strike CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                        <NOTES />
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1767758766416" BASECOST="0.0" LEVELS="0" ALIAS="Strike" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1767758771944" BASECOST="0.0" LEVELS="0" ALIAS="Basic Strike" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
                                     </SKILL>
                                     <SKILL XMLID="COMBAT_LEVELS" ID="1766530718850" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with any three maneuvers or a tight group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="Multipower Tight Group of Attacks CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                                     <NOTES />
@@ -684,7 +690,10 @@ export function registerCslTests(quench) {
                                         <NOTES />
                                     </ADDER>
                                     </SKILL>
-                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530745617" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHDCV" OPTIONID="HTHDCV" OPTION_ALIAS="DCV with HTH or Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="HTH or Ranged DCV CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1766530745617" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHDCV" OPTIONID="HTHDCV" OPTION_ALIAS="DCV with Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="Ranged DCV CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                    <NOTES />
+                                    </SKILL>
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1767760617589" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHDCV" OPTIONID="HTHDCV" OPTION_ALIAS="DCV with HTH Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="HTH DCV CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                                     <NOTES />
                                     </SKILL>
                                     <SKILL XMLID="COMBAT_LEVELS" ID="1766530753770" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DECV" OPTIONID="DECV" OPTION_ALIAS="DECV versus all Mental Powers and attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="DECV CSL" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
@@ -864,12 +873,15 @@ export function registerCslTests(quench) {
                         let singleNonMentalCsl;
                         let singleMentalCsl;
                         let singleStrikeCsl;
+                        let anyStrikeCsl;
                         let multipowerTightGroupOfAttacksCsl;
                         let listHthMartialArtsStyleCsl;
                         let martialManeuversCsl;
                         let magicSubsetCsl;
                         let multipowerBroadGroupOfAttacksCsl;
 
+                        let hthDcvCsl;
+                        let rangedDcvCsl;
                         let hthCsl;
                         let rangedCsl;
                         let mentalCsl;
@@ -919,6 +931,7 @@ export function registerCslTests(quench) {
                             );
                             singleMentalCsl = actor.items.find((item) => item.name === "Single Attack Mental CSL");
                             singleStrikeCsl = actor.items.find((item) => item.name === "Single Strike CSL");
+                            anyStrikeCsl = actor.items.find((item) => item.name === "Any Strike CSL");
                             multipowerTightGroupOfAttacksCsl = actor.items.find(
                                 (item) => item.name === "Multipower Tight Group of Attacks CSL",
                             );
@@ -934,6 +947,9 @@ export function registerCslTests(quench) {
                             hthCsl = actor.items.find((item) => item.name === "HTH CSL");
                             rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
                             mentalCsl = actor.items.find((item) => item.name === "Mental CSL");
+
+                            hthDcvCsl = actor.items.find((item) => item.name === "HTH DCV CSL");
+                            rangedDcvCsl = actor.items.find((item) => item.name === "Ranged DCV CSL");
 
                             dcvCsl = actor.items.find((item) => item.name === "DCV CSL");
                             decvCsl = actor.items.find((item) => item.name === "DECV CSL");
@@ -1003,6 +1019,17 @@ export function registerCslTests(quench) {
                                 expect(singleStrikeCsl.cslAppliesTo(basicStrike)).to.be.true;
                             });
 
+                            it("should apply CSL to power because it's listed - anyStrikeCsl", function () {
+                                expect(anyStrikeCsl.cslAppliesTo(strike)).to.be.true;
+                                expect(anyStrikeCsl.cslAppliesTo(basicStrike)).to.be.true;
+                            });
+
+                            it("should not apply CSL to power that is not listed - anyStrikeCsl", function () {
+                                expect(anyStrikeCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                expect(anyStrikeCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                expect(anyStrikeCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                            });
+
                             it("should not apply CSL to power because it's not listed - multipowerTightGroupOfAttacksCsl", function () {
                                 expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be
                                     .false;
@@ -1058,10 +1085,29 @@ export function registerCslTests(quench) {
                                     .true;
                             });
 
-                            it.skip("should DCV with HTH combat - ", function () {
-                                expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                            it("should apply DCV with HTH combat - hthDcvCsl", function () {
+                                expect(hthDcvCsl.cslAppliesTo(strike)).to.be.true;
+                                expect(hthDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
                             });
-                            it.skip("should DCV with Ranged combat");
+
+                            it("should not apply DCV with HTH combat - hthDcvCsl", function () {
+                                expect(hthDcvCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                expect(hthDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                expect(hthDcvCsl.cslAppliesTo(basicShot)).to.be.false;
+                                expect(hthDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                            });
+
+                            it("should apply DCV with Ranged combat - rangedDcvCsl", function () {
+                                expect(rangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                expect(rangedDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                            });
+
+                            it("should not apply DCV with Ranged combat - rangedDcvCsl", function () {
+                                expect(rangedDcvCsl.cslAppliesTo(strike)).to.be.false;
+                                expect(rangedDcvCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                expect(rangedDcvCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                expect(rangedDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                            });
 
                             it("should apply CSL for HTH combat - hthCsl", function () {
                                 expect(hthCsl.cslAppliesTo(strike)).to.be.true;
@@ -1074,6 +1120,7 @@ export function registerCslTests(quench) {
                                 expect(hthCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
                                 expect(hthCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
                                 expect(hthCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                                expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
                             });
 
                             it("should apply CSL for Ranged combat - rangedCsl", function () {
@@ -1087,6 +1134,7 @@ export function registerCslTests(quench) {
                                 expect(rangedCsl.cslAppliesTo(basicStrike)).to.be.false;
                                 expect(rangedCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
                                 expect(rangedCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
                             });
 
                             it("should apply CSL for Mental combat - mentalCsl", function () {
@@ -1100,6 +1148,7 @@ export function registerCslTests(quench) {
                                 expect(mentalCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
                                 expect(mentalCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
                                 expect(mentalCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                                expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
                             });
 
                             it("should have raised the actor's DCV by 1 - dcvCsl", function () {
@@ -1247,35 +1296,35 @@ export function registerCslTests(quench) {
 
                         describe("Invalid TWODCV/TWOOCV CSLs", function () {
                             it("should recognize correctly specified TWODCV", function () {
-                                expect(hthAndRangedDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(hthAndRangedDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                                expect(hthAndRangedDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(hthAndRangedDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
 
-                                expect(hthAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(hthAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                                expect(hthAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(hthAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
 
-                                expect(rangedAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(rangedAndMentalDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                                expect(rangedAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(rangedAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
                             });
 
                             it("should recognize incorrectly specified TWODCV", function () {
-                                expect(invalidTwoDcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(invalidTwoDcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(0);
+                                expect(invalidTwoDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(invalidTwoDcvCsl.csl5eCslDcvOcvTypes).to.have.length(0);
                             });
 
                             it("should recognize correctly specified TWOOCV", function () {
-                                expect(hthAndRangedOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(hthAndRangedOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                                expect(hthAndRangedOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(hthAndRangedOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
 
-                                expect(hthAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(hthAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                                expect(hthAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(hthAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
 
-                                expect(rangedAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(rangedAndMentalOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(2);
+                                expect(rangedAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(rangedAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
                             });
 
                             it("should recognize incorrectly specified TWOOCV", function () {
-                                expect(invalidTwoOcvCsl.csl5eCslTwoDcvOcvTypes).to.be.an("array");
-                                expect(invalidTwoOcvCsl.csl5eCslTwoDcvOcvTypes).to.have.length(0);
+                                expect(invalidTwoOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                expect(invalidTwoOcvCsl.csl5eCslDcvOcvTypes).to.have.length(0);
                             });
                         });
                     });

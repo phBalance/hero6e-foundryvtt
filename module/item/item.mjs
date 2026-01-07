@@ -5898,28 +5898,37 @@ export class HeroSystem6eItem extends Item {
         return attackMatchesCustomAdder;
     }
 
-    get csl5eCslTwoDcvOcvTypes() {
+    get csl5eCslDcvOcvTypes() {
         if (
             !this.is5e ||
             this.system.XMLID !== "COMBAT_LEVELS" ||
-            !(this.system.OPTIONID === "TWOOCV" || this.system.OPTIONID === "TWODCV")
+            !(
+                this.system.OPTIONID === "TWOOCV" ||
+                this.system.OPTIONID === "TWODCV" ||
+                this.system.OPTIONID === "HTHDCV"
+            )
         ) {
             return [];
         }
 
         // Uses OPTION_ALIAS (free text) to get an array of the recognized types of this CSL.
-        const twoCvTypes = Object.keys(CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES)
+        const cvTypes = Object.keys(CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES)
             .map((cvType) => (this.system.OPTION_ALIAS.toLowerCase().includes(cvType) ? cvType : ""))
             .filter(Boolean);
 
-        if (twoCvTypes.length !== 2) {
+        if ((this.system.OPTIONID === "TWOOCV" || this.system.OPTIONID === "TWODCV") && cvTypes.length !== 2) {
             console.warn(
-                `Unknown 5e CSL TWOOCV/TWODCV type "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.detailedName()}`,
+                `${this.actor?.name} Unknown 5e CSL TWOOCV/TWODCV type "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.detailedName()}`,
+                this,
+            );
+        } else if (this.system.OPTIONID === "HTHDCV" && cvTypes.length !== 1) {
+            console.warn(
+                `${this.actor?.name} Unknown 5e CSL HTHDCV type "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.detailedName()}`,
                 this,
             );
         }
 
-        return twoCvTypes;
+        return cvTypes;
     }
 
     cslAppliesTo(attackItem) {
@@ -5960,12 +5969,17 @@ export class HeroSystem6eItem extends Item {
             return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
         }
 
+        function isHth(attackItem) {
+            const range = attackItem.system.range;
+            return range === CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+        }
+
         function isRangedNonMental(attackItem) {
             return isRanged(attackItem) && !usesOmcv(attackItem);
         }
 
         function isHthNonMental(attackItem) {
-            return !isRanged(attackItem) && !usesOmcv(attackItem);
+            return isHth(attackItem) && !usesOmcv(attackItem);
         }
 
         function isMartialManeuver(attackItem) {
@@ -5975,7 +5989,7 @@ export class HeroSystem6eItem extends Item {
         // The rest of the CSL types are very different between 5e and 6e.
         if (this.is5e) {
             if (this.system.XMLID !== "COMBAT_LEVELS") {
-                // Only CSLs
+                // Only CSLs should be able to make it here
                 return false;
             }
 
@@ -6006,18 +6020,19 @@ export class HeroSystem6eItem extends Item {
                     return isMartialManeuver(attackItem);
 
                 // PH: FIXME: We should make sure these two offer the appropriate options (no ocv/omcv)
+                case "HTHDCV":
                 case "TWODCV":
                 case "TWOOCV": {
-                    for (const type of this.csl5eCslTwoDcvOcvTypes) {
-                        if (type === CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES.hth) {
+                    for (const type of this.csl5eCslDcvOcvTypes) {
+                        if (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.hth) {
                             if (isHthNonMental(attackItem)) {
                                 return true;
                             }
-                        } else if (type === CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES.ranged) {
+                        } else if (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.ranged) {
                             if (isRangedNonMental(attackItem)) {
                                 return true;
                             }
-                        } else if (type === CONFIG.HERO.CSL_TWO_CV_LEVELS_TYPES.mental) {
+                        } else if (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.mental) {
                             if (usesOmcv(attackItem)) {
                                 return true;
                             }
@@ -6028,9 +6043,6 @@ export class HeroSystem6eItem extends Item {
                     return false;
                 }
 
-                case "HTHDCV":
-                    return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
-
                 case "DCV":
                     return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
 
@@ -6040,6 +6052,8 @@ export class HeroSystem6eItem extends Item {
                 default:
                 // Drop through and be handled outside the switch
             }
+
+            // PH: FIXME: Add heroValidations for too many customAdders for cheap CSLs? Some of these can be curiously broad.
 
             // The other types of CSLs support a limited number of attacks. We have to check that attackItem
             // in the allow list.
@@ -6062,7 +6076,7 @@ export class HeroSystem6eItem extends Item {
             switch (this.system.XMLID) {
                 case "COMBAT_LEVELS":
                     // 6e CSLs are only good for non mental attacks
-                    if (attackItem.system.attacksWith === "omcv") {
+                    if (usesOmcv(attackItem)) {
                         return false;
                     }
 
@@ -6091,7 +6105,7 @@ export class HeroSystem6eItem extends Item {
 
                 case "MENTAL_COMBAT_LEVELS":
                     // 6e MCSLs are only good for "mental" attacks
-                    if (attackItem.system.attacksWith !== "omcv") {
+                    if (!usesOmcv(attackItem)) {
                         return false;
                     }
 
@@ -6113,33 +6127,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         console.error(`Unhandled CSL ${this.detailedName()}/${this.is5e}`);
-
-        // PH: FIXME: THis is the previous stuff ... should be removed
-        // // 5e with HTH and Mental Combat (treated as ALL)
-        // if (this.system.OPTIONID === "HTHMENTAL") {
-        //     return true;
-        // }
-
-        // // Mental vs Physical
-        // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.system.attacksWith === "omcv") {
-        //     return false;
-        // }
-        // if (["MENTAL_COMBAT_LEVELS"].includes(this.system.XMLID) && attackItem.system.attacksWith === "ocv") {
-        //     return false;
-        // }
-
-        // // HTH
-        // if (
-        //     this.system.OPTIONID === "HTH" &&
-        //     (attackItem.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE || isManeuverHthCategory(attackItem))
-        // ) {
-        //     return true;
-        // }
-
-        // // RANGED
-        // if (this.system.OPTIONID === "RANGED" && attackItem.system.range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
-        //     return true;
-        // }
 
         return false;
     }

@@ -461,7 +461,7 @@ HERO.PENALTY_SKILL_LEVELS_TYPES = Object.freeze({
 });
 
 // NOTE: Expecting strings to be lower case
-HERO.CSL_TWO_CV_LEVELS_TYPES = Object.freeze({
+HERO.CSL_5E_CV_LEVELS_TYPES = Object.freeze({
     // Non mental hand-to-hand attacks
     hth: "hth",
 
@@ -3299,11 +3299,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // TWODCV/TWOOCV type specified correctly?
                 if (
                     (item.system.OPTIONID === "TWODCV" || item.system.OPTIONID === "TWOOCV") &&
-                    !item.csl5eCslTwoDcvOcvTypes
+                    item.csl5eCslDcvOcvTypes.length !== 2
                 ) {
                     validations.push({
                         property: "OPTION_ALIAS",
-                        message: `Expecting two of these words [${Object.keys(HERO.CSL_TWO_CV_LEVELS_TYPES).join(", ")}].`,
+                        message: `Expecting two of these words [${Object.keys(HERO.CSL_5E_CV_LEVELS_TYPES).join(", ")}].`,
+                        example: `DCV with HTH and Ranged combat`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                } else if (item.system.OPTIONID === "HTHDCV" && item.csl5eCslDcvOcvTypes.length !== 1) {
+                    validations.push({
+                        property: "OPTION_ALIAS",
+                        message: `Expecting one of these words [${Object.keys(HERO.CSL_5E_CV_LEVELS_TYPES).join(", ")}].`,
                         example: `DCV with HTH and Ranged combat`,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
