@@ -419,13 +419,29 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
     return remainingRangePenalty;
 }
 
-async function addCslsIntoToHitRoll(action, attackHeroRoller) {
+/**
+ * Add CSL modifiers that are associated with the attack. This means that we ignore CSLs that are solely defensive.
+ *
+ * @param {*} action
+ * @param {HeroRoller} attackHeroRoller
+ */
+async function addAttackCslsIntoToHitRoll(action, attackHeroRoller) {
     const item = action.system.currentItem;
 
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item).details) {
-        // Requires A Roll?
+        // Requires A Roll? Only include if successful.
         if (!(await rollRequiresASkillRollCheck(csl.item))) {
+            continue;
+        }
+
+        // Is this a purely defensive CSL? If so, ignore it.
+        const cslChoices = csl.item.cslChoices;
+        const numChoices = Object.keys(cslChoices).length;
+        if (
+            (numChoices === 2 && cslChoices.dcv && cslChoices.dmcv) ||
+            (numChoices === 1 && (cslChoices.dcv || cslChoices.dmcv))
+        ) {
             continue;
         }
 
@@ -521,7 +537,7 @@ export async function doAoeActionToHit(action, options) {
     addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
 
     // Combat Skill Levels
-    await addCslsIntoToHitRoll(action, attackHeroRoller);
+    await addAttackCslsIntoToHitRoll(action, attackHeroRoller);
 
     // This is the actual roll to hit. In order to provide for a die roll
     // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
@@ -775,7 +791,7 @@ async function doSingleTargetActionToHit(action, options) {
     addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
 
     // Combat Skill Levels
-    await addCslsIntoToHitRoll(action, attackHeroRoller);
+    await addAttackCslsIntoToHitRoll(action, attackHeroRoller);
 
     // Mind Scan
     if (parseInt(options.mindScanMinds)) {
