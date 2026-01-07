@@ -5818,18 +5818,6 @@ export class HeroSystem6eItem extends Item {
         const combatUses = {};
 
         if (this.is5e) {
-            // 5e has a number of purely defensive options. Those should return nothing as they can't
-            // affect attacks and are figured against defense elsewhere.
-            // PH: FIXME: make sure they're applied elsewhere
-            if (
-                this.system.OPTIONID === "TWODCV" ||
-                this.system.OPTIONID === "DCV" ||
-                this.system.OPTIONID === "DECV" ||
-                this.system.OPTIONID === "HTHDCV"
-            ) {
-                return {};
-            }
-
             // Most CSLs have all options, so start with that.
             combatUses.ocv = "ocv";
             combatUses.omcv = "omcv";
@@ -5837,8 +5825,21 @@ export class HeroSystem6eItem extends Item {
             combatUses.dmcv = "dmcv";
             combatUses.dc = "dc";
 
+            // 5e has a number of purely defensive options. Remove offensive options for those.
+            // PH: FIXME: make sure they're applied elsewhere
+            const isOnlyDefensive =
+                this.system.OPTIONID === "TWODCV" ||
+                this.system.OPTIONID === "DCV" ||
+                this.system.OPTIONID === "DECV" ||
+                this.system.OPTIONID === "HTHDCV";
+            if (isOnlyDefensive) {
+                delete combatUses.ocv;
+                delete combatUses.omcv;
+                delete combatUses.dc;
+            }
+
             // If this CSL is mental only, remove the non mental options.
-            const isMentalOnly = this.system.OPTIONID === "MENTAL";
+            const isMentalOnly = this.system.OPTIONID === "MENTAL" || this.system.OPTIONID === "DECV";
             if (isMentalOnly) {
                 delete combatUses.ocv;
                 delete combatUses.dcv;
@@ -5846,11 +5847,13 @@ export class HeroSystem6eItem extends Item {
 
             // If this CSL for sure has no mental, remove the mental options.
             const hasNoMental =
-                (this.system.OPTIONID === "TWOOCV" &&
+                ((this.system.OPTIONID === "TWODCV" || this.system.OPTIONID === "TWOOCV") &&
                     !this.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.mental)) ||
                 this.system.OPTIONID === "MARTIAL" ||
                 this.system.OPTIONID === "HTH" ||
-                this.system.OPTIONID === "RANGED";
+                this.system.OPTIONID === "RANGED" ||
+                this.system.OPTIONID === "HTHDCV" ||
+                this.system.OPTIONID === "DCV";
             if (hasNoMental) {
                 delete combatUses.omcv;
                 delete combatUses.dmcv;

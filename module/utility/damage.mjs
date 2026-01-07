@@ -5,6 +5,10 @@ import { getSystemDisplayUnits } from "./units.mjs";
 import { squelch } from "./util.mjs";
 
 export function combatSkillLevelsForAttack(item) {
+    if (!item.system._active) {
+        console.error(`Missing _active`, item, this);
+    }
+
     const results = {
         ocv: 0,
         dcv: 0,
@@ -14,12 +18,11 @@ export function combatSkillLevelsForAttack(item) {
         details: [],
     };
 
-    if (!item.actor) return results;
-    if (!item.system._active) {
-        console.error(`Missing _active`, item, this);
+    if (!item.actor) {
+        return results;
     }
 
-    // PH: FIXME: As per PSL usage, do CSLs stack for base item and effective attack item?
+    // PH: FIXME: Same questions as PSL usage, do CSLs stack for base item and effective attack item? Would seem they should.
     for (const cslSkill of item.csls) {
         const detail = {
             ocv: 0,
@@ -35,7 +38,7 @@ export function combatSkillLevelsForAttack(item) {
                 detail[cslSkill.system.csl[i]]++;
             } else {
                 if (cslSkill.system.csl[i] !== undefined) {
-                    console.warn(`Unhandled csl specification, retargeting to +ocv`, cslSkill.system.csl);
+                    console.warn(`Unhandled CSL specification, retargeting to +ocv`, cslSkill.system.csl);
                 }
                 detail.ocv++;
             }
