@@ -5816,19 +5816,69 @@ export class HeroSystem6eItem extends Item {
         }
 
         const combatUses = {};
-        const isMental = this.system.XMLID === "MENTAL_COMBAT_LEVELS";
-        const _ocv = isMental ? "omcv" : "ocv";
-        const _dcv = isMental ? "dmcv" : "dcv";
-        combatUses[_ocv] = _ocv;
 
-        // Certain CSLs only have OCV/OMCV as an option.
-        if (
-            this.system.OPTIONID !== "SINGLE" &&
-            this.system.OPTIONID !== "SINGLESINGLE" &&
-            this.system.OPTIONID !== "SINGLESTRIKE"
-        ) {
+        if (this.is5e) {
+            // 5e has a number of purely defensive options. Those should return nothing as they can't
+            // affect attacks and are figured against defense elsewhere.
+            // PH: FIXME: make sure they're applied elsewhere
+            if (
+                this.system.OPTIONID === "TWODCV" ||
+                this.system.OPTIONID === "DCV" ||
+                this.system.OPTIONID === "DECV" ||
+                this.system.OPTIONID === "HTHDCV"
+            ) {
+                return {};
+            }
+
+            // Most CSLs have all options, so start with that.
+            combatUses.ocv = "ocv";
+            combatUses.omcv = "omcv";
+            combatUses.dcv = "dcv";
+            combatUses.dmcv = "dmcv";
+            combatUses.dc = "dc";
+
+            // If this CSL is mental only, remove the non mental options.
+            const isMentalOnly = this.system.OPTIONID === "MENTAL";
+            if (isMentalOnly) {
+                delete combatUses.ocv;
+                delete combatUses.dcv;
+            }
+
+            // If this CSL for sure has no mental, remove the mental options.
+            const hasNoMental =
+                (this.system.OPTIONID === "TWOOCV" &&
+                    !this.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.mental)) ||
+                this.system.OPTIONID === "MARTIAL" ||
+                this.system.OPTIONID === "HTH" ||
+                this.system.OPTIONID === "RANGED";
+            if (hasNoMental) {
+                delete combatUses.omcv;
+                delete combatUses.dmcv;
+            }
+
+            // Inexpensive options don't provide dcv, dmcv, or dc options - only omcv or ocv.
+            if (
+                this.system.OPTIONID === "SINGLESINGLE" ||
+                this.system.OPTIONID === "SINGLE" ||
+                this.system.OPTIONID === "SINGLESTRIKE"
+            ) {
+                delete combatUses.dcv;
+                delete combatUses.dmcv;
+                delete combatUses.dc;
+            }
+        } else {
+            const isMental = this.system.XMLID === "MENTAL_COMBAT_LEVELS";
+            const _ocv = isMental ? "omcv" : "ocv";
+            const _dcv = isMental ? "dmcv" : "dcv";
+            combatUses[_ocv] = _ocv;
             combatUses[_dcv] = _dcv;
             combatUses.dc = "dc";
+
+            // Inexpensive options don't provide dcv, dmcv, or dc options - only omcv or ocv.
+            if (this.system.OPTIONID === "SINGLE") {
+                delete combatUses[_dcv];
+                delete combatUses.dc;
+            }
         }
 
         return combatUses;
@@ -6020,6 +6070,7 @@ export class HeroSystem6eItem extends Item {
                     return isMartialManeuver(attackItem);
 
                 // PH: FIXME: We should make sure these two offer the appropriate options (no ocv/omcv)
+                // PH: FIXME: We should have TWODCV giving the right options and automatically applying
                 case "HTHDCV":
                 case "TWODCV":
                 case "TWOOCV": {

@@ -9,545 +9,8 @@ export function registerCslTests(quench) {
             describe("Combat Skill Levels (CSL & SL)", function () {
                 this.timeout(20000);
 
-                describe("cslChoices function", async function () {
-                    describe("5e", async function () {
-                        const contents = `
-                            <?xml version="1.0" encoding="UTF-16"?>
-                            <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
-                            <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
-                            <CHARACTER_INFO CHARACTER_NAME="TEST 5e CSLs" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
-                                <BACKGROUND />
-                                <PERSONALITY />
-                                <QUOTE />
-                                <TACTICS />
-                                <CAMPAIGN_USE />
-                                <APPEARANCE />
-                                <NOTES1 />
-                                <NOTES2 />
-                                <NOTES3 />
-                                <NOTES4 />
-                                <NOTES5 />
-                            </CHARACTER_INFO>
-                            <CHARACTERISTICS>
-                                <STR XMLID="STR" ID="1766530675632" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </STR>
-                                <DEX XMLID="DEX" ID="1766530675402" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </DEX>
-                                <CON XMLID="CON" ID="1766530675312" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </CON>
-                                <BODY XMLID="BODY" ID="1766530675632" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </BODY>
-                                <INT XMLID="INT" ID="1766530675225" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </INT>
-                                <EGO XMLID="EGO" ID="1766530676081" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </EGO>
-                                <PRE XMLID="PRE" ID="1766530675874" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </PRE>
-                                <COM XMLID="COM" ID="1766530675755" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </COM>
-                                <PD XMLID="PD" ID="1766530675297" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </PD>
-                                <ED XMLID="ED" ID="1766530675389" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </ED>
-                                <SPD XMLID="SPD" ID="1766530675628" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </SPD>
-                                <REC XMLID="REC" ID="1766530675552" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </REC>
-                                <END XMLID="END" ID="1766530676091" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </END>
-                                <STUN XMLID="STUN" ID="1766530675416" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </STUN>
-                                <RUNNING XMLID="RUNNING" ID="1766530675560" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </RUNNING>
-                                <SWIMMING XMLID="SWIMMING" ID="1766530675755" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </SWIMMING>
-                                <LEAPING XMLID="LEAPING" ID="1766530675894" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </LEAPING>
-                            </CHARACTERISTICS>
-                            <SKILLS>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1766531567248" BASECOST="0.0" LEVELS="0" ALIAS="CSLs" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                <NOTES />
-                                </LIST>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530693138" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLESINGLE" OPTIONID="SINGLESINGLE" OPTION_ALIAS="with any single attack with one specific weapon" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                    <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530697066" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530703345" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLESTRIKE" OPTIONID="SINGLESTRIKE" OPTION_ALIAS="with any single Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530709609" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STRIKE" OPTIONID="STRIKE" OPTION_ALIAS="with any Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530718850" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with any three maneuvers or a tight group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530726521" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MARTIAL" OPTIONID="MARTIAL" OPTION_ALIAS="with Martial Maneuvers" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530733513" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MAGIC" OPTIONID="MAGIC" OPTION_ALIAS="with Magic" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530739690" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with a broadly-defined category of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530745617" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHDCV" OPTIONID="HTHDCV" OPTION_ALIAS="DCV with HTH or Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530753770" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DECV" OPTIONID="DECV" OPTION_ALIAS="DECV versus all Mental Powers and attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530761961" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTH" OPTIONID="HTH" OPTION_ALIAS="with HTH Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530769146" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="with Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530776817" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTAL" OPTIONID="MENTAL" OPTION_ALIAS="with Mental Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530785177" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DCV" OPTIONID="DCV" OPTION_ALIAS="with DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530791249" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOOCV" OPTIONID="TWOOCV" OPTION_ALIAS="OCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530802081" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWODCV" OPTIONID="TWODCV" OPTION_ALIAS="DCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530808010" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHRANGED" OPTIONID="HTHRANGED" OPTION_ALIAS="with HTH and Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530817810" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHMENTAL" OPTIONID="HTHMENTAL" OPTION_ALIAS="with HTH and Mental Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530826562" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTALRANGED" OPTIONID="MENTALRANGED" OPTION_ALIAS="with Mental and Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766530832753" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="SKILL_LEVELS" ID="1766530843073" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OVERALL" OPTIONID="OVERALL" OPTION_ALIAS="Overall" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="SKILL_LEVELS" ID="1766596963832" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONCOMBAT" OPTIONID="NONCOMBAT" OPTION_ALIAS="with all non-combat Skills" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766531567248" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                            </SKILLS>
-                            <PERKS />
-                            <TALENTS />
-                            <MARTIALARTS />
-                            <POWERS />
-                            <DISADVANTAGES />
-                            <EQUIPMENT />
-                            </CHARACTER>
-                        `;
-
-                        let actor;
-                        before(async function () {
-                            actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
-                        });
-
-                        after(async function () {
-                            await deleteQuenchActor({ quench: this, actor });
-                        });
-
-                        describe("CSLs (Physical and Mental)", function () {
-                            it("should return correct choices for SINGLESINGLE CSL", function () {
-                                const singleSingleCsl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "COMBAT_LEVELS" &&
-                                        item.system.OPTIONID === "SINGLESINGLE",
-                                );
-                                expect(!!singleSingleCsl).to.be.true;
-
-                                // SINGLESINGLE should only have OCV, no DCV or DC
-                                const choices = singleSingleCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.not.have.property("dcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for SINGLE CSL", function () {
-                                const singleCsl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "SINGLE",
-                                );
-                                expect(!!singleCsl).to.be.true;
-
-                                // SINGLE should only have OCV, no DCV or DC
-                                const choices = singleCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.not.have.property("dcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for SINGLESTRIKE CSL", function () {
-                                const singleCsl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "COMBAT_LEVELS" &&
-                                        item.system.OPTIONID === "SINGLESTRIKE",
-                                );
-                                expect(!!singleCsl).to.be.true;
-
-                                // SINGLE should only have OCV, no DCV or DC
-                                const choices = singleCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.not.have.property("dcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for DCV CSL", function () {
-                                const dcvCsl = actor.items.find(
-                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "DCV",
-                                );
-                                expect(!!dcvCsl).to.be.true;
-
-                                // DCV CSL should have OCV, DCV, and DC
-                                const choices = dcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for ALL CSL", function () {
-                                const allCsl = actor.items.find(
-                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "ALL",
-                                );
-                                expect(!!allCsl).to.be.true;
-
-                                // ALL CSL should have OCV, DCV, and DC
-                                const choices = allCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
-                                expect(choices).to.have.property("dc");
-                            });
-                        });
-
-                        describe("SLs", function () {
-                            it("should return correct choices for OVERALL Skill Levels", function () {
-                                const overallSl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
-                                );
-                                expect(!!overallSl).to.be.true;
-
-                                const choices = overallSl.cslChoices;
-                                // OVERALL Skill Levels should have all combat values
-                                expect(Object.keys(choices)).to.have.length(5);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for NONCOMBAT Skill Levels", function () {
-                                const NonCombatSl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "NONCOMBAT",
-                                );
-                                expect(!!NonCombatSl).to.be.true;
-
-                                // Only OVERALL Skill Levels should have all combat values
-                                const choices = NonCombatSl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(0);
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dcv");
-                                expect(choices).to.not.have.property("dmcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-                        });
-                    });
-
-                    describe("6e", async function () {
-                        const contents = `
-                            <?xml version="1.0" encoding="UTF-16"?>
-                            <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
-                            <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
-                            <CHARACTER_INFO CHARACTER_NAME="TEST 6e CSLs" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
-                                <BACKGROUND />
-                                <PERSONALITY />
-                                <QUOTE />
-                                <TACTICS />
-                                <CAMPAIGN_USE />
-                                <APPEARANCE />
-                                <NOTES1 />
-                                <NOTES2 />
-                                <NOTES3 />
-                                <NOTES4 />
-                                <NOTES5 />
-                            </CHARACTER_INFO>
-                            <CHARACTERISTICS>
-                                <STR XMLID="STR" ID="1766602873976" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </STR>
-                                <DEX XMLID="DEX" ID="1766602873466" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </DEX>
-                                <CON XMLID="CON" ID="1766602873756" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </CON>
-                                <INT XMLID="INT" ID="1766602873575" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </INT>
-                                <EGO XMLID="EGO" ID="1766602873777" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </EGO>
-                                <PRE XMLID="PRE" ID="1766602873884" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </PRE>
-                                <OCV XMLID="OCV" ID="1766602874109" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </OCV>
-                                <DCV XMLID="DCV" ID="1766602873488" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </DCV>
-                                <OMCV XMLID="OMCV" ID="1766602873355" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </OMCV>
-                                <DMCV XMLID="DMCV" ID="1766602873724" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </DMCV>
-                                <SPD XMLID="SPD" ID="1766602873826" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </SPD>
-                                <PD XMLID="PD" ID="1766602873901" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </PD>
-                                <ED XMLID="ED" ID="1766602873652" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </ED>
-                                <REC XMLID="REC" ID="1766602874131" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </REC>
-                                <END XMLID="END" ID="1766602873516" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </END>
-                                <BODY XMLID="BODY" ID="1766602873927" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </BODY>
-                                <STUN XMLID="STUN" ID="1766602873712" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </STUN>
-                                <RUNNING XMLID="RUNNING" ID="1766602873625" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </RUNNING>
-                                <SWIMMING XMLID="SWIMMING" ID="1766602873315" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </SWIMMING>
-                                <LEAPING XMLID="LEAPING" ID="1766602874001" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </LEAPING>
-                            </CHARACTERISTICS>
-                            <SKILLS>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1766603793329" BASECOST="0.0" LEVELS="0" ALIAS="Physical CSLs" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                    <NOTES />
-                                </LIST>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602895580" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602901059" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with a small group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602907059" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with a large group of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602913067" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTH" OPTIONID="HTH" OPTION_ALIAS="with HTH Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602919051" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="with Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="COMBAT_LEVELS" ID="1766602924379" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="with All Attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603793329" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1766603841563" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                <NOTES />
-                                </LIST>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1766603844397" BASECOST="0.0" LEVELS="0" ALIAS="Mental CSLs" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                <NOTES />
-                                </LIST>
-                                <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1766602956499" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with a single Mental Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603844397" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1766602960891" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with a group of Mental Powers" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603844397" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1766602966531" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with all Mental Powers" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603844397" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1766603883799" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                <NOTES />
-                                </LIST>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1766603885850" BASECOST="0.0" LEVELS="0" ALIAS="Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                <NOTES />
-                                </LIST>
-                                <SKILL XMLID="SKILL_LEVELS" ID="1766602988187" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OVERALL" OPTIONID="OVERALL" OPTION_ALIAS="Overall" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603885850" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                                <SKILL XMLID="SKILL_LEVELS" ID="1766602994556" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLEMOVEMENT" OPTIONID="SINGLEMOVEMENT" OPTION_ALIAS="with one mode of Movement" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1766603885850" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                                <NOTES />
-                                </SKILL>
-                            </SKILLS>
-                            <PERKS />
-                            <TALENTS />
-                            <MARTIALARTS />
-                            <POWERS />
-                            <DISADVANTAGES />
-                            <EQUIPMENT />
-                            </CHARACTER>
-                        `;
-
-                        let actor;
-                        before(async function () {
-                            actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
-                        });
-
-                        after(async function () {
-                            await deleteQuenchActor({ quench: this, actor });
-                        });
-
-                        describe("Physical CSL", function () {
-                            it("should return correct choices for Physical SINGLE CSL", function () {
-                                const singleCsl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "SINGLE",
-                                );
-                                expect(!!singleCsl).to.be.true;
-
-                                // Physical SINGLE should only have OCV, no DCV or DC
-                                const choices = singleCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.not.have.property("dcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for Physical TIGHT CSL", function () {
-                                const tightCsl = actor.items.find(
-                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "TIGHT",
-                                );
-                                expect(!!tightCsl).to.be.true;
-
-                                // Physical TIGHT should have OCV, DCV, and DC
-                                const choices = tightCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for Physical ALL CSL", function () {
-                                const allCsl = actor.items.find(
-                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "ALL",
-                                );
-                                expect(!!allCsl).to.be.true;
-
-                                // Physical ALL should have OCV, DCV, and DC
-                                const choices = allCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
-                                expect(choices).to.have.property("dc");
-                            });
-                        });
-
-                        describe("Mental CSL", function () {
-                            it("should return correct choices for Mental SINGLE CSL", function () {
-                                const mentalSingleCsl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "MENTAL_COMBAT_LEVELS" &&
-                                        item.system.OPTIONID === "SINGLE",
-                                );
-                                expect(!!mentalSingleCsl).to.be.true;
-
-                                // Mental SINGLE should only have OMCV, no DMCV or DC
-                                const choices = mentalSingleCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.not.have.property("dmcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for Mental BROAD CSL", function () {
-                                const mentalBroadCsl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "MENTAL_COMBAT_LEVELS" &&
-                                        item.system.OPTIONID === "BROAD",
-                                );
-                                expect(!!mentalBroadCsl).to.be.true;
-
-                                // Mental BROAD should have OMCV, DMCV, and DC
-                                const choices = mentalBroadCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-                        });
-
-                        describe("Skill Levels", function () {
-                            it("should return correct choices for OVERALL Skill Levels", function () {
-                                const overallSl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
-                                );
-                                expect(!!overallSl).to.be.true;
-
-                                // OVERALL Skill Levels should have all combat values
-                                const choices = overallSl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return empty choices for non-OVERALL Skill Levels", function () {
-                                const movementSl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "SKILL_LEVELS" &&
-                                        item.system.OPTIONID === "SINGLEMOVEMENT",
-                                );
-                                expect(!!movementSl).to.be.true;
-
-                                // Non-OVERALL Skill Levels should return empty object
-                                const choices = movementSl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(0);
-                            });
-                        });
-                    });
-                });
-
-                describe("Applicability To Attack - cslAppliesTo", function () {
-                    describe("5e", async function () {
-                        const contents = `
+                describe("5e", async function () {
+                    const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
                             <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                                 <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -854,134 +317,123 @@ export function registerCslTests(quench) {
                                 <EQUIPMENT />
                             </CHARACTER>
                         `;
-                        let actor;
+                    let actor;
 
-                        let singleTargetMentalBlast;
-                        let aoeMentalBlast;
-                        let singleTargetDrainStun;
-                        let singleTargetDrainBody;
-                        let aoeDrainStun;
-                        let strike;
-                        let basicStrike;
-                        let martialStrike;
-                        let flyingDodge;
-                        let basicShot;
-                        let defensiveShot;
-                        let offensiveRangedDisarm;
+                    let singleTargetMentalBlast;
+                    let aoeMentalBlast;
+                    let singleTargetDrainStun;
+                    let singleTargetDrainBody;
+                    let aoeDrainStun;
+                    let strike;
+                    let basicStrike;
+                    let martialStrike;
+                    let flyingDodge;
+                    let basicShot;
+                    let defensiveShot;
+                    let offensiveRangedDisarm;
 
-                        let notImplementedCorrectlyCsl;
-                        let singleNonMentalCsl;
-                        let singleMentalCsl;
-                        let singleStrikeCsl;
-                        let anyStrikeCsl;
-                        let multipowerTightGroupOfAttacksCsl;
-                        let listHthMartialArtsStyleCsl;
-                        let martialManeuversCsl;
-                        let magicSubsetCsl;
-                        let multipowerBroadGroupOfAttacksCsl;
+                    let notImplementedCorrectlyCsl;
+                    let singleNonMentalCsl;
+                    let singleMentalCsl;
+                    let singleStrikeCsl;
+                    let anyStrikeCsl;
+                    let multipowerTightGroupOfAttacksCsl;
+                    let listHthMartialArtsStyleCsl;
+                    let martialManeuversCsl;
+                    let magicSubsetCsl;
+                    let multipowerBroadGroupOfAttacksCsl;
 
-                        let hthDcvCsl;
-                        let rangedDcvCsl;
-                        let hthCsl;
-                        let rangedCsl;
-                        let mentalCsl;
-                        let hthAndRangedDcvCsl;
-                        let hthAndRangedOcvCsl;
-                        let hthAndMentalDcvCsl;
-                        let hthAndMentalOcvCsl;
-                        let rangedAndMentalDcvCsl;
-                        let rangedAndMentalOcvCsl;
-                        let dcvCsl;
-                        let decvCsl;
-                        let allCsl;
+                    let hthDcvCsl;
+                    let rangedDcvCsl;
+                    let hthCsl;
+                    let rangedCsl;
+                    let mentalCsl;
+                    let hthAndRangedDcvCsl;
+                    let hthAndRangedOcvCsl;
+                    let hthAndMentalDcvCsl;
+                    let hthAndMentalOcvCsl;
+                    let rangedAndMentalDcvCsl;
+                    let rangedAndMentalOcvCsl;
+                    let dcvCsl;
+                    let decvCsl;
+                    let allCsl;
 
-                        let overallSl;
-                        let nonOverallSl;
+                    let overallSl;
+                    let nonOverallSl;
 
-                        let invalidTwoDcvCsl;
-                        let invalidTwoOcvCsl;
+                    let invalidTwoDcvCsl;
+                    let invalidTwoOcvCsl;
 
-                        before(async function () {
-                            actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
-                            singleTargetMentalBlast = actor.items.find(
-                                (item) => item.name === "Single Target Ego Attack",
-                            );
-                            aoeMentalBlast = actor.items.find((item) => item.name === "AoE Ego Attack");
-                            singleTargetDrainStun = actor.items.find(
-                                (item) => item.name === "Single Target Drain STUN",
-                            );
-                            singleTargetDrainBody = actor.items.find(
-                                (item) => item.name === "Single Target Drain BODY",
-                            );
-                            aoeDrainStun = actor.items.find((item) => item.name === "AoE Drain STUN");
-                            strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                            basicStrike = actor.items.find((item) => item.name === "Basic Strike");
-                            martialStrike = actor.items.find((item) => item.name === "Martial Strike");
-                            flyingDodge = actor.items.find((item) => item.name === "Flying Dodge");
-                            basicShot = actor.items.find((item) => item.name === "Basic Shot");
-                            defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
-                            offensiveRangedDisarm = actor.items.find((item) => item.name === "Offensive Ranged Disarm");
+                        singleTargetMentalBlast = actor.items.find((item) => item.name === "Single Target Ego Attack");
+                        aoeMentalBlast = actor.items.find((item) => item.name === "AoE Ego Attack");
+                        singleTargetDrainStun = actor.items.find((item) => item.name === "Single Target Drain STUN");
+                        singleTargetDrainBody = actor.items.find((item) => item.name === "Single Target Drain BODY");
+                        aoeDrainStun = actor.items.find((item) => item.name === "AoE Drain STUN");
+                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                        martialStrike = actor.items.find((item) => item.name === "Martial Strike");
+                        flyingDodge = actor.items.find((item) => item.name === "Flying Dodge");
+                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                        defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
+                        offensiveRangedDisarm = actor.items.find((item) => item.name === "Offensive Ranged Disarm");
 
-                            notImplementedCorrectlyCsl = actor.items.find(
-                                (item) => item.name === "Not Implemented Correctly",
-                            );
-                            singleNonMentalCsl = actor.items.find(
-                                (item) => item.name === "Single Attack Non Mental CSL",
-                            );
-                            singleMentalCsl = actor.items.find((item) => item.name === "Single Attack Mental CSL");
-                            singleStrikeCsl = actor.items.find((item) => item.name === "Single Strike CSL");
-                            anyStrikeCsl = actor.items.find((item) => item.name === "Any Strike CSL");
-                            multipowerTightGroupOfAttacksCsl = actor.items.find(
-                                (item) => item.name === "Multipower Tight Group of Attacks CSL",
-                            );
-                            listHthMartialArtsStyleCsl = actor.items.find(
-                                (item) => item.name === "HTH Martial Arts Style List CSL",
-                            );
-                            martialManeuversCsl = actor.items.find((item) => item.name === "Martial Maneuvers CSL");
-                            magicSubsetCsl = actor.items.find((item) => item.name === "Magic Subset CSL");
-                            multipowerBroadGroupOfAttacksCsl = actor.items.find(
-                                (item) => item.name === "Multipower Broad CSL",
-                            );
+                        notImplementedCorrectlyCsl = actor.items.find(
+                            (item) => item.name === "Not Implemented Correctly",
+                        );
+                        singleNonMentalCsl = actor.items.find((item) => item.name === "Single Attack Non Mental CSL");
+                        singleMentalCsl = actor.items.find((item) => item.name === "Single Attack Mental CSL");
+                        singleStrikeCsl = actor.items.find((item) => item.name === "Single Strike CSL");
+                        anyStrikeCsl = actor.items.find((item) => item.name === "Any Strike CSL");
+                        multipowerTightGroupOfAttacksCsl = actor.items.find(
+                            (item) => item.name === "Multipower Tight Group of Attacks CSL",
+                        );
+                        listHthMartialArtsStyleCsl = actor.items.find(
+                            (item) => item.name === "HTH Martial Arts Style List CSL",
+                        );
+                        martialManeuversCsl = actor.items.find((item) => item.name === "Martial Maneuvers CSL");
+                        magicSubsetCsl = actor.items.find((item) => item.name === "Magic Subset CSL");
+                        multipowerBroadGroupOfAttacksCsl = actor.items.find(
+                            (item) => item.name === "Multipower Broad CSL",
+                        );
 
-                            hthCsl = actor.items.find((item) => item.name === "HTH CSL");
-                            rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
-                            mentalCsl = actor.items.find((item) => item.name === "Mental CSL");
+                        hthCsl = actor.items.find((item) => item.name === "HTH CSL");
+                        rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
+                        mentalCsl = actor.items.find((item) => item.name === "Mental CSL");
 
-                            hthDcvCsl = actor.items.find((item) => item.name === "HTH DCV CSL");
-                            rangedDcvCsl = actor.items.find((item) => item.name === "Ranged DCV CSL");
+                        hthDcvCsl = actor.items.find((item) => item.name === "HTH DCV CSL");
+                        rangedDcvCsl = actor.items.find((item) => item.name === "Ranged DCV CSL");
 
-                            dcvCsl = actor.items.find((item) => item.name === "DCV CSL");
-                            decvCsl = actor.items.find((item) => item.name === "DECV CSL");
+                        dcvCsl = actor.items.find((item) => item.name === "DCV CSL");
+                        decvCsl = actor.items.find((item) => item.name === "DECV CSL");
 
-                            hthAndRangedDcvCsl = actor.items.find((item) => item.name === "HTH and Ranged DCV CSL");
-                            hthAndRangedOcvCsl = actor.items.find((item) => item.name === "HTH and Ranged OCV CSL");
-                            hthAndMentalDcvCsl = actor.items.find((item) => item.name === "HTH and Mental DCV CSL");
-                            hthAndMentalOcvCsl = actor.items.find((item) => item.name === "HTH and Mental OCV CSL");
-                            rangedAndMentalDcvCsl = actor.items.find(
-                                (item) => item.name === "Ranged and Mental DCV CSL",
-                            );
-                            rangedAndMentalOcvCsl = actor.items.find(
-                                (item) => item.name === "Mental and Ranged OCV CSL",
-                            );
+                        hthAndRangedDcvCsl = actor.items.find((item) => item.name === "HTH and Ranged DCV CSL");
+                        hthAndRangedOcvCsl = actor.items.find((item) => item.name === "HTH and Ranged OCV CSL");
+                        hthAndMentalDcvCsl = actor.items.find((item) => item.name === "HTH and Mental DCV CSL");
+                        hthAndMentalOcvCsl = actor.items.find((item) => item.name === "HTH and Mental OCV CSL");
+                        rangedAndMentalDcvCsl = actor.items.find((item) => item.name === "Ranged and Mental DCV CSL");
+                        rangedAndMentalOcvCsl = actor.items.find((item) => item.name === "Mental and Ranged OCV CSL");
 
-                            allCsl = actor.items.find((item) => item.name === "All CSL");
+                        allCsl = actor.items.find((item) => item.name === "All CSL");
 
-                            overallSl = actor.items.find((item) => item.name === "Overall SL");
-                            nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
+                        overallSl = actor.items.find((item) => item.name === "Overall SL");
+                        nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
 
-                            invalidTwoDcvCsl = actor.items.find(
-                                (item) => item.name === "Didn't mention DCV with Mental, HTH, or Ranged",
-                            );
-                            invalidTwoOcvCsl = actor.items.find(
-                                (item) => item.name === "Didn't mention OCV with Mental, HTH, or Ranged",
-                            );
-                        });
+                        invalidTwoDcvCsl = actor.items.find(
+                            (item) => item.name === "Didn't mention DCV with Mental, HTH, or Ranged",
+                        );
+                        invalidTwoOcvCsl = actor.items.find(
+                            (item) => item.name === "Didn't mention OCV with Mental, HTH, or Ranged",
+                        );
+                    });
 
-                        after(async function () {
-                            await deleteQuenchActor({ quench: this, actor });
-                        });
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
 
+                    describe("Applicability To Attack - cslAppliesTo", function () {
                         describe("cslAppliesTo correctness", function () {
                             it("should return false when not called on a CSL/MCSL/SL", function () {
                                 expect(strike.cslAppliesTo(strike)).to.be.false;
@@ -1329,8 +781,276 @@ export function registerCslTests(quench) {
                         });
                     });
 
-                    describe("6e", async function () {
-                        const contents = `
+                    describe("cslChoices function", async function () {
+                        describe("CSLs (Physical and Mental)", function () {
+                            it("should return correct choices for SINGLESINGLE CSL", function () {
+                                // SINGLESINGLE should only have OCV, no DCV or DC
+                                const choices = notImplementedCorrectlyCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(2);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for SINGLE CSL", function () {
+                                // SINGLE should only have OCV, no DCV or DC
+                                const choices = singleNonMentalCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(2);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for SINGLESTRIKE CSL", function () {
+                                // SINGLESTRIKE should only have OCV, no DCV or DC
+                                const choices = singleStrikeCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(2);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for STRIKE CSL", function () {
+                                // STRIKE CSL should have OCV, DCV, and DC
+                                const choices = anyStrikeCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for TIGHT CSL", function () {
+                                // TIGHT should have OCV, DCV, and DC
+                                const choices = multipowerTightGroupOfAttacksCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for MARTIAL CSL", function () {
+                                // MARTIAL should have OCV, DCV, and DC
+                                const choices = martialManeuversCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for MAGIC CSL", function () {
+                                // MAGIC should have OCV, DCV, and DC
+                                const choices = magicSubsetCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for BROAD CSL", function () {
+                                // BROAD should have OCV, DCV, and DC
+                                const choices = multipowerBroadGroupOfAttacksCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for HTHDCV CSL - HTH option", function () {
+                                // HTHDCV should not ever have OCV, DCV, and DC displayed
+                                const choices = hthDcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for HTHDCV CSL - Ranged option", function () {
+                                // HTHDCV should not ever have OCV, DCV, and DC displayed
+                                const choices = rangedDcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for DECV CSL", function () {
+                                // DECV should not ever have OMCV, DMCV, and DC displayed as it's an Active Effect
+                                const choices = rangedDcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("omcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for HTH CSL", function () {
+                                // HTH should have OCV, DCV, and DC
+                                const choices = hthCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for RANGED CSL", function () {
+                                // RANGED should have OCV, DCV, and DC
+                                const choices = rangedCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for MENTAL CSL", function () {
+                                // MENTAL should have OMCV, DMCV, and DC
+                                const choices = mentalCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for DCV CSL", function () {
+                                // DCV should not ever have OCV, DCV, and DC displayed as it's an Active Effect
+                                const choices = dcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("omcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for TWOOCV CSL - HTH and Ranged", function () {
+                                // TWOOCV should have OCV, DCV, and DC
+                                const choices = hthAndRangedOcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for TWOOCV CSL - HTH and Mental", function () {
+                                // TWOOCV should have OCV, DCV, and DC
+                                const choices = hthAndMentalOcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for TWOOCV CSL - Ranged and Mental", function () {
+                                // TWOOCV should have OCV, DCV, and DC
+                                const choices = rangedAndMentalOcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for TWODCV CSL - HTH and Ranged", function () {
+                                // TWOOCV should have OCV, DCV, and DC
+                                const choices = hthAndRangedDcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for TWODCV CSL - HTH and Mental", function () {
+                                // TWOOCV should not ever have OCV, OMCV, DCV, DMCV, and DC displayed
+                                const choices = hthAndMentalDcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("omcv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for TWODCV CSL - Ranged and Mental", function () {
+                                // TWOOCV should not ever have OCV, OMCV, DCV, DMCV, and DC displayed
+                                const choices = rangedAndMentalDcvCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("omcv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for ALL CSL", function () {
+                                const allCsl = actor.items.find(
+                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "ALL",
+                                );
+                                expect(!!allCsl).to.be.true;
+
+                                // ALL CSL should have OCV, DCV, and DC
+                                const choices = allCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+                        });
+
+                        describe("SLs", function () {
+                            it("should return correct choices for OVERALL Skill Levels", function () {
+                                const overallSl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
+                                );
+                                expect(!!overallSl).to.be.true;
+
+                                const choices = overallSl.cslChoices;
+                                // OVERALL Skill Levels should have all combat values
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for NONCOMBAT Skill Levels", function () {
+                                const NonCombatSl = actor.items.find(
+                                    (item) =>
+                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "NONCOMBAT",
+                                );
+                                expect(!!NonCombatSl).to.be.true;
+
+                                // Only OVERALL Skill Levels should have all combat values
+                                const choices = NonCombatSl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
+                                expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("omcv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+                        });
+                    });
+                });
+
+                describe("6e", function () {
+                    const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
                             <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                                 <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -1586,80 +1306,75 @@ export function registerCslTests(quench) {
                                 <EQUIPMENT />
                             </CHARACTER>
                         `;
-                        let actor;
+                    let actor;
 
-                        let singleTargetMentalBlast;
-                        let aoeMentalBlast;
-                        let singleTargetDrain;
-                        let aoeDrain;
-                        let strike;
-                        let basicStrike;
-                        let counterstrike;
-                        let basicShot;
+                    let singleTargetMentalBlast;
+                    let aoeMentalBlast;
+                    let singleTargetDrain;
+                    let aoeDrain;
+                    let strike;
+                    let basicStrike;
+                    let counterstrike;
+                    let basicShot;
 
-                        let singleAttackCslShouldNotWork;
-                        let singleStrikeTargetCsl;
-                        let smallGroupCsl;
-                        let largeGroupCsl;
-                        let hthCsl;
-                        let rangedCsl;
-                        let allAttacksCsl;
+                    let singleAttackCslShouldNotWork;
+                    let singleStrikeTargetCsl;
+                    let smallGroupCsl;
+                    let largeGroupCsl;
+                    let hthCsl;
+                    let rangedCsl;
+                    let allAttacksCsl;
 
-                        let singleMentalAttackShouldNotWork;
-                        let singleMentalAttackMcsl;
-                        let groupIndividualMentalMcsl;
-                        let groupMentalMcsl;
-                        let allMentalMcsl;
+                    let singleMentalAttackShouldNotWork;
+                    let singleMentalAttackMcsl;
+                    let groupIndividualMentalMcsl;
+                    let groupMentalMcsl;
+                    let allMentalMcsl;
 
-                        let overallSl;
-                        let nonOverallSl;
+                    let overallSl;
+                    let nonOverallSl;
 
-                        before(async function () {
-                            actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
-                            singleTargetMentalBlast = actor.items.find(
-                                (item) => item.name === "Single Target Mental Blast",
-                            );
-                            aoeMentalBlast = actor.items.find((item) => item.name === "AoE Mental Blast");
-                            singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
-                            aoeDrain = actor.items.find((item) => item.name === "AoE Drain");
-                            strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                            basicStrike = actor.items.find((item) => item.name === "Basic Strike");
-                            counterstrike = actor.items.find((item) => item.name === "Counterstrike");
-                            basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                        singleTargetMentalBlast = actor.items.find(
+                            (item) => item.name === "Single Target Mental Blast",
+                        );
+                        aoeMentalBlast = actor.items.find((item) => item.name === "AoE Mental Blast");
+                        singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
+                        aoeDrain = actor.items.find((item) => item.name === "AoE Drain");
+                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                        counterstrike = actor.items.find((item) => item.name === "Counterstrike");
+                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
 
-                            singleAttackCslShouldNotWork = actor.items.find(
-                                (item) => item.name === "Single Attack CSL Should Not Work",
-                            );
-                            singleStrikeTargetCsl = actor.items.find(
-                                (item) => item.name === "Strike Single Target CSL",
-                            );
-                            smallGroupCsl = actor.items.find((item) => item.name === "Small Group CSL");
-                            largeGroupCsl = actor.items.find((item) => item.name === "Large Group CSL");
-                            hthCsl = actor.items.find((item) => item.name === "HTH CSL");
-                            rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
-                            allAttacksCsl = actor.items.find((item) => item.name === "All Attacks CSL");
+                        singleAttackCslShouldNotWork = actor.items.find(
+                            (item) => item.name === "Single Attack CSL Should Not Work",
+                        );
+                        singleStrikeTargetCsl = actor.items.find((item) => item.name === "Strike Single Target CSL");
+                        smallGroupCsl = actor.items.find((item) => item.name === "Small Group CSL");
+                        largeGroupCsl = actor.items.find((item) => item.name === "Large Group CSL");
+                        hthCsl = actor.items.find((item) => item.name === "HTH CSL");
+                        rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
+                        allAttacksCsl = actor.items.find((item) => item.name === "All Attacks CSL");
 
-                            singleMentalAttackShouldNotWork = actor.items.find(
-                                (item) => item.name === "Single Mental Attack MCSL Should Not Work",
-                            );
-                            singleMentalAttackMcsl = actor.items.find(
-                                (item) => item.name === "Single Mental Attack MCSL",
-                            );
-                            groupIndividualMentalMcsl = actor.items.find(
-                                (item) => item.name === "Group MCSL (Individual)",
-                            );
-                            groupMentalMcsl = actor.items.find((item) => item.name === "Group MCSL");
-                            allMentalMcsl = actor.items.find((item) => item.name === "All Mental MCSL");
+                        singleMentalAttackShouldNotWork = actor.items.find(
+                            (item) => item.name === "Single Mental Attack MCSL Should Not Work",
+                        );
+                        singleMentalAttackMcsl = actor.items.find((item) => item.name === "Single Mental Attack MCSL");
+                        groupIndividualMentalMcsl = actor.items.find((item) => item.name === "Group MCSL (Individual)");
+                        groupMentalMcsl = actor.items.find((item) => item.name === "Group MCSL");
+                        allMentalMcsl = actor.items.find((item) => item.name === "All Mental MCSL");
 
-                            overallSl = actor.items.find((item) => item.name === "Overall SL");
-                            nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
-                        });
+                        overallSl = actor.items.find((item) => item.name === "Overall SL");
+                        nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
+                    });
 
-                        after(async function () {
-                            await deleteQuenchActor({ quench: this, actor });
-                        });
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
 
+                    describe("Applicability To Attack - cslAppliesTo", function () {
                         describe("cslAppliesTo correctness", function () {
                             it("should return false when not called on a CSL/MCSL/SL", function () {
                                 expect(strike.cslAppliesTo(strike)).to.be.false;
@@ -1786,6 +1501,112 @@ export function registerCslTests(quench) {
                                 expect(nonOverallSl.cslAppliesTo(strike)).to.be.false;
                                 expect(nonOverallSl.cslAppliesTo(counterstrike)).to.be.false;
                                 expect(nonOverallSl.cslAppliesTo(basicShot)).to.be.false;
+                            });
+                        });
+                    });
+
+                    describe("Applicability to Attack - cslChoices", function () {
+                        describe("Physical CSL", function () {
+                            it("should return correct choices for Physical SINGLE CSL", function () {
+                                // Physical SINGLE should only have OCV, no DCV or DC
+                                const choices = singleStrikeTargetCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for Physical TIGHT CSL", function () {
+                                // Physical TIGHT should have OCV, DCV, and DC
+                                const choices = smallGroupCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for Physical BROAD CSL", function () {
+                                // Physical BROAD should have OCV, DCV, and DC
+                                const choices = largeGroupCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for Physical HTH CSL", function () {
+                                // Physical HTH should have OCV, DCV, and DC
+                                const choices = hthCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for Physical RANGED CSL", function () {
+                                // Physical RANGED should have OCV, DCV, and DC
+                                const choices = rangedCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for Physical ALL CSL", function () {
+                                // Physical ALL should have OCV, DCV, and DC
+                                const choices = allAttacksCsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dc");
+                            });
+                        });
+
+                        describe("Mental CSL", function () {
+                            it("should return correct choices for Mental SINGLE CSL", function () {
+                                // Mental SINGLE should only have OMCV, no DMCV or DC
+                                const choices = singleMentalAttackMcsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.not.have.property("dmcv");
+                                expect(choices).to.not.have.property("dc");
+                            });
+
+                            it("should return correct choices for Mental TIGHT CSL", function () {
+                                // Mental TIGHT should have OMCV, DMCV, and DC
+                                const choices = groupMentalMcsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for Mental BROAD CSL", function () {
+                                // Mental BROAD should have OMCV, DMCV, and DC
+                                const choices = allMentalMcsl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+                        });
+
+                        describe("Skill Levels", function () {
+                            it("should return correct choices for OVERALL Skill Levels", function () {
+                                // OVERALL Skill Levels should have all combat values
+                                const choices = overallSl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(choices).to.have.property("ocv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dmcv");
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return empty choices for non-OVERALL Skill Levels", function () {
+                                // Non-OVERALL Skill Levels should return empty object
+                                const choices = nonOverallSl.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(0);
                             });
                         });
                     });
