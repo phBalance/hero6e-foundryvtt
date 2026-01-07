@@ -2741,15 +2741,21 @@ export class HeroSystem6eActor extends Actor {
             }
             uploadProgressBar.advance(`${this.name}: Restored retained damage`, 0);
 
-            uploadProgressBar.advance(`${this.name}: Assign targetId for Combat Skill Levels CSL`, 1);
+            uploadProgressBar.advance(`${this.name}: Assigning targetId for Combat Skill Levels CSL`, 0);
             for (const csl of this.allCslSkills) {
                 const _ADDER = foundry.utils.deepClone(csl.system._source.ADDER);
                 for (const customAdder of _ADDER.filter((a) => a.XMLID === "ADDER")) {
-                    const targetId = this._cslItems.find((item) =>
-                        `${item.name}${item.system.ALIAS}${item.system.XMLID}`.match(
-                            new RegExp(customAdder.ALIAS, "i"),
-                        ),
-                    )?.id;
+                    const targetId = this._cslItems.find((item) => {
+                        // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
+                        // is thus providing a name - other options can have multiple matches.
+                        const aliasToMatch = `^${customAdder.ALIAS}$`;
+
+                        return (
+                            `${item.name}`.match(new RegExp(aliasToMatch, "i")) ||
+                            `${item.system.ALIAS}`.match(new RegExp(aliasToMatch, "i")) ||
+                            `${item.system.XMLID}`.match(new RegExp(aliasToMatch, "i"))
+                        );
+                    })?.id;
 
                     if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
                         console.warn(
@@ -2767,7 +2773,7 @@ export class HeroSystem6eActor extends Actor {
                 //       _source as well... so we're not sure why this voodoo works.
                 await csl.update({ [`system.ADDER`]: _ADDER });
             }
-            uploadProgressBar.advance(`${this.name}: Processed CSL`, 0);
+            uploadProgressBar.advance(`${this.name}: Assigned targetId for Combat Skill Levels CSL`, 1);
 
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);
@@ -3453,10 +3459,11 @@ export class HeroSystem6eActor extends Actor {
         return this.items
             .filter(
                 (o) =>
-                    o.rollsToHit() &&
-                    (!o.baseInfo.behaviors.includes("optional-maneuver") ||
-                        game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
-                    !o.system.XMLID.startsWith("__"),
+                    (o.rollsToHit() &&
+                        (!o.baseInfo.behaviors.includes("optional-maneuver") ||
+                            game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
+                        !o.system.XMLID.startsWith("__")) ||
+                    o.baseInfo.type.includes("framework"), // CSL custom adders can specify a framework to indicate all of the framework's children are included.
             )
             .sort((a, b) => a.name.localeCompare(b.name))
             .sort(_sortCslItems);
