@@ -208,8 +208,13 @@ export class ItemAttackFormApplication extends FormApplication {
                         delete entry.cslChoices.dmcv;
                     }
 
-                    // If there are now no choices left, skip this CSL.
-                    if (Object.keys(entry.cslChoices).length === 0) {
+                    // If there are now no choices left, skip this CSL. If there are only defensive options left, skip this CSL as well.
+                    const numFilteredChoices = Object.keys(entry.cslChoices).length;
+                    if (
+                        Object.keys(entry.cslChoices).length === 0 ||
+                        (numFilteredChoices === 2 && entry.cslChoices.dcv && entry.cslChoices.dmcv) ||
+                        (numFilteredChoices === 1 && (entry.cslChoices.dcv || entry.cslChoices.dmcv))
+                    ) {
                         continue;
                     }
 
