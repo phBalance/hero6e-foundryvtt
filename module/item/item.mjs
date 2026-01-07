@@ -1403,11 +1403,11 @@ export class HeroSystem6eItem extends Item {
         const item = this;
 
         if (!this.isActive) {
-            console.warn(`${item.detailedName()} is alredy off`);
+            console.warn(`${item.detailedName()} is already off`);
             return;
         }
 
-        if (!this.isActivatable) {
+        if (!this.isActivatable()) {
             console.warn(`${item.detailedName()} is not activatable, probably shouldn't be calling toggleOff`);
         }
 
