@@ -3290,11 +3290,86 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         return 0;
                 }
             },
+            heroValidation: function (item) {
+                const validations = [];
+
+                // Ensure that all custom adders are mapped to objects
+                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
+                if (customCslAddersWithoutItems.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Some CSLs have limits on the number of supported attacks
+                // Custom adders are how we track how many attacks that this CSL applies to.
+                const customAdders = item.customCslAdders;
+                const maxCustomAdders = item.maxCustomCslAdders;
+                if (customAdders.length > maxCustomAdders) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Expecting CSL to have ${maxCustomAdders} or fewer attacks. Consider consolidating related attacks into a list or multipower`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Ensure that all of the defined custom adders are supported
+                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
+                if (notAllowedItemsInCustomAdders.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                return validations;
+            },
             xml: `<SKILL XMLID="COMBAT_LEVELS" ID="1709161485197" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
         {
             heroValidation: function (item) {
                 const validations = [];
+
+                // Ensure that all custom adders are mapped to objects
+                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
+                if (customCslAddersWithoutItems.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Some CSLs have limits on the number of supported attacks
+                // Custom adders are how we track how many attacks that this CSL applies to.
+                const customAdders = item.customCslAdders;
+                const maxCustomAdders = item.maxCustomCslAdders;
+                if (customAdders.length > maxCustomAdders) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Expecting CSL to have ${maxCustomAdders} or fewer attacks. Consider consolidating related attacks into a list or multipower`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Ensure that all of the defined custom adders are supported
+                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
+                if (notAllowedItemsInCustomAdders.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
 
                 // TWODCV/TWOOCV type specified correctly?
                 if (
@@ -3303,14 +3378,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 ) {
                     validations.push({
                         property: "OPTION_ALIAS",
-                        message: `Expecting two of these words [${Object.keys(HERO.CSL_5E_CV_LEVELS_TYPES).join(", ")}].`,
+                        message: `Expecting two of these words [${Object.keys(HERO.CSL_5E_CV_LEVELS_TYPES).join(", ")}]`,
                         example: `DCV with HTH and Ranged combat`,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
                 } else if (item.system.OPTIONID === "HTHDCV" && item.csl5eCslDcvOcvTypes.length !== 1) {
                     validations.push({
                         property: "OPTION_ALIAS",
-                        message: `Expecting one of these words [${[HERO.CSL_5E_CV_LEVELS_TYPES.hth, HERO.CSL_5E_CV_LEVELS_TYPES.ranged].join(", ")}].`,
+                        message: `Expecting one of these words [${[HERO.CSL_5E_CV_LEVELS_TYPES.hth, HERO.CSL_5E_CV_LEVELS_TYPES.ranged].join(", ")}]`,
                         example: `DCV with HTH and Ranged combat`,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -3816,6 +3891,46 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         );
                         return 0;
                 }
+            },
+            heroValidation: function (item) {
+                const validations = [];
+
+                // Ensure that all custom adders are mapped to objects
+                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
+                if (customCslAddersWithoutItems.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Some CSLs have limits on the number of supported attacks
+                // Custom adders are how we track how many attacks that this CSL applies to.
+                const customAdders = item.customCslAdders;
+                const maxCustomAdders = item.maxCustomCslAdders;
+                if (customAdders.length > maxCustomAdders) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Expecting CSL to have ${maxCustomAdders} or fewer attacks. Consider consolidating related attacks into a list or multipower`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Ensure that all of the defined custom adders are supported
+                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
+                if (notAllowedItemsInCustomAdders.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                return validations;
             },
             xml: `<SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1709161526214" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="39" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with a single Mental Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
