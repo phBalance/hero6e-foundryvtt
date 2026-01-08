@@ -445,7 +445,8 @@ async function addAttackCslsIntoToHitRoll(action, attackHeroRoller) {
         cvMod.dc += csl.dc;
         cvMod.ocv += csl.ocv;
         cvMod.omcv += csl.omcv;
-        cvMod.dcv += csl.dcv;
+        cvMod.dcvHth += csl.dcvHth;
+        cvMod.dcvRanged += csl.dcvRanged;
         cvMod.dmcv += csl.dmcv;
     }
 
