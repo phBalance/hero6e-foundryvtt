@@ -16881,11 +16881,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            // Teleport related
             key: "SAFEBLINDTELEPORT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SAFEBLINDTELEPORT" ID="1734150398776" BASECOST="0.25" LEVELS="0" ALIAS="Safe Blind Teleport" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // Movement related
+            key: "SAFEBLINDTRAVEL",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="SAFEBLINDTRAVEL" ID="1767841144908" BASECOST="0.25" LEVELS="0" ALIAS="Safe Blind Travel" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
