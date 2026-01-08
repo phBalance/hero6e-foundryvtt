@@ -3310,7 +3310,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 } else if (item.system.OPTIONID === "HTHDCV" && item.csl5eCslDcvOcvTypes.length !== 1) {
                     validations.push({
                         property: "OPTION_ALIAS",
-                        message: `Expecting one of these words [${Object.keys(HERO.CSL_5E_CV_LEVELS_TYPES).join(", ")}].`,
+                        message: `Expecting one of these words [${[HERO.CSL_5E_CV_LEVELS_TYPES.hth, HERO.CSL_5E_CV_LEVELS_TYPES.ranged].join(", ")}].`,
                         example: `DCV with HTH and Ranged combat`,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
