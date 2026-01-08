@@ -6038,8 +6038,9 @@ export class HeroSystem6eItem extends Item {
 
     /**
      * Typically custom adders put into a CSL just point to an item. However, we also allow
-     * frameworks to be pointed to. If any of the adders point to a framework, expand it out
-     * to all of the slots of that framework.
+     * frameworks (MP, EC, VPP, and lists) to be pointed to as a shorthand for all the framework's slots. If any of the
+     * adders point to a framework, expand it out to all of the slots of that framework.
+     *
      * Return the expanded array of items that are valid for this CSL.
      *
      * @param {HeroAdderModel} customCslAdders
@@ -6071,7 +6072,22 @@ export class HeroSystem6eItem extends Item {
     isAttackItemInCslAllowList(attackItem) {
         const lookingForId = attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
         const attackMatchesCustomAdder = !!this.customCslAddersToExpandedItems.find((item) => item.id === lookingForId);
-        return attackMatchesCustomAdder;
+        if (attackMatchesCustomAdder) {
+            return true;
+        }
+
+        // As a convenience we automatically associate any CSLs which are in a compound power
+        // to be considered attached to attack items inside the compound power.
+        const isInCompoundItem = attackItem.parentItem?.system.XMLID === "COMPOUNDPOWER";
+        if (isInCompoundItem) {
+            // All attacks in this compound power
+            const cslInSameCompoundPower = !!attackItem.parentItem.childItems.find((item) => item.id === this.id);
+            if (cslInSameCompoundPower) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -6132,13 +6148,6 @@ export class HeroSystem6eItem extends Item {
         // // Mental vs Physical
         // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.system.attacksWith === "omcv") {
         //     return false;
-        // }
-
-        // PH: FIXME: Do we have to work this? Should be in _csl...
-        // CSL associated with same compound power
-        // Note that we don't bother verifying Mental/Physical, nor ADDER that may associate wth a different attackItem
-        // if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
-        //     return this.parentItem?.id === attackItem.parentItem?.id;
         // }
 
         // SKILL_LEVELS: OVERALL, the 5e 10pt or 6e 12pt, work for any kind of attack but no other form does.
