@@ -800,7 +800,8 @@ export function registerCslTests(quench) {
                                 expect(Object.keys(choices)).to.have.length(2);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dcvRanged");
+                                expect(choices).to.not.have.property("dcvHth");
                                 expect(choices).to.not.have.property("dmcv");
                                 expect(choices).to.not.have.property("dc");
                             });
@@ -811,78 +812,88 @@ export function registerCslTests(quench) {
                                 expect(Object.keys(choices)).to.have.length(2);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dcvRanged");
+                                expect(choices).to.not.have.property("dcvHth");
                                 expect(choices).to.not.have.property("dmcv");
                                 expect(choices).to.not.have.property("dc");
                             });
 
                             it("should return correct choices for STRIKE CSL", function () {
-                                // STRIKE CSL should have OCV, DCV, and DC
+                                // STRIKE CSL should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
                                 const choices = anyStrikeCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for TIGHT CSL", function () {
-                                // TIGHT should have OCV, DCV, and DC
+                                // TIGHT should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
                                 const choices = multipowerTightGroupOfAttacksCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for MARTIAL CSL", function () {
-                                // MARTIAL should have OCV, DCV, and DC
+                                // MARTIAL should have OCV, DCV (both), and DC. Assume GM allows mental too.
                                 const choices = martialManeuversCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("omcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
+                                expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for MAGIC CSL", function () {
-                                // MAGIC should have OCV, DCV, and DC
+                                // MAGIC should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
                                 const choices = magicSubsetCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for BROAD CSL", function () {
-                                // BROAD should have OCV, DCV, and DC
+                                // BROAD should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
                                 const choices = multipowerBroadGroupOfAttacksCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for HTHDCV CSL - HTH option", function () {
-                                // HTHDCV should not ever have OCV, DCV, and DC displayed
+                                // HTHDCV should not ever have OCV, DCV (ranged), and DC displayed
                                 const choices = hthDcvCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvHth");
+                                expect(choices).to.not.have.property("dcvRanged");
                                 expect(choices).to.not.have.property("ocv");
                                 expect(choices).to.not.have.property("dc");
                             });
 
                             it("should return correct choices for HTHDCV CSL - Ranged option", function () {
-                                // HTHDCV should not ever have OCV, DCV, and DC displayed
+                                // HTHDCV should not ever have OCV, DCV (HTH), and DC displayed
                                 const choices = rangedDcvCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.not.have.property("dcvHth");
                                 expect(choices).to.not.have.property("ocv");
                                 expect(choices).to.not.have.property("dc");
                             });
@@ -893,26 +904,29 @@ export function registerCslTests(quench) {
                                 expect(Object.keys(choices)).to.have.length(1);
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dcvRanged");
+                                expect(choices).to.not.have.property("dcvHth");
                                 expect(choices).to.not.have.property("dc");
                             });
 
                             it("should return correct choices for HTH CSL", function () {
-                                // HTH should have OCV, DCV, and DC
+                                // HTH should have OCV, DCV (HTH only), and DC
                                 const choices = hthCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(3);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dc");
+                                expect(choices).to.not.have.property("dcvRanged");
                             });
 
                             it("should return correct choices for RANGED CSL", function () {
-                                // RANGED should have OCV, DCV, and DC
+                                // RANGED should have OCV, DCV (ranged only), and DC
                                 const choices = rangedCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(3);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
                                 expect(choices).to.have.property("dc");
+                                expect(choices).to.not.have.property("dcvHth");
                             });
 
                             it("should return correct choices for MENTAL CSL", function () {
@@ -925,75 +939,83 @@ export function registerCslTests(quench) {
                             });
 
                             it("should return correct choices for DCV CSL", function () {
-                                // DCV should not ever have OCV, DCV, and DC displayed as it's an Active Effect
+                                // DCV should not ever have OCV and DC displayed as it's an Active Effect
                                 const choices = dcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dcv");
+                                expect(Object.keys(choices)).to.have.length(2);
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.not.have.property("ocv");
                                 expect(choices).to.not.have.property("omcv");
                                 expect(choices).to.not.have.property("dc");
                             });
 
                             it("should return correct choices for TWOOCV CSL - HTH and Ranged", function () {
-                                // TWOOCV should have OCV, DCV, and DC
+                                // TWOOCV should have OCV, DCV (both), and DC
                                 const choices = hthAndRangedOcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(Object.keys(choices)).to.have.length(4);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for TWOOCV CSL - HTH and Mental", function () {
-                                // TWOOCV should have OCV, DCV, and DC
+                                // TWOOCV should have OCV, OMCV, DCV (HTH), DMCV, and DC
                                 const choices = hthAndMentalOcvCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(5);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
+                                expect(choices).to.not.have.property("dcvRanged");
                             });
 
                             it("should return correct choices for TWOOCV CSL - Ranged and Mental", function () {
-                                // TWOOCV should have OCV, DCV, and DC
+                                // TWOOCV should have OCV, OMCV, DCV (ranged), DMCV, and DC
                                 const choices = rangedAndMentalOcvCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(5);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
+                                expect(choices).to.not.have.property("dcvHth");
                             });
 
                             it("should return correct choices for TWODCV CSL - HTH and Ranged", function () {
-                                // TWODCV should have OCV and DC
+                                // TWODCV should not have OCV, OMCV, and DC
                                 const choices = hthAndRangedDcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dcv");
+                                expect(Object.keys(choices)).to.have.length(2);
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.not.have.property("ocv");
+                                expect(choices).to.not.have.property("omcv");
                                 expect(choices).to.not.have.property("dc");
                             });
 
                             it("should return correct choices for TWODCV CSL - HTH and Mental", function () {
-                                // TWODCV should not ever have OCV, OMCV, DCV, DMCV, and DC displayed
+                                // TWODCV not should have OCV, OMCV, DCV (ranged), and DC displayed
                                 const choices = hthAndMentalDcvCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.not.have.property("ocv");
                                 expect(choices).to.not.have.property("omcv");
                                 expect(choices).to.not.have.property("dc");
+                                expect(choices).to.not.have.property("dcvRanged");
                             });
 
                             it("should return correct choices for TWODCV CSL - Ranged and Mental", function () {
-                                // TWODCV should not ever have OCV, OMCV, DCV, DMCV, and DC displayed
+                                // TWODCV should not ever have OCV, OMCV, DCV (hth), and DC displayed
                                 const choices = rangedAndMentalDcvCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.not.have.property("ocv");
                                 expect(choices).to.not.have.property("omcv");
                                 expect(choices).to.not.have.property("dc");
+                                expect(choices).to.not.have.property("dcvHth");
                             });
 
                             it("should return correct choices for ALL CSL", function () {
@@ -1002,12 +1024,13 @@ export function registerCslTests(quench) {
                                 );
                                 expect(!!allCsl).to.be.true;
 
-                                // ALL CSL should have OCV, DCV, and DC
+                                // ALL CSL should have OCV, OMCV, DCV (both), and DC
                                 const choices = allCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });
@@ -1023,10 +1046,11 @@ export function registerCslTests(quench) {
 
                                 const choices = overallSl.cslChoices;
                                 // OVERALL Skill Levels should have all combat values
-                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });
@@ -1043,7 +1067,8 @@ export function registerCslTests(quench) {
                                 expect(Object.keys(choices)).to.have.length(0);
                                 expect(choices).to.not.have.property("ocv");
                                 expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dcvRanged");
+                                expect(choices).to.not.have.property("dcvHth");
                                 expect(choices).to.not.have.property("dmcv");
                                 expect(choices).to.not.have.property("dc");
                             });
@@ -1514,52 +1539,58 @@ export function registerCslTests(quench) {
                                 const choices = singleStrikeTargetCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(1);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.not.have.property("dcv");
+                                expect(choices).to.not.have.property("dcvRanged");
+                                expect(choices).to.not.have.property("dcvHth");
                                 expect(choices).to.not.have.property("dc");
                             });
 
                             it("should return correct choices for Physical TIGHT CSL", function () {
-                                // Physical TIGHT should have OCV, DCV, and DC
+                                // Physical TIGHT should have OCV, DCV (both), and DC
                                 const choices = smallGroupCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(Object.keys(choices)).to.have.length(4);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for Physical BROAD CSL", function () {
-                                // Physical BROAD should have OCV, DCV, and DC
+                                // Physical BROAD should have OCV, DCV (both), and DC
                                 const choices = largeGroupCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(Object.keys(choices)).to.have.length(4);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for Physical HTH CSL", function () {
-                                // Physical HTH should have OCV, DCV, and DC
+                                // Physical HTH should have OCV, DCV (HTH), and DC
                                 const choices = hthCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(3);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dc");
+                                expect(choices).to.not.have.property("dcvRanged");
                             });
 
                             it("should return correct choices for Physical RANGED CSL", function () {
-                                // Physical RANGED should have OCV, DCV, and DC
+                                // Physical RANGED should have OCV, DCV (ranged), and DC
                                 const choices = rangedCsl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(3);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
                                 expect(choices).to.have.property("dc");
+                                expect(choices).to.not.have.property("dcvHth");
                             });
 
                             it("should return correct choices for Physical ALL CSL", function () {
-                                // Physical ALL should have OCV, DCV, and DC
+                                // Physical ALL should have OCV, DCV (both), and DC
                                 const choices = allAttacksCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
+                                expect(Object.keys(choices)).to.have.length(4);
                                 expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dc");
                             });
                         });
@@ -1597,10 +1628,11 @@ export function registerCslTests(quench) {
                             it("should return correct choices for OVERALL Skill Levels", function () {
                                 // OVERALL Skill Levels should have all combat values
                                 const choices = overallSl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
+                                expect(Object.keys(choices)).to.have.length(6);
                                 expect(choices).to.have.property("ocv");
                                 expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcv");
+                                expect(choices).to.have.property("dcvRanged");
+                                expect(choices).to.have.property("dcvHth");
                                 expect(choices).to.have.property("dmcv");
                                 expect(choices).to.have.property("dc");
                             });

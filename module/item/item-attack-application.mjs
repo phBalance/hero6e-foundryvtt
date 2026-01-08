@@ -200,20 +200,38 @@ export class ItemAttackFormApplication extends FormApplication {
 
                     // Filter physical or mental choices based on the CSL type
                     // PH: FIXME: Don't we need to do this on updates as well as the attack could have changed type based on weapon?
-                    if (this.data.originalItem.system.attacksWith === "omcv") {
+                    const isMentalAttack = this.data.originalItem.system.attacksWith === "omcv";
+                    if (isMentalAttack) {
                         delete entry.cslChoices.ocv;
-                        delete entry.cslChoices.dcv;
+                        delete entry.cslChoices.dcvRanged;
+                        delete entry.cslChoices.dcvHth;
                     } else {
                         delete entry.cslChoices.omcv;
                         delete entry.cslChoices.dmcv;
+
+                        // PH: FIXME: consolidate and move this function
+                        function isRanged(attackItem) {
+                            const range = attackItem.system.range;
+                            return !(
+                                range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE
+                            );
+                        }
+
+                        // Filter DCV options based on the attack type. CSLs only permit defense against the type of attack that was used
+                        const isRangedAttack = isRanged(this.data.originalItem);
+                        if (isRangedAttack) {
+                            delete entry.cslChoices.dcvHth;
+                        } else {
+                            delete entry.cslChoices.dcvRanged;
+                        }
                     }
 
                     // If there are now no choices left, skip this CSL. If there are only defensive options left, skip this CSL as well.
                     const numFilteredChoices = Object.keys(entry.cslChoices).length;
                     if (
                         Object.keys(entry.cslChoices).length === 0 ||
-                        (numFilteredChoices === 2 && entry.cslChoices.dcv && entry.cslChoices.dmcv) ||
-                        (numFilteredChoices === 1 && (entry.cslChoices.dcv || entry.cslChoices.dmcv))
+                        (numFilteredChoices === 1 &&
+                            (entry.cslChoices.dcvHth || entry.cslChoices.dcvRanged || entry.cslChoices.dmcv))
                     ) {
                         continue;
                     }

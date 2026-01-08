@@ -5800,16 +5800,22 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
-     * Must only be called on CSLs or SKILL_LEVELS.
-     * NOTE: Probably still wrong for 5e as we're not filtering for mental configurations (e.g. HTH and mental).
+     * Must only be called on COMBAT_LEVELS, MENTAL_COMBAT_LEVELS, or SKILL_LEVELS.
      *
-     * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcv, dmcv, dc)
+     * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcv_ranged, dcv_hth, dmcv, dc)
      */
     get cslChoices() {
         const isSkillLevel = this.system.XMLID === "SKILL_LEVELS";
         if (isSkillLevel) {
             if (this.system.OPTIONID === "OVERALL") {
-                return { ocv: "ocv", omcv: "omcv", dcv: "dcv", dmcv: "dmcv", dc: "dc" };
+                return {
+                    ocv: "ocv",
+                    omcv: "omcv",
+                    dcvRanged: "dcv ranged",
+                    dcvHth: "dcv HTH",
+                    dmcv: "dmcv",
+                    dc: "dc",
+                };
             } else {
                 return {};
             }
@@ -5821,7 +5827,8 @@ export class HeroSystem6eItem extends Item {
             // Most CSLs have all options, so start with that.
             combatUses.ocv = "ocv";
             combatUses.omcv = "omcv";
-            combatUses.dcv = "dcv";
+            combatUses.dcvRanged = "dcv ranged";
+            combatUses.dcvHth = "dcv HTH";
             combatUses.dmcv = "dmcv";
             combatUses.dc = "dc";
 
@@ -5842,14 +5849,14 @@ export class HeroSystem6eItem extends Item {
             const isMentalOnly = this.system.OPTIONID === "MENTAL" || this.system.OPTIONID === "DECV";
             if (isMentalOnly) {
                 delete combatUses.ocv;
-                delete combatUses.dcv;
+                delete combatUses.dcvRanged;
+                delete combatUses.dcvHth;
             }
 
             // If this CSL for sure has no mental, remove the mental options.
             const hasNoMental =
                 ((this.system.OPTIONID === "TWODCV" || this.system.OPTIONID === "TWOOCV") &&
                     !this.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.mental)) ||
-                this.system.OPTIONID === "MARTIAL" ||
                 this.system.OPTIONID === "HTH" ||
                 this.system.OPTIONID === "RANGED" ||
                 this.system.OPTIONID === "HTHDCV" ||
@@ -5865,21 +5872,59 @@ export class HeroSystem6eItem extends Item {
                 this.system.OPTIONID === "SINGLE" ||
                 this.system.OPTIONID === "SINGLESTRIKE"
             ) {
-                delete combatUses.dcv;
+                delete combatUses.dcvRanged;
+                delete combatUses.dcvHth;
                 delete combatUses.dmcv;
                 delete combatUses.dc;
             }
+
+            // PH: FIXME: 5e hero validations
+
+            // Some options exclude DCV against HTH or Ranged.
+            if (
+                this.system.OPTIONID === "HTH" ||
+                (this.system.OPTIONID === "HTHDCV" &&
+                    !this.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.ranged)) ||
+                ((this.system.OPTIONID === "TWODCV" || this.system.OPTIONID === "TWOOCV") &&
+                    !this.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.ranged))
+            ) {
+                delete combatUses.dcvRanged;
+            } else if (
+                this.system.OPTIONID === "RANGED" ||
+                (this.system.OPTIONID === "HTHDCV" &&
+                    !this.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.hth)) ||
+                ((this.system.OPTIONID === "TWODCV" || this.system.OPTIONID === "TWOOCV") &&
+                    !this.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.hth))
+            ) {
+                delete combatUses.dcvHth;
+            }
         } else {
             const isMental = this.system.XMLID === "MENTAL_COMBAT_LEVELS";
-            const _ocv = isMental ? "omcv" : "ocv";
-            const _dcv = isMental ? "dmcv" : "dcv";
-            combatUses[_ocv] = _ocv;
-            combatUses[_dcv] = _dcv;
-            combatUses.dc = "dc";
+            if (isMental) {
+                combatUses.omcv = "omcv";
+                combatUses.dmcv = "dmcv";
+                combatUses.dc = "dc";
+            } else {
+                combatUses.ocv = "ocv";
+                combatUses.dcvRanged = "dcv ranged";
+                combatUses.dcvHth = "dcv HTH";
+                combatUses.dc = "dc";
+            }
+
+            // PH: FIXME: 6e hero validations
+
+            // Some options exclude DCV against HTH or Ranged.
+            if (this.system.OPTIONID === "HTH") {
+                delete combatUses.dcvRanged;
+            } else if (this.system.OPTIONID === "RANGED") {
+                delete combatUses.dcvHth;
+            }
 
             // Inexpensive options don't provide dcv, dmcv, or dc options - only omcv or ocv.
             if (this.system.OPTIONID === "SINGLE") {
-                delete combatUses[_dcv];
+                delete combatUses.dcvRanged;
+                delete combatUses.dcvHth;
+                delete combatUses.dmcv;
                 delete combatUses.dc;
             }
         }
@@ -5984,6 +6029,12 @@ export class HeroSystem6eItem extends Item {
         return cvTypes;
     }
 
+    /**
+     * Is this item a CSL and does it apply to the given attackItem
+     *
+     * @param {HeroSystem6eItem} attackItem
+     * @returns boolean
+     */
     cslAppliesTo(attackItem) {
         if (!this.isCsl) {
             console.error("This is not a CSL", this, attackItem);
@@ -5999,9 +6050,9 @@ export class HeroSystem6eItem extends Item {
         // PH: FIXME: Do we have to work this? Should be in _csl...
         // CSL associated with same compound power
         // Note that we don't bother verifying Mental/Physical, nor ADDER that may associate wth a different attackItem
-        if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
-            return this.parentItem?.id === attackItem.parentItem?.id;
-        }
+        // if (this.parentItem?.system.XMLID === "COMPOUNDPOWER") {
+        //     return this.parentItem?.id === attackItem.parentItem?.id;
+        // }
 
         // SKILL_LEVELS: OVERALL, the 5e 10pt or 6e 12pt, work for any kind of attack but no other form does.
         if (this.system.XMLID === "SKILL_LEVELS") {
