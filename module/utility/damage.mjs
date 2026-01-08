@@ -11,7 +11,8 @@ export function combatSkillLevelsForAttack(item) {
 
     const results = {
         ocv: 0,
-        dcv: 0,
+        dcvHth: 0,
+        dcvRanged: 0,
         dmcv: 0,
         omcv: 0,
         dc: 0,
@@ -26,7 +27,8 @@ export function combatSkillLevelsForAttack(item) {
     for (const cslSkill of item.csls) {
         const detail = {
             ocv: 0,
-            dcv: 0,
+            dcvHth: 0,
+            dcvRanged: 0,
             dmcv: 0,
             omcv: 0,
             dc: 0,
@@ -37,19 +39,21 @@ export function combatSkillLevelsForAttack(item) {
             if (detail[cslSkill.system.csl[i]] !== undefined) {
                 detail[cslSkill.system.csl[i]]++;
             } else {
-                if (cslSkill.system.csl[i] !== undefined) {
-                    console.warn(`Unhandled CSL specification, retargeting to +ocv`, cslSkill.system.csl);
-                }
+                console.error(
+                    `${cslSkill.detailedName()}: unhandled CSL specification, retargeting to +ocv`,
+                    cslSkill.system.csl,
+                );
                 detail.ocv++;
             }
         }
 
         // Add to result summary
         results.details.push(detail);
-        for (const key of ["ocv", "dcv", "omcv", "dmcv", "dc"]) {
+        for (const key of ["ocv", "dcvHth", "dcvRanged", "omcv", "dmcv", "dc"]) {
             results[key] += detail[key];
         }
     }
+
     return results;
 }
 
