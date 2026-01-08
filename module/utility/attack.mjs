@@ -53,24 +53,6 @@ export class Attack {
         let comma = false;
         const changes = [];
 
-        if (cvModifier.cvMod.ocv) {
-            console.warn(
-                "Skipping creation an AE for OCV as it only works for an instant, no need to keep track of it.",
-                action,
-            );
-            // const ocv = cvModifier.cvMod.ocv;
-            // if (ocv < 0) {
-            //     icon = "icons/svg/downgrade.svg";
-            // }
-            // label += ` ${ocv.signedStringHero()} OCV`;
-            // comma = true;
-            // changes.push({
-            //     key: `system.characteristics.ocv.value`,
-            //     value: ocv,
-            //     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-            //     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-            // });
-        }
         if (cvModifier.cvMod.dcv) {
             const dcv = cvModifier.cvMod.dcv;
             if (dcv < 0) {

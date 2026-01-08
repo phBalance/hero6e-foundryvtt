@@ -5,25 +5,30 @@ import { getSystemDisplayUnits } from "./units.mjs";
 import { squelch } from "./util.mjs";
 
 export function combatSkillLevelsForAttack(item) {
+    if (!item.system._active) {
+        console.error(`Missing _active`, item, this);
+    }
+
     const results = {
         ocv: 0,
-        dcv: 0,
+        dcvHth: 0,
+        dcvRanged: 0,
         dmcv: 0,
         omcv: 0,
         dc: 0,
         details: [],
     };
 
-    if (!item.actor) return results;
-    if (!item.system._active) {
-        console.error(`Missing _active`, item, this);
+    if (!item.actor) {
+        return results;
     }
 
-    // PH: FIXME: As per PSL usage, do CSLs stack for base item and effective attack item?
+    // PH: FIXME: Same questions as PSL usage, do CSLs stack for base item and effective attack item? Would seem they should.
     for (const cslSkill of item.csls) {
         const detail = {
             ocv: 0,
-            dcv: 0,
+            dcvHth: 0,
+            dcvRanged: 0,
             dmcv: 0,
             omcv: 0,
             dc: 0,
@@ -34,19 +39,21 @@ export function combatSkillLevelsForAttack(item) {
             if (detail[cslSkill.system.csl[i]] !== undefined) {
                 detail[cslSkill.system.csl[i]]++;
             } else {
-                if (cslSkill.system.csl[i] !== undefined) {
-                    console.warn(`Unhandled csl specification, retargeting to +ocv`, cslSkill.system.csl);
-                }
+                console.error(
+                    `${cslSkill.detailedName()}: unhandled CSL specification, retargeting to +ocv`,
+                    cslSkill.system.csl,
+                );
                 detail.ocv++;
             }
         }
 
         // Add to result summary
         results.details.push(detail);
-        for (const key of ["ocv", "dcv", "omcv", "dmcv", "dc"]) {
+        for (const key of ["ocv", "dcvHth", "dcvRanged", "omcv", "dmcv", "dc"]) {
             results[key] += detail[key];
         }
     }
+
     return results;
 }
 

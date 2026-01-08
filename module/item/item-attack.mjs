@@ -419,25 +419,34 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
     return remainingRangePenalty;
 }
 
-async function addCslsIntoToHitRoll(action, attackHeroRoller) {
+/**
+ * Add CSL modifiers that are associated with the attack. This means that we ignore CSLs that are solely defensive.
+ *
+ * @param {*} action
+ * @param {HeroRoller} attackHeroRoller
+ */
+async function addAttackCslsIntoToHitRoll(action, attackHeroRoller) {
     const item = action.system.currentItem;
 
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item).details) {
-        // Requires A Roll?
+        // Requires A Roll? Only include if successful.
+        // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
+        //            presumably, also not be active for the next phase.
         if (!(await rollRequiresASkillRollCheck(csl.item))) {
             continue;
         }
 
         const id = csl.item.id;
-        skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, omcv: 0, dcv: 0, dmcv: 0, dc: 0 };
+        skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, omcv: 0, dcvHth: 0, dcvRanged: 0, dmcv: 0, dc: 0 };
         const cvMod = skillLevelMods[id];
         action.system.item[id] = csl.item;
 
         cvMod.dc += csl.dc;
         cvMod.ocv += csl.ocv;
         cvMod.omcv += csl.omcv;
-        cvMod.dcv += csl.dcv;
+        cvMod.dcvHth += csl.dcvHth;
+        cvMod.dcvRanged += csl.dcvRanged;
         cvMod.dmcv += csl.dmcv;
     }
 
@@ -448,9 +457,9 @@ async function addCslsIntoToHitRoll(action, attackHeroRoller) {
             action.system,
             skillLevelMods[key].ocv,
             skillLevelMods[key].omcv,
-            skillLevelMods[key].dcv,
-            skillLevelMods[key].dmcv,
-            skillLevelMods[key].dc,
+            0, // NOTE: Can't make CSLs into DCV modifiers at the to-hit phase. Done elsewhere.
+            0, // NOTE: Can't make CSLs into DMCV modifiers at the to-hit phase. Done elsewhere.
+            0, // NOTE:  Can't make CSLs into DC additions at the to-hit phase. Done elsewhere.
         );
         cvModifiers.push(cvMod);
     });
@@ -521,7 +530,7 @@ export async function doAoeActionToHit(action, options) {
     addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
 
     // Combat Skill Levels
-    await addCslsIntoToHitRoll(action, attackHeroRoller);
+    await addAttackCslsIntoToHitRoll(action, attackHeroRoller);
 
     // This is the actual roll to hit. In order to provide for a die roll
     // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
@@ -599,6 +608,73 @@ export async function doAoeActionToHit(action, options) {
     };
 
     await ChatMessage.create(chatData);
+}
+
+/**
+ * Figure in all defensive calculations to determine what the defender's defensive CV is against
+ * this particular attack.
+ *
+ * @param {Object} defendingTarget - Actor being attacked
+ * @param {HeroSystem6eActor} attackingActor - Actor that is attacking
+ * @param {HeroSystem6eItem} attackItem
+ */
+function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingActor, attackItem) {
+    const defensiveTags = [];
+    const defensiveCharacteristic = attackItem.system.defendsWith;
+    const defendingActor = defendingTarget.actor;
+    let targetDefenseValue = roundFavorPlayerAwayFromZero(
+        defendingActor?.system.characteristics[defensiveCharacteristic]?.value,
+    );
+
+    // PH: FIXME: Defensive tags are probably now needed for CSLs and DCV 0 vs 3
+
+    // Bases have no DCV.  DCV=3; 0 if adjacent
+    if (isNaN(targetDefenseValue) || defendingActor.type === "base2") {
+        const attackerToken = attackingActor.token || attackingActor.getActiveTokens()[0];
+        if (!defendingActor || calculateDistanceBetween(attackerToken, defendingTarget).distance > 2) {
+            targetDefenseValue = 3;
+        } else {
+            targetDefenseValue = 0;
+        }
+    }
+
+    // PH: FIXME: consolidate and put somewhere
+    function isRanged(attackItem) {
+        const range = attackItem.system.range;
+        return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
+    }
+
+    // Does the defender have any CSLs that apply vs this attack?
+    let defensiveLevels = 0;
+    if (defendingActor) {
+        const defendsWith = attackItem.system.defendsWith;
+        const attackIsRanged = isRanged(attackItem);
+        for (const csl of defendingActor.activeCslSkills) {
+            let levelsForThisCsl = 0;
+            for (const levelUse of csl.system.csl) {
+                if (
+                    (levelUse === "dcvHth" && defendsWith === "dcv" && !attackIsRanged) ||
+                    (levelUse === "dcvRanged" && defendsWith === "dcv" && attackIsRanged) ||
+                    (levelUse === "dmcv" && defendsWith === "dmcv")
+                ) {
+                    levelsForThisCsl += 1;
+                }
+            }
+
+            if (levelsForThisCsl) {
+                defensiveLevels += levelsForThisCsl;
+                defensiveTags.push({
+                    name: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
+                    value: levelsForThisCsl,
+                    title: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
+                    gmOnly: true,
+                });
+            }
+        }
+    }
+    targetDefenseValue += defensiveLevels;
+
+    return { targetDefenseValue, defensiveTags };
 }
 
 /// ChatMessage showing Attack To Hit
@@ -748,7 +824,7 @@ async function doSingleTargetActionToHit(action, options) {
     addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
 
     // Combat Skill Levels
-    await addCslsIntoToHitRoll(action, attackHeroRoller);
+    await addAttackCslsIntoToHitRoll(action, attackHeroRoller);
 
     // Mind Scan
     if (parseInt(options.mindScanMinds)) {
@@ -840,20 +916,11 @@ async function doSingleTargetActionToHit(action, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        let targetDefenseValue = roundFavorPlayerAwayFromZero(
-            target.actor?.system.characteristics[toHitChar.toLowerCase()]?.value,
+        const { targetDefenseValue, defensiveTags } = determineDefensiveCombatValueAgainstAttack(
+            target,
+            actor,
+            item.effectiveAttackItem,
         );
-
-        // Bases have no DCV.  DCV=3; 0 if adjacent
-        // Mind Scan defers DMCV so use 3 for now
-        if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
-            const _token = actor.token || actor.getActiveTokens()[0];
-            if (!target.actor || calculateDistanceBetween(_token, target).distance > 2) {
-                targetDefenseValue = 3;
-            } else {
-                targetDefenseValue = 0;
-            }
-        }
 
         // Mind scan typically has just 1 target, but could have more. Use same roll for all targets.
         const targetHeroRoller = aoeAlwaysHit || options.mindScanMinds ? attackHeroRoller : attackHeroRoller.clone();
@@ -910,6 +977,7 @@ async function doSingleTargetActionToHit(action, options) {
             autoSuccess: autoSuccess,
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
             value: targetDefenseValue,
+            defensiveTags: defensiveTags,
             result: { hit: hit, by: by.toString() },
             roller: options.mindScanMinds
                 ? targetsArray[0].id === target.id

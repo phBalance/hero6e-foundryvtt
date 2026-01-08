@@ -225,6 +225,15 @@ export async function migrateWorld() {
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.5`, "background: #1111FF; color: #FFFFFF");
 
+    await migrateToVersion(
+        "4.2.9",
+        lastMigration,
+        getAllActorsInGame(),
+        "Combat Skill Levels",
+        async (actor) => await migrateTo4_2_9(actor),
+    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.9`, "background: #1111FF; color: #FFFFFF");
+
     // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
     await migrateToVersion(
         game.system.version,
@@ -312,21 +321,67 @@ async function commitItemsCollectionMigrateDataChanges(item) {
     }
 }
 
-async function migrateTo4_2_0(actor) {
+async function migrateTo4_2_9(actor) {
     try {
-        await addPerceptionXmlTag(actor);
-        await coerceIs5eToBoolean(actor);
-        await addXmlidToCharacteristics(actor);
-        //await convertCharacteristicsToItem(actor);
+        await fixupCslChoices(actor);
     } catch (e) {
         console.error(e);
     }
+}
+
+// Many CSLs have invalid choices in their internal structure. Fix them.
+async function fixupCslChoices(actor) {
+    const itemUpdates = [];
+
+    for (const item of actor.items) {
+        if (!item.isCsl) {
+            continue;
+        }
+
+        // We have a bug in isCsl right now that shows all SKILL_LEVELS as CSLs. Work around it for the time being.
+        if (item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID !== "OVERALL") {
+            continue;
+        }
+
+        const possibleChoices = item.cslChoices;
+        const selectedChoices = foundry.utils.deepClone(item.system._source.csl);
+        let changed = false;
+
+        // Make sure none of the selectedChoices are outside the possibleChoices set. If they are,
+        // just set them to the first option of the possibleChoices (because who knows what is best).
+        for (let i = 0; i < selectedChoices.length; ++i) {
+            if (possibleChoices[selectedChoices[i]] === undefined) {
+                selectedChoices[i] = Object.keys(possibleChoices)[0];
+                changed = true;
+            }
+        }
+
+        // Save it out.
+        if (changed) {
+            itemUpdates.push({ _id: item._id, "system.csl": selectedChoices });
+        }
+    }
+
+    return itemUpdates.length > 0
+        ? Item.implementation.updateDocuments(itemUpdates, { parent: actor })
+        : Promise.resolve(true);
 }
 
 async function migrateTo4_2_5(actor) {
     try {
         await replaceFreeStuffWithProperEdition(actor);
         await refreshSkillLevelsOverall(actor);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function migrateTo4_2_0(actor) {
+    try {
+        await addPerceptionXmlTag(actor);
+        await coerceIs5eToBoolean(actor);
+        await addXmlidToCharacteristics(actor);
+        //await convertCharacteristicsToItem(actor);
     } catch (e) {
         console.error(e);
     }
