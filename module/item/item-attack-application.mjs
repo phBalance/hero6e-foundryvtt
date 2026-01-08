@@ -198,8 +198,15 @@ export class ItemAttackFormApplication extends FormApplication {
                         csl: [],
                     };
 
+                    // PH: FIXME: consolidate and move this function
+                    function isRanged(attackItem) {
+                        const range = attackItem.system.range;
+                        return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
+                    }
+
                     // Filter physical or mental choices based on the CSL type
                     // PH: FIXME: Don't we need to do this on updates as well as the attack could have changed type based on weapon?
+                    const isRangedAttack = isRanged(this.data.originalItem);
                     const isMentalAttack = this.data.originalItem.system.attacksWith === "omcv";
                     if (isMentalAttack) {
                         delete entry.cslChoices.ocv;
@@ -209,16 +216,7 @@ export class ItemAttackFormApplication extends FormApplication {
                         delete entry.cslChoices.omcv;
                         delete entry.cslChoices.dmcv;
 
-                        // PH: FIXME: consolidate and move this function
-                        function isRanged(attackItem) {
-                            const range = attackItem.system.range;
-                            return !(
-                                range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE
-                            );
-                        }
-
-                        // Filter DCV options based on the attack type. CSLs only permit defense against the type of attack that was used
-                        const isRangedAttack = isRanged(this.data.originalItem);
+                        // Filter DCV options based on the attack type. CSLs only permit defense against the type of attack that was used.
                         if (isRangedAttack) {
                             delete entry.cslChoices.dcvHth;
                         } else {
@@ -236,11 +234,31 @@ export class ItemAttackFormApplication extends FormApplication {
                         continue;
                     }
 
-                    // CSL radioBoxes names
+                    // CSL radioBoxes names. If we have filtered out the active option, then attempt to pick a reasonable substitute.
                     for (let c = 0; c < parseInt(csl.item.system.LEVELS || 0); c++) {
+                        let value = csl.item.system.csl[c];
+                        if (!Object.hasOwn(entry.cslChoices, value)) {
+                            if (value === "ocv" && isMentalAttack) {
+                                value = "omcv";
+                            } else if (value === "omcv" && !isMentalAttack) {
+                                value = "ocv";
+                            } else if ((value === "dcvHth" || value === "dcvRanged") && isMentalAttack) {
+                                value = "dmcv";
+                            } else if (value === "dmcv" && !isMentalAttack) {
+                                if (isRangedAttack) {
+                                    value = "dcvRanged";
+                                } else {
+                                    value = "dcvHth";
+                                }
+                            } else {
+                                // We seem to be missing an intelligent default. Just pick the first one.
+                                value = entry.cslChoices[0];
+                            }
+                        }
+
                         entry.csl.push({
                             name: `${csl.item.id}.system.csl.${c}`,
-                            value: csl.item.system.csl ? csl.item.system.csl[c] : "undefined",
+                            value: value,
                         });
                     }
 
@@ -585,7 +603,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 }
             }
         }
-        if (updates) {
+        if (updates.length > 0) {
             await this.data.actor.updateEmbeddedDocuments("Item", updates);
         }
 
