@@ -619,6 +619,7 @@ export async function doAoeActionToHit(action, options) {
  * @param {HeroSystem6eItem} attackItem
  */
 function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingActor, attackItem) {
+    const defensiveTags = [];
     const defensiveCharacteristic = attackItem.system.defendsWith;
     const defendingActor = defendingTarget.actor;
     let targetDefenseValue = roundFavorPlayerAwayFromZero(
@@ -649,20 +650,31 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
         const defendsWith = attackItem.system.defendsWith;
         const attackIsRanged = isRanged(attackItem);
         for (const csl of defendingActor.activeCslSkills) {
+            let levelsForThisCsl = 0;
             for (const levelUse of csl.system.csl) {
                 if (
                     (levelUse === "dcvHth" && defendsWith === "dcv" && !attackIsRanged) ||
                     (levelUse === "dcvRanged" && defendsWith === "dcv" && attackIsRanged) ||
                     (levelUse === "dmcv" && defendsWith === "dmcv")
                 ) {
-                    defensiveLevels += 1;
+                    levelsForThisCsl += 1;
                 }
+            }
+
+            if (levelsForThisCsl) {
+                defensiveLevels += levelsForThisCsl;
+                defensiveTags.push({
+                    name: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
+                    value: levelsForThisCsl,
+                    title: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
+                    gmOnly: true,
+                });
             }
         }
     }
     targetDefenseValue += defensiveLevels;
 
-    return targetDefenseValue;
+    return { targetDefenseValue, defensiveTags };
 }
 
 /// ChatMessage showing Attack To Hit
@@ -904,7 +916,11 @@ async function doSingleTargetActionToHit(action, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        const targetDefenseValue = determineDefensiveCombatValueAgainstAttack(target, actor, item.effectiveAttackItem);
+        const { targetDefenseValue, defensiveTags } = determineDefensiveCombatValueAgainstAttack(
+            target,
+            actor,
+            item.effectiveAttackItem,
+        );
 
         // Mind scan typically has just 1 target, but could have more. Use same roll for all targets.
         const targetHeroRoller = aoeAlwaysHit || options.mindScanMinds ? attackHeroRoller : attackHeroRoller.clone();
@@ -961,6 +977,7 @@ async function doSingleTargetActionToHit(action, options) {
             autoSuccess: autoSuccess,
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
             value: targetDefenseValue,
+            defensiveTags: defensiveTags,
             result: { hit: hit, by: by.toString() },
             roller: options.mindScanMinds
                 ? targetsArray[0].id === target.id
