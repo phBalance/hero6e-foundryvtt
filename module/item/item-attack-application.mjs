@@ -252,7 +252,7 @@ export class ItemAttackFormApplication extends FormApplication {
                                 }
                             } else {
                                 // We seem to be missing an intelligent default. Just pick the first one.
-                                value = entry.cslChoices[0];
+                                value = Object.keys(entry.cslChoices)[0];
                             }
                         }
 

@@ -58,7 +58,7 @@ export function initializeItemHandlebarsHelpers() {
 
 function itemHeroValidationForProperty(item, property) {
     return item.heroValidation
-        .filter((o) => o.property === property)
+        .filter((validation) => validation.property === property)
         .map((m) => `${m.message} For example: "${m.example}"`)
         .join(" ");
 }
@@ -702,18 +702,18 @@ export class HeroSystem6eItem extends Item {
     }
 
     get heroValidation() {
-        const _heroValidation = [];
+        const _heroValidations = [];
 
         if (this.baseInfo) {
             if (this.baseInfo.heroValidation) {
                 const v = this.baseInfo.heroValidation(this);
                 if (v) {
-                    _heroValidation.push(...v.map((m) => ({ ...m, itemId: this.id })));
+                    _heroValidations.push(...v.map((m) => ({ ...m, itemId: this.id })));
                 }
 
                 for (const modifier of this.modifiers.filter((m) => m.baseInfo?.heroValidation)) {
                     const v2 = modifier.baseInfo.heroValidation(modifier);
-                    _heroValidation.push(...v2.map((m) => ({ ...m, itemId: this.id })));
+                    _heroValidations.push(...v2.map((m) => ({ ...m, itemId: this.id })));
                 }
             }
         }
@@ -722,7 +722,7 @@ export class HeroSystem6eItem extends Item {
         if (this.baseInfo?.type.includes("adjustment")) {
             const result = this.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
-                _heroValidation.push({
+                _heroValidations.push({
                     property: "INPUT",
                     message:
                         this.system.XMLID === "TRANSFER"
@@ -737,7 +737,7 @@ export class HeroSystem6eItem extends Item {
                     result.reducesArray.length > maxAllowedEffects.maxReduces ||
                     result.enhancesArray.length > maxAllowedEffects.maxEnhances
                 ) {
-                    _heroValidation.push({
+                    _heroValidations.push({
                         property: "INPUT",
                         message: `Has too many adjustment targets defined`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
@@ -748,7 +748,7 @@ export class HeroSystem6eItem extends Item {
 
         const e = this.system.debugModelProps();
         if (e) {
-            _heroValidation.push({
+            _heroValidations.push({
                 //property:
                 message: `PLEASE REPORT THIS ERROR: ${e}`,
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
@@ -756,7 +756,7 @@ export class HeroSystem6eItem extends Item {
             });
         }
 
-        return _heroValidation;
+        return _heroValidations;
     }
 
     get pslRangePenaltyOffsetItems() {
@@ -5947,12 +5947,93 @@ export class HeroSystem6eItem extends Item {
      * @returns HeroAdderModel[]
      */
     get customCslAdders() {
-        const customCslAdders =
-            this.adders.filter(
-                (adder) => adder.XMLID === "ADDER" && adder.targetId && adder.BASECOST === 0 && adder.ALIAS,
-            ) || [];
+        const customCslAdders = this.adders.filter(
+            (adder) => adder.XMLID === "ADDER" && adder.BASECOST === 0 && adder.ALIAS,
+        );
 
         return customCslAdders;
+    }
+
+    /**
+     * Returns the maximum number of attacks the CSL can be applied against
+     * @returns Number
+     */
+    get maxCustomCslAdders() {
+        // Overall skill levels can be applied to an infinite number. Other skill levels apply to 0.
+        if (this.system.XMLID === "SKILL_LEVELS") {
+            if (this.system.OPTIONID === "OVERALL") {
+                return +Infinity;
+            }
+
+            return 0;
+        }
+
+        if (this.is5e) {
+            if (this.system.XMLID === "COMBAT_LEVELS") {
+                // It is possible to define a 5e of any cost that applys to an infinite number of attacks
+                // by defining a single weapon. As a result, there is only 1 CSL type that has a limit.
+                if (this.system.OPTIONID === "SINGLESINGLE") {
+                    return 1;
+                }
+
+                return +Infinity;
+            }
+        } else {
+            // 6e
+            switch (this.system.XMLID) {
+                case "COMBAT_LEVELS":
+                    if (this.system.OPTIONID === "SINGLE") {
+                        return 1;
+                    } else if (this.system.OPTIONID === "TIGHT") {
+                        return 3;
+                    } else if (this.system.OPTIONID === "BROAD") {
+                        return 10; // Randomly picked. If they're for a multipower then just choose the multipower and that's 1.
+                    } else {
+                        return +Infinity;
+                    }
+
+                case "MENTAL_COMBAT_LEVELS":
+                    if (this.system.OPTIONID === "SINGLE") {
+                        return 1;
+                    } else if (this.system.OPTIONID === "TIGHT") {
+                        return 3;
+                    } else {
+                        return +Infinity;
+                    }
+
+                default:
+                // Intentionally fall through
+            }
+        }
+
+        console.error(`Unhandled CSL ${this.detailedName()}/${this.is5e}`);
+        return 0;
+    }
+
+    /**
+     * Return an array of custom adders to their matching item. It is possible for the array to have
+     * undefined elements if there is no match.
+     *
+     * @returns HeroSystem6eItem|undefined[]
+     */
+    get customCslAddersToItems() {
+        return this.customCslAdders.map((customCslAdder) => {
+            return this.actor?.items.find((item) => item.id === customCslAdder.targetId);
+        });
+    }
+
+    /**
+     * Return an array of custom adders which don't match to an item.
+     *
+     * @returns HeroAdderModel[]
+     */
+    get customCslAddersWithoutItems() {
+        return this.customCslAdders
+            .map((customCslAdder) => {
+                const found = this.actor?.items.find((item) => item.id === customCslAdder.targetId);
+                return found ? undefined : customCslAdder;
+            })
+            .filter(Boolean);
     }
 
     /**
@@ -5963,12 +6044,9 @@ export class HeroSystem6eItem extends Item {
      *
      * @param {HeroAdderModel} customCslAdders
      */
-    get customCslAddersToAllowedItems() {
-        const allowedItems = this.customCslAdders
-            .map((customCslAdder) => {
-                return this.actor?.items.find((item) => item.id === customCslAdder.targetId);
-            })
-            .filter(Boolean)
+    get customCslAddersToExpandedItems() {
+        const allowedItems = this.customCslAddersToItems
+            .filter(Boolean) // Remove any unfound adder -> item mappings
             .map((matchingItem) => {
                 const isFrameworkItem = matchingItem.baseInfo?.type.includes("framework");
                 if (isFrameworkItem) {
@@ -5992,8 +6070,17 @@ export class HeroSystem6eItem extends Item {
      */
     isAttackItemInCslAllowList(attackItem) {
         const lookingForId = attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
-        const attackMatchesCustomAdder = !!this.customCslAddersToAllowedItems.find((item) => item.id === lookingForId);
+        const attackMatchesCustomAdder = !!this.customCslAddersToExpandedItems.find((item) => item.id === lookingForId);
         return attackMatchesCustomAdder;
+    }
+
+    /**
+     * Are there any items which are not allowed that are the target of custom adders?
+     *
+     * @returns boolean
+     */
+    get notAllowedItemsInCustomAdders() {
+        return this.customCslAddersToExpandedItems.filter((item) => !this.cslAppliesTo(item));
     }
 
     get csl5eCslDcvOcvTypes() {
@@ -6157,8 +6244,6 @@ export class HeroSystem6eItem extends Item {
                 default:
                 // Drop through and be handled outside the switch
             }
-
-            // PH: FIXME: Add heroValidations for too many customAdders for cheap CSLs? Some of these can be curiously broad.
 
             // The other types of CSLs support a limited number of attacks. We have to check that attackItem
             // in the allow list.

@@ -441,8 +441,9 @@ export function registerCslTests(quench) {
                         });
 
                         describe("CSLs", function () {
-                            // PH: FIXME: The 1 point CSL should only apply to a particular maneuver with a particular weapon
-                            it.skip("should not apply CSL to mental power - notImplementedCorrectlyCsl", function () {
+                            // The 1 point CSL should only apply to a particular maneuver with a particular weapon that is listed
+                            // but we don't have a way to do that.
+                            it.skip("should not apply CSL to unlisted power - notImplementedCorrectlyCsl", function () {
                                 expect(notImplementedCorrectlyCsl.cslAppliesTo(strike)).to.be.false;
                             });
 
