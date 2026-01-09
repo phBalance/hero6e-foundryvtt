@@ -323,14 +323,14 @@ async function commitItemsCollectionMigrateDataChanges(item) {
 
 async function migrateTo4_2_9(actor) {
     try {
-        await fixupCslChoices(actor);
+        await fixupCslChoices4_2_9(actor);
     } catch (e) {
         console.error(e);
     }
 }
 
 // Many CSLs have invalid choices in their internal structure. Fix them.
-async function fixupCslChoices(actor) {
+async function fixupCslChoices4_2_9(actor) {
     const itemUpdates = [];
 
     for (const item of actor.items) {
@@ -343,22 +343,56 @@ async function fixupCslChoices(actor) {
             continue;
         }
 
-        const possibleChoices = item.cslChoices;
+        const cslUpdates = {};
+        let changes = false;
+
+        // Initialize csl array making sure that the selectedChoice is a valid allowedChoices.
+        const allowedChoices = item.cslChoices;
         const selectedChoices = foundry.utils.deepClone(item.system._source.csl);
-        let changed = false;
+        const expectedNumEntries = Math.max(selectedChoices.length, item.system.LEVELS);
+        selectedChoices.length = expectedNumEntries; // Truncate or expand the array as required
 
         // Make sure none of the selectedChoices are outside the possibleChoices set. If they are,
         // just set them to the first option of the possibleChoices (because who knows what is best).
-        for (let i = 0; i < selectedChoices.length; ++i) {
-            if (possibleChoices[selectedChoices[i]] === undefined) {
-                selectedChoices[i] = Object.keys(possibleChoices)[0];
-                changed = true;
+        for (let i = 0; i < expectedNumEntries; ++i) {
+            if (allowedChoices[selectedChoices[i]] === undefined) {
+                selectedChoices[i] = Object.keys(allowedChoices)[0];
+                changes = true;
             }
         }
+        cslUpdates["system.csl"] = selectedChoices;
 
-        // Save it out.
-        if (changed) {
-            itemUpdates.push({ _id: item._id, "system.csl": selectedChoices });
+        // Setup targetId
+        const allAdders = foundry.utils.deepClone(item.system._source.ADDER);
+        for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
+            const targetId = (item.actor?._cslItems || []).find((item) => {
+                // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
+                // is thus providing a unique name - other options can potentially have multiple matches of which
+                // we'll end up with the first. This could result in a situation where someone can not match
+                // the attack they actually want.
+                const aliasToMatch = `^${customAdder.ALIAS}$`;
+
+                return (
+                    `${item.name}`.match(new RegExp(aliasToMatch, "i")) ||
+                    `${item.system.ALIAS}`.match(new RegExp(aliasToMatch, "i")) ||
+                    `${item.system.XMLID}`.match(new RegExp(aliasToMatch, "i"))
+                );
+            })?.id;
+
+            if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
+                console.warn(`Failed to match custom adder ${customAdder.ALIAS} for CSL ${item.detailedName()}.`);
+            }
+
+            if (customAdder.targetId !== targetId) {
+                customAdder.targetId = targetId;
+                changes = true;
+            }
+        }
+        cslUpdates["system.ADDER"] = allAdders;
+
+        if (changes) {
+            cslUpdates._id = item._id;
+            itemUpdates.push(cslUpdates);
         }
     }
 

@@ -664,7 +664,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
 
     // DEADLYBLOW
     // Only check if it has been turned off
-    // FIXME: This function should not be changing the item.system. Please fix me by moving this to somewhere in the user flow.
+    // PH: FIXME: This function should not be changing the item.system. Please fix me by moving this to somewhere in the user flow.
     const deadlyBlows = item.actor?.items.filter((item) => item.system.XMLID === "DEADLYBLOW") || [];
     deadlyBlows.forEach((deadlyBlow) => {
         item.system.conditionalAttacks ??= {};
