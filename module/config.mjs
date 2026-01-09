@@ -11721,6 +11721,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // 6e FORCEFIELD related
+            key: "IMPERMEABLE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="IMPERMEABLE" ID="1767853022608" BASECOST="0.0" LEVELS="0" ALIAS="Impermeable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        undefined,
+    );
+    addPower(
+        {
             // FRINGE_BENEFIT related
             key: "IMPROVEDEQUIPMENTAVAILABILITY",
             behaviors: ["adder"],
