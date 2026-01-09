@@ -2741,39 +2741,21 @@ export class HeroSystem6eActor extends Actor {
             }
             uploadProgressBar.advance(`${this.name}: Restored retained damage`, 0);
 
-            uploadProgressBar.advance(`${this.name}: Assigning targetId for Combat Skill Levels CSL`, 0);
+            uploadProgressBar.advance(`${this.name}: Initializing Combat Skill Levels`, 0);
+            const cslInitializationUpdates = [];
             for (const csl of this.allCslSkills) {
-                const _ADDER = foundry.utils.deepClone(csl.system._source.ADDER);
-                for (const customAdder of _ADDER.filter((a) => a.XMLID === "ADDER")) {
-                    const targetId = this._cslItems.find((item) => {
-                        // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
-                        // is thus providing a name - other options can have multiple matches.
-                        const aliasToMatch = `^${customAdder.ALIAS}$`;
-
-                        return (
-                            `${item.name}`.match(new RegExp(aliasToMatch, "i")) ||
-                            `${item.system.ALIAS}`.match(new RegExp(aliasToMatch, "i")) ||
-                            `${item.system.XMLID}`.match(new RegExp(aliasToMatch, "i"))
-                        );
-                    })?.id;
-
-                    if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
-                        console.warn(
-                            `Failed to match custom adder ${customAdder.ALIAS} for CSL ${csl.detailedName()}.`,
-                        );
-                    }
-
-                    customAdder.targetId = targetId;
+                const cslChanges = csl.initializeCsl();
+                if (csl._id != null) {
+                    cslChanges._id = csl._id;
+                    cslInitializationUpdates.push(cslChanges);
+                } else {
+                    foundry.utils.mergeObject(csl, cslChanges);
                 }
-
-                // NOTE: When updating arrays, we seem to have to make sure that the array being sent is an Object. If it has _source
-                //       (i.e. not a pure Object) things will get weird. At the time of writing this, we're not sure why
-                //       but if we do send a _source property then we need to make sure that it has been updated too. Weird!
-                //       To make sure we're using an Object we deepClone the _source.ADDER, but won't the objects of the array have
-                //       _source as well... so we're not sure why this voodoo works.
-                await csl.update({ [`system.ADDER`]: _ADDER });
             }
-            uploadProgressBar.advance(`${this.name}: Assigned targetId for Combat Skill Levels CSL`, 1);
+            if (cslInitializationUpdates.length > 0) {
+                await Item.implementation.updateDocuments(cslInitializationUpdates, { parent: this });
+            }
+            uploadProgressBar.advance(`${this.name}: Initialized Combat Skill Levels`, 1);
 
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);

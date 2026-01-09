@@ -819,21 +819,9 @@ export class HeroSystem6eItem extends Item {
 
     // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
     // which requested the operation.
-    async _preUpdate(changes, options, user) {
-        if (this.isCsl) {
-            const LEVELS = changes.system?.LEVELS || this.system.LEVELS;
-            if (this.system.csl.length !== LEVELS) {
-                const csl = new Array(LEVELS);
-                for (let idx = 0; idx < csl.length; idx++) {
-                    csl[idx] = this.system.csl?.[idx] || Object.keys(this.cslChoices)[0];
-                }
-                // Tacking onto "changed" to avoid extra _onUpdate calls
-                changes.system ??= {};
-                changes.system.csl = csl;
-            }
-        }
-        await super._preUpdate(changes, options, user);
-    }
+    // async _preUpdate(changes, options, user) {
+    //     await super._preUpdate(changes, options, user);
+    // }
 
     async _onUpdate(changed, options, userId) {
         // We favor effect.disabled over system.active (in fact shouldn't be changing system.active)
@@ -902,15 +890,9 @@ export class HeroSystem6eItem extends Item {
             });
         }
 
-        if (this.system.XMLID === "COMBAT_LEVELS") {
-            if (this.system.csl.length !== this.system.LEVELS) {
-                const csl = new Array(this.system.LEVELS);
-                for (let idx = 0; idx < csl.length; idx++) {
-                    csl[idx] = this.system.csl?.[idx] || Object.keys(this.cslChoices)[0];
-                }
-
-                await this.update({ "system.csl": csl });
-            }
+        if (this.isCsl) {
+            const cslChanges = this.initializeCsl();
+            await this.update(cslChanges);
         }
 
         // turn off items that use END, Charges, MP, etc
@@ -1578,7 +1560,7 @@ export class HeroSystem6eItem extends Item {
      * @param {Event} [event]
      * @returns {Promise<undefined>}
      */
-    async changeClips(/*event*/) {
+    async changeClips(event) {
         const tokenUuid = $(event.currentTarget).closest("[data-token-uuid]").data().tokenUuid;
         const token = fromUuidSync(tokenUuid);
 
@@ -5800,6 +5782,67 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
+     * Do any (re)initialization required for the CSL. It is safe to call this with an already initialized CSL.
+     *
+     * @returns {Object} cslUpdates - an accumulator of changes to be passed to updateDocuments
+     */
+    initializeCsl() {
+        const cslUpdates = {};
+
+        if (!this.isCsl) {
+            console.error("This is not a CSL - shouldn't be initialized", this);
+            return cslUpdates;
+        }
+
+        // We have a bug in isCsl right now that shows all SKILL_LEVELS as CSLs. Work around it for the time being.
+        if (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID !== "OVERALL") {
+            return cslUpdates;
+        }
+
+        // Initialize csl array
+        const allowedChoices = this.cslChoices;
+        const selectedChoices = foundry.utils.deepClone(this.system._source.csl);
+        const expectedNumEntries = Math.max(selectedChoices.length, this.system.LEVELS);
+        selectedChoices.length = expectedNumEntries; // Truncate or expand the array as required
+
+        // Make sure none of the selectedChoices are outside the possibleChoices set. If they are,
+        // just set them to the first option of the possibleChoices (because who knows what is best).
+        for (let i = 0; i < expectedNumEntries; ++i) {
+            if (allowedChoices[selectedChoices[i]] === undefined) {
+                selectedChoices[i] = Object.keys(allowedChoices)[0];
+            }
+        }
+        cslUpdates["system.csl"] = selectedChoices;
+
+        // Setup targetId
+        const allAdders = foundry.utils.deepClone(this.system._source.ADDER);
+        for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
+            const targetId = (this.actor?._cslItems || []).find((item) => {
+                // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
+                // is thus providing a unique name - other options can potentially have multiple matches of which
+                // we'll end up with the first. This could result in a situation where someone can not match
+                // the attack they actually want.
+                const aliasToMatch = `^${customAdder.ALIAS}$`;
+
+                return (
+                    `${item.name}`.match(new RegExp(aliasToMatch, "i")) ||
+                    `${item.system.ALIAS}`.match(new RegExp(aliasToMatch, "i")) ||
+                    `${item.system.XMLID}`.match(new RegExp(aliasToMatch, "i"))
+                );
+            })?.id;
+
+            if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
+                console.warn(`Failed to match custom adder ${customAdder.ALIAS} for CSL ${this.detailedName()}.`);
+            }
+
+            customAdder.targetId = targetId;
+        }
+        cslUpdates["system.ADDER"] = allAdders;
+
+        return cslUpdates;
+    }
+
+    /**
      * Must only be called on COMBAT_LEVELS, MENTAL_COMBAT_LEVELS, or SKILL_LEVELS.
      *
      * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcv_ranged, dcv_hth, dmcv, dc)
@@ -5833,7 +5876,6 @@ export class HeroSystem6eItem extends Item {
             combatUses.dc = "dc";
 
             // 5e has a number of purely defensive options. Remove offensive options for those.
-            // PH: FIXME: make sure they're applied elsewhere
             const isOnlyDefensive =
                 this.system.OPTIONID === "TWODCV" ||
                 this.system.OPTIONID === "DCV" ||
@@ -5878,8 +5920,6 @@ export class HeroSystem6eItem extends Item {
                 delete combatUses.dc;
             }
 
-            // PH: FIXME: 5e hero validations
-
             // Some options exclude DCV against HTH or Ranged.
             if (
                 this.system.OPTIONID === "HTH" ||
@@ -5910,8 +5950,6 @@ export class HeroSystem6eItem extends Item {
                 combatUses.dcvHth = "dcv HTH";
                 combatUses.dc = "dc";
             }
-
-            // PH: FIXME: 6e hero validations
 
             // Some options exclude DCV against HTH or Ranged.
             if (this.system.OPTIONID === "HTH") {
@@ -6345,14 +6383,6 @@ export class HeroSystem6eItem extends Item {
         return super.migrateData(source);
     }
 
-    static migrateData_4_0_26(source) {
-        // Remove the isHeroic property as it is now calculated on the fly
-        if (source.system?.isHeroic !== undefined) {
-            delete source.system.isHeroic;
-            tagObjectForPersistence(source);
-        }
-    }
-
     static migrateData_4_2_5(source) {
         // 4.2.5 migration
         // We used to store charge data as a object.
@@ -6378,6 +6408,14 @@ export class HeroSystem6eItem extends Item {
             foundry.utils.deleteProperty(source, "system.charges");
 
             // Signal to migration code that this object has changed and needs to be persisted to the DB
+            tagObjectForPersistence(source);
+        }
+    }
+
+    static migrateData_4_0_26(source) {
+        // Remove the isHeroic property as it is now calculated on the fly
+        if (source.system?.isHeroic !== undefined) {
+            delete source.system.isHeroic;
             tagObjectForPersistence(source);
         }
     }
