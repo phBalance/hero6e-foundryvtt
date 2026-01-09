@@ -1560,7 +1560,7 @@ export class HeroSystem6eItem extends Item {
      * @param {Event} [event]
      * @returns {Promise<undefined>}
      */
-    async changeClips(/*event*/) {
+    async changeClips(event) {
         const tokenUuid = $(event.currentTarget).closest("[data-token-uuid]").data().tokenUuid;
         const token = fromUuidSync(tokenUuid);
 
