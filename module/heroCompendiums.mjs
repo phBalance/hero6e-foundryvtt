@@ -7,8 +7,8 @@ export async function CreateHeroCompendiums() {
     if (!game.user.isGM) return;
 
     try {
-        CreateHeroItems();
-        CreateHeroMacros();
+        await CreateHeroItems();
+        await CreateHeroMacros();
     } catch (e) {
         console.error(e);
     }
@@ -35,6 +35,11 @@ async function CreateHeroMacros() {
         await pack.deleteCompendium();
     }
     pack = await FoundryVttCompendiumCollection.createCompendium(metadata);
+
+    // V13 seems to default new compendiums to locked
+    if (pack.locked) {
+        await pack.configure({ locked: false });
+    }
 
     const macroItemsArray = [];
 
