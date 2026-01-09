@@ -4670,8 +4670,8 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isSeparator() {
-        // It appears that some seperators can have childItems.  Not sure why this is the case.
-        return this.system.XMLID === "LIST" && this.system.ALIAS.trim() === "";
+        // It appears that some seperators can have childItems. Not sure why this is the case.
+        return this.system.XMLID === "LIST" && this.system.ALIAS.trim() === "" && this.system.NAME === "";
     }
 
     get isRangedSense() {
