@@ -1963,13 +1963,15 @@ export class HeroSystem6eActor extends Actor {
                             (item.system.chargeItemModifier &&
                                 (item.system._charges !== item.system.chargesMax ||
                                     item.system._clips !== item.system.clipsMax)) ||
-                            item.system.ablative > 0,
+                            item.system.ablative > 0 ||
+                            (item.system.XMLID === "ENDURANCERESERVE" && item.system.LEVELS !== item.system.value),
                     )
                     .map((o) => ({
                         id: o.id,
                         _charges: o.system._charges,
                         _clips: o.system._clips,
                         ablative: o.system.ablative,
+                        value: o.system.value,
                     })),
 
                 was5e: this.is5e,
@@ -2506,6 +2508,9 @@ export class HeroSystem6eActor extends Actor {
                         "system._clips": Math.min(item.system.clipsMax, resourceData._clips),
                         "system.ablative": Math.max(item.system.ablative, resourceData.ablative),
                     });
+                    if (item.system.XMLID === "ENDURANCERESERVE") {
+                        await item.update({ "system.value": Math.min(item.system.value, resourceData.value) });
+                    }
                 } else {
                     console.warn(
                         `Unable to locate ${resourceData.NAME}/${resourceData.ALIAS} to consume charges after upload.`,
