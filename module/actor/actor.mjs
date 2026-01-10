@@ -2143,10 +2143,14 @@ export class HeroSystem6eActor extends Actor {
 
             // Remove all temporary effects
             uploadProgressBar.advance(`${this.name}: Removing temporaryEffects effects`, 0);
-            await this.deleteEmbeddedDocuments(
-                "ActiveEffect",
-                this.temporaryEffects.map((o) => o.id),
-            );
+            try {
+                await this.deleteEmbeddedDocuments(
+                    "ActiveEffect",
+                    this.temporaryEffects.map((o) => o.id),
+                );
+            } catch (e) {
+                console.error(e);
+            }
             uploadProgressBar.advance(`${this.name}: Removed temporaryEffects effects`, 1);
 
             // CHARACTERISTICS
