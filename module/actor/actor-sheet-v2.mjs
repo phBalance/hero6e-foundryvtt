@@ -46,10 +46,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static initializeTemplate() {
         HeroSystemActorSheetV2.PARTS = {
             aside: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/aside.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-aside-v2.hbs`,
             },
             header: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/header.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-header-v2.hbs`,
             },
             tabs: {
                 // Foundry-provided generic template
@@ -57,43 +57,43 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 // classes: ['sysclass'], // Optionally add extra classes to the part for extra customization
             },
             attacks: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/attacks.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-attacks-v2.hbs`,
                 scrollable: [""],
             },
             defenses: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/defenses.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-defenses-v2.hbs`,
                 scrollable: [""],
             },
             movements: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/movements.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-movements-v2.hbs`,
                 scrollable: [""],
             },
             martialArts: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/martial-arts.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-martial-arts-v2.hbs`,
                 scrollable: [""],
             },
             skills: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/skills.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-skills-v2.hbs`,
                 scrollable: [""],
             },
             maneuvers: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/maneuvers.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-maneuvers-v2.hbs`,
                 scrollable: [""],
             },
             powers: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/powers.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-v2.hbs`,
                 scrollable: [""],
             },
             equipment: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/equipment.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-v2.hbs`,
                 scrollable: [""],
             },
             other: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/other.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
                 scrollable: [""],
             },
             analysis: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/analysis.hbs`,
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-analysis-v2.hbs`,
                 scrollable: [""],
             },
         };
@@ -114,7 +114,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "analysis" },
             ],
             labelPrefix: "ActorSheet.Tabs", // Optional. Prepended to the id to generate a localization key
-            initial: "attacks", // Set the initial tab
+            initial: "powers", // Set the initial tab
         },
     };
 
@@ -132,6 +132,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     break;
                 case "attacks":
                     context.items = this.actor.items.filter((item) => item.showAttack);
+                    break;
+                case "powers":
+                    context.items = this.actor.items.filter((item) => item.type === "power");
                     break;
             }
         } catch (e) {

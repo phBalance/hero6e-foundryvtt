@@ -309,6 +309,8 @@ Hooks.once("init", async function () {
 
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
         `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
+
+        `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs`,
     ];
     // Handlebars Templates and Partials
     foundryVttLoadTemplates(templatePaths);

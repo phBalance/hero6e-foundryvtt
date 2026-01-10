@@ -17,7 +17,7 @@
             <div class="item-column item-controls"></div>
         </div>
 
-        <ol class="item-list abilities-list">
+        <ol class="item-list attacks-list">
             {{#each items as |item|}}
                 <li class="item attack draggable expandable-document" data-document-uuid="{{this.uuid}}">
                     <div class="item-row">
@@ -57,12 +57,14 @@
                             <a class="fa-fw fa-solid fa-ellipsis-vertical" data-action="documentListContext"></a>
                             <a class="fa-solid fa-angle-{{ifThen abilityContext.expanded "down" "right"}}" data-action="toggleDocumentDescription"></a>
                         </div>
+
                     </div>
-                    <div class="item-description">
-                        <div class="item-description-content">
-                            {{{itemFullDescription item}}}
+
+                        <div class="item-description-expandable">
+                            <div class="item-description-content">
+                                {{{itemFullDescription item}}}
+                            </div>
                         </div>
-                    </div>
                 </li>
             {{/each}}
         </ol>

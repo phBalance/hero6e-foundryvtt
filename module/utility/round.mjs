@@ -28,7 +28,7 @@ function truncatedNumber10TimesLarger(number) {
  * @param {number} roundToZeroAt - The decimal digit (expressed as an integer) where we should be rounding towards 0
  * @returns number
  */
-export function roundFavorToOrAwayFromZero(number, roundToZeroAt) {
+function roundFavorToOrAwayFromZero(number, roundToZeroAt) {
     // Since we only work with 1 decimal digit, we'll avoid floating point comparisons
     // by working with a number that is 10 times larger. The Hero system never works with numbers
     // that are large enough that we have to worry about overflowing JavaScript's number type.

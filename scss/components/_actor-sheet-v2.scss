@@ -3,7 +3,9 @@
     min-width: 500px;
 }
 
-/* Setup Grid with header, navbar and left sidebar */
+/************************************************************************
+* Setup Grid with header, navbar and left sidebar
+************************************************************************/
 .herosystem6e.actor-sheet-v2 section.window-content {
     display: grid;
     grid-template:
@@ -15,7 +17,9 @@
     gap: 2px;
 }
 
-/* grid-area: sidebar */
+/************************************************************************
+* grid-area: sidebar
+************************************************************************/
 .herosystem6e.actor-sheet-v2 .window-content aside {
     grid-area: sidebar;
     display: flex;
@@ -59,6 +63,9 @@
     }
 }
 
+/************************************************************************
+* grid-area: header
+************************************************************************/
 .herosystem6e.actor-sheet-v2 .window-content header {
     grid-area: header;
 
@@ -87,7 +94,9 @@
     }
 }
 
-/* grid-area: nav */
+/************************************************************************
+* grid-area: nav
+************************************************************************/
 .herosystem6e.actor-sheet-v2 .window-content nav {
     grid-area: nav;
     transition: all 0.1s ease-out;
@@ -114,12 +123,16 @@
     }
 }
 
-// Override nav.tabs
+/************************************************************************
+* Override nav.tabs
+************************************************************************/
 .herosystem6e.actor-sheet-v2 .window-content nav.sheet-tabs.tabs {
     gap: 0;
 }
 
-/* grid-area: content */
+/************************************************************************
+* grid-area: content 
+************************************************************************/
 .herosystem6e.actor-sheet-v2 .window-content section.tab {
     grid-area: content;
     position: relative;
@@ -136,22 +149,14 @@
     }
 }
 
-/* Attacks */
-.herosystem6e.actor-sheet-v2 .window-content section.tab.attacks {
+/************************************************************************
+* Generic Item List Container
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab {
     .item-list-container {
         display: grid;
         box-sizing: content-box;
-        grid-template-columns:
-            minmax(auto, 1fr) /* name - flexible */
-            minmax(2rem, 28px) /* ocv */
-            minmax(2rem, 28px) /* dcv */
-            minmax(2rem, 84px) /* offdef */
-            minmax(2rem, 68px) /* dmg */
-            minmax(min-content, 128px) /* res */
-            minmax(min-content, 32px) /* end */
-            minmax(min-content, 73px) /* aoe - example for second flexible column */
-            minmax(2rem, 4rem); /* controls */
-
+        grid-template-columns: repeat(auto-fit, minmax(min-content, 1fr));
         gap: 0;
         align-items: stretch;
         text-align: center;
@@ -189,11 +194,11 @@
             .item {
                 display: contents;
 
-                &:nth-child(odd) > .item-row > * {
+                &:nth-child(odd) > div > * {
                     background-color: var(--table-row-color-odd);
                 }
 
-                &:nth-child(even) > .item-row > * {
+                &:nth-child(even) > div > * {
                     background-color: var(--table-row-color-even);
                 }
 
@@ -225,7 +230,7 @@
                     }
                 }
 
-                .item-description {
+                .item-description-expandable {
                     grid-column: 1 / -1;
                     display: grid;
                     grid-template-rows: 0fr;
@@ -237,14 +242,14 @@
                 }
 
                 &.expanded {
-                    .item-description {
+                    .item-description-expandable {
                         grid-template-rows: 1fr;
-                        background-color: var(--color-bg-option);
-                        border-bottom: 1px solid var(--color-border-light);
+
+                        // border-bottom: 1px solid var(--color-border-light);
 
                         .item-description-content {
                             // padding: 8px 12px;
-                            padding-left: 42px; // align with item name
+                            // padding-left: 42px; // align with item name
                         }
                     }
 
@@ -255,50 +260,51 @@
             }
         }
 
-        // .item-name {
-        //     justify-content: flex-start;
-        //     text-align: left;
-        //     padding-left: 8px;
-        //     gap: 8px;
-
-        //     &.rollable {
-        //         cursor: var(--cursor-pointer);
-
-        //         &:hover .label {
-        //             text-shadow: 0 0 8px var(--color-shadow-primary);
-        //         }
-        //     }
-
-        //     .name {
-        //         display: flex;
-        //         flex-direction: column;
-
-        //         .label {
-        //             font-weight: bold;
-        //             font-size: var(--font-size-15);
-        //         }
-
-        //         .keywords {
-        //             font-size: var(--font-size-12);
-        //             opacity: 0.8;
-        //         }
-        //     }
-
-        //     img {
-        //         width: 30px;
-        //         height: 30px;
-        //         border: none;
-        //         flex-shrink: 0;
-        //     }
-        // }
-
         .item-controls {
             gap: 4px;
             font-size: var(--font-size-16);
         }
-    }
 
-    // .item-column {
-    //     overflow-wrap: anywhere;
-    // }
+        div.item-row > div.item-column.item-description {
+            display: inline;
+            text-align: left;
+        }
+    }
+}
+
+/************************************************************************
+* Attacks 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.attacks {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(auto, 1fr) /* name - flexible */
+            minmax(2rem, 28px) /* ocv */
+            minmax(2rem, 28px) /* dcv */
+            minmax(2rem, 84px) /* offdef */
+            minmax(2rem, 68px) /* dmg */
+            minmax(min-content, 128px) /* res */
+            minmax(min-content, 32px) /* end */
+            minmax(min-content, 73px) /* aoe - example for second flexible column */
+            minmax(2rem, 4rem); /* controls */
+    }
+}
+
+/************************************************************************
+* Powers 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.powers {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(2rem, 45px) /* name - flexible */
+            minmax(2rem, 28px) /* costs */
+            minmax(auto, 1fr) /* description */
+            minmax(2rem, 84px) /* end */
+            minmax(2rem, 84px) /* active */
+            minmax(2rem, 4rem); /* controls */
+    }
 }
