@@ -154,7 +154,7 @@ class HeroItemModCommonModel extends foundry.abstract.DataModel {
         try {
             if (this._hdcXml) {
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
-                    if (this[attribute.name] === undefined) {
+                    if (this.schema.fields[attribute.name] === undefined) {
                         const e = `${this.xmlTag} HeroItemModCommonModel is missing ${attribute.name} property.  Fix then reload ${this.actor.name}.`;
                         console.error(e);
                         return e;
@@ -568,7 +568,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         try {
             if (this._hdcXml) {
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
-                    if (this[attribute.name] === undefined) {
+                    if (this.schema.fields[attribute.name] === undefined) {
                         const e = `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`;
                         console.error(e);
                         return e;
@@ -1486,7 +1486,7 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
         try {
             if (this._hdcXml) {
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
-                    if (this[attribute.name] === undefined) {
+                    if (this.schema.fields[attribute.name] === undefined) {
                         const e = `${this.xmlTag} HeroItemCharacteristic is missing ${attribute.name} property.`;
                         console.error(e);
                         return e;
@@ -1835,7 +1835,7 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
             // Not sure what to do here as we don't follow the XML -> JSON -> DataModel exacly the same
             // if (this._hdcXml) {
             //     for (const attribute of this.hdcHTMLCollection.children[0].attributes) {
-            //         if (this[attribute.name] === undefined) {
+            //         if (this.schema.fields[attribute.name] === undefined) {
             //             console.error(`${this.xmlTag} HeroActorModel is missing ${attribute.name} property.`);
             //         }
             //     }
