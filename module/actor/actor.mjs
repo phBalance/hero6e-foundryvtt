@@ -3450,7 +3450,11 @@ export class HeroSystem6eActor extends Actor {
                             game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
                         !item.system.XMLID.startsWith("__")) ||
                     (item.baseInfo.type.includes("framework") && // CSL custom adders can specify a framework to indicate all of the framework's children are included.
-                        !(item.system.XMLID === "LIST" && item.isSeparator)), // Ignore separators which are lists with this special ALIAS
+                        !item.isSeparator && // Ignore separators
+                        !(
+                            item.system.XMLID === "LIST" &&
+                            ["skill", "talent", "perk", "disadvantage"].includes(item.type)
+                        )), // Ignore LISTs in the skills, talents, perks, and disads section as they can't have attacks
             )
             .sort((a, b) => a.name.localeCompare(b.name))
             .sort(_sortCslItems);
