@@ -6257,8 +6257,6 @@ export class HeroSystem6eItem extends Item {
                 case "MARTIAL":
                     return isMartialManeuver(attackItem);
 
-                // PH: FIXME: We should make sure these two offer the appropriate options (no ocv/omcv)
-                // PH: FIXME: We should have TWODCV giving the right options and automatically applying
                 case "HTHDCV":
                 case "TWODCV":
                 case "TWOOCV": {
@@ -7038,18 +7036,14 @@ export function cloneToEffectiveAttackItem({
 }) {
     // PH: FIXME: Add a way to create a new power type. Change the name of the function. Check CLUBWEAPON and
     //            probably want to give a warning if CLUBWEAPON is on and the attack is not a killing attack.
-    const clubWeaponActive = originalItem.actor?.items.find(
-        (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "CLUBWEAPON" && anItem.isActive,
-    );
+    // const clubWeaponActive = originalItem.actor?.items.find(
+    //     (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "CLUBWEAPON" && anItem.isActive,
+    // );
 
     let effectiveItem;
-    if (clubWeaponActive) {
-        effectiveItem = buildItemAsClub(100, originalItem.actor, originalItem.name);
-    } else {
-        const effectiveItemData = originalItem.toObject(false);
-        effectiveItemData._id = null;
-        effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
-    }
+    const effectiveItemData = originalItem.toObject(false);
+    effectiveItemData._id = null;
+    effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
 
     // PH: FIXME: Doesn't include TK
