@@ -3293,6 +3293,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             heroValidation: function (item) {
                 const validations = [];
 
+                // If there are no mapped attacks then the CSL won't work
+                if (item.customCslAdders.length === 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `There are no attacks associated with this CSL.`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
+
                 // Ensure that all custom adders are mapped to objects
                 const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
                 if (customCslAddersWithoutItems.length > 0) {
@@ -3335,6 +3345,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             heroValidation: function (item) {
                 const validations = [];
+
+                // If there are no mapped attacks then the CSL won't work
+                if (item.customCslAdders.length === 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `There are no attacks associated with this CSL.`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
 
                 // Ensure that all custom adders are mapped to objects
                 const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
@@ -9407,6 +9427,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="AFFECTSBOTH" ID="1735589942309" BASECOST="0.5" LEVELS="0" ALIAS="Affects Mental And Physical Attackers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "AFTERUSE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="AFTERUSE" ID="1725669588058" BASECOST="0.25" LEVELS="0" ALIAS="Side Effect occurs when character stops using power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
