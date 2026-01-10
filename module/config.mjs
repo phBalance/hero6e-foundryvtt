@@ -15309,6 +15309,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
     addPower(undefined, {
+        key: "BODYONLY",
+        behaviors: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(true),
+        xml: `<MODIFIER XMLID="BODYONLY" ID="1663423869228" BASECOST="-0.5" LEVELS="0" ALIAS="Affects Body Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
+    addPower(undefined, {
         key: "BOECV",
         behaviors: ["modifier"],
         costPerLevel: fixedValueFunction(0),
