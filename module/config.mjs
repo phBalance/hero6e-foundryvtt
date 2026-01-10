@@ -15320,6 +15320,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
     addPower(undefined, {
+        // SHAPESHIFT related
         key: "BODYONLY",
         behaviors: ["modifier"],
         costPerLevel: fixedValueFunction(0),
