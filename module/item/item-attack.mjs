@@ -1007,7 +1007,7 @@ async function doSingleTargetActionToHit(action, options) {
 
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
-            const singleTarget = Array.from(targets)[0];
+            const singleTarget = Array.from(targets)[0] || { id: null };
             const toHitRollTotal = targetData[0].toHitRollTotal;
             const firstShotResult = targetData[0].result.hit;
             const autoSuccess = targetData[0].autoSuccess;
@@ -1025,7 +1025,9 @@ async function doSingleTargetActionToHit(action, options) {
                     shot + 1
                 }/${autoFireShots}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
 
-                const value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value;
+                const value = singleTarget.id
+                    ? singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value
+                    : 3;
                 let hit = "Miss";
                 let by = Math.abs(autofireShotRollTotal - value);
 
