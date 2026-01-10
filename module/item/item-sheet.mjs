@@ -184,6 +184,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 // Enumerate attacks
                 data.attacks = [];
                 if (item.actor) {
+                    // Actual items
                     for (const attack of item.actor._cslItems) {
                         // Check if there is an adder (if so attack is checked)
                         const adder = this.item.adders.find((a) => a.ALIAS == attack.name && a.targetId === attack.id);
@@ -195,6 +196,19 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                             title: `${
                                 attack.system.XMLID + (attack.system.DISPLAY ? " (" + attack.system.DISPLAY + ")" : "")
                             }: ${attack.system.description.replace(/"/g, "&quot;")}`,
+                        });
+                    }
+
+                    // If there are any custom adders which don't point to real powers include in the list so that
+                    // users can uncheck it and make the custom adder go away without having to delete the adder directly
+                    // as that's not intuitive.
+                    for (const incorrectCustomAdder of item.customCslAddersWithoutItems) {
+                        const name = `${incorrectCustomAdder.ALIAS} (Invalid)`;
+                        data.attacks.push({
+                            id: null,
+                            name: name,
+                            checked: true,
+                            title: `The ${name} is invalid. Perhaps it was mispelt in Hero Designer or you have since deleted the linked item? Delete or edit the adder with this name from the ADDER section below.`,
                         });
                     }
                 }
