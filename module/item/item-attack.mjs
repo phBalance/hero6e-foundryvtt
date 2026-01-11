@@ -652,9 +652,12 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
         for (const csl of defendingActor.activeCslSkills) {
             let levelsForThisCsl = 0;
             for (const levelUse of csl.system.csl) {
+                // Check if the CSL applies defense. Note the special case for the 5e "DCV" defense because
+                // we only support dcvHth and dcvRanged as the single string.
                 if (
-                    (levelUse === "dcvHth" && defendsWith === "dcv" && !attackIsRanged) ||
-                    (levelUse === "dcvRanged" && defendsWith === "dcv" && attackIsRanged) ||
+                    (defendsWith === "dcv" && csl.system.OPTIONID === "DCV") ||
+                    (defendsWith === "dcv" && levelUse === "dcvHth" && !attackIsRanged) ||
+                    (defendsWith === "dcv" && levelUse === "dcvRanged" && attackIsRanged) ||
                     (levelUse === "dmcv" && defendsWith === "dmcv")
                 ) {
                     levelsForThisCsl += 1;
