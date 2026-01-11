@@ -2,56 +2,83 @@
     <div class="item-row {{#if (not this.isFromBaseActor)}}delta-item{{/if}} {{this.system.XMLID}} {{#if this.vppUnSlotted}}vpp-unslotted{{/if}} {{actorItemHeroValidationCss this}}"
     title="{{actorItemHeroValidation this}}"
     >
-        {{#if (eq item.system.XMLID "LIST")}}
-            <div class="item-column item-name">
-                <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
-                <div class="name">
-                    <div class="label">{{this.name}}</div>
-                    <div class="keywords">{{this.system.XMLID}}</div>
-                </div>
-            </div>
-            <div></div> {{!-- cost --}}
-            <div></div> {{!-- description --}}
-            <div></div> {{!-- end --}}
-            <div></div> {{!-- active --}}
-        {{else}}
-            <div class="item-column item-name">
-                <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
-                {{!-- <div class="name">
-                    <div class="label">{{this.name}}</div>
-                    <div class="keywords">{{this.system.XMLID}}</div>
-                </div> --}}
-            </div>
-            <div class="item-column item-cost">
-                {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
-                    {{this.compoundCostForDisplay}}
-                {{else if this.isSeparator}}
-                    {{!-- Show no cost--}}
-                {{else if (eq this.system.XMLID "LIST")}}
-                    <span style="opacity: 0.5">{{this.listCost}}</span>
+    <div class="item-column item-cost">
+            {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
+                {{this.compoundCostForDisplay}}
+            {{else if this.isSeparator}}
+                {{!-- Show no cost--}}
+            {{else if (eq this.system.XMLID "LIST")}}
+                <span style="opacity: 0.5">{{this.listCost}}</span>
+            {{else}}
+                {{#if (eq this.parentItem.system.XMLID "COMPOUNDPOWER")}}
+                    <span style="opacity: 0.5">{{this.characterPointCostForDisplayPlusSuffix}}</span>
                 {{else}}
-                    {{#if (eq this.parentItem.system.XMLID "COMPOUNDPOWER")}}
-                        <span style="opacity: 0.5">{{this.characterPointCostForDisplayPlusSuffix}}</span>
-                    {{else}}
-                        {{this.characterPointCostForDisplayPlusSuffix}}
-                    {{/if}}
+                    {{this.characterPointCostForDisplayPlusSuffix}}
                 {{/if}}
-            </div>
-            <div class="item-column item-description {{#if this.parentItem.type}}item-framework-child-name{{#if this.parentItem.parentItem}}2{{/if}}{{/if}} {{#if (and this.childIdx this.parentItem)}}parent-xmlid-{{toLowerCase this.parentItem.system.XMLID}} parent-xmlid-{{toLowerCase this.parentItem.parentItem.system.XMLID}}{{/if}}">
-                {{#if (and this.childIdx this.parentItem)}}
-                    {{this.childIdx}})
+            {{/if}}
+        </div>
+
+        {{!-- <div class="item-column item-level0">
+            {{#if (eq this.childIdx 0)}}
+               {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-name-v2.hbs') this }}
+            {{else}}
+                <div class="item-image"></div>
+            {{/if}}
+        </div>
+        <div class="item-column item-level1">
+            {{#if (eq this.childIdx 1)}}
+               {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-name-v2.hbs') this }}
+            {{else if (gt this.childIdx 1)}}
+                <div class="item-image"></div>
+            {{/if}}
+        </div>
+        <div class="item-column item-level2">
+            {{#if (eq this.childIdx 2)}}
+               {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-name-v2.hbs') this }}
+            {{else if (gt this.childIdx 2)}}
+                <div class="item-image"></div>
+            {{/if}}
+        </div> --}}
+        
+        <div class="item-column item-description item-depth-{{this.childDepth}}">
+            
+            {{#if this.isContainer}}
+                {{#if this.system.collapse}}
+                    <a class="item-image item-control item-expand" title="{{localize "ActorSheet.ExpandItem"}}" >
+                        <i class="fas fa-square-caret-right fa-2x"></i>
+                    </a>
+                {{else}}
+                    <a class="item-image item-control item-collapse" title="{{localize "ActorSheet.CollapseItem"}}" >
+                        <i class="fas fa-square-caret-down fa-2x"></i>
+                    </a>
                 {{/if}}
+            {{else}}
+                <img class="item-image" src="{{this.img}}" alt="{{this.name}}"> 
+            {{/if}}
+
+            
+            {{#if (and this.childIdx this.parentItem)}}
+                {{this.childIdx}})
+            {{/if}}
+            <div class="item-description-full">
                 {{{itemFullDescription this}}}
                 {{#if this.system.NOTES}}
                     <div class="item-notes-editable-content"><b>Notes:</b> {{{this.system.NOTES}}}</div>
                 {{/if}}
             </div>
-            <div class="item-column item-end">
-                {{this.system.endEstimate}}
-            </div>
-        {{/if}}
+            
+        </div>
+        <div class="item-column item-end">
+            {{this.system.endEstimate}}
+        </div>
         <div class="item-column item-controls">
             {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}
         </div>
     </div>
 </li>
+
+{{#if (not this.system.collapse)}}
+    {{#each this.childItems }}
+        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs') this }}
+    {{/each}}
+{{/if}}
