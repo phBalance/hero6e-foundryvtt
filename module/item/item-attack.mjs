@@ -3437,7 +3437,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
                     [game.system.id]: {
                         bodyDamage: senseGroup.bodyDamage,
                         XMLID: senseAffectingItem.system.XMLID,
-                        source: token?.name || senseAffectingItem.actor.name,
+                        source: getTokenEducatedGuess({ actor: senseAffectingItem.actor })?.name,
                         expiresOn: "segmentEnd",
                     },
                 },
