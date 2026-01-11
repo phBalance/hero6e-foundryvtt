@@ -5787,6 +5787,15 @@ export class HeroSystem6eItem extends Item {
         return this.baseInfo?.behaviors.includes("csl");
     }
 
+    get isCslValidHeroValidation() {
+        // If there are no mapped attacks then the CSL won't work
+        return (
+            this.customCslAdders.length > 0 ||
+            this.parentItem?.system.XMLID === "COMPOUNDPOWER" ||
+            ["ALL"].includes(this.system.OPTIONID)
+        );
+    }
+
     /**
      * Do any (re)initialization required for the CSL. It is safe to call this with an already initialized CSL.
      *
