@@ -55,11 +55,10 @@
                 {{/if}}
             {{/if}}
 
-            
-            {{#if (and this.childIdx this.parentItem)}}
-                {{this.childIdx}})
-            {{/if}}
             <div class="item-description-full">
+                {{#if (and this.childIdx this.parentItem)}}
+                    {{this.childIdx}})
+                {{/if}}
                 {{{itemFullDescription this}}}
                 {{#if this.system.NOTES}}
                     <div class="item-notes-editable-content"><b>Notes:</b> {{{this.system.NOTES}}}</div>
