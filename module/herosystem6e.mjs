@@ -907,7 +907,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
     if (today != lastDate) {
         lastDate = today;
-        game.user.setFlag(game.system.id, "lastDate", lastDate);
+        await game.user.setFlag(game.system.id, "lastDate", lastDate);
     }
 
     // If there are lots of actors updateWorldTime may result in performance issues.

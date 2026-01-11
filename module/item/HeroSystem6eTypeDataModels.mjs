@@ -540,6 +540,11 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         return range;
     }
 
+    get duration() {
+        // TODO: implement modifers to change duration
+        return this.item.baseInfo?.duration;
+    }
+
     get #rollProps() {
         if (!this.item.hasSuccessRoll()) {
             return {};
