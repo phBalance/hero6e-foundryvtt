@@ -1780,10 +1780,10 @@ export async function _onRollDamage(event) {
     const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting();
     const isKilling = item.effectiveAttackItem.doesKillingDamage;
     const isEntangle = item.effectiveAttackItem.system.XMLID === "ENTANGLE";
-    const isNormalAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isKilling;
-    const isKillingAttack = !isEntangle && !isSenseAffecting && !isAdjustment && isKilling;
     const isEffectBasedAttack =
         isBodyBasedEffectRoll(item.effectiveAttackItem) || isStunBasedEffectRoll(item.effectiveAttackItem);
+    const isNormalAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && !isKilling;
+    const isKillingAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && isKilling;
 
     const increasedMultiplierLevels = parseInt(
         item.effectiveAttackItem.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0,

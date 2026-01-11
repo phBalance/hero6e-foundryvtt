@@ -2487,7 +2487,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FOLLOWER":
-                description = system.ALIAS.replace("Followers: ", "");
+                description = `${system.ALIAS}`;
                 break;
 
             case "MINDSCAN":
@@ -4923,7 +4923,7 @@ export class HeroSystem6eItem extends Item {
         const quantity = this.system.QUANTITY;
         let doublingsCost = 0;
         if (quantity != null && quantity > 1) {
-            const doublings = Math.ceil(Math.log(quantity) / Math.log(2));
+            const doublings = Math.ceil(Math.log2(quantity));
 
             // The cost is always the cheaper of buying multiple quantities or paying the 5pt doubling cost.
             // We're multiplying, so remember to round.
@@ -5742,8 +5742,6 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.NAME === "") return this.name || this.system.XMLID;
         return `${this.name} [${this.system.XMLID}]`;
-
-        //return `${this.name}/${this.system.XMLID}`;
     }
 
     toXML() {
