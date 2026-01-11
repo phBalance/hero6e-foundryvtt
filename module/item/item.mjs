@@ -5803,7 +5803,11 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isCsl() {
-        return this.baseInfo?.behaviors.includes("csl");
+        return (
+            this.system.XMLID === "COMBAT_LEVELS" ||
+            this.system.XMLID === "MENTAL_COMBAT_LEVELS" ||
+            (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID === "OVERALL")
+        );
     }
 
     get isCslValidHeroValidation() {
