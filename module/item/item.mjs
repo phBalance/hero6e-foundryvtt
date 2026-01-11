@@ -5807,11 +5807,15 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isCslValidHeroValidation() {
-        // If there are no mapped attacks then the CSL won't work
+        // If there are no mapped attacks, and there need to be, then the CSL won't work. The rules are:
+        // 1. The CSL doesn't need to have custom adders because it supports an Infinite number of potential adders
+        // 2. Are there no adders when they need to be provided for the CSL to work?
+        // 3. We allow CSLs in COMPOUNDPOWERS to automatically work for all attacks within the COMPOUNDPOWER.
+        const cslCustomAdders = this.customCslAdders;
         return (
-            this.customCslAdders.length > 0 ||
-            this.parentItem?.system.XMLID === "COMPOUNDPOWER" ||
-            ["ALL"].includes(this.system.OPTIONID)
+            this.maxCustomCslAdders === +Infinity ||
+            cslCustomAdders.length > 0 ||
+            this.parentItem?.system.XMLID === "COMPOUNDPOWER"
         );
     }
 
@@ -6048,12 +6052,18 @@ export class HeroSystem6eItem extends Item {
 
         if (this.is5e) {
             if (this.system.XMLID === "COMBAT_LEVELS") {
-                // It is possible to define a 5e of any cost that applys to an infinite number of attacks
-                // by defining a single weapon. As a result, there is only 1 CSL type that has a limit.
-                if (this.system.OPTIONID === "SINGLESINGLE") {
+                if (
+                    this.system.OPTIONID === "SINGLESINGLE" ||
+                    this.system.OPTIONID === "SINGLE" ||
+                    this.system.OPTIONID === "SINGLESTRIKE"
+                ) {
                     return 1;
+                } else if (this.system.OPTIONID === "STRIKE" || this.system.OPTIONID === "TIGHT") {
+                    return 3;
                 }
 
+                // Most 5e CSLs don't have restrictions on them in terms of the number of items. The restriction
+                // is based on "related" and that's not something that we can police.
                 return +Infinity;
             }
         } else {
