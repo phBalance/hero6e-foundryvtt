@@ -1135,7 +1135,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             KILLING: new StringField(),
             LENGTHLEVELS: new StringField(),
             MDLEVELS: new HeroNumberField({ integer: true }),
-            NUMBER: new StringField(),
+            NUMBER: new HeroNumberField({ integer: true, positive: true }),
             OCV: new StringField(),
             OPTION: new StringField(),
             OPTIONID: new StringField(),
@@ -1167,7 +1167,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
 
             // Perk
             BASEPOINTS: new StringField(),
-            DISADPOINTS: new StringField(),
+            DISADPOINTS: new HeroNumberField({ integer: true, min: 0 }),
         };
     }
 }
@@ -1222,9 +1222,9 @@ export class HeroSystem6eItemPerk extends HeroSystem6eItemTypeDataModelProps {
         return {
             ...super.defineSchema(),
             BASEPOINTS: new StringField(),
-            DISADPOINTS: new StringField(),
+            DISADPOINTS: new HeroNumberField({ integer: true, min: 0 }),
             INTBASED: new StringField(),
-            NUMBER: new StringField(),
+            NUMBER: new HeroNumberField({ integer: true, positive: true }),
             OPTION: new StringField(),
             OPTIONID: new StringField(),
             ROLL: new StringField(),

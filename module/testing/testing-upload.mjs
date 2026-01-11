@@ -11554,6 +11554,100 @@ export function registerUploadTests(quench) {
                     assert.equal(item.end, 2);
                 });
             });
+
+            describe("FOLLOWER - #3515", function () {
+                describe("5e", function () {
+                    const contents = `
+                        <PERK XMLID="FOLLOWER" ID="1755882807926" BASECOST="0.0" LEVELS="0" ALIAS="Follower" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="His Pack (2 Dogs, 1 Owl, 1 Undecided)" NUMBER="3" BASEPOINTS="87" DISADPOINTS="35" FILE_ASSOCIATION="LargeHunting_PackDog-5e-122pts - Beavis.hdc">
+                            <NOTES>92 base and 35 disad each.</NOTES>
+                        </PERK>
+                    `;
+                    let followerItem;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+
+                        followerItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(followerItem.system.XMLID, followerItem);
+                    });
+
+                    it("description", function () {
+                        assert.equal(followerItem.system.description, "Follower");
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(followerItem.characterPointCost, 27);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(followerItem.realCost, 27);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(followerItem.activePoints, 27);
+                    });
+
+                    it("end", function () {
+                        assert.equal(followerItem.end, 0);
+                    });
+                });
+
+                describe("6e", function () {
+                    const contents = `
+                        <PERK XMLID="FOLLOWER" ID="1768096871775" BASECOST="0.0" LEVELS="0" ALIAS="Follower" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="His Pack (2 Dogs, 1 Owl, 1 Undecided)" NUMBER="3" BASEPOINTS="92" DISADPOINTS="0">
+                            <NOTES />
+                        </PERK>
+                    `;
+                    let followerItem;
+
+                    before(async function () {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+
+                        followerItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+
+                        actor.items.set(followerItem.system.XMLID, followerItem);
+                    });
+
+                    it("description", function () {
+                        assert.equal(followerItem.system.description, "Follower");
+                    });
+
+                    it("character point cost", function () {
+                        assert.equal(followerItem.characterPointCost, 28);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(followerItem.realCost, 28);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(followerItem.activePoints, 28);
+                    });
+
+                    it("end", function () {
+                        assert.equal(followerItem.end, 0);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

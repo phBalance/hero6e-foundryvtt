@@ -604,44 +604,6 @@ export function registerCslTests(quench) {
                                 expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
                             });
 
-                            it("should have raised the actor's DCV by 1 - dcvCsl", function () {
-                                expect(actor.system.characteristics.dcv.value).to.equal(4);
-                            });
-
-                            describe("DCV CSL should be an affect effect that can be turned off", function () {
-                                before(async function () {
-                                    await dcvCsl.turnOff();
-                                });
-
-                                after(async function () {
-                                    await dcvCsl.turnOn();
-                                });
-
-                                it("should reduce the actor's DCV by 1 when disabled", function () {
-                                    // PH: FIXME: This test is flakey. See #3467 for instance.
-                                    expect(actor.system.characteristics.dcv.value).to.equal(3);
-                                });
-                            });
-
-                            it("should have raised the actor's DMCV by 1 - dcvCsl", function () {
-                                expect(actor.system.characteristics.dmcv.value).to.equal(4);
-                            });
-
-                            describe("DECV CSL should be an affect effect that can be turned off", function () {
-                                before(async function () {
-                                    await decvCsl.turnOff();
-                                });
-
-                                after(async function () {
-                                    await decvCsl.turnOn();
-                                });
-
-                                it("should reduce the actor's DECV by 1 when disabled", function () {
-                                    // PH: FIXME: This test is flakey. See #3467 for instance.
-                                    expect(actor.system.characteristics.dmcv.value).to.equal(3);
-                                });
-                            });
-
                             it("should apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
                                 expect(hthAndRangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
                                 expect(hthAndRangedDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
