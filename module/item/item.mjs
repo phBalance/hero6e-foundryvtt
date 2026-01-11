@@ -256,6 +256,12 @@ export class HeroSystem6eItem extends Item {
     async _preCreate(data, options, userId) {
         await super._preCreate(data, options, userId);
 
+        // Initialize new CSLs
+        if (this.isCsl) {
+            const initializationChanges = this.initializeCsl(this.system.LEVELS);
+            this.updateSource(foundry.utils.mergeObject(initializationChanges));
+        }
+
         // assign a default image
         if (!data.img || data.img === "icons/svg/item-bag.svg") {
             if (this.system.XMLID === "COMPOUNDPOWER") {
@@ -819,9 +825,15 @@ export class HeroSystem6eItem extends Item {
 
     // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
     // which requested the operation.
-    // async _preUpdate(changes, options, user) {
-    //     await super._preUpdate(changes, options, user);
-    // }
+    async _preUpdate(changes, options, user) {
+        // Reinitialize CSLs if LEVELS have changed
+        if (this.isCsl && changes.system.LEVELS !== this.system.LEVELS) {
+            const reinitializationChanges = this.initializeCsl(changes.system.LEVELS);
+            foundry.utils.mergeObject(changes, reinitializationChanges);
+        }
+
+        await super._preUpdate(changes, options, user);
+    }
 
     async _onUpdate(changed, options, userId) {
         // We favor effect.disabled over system.active (in fact shouldn't be changing system.active)
@@ -891,7 +903,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.isCsl) {
-            const cslChanges = this.initializeCsl();
+            const cslChanges = this.initializeCsl(this.system.LEVELS);
             await this.update(cslChanges);
         }
 
@@ -5828,18 +5840,12 @@ export class HeroSystem6eItem extends Item {
      *
      * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
      */
-    initializeCsl() {
+    initializeCsl(expectedNumEntries) {
         const cslUpdates = {};
-
-        // We have a bug in isCsl right now that shows all SKILL_LEVELS as CSLs. Work around it for the time being.
-        if (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID !== "OVERALL") {
-            return cslUpdates;
-        }
 
         // (Re)initialize csl array
         const allowedChoices = this.cslChoices;
         const selectedChoices = foundry.utils.deepClone(this.system._source.csl);
-        const expectedNumEntries = Math.max(selectedChoices.length, this.system.LEVELS);
         selectedChoices.length = expectedNumEntries; // Truncate or expand the array as required
 
         // Make sure none of the selectedChoices are outside the possibleChoices set. If they are,
