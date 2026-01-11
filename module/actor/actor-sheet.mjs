@@ -1230,9 +1230,13 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                         itemData.system.ID = new Date().getTime();
 
                         // Finally, create the item!
-                        await HeroSystem6eItem.create(itemData, {
+                        const item = await HeroSystem6eItem.create(itemData, {
                             parent: actor,
                         });
+
+                        // CHANGEENVIRONMENT was defaulting to on, turn it off #3485
+                        await item.resetToOriginal();
+
                         return;
                     },
                 },
