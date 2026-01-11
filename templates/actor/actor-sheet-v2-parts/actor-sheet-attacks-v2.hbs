@@ -21,7 +21,7 @@
             {{#each items as |item|}}
                 <li class="item attack draggable expandable-document" data-document-uuid="{{this.uuid}}">
                     <div class="item-row">
-                        <div class="item-column item-name rollable" data-action="roll">
+                        <div class="item-column item-name">
                             <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
                             <div class="name">
                                 <div class="label">{{this.name}}</div>
@@ -54,10 +54,7 @@
                             {{/if}}
                         </div>
                         <div class="item-column item-controls">
-                            <a class="fa-fw fa-solid fa-ellipsis-vertical" data-action="documentListContext"></a>
-                            <a class="fa-solid fa-angle-{{ifThen abilityContext.expanded "down" "right"}}" data-action="toggleDocumentDescription"></a>
-                        </div>
-
+                            {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}                        </div>
                     </div>
 
                         <div class="item-description-expandable">

@@ -114,7 +114,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "analysis" },
             ],
             labelPrefix: "ActorSheet.Tabs", // Optional. Prepended to the id to generate a localization key
-            initial: "powers", // Set the initial tab
+            initial: "attacks", // Set the initial tab
         },
     };
 
