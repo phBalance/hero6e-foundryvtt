@@ -2479,7 +2479,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FOLLOWER":
-                description = system.ALIAS.replace("Followers: ", "");
+                description = `${system.ALIAS}`;
                 break;
 
             case "MINDSCAN":
