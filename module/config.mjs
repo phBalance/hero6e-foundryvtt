@@ -1102,10 +1102,35 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
-                if (char.actor.is5e) {
-                    return "5e calculated DEX/3";
+                const actor = char.actor;
+                let notes = [];
+
+                if (actor.is5e) {
+                    notes.push("5e calculated DEX/3");
                 }
-                return null;
+
+                let dcvHthLevels = 0;
+                let dcvRangedLevels = 0;
+                let dcvLevels = 0;
+                for (const csl of actor.activeCslSkills) {
+                    for (const levelUse of csl.system.csl) {
+                        if (csl.system.OPTIONID === "DCV") {
+                            dcvLevels += 1;
+                        } else if (levelUse === "dcvHth") {
+                            dcvHthLevels += 1;
+                        } else if (levelUse === "dcvRanged") {
+                            dcvRangedLevels += 1;
+                        }
+                    }
+                }
+
+                if (dcvHthLevels || dcvRangedLevels || dcvLevels) {
+                    notes.push(
+                        `Extra CSL defenses: HTH DCV ${dcvHthLevels.signedStringHero()}, Ranged DCV ${dcvRangedLevels.signedStringHero()}, DCV ${dcvLevels.signedStringHero()}`,
+                    );
+                }
+
+                return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
                 return Math.max(0, roundFavorPlayerAwayFromZero(actor.system.characteristics.dex.value / 3));
@@ -1162,10 +1187,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
-                if (char.actor.is5e) {
-                    return "5e calculated EGO/3";
+                const actor = char.actor;
+                let notes = [];
+
+                if (actor.is5e) {
+                    notes.push("5e calculated EGO/3");
                 }
-                return null;
+
+                let dmcvLevels = 0;
+                for (const csl of actor.activeCslSkills) {
+                    for (const levelUse of csl.system.csl) {
+                        if (levelUse === "dmcv") {
+                            dmcvLevels += 1;
+                        }
+                    }
+                }
+
+                if (dmcvLevels) {
+                    notes.push(`Extra CSL defenses: DMCV ${dmcvLevels.signedStringHero()}`);
+                }
+
+                return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
                 return Math.max(0, roundFavorPlayerAwayFromZero(actor.system.characteristics.ego.value / 3));
