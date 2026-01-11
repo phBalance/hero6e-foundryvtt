@@ -2753,7 +2753,7 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: Linking Combat Skill Levels`, 0);
             const cslInitializationUpdates = [];
             for (const csl of this.allCslSkills) {
-                const cslChangesToLink = csl.linkCslBasedOnCustomAdders();
+                const cslChangesToLink = csl.linkCslBasedOnCustomAdders(this.system._source.ADDER);
                 if (csl._id != null) {
                     cslChangesToLink._id = csl._id;
                     cslInitializationUpdates.push(cslChangesToLink);

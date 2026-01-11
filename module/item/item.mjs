@@ -826,10 +826,19 @@ export class HeroSystem6eItem extends Item {
     // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
     // which requested the operation.
     async _preUpdate(changes, options, user) {
-        // Reinitialize CSLs if LEVELS have changed
-        if (this.isCsl && changes.system.LEVELS !== this.system.LEVELS) {
-            const reinitializationChanges = this.initializeCsl(changes.system.LEVELS);
-            foundry.utils.mergeObject(changes, reinitializationChanges);
+        // CSLs have multiple fields which are linked. Do that linking.
+        if (this.isCsl) {
+            // Reinitialize CSLs if their LEVELS have changed
+            if (changes.system.LEVELS != null && changes.system.LEVELS !== this.system.LEVELS) {
+                const reinitializationChanges = this.initializeCsl(changes.system.LEVELS);
+                foundry.utils.mergeObject(changes, reinitializationChanges);
+            }
+
+            // Update CSLs if their ADDER array has changed (in any way)
+            if (changes.system.ADDER != null) {
+                const relinkChanges = this.linkCslBasedOnCustomAdders(changes.system.ADDER);
+                foundry.utils.mergeObject(changes, relinkChanges);
+            }
         }
 
         await super._preUpdate(changes, options, user);
@@ -5838,6 +5847,8 @@ export class HeroSystem6eItem extends Item {
     /**
      * Do any (re)initialization required for the CSL. It is safe to call this with an already initialized CSL.
      *
+     * @param {Number} expectedNumEntries
+     *
      * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
      */
     initializeCsl(expectedNumEntries) {
@@ -5863,13 +5874,15 @@ export class HeroSystem6eItem extends Item {
     /**
      * Link the CSL's custom adders to other items
      *
+     * @param {HeroAdderModel[]} adders - All system.ADDER which will not be mutated
+     *
      * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
      */
-    linkCslBasedOnCustomAdders() {
+    linkCslBasedOnCustomAdders(adders) {
         const cslUpdates = {};
 
         // Setup targetId
-        const allAdders = foundry.utils.deepClone(this.system._source.ADDER);
+        const allAdders = foundry.utils.deepClone(adders);
         for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
             const targetId = (this.actor?._cslItems || []).find((item) => {
                 // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
