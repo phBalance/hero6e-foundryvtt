@@ -222,12 +222,9 @@
                     > * {
                         padding: 4px;
                         min-height: 36px;
-
-                        // display: flex;
-
-                        // align-items: center;
-
-                        // justify-content: center;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                         flex-shrink: 1;
                     }
 
@@ -245,6 +242,16 @@
                             flex-shrink: 0;
                         }
                     }
+
+                    .item-column.item-controls {
+                        gap: 4px;
+                        font-size: var(--font-size-16);
+                        text-align: right;
+                        white-space: nowrap;
+                        margin-right: 2px;
+                        padding-right: 10px; // For FireFox
+                        justify-content: right;
+                    }
                 }
 
                 .item-description-expandable {
@@ -252,9 +259,11 @@
                     display: grid;
                     grid-template-rows: 0fr;
                     transition: grid-template-rows 0.2s ease-out;
+                    text-align: left;
 
                     .item-description-content {
                         overflow: hidden;
+                        padding-left: 42px;
                     }
                 }
 
@@ -266,7 +275,6 @@
                         .item-description-content {
                             // padding: 8px 12px;
                             // padding-left: 20px; // align with item name
-                            text-align: left;
                         }
                     }
 
@@ -276,13 +284,16 @@
                     }
                 }
             }
-        }
 
-        .item-controls {
-            gap: 4px;
-            font-size: var(--font-size-16);
-            text-align: right;
-            white-space: nowrap;
+            .item .item-image i.fa-square-caret-down {
+                transform: rotate(0deg);
+                transition: transform 0.2s ease-in-out;
+            }
+
+            .item.collapsed .item-image i.fa-square-caret-down {
+                transform: rotate(-90deg);
+                transition: transform 0.2s ease-in-out;
+            }
         }
 
         div.item-row > div.item-column.item-description {

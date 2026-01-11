@@ -22,6 +22,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         },
         actions: {
             roll: HeroSystemActorSheetV2.#onRoll,
+            toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
         },
         //tag: "form", // The default is "div"
         window: {
@@ -382,6 +383,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             eventName: "click",
         });
 
+        // item-description-expand chevron expand collapse
         this.element.querySelectorAll('[data-action="toggleDocumentDescription"]').forEach((el) => {
             el.addEventListener("click", (ev) => {
                 ev.preventDefault();
@@ -404,8 +406,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 },
             },
             {
-                name: "Share",
+                name: "Display in chat",
                 icon: '<i class="fa-solid fa-fw fa-share-from-square"></i>',
+                condition: (target) => {
+                    const document = this._getEmbeddedDocument(target);
+                    return !!document.system.description;
+                },
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
                     await document.chat();
@@ -451,5 +457,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             console.error("Unable to locate roll item");
         }
         await item.roll();
+    }
+
+    static async #onToggleItemContainer(event, target) {
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("Unable to locate item");
+        }
+        target.closest("li").classList.toggle("collapsed");
     }
 }
