@@ -3429,9 +3429,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
         if (senseGroup.bodyDamage > 0) {
             token.actor.addActiveEffect({
                 ...senseGroup.statusEffect,
-                name: `${senseAffectingItem.effectiveAttackItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseGroup.XMLID} ${
-                    senseGroup.bodyDamage
-                } segments remaining [${senseAffectingItem.actor.name}]`,
+                name: `${senseAffectingItem.effectiveAttackItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseGroup.XMLID}`,
                 duration: {
                     seconds: senseGroup.bodyDamage,
                 },
@@ -3439,11 +3437,10 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
                     [game.system.id]: {
                         bodyDamage: senseGroup.bodyDamage,
                         XMLID: senseAffectingItem.system.XMLID,
-                        source: senseAffectingItem.actor.name,
+                        source: token?.name || senseAffectingItem.actor.name,
                         expiresOn: "segmentEnd",
                     },
                 },
-                origin: senseAffectingItem.uuid,
             });
         }
     }

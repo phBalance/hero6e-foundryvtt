@@ -548,20 +548,34 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             const elapsed = wt - start;
             const remaining = d.seconds - elapsed;
 
-            const sec_num = parseInt(remaining, 10);
-            const hours = Math.floor(sec_num / 3600);
-            const minutes = Math.floor(sec_num / 60) % 60;
-            const seconds = sec_num % 60;
+            let totalSeconds = parseInt(remaining, 10);
+
+            const days = Math.floor(totalSeconds / (3600 * 24)); // 3600 seconds in an hour, 24 hours in a day
+            totalSeconds %= 3600 * 24; // Remaining seconds after calculating days
+
+            const hours = Math.floor(totalSeconds / 3600); // 3600 seconds in an hour
+            totalSeconds %= 3600; // Remaining seconds after calculating hours
+
+            const minutes = Math.floor(totalSeconds / 60); // 60 seconds in a minute
+            totalSeconds %= 60; // Remaining seconds
+
+            const seconds = totalSeconds;
 
             return {
                 type: "seconds",
                 duration: d.seconds,
                 remaining: remaining,
-                label: `${hours ? `${hours}h` : ""} ${minutes ? `${minutes}m` : ""} ${seconds ? `${seconds}s` : ""}`,
+                label: `${days ? `${days}d ` : ""}${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds ? `${seconds}s` : ""}`,
                 _worldTime: wt,
             };
         }
 
         return super._prepareDuration();
+    }
+
+    get nameExtended() {
+        const sourceName = this.flags[game.system.id]?.source;
+        const d = this._prepareDuration();
+        return `${this.name} [${sourceName ? `${sourceName}, ` : ""}${d.label}]`;
     }
 }
