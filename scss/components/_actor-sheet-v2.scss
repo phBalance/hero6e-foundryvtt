@@ -144,6 +144,8 @@
 
     .item-row {
         .item-name {
+            display: flex;
+
             .name {
                 .keywords {
                     font-size: var(--font-size-12);
@@ -212,7 +214,8 @@
                     > * {
                         padding: 4px;
                         min-height: 36px;
-                        display: flex;
+
+                        // display: flex;
 
                         // align-items: center;
 
@@ -277,8 +280,9 @@
         .item-controls {
             gap: 4px;
             font-size: var(--font-size-16);
-            flex-wrap: wrap;
-            justify-content: flex-end;
+            text-align: right;
+
+            // white-space: nowrap;
         }
 
         div.item-row > div.item-column.item-description {
@@ -296,7 +300,7 @@
         display: grid;
         box-sizing: content-box;
         grid-template-columns:
-            minmax(auto, 1fr) /* name - flexible */
+            minmax(auto, 3fr) /* name - flexible */
             minmax(2rem, 28px) /* ocv */
             minmax(2rem, 28px) /* dcv */
             minmax(2rem, 84px) /* offdef */
@@ -304,7 +308,7 @@
             minmax(min-content, 120px) /* res */
             minmax(min-content, 32px) /* end */
             minmax(min-content, 73px) /* aoe - example for second flexible column */
-            minmax(2rem, 120px); /* controls */
+            minmax(min-content, 120px); /* controls */
     }
 }
 
@@ -320,7 +324,6 @@
             minmax(2rem, 28px) /* costs */
             minmax(auto, 1fr) /* description */
             minmax(2rem, 84px) /* end */
-            minmax(2rem, 84px) /* active */
-            minmax(2rem, 4rem); /* controls */
+            minmax(min-content, 120px); /* controls */
     }
 }

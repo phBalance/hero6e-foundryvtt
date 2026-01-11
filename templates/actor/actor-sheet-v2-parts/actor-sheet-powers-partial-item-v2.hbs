@@ -49,12 +49,9 @@
             <div class="item-column item-end">
                 {{this.system.endEstimate}}
             </div>
-            <div class="item-column item-dmg">
-                {{> (getModulePath 'item/item-action-icons-partial.hbs') this }}
-            </div>
         {{/if}}
         <div class="item-column item-controls">
-            <a class="fa-fw fa-solid fa-ellipsis-vertical" data-action="documentListContext"></a> 
+            {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}
         </div>
     </div>
 </li>
