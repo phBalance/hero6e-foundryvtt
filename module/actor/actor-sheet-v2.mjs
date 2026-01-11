@@ -406,6 +406,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             {
                 name: "Share",
                 icon: '<i class="fa-solid fa-fw fa-share-from-square"></i>',
+                condition: (target) => {
+                    const document = this._getEmbeddedDocument(target);
+                    return !!document.system.description;
+                },
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
                     await document.chat();

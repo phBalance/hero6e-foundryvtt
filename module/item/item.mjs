@@ -2240,11 +2240,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get childDepth() {
-        if (!this.parentItem) return 0;
-        if (this.parentItem?.parentItem) {
+        if (this.parentItem) {
             return this.parentItem.childDepth + 1;
         }
-        return this.parentItem.childDepth;
+        return 0;
     }
 
     // If this item belongs to an unlinked actor may want to know if it was
