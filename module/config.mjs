@@ -5054,11 +5054,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 5),
             cost: function (item) {
                 const basePoints = parseInt(item.system.BASEPOINTS) || 0;
-                const number = parseInt(item.system.NUMBER) || 1;
+                const number = item.system.NUMBER || 1;
+
                 // A character can have double the number of
                 // Followers for +5 CP (twice as many for +5 CP, four times as
                 // many for +10 CP, and so on)
-                const doublingCost = Math.log2(number, 2) * 5;
+                const doublingCost = 5 * Math.ceil(Math.log2(number));
                 return roundFavorPlayerTowardsZero(basePoints / 5 + doublingCost);
             },
             name: "Follower",
