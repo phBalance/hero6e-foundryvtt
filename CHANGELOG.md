@@ -3,6 +3,7 @@
 ### Version 4.2.9 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improve 5e and 6e CSLs. [#3474](https://github.com/dmdorman/hero6e-foundryvtt/issues/3474) [#3447](https://github.com/dmdorman/hero6e-foundryvtt/issues/3447) [#3273](https://github.com/dmdorman/hero6e-foundryvtt/issues/3273) [#2160](https://github.com/dmdorman/hero6e-foundryvtt/issues/2160) [#2138](https://github.com/dmdorman/hero6e-foundryvtt/issues/2138)
+- Effect based powers (e.g. Mind Control) can now roll damage. [#3515](https://github.com/dmdorman/hero6e-foundryvtt/issues/3515)
 
 ## Version 4.2.8 20260104
 
