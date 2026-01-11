@@ -2750,21 +2750,21 @@ export class HeroSystem6eActor extends Actor {
             }
             uploadProgressBar.advance(`${this.name}: Restored retained damage`, 0);
 
-            uploadProgressBar.advance(`${this.name}: Initializing Combat Skill Levels`, 0);
+            uploadProgressBar.advance(`${this.name}: Linking Combat Skill Levels`, 0);
             const cslInitializationUpdates = [];
             for (const csl of this.allCslSkills) {
-                const cslChanges = csl.initializeCsl();
+                const cslChangesToLink = csl.linkCslBasedOnCustomAdders();
                 if (csl._id != null) {
-                    cslChanges._id = csl._id;
-                    cslInitializationUpdates.push(cslChanges);
+                    cslChangesToLink._id = csl._id;
+                    cslInitializationUpdates.push(cslChangesToLink);
                 } else {
-                    foundry.utils.mergeObject(csl, cslChanges);
+                    foundry.utils.mergeObject(csl, cslChangesToLink);
                 }
             }
             if (cslInitializationUpdates.length > 0) {
                 await Item.implementation.updateDocuments(cslInitializationUpdates, { parent: this });
             }
-            uploadProgressBar.advance(`${this.name}: Initialized Combat Skill Levels`, 1);
+            uploadProgressBar.advance(`${this.name}: Linked Combat Skill Levels`, 1);
 
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);

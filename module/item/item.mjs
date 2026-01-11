@@ -5818,22 +5818,17 @@ export class HeroSystem6eItem extends Item {
     /**
      * Do any (re)initialization required for the CSL. It is safe to call this with an already initialized CSL.
      *
-     * @returns {Object} cslUpdates - an accumulator of changes to be passed to updateDocuments
+     * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
      */
     initializeCsl() {
         const cslUpdates = {};
-
-        if (!this.isCsl) {
-            console.error("This is not a CSL - shouldn't be initialized", this);
-            return cslUpdates;
-        }
 
         // We have a bug in isCsl right now that shows all SKILL_LEVELS as CSLs. Work around it for the time being.
         if (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID !== "OVERALL") {
             return cslUpdates;
         }
 
-        // Initialize csl array
+        // (Re)initialize csl array
         const allowedChoices = this.cslChoices;
         const selectedChoices = foundry.utils.deepClone(this.system._source.csl);
         const expectedNumEntries = Math.max(selectedChoices.length, this.system.LEVELS);
@@ -5847,6 +5842,17 @@ export class HeroSystem6eItem extends Item {
             }
         }
         cslUpdates["system.csl"] = selectedChoices;
+
+        return cslUpdates;
+    }
+
+    /**
+     * Link the CSL's custom adders to other items
+     *
+     * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
+     */
+    linkCslBasedOnCustomAdders() {
+        const cslUpdates = {};
 
         // Setup targetId
         const allAdders = foundry.utils.deepClone(this.system._source.ADDER);
