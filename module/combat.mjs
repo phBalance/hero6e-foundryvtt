@@ -47,7 +47,13 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     get segment() {
-        return parseInt(this.getFlag(game.system.id, "segment")) || 12;
+        const segment = HeroSystem6eCombat.singleCombatantTracker
+            ? this.getFlag(game.system.id, "segment")
+            : this.combatant?.getFlag(game.system.id, "segment");
+        if (segment == undefined) {
+            console.warn(`segment is ${segment}`);
+        }
+        return segment ?? 12;
     }
 
     static #canUpdate(user, doc, data) {
@@ -842,12 +848,11 @@ export class HeroSystem6eCombat extends Combat {
                     item.type !== "skill" && // Natural skills are always on, but only use resources when used/rolled
                     item.baseInfo && // Do we have baseInfo for this power
                     item.baseInfo.duration !== "instant" && // Is the power non instant
-                    ((parseInt(item.end || 0) > 0 && // Does the power use END?
-                        !item.system.MODIFIER?.find(
-                            (o) =>
-                                (o.XMLID === "COSTSEND" && o.OPTIONID === "ACTIVATE") ||
-                                o.XMLID === "COSTSENDONLYTOACTIVATE",
-                        )) || // Does the power use END continuously?
+                    (!item.system.MODIFIER?.find(
+                        (o) =>
+                            (o.XMLID === "COSTSEND" && o.OPTIONID === "ACTIVATE") ||
+                            o.XMLID === "COSTSENDONLYTOACTIVATE",
+                    ) || // Does the power use END continuously?
                         (item.system.chargeModifier && !item.system.chargeModifier.CONTINUING)), // Does the power use charges but is not continuous (as that is tracked by an effect when made active)?
             )) {
                 const {

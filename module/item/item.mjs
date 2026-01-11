@@ -1195,6 +1195,26 @@ export class HeroSystem6eItem extends Item {
         // Make sure activeEffects are properly defined
         await this.setActiveEffects();
 
+        // If this is a constant power where to show the "to-hit" then don't bother spending
+        // resources or checking for requires a roll.
+        // Also don't check VPP as we use "carried" to determine if we can toggle/roll.
+        if (item.system.duration === "constant" && item.baseInfo.behaviors.includes("to-hit")) {
+            await this.setActive(true);
+
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+            speaker["alias"] = item.actor.name;
+
+            const chatData = {
+                author: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                content: `Turned on ${item.name}. Will consume resources on each phase.`,
+                whisper: whisperUserTargetsForActor(item.actor),
+                speaker,
+            };
+            await ChatMessage.create(chatData);
+            return;
+        }
+
         if (item.isActive) {
             console.warn(`${item.name} is already on`);
             return;
