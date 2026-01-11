@@ -560,16 +560,17 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                         SELECTED: true,
                         BASECOST_total: 0,
                         targetId: attackItem.id,
+                        xmlTag: "ADDER",
                     };
 
-                    await this.item.update({ [`system.ADDER`]: [...this.item.system.ADDER, newAdder] });
+                    const newAdderArray = [...foundry.utils.deepClone(this.item.system._source.ADDER), newAdder];
+                    await this.item.update({ [`system.ADDER`]: newAdderArray });
                 } else if (adder && !checked) {
                     // Delete custom adders that matches attack name
-                    //this.item.system.ADDER = this.item.system.ADDER.filter((o) => o.targetId != attackItem.id);
                     await this.item.update({
-                        [`system.ADDER`]: foundry.utils.deepClone(
-                            this.item.system.ADDER.filter((o) => o.targetId !== attackItem.id),
-                        ),
+                        [`system.ADDER`]: foundry.utils
+                            .deepClone(this.item.system._source.ADDER)
+                            .filter((o) => o.targetId !== attackItem.id),
                     });
                 }
             }

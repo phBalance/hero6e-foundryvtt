@@ -3264,7 +3264,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COMBAT_LEVELS",
             type: ["skill"],
-            behaviors: ["activatable", "csl"],
+            behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             costEnd: false,
@@ -3911,7 +3911,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTAL_COMBAT_LEVELS",
             type: ["skill"],
-            behaviors: ["activatable", "csl"],
+            behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -4415,7 +4415,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SKILL_LEVELS",
             type: ["skill"],
-            behaviors: ["activatable", "csl"],
+            behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),

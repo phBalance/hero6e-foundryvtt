@@ -256,6 +256,12 @@ export class HeroSystem6eItem extends Item {
     async _preCreate(data, options, userId) {
         await super._preCreate(data, options, userId);
 
+        // Initialize new CSLs
+        if (this.isCsl) {
+            const initializationChanges = this.initializeCsl(this.system.LEVELS);
+            this.updateSource(foundry.utils.mergeObject(initializationChanges));
+        }
+
         // assign a default image
         if (!data.img || data.img === "icons/svg/item-bag.svg") {
             if (this.system.XMLID === "COMPOUNDPOWER") {
@@ -819,9 +825,24 @@ export class HeroSystem6eItem extends Item {
 
     // Pre-process an update operation for a single Document instance. Pre-operation events only occur for the client
     // which requested the operation.
-    // async _preUpdate(changes, options, user) {
-    //     await super._preUpdate(changes, options, user);
-    // }
+    async _preUpdate(changes, options, user) {
+        // CSLs have multiple fields which are linked. Do that linking.
+        if (this.isCsl) {
+            // Reinitialize CSLs if their LEVELS have changed
+            if (changes.system.LEVELS != null && changes.system.LEVELS !== this.system.LEVELS) {
+                const reinitializationChanges = this.initializeCsl(changes.system.LEVELS);
+                foundry.utils.mergeObject(changes, reinitializationChanges);
+            }
+
+            // Update CSLs if their ADDER array has changed (in any way)
+            if (changes.system.ADDER != null) {
+                const relinkChanges = this.linkCslBasedOnCustomAdders(changes.system.ADDER);
+                foundry.utils.mergeObject(changes, relinkChanges);
+            }
+        }
+
+        await super._preUpdate(changes, options, user);
+    }
 
     async _onUpdate(changed, options, userId) {
         // We favor effect.disabled over system.active (in fact shouldn't be changing system.active)
@@ -891,7 +912,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.isCsl) {
-            const cslChanges = this.initializeCsl();
+            const cslChanges = this.initializeCsl(this.system.LEVELS);
             await this.update(cslChanges);
         }
 
@@ -5803,40 +5824,39 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isCsl() {
-        return this.baseInfo?.behaviors.includes("csl");
+        return (
+            this.system.XMLID === "COMBAT_LEVELS" ||
+            this.system.XMLID === "MENTAL_COMBAT_LEVELS" ||
+            (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID === "OVERALL")
+        );
     }
 
     get isCslValidHeroValidation() {
-        // If there are no mapped attacks then the CSL won't work
+        // If there are no mapped attacks, and there need to be, then the CSL won't work. The rules are:
+        // 1. The CSL doesn't need to have custom adders because it supports an Infinite number of potential adders
+        // 2. Are there no adders when they need to be provided for the CSL to work?
+        // 3. We allow CSLs in COMPOUNDPOWERS to automatically work for all attacks within the COMPOUNDPOWER.
+        const cslCustomAdders = this.customCslAdders;
         return (
-            this.customCslAdders.length > 0 ||
-            this.parentItem?.system.XMLID === "COMPOUNDPOWER" ||
-            ["ALL"].includes(this.system.OPTIONID)
+            this.maxCustomCslAdders === +Infinity ||
+            cslCustomAdders.length > 0 ||
+            this.parentItem?.system.XMLID === "COMPOUNDPOWER"
         );
     }
 
     /**
      * Do any (re)initialization required for the CSL. It is safe to call this with an already initialized CSL.
      *
-     * @returns {Object} cslUpdates - an accumulator of changes to be passed to updateDocuments
+     * @param {Number} expectedNumEntries
+     *
+     * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
      */
-    initializeCsl() {
+    initializeCsl(expectedNumEntries) {
         const cslUpdates = {};
 
-        if (!this.isCsl) {
-            console.error("This is not a CSL - shouldn't be initialized", this);
-            return cslUpdates;
-        }
-
-        // We have a bug in isCsl right now that shows all SKILL_LEVELS as CSLs. Work around it for the time being.
-        if (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID !== "OVERALL") {
-            return cslUpdates;
-        }
-
-        // Initialize csl array
+        // (Re)initialize csl array
         const allowedChoices = this.cslChoices;
         const selectedChoices = foundry.utils.deepClone(this.system._source.csl);
-        const expectedNumEntries = Math.max(selectedChoices.length, this.system.LEVELS);
         selectedChoices.length = expectedNumEntries; // Truncate or expand the array as required
 
         // Make sure none of the selectedChoices are outside the possibleChoices set. If they are,
@@ -5848,8 +5868,21 @@ export class HeroSystem6eItem extends Item {
         }
         cslUpdates["system.csl"] = selectedChoices;
 
+        return cslUpdates;
+    }
+
+    /**
+     * Link the CSL's custom adders to other items
+     *
+     * @param {HeroAdderModel[]} adders - All system.ADDER which will not be mutated
+     *
+     * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
+     */
+    linkCslBasedOnCustomAdders(adders) {
+        const cslUpdates = {};
+
         // Setup targetId
-        const allAdders = foundry.utils.deepClone(this.system._source.ADDER);
+        const allAdders = foundry.utils.deepClone(adders);
         for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
             const targetId = (this.actor?._cslItems || []).find((item) => {
                 // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
@@ -6042,12 +6075,18 @@ export class HeroSystem6eItem extends Item {
 
         if (this.is5e) {
             if (this.system.XMLID === "COMBAT_LEVELS") {
-                // It is possible to define a 5e of any cost that applys to an infinite number of attacks
-                // by defining a single weapon. As a result, there is only 1 CSL type that has a limit.
-                if (this.system.OPTIONID === "SINGLESINGLE") {
+                if (
+                    this.system.OPTIONID === "SINGLESINGLE" ||
+                    this.system.OPTIONID === "SINGLE" ||
+                    this.system.OPTIONID === "SINGLESTRIKE"
+                ) {
                     return 1;
+                } else if (this.system.OPTIONID === "STRIKE" || this.system.OPTIONID === "TIGHT") {
+                    return 3;
                 }
 
+                // Most 5e CSLs don't have restrictions on them in terms of the number of items. The restriction
+                // is based on "related" and that's not something that we can police.
                 return +Infinity;
             }
         } else {
