@@ -3,6 +3,10 @@
     min-width: 500px;
 }
 
+.herosystem6e.actor-sheet-v2.minimizing {
+    min-height: 0;
+}
+
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/
@@ -209,8 +213,10 @@
                         padding: 4px;
                         min-height: 36px;
                         display: flex;
-                        align-items: center;
-                        justify-content: center;
+
+                        // align-items: center;
+
+                        // justify-content: center;
                         flex-shrink: 1;
                     }
 
@@ -241,20 +247,28 @@
                     }
                 }
 
+                & {
+                    .item-row .item-controls .fa-angle-right {
+                        transform: rotate(0deg);
+                        transition: transform 0.2s ease-in-out;
+                    }
+                }
+
                 &.expanded {
                     .item-description-expandable {
                         grid-template-rows: 1fr;
-
-                        // border-bottom: 1px solid var(--color-border-light);
+                        border-top: 1px dashed var(--color-border-light);
 
                         .item-description-content {
                             // padding: 8px 12px;
-                            // padding-left: 42px; // align with item name
+                            // padding-left: 20px; // align with item name
+                            text-align: left;
                         }
                     }
 
                     .item-row .item-controls .fa-angle-right {
                         transform: rotate(90deg);
+                        transition: transform 0.2s ease-in-out;
                     }
                 }
             }
@@ -263,6 +277,8 @@
         .item-controls {
             gap: 4px;
             font-size: var(--font-size-16);
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         div.item-row > div.item-column.item-description {
@@ -285,10 +301,10 @@
             minmax(2rem, 28px) /* dcv */
             minmax(2rem, 84px) /* offdef */
             minmax(2rem, 68px) /* dmg */
-            minmax(min-content, 128px) /* res */
+            minmax(min-content, 120px) /* res */
             minmax(min-content, 32px) /* end */
             minmax(min-content, 73px) /* aoe - example for second flexible column */
-            minmax(2rem, 4rem); /* controls */
+            minmax(2rem, 120px); /* controls */
     }
 }
 
