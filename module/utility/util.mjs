@@ -203,23 +203,11 @@ export async function getTemporaryEffectsOwnedByActorInCombat(actor) {
 
 /// Check the actor for any effects that should expire, and expire them.
 export async function expireEffects(actor, expiresOn) {
-    // if (actor.inCombat) {
-    //     console.log(`%c ExpireEffects ${actor.name} ${game.time.worldTime}`, "background: #229; color: #bada55");
-    // }
-
-    // AARON UGLY HACK
-    // Prevent worldtime + onTurnStart from both running expireEffects at the same time (async issues)
-    // window.expireEffects ??= {};
-    // if (window.expireEffects[actor.id]) {
-    //     console.warn(
-    //         `expireEffects for ${actor.name} was called twice in quick succession which can cause issues. Suppressing this call.`,
-    //     );
-    //     return;
-    // } else {
-    //     window.expireEffects[actor.id] = game.time.worldTime;
-    // }
-
     const temporaryEffects = actor.temporaryEffects;
+
+    if (!expiresOn) {
+        console.error(`missing expiresOn`);
+    }
 
     const adjustmentChatMessages = [];
     for (const ae of temporaryEffects) {
@@ -330,21 +318,31 @@ export async function expireEffects(actor, expiresOn) {
                     break;
                 }
             } else {
+                // FLASHes expire on segmentEnd.
+                // ExpireEffects is called twice, one from worldTimeUpdate and
+                // one from turnStart.  Only do the worldTimeUpdate one.
+                // This avoids the double chat message & AE errors for deleting already
+                // deleted AE.
+                if (expiresOn === "turnStart" && aeExpiresOn === "segmentEnd") {
+                    break;
+                }
                 // Catch all to delete the expired AE.
                 // May need to revisit and make exception for statuses (like prone/recovery)
+
                 if (ae.parent instanceof HeroSystem6eActor) {
                     const cardHtml = `${ae.name.replace(/\d+ segments remaining/, "")} has expired.`;
                     const chatData = {
                         //author: game.user._id,
                         content: cardHtml,
-                        //speaker: speaker,
+                        speaker: ChatMessage.getSpeaker({
+                            actor,
+                            token: tokenEducatedGuess({ actor }),
+                        }),
                     };
                     await ChatMessage.create(chatData);
-                    //adjustmentChatMessages.push(chatMessage);  // Not a adjustment card (but could be if we filled in additional props)
                     await ae.delete();
                 }
                 break;
-                //}
             }
 
             // Add duration to startTime (if ae wasn't deleted)

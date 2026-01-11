@@ -842,45 +842,6 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 }
             }
 
-            // Update Flash name?
-            const flashEffects = actor.temporaryEffects.filter((o) =>
-                ["FLASH", "MANEUVER"].includes(o.flags[game.system.id]?.XMLID),
-            );
-            for (const flashAe of flashEffects) {
-                const senseAffectingItem = fromUuidSync(flashAe.origin);
-                if (!senseAffectingItem) {
-                    console.error("active effect item not found", flashAe);
-                    break;
-                }
-
-                // Double check this is a FLASH or has a EFFECT with FLASH
-                if (
-                    senseAffectingItem.system.XMLID !== "FLASH" &&
-                    !senseAffectingItem.system.EFFECT?.includes("FLASH")
-                ) {
-                    break;
-                }
-
-                const d = flashAe._prepareDuration();
-                if (d.remaining > 0) {
-                    const newName = `${senseAffectingItem.system.XMLID.replace(
-                        "MANEUVER",
-                        senseAffectingItem.system.ALIAS,
-                    )} ${senseAffectingItem.system.OPTIONID} ${d.remaining} segments remaining [${senseAffectingItem.actor.name}]`;
-                    flashAe.update({ name: newName });
-                } else {
-                    const cardHtml = `${flashAe.name.replace(/\d+ segments remaining/, "")} has expired.`;
-                    const chatData = {
-                        //author: game.user._id,
-                        content: cardHtml,
-                        speaker: ChatMessage.getSpeaker({ actor }),
-                    };
-                    await ChatMessage.create(chatData);
-
-                    await flashAe.delete();
-                }
-            }
-
             // Power Toggles with charges
             // Aaron was unable to make the AE transfer from item to actor and also expire, so we handle them here.
             // There is an opportunity to improve/refactor this.
