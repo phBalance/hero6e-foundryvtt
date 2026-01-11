@@ -6100,7 +6100,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CHANGEENVIRONMENT",
             type: ["attack"],
-            behaviors: ["to-hit", "dice"],
+            behaviors: ["to-hit", "dice", "activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "Target’s DCV",
