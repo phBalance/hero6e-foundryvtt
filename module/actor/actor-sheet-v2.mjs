@@ -134,7 +134,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     context.items = this.actor.items.filter((item) => item.showAttack);
                     break;
                 case "powers":
-                    context.items = this.actor.items.filter((item) => item.type === "power");
+                    context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
                     break;
             }
         } catch (e) {

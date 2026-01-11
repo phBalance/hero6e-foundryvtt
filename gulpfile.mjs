@@ -32,6 +32,7 @@ function validateScssFilesByLint() {
     return gulp.src(SASS_FILES).pipe(
         gulpStylelint({
             failAfterError: false,
+            fix: true,
             reporters: [{ formatter: "string", console: true }],
         }),
     );

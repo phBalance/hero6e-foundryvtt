@@ -2239,6 +2239,14 @@ export class HeroSystem6eItem extends Item {
         return result;
     }
 
+    get childDepth() {
+        if (!this.parentItem) return 0;
+        if (this.parentItem?.parentItem) {
+            return this.parentItem.childDepth + 1;
+        }
+        return this.parentItem.childDepth;
+    }
+
     // If this item belongs to an unlinked actor may want to know if it was
     // inherited from the baseActor.
     get baseActor() {
