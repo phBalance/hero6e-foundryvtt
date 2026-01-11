@@ -3294,7 +3294,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const validations = [];
 
                 // If there are no mapped attacks then the CSL won't work
-                if (item.customCslAdders.length === 0) {
+                if (!item.isCslValidHeroValidation) {
                     validations.push({
                         property: "ALIAS",
                         message: `There are no attacks associated with this CSL.`,
@@ -3347,7 +3347,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const validations = [];
 
                 // If there are no mapped attacks then the CSL won't work
-                if (item.customCslAdders.length === 0) {
+                if (!item.isCslValidHeroValidation) {
                     validations.push({
                         property: "ALIAS",
                         message: `There are no attacks associated with this CSL.`,
