@@ -592,13 +592,11 @@ export class HeroSystem6eActor extends Actor {
 
         // 5e calculated characteristics
         if (this.is5e && data.system?.characteristics) {
-            let _getCharacteristicInfoArrayForActor; // a bit of caching
+            const characteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this); // a bit of caching
             const changes = {};
             for (const changeKey of Object.keys(data.system.characteristics)) {
                 if (data.system.characteristics[changeKey].value !== undefined) {
-                    _getCharacteristicInfoArrayForActor ??= getCharacteristicInfoArrayForActor(this);
-
-                    for (const char of _getCharacteristicInfoArrayForActor.filter(
+                    for (const char of characteristicInfoArrayForActor.filter(
                         (o) => o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) || o.key == changeKey,
                     )) {
                         const key = char.key.toLocaleLowerCase();
@@ -2753,7 +2751,7 @@ export class HeroSystem6eActor extends Actor {
             uploadProgressBar.advance(`${this.name}: Linking Combat Skill Levels`, 0);
             const cslInitializationUpdates = [];
             for (const csl of this.allCslSkills) {
-                const cslChangesToLink = csl.linkCslBasedOnCustomAdders(this.system._source.ADDER);
+                const cslChangesToLink = csl.linkCslBasedOnCustomAdders(csl.system._source.ADDER);
                 if (csl._id != null) {
                     cslChangesToLink._id = csl._id;
                     cslInitializationUpdates.push(cslChangesToLink);
