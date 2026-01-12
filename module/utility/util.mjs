@@ -255,6 +255,7 @@ export async function expireEffects(actor, expiresOn) {
         // With Simple Calendar you can move time ahead in large steps.
         // Need to loop as multiple fades may be required.
         // The null check is for AE that have no duration.
+        // TODO: Aaron dislikes WHILE loops, can this be reworked such that it there is not a possibility of infinite loop?
         while (ae._prepareDuration().remaining <= zero && ae._prepareDuration().remaining !== null) {
             const origin = fromUuidSync(ae.origin);
             const item =

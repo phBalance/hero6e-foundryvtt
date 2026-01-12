@@ -2,7 +2,7 @@
 
 ### Version 4.2.9 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Improve 5e and 6e CSLs. [#3474](https://github.com/dmdorman/hero6e-foundryvtt/issues/3474) [#3447](https://github.com/dmdorman/hero6e-foundryvtt/issues/3447) [#3273](https://github.com/dmdorman/hero6e-foundryvtt/issues/3273) [#2160](https://github.com/dmdorman/hero6e-foundryvtt/issues/2160) [#2138](https://github.com/dmdorman/hero6e-foundryvtt/issues/2138)
+- Improve 5e and 6e CSLs. DCVs are now classified as HTH or RANGED and show in the characteristics DCV notes field of the actor and defense tags. [#3474](https://github.com/dmdorman/hero6e-foundryvtt/issues/3474) [#3447](https://github.com/dmdorman/hero6e-foundryvtt/issues/3447) [#3273](https://github.com/dmdorman/hero6e-foundryvtt/issues/3273) [#2160](https://github.com/dmdorman/hero6e-foundryvtt/issues/2160) [#2138](https://github.com/dmdorman/hero6e-foundryvtt/issues/2138)
 - Effect based powers (e.g. Mind Control) can now roll damage. [#3515](https://github.com/dmdorman/hero6e-foundryvtt/issues/3515)
 - CHANGE ENVIRONMENT can now be toggled on and off. [#3485](https://github.com/dmdorman/hero6e-foundryvtt/issues/3485)
 
