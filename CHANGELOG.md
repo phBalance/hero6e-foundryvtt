@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.2.9 20261101 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.10 20260112 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed HDC uploads with CSLs and custom adders. [#3536](https://github.com/dmdorman/hero6e-foundryvtt/issues/3536)
+
+### Version 4.2.9 20260111
 
 - Improve 5e and 6e CSLs. DCVs are now classified as HTH or RANGED and show in the characteristics DCV notes field of the actor and defense tags. [#3474](https://github.com/dmdorman/hero6e-foundryvtt/issues/3474) [#3447](https://github.com/dmdorman/hero6e-foundryvtt/issues/3447) [#3273](https://github.com/dmdorman/hero6e-foundryvtt/issues/3273) [#2160](https://github.com/dmdorman/hero6e-foundryvtt/issues/2160) [#2138](https://github.com/dmdorman/hero6e-foundryvtt/issues/2138)
 - Effect based powers (e.g. Mind Control) can now roll damage. [#3515](https://github.com/dmdorman/hero6e-foundryvtt/issues/3515)
