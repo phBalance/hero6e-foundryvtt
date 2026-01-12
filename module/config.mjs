@@ -6336,13 +6336,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 if (value > maxValue) {
-                    const msg = `${actorItemDefense.name} has more ${options.attackDefenseVs} LEVELS (${value}) than natural LEVELS (${maxValue}). Defenses may not properly represent this defense. Consider ARMOR if you want resistant defenses.`;
-                    // Attempt some sort of spam control
-                    if ($(ui.notifications.active).first("li:contains('than natural LEVELS')").length === 0) {
-                        // if (!ui.notifications.queue.find((n) => n.message === msg)) {
+                    const msg = `${actorItemDefense.detailedName()} has more ${options.attackDefenseVs} LEVELS (${value}) than natural LEVELS (${maxValue}). Defenses may not properly represent this defense. Consider ARMOR if you want resistant defenses.`;
+                    if (!squelch(actorItemDefense.id)) {
                         ui.notifications.warn(msg, actorItemDefense);
                     }
-                    //value = maxValue;
                 }
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
@@ -8463,12 +8460,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCREASEDARC360",
             type: ["sense"],
-            behaviors: ["activatabnle"],
+            behaviors: ["activatable"],
             duration: "persistent", // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="INCREASEDARC360" ID="1763943009288" BASECOST="25.0" LEVELS="0" ALIAS="Increased Arc Of Perception (360 Degrees)" POSITION="79" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // SUMMON related
+            key: "INCREASETOTAL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: ` <ADDER XMLID="INCREASETOTAL" ID="1688216155887" BASECOST="0.0" LEVELS="1" ALIAS="x2 Number Of Beings" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">`,
         },
         {},
     );
@@ -13380,6 +13388,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // SIDEEFFECTS related
+            // Side Effect does a predefined amount of damage
+            key: "PREDEFINEDDAMAGE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="PREDEFINEDDAMAGE" ID="1688216154910" BASECOST="0.25" LEVELS="0" ALIAS="Side Effect does a predefined amount of damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // FRINGE_BENEFIT related
             key: "PRESSPASS",
             behaviors: ["adder"],
@@ -15018,6 +15038,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // DUPLICATION related
+            key: "ZEROPHASERECOMBINATION",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ZEROPHASERECOMBINATION" ID="1688216130499" BASECOST="10.0" LEVELS="0" ALIAS="Easy Recombination (Zero-Phase Action at Full DCV)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
 })();
 
 (function addModifiersToPowerList() {
@@ -15097,6 +15128,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ALLORNOTHING" ID="1764594003100" BASECOST="-0.5" LEVELS="0" ALIAS="All Or Nothing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ALTEREDDUPLICATES",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ALTEREDDUPLICATES" ID="1688216130571" BASECOST="0.25" LEVELS="0" ALIAS="Altered Duplicates" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="QUARTER" OPTIONID="QUARTER" OPTION_ALIAS="25%" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -15589,6 +15630,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="CONTINUOUSCONCENTRATION" ID="1743878031238" BASECOST="1.0" LEVELS="0" ALIAS="Must Concentrate throughout use of Constant Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // VPP framework related
+            key: "COSMIC",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="COSMIC" ID="1663758701677" BASECOST="2.0" LEVELS="0" ALIAS="Cosmic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -16118,13 +16170,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    addPower(undefined, {
-        key: "INDEPENDENT",
-        behaviors: ["modifier"],
-        costPerLevel: fixedValueFunction(0),
-        dcAffecting: fixedValueFunction(false),
-        xml: `<MODIFIER XMLID="INDEPENDENT" ID="1737919880443" BASECOST="-2.0" LEVELS="0" ALIAS="Independent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-    });
+    addPower(
+        // 15. Removed Limitations: The following Limitations
+        // have been removed, or have been incorporated
+        // into other Power Modifiers: Activation
+        // Roll; Gradual Effect; Independent; Requires
+        // A Skill Roll. (See the new Requires A Roll
+        // Limitation.)
+        undefined,
+        {
+            key: "INDEPENDENT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="INDEPENDENT" ID="1737919880443" BASECOST="-2.0" LEVELS="0" ALIAS="Independent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+    );
     addPower(
         {
             key: "INDIRECT",
@@ -16924,6 +16985,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // Ranged Recombination
+            key: "RANGEDRECOMBINATION",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="RANGEDRECOMBINATION" ID="1688216130560" BASECOST="0.5" LEVELS="0" ALIAS="Ranged Recombination" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // DUPLICATION related
+            key: "RAPIDDUPLICATION",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="RAPIDDUPLICATION" ID="1688216130501" BASECOST="0.0" LEVELS="6" ALIAS="Rapid Duplication (can create 64 Duplicates per Half Phase)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "RAPIDNONCOMBATMOVEMENT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -17213,6 +17296,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SPECIFICBEING" ID="1767550694169" BASECOST="1.0" LEVELS="0" ALIAS="Specific Being" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // CUSTOMPOWER related
+            key: "SPELL",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="SPELL" ID="1688217018497" BASECOST="-0.5" LEVELS="0" ALIAS="Spell" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
