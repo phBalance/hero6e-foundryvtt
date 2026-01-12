@@ -417,7 +417,7 @@ export async function performAdjustment(
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     let potentialCharacteristic = nameOfCharOrPower.toLowerCase();
     const simplifiedHealing =
-        attackItem.system.INPUT.match(/simplified/i) &&
+        attackItem.system.INPUT?.match(/simplified/i) &&
         ["BODY", "STUN"].includes(potentialCharacteristic.toUpperCase());
     //const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
