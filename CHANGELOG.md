@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.2.10 20260112 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.11 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+-
+
+### Version 4.2.10 20260112
 
 - Fixed HDC uploads with CSLs and custom adders. [#3536](https://github.com/dmdorman/hero6e-foundryvtt/issues/3536)
 
