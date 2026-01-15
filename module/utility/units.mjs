@@ -29,7 +29,9 @@ export function getSystemDisplayUnits(is5e) {
  */
 export function convertSystemUnitsToMetres(distanceInSystemUnits, is5e) {
     if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e paramater`, is5e);
+        console.error(`bad is5e parameter, using DefaultEdition`, is5e);
+        const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
+        is5e = DefaultEdition;
     }
 
     return distanceInSystemUnits * (is5e ? 2 : 1);

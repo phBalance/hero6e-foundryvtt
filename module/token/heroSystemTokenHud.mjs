@@ -26,7 +26,7 @@ function generateMovementCanSelectFunction(characteristic) {
 function generateMovementMaxCombatDistanceMeters(characteristic) {
     return (token) => {
         const combatMovementInSystemUnits = token.actor?.system.characteristics[characteristic]?.value || 0;
-        return convertSystemUnitsToMetres(combatMovementInSystemUnits, token.actor.is5e);
+        return convertSystemUnitsToMetres(combatMovementInSystemUnits, token.actor?.is5e);
     };
 }
 
@@ -39,11 +39,12 @@ function generateMovementMaxNonCombatDistanceMeters(characteristic) {
 
         // Look for powers with nonCombatMultipliers
         try {
-            const movementEffectsWithImprovedNonCombat = token.actor?.appliedEffects.filter(
-                (ae) =>
-                    ae.changes.find((c) => c.key === `system.characteristics.${characteristic}.max`) &&
-                    ae.parent.findModsByXmlid("IMPROVEDNONCOMBAT"),
-            );
+            const movementEffectsWithImprovedNonCombat =
+                token.actor?.appliedEffects.filter(
+                    (ae) =>
+                        ae.changes.find((c) => c.key === `system.characteristics.${characteristic}.max`) &&
+                        ae.parent.findModsByXmlid("IMPROVEDNONCOMBAT"),
+                ) ?? [];
             for (const ae of movementEffectsWithImprovedNonCombat) {
                 const change = ae.changes.find((c) => c.key === `system.characteristics.${characteristic}.max`);
                 const distance = parseInt(change.value) || 0;
@@ -67,7 +68,7 @@ function generateMovementMaxNonCombatDistanceMeters(characteristic) {
             );
         }
 
-        return convertSystemUnitsToMetres(extraNonCombatMovement + combatMovementInSystemUnits, token.actor.is5e);
+        return convertSystemUnitsToMetres(extraNonCombatMovement + combatMovementInSystemUnits, token.actor?.is5e);
     };
 }
 
