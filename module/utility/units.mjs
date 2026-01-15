@@ -14,8 +14,12 @@ import { squelch } from "./util.mjs";
  */
 
 export function getSystemDisplayUnits(is5e) {
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e paramater`, is5e);
+    if (is5e !== false && is5e !== true) {
+        if (!squelch("units5e")) {
+            console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
+        }
+        const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
+        is5e = DefaultEdition;
     }
 
     return is5e ? '"' : "m";
@@ -28,8 +32,10 @@ export function getSystemDisplayUnits(is5e) {
  * @returns number
  */
 export function convertSystemUnitsToMetres(distanceInSystemUnits, is5e) {
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e parameter, using DefaultEdition`, is5e);
+    if (is5e !== false && is5e !== true) {
+        if (!squelch("units5e")) {
+            console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
+        }
         const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
         is5e = DefaultEdition;
     }
@@ -44,16 +50,24 @@ export function convertSystemUnitsToMetres(distanceInSystemUnits, is5e) {
  * @returns number - number of system units of the hex (same for 5e and double for 6e)
  */
 export function convertHexesToSystemUnits(distanceInHexes, is5e) {
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e paramater`, is5e);
+    if (is5e !== false && is5e !== true) {
+        if (!squelch("units5e")) {
+            console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
+        }
+        const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
+        is5e = DefaultEdition;
     }
 
     return distanceInHexes * (is5e ? 1 : 2);
 }
 
 export function hexDistanceToSystemDisplayString(distanceInHexes, is5e) {
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e paramater`, is5e);
+    if (is5e !== false && is5e !== true) {
+        if (!squelch("units5e")) {
+            console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
+        }
+        const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
+        is5e = DefaultEdition;
     }
 
     return `${convertHexesToSystemUnits(distanceInHexes, is5e)}${getSystemDisplayUnits(is5e)}`;
@@ -69,8 +83,12 @@ export function hexDistanceToSystemDisplayString(distanceInHexes, is5e) {
  * @returns number
  */
 export function getRoundedDownDistanceInSystemUnits(distanceInMetres, is5e) {
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e paramater`, is5e);
+    if (is5e !== false && is5e !== true) {
+        if (!squelch("units5e")) {
+            console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
+        }
+        const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
+        is5e = DefaultEdition;
     }
 
     const roundedDistanceInMetres = is5e ? Math.floor(distanceInMetres / 2) : Math.floor(distanceInMetres);
@@ -92,8 +110,12 @@ export function getRoundedDownDistanceInSystemUnits(distanceInMetres, is5e) {
  * @returns number
  */
 export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres, is5e) {
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e paramater`, is5e);
+    if (is5e !== false && is5e !== true) {
+        if (!squelch("units5e")) {
+            console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
+        }
+        const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
+        is5e = DefaultEdition;
     }
 
     const roundedDistanceInMetres = is5e
@@ -113,8 +135,12 @@ export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres,
  * @returns number
  */
 export function getRoundedUpDistanceInSystemUnits(distanceInMetres, is5e) {
-    if (is5e !== false && is5e !== true && is5e !== undefined) {
-        console.error(`bad is5e paramater`, is5e);
+    if (is5e !== false && is5e !== true) {
+        if (!squelch("units5e")) {
+            console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
+        }
+        const DefaultEdition = game.settings.get(game.system.id, "DefaultEdition");
+        is5e = DefaultEdition;
     }
 
     const roundedDistanceInMetres = is5e ? Math.ceil(distanceInMetres / 2) : Math.ceil(distanceInMetres);
