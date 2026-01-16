@@ -2787,7 +2787,7 @@ export class HeroSystem6eActor extends Actor {
                 .filter((o) => o.delta > 500)
                 .sort((a, b) => b.delta - a.delta);
             for (const concern of performanceConcerns) {
-                console.warn({ delta: concern.delta, message: concern.message });
+                console.warn(`uploadFromXml performance concern: ${concern.message} ${concern.delta}s`, concern);
             }
 
             uploadPerformance.totalTime = new Date().getTime() - uploadPerformance.startTime;
