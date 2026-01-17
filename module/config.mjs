@@ -16170,12 +16170,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
     addPower(
-        // 15. Removed Limitations: The following Limitations
-        // have been removed, or have been incorporated
-        // into other Power Modifiers: Activation
-        // Roll; Gradual Effect; Independent; Requires
-        // A Skill Roll. (See the new Requires A Roll
-        // Limitation.)
+        // Independent limitation was removed in 6e
         undefined,
         {
             key: "INDEPENDENT",

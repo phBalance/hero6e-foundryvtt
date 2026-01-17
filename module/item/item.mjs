@@ -14,7 +14,12 @@ import {
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
-import { getPowerInfo, hdcTimeOptionIdToSeconds, whisperUserTargetsForActor } from "../utility/util.mjs";
+import {
+    getPowerInfo,
+    hdcTimeOptionIdToSeconds,
+    tokenEducatedGuess,
+    whisperUserTargetsForActor,
+} from "../utility/util.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
     buildStrengthItem,
@@ -1367,11 +1372,13 @@ export class HeroSystem6eItem extends Item {
             // }
         }
 
+        const speaker = ChatMessage.getSpeaker({
+            actor: item.actor,
+            token: tokenEducatedGuess({ actor: item.actor }),
+        });
+
         const success = await rollRequiresASkillRollCheck(this, event);
         if (!success) {
-            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-            speaker["alias"] = item.actor.name;
-
             const chatData = {
                 author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
@@ -1385,9 +1392,6 @@ export class HeroSystem6eItem extends Item {
 
             return;
         }
-
-        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-        speaker["alias"] = item.actor.name;
 
         const chatData = {
             author: game.user._id,
@@ -1448,9 +1452,10 @@ export class HeroSystem6eItem extends Item {
 
         if (!options.silent) {
             // Let GM know power was deactivated
-            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-            speaker["alias"] = item.actor.name;
-
+            const speaker = ChatMessage.getSpeaker({
+                actor: item.actor,
+                token: tokenEducatedGuess({ actor: item.actor }),
+            });
             const chatData = {
                 author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
@@ -2020,10 +2025,11 @@ export class HeroSystem6eItem extends Item {
 
     // FIXME: This should be trimmed down
     isActivatable() {
-        if (this.duration)
-            if (this.baseInfo?.behaviors?.includes("activatable")) {
-                return true;
-            }
+        //TODO: If ALWAYSON then not isActivable, or at least grey out box to do so.  Perpahs make it so you can't turnOff in code too.
+
+        if (this.baseInfo?.behaviors?.includes("activatable")) {
+            return true;
+        }
 
         if (this.type === "characteristic") {
             return false;
