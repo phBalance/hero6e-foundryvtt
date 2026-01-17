@@ -3855,6 +3855,7 @@ export class HeroSystem6eActor extends Actor {
                 });
             } else {
                 await this.addActiveEffect(activeEffect);
+                //await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         }
 
