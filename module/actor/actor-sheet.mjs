@@ -401,10 +401,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             // Display Heroic Action Points
             data.useHAP = game.settings.get(game.system.id, "HAP");
 
-            // Not all actor types have END & STUN
-            // data.hasEND = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "END");
-            // data.hasSTUN = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "STUN");
-
             // Endurance Reserve
             data.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
         } catch (ex) {

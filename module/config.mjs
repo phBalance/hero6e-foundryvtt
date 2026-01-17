@@ -775,7 +775,7 @@ function pdEdCostPerLevel(itemOrActor) {
     const hasAutomatonPowerWithNoStun = !!actor?.items.find(
         (power) =>
             power.system.XMLID === "AUTOMATON" &&
-            (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+            (power.system.OPTIONID === "NOSTUN1" || power.system.OPTIONID === "NOSTUN2"),
     );
     if (hasAutomatonPowerWithNoStun) {
         return 3;
@@ -1488,14 +1488,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // The Automaton power presents awkwardly in HDC. A character has STUN unless they have certain levels
                 // of the AUTOMATON powers.
                 if (["automaton", "pc", "npc"].includes(actor.type)) {
-                    const hasStun1 = !!actor.items.find(
-                        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
-                    ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
-                    const hasStun2 = !!actor.items.find(
-                        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
-                    ); // Takes No STUN
+                    const isAutomatonPowerWithNoStun = !!actor.items.find(
+                        (item) =>
+                            item.system.XMLID === "AUTOMATON" &&
+                            (item.system.OPTIONID === "NOSTUN1" || item.system.OPTIONID === "NOSTUN2"),
+                    );
 
-                    return hasStun1 || hasStun2;
+                    return isAutomatonPowerWithNoStun;
                 }
 
                 return false;
@@ -8471,17 +8470,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            // SUMMON related
-            key: "INCREASETOTAL",
-            behaviors: ["adder"],
-            type: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: ` <ADDER XMLID="INCREASETOTAL" ID="1688216155887" BASECOST="0.0" LEVELS="1" ALIAS="x2 Number Of Beings" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">`,
-        },
-        {},
-    );
-    addPower(
-        {
             key: "INFRAREDPERCEPTION",
             type: ["sense"],
             behaviors: ["adder"],
@@ -11908,6 +11896,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INCREASEDWEIGHT" ID="1711728009754" BASECOST="0.0" LEVELS="1" ALIAS="x2 Increased Weight" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // SUMMON related
+            key: "INCREASETOTAL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="INCREASETOTAL" ID="1688216155887" BASECOST="0.0" LEVELS="1" ALIAS="x2 Number Of Beings" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );

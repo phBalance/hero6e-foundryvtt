@@ -58,32 +58,31 @@ export function registerBaseTests(quench) {
                     });
 
                     it("should have the BASESIZE characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "BASESIZE")).to.be
-                            .true;
+                        expect(actor.hasCharacteristic("BASESIZE")).to.be.true;
                     });
 
                     it("should have the BODY characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "BODY")).to.be.true;
+                        expect(actor.hasCharacteristic("BODY")).to.be.true;
                     });
 
                     it("should have the DEF characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "DEF")).to.be.true;
+                        expect(actor.hasCharacteristic("DEF")).to.be.true;
                     });
 
                     it("should NOT have the PD characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "PD")).to.be.false;
+                        expect(actor.hasCharacteristic("PD")).to.be.false;
                     });
 
                     it("should NOT have the ED characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "ED")).to.be.false;
+                        expect(actor.hasCharacteristic("ED")).to.be.false;
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
+                        expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
 
                     it("should NOT have the SIZE characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "SIZE")).to.be.false;
+                        expect(actor.hasCharacteristic("SIZE")).to.be.false;
                     });
 
                     it("should have correct characteristic values", function () {
@@ -154,40 +153,39 @@ export function registerBaseTests(quench) {
                     });
 
                     it("should have the BASESIZE characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "BASESIZE")).to.be
-                            .true;
+                        expect(actor.hasCharacteristic("BASESIZE")).to.be.true;
                     });
 
                     it("should have the BODY characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "BODY")).to.be.true;
+                        expect(actor.hasCharacteristic("BODY")).to.be.true;
                     });
 
                     it("should have the PD characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "PD")).to.be.true;
+                        expect(actor.hasCharacteristic("PD")).to.be.true;
                     });
 
                     it("should have the ED characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "ED")).to.be.true;
+                        expect(actor.hasCharacteristic("ED")).to.be.true;
                     });
 
                     it("should NOT have the DEF characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "DEF")).to.be.false;
+                        expect(actor.hasCharacteristic("DEF")).to.be.false;
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
+                        expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
 
                     it("should NOT have the SIZE characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "SIZE")).to.be.false;
+                        expect(actor.hasCharacteristic("SIZE")).to.be.false;
                     });
 
                     it("should NOT have the OCV characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "OCV")).to.be.false;
+                        expect(actor.hasCharacteristic("OCV")).to.be.false;
                     });
 
                     it("should NOT have the DCV characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "DCV")).to.be.false;
+                        expect(actor.hasCharacteristic("DCV")).to.be.false;
                     });
 
                     it("should have correct characteristic values", function () {
