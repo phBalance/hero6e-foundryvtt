@@ -1,5 +1,4 @@
 import { HEROSYS } from "./herosystem6e.mjs";
-import { getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 
 export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("abs", abs);
@@ -221,7 +220,7 @@ function actorHeroValidationCssByItemType(actor, itemType) {
 
 function hasCharacteristic(actor, characteristic) {
     if (actor) {
-        return getCharacteristicInfoArrayForActor(actor).find((o) => o.key === characteristic);
+        return actor.hasCharacteristic(characteristic);
     }
     console.error("No actor provided");
     return false;
