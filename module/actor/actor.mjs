@@ -124,17 +124,60 @@ export class HeroSystem6eActor extends Actor {
         super._onCreate(data, options, userId);
     }
 
-    // prepareData() {
-    //     // Set XMLID of characteristics; typically occurs when new actor without HDC upload
-    //     // Used with conditional defenses
-    //     for (const key of Object.keys(this.system).filter((o) => o.match(/[A-Z]/))) {
-    //         const char = this.system[key];
-    //         if (char instanceof HeroItemCharacteristic && !char.XMLID) {
-    //             char.XMLID = char.schema.name;
-    //             console.log(`Updated XMLID for ${this.name}/${char.XMLID}`);
-    //         }
-    //     }
-    // }
+    /**
+     * Prepare data for the Document. This method provides an opportunity for Document classes to define special data
+     * preparation logic to compute values that don't need to be stored in the database, such as a "bloodied" hp value
+     * or the total carrying weight of items. The work done by this method should be idempotent per initialization.
+     * There are situations in which prepareData may be called more than once.
+     *
+     * By default, foundry calls the following methods in order whenever the document is created or updated.
+     * 1. {@link reset} (Inherited from DataModel)
+     * 2. {@link _initialize} (Inherited from DataModel)
+     * 3. {@link prepareData}
+     * 4. {@link foundry.abstract.TypeDataModel.prepareBaseData | TypeDataModel#prepareBaseData}
+     * 5. {@link prepareBaseData}
+     * 6. {@link prepareEmbeddedDocuments}
+     * 7. {@link foundry.abstract.TypeDataModel.prepareDerivedData | TypeDataModel#prepareBaseData}
+     * 8. {@link prepareDerivedData}
+     *
+     * Do NOT invoke database operations like {@link update} or {@link setFlag} within data prep, as that can cause an
+     * infinite loop by re-triggering the data initialization process.
+     *
+     * If possible you should extend {@link prepareBaseData} and {@link prepareDerivedData} instead of this function
+     * directly, but some systems with more complicated calculations may want to override this function to add extra
+     * steps, such as to calculate certain item values after actor data prep.
+     */
+    prepareData() {
+        this._clearCachedValues();
+        super.prepareData();
+    }
+
+    /**
+     * Prepare all embedded Document instances which exist within this primary Document.
+     */
+    prepareEmbeddedDocuments() {
+        super.prepareEmbeddedDocuments();
+    }
+
+    /**
+     * Apply transformations or derivations to the values of the source data object.
+     * Compute data fields whose values are not stored to the database.
+     *
+     * If possible when modifying the `system` object you should use
+     * {@link foundry.abstract.TypeDataModel.prepareDerivedData | TypeDataModel#prepareDerivedData} on your data models
+     * instead of this method directly on the document.
+     */
+    prepareDerivedData() {
+        super.prepareDerivedData();
+    }
+
+    /**
+     * Clear cached class collections.
+     * @internal
+     */
+    _clearCachedValues() {
+        this._lazy = {};
+    }
 
     /// Override and should probably be used instead of add/remove ActiveEffect
     async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
@@ -1841,7 +1884,8 @@ export class HeroSystem6eActor extends Actor {
     }
 
     hasCharacteristic(characteristic) {
-        return getCharacteristicInfoArrayForActor(this).find((o) => o.key === characteristic);
+        // Coerce into boolean
+        return !!getCharacteristicInfoArrayForActor(this).find((o) => o.key === characteristic);
     }
 
     getActiveConstantItems() {

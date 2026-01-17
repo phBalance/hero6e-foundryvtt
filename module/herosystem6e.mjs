@@ -54,7 +54,7 @@ import SettingsHelpers from "./settings/settings-helpers.mjs";
 
 import { HeroSystemTokenHud } from "./token/heroSystemTokenHud.mjs";
 
-import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
+import { expireEffects } from "./utility/util.mjs";
 import "./utility/adjustment.mjs";
 import "./utility/chat-dice.mjs";
 
@@ -777,70 +777,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
-            const automation = game.settings.get(HEROSYS.module, "automation");
-            if (
-                !actor.inCombat &&
-                (automation === "all" ||
-                    (automation === "npcOnly" && actor.type == "npc") ||
-                    (automation === "pcEndOnly" && actor.type === "pc")) &&
-                getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "END") &&
-                multiplier > 0
-            ) {
-                if (
-                    parseInt(actor.system.characteristics.end.value) < parseInt(actor.system.characteristics.end.max) ||
-                    parseInt(actor.system.characteristics.stun.value) < parseInt(actor.system.characteristics.stun.max)
-                ) {
-                    // If this is an NPC and their STUN <= 0 then leave them be.
-                    // Typically, you should only use the Recovery Time Table for
-                    // PCs. Once an NPC is Knocked Out below the -10 STUN level
-                    // they should normally remain unconscious until the fight ends.
-
-                    // TODO: Implement optional longer term recovery
-                    // For STUN:
-                    // From 0 to -10 they get 1 recovery every phase and post 12
-                    // From -11 to -20 they get 1 recovery post 12
-                    // From -21 to -30 they get 1 recovery per minute
-                    // From -31 they're completely out at the GM's discretion
-
-                    if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
-                        const rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
-                        const endValue = Math.min(
-                            parseInt(actor.system.characteristics.end.max),
-                            parseInt(actor.system.characteristics.end.value) + rec,
-                        );
-                        const stunValue = Math.min(
-                            parseInt(actor.system.characteristics.stun.max),
-                            parseInt(actor.system.characteristics.stun.value) + rec,
-                        );
-
-                        await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
-
-                        await actor.update(
-                            {
-                                "system.characteristics.end.value": endValue,
-                                "system.characteristics.stun.value": stunValue,
-                            },
-                            { render: true },
-                        );
-                    }
-                }
-
-                // END RESERVE
-                for (const item of actor.items.filter((o) => o.system.XMLID === "ENDURANCERESERVE")) {
-                    const ENDURANCERESERVEREC = item.findModsByXmlid("ENDURANCERESERVEREC");
-                    if (ENDURANCERESERVEREC) {
-                        const newValue = Math.min(
-                            item.system.max,
-                            item.system.value + parseInt(ENDURANCERESERVEREC.LEVELS * multiplier),
-                        );
-                        if (newValue > item.system.value) {
-                            await item.update({
-                                "system.value": newValue,
-                            });
-                        }
-                    }
-                }
-            }
+            await _outOfCombatRecovery(actor, multiplier);
 
             // Power Toggles with charges
             // Aaron was unable to make the AE transfer from item to actor and also expire, so we handle them here.
@@ -880,6 +817,101 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
         );
     }
 });
+
+async function _outOfCombatRecovery(actor, multiplier) {
+    const startDate = Date.now();
+    let recoveryDate;
+    let enduranceReserveDate;
+    if (actor.inCombat) return;
+    if (multiplier === 0) return;
+
+    const automation = game.settings.get(HEROSYS.module, "automation");
+
+    if (
+        automation === "all" ||
+        (automation === "npcOnly" && actor.type == "npc") ||
+        (automation === "pcEndOnly" && actor.type === "pc")
+    ) {
+        recoveryDate = Date.now();
+        const rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
+        const actorUpdates = {};
+
+        if (
+            actor.hasCharacteristic("STUN") &&
+            actor.system.characteristics.stun.value < actor.system.characteristics.stun.max
+        ) {
+            // If this is an NPC and their STUN <= 0 then leave them be.
+            // Typically, you should only use the Recovery Time Table for
+            // PCs. Once an NPC is Knocked Out below the -10 STUN level
+            // they should normally remain unconscious until the fight ends.
+
+            // TODO: Implement optional longer term recovery
+            // For STUN:
+            // From 0 to -10 they get 1 recovery every phase and post 12
+            // From -11 to -20 they get 1 recovery post 12
+            // From -21 to -30 they get 1 recovery per minute
+            // From -31 they're completely out at the GM's discretion
+
+            if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
+                const stunValue = Math.min(
+                    parseInt(actor.system.characteristics.stun.max),
+                    parseInt(actor.system.characteristics.stun.value) + rec,
+                );
+                foundry.utils.setProperty(actorUpdates, "system.characteristics.stun.value", stunValue);
+            }
+        }
+
+        if (
+            actor.hasCharacteristic("END") &&
+            actor.system.characteristics.end.value < actor.system.characteristics.end.max
+        ) {
+            const endValue = Math.min(
+                parseInt(actor.system.characteristics.end.max),
+                parseInt(actor.system.characteristics.end.value) + rec,
+            );
+            foundry.utils.setProperty(actorUpdates, "system.characteristics.end.value", endValue);
+        }
+
+        if (Object.keys(actorUpdates).length > 0) {
+            // Intentionally not awaiting.
+            // Trying to keep updateWorldTime loop as quick as possible.
+            // This actor isn't in combat and unlikely to have actor sheet open, so not time sensitive.
+            // Stun effect (if any) should be removed during actor.onUpdate
+            actor.update(actorUpdates);
+        }
+
+        // END RESERVE
+        enduranceReserveDate = Date.now();
+        for (const enduranceReserveItem of actor.items.filter((o) => o.system.XMLID === "ENDURANCERESERVE")) {
+            const ENDURANCERESERVEREC = enduranceReserveItem.findModsByXmlid("ENDURANCERESERVEREC");
+            if (ENDURANCERESERVEREC) {
+                const newValue = Math.min(
+                    enduranceReserveItem.system.LEVELS,
+                    enduranceReserveItem.system.value + parseInt(ENDURANCERESERVEREC.LEVELS * multiplier),
+                );
+                if (isNaN(newValue)) {
+                    console.error(`${actor.name} ENDURANCERESERVEREC`);
+                    break;
+                }
+                if (newValue > enduranceReserveItem.system.value) {
+                    // Intentionally not awaiting.
+                    // Trying to keep updateWorldTime loop as quick as possible.
+                    // This actor isn't in combat and unlikely to have actor sheet open, so not time sensitive.
+                    enduranceReserveItem.update({
+                        "system.value": newValue,
+                    });
+                }
+            }
+        }
+    }
+    const endDate = Date.now();
+    const deltaDate = endDate - startDate;
+    if (deltaDate > 100) {
+        console.warn(
+            `${actor.name} took ${deltaDate}ms to process _outOfCombatRecovery. recoveryDate=${recoveryDate - startDate}.  enduranceReserve=${enduranceReserveDate - startDate}.`,
+        );
+    }
+}
 
 // If compendium is created you have to reload to get the new application class.
 // This is known issue https://discord.com/channels/170995199584108546/670336275496042502/1255649814096511107
