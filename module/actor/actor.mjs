@@ -4,15 +4,14 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
-    whisperUserTargetsForActor,
     squelch,
+    whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
-//import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
 
 // v13 compatibility
@@ -1884,8 +1883,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     hasCharacteristic(characteristic) {
-        // Coerce into boolean
-        return !!getCharacteristicInfoArrayForActor(this).find((o) => o.key === characteristic);
+        return !this.system[characteristic]?.baseInfo.ignoreForActor(this);
     }
 
     getActiveConstantItems() {
