@@ -324,7 +324,8 @@ export class HeroSystem6eToken extends FoundryVttToken {
                 effect === overlayEffect
                     ? this._drawOverlay(
                           effect.img,
-                          overlayEffect.statuses.has("knockedOut") && this.actor?.knockedOutOfCombat
+                          (overlayEffect.statuses.has("knockedOut") && this.actor?.knockedOutOfCombat) ||
+                              overlayEffect.statuses.has("dead")
                               ? "ff5555"
                               : effect.tint,
                       )
