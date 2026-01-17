@@ -747,57 +747,15 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
     for (const actor of actors) {
         try {
-            // Create a natural body healing if needed (requires permissions)
-            await actor.setNaturalHealing();
-
-            // Active Effects
-            // When in combat we expire effects on onStartTurn, but for some async reason gameTime cause issues if they are first in the segment.
-            // So we will expireEffects here if this actor is the current combatant.
-            // if (
-            //     !actor.inCombat ||
-            //     game.combats.viewed.combatant?.actorId === actor.id ||
-            //     actor.temporaryEffects.find((o) => o.name === "TakeRecovery")
-            // ) {
-            //     if (actor.inCombat) {
-            //         console.debug(`calling expireEffects for ${actor.name} who is inCombat`);
-            //     }
-            //     await expireEffects(actor);
-            // } else {
-            //     if (actor.inCombat) {
-            //         // We are only expiring temporary effects in expireEffects.
-            //         // Drains should expire on worldTime regardless of combat status, which we currently don't do.
-            //         console.debug(
-            //             `skipping expireEffects for ${actor.name} who is inCombat. ${game.combats.viewed.combatant?.actorId !== actor.id ? "Not active combatant" : ""}`,
-            //         );
-            //     }
-            // }
-            // Always expire effects
-            // AARON: We are now expecting flags[game.system.id].expiresOn property
+            // Expire effects that expire on segment end
             await expireEffects(actor, "segment");
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
             await _outOfCombatRecovery(actor, multiplier);
 
-            // Power Toggles with charges
-            // Aaron was unable to make the AE transfer from item to actor and also expire, so we handle them here.
-            // There is an opportunity to improve/refactor this.
-            for (const aeWithCharges of actor.temporaryEffects.filter((o) =>
-                o.parent instanceof HeroSystem6eItem ? o.parent.findModsByXmlid("CONTINUING") : false,
-            )) {
-                if (!aeWithCharges.parent.isActive) {
-                    console.error(`${aeWithCharges.name} is inactive and will not expire.`);
-                    continue;
-                }
-                if (
-                    game.time.worldTime >=
-                    aeWithCharges.flags[game.system.id]?.startTime + aeWithCharges.duration.seconds
-                ) {
-                    await aeWithCharges.parent.toggle();
-                } else {
-                    if (game.ready) game[HEROSYS.module].effectPanel.refresh();
-                }
-            }
+            // Expire continuing charges
+            await _expireContinuingCharges(actor);
         } catch (e) {
             console.error(e, actor, actor?.temporaryEffects[0]);
         }
@@ -811,12 +769,31 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     // If there are lots of actors updateWorldTime may result in performance issues.
     // Notify GM when this is a concern.
     const deltaMs = Date.now() - start;
-    if (game.settings.get(game.system.id, "alphaTesting") && deltaMs > 100) {
-        ui.notifications.warn(
-            `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
-        );
+    if (deltaMs > 100) {
+        const msg = `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`;
+        if (game.settings.get(game.system.id, "alphaTesting")) {
+            ui.notifications.warn(msg);
+        } else {
+            console.warn(msg);
+        }
     }
 });
+
+async function _expireContinuingCharges(actor) {
+    for (const aeWithCharges of actor.temporaryEffects.filter((o) =>
+        o.parent instanceof HeroSystem6eItem ? o.parent.findModsByXmlid("CONTINUING") : false,
+    )) {
+        if (!aeWithCharges.parent.isActive) {
+            console.error(`${aeWithCharges.name} is inactive and will not expire.`);
+            continue;
+        }
+        if (game.time.worldTime >= aeWithCharges.flags[game.system.id]?.startTime + aeWithCharges.duration.seconds) {
+            await aeWithCharges.parent.toggle();
+        } else {
+            if (game.ready) game[HEROSYS.module].effectPanel.refresh();
+        }
+    }
+}
 
 async function _outOfCombatRecovery(actor, multiplier) {
     const startDate = Date.now();
