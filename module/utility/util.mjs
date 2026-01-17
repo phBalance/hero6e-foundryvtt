@@ -149,10 +149,18 @@ export function getCharacteristicInfoArrayForActor(actor) {
     if (!actor) {
         console.error("getCharacteristicInfoArrayForActor missing actor", this);
     }
+    if (!actor._lazy) {
+        console.warn("missing actor._lazy");
+    }
+
+    if (actor._lazy._isNonIgnoredCharacteristicsAndMovementPowerForActor) {
+        return actor._lazy._isNonIgnoredCharacteristicsAndMovementPowerForActor;
+    }
 
     const isCharOrMovePowerForActor = _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor);
     const powerList = actor?.system?.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(isCharOrMovePowerForActor);
+    actor._lazy._isNonIgnoredCharacteristicsAndMovementPowerForActor = powers;
     return powers;
 }
 
