@@ -769,10 +769,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     // If there are lots of actors updateWorldTime may result in performance issues.
     // Notify GM when this is a concern.
     const deltaMs = Date.now() - start;
-    if (game.settings.get(game.system.id, "alphaTesting") && deltaMs > 100) {
-        ui.notifications.warn(
-            `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
-        );
+    if (deltaMs > 100) {
+        const msg = `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`;
+        if (game.settings.get(game.system.id, "alphaTesting")) {
+            ui.notifications.warn(msg);
+        } else {
+            console.warn(msg);
+        }
     }
 });
 
