@@ -8471,17 +8471,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            // SUMMON related
-            key: "INCREASETOTAL",
-            behaviors: ["adder"],
-            type: ["adder"],
-            costPerLevel: fixedValueFunction(0),
-            xml: ` <ADDER XMLID="INCREASETOTAL" ID="1688216155887" BASECOST="0.0" LEVELS="1" ALIAS="x2 Number Of Beings" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">`,
-        },
-        {},
-    );
-    addPower(
-        {
             key: "INFRAREDPERCEPTION",
             type: ["sense"],
             behaviors: ["adder"],
@@ -11908,6 +11897,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INCREASEDWEIGHT" ID="1711728009754" BASECOST="0.0" LEVELS="1" ALIAS="x2 Increased Weight" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // SUMMON related
+            key: "INCREASETOTAL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="INCREASETOTAL" ID="1688216155887" BASECOST="0.0" LEVELS="1" ALIAS="x2 Number Of Beings" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
         {},
     );
