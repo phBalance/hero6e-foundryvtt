@@ -4,15 +4,14 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
-    whisperUserTargetsForActor,
     squelch,
+    whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
-//import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
 
 // v13 compatibility
@@ -1884,8 +1883,10 @@ export class HeroSystem6eActor extends Actor {
     }
 
     hasCharacteristic(characteristic) {
-        // Coerce into boolean
-        return !!getCharacteristicInfoArrayForActor(this).find((o) => o.key === characteristic);
+        // If the actor has the baseInfo and it shouldn't be ignored for this actor type, we have the characteristic
+        // otherwise we don't
+        const doesNotHaveCharacteristic = this.system[characteristic]?.baseInfo?.ignoreForActor(this) ?? true;
+        return !doesNotHaveCharacteristic;
     }
 
     getActiveConstantItems() {
@@ -2760,7 +2761,7 @@ export class HeroSystem6eActor extends Actor {
             // Apply retained damage
             if (this.id) {
                 for (const key of ["body", "stun", "end"]) {
-                    if (!getCharacteristicInfoArrayForActor(this).find((o) => o.key === key.toUpperCase())) continue;
+                    if (!this.hasCharacteristic(key.toUpperCase())) continue;
                     if (retainValuesOnUpload[key] == undefined) continue;
                     if (this.system.characteristics[key] == undefined) continue;
 
@@ -2924,14 +2925,14 @@ export class HeroSystem6eActor extends Actor {
     async addFreeStuff() {
         // If we have no INT then delete PERCEPTION
         const itemToDelete = [];
-        const hasINT = getCharacteristicInfoArrayForActor(this).find((o) => o.key === "INT");
+        const hasINT = this.hasCharacteristic("INT");
         if (!hasINT && this.items.find((item) => item.system.XMLID === "PERCEPTION")) {
             itemToDelete.push(...this.items.filter((item) => item.system.XMLID === "PERCEPTION"));
             console.warn(`Deleting PERCEPTION because ${this.name} has no INT`);
         }
 
         // If we have no STR then delete COMBAT MANEUVERS
-        const hasSTR = getCharacteristicInfoArrayForActor(this).find((o) => o.key === "STR");
+        const hasSTR = this.hasCharacteristic("STR");
         if (!hasSTR & this.items.find((item) => item.type === "maneuver")) {
             console.warn(`Deleting COMBAT MANEUVERS because ${this.name} has no STR`);
             itemToDelete.push(...this.items.filter((item) => item.type === "maneuver"));

@@ -17,9 +17,8 @@ import {
 import {
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
-    whisperUserTargetsForActor,
-    getCharacteristicInfoArrayForActor,
     tokenEducatedGuess,
+    whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
@@ -545,7 +544,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            const hasDCV = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "DCV");
+            const hasDCV = this.actor.hasCharacteristic("DCV");
             const MOBILITY = this.findModsByXmlid("MOBILITY");
             if (this.id && MOBILITY && hasDCV) {
                 const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
