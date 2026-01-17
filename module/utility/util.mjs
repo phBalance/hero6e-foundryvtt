@@ -345,7 +345,7 @@ export async function expireEffects(actor, expiresOn) {
                         content: cardHtml,
                         speaker: ChatMessage.getSpeaker({
                             actor,
-                            token: tokenEducatedGuess({ actor }),
+                            token: tokenEducatedGuess(actor),
                         }),
                     };
                     await ChatMessage.create(chatData);
