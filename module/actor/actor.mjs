@@ -1845,13 +1845,9 @@ export class HeroSystem6eActor extends Actor {
     }
 
     getActiveConstantItems() {
-        let results = [];
-        for (let item of this.items.filter((item) => item.isActive)) {
-            let duration = getPowerInfo({
-                xmlid: item.system.XMLID,
-                actor: this,
-            })?.duration;
-            if (duration === "constant") {
+        const results = [];
+        for (const item of this.items.filter((item) => item.isActive)) {
+            if (item.system.duration === "constant") {
                 results.push(item);
             } else {
                 const NONPERSISTENT = item.modifiers.find((o) => o.XMLID === "NONPERSISTENT");

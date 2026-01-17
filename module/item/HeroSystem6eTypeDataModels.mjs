@@ -542,7 +542,29 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
 
     get duration() {
         // TODO: implement modifers to change duration
-        return this.item.baseInfo?.duration;
+
+        if (this.item.findModsByXmlid("INHERENT")) {
+            return "inherent";
+        }
+
+        if (this.item.findModsByXmlid("NONPERSISTENT")) {
+            return "constant";
+        }
+
+        if (this.item.findModsByXmlid("PERSISTENT")) {
+            return "persistent";
+        }
+
+        if (this.item.findModsByXmlid("CONSTANT")) {
+            return "constant";
+        }
+
+        if (this.item.baseInfo === undefined) {
+            console.error("missing baseInfo");
+            return "instant";
+        }
+
+        return this.item.baseInfo.duration;
     }
 
     get #rollProps() {

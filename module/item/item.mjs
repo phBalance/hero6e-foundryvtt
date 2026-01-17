@@ -1463,9 +1463,7 @@ export class HeroSystem6eItem extends Item {
             }
             await this.updateEmbeddedDocuments("ActiveEffect", changes);
             if (this.effects.contents[0].disabled === value) {
-                ui.notifications.error(
-                    `${this.name} failed to update AE.disabled. Suspect a Foundry bug.  Reloading browser should temporarily resolve.`,
-                );
+                console.error(`${this.name} failed to update (async?).`);
             }
             return;
         }
@@ -2010,9 +2008,10 @@ export class HeroSystem6eItem extends Item {
 
     // FIXME: This should be trimmed down
     isActivatable() {
-        if (this.baseInfo?.behaviors?.includes("activatable")) {
-            return true;
-        }
+        if (this.duration)
+            if (this.baseInfo?.behaviors?.includes("activatable")) {
+                return true;
+            }
 
         if (this.type === "characteristic") {
             return false;
