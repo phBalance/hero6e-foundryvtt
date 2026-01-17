@@ -775,7 +775,7 @@ function pdEdCostPerLevel(itemOrActor) {
     const hasAutomatonPowerWithNoStun = !!actor?.items.find(
         (power) =>
             power.system.XMLID === "AUTOMATON" &&
-            (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+            (power.system.OPTIONID === "NOSTUN1" || power.system.OPTIONID === "NOSTUN2"),
     );
     if (hasAutomatonPowerWithNoStun) {
         return 3;
@@ -1488,14 +1488,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // The Automaton power presents awkwardly in HDC. A character has STUN unless they have certain levels
                 // of the AUTOMATON powers.
                 if (["automaton", "pc", "npc"].includes(actor.type)) {
-                    const hasStun1 = !!actor.items.find(
-                        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
-                    ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
-                    const hasStun2 = !!actor.items.find(
-                        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
-                    ); // Takes No STUN
+                    const isAutomatonPowerWithNoStun = !!actor.items.find(
+                        (item) =>
+                            item.system.XMLID === "AUTOMATON" &&
+                            (item.system.OPTIONID === "NOSTUN1" || item.system.OPTIONID === "NOSTUN2"),
+                    );
 
-                    return hasStun1 || hasStun2;
+                    return isAutomatonPowerWithNoStun;
                 }
 
                 return false;
