@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
+import { getPowerInfo, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
@@ -783,7 +783,7 @@ async function doSingleTargetActionToHit(action, options) {
     const itemData = item.effectiveAttackItem.system;
 
     const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.attacksWith]?.value);
-    if (!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === itemData.attacksWith.toUpperCase())) {
+    if (!actor.hasStunCharacteristic(itemData.attacksWith.toUpperCase())) {
         ui.notifications.warn(
             `<b>${item.actor.name}</b> does not have <b>${itemData.attacksWith.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
         );
@@ -2564,7 +2564,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const hasStun2 = !!token.actor.items.find(
             (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
         ); // Takes No STUN
-        const hasStunCharacteristic = !!getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === "STUN");
+        const hasStunCharacteristic = token.actor.hasCharacteristic("STUN");
 
         if (hasStun1) {
             defenseTags.push({
@@ -2605,7 +2605,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // See if token has CON.  Notice we check raw actor type from config, not current actor props as
     // this token may have originally been a PC, and changed to a BASE.
     // check if target is stunned.  Must have CON
-    const hasCon = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === "CON");
+    const hasCon = token.actor.hasCharacteristic("CON");
     if (damageDetail.stun > 0 && game.settings.get(HEROSYS.module, "stunned") && hasCon) {
         // determine if target was Stunned
         const CANNOTBESTUNNED = token.actor.items.find(
@@ -2737,7 +2737,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
         // See if token has STUN.  Notice we check raw actor type from config, not current actor props as
         // this token may have originally been a PC, and changed to a BASE.
-        const hasSTUN = getCharacteristicInfoArrayForActor(token.actor).find((o) => o.key === "STUN");
+        const hasSTUN = token.actor.hasCharacteristic("STUN");
         if (hasSTUN) {
             changes["system.characteristics.stun.value"] =
                 token.actor.system.characteristics.stun?.value - damageDetail.stun;
@@ -3972,7 +3972,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     let actualStunRoller = null;
     if (useResources && resourcesRequired.totalEnd > actorEndurance) {
         // Automation or other actor without STUN?
-        const hasSTUN = getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN");
+        const hasSTUN = actor.hasCharacteristic("STUN");
         if (!hasSTUN) {
             return {
                 error: `${item.detailedName()} needs ${resourcesRequired.totalEnd} END but ${actor.name} only has ${actorEndurance} END. This actor cannot use STUN for END`,

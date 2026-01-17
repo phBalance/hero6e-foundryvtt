@@ -1,7 +1,5 @@
 import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
-import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
-
 export function registerAutomatonTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.actor.automaton",
@@ -107,7 +105,7 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.true;
+                        expect(actor.hasCharacteristic("STUN")).to.be.true;
                     });
                 });
 
@@ -206,7 +204,7 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
+                        expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
                 });
 
@@ -305,7 +303,7 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
+                        expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
                 });
 
@@ -413,7 +411,7 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
+                        expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
                 });
             });

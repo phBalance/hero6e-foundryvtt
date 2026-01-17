@@ -14,12 +14,7 @@ import {
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
-import {
-    getPowerInfo,
-    hdcTimeOptionIdToSeconds,
-    whisperUserTargetsForActor,
-    getCharacteristicInfoArrayForActor,
-} from "../utility/util.mjs";
+import { getPowerInfo, hdcTimeOptionIdToSeconds, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
     buildStrengthItem,
@@ -544,7 +539,7 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            const hasDCV = getCharacteristicInfoArrayForActor(this.actor).find((o) => o.key === "DCV");
+            const hasDCV = this.actor.hasCharacteristic("DCV");
             const MOBILITY = this.findModsByXmlid("MOBILITY");
             if (this.id && MOBILITY && hasDCV) {
                 const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
