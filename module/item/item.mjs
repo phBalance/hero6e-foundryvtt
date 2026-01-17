@@ -724,17 +724,34 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        function invalidAdjustmentMessageBasedOnInput(item) {
+            switch (item.system.XMLID) {
+                case "TRANSFER":
+                    return `Expecting characteristic abbreviations or power names connected by " -> ", " to ", or " TO "`;
+                case "HEALING":
+                    return `Expecting characteristic abbreviations separated by commas. SIMPLIFIED is also valid.`;
+                default:
+                    return `Expecting characteristic abbreviations or power names separated by commas.`;
+            }
+        }
+
+        function invalidAdjustmentExampleBasedOnInput(item) {
+            switch (item.system.XMLID) {
+                case "TRANSFER":
+                    return `STR, CON -> STR, CON`;
+                default:
+                    return `STR, CON`;
+            }
+        }
+
         // Adjustment Powers
         if (this.baseInfo?.type.includes("adjustment")) {
             const result = this.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
                 _heroValidations.push({
                     property: "INPUT",
-                    message:
-                        this.system.XMLID === "TRANSFER"
-                            ? `Expecting characteristic abbreviations or power names connected by " -> ", " to ", or " TO "`
-                            : `Expecting characteristic abbreviations or power names separated by commas.`,
-                    example: this.system.XMLID === "TRANSFER" ? `STR, CON -> STR, CON` : `STR, CON`,
+                    message: invalidAdjustmentMessageBasedOnInput(this),
+                    example: invalidAdjustmentExampleBasedOnInput(this),
                     severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
                 });
             } else {
