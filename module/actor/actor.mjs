@@ -2034,7 +2034,6 @@ export class HeroSystem6eActor extends Actor {
             const freeStuffCount = powerListTentative.filter(freeStuffFilter).length;
 
             const xmlItemsToProcess =
-                1 + // Delete existing effects
                 1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
                 (heroJson.CHARACTER.DISADVANTAGES?.length || 0) +
                 (heroJson.CHARACTER.EQUIPMENT?.length || 0) +
@@ -2180,18 +2179,6 @@ export class HeroSystem6eActor extends Actor {
 
                 changes = {};
             }
-
-            // Remove all temporary effects
-            uploadProgressBar.advance(`${this.name}: Removing temporaryEffects effects`, 0);
-            try {
-                await this.deleteEmbeddedDocuments(
-                    "ActiveEffect",
-                    this.temporaryEffects.map((o) => o.id),
-                );
-            } catch (e) {
-                console.error(e);
-            }
-            uploadProgressBar.advance(`${this.name}: Removed temporaryEffects effects`, 1);
 
             // CHARACTERISTICS
             if (heroJson.CHARACTER?.CHARACTERISTICS) {
@@ -3049,7 +3036,7 @@ export class HeroSystem6eActor extends Actor {
             (item) => item.system.XMLID === XMLID && item.type === "maneuver" && !item.system.ID,
         );
         if (maneuverItems.length > 0) {
-            console.debug(`${XMLID} already exists`);
+            //console.debug(`${XMLID} already exists`);
 
             // Make sure we only have one
             const itemsToDelete = maneuverItems.splice(1);
