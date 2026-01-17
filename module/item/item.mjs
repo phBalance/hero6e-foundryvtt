@@ -2025,10 +2025,11 @@ export class HeroSystem6eItem extends Item {
 
     // FIXME: This should be trimmed down
     isActivatable() {
-        if (this.duration)
-            if (this.baseInfo?.behaviors?.includes("activatable")) {
-                return true;
-            }
+        //TODO: If ALWAYSON then not isActivable, or at least grey out box to do so.  Perpahs make it so you can't turnOff in code too.
+
+        if (this.baseInfo?.behaviors?.includes("activatable")) {
+            return true;
+        }
 
         if (this.type === "characteristic") {
             return false;
