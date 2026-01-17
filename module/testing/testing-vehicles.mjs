@@ -1,7 +1,5 @@
 import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
 
-import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
-
 export function registerVehicleTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.actor.vehicle",
@@ -92,7 +90,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the SIZE characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "SIZE")).to.be.true;
+                        expect(actor.hasCharacteristic("SIZE")).to.be.true;
                     });
 
                     it("should have the correct SIZE characteristic value", function () {
@@ -104,7 +102,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the STR characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STR")).to.be.true;
+                        expect(actor.hasCharacteristic("STR")).to.be.true;
                     });
 
                     it("should have the correct STR characteristic value", function () {
@@ -116,7 +114,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the DEX characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "DEX")).to.be.true;
+                        expect(actor.hasCharacteristic("DEX")).to.be.true;
                     });
 
                     it("should have the correct DEX characteristic value", function () {
@@ -128,7 +126,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the BODY characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "BODY")).to.be.true;
+                        expect(actor.hasCharacteristic("BODY")).to.be.true;
                     });
 
                     it("should have the correct BODY characteristic value", function () {
@@ -140,7 +138,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the SPD characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "SPD")).to.be.true;
+                        expect(actor.hasCharacteristic("SPD")).to.be.true;
                     });
 
                     it("should have the correct SPD characteristic value", function () {
@@ -152,7 +150,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the OCV characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "OCV")).to.be.true;
+                        expect(actor.hasCharacteristic("OCV")).to.be.true;
                     });
 
                     it("should have the correct OCV characteristic value", function () {
@@ -164,7 +162,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the DCV characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "DCV")).to.be.true;
+                        expect(actor.hasCharacteristic("DCV")).to.be.true;
                     });
 
                     it("should have the correct DCV characteristic value", function () {
@@ -178,7 +176,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the PD characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "PD")).to.be.true;
+                        expect(actor.hasCharacteristic("PD")).to.be.true;
                     });
 
                     it("should have the correct PD characteristic value", function () {
@@ -190,7 +188,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the ED characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "ED")).to.be.true;
+                        expect(actor.hasCharacteristic("ED")).to.be.true;
                     });
 
                     it("should have the correct ED characteristic value", function () {
@@ -202,7 +200,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
+                        expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
 
                     it("should have 0m of leaping", function () {
@@ -400,7 +398,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the SIZE characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "SIZE")).to.be.true;
+                        expect(actor.hasCharacteristic("SIZE")).to.be.true;
                     });
 
                     it("should have the correct SIZE characteristic value", function () {
@@ -412,7 +410,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the STR characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STR")).to.be.true;
+                        expect(actor.hasCharacteristic("STR")).to.be.true;
                     });
 
                     it("should have the correct STR characteristic value", function () {
@@ -424,7 +422,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the DEX characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "DEX")).to.be.true;
+                        expect(actor.hasCharacteristic("DEX")).to.be.true;
                     });
 
                     it("should have the correct DEX characteristic value", function () {
@@ -436,7 +434,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the BODY characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "BODY")).to.be.true;
+                        expect(actor.hasCharacteristic("BODY")).to.be.true;
                     });
 
                     it("should have the correct BODY characteristic value", function () {
@@ -448,7 +446,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the SPD characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "SPD")).to.be.true;
+                        expect(actor.hasCharacteristic("SPD")).to.be.true;
                     });
 
                     it("should have the correct SPD characteristic value", function () {
@@ -460,7 +458,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the OCV characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "OCV")).to.be.true;
+                        expect(actor.hasCharacteristic("OCV")).to.be.true;
                     });
 
                     it("should have the correct OCV characteristic value", function () {
@@ -472,7 +470,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the DCV characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "DCV")).to.be.true;
+                        expect(actor.hasCharacteristic("DCV")).to.be.true;
                     });
 
                     it("should have the correct DCV characteristic value", function () {
@@ -484,7 +482,7 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should NOT have the STUN characteristic", function () {
-                        expect(!!getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN")).to.be.false;
+                        expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
 
                     it('should have 0" of leaping', function () {

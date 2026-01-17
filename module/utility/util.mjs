@@ -139,10 +139,11 @@ export function getPowerInfo(options) {
     return powerInfo;
 }
 
-function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
+function isNonIgnoredCharacteristicsAndMovementBaseInfoForActor(actor) {
     // NOTE: CUSTOM characteristics are ignored in config.mjs until supported.
-    return (power) =>
-        (power.type.includes("characteristic") || power.type.includes("movement")) && !power.ignoreForActor(actor);
+    return (baseInfo) =>
+        (baseInfo.type.includes("characteristic") || baseInfo.type.includes("movement")) &&
+        !baseInfo.ignoreForActor(actor);
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {
@@ -157,7 +158,7 @@ export function getCharacteristicInfoArrayForActor(actor) {
         return actor._lazy._isNonIgnoredCharacteristicsAndMovementPowerForActor;
     }
 
-    const isCharOrMovePowerForActor = _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor);
+    const isCharOrMovePowerForActor = isNonIgnoredCharacteristicsAndMovementBaseInfoForActor(actor);
     const powerList = actor?.system?.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(isCharOrMovePowerForActor);
     actor._lazy._isNonIgnoredCharacteristicsAndMovementPowerForActor = powers;
