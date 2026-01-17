@@ -4532,6 +4532,7 @@ export async function _onModalDamageCard(event) {
  * @returns {Token | TokenDocument}
  */
 export function getTokenEducatedGuess(options = {}) {
+    console.warn("depricated getTokenEducatedGuess");
     // NOTE: This is a catch in case we've done something stupid as FoundryVTT has 3 types of tokens.
     const isPrototypeToken = options.token instanceof foundry.data.PrototypeToken;
     if (isPrototypeToken) {

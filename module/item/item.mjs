@@ -19,6 +19,7 @@ import {
     hdcTimeOptionIdToSeconds,
     whisperUserTargetsForActor,
     getCharacteristicInfoArrayForActor,
+    tokenEducatedGuess,
 } from "../utility/util.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
@@ -1372,11 +1373,13 @@ export class HeroSystem6eItem extends Item {
             // }
         }
 
+        const speaker = ChatMessage.getSpeaker({
+            actor: item.actor,
+            token: tokenEducatedGuess({ actor: item.actor }),
+        });
+
         const success = await rollRequiresASkillRollCheck(this, event);
         if (!success) {
-            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-            speaker["alias"] = item.actor.name;
-
             const chatData = {
                 author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
@@ -1390,9 +1393,6 @@ export class HeroSystem6eItem extends Item {
 
             return;
         }
-
-        const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-        speaker["alias"] = item.actor.name;
 
         const chatData = {
             author: game.user._id,
@@ -1453,9 +1453,10 @@ export class HeroSystem6eItem extends Item {
 
         if (!options.silent) {
             // Let GM know power was deactivated
-            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-            speaker["alias"] = item.actor.name;
-
+            const speaker = ChatMessage.getSpeaker({
+                actor: item.actor,
+                token: tokenEducatedGuess({ actor: item.actor }),
+            });
             const chatData = {
                 author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
