@@ -587,3 +587,34 @@ export function hdcTextNumberToNumeric(textNumber) {
             return 0;
     }
 }
+
+/**
+ * DELETE WHEN V12 NO LONGER SUPPORTED
+ *
+ * Copied directly from
+ *
+ * A helper function which searches through an object to delete a value by a string key.
+ * The string key supports the notation a.b.c which would delete object[a][b][c]
+ * @param {object} object   The object to traverse
+ * @param {string} key      An object property with notation a.b.c
+ * @returns {boolean}       Was the property deleted?
+ */
+function v12DeleteProperty(object, key) {
+    if (!key || !object) return false;
+    let parent;
+    let target = object;
+    const parts = key.split(".");
+    for (const p of parts) {
+        if (!target) return false;
+        const type = typeof target;
+        if (type !== "object" && type !== "function") return false;
+        if (!(p in target)) return false;
+        parent = target;
+        target = parent[p];
+    }
+    delete parent[parts.at(-1)];
+    return true;
+}
+
+// DELETE WHEN V12 NO LONGER SUPPORTED
+export const foundryVttDeleteProperty = foundry.utils?.deleteProperty || v12DeleteProperty;

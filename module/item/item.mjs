@@ -15,6 +15,7 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import {
+    foundryVttDeleteProperty,
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
     tokenEducatedGuess,
@@ -6493,7 +6494,7 @@ export class HeroSystem6eItem extends Item {
             // Delete the now migrated system.charges object.
             // This is the data that needs removed from that database. No longer needed as we migrated
             // important values to _charges and _clips.
-            foundry.utils.deleteProperty(source, "system.charges");
+            foundryVttDeleteProperty(source, "system.charges");
 
             // Signal to migration code that this object has changed and needs to be persisted to the DB
             tagObjectForPersistence(source);
