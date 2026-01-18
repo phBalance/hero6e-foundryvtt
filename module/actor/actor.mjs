@@ -3452,6 +3452,12 @@ export class HeroSystem6eActor extends Actor {
         return roundFavorPlayerTowardsZero(this._activePoints);
     }
 
+    /**
+     * Return an array of the actor's items that could be a match. They will either be single items or framework that contains
+     * potentially multiplie items.
+     *
+     * @returns {HeroSystem6eItem[]}
+     */
     get _cslItems() {
         const priorityCsl = function (item) {
             switch (item.type) {

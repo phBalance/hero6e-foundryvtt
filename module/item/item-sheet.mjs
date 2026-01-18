@@ -172,18 +172,34 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 // Enumerate attacks
                 data.attacks = [];
                 if (item.actor) {
+                    const cslChoices = item.cslChoices;
+
                     // Actual items
-                    for (const attack of item.actor._cslItems) {
+                    for (const attackOrFramework of item.actor._cslItems) {
+                        // Make no attempt to disqualify frameworks although we could enumerate and exclude if nothing matches
+                        if (attackOrFramework.type !== "framework") {
+                            // Is this attack a potentially good match? CSL needs to provide ocv to match attacks that use ocv
+                            // and omcv for attacks that use omcv.
+                            // If it matches neither, then it's probably a purely defensive CSL and it's ok to show no items.
+                            const attacksWith = attackOrFramework.system.attacksWith;
+                            if (!cslChoices[attacksWith]) {
+                                continue;
+                            }
+                        }
+
                         // Check if there is an adder (if so attack is checked)
-                        const adder = this.item.adders.find((a) => a.ALIAS == attack.name && a.targetId === attack.id);
+                        const adder = this.item.adders.find(
+                            (a) => a.ALIAS == attackOrFramework.name && a.targetId === attackOrFramework.id,
+                        );
 
                         data.attacks.push({
-                            id: attack.id,
-                            name: attack.name,
+                            id: attackOrFramework.id,
+                            name: attackOrFramework.name,
                             checked: adder ? true : false,
                             title: `${
-                                attack.system.XMLID + (attack.system.DISPLAY ? " (" + attack.system.DISPLAY + ")" : "")
-                            }: ${attack.system.description.replace(/"/g, "&quot;")}`,
+                                attackOrFramework.system.XMLID +
+                                (attackOrFramework.system.DISPLAY ? " (" + attackOrFramework.system.DISPLAY + ")" : "")
+                            }: ${attackOrFramework.system.description.replace(/"/g, "&quot;")}`,
                         });
                     }
 
