@@ -997,7 +997,7 @@ export class HeroSystem6eItem extends Item {
         return false;
     }
 
-    async roll(event, options = {}) {
+    async roll(options = {}) {
         if (!this.actor.canAct(true, event)) return;
 
         if (this.actor.needsToAbortToAct() && !this.canBeAbortedTo()) {
@@ -1613,12 +1613,13 @@ export class HeroSystem6eItem extends Item {
 
     /**
      *
-     * @param {Event} [event]
      * @returns {Promise<undefined>}
      */
-    async changeClips(event) {
-        const tokenUuid = $(event.currentTarget).closest("[data-token-uuid]").data().tokenUuid;
-        const token = fromUuidSync(tokenUuid);
+    async changeClips(options = {}) {
+        if (!options.token) {
+            console.error("changeClips: unable to locate token");
+        }
+        const token = options.token ?? tokenEducatedGuess({ item: this });
 
         const chargeModifier = this.system.chargeModifier;
         if (!chargeModifier) {
@@ -1646,9 +1647,8 @@ export class HeroSystem6eItem extends Item {
         await ChatMessage.create(chatData);
     }
 
-    async changeVpp(event) {
-        const tokenUuid = $(event.currentTarget).closest("[data-token-uuid]").data().tokenUuid;
-        await ItemVppConfig.create({ item: this, tokenUuid });
+    async changeVpp(options = {}) {
+        await ItemVppConfig.create({ item: this, token: options.token, tokenUuid: options.token?.uuid });
     }
 
     isPerceivable(perceptionSuccess) {

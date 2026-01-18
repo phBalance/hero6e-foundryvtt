@@ -488,6 +488,7 @@ export function toHHMMSS(secs) {
 }
 
 export function tokenEducatedGuess(options = {}) {
+    console.warn("deprecated tokenEducatedGuess, pass actual token from sheets");
     // TokenId
     const token = options.token || canvas.tokens.get(options.tokenId);
     if (token) {

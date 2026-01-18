@@ -307,7 +307,7 @@ export class Attack {
     static getMultipleAttackManeuverInfo(item, targetedTokens, options, system) {
         // TODO: need to adjust DCV
         const maneuver = {
-            attackerTokenId: system.attackerToken?.id ?? null,
+            attackerTokenUuid: system.attackerToken?.uuid ?? null,
             isMultipleAttack: true,
             itemId: item.id,
             cvModifiers: [],
@@ -356,7 +356,7 @@ export class Attack {
     static getHaymakerManeuverInfo(item, targetedTokens, options, system) {
         const attacks = [Attack.getHaymakerAttackInfo(item, targetedTokens, options, system)];
         return {
-            attackerTokenId: system.attackerToken?.id ?? null,
+            attackerTokenUuid: system.attackerToken?.uuid ?? null,
             isHaymakerAttack: true,
             attacks,
             itemId: item.id,
@@ -380,7 +380,7 @@ export class Attack {
             return Attack.getHaymakerManeuverInfo(item, targetedTokens, options, system);
         }
         return {
-            attackerTokenId: system.attackerToken?.id ?? null,
+            attackerTokenUuid: system.attackerToken?.uuid ?? null,
             attacks: [Attack.getAttackInfo(item, targetedTokens, options, system)],
             itemId: item.id,
             cvModifiers: [],
@@ -436,14 +436,14 @@ export class Attack {
         return maneuver;
     }
 
-    static getActionInfo(item, targetedTokens, options = {}) {
+    static getActionInfo(item, targetedTokens, options) {
         // do I need to safety things here?
         if (!item) {
             console.error("There is no attack item!");
             return null;
         }
 
-        const attackerToken = getTokenEducatedGuess({ actor: item.actor, ...options });
+        const attackerToken = options.token ?? getTokenEducatedGuess({ actor: item.actor, ...options });
         const system = {
             actor: item.actor,
             attackerToken,

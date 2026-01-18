@@ -22,8 +22,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         },
         actions: {
             clear: HeroSystemActorSheetV2.#onClear,
+            clips: HeroSystemActorSheetV2.#onClips,
             roll: HeroSystemActorSheetV2.#onRoll,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
+            vpp: HeroSystemActorSheetV2.#onVpp,
         },
         //tag: "form", // The default is "div"
         window: {
@@ -101,6 +103,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         };
     }
 
+    #token;
+
+    get token() {
+        return this.document.token ?? this.#token;
+    }
+
     static TABS = {
         primary: {
             tabs: [
@@ -121,6 +129,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     };
 
     async _preparePartContext(partId, context) {
+        globalThis.sheet = this;
         context = await super._preparePartContext(partId, context);
         context.tab = context.tabs[partId];
 
@@ -369,6 +378,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     async _onFirstRender(context, options) {
         await super._onFirstRender(context, options);
 
+        // Keep track of token; needed for linked actors
+        this.#token = options.token;
+
         // General right click on row
         this._createContextMenu(this._getDocumentListContextOptions, "[data-document-uuid]", {
             hookName: "getDocumentListContextOptions",
@@ -400,17 +412,16 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static SEARCH_DELAY = 200;
 
-    _debouncedSearch = foundry.utils.debounce(this._onSearch.bind(this), this.constructor.SEARCH_DELAY);
+    _debouncedSearch = foundry.utils.debounce(this.#onSearch.bind(this), this.constructor.SEARCH_DELAY);
 
-    _onSearch(ev) {
+    #onSearch(ev) {
         const filter = ev.target.value;
         const regex = new RegExp(RegExp.escape(filter), "i");
         const itemList = ev.target.closest(".tab.active").querySelector(".item-list");
         for (const li of itemList.children) {
-            const documentUuid = li.closest("[data-document-uuid]").dataset.documentUuid;
-            const item = fromUuidSync(documentUuid);
+            const item = this._getEmbeddedDocument(li);
             if (!item) {
-                console.error(`Unable to locate ${documentUuid}`);
+                console.error(`onSearch: Unable to locate item}`, li);
                 continue;
             }
             try {
@@ -499,12 +510,28 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
     }
 
+    static async #onClips(event, target) {
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("onClips: Unable to locate roll item");
+        }
+        await item.changeClips({ event: this.event, token: this.token });
+    }
+
     static async #onRoll(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("Unable to locate roll item");
+            console.error("onRoll: Unable to locate roll item");
         }
-        await item.roll();
+        await item.roll({ event: this.event, token: this.token });
+    }
+
+    static async #onVpp(event, target) {
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("onVpp: Unable to locate roll item");
+        }
+        await item.changeVpp({ event: this.event, token: this.token });
     }
 
     static async #onToggleItemContainer(event, target) {
