@@ -234,6 +234,15 @@ export async function migrateWorld() {
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.9`, "background: #1111FF; color: #FFFFFF");
 
+    await migrateToVersion(
+        "4.2.12",
+        lastMigration,
+        getAllActorsInGame(),
+        "Weapon Master",
+        async (actor) => await migrateTo4_2_12(actor),
+    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.9`, "background: #1111FF; color: #FFFFFF");
+
     // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
     await migrateToVersion(
         game.system.version,
@@ -318,6 +327,36 @@ async function commitItemsCollectionMigrateDataChanges(item) {
         const { system, flags } = item.toObject();
         delete flags[game.system.id][needToPersistToDb];
         await item.update({ "==system": system, "==flags": flags });
+    }
+}
+
+async function migrateTo4_2_12(actor) {
+    try {
+        await refreshWeaponMaster(actor);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function refreshWeaponMaster(actor) {
+    // Weapon Master acts like a CSL and is now supported. Need the csl prop array built.
+    try {
+        const weaponMasterItems = actor.items.filter((item) => item.system.XMLID === "WEAPON_MASTER");
+
+        for (const item of weaponMasterItems) {
+            try {
+                const numEntries = 6 * item.system.LEVELS;
+                const csl = new Array(numEntries);
+                for (let idx = 0; idx < csl.length; idx++) {
+                    csl[idx] = "dc";
+                }
+                await item.update({ [`system.csl`]: csl });
+            } catch (e) {
+                console.error(e, item);
+            }
+        }
+    } catch (e) {
+        console.error(e, actor);
     }
 }
 
