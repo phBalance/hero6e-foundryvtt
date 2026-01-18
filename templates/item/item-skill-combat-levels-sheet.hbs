@@ -37,23 +37,21 @@
         </div>
 
 
-        <div class="form-group">
-            <label>Attacks Included:</label>
-            <div class="form-fields csl-attack-list">
-                <ul>
-                    {{#each attacks }}
-                        <li><input type="checkbox" name="{{this.id}}" {{checked this.checked}}
-                            data-dtype="Boolean" />
-                        {{this.name}}
-                        </li>
-                    {{/each}}
-                </ul>
+        {{#if attacks.length}}
+            <div class="form-group">
+                <label>Attacks Included:</label>
+                <div class="form-fields csl-attack-list">
+                    <ul>
+                        {{#each attacks }}
+                            <li><input type="checkbox" name="{{this.id}}" {{checked this.checked}}
+                                data-dtype="Boolean" />
+                            {{this.name}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                </div>
             </div>
-        </div>
-
-
-
-
+        {{/if}}
 
         <div class="form-group">
             <label>LEVELS</label>

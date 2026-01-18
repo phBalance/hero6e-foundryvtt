@@ -198,16 +198,10 @@ export class ItemAttackFormApplication extends FormApplication {
                         csl: [],
                     };
 
-                    // PH: FIXME: consolidate and move this function
-                    function isRanged(attackItem) {
-                        const range = attackItem.system.range;
-                        return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
-                    }
-
                     // Filter physical or mental choices based on the CSL type
                     // PH: FIXME: Don't we need to do this on updates as well as the attack could have changed type based on weapon?
-                    const isRangedAttack = isRanged(this.data.originalItem);
-                    const isMentalAttack = this.data.originalItem.system.attacksWith === "omcv";
+                    const isRangedAttack = this.data.originalItem.isRanged;
+                    const isMentalAttack = this.data.originalItem.usesOmcv;
                     if (isMentalAttack) {
                         delete entry.cslChoices.ocv;
                         delete entry.cslChoices.dcvRanged;
@@ -306,7 +300,7 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.maSelectedWeaponId ??= null;
             this.data.maPossibleWeapons = [];
             if (
-                (this.data.originalItem.type === "martialart" &&
+                (this.data.originalItem.isMartialManeuver &&
                     this.data.originalItem.actor.items.some((item) => item.system.XMLID === "WEAPON_ELEMENT")) ||
                 isRangedCombatManeuver(this.data.originalItem)
             ) {

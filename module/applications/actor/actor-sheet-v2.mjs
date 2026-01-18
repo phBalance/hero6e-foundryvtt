@@ -178,7 +178,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             context.gameSystemId = game.system.id;
             context.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
             context.hasEquipment = !!context.actor.items.find((o) => o.type === "equipment");
-            context.hasMartialArts = !!context.actor.items.find((o) => o.type === "martialart");
+            context.hasMartialArts = !!context.actor.items.find((o) => o.isMartialManeuver);
             context.useHAP = game.settings.get(game.system.id, "HAP");
         } catch (e) {
             console.error(e);

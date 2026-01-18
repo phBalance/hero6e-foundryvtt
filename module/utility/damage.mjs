@@ -236,8 +236,8 @@ function isNonKillingStrengthBasedManeuver(item) {
     return (
         !item.doesKillingDamage &&
         item.system.usesStrength &&
-        (item.type === "martialart" ||
-            (item.type === "maneuver" &&
+        (item.isMartialManeuver ||
+            (item.isCombatManeuver &&
                 (item.system.XMLID === "STRIKE" ||
                     item.system.XMLID === "DISARM" ||
                     item.system.XMLID === "GRABBY" ||
@@ -250,28 +250,20 @@ function isNonKillingStrengthBasedManeuver(item) {
 }
 
 export function isRangedCombatManeuver(item) {
-    return (
-        item.type === "maneuver" &&
-        // PH: FIXME: should add CATEGORY to match martial maneuvers
-        item.rangeForItem !== CONFIG.HERO.RANGE_TYPES.NO_RANGE &&
-        item.rangeForItem !== CONFIG.HERO.RANGE_TYPES.SELF
-    );
+    return item.isCombatManeuver && item.isRanged;
 }
 
 export function isHthCombatManeuver(item) {
-    return (
-        item.type === "maneuver" &&
-        // PH: FIXME: should add CATEGORY to match martial maneuvers
-        (item.rangeForItem === CONFIG.HERO.RANGE_TYPES.NO_RANGE || item.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF)
-    );
+    return item.isCombatManeuver && item.isHth;
 }
 
 export function isRangedMartialManeuver(item) {
-    return item.type === "martialart" && item.system.CATEGORY === "Ranged";
+    // PH: FIXME: Is this CATEGORY check wrong or should we be modifying item::isRanged?
+    return item.isMartialManeuver && item.system.CATEGORY === "Ranged";
 }
 
 export function isHthMartialManeuver(item) {
-    return item.type === "martialart" && isManeuverHthCategory(item);
+    return item.isMartialManeuver && isManeuverHthCategory(item);
 }
 
 // NOTE: HD has a bug where custom martial maneuvers have CATEGORY of "Hand to Hand" (note lower case)
@@ -284,7 +276,7 @@ function isManeuverThatIsUsingAWeapon(item, options) {
         console.error(`Missing _active`, item, options, item);
     }
     return (
-        (item.type === "martialart" || item.type === "maneuver") &&
+        (item.isMartialManeuver || item.isCombatManeuver) &&
         !!(item.system._active.maWeaponItem || options.maWeaponItem)
     );
 }
@@ -294,8 +286,7 @@ function isManeuverThatIsUsingAnEmptyHand(item, options) {
         console.error(`Missing _active`, item, options, item);
     }
     return (
-        (item.type === "martialart" || item.type === "maneuver") &&
-        !(item.system._active.maWeaponItem || options.maWeaponItem)
+        (item.isMartialManeuver || item.isCombatManeuver) && !(item.system._active.maWeaponItem || options.maWeaponItem)
     );
 }
 
@@ -382,7 +373,7 @@ export function isManeuverThatDoesNormalDamage(item) {
     const effect = getManeuverEffect(item);
 
     return (
-        (item.type === "martialart" || item.type === "maneuver") &&
+        (item.isMartialManeuver || item.isCombatManeuver) &&
         (effect.search(/NORMALDC/) > -1 ||
             effect.search(/WEAPONDC/) > -1 ||
             effect.search(/STRDC/) > -1 ||
@@ -401,7 +392,7 @@ function doubleDamageLimit() {
  * @returns {number}
  */
 export function getExtraMartialDcsOrZero(item) {
-    if (item.type !== "martialart") {
+    if (!item.isMartialManeuver) {
         return 0;
     }
 
@@ -476,7 +467,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     // EXTRADCs and RANGEDDCs
     // 5e EXTRADC and RANGEDDCs for armed killing attacks count at full DCs but do NOT count towards the base DC. FRed pg. 406.
     // 6e doesn't have the concept of base and added DCs but do the same in case they turn on the doubling rule.
-    if (item.type === "martialart" && (item.system._active.maWeaponItem || options.maWeaponItem)) {
+    if (item.isMartialManeuver && (item.system._active.maWeaponItem || options.maWeaponItem)) {
         addExtraMartialDcsToBundle(item, addedDamageBundle);
     }
 
@@ -493,9 +484,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
 
         // Martial Maneuvers in 5e ignore advantages (FRed pg 407). Everything else cares about them.
         const alteredManeuverDc =
-            item.is5e && item.type === "martialart"
-                ? maneuverDC * (1 + baseAttackItem._advantagesAffectingDc)
-                : maneuverDC;
+            item.is5e && item.isMartialManeuver ? maneuverDC * (1 + baseAttackItem._advantagesAffectingDc) : maneuverDC;
         const maneuverDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, alteredManeuverDc);
         const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, maneuverDiceParts);
 
@@ -615,7 +604,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
         // PH: FIXME: Implement the exceptions: See 6e v2 pg. 99. 5e has none?
         if (
             !["maneuver", "martialart"].includes(item.type) ||
-            (item.type === "maneuver" && item.system.XMLID === "STRIKE")
+            (item.isCombatManeuver && item.system.XMLID === "STRIKE")
         ) {
             const rawHaymakerDc = parseInt(options.haymakerManeuverActiveItem.system.DC);
 
@@ -1308,7 +1297,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
         }
 
         // 5e martial arts EXTRADCs and RANGEDDCs are baseDCs when unarmed. Do the same for 6e in case they use the optional damage doubling rules too.
-        if (item.type === "martialart" && !item.system.USEWEAPON) {
+        if (item.isMartialManeuver && !item.system.USEWEAPON) {
             addExtraMartialDcsToBundle(item, baseDicePartsBundle);
         }
 
