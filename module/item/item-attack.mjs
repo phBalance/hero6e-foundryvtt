@@ -680,7 +680,6 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
                     name: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
                     value: levelsForThisCsl,
                     title: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
-                    gmOnly: true,
                 });
             }
         }
