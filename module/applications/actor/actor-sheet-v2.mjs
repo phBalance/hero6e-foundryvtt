@@ -1,7 +1,7 @@
-import { HEROSYS } from "../herosystem6e.mjs";
-import { getActorDefensesVsAttack } from "../utility/defense.mjs";
-import { HeroSystem6eActor } from "./actor.mjs";
-import { HeroSystem6eItem } from "../item/item.mjs";
+import { HEROSYS } from "../../herosystem6e.mjs";
+import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
+import { HeroSystem6eActor } from "../../actor/actor.mjs";
+import { HeroSystem6eItem } from "../../item/item.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -21,6 +21,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             height: 700,
         },
         actions: {
+            clear: HeroSystemActorSheetV2.#onClear,
             roll: HeroSystemActorSheetV2.#onRoll,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
         },
@@ -391,6 +392,42 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 ev.target.closest("li").classList.toggle("expanded");
             });
         });
+
+        this.element.querySelectorAll('[data-action="search"]').forEach((el) => {
+            el.addEventListener("keydown", this._debouncedSearch, { passive: true });
+        });
+    }
+
+    static SEARCH_DELAY = 200;
+
+    _debouncedSearch = foundry.utils.debounce(this._onSearch.bind(this), this.constructor.SEARCH_DELAY);
+
+    _onSearch(ev) {
+        const filter = ev.target.value;
+        const regex = new RegExp(RegExp.escape(filter), "i");
+        const itemList = ev.target.closest(".tab.active").querySelector(".item-list");
+        for (const li of itemList.children) {
+            const documentUuid = li.closest("[data-document-uuid]").dataset.documentUuid;
+            const item = fromUuidSync(documentUuid);
+            if (!item) {
+                console.error(`Unable to locate ${documentUuid}`);
+                continue;
+            }
+            try {
+                if (
+                    item.name.match(regex) ||
+                    item.system.XMLID.match(regex) ||
+                    item.system.description.match(regex) ||
+                    item.parentItem?.system.description.match(regex)
+                ) {
+                    li.classList.remove("hidden");
+                } else {
+                    li.classList.add("hidden");
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
     }
 
     _getDocumentListContextOptions() {
@@ -449,6 +486,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         return document;
+    }
+
+    static async #onClear(event, target) {
+        const inputSearch = target.closest("div.search").querySelector("input");
+        if (inputSearch) {
+            inputSearch.value = "";
+            const itemList = target.closest(".tab.active").querySelector(".item-list");
+            for (const li of itemList.children) {
+                li.classList.remove("hidden");
+            }
+        }
     }
 
     static async #onRoll(event, target) {

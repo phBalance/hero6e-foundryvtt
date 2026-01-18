@@ -3,6 +3,16 @@
   data-group='primary'
   data-tab='powers'
 >
+    <section class="list-controls">
+        <div class="search">
+            <input type="text" placeholder="Search" data-action="search">
+            <ul class="unlist controls">
+                <button type="button" class="unbutton filter-control always-interactive" data-action="clear" data-tooltip="" aria-label="Clear Filters">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </ul>
+        </div>
+    </section>
     <section class="item-list-container">
         <div class="item-header">
             <div class="item-column item-cost">{{localize "ActorSheet.Cost"}}</div>
@@ -11,11 +21,10 @@
             <div class="item-column item-controls"></div>
         </div>
 
-        <ol class="item-list powers-list">
+        <ol class="item-list unlist">
             {{#each items as |item|}}
                 {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs') item }}
             {{/each}}
         </ol>
     </section>
-
 </section>
