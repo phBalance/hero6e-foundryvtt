@@ -472,6 +472,18 @@ HERO.CSL_5E_CV_LEVELS_TYPES = Object.freeze({
     mental: "mental",
 });
 
+// NOTE: Expecting strings to be lower case
+HERO.CSL_WEAPON_MASTER_WEAPON_TYPES = Object.freeze({
+    // Killing attacks
+    killing: "killing",
+
+    // Normal attacks
+    normal: "normal",
+
+    // Must list all attacks
+    explicit: "explicit",
+});
+
 // TODO: This could be created from powers.
 HERO.movementPowers = Object.freeze({
     extradimensionalmovement: "Extra Dimensional Movement",
@@ -5982,6 +5994,69 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         );
                         return 0;
                 }
+            },
+            heroValidation: function (item) {
+                const validations = [];
+
+                // If there are no mapped attacks then the CSL won't work
+                if (!item.isCslValidHeroValidation) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `There are no attacks associated with this CSL.`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
+
+                // Ensure that all custom adders are mapped to objects
+                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
+                if (customCslAddersWithoutItems.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Some CSLs have limits on the number of supported attacks
+                // Custom adders are how we track how many attacks that this CSL applies to.
+                const customAdders = item.customCslAdders;
+                const maxCustomAdders = item.maxCustomCslAdders;
+                if (customAdders.length > maxCustomAdders) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Expecting CSL to have ${maxCustomAdders} or fewer attacks. Consider consolidating related attacks into a list or multipower`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Ensure that all of the defined custom adders are supported
+                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
+                if (notAllowedItemsInCustomAdders.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // ANYHTH/ANYRANGED options specified correctly?
+                if (
+                    (item.system.OPTIONID === "ANYHTH" || item.system.OPTIONID === "ANYRANGED") &&
+                    item.cslWeaponMasterWeaponTypes.length !== 1
+                ) {
+                    validations.push({
+                        property: "OPTION_ALIAS",
+                        message: `Expecting one of these words [${Object.keys(HERO.CSL_WEAPON_MASTER_WEAPON_TYPES).join(", ")}]`,
+                        example: `DCV with HTH and Ranged combat`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                return validations;
             },
             xml: `<TALENT XMLID="WEAPON_MASTER" ID="1709160011422" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited group]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },

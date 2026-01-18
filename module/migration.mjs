@@ -404,7 +404,7 @@ async function fixupCslChoices4_2_9(actor) {
         // Setup targetId
         const allAdders = foundry.utils.deepClone(item.system._source.ADDER);
         for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
-            const targetId = (item.actor?._cslItems || []).find((item) => {
+            const targetId = (item.actor?.cslItems || []).find((item) => {
                 // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
                 // is thus providing a unique name - other options can potentially have multiple matches of which
                 // we'll end up with the first. This could result in a situation where someone can not match

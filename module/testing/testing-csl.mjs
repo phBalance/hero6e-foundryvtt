@@ -1237,8 +1237,26 @@ export function registerCslTests(quench) {
                                     <TALENT XMLID="WEAPON_MASTER" ID="1768757969973" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYHTH" OPTIONID="ANYHTH" OPTION_ALIAS="all HTH Killing Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All HTH KA Weapons">
                                         <NOTES />
                                     </TALENT>
-                                    <TALENT XMLID="WEAPON_MASTER" ID="1768757977630" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYRANGED" OPTIONID="ANYRANGED" OPTION_ALIAS="all Ranged Killing Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All Ranged KA Weapons">
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768773365541" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYHTH" OPTIONID="ANYHTH" OPTION_ALIAS="all HTH Normal Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All HTH Normal Weapons">
                                         <NOTES />
+                                    </TALENT>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768774588721" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYHTH" OPTIONID="ANYHTH" OPTION_ALIAS="all HTH Explicit Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All HTH Explicit Weapons">
+                                        <NOTES />
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1768774888534" BASECOST="0.0" LEVELS="0" ALIAS="Single Target Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                    </TALENT>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768757977630" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYRANGED" OPTIONID="ANYRANGED" OPTION_ALIAS="all Ranged Killing Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All Ranged KA Weapons">
+                                        <NOTES />
+                                    </TALENT>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768773385124" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYRANGED" OPTIONID="ANYRANGED" OPTION_ALIAS="all Ranged Normal Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All Ranged Normal Weapons">
+                                        <NOTES />
+                                    </TALENT>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768774611979" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYRANGED" OPTIONID="ANYRANGED" OPTION_ALIAS="all Ranged Explicit Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All Ranged Explicit Weapons">
+                                        <NOTES />
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1768774869672" BASECOST="0.0" LEVELS="0" ALIAS="Single Target Energy Blast" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
                                     </TALENT>
                                 </TALENTS>
                                 <MARTIALARTS>
@@ -1325,6 +1343,57 @@ export function registerCslTests(quench) {
                                         <NOTES />
                                     </MODIFIER>
                                     </POWER>
+                                    <LIST XMLID="GENERIC_OBJECT" ID="1767912298510" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                    <NOTES />
+                                    </LIST>
+                                    <POWER XMLID="COMPOUNDPOWER" ID="1767911691156" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Rifle" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    <SKILL XMLID="COMBAT_LEVELS" ID="1767912325503" BASECOST="0.0" LEVELS="5" ALIAS="Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Stabilizer" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                        <NOTES />
+                                    </SKILL>
+                                    <POWER XMLID="RKA" ID="1767912345670" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Ranged" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=".50 bullet" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                        <NOTES />
+                                    </POWER>
+                                    </POWER>
+                                    <LIST XMLID="GENERIC_OBJECT" ID="1768759979792" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                    <NOTES />
+                                    </LIST>
+                                    <LIST XMLID="GENERIC_OBJECT" ID="1768759982236" BASECOST="0.0" LEVELS="0" ALIAS="Weapon Master Killing Weapons" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                    <NOTES />
+                                    </LIST>
+                                    <POWER XMLID="HKA" ID="1768759475233" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1768759982236" NAME="Single Target HTH Killing Attack" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    </POWER>
+                                    <POWER XMLID="RKA" ID="1768759491121" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1768759982236" NAME="Single Target Ranged Killing Attack" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    </POWER>
+                                    <POWER XMLID="HKA" ID="1768760090842" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1768759982236" NAME="Single Target HTH Mental Killing Attack" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    <MODIFIER XMLID="ACV" ID="1768760104038" BASECOST="0.25" LEVELS="0" ALIAS="Alternate Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONMENTALOMCVDMCV" OPTIONID="NONMENTALOMCVDMCV" OPTION_ALIAS="uses OMCV against DMCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                    <MODIFIER XMLID="AVAD" ID="1768760122114" BASECOST="1.0" LEVELS="0" ALIAS="Attack Versus Alternate Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMONRARE" OPTIONID="COMMONRARE" OPTION_ALIAS="Common -&gt; Rare" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Resistant Mental Defense" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                    </POWER>
+                                    <POWER XMLID="RKA" ID="1768760158206" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1768759982236" NAME="Single Target Ranged Mental Killing Attack" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    <MODIFIER XMLID="ACV" ID="1768760171548" BASECOST="0.25" LEVELS="0" ALIAS="Alternate Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONMENTALOMCVDMCV" OPTIONID="NONMENTALOMCVDMCV" OPTION_ALIAS="uses OMCV against DMCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                    <MODIFIER XMLID="AVAD" ID="1768760171569" BASECOST="1.0" LEVELS="0" ALIAS="Attack Versus Alternate Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMONRARE" OPTIONID="COMMONRARE" OPTION_ALIAS="Common -&gt; Rare" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Resistant Mental Defense" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                    </MODIFIER>
+                                    </POWER>
+                                    <POWER XMLID="HANDTOHANDATTACK" ID="1768773527007" BASECOST="0.0" LEVELS="1" ALIAS="Hand-To-Hand Attack" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1768759982236" NAME="Single Target Hand-To-Hand Attack" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                        <NOTES />
+                                        <MODIFIER XMLID="HANDTOHANDATTACK" ID="1768774053618" BASECOST="-0.25" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                            <NOTES />
+                                        </MODIFIER>
+                                    </POWER>
+                                    <POWER XMLID="ENERGYBLAST" ID="1768773560175" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1768759982236" NAME="Single Target Energy Blast" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    </POWER>
                                 </POWERS>
                                 <DISADVANTAGES />
                                 <EQUIPMENT />
@@ -1340,6 +1409,12 @@ export function registerCslTests(quench) {
                     let basicStrike;
                     let counterstrike;
                     let basicShot;
+                    let singleTargetHka;
+                    let singleTargetMentalHka;
+                    let singleTargetRka;
+                    let singleTargetMentalRka;
+                    let singleTargetHa;
+                    let singleTargetEb;
 
                     let singleAttackCslShouldNotWork;
                     let singleStrikeTargetCsl;
@@ -1360,8 +1435,12 @@ export function registerCslTests(quench) {
 
                     let veryLimitedWm;
                     let limitedWm;
-                    let allHthWm;
-                    let allRangedWm;
+                    let allHthKillingWm;
+                    let allRangedKillingWm;
+                    let allHthNormalWm;
+                    let allRangedNormalWm;
+                    let allHthExplicitWm;
+                    let allRangedExplicitWm;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
@@ -1376,6 +1455,18 @@ export function registerCslTests(quench) {
                         basicStrike = actor.items.find((item) => item.name === "Basic Strike");
                         counterstrike = actor.items.find((item) => item.name === "Counterstrike");
                         basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                        singleTargetHka = actor.items.find((item) => item.name === "Single Target HTH Killing Attack");
+                        singleTargetMentalHka = actor.items.find(
+                            (item) => item.name === "Single Target HTH Mental Killing Attack",
+                        );
+                        singleTargetRka = actor.items.find(
+                            (item) => item.name === "Single Target Ranged Killing Attack",
+                        );
+                        singleTargetMentalRka = actor.items.find(
+                            (item) => item.name === "Single Target Ranged Mental Killing Attack",
+                        );
+                        singleTargetHa = actor.items.find((item) => item.name === "Single Target Hand-To-Hand Attack");
+                        singleTargetEb = actor.items.find((item) => item.name === "Single Target Energy Blast");
 
                         singleAttackCslShouldNotWork = actor.items.find(
                             (item) => item.name === "Single Attack CSL Should Not Work",
@@ -1400,8 +1491,14 @@ export function registerCslTests(quench) {
 
                         veryLimitedWm = actor.items.find((item) => item.name === "WM Very Limited Group");
                         limitedWm = actor.items.find((item) => item.name === "WM Limited Group");
-                        allHthWm = actor.items.find((item) => item.name === "WM All HTH KA Weapons");
-                        allRangedWm = actor.items.find((item) => item.name === "WM All Ranged KA Weapons");
+                        allHthKillingWm = actor.items.find((item) => item.name === "WM All HTH KA Weapons");
+                        allRangedKillingWm = actor.items.find((item) => item.name === "WM All Ranged KA Weapons");
+                        allHthNormalWm = actor.items.find((item) => item.name === "WM All HTH Normal Weapons");
+                        allRangedNormalWm = actor.items.find((item) => item.name === "WM All Ranged Normal Weapons");
+                        allHthExplicitWm = actor.items.find((item) => item.name === "WM All HTH Explicit Weapons");
+                        allRangedExplicitWm = actor.items.find(
+                            (item) => item.name === "WM All Ranged Explicit Weapons",
+                        );
                     });
 
                     after(async function () {
@@ -1429,7 +1526,9 @@ export function registerCslTests(quench) {
                             });
 
                             it("should have the correct number of csl array entries (6 x LEVELS) - Weapon Master", function () {
-                                expect(6 * allRangedWm.system.LEVELS).to.equal(allRangedWm.system.csl.length);
+                                expect(6 * allRangedKillingWm.system.LEVELS).to.equal(
+                                    allRangedKillingWm.system.csl.length,
+                                );
                             });
                         });
 
@@ -1573,32 +1672,98 @@ export function registerCslTests(quench) {
                                 expect(limitedWm.cslAppliesTo(strike)).to.be.false;
                             });
 
-                            it("should apply to HTH killing weapon - All HTH Group", function () {
-                                expect(allHthWm.cslAppliesTo(basicStrike)).to.be.true;
+                            describe("killing group", function () {
+                                it("should apply to HTH killing weapon - All HTH Killing Group", function () {
+                                    expect(allHthKillingWm.cslAppliesTo(singleTargetHka)).to.be.true;
+                                });
+
+                                it("should not apply to HTH normal weapon - All HTH Killing Group", function () {
+                                    expect(allHthKillingWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                });
+
+                                it("should not apply to Ranged killing weapon - All HTH Killing Group", function () {
+                                    expect(allHthKillingWm.cslAppliesTo(singleTargetRka)).to.be.false;
+                                });
+
+                                it("should not apply to HTH mental killing weapon - All HTH Killing Group", function () {
+                                    expect(allHthKillingWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
+                                });
+
+                                it("should apply to Ranged killing weapon - All Ranged Killing Group", function () {
+                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetRka)).to.be.true;
+                                });
+
+                                it("should not apply to HTH normal weapon - All Ranged Killing Group", function () {
+                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                });
+
+                                it("should not apply to Ranged normal weapon - All Ranged Killing Group", function () {
+                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetEb)).to.be.false;
+                                });
+
+                                it("should not apply to ranged adjustment weapon - All Ranged Killing Group", function () {
+                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                });
+
+                                it("should not apply to Ranged mental killing weapon - All Ranged Killing Group", function () {
+                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetMentalRka)).to.be.false;
+                                });
                             });
 
-                            it("should apply to HTH weapon - All HTH Group", function () {
-                                expect(allHthWm.cslAppliesTo(strike)).to.be.true;
+                            describe("normal group", function () {
+                                it("should apply to HTH normal weapon - All HTH Normal Group", function () {
+                                    expect(allHthNormalWm.cslAppliesTo(singleTargetHa)).to.be.true;
+                                });
+
+                                it("should apply to HTH killing weapon - All HTH Normal Group", function () {
+                                    expect(allHthNormalWm.cslAppliesTo(singleTargetHka)).to.be.false;
+                                });
+
+                                it("should not apply to Ranged killing weapon - All HTH Normal Group", function () {
+                                    expect(allHthNormalWm.cslAppliesTo(singleTargetRka)).to.be.false;
+                                });
+
+                                it("should not apply to HTH mental killing weapon - All HTH Normal Group", function () {
+                                    expect(allHthNormalWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
+                                });
+
+                                it("should not apply to HTH mental killing weapon - All HTH Normal Group", function () {
+                                    expect(allHthNormalWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
+                                });
+
+                                it("should apply to Ranged killing weapon - All Ranged Normal Group", function () {
+                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetEb)).to.be.true;
+                                });
+
+                                it("should not apply to HTH normal weapon - All Ranged Normal Group", function () {
+                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                });
+
+                                it("should not apply to Ranged killing weapon - All Ranged Normal Group", function () {
+                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetRka)).to.be.false;
+                                });
+
+                                it("should not apply to ranged adjustment weapon - All Ranged Normal Group", function () {
+                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                });
                             });
 
-                            it("should not apply to Ranged adjustment weapon - All HTH Group", function () {
-                                expect(allHthWm.cslAppliesTo(singleTargetDrain)).to.be.false;
-                            });
+                            describe("explicit group", function () {
+                                it("should apply to explicit listed weapon - All HTH Explicit Group", function () {
+                                    expect(allHthExplicitWm.cslAppliesTo(singleTargetHa)).to.be.true;
+                                });
 
-                            it("should not apply to Ranged mental weapon - All HTH Group", function () {
-                                expect(allHthWm.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                            });
+                                it("should not apply to unlisted Ranged mental killing weapon - All HTH Explicit Group", function () {
+                                    expect(allHthExplicitWm.cslAppliesTo(singleTargetMentalRka)).to.be.false;
+                                });
 
-                            it("should apply to Ranged adjustment weapon - All Ranged Group", function () {
-                                expect(allRangedWm.cslAppliesTo(singleTargetDrain)).to.be.true;
-                            });
+                                it("should apply to listed Ranged killing weapon - All Ranged Explicit Group", function () {
+                                    expect(allRangedExplicitWm.cslAppliesTo(singleTargetEb)).to.be.true;
+                                });
 
-                            it("should apply to Ranged mental weapon - All Ranged Group", function () {
-                                expect(allRangedWm.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply to normal HTH weapon - All Ranged Group", function () {
-                                expect(allRangedWm.cslAppliesTo(strike)).to.be.false;
+                                it("should not apply to unlisted HTH normal weapon - All Ranged Explicit Group", function () {
+                                    expect(allRangedExplicitWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                });
                             });
                         });
                     });
@@ -1729,13 +1894,13 @@ export function registerCslTests(quench) {
                             });
 
                             it("should return correct choices for WM with All HTH", function () {
-                                const choices = allHthWm.cslChoices;
+                                const choices = allHthKillingWm.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(1);
                                 expect(choices).to.have.property("dc");
                             });
 
                             it("should return correct choices for WM with All Ranged", function () {
-                                const choices = allRangedWm.cslChoices;
+                                const choices = allRangedKillingWm.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(1);
                                 expect(choices).to.have.property("dc");
                             });

@@ -66,20 +66,6 @@ export async function onMessageRendered(html) {
     }
 }
 
-function isBodyBasedEffectRoll(item) {
-    return item.system.XMLID === "TRANSFORM";
-}
-
-function isStunBasedEffectRoll(item) {
-    return (
-        item.system.XMLID === "MENTALILLUSIONS" ||
-        item.system.XMLID === "MINDCONTROL" ||
-        item.system.XMLID === "MINDSCAN" ||
-        item.system.XMLID === "TELEPATHY"
-    );
-}
-
-// PH: FIXME: Should we be looking to override the existing Item JSON functions for this functionality?
 /**
  * Turn an item into JSON.
  * Reverse the process with rehydrateAttackItem
@@ -792,10 +778,8 @@ async function doSingleTargetActionToHit(action, options) {
 
     const toHitChar = CONFIG.HERO.defendsWith[itemData.defendsWith];
 
-    const adjustment = getPowerInfo({
-        item: item.effectiveAttackItem,
-    })?.type?.includes("adjustment");
-    const senseAffecting = item.effectiveAttackItem.isSenseAffecting();
+    const adjustment = item.effectiveAttackItem.isAdjustment;
+    const senseAffecting = item.effectiveAttackItem.isSenseAffecting;
 
     // TODO: Much of this looks similar to the AOE stuff above. Any way to combine?
     // -------------------------------------------------
@@ -1277,7 +1261,7 @@ function getAttackTags(item) {
     }
 
     // ADJUSTMENT should include what we are adjusting
-    if (baseAttackItem.baseInfo.type.includes("adjustment")) {
+    if (baseAttackItem.isAdjustment) {
         const { valid, reducesArray, enhancesArray } = baseAttackItem.splitAdjustmentSourceAndTarget();
         if (!valid) {
             attackTags.push({ name: baseAttackItem.system.INPUT });
@@ -1778,14 +1762,11 @@ export async function _onRollDamage(event) {
     toHitData.targetEntangle =
         toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
 
-    const isAdjustment = !!getPowerInfo({
-        item: item.effectiveAttackItem,
-    })?.type?.includes("adjustment");
-    const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting();
+    const isAdjustment = item.effectiveAttackItem.isAdjustment;
+    const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting;
     const isKilling = item.effectiveAttackItem.doesKillingDamage;
-    const isEntangle = item.effectiveAttackItem.system.XMLID === "ENTANGLE";
-    const isEffectBasedAttack =
-        isBodyBasedEffectRoll(item.effectiveAttackItem) || isStunBasedEffectRoll(item.effectiveAttackItem);
+    const isEntangle = item.effectiveAttackItem.isEntangle;
+    const isEffectBasedAttack = item.effectiveAttackItem.isEffectBased;
     const isNormalAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && !isKilling;
     const isKillingAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && isKilling;
 
@@ -2011,8 +1992,8 @@ export async function _onRollMindScanEffectRoll(event) {
     const egoAdder = parseInt(button.innerHTML.match(/\d+/)) || 0;
     const targetEgo = targetsEgo + egoAdder;
 
-    const adjustment = item.effectiveAttackItem.baseInfo?.type?.includes("adjustment"); // PH: FIXME: use accessor
-    const senseAffecting = item.effectiveAttackItem.isSenseAffecting();
+    const adjustment = item.effectiveAttackItem.isAdjustment;
+    const senseAffecting = item.effectiveAttackItem.isSenseAffecting;
 
     const useStandardEffect = item.effectiveAttackItem.system.USESTANDARDEFFECT || false;
 
@@ -2363,8 +2344,8 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         await doManeuverEffects(item, action);
     }
 
-    if (item.effectiveAttackItem.system.XMLID === "ENTANGLE") {
-        return _onApplyEntangleToSpecificToken(item, targetToken, damageRoller, action);
+    if (item.effectiveAttackItem.isEntangle) {
+        return _onApplyEntangleToSpecificToken(item, token, damageRoller, action);
     }
 
     // Target an ENTANGLE?
@@ -2526,14 +2507,9 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // We need to recalculate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(damageRoller, item, damageData);
 
-    const isTransform =
-        getPowerInfo({
-            item: item.effectiveAttackItem,
-        })?.XMLID === "TRANSFORM";
-    const isAdjustment = !!getPowerInfo({
-        item: item.effectiveAttackItem,
-    })?.type?.includes("adjustment");
-    const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting();
+    const isTransform = item.effectiveAttackItem.isTransform;
+    const isAdjustment = item.effectiveAttackItem.isAdjustment;
+    const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting;
 
     if (isTransform) {
         return _onApplyTransformationToSpecificToken(item, targetToken, damageDetail, defense, defenseTags, action);
@@ -3008,7 +2984,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
     // We don't support adjustment powers on entangles
     // TODO: Add drian body support for entangles
-    if (attackItem.baseInfo?.type.includes("adjustment")) {
+    if (attackItem.isAdjustment) {
         ui.notifications.error(
             `An entangle (${fromUuidSync(entangleAE.origin).name || entangleAE.name}) is not a supported target for an adjustment power (${attackItem.name}).`,
         );
@@ -3497,13 +3473,11 @@ async function _calcDamage(damageRoller, item, options) {
     let damageDetail = {};
     const itemData = item.effectiveAttackItem.system;
 
-    const isAdjustment = !!getPowerInfo({
-        item: item.effectiveAttackItem,
-    })?.type?.includes("adjustment");
-    const isSenseAffectingPower = item.effectiveAttackItem.isSenseAffecting();
-    const isEntangle = item.effectiveAttackItem.system.XMLID === "ENTANGLE";
-    const isBodyBasedEffectRollItem = isBodyBasedEffectRoll(item.effectiveAttackItem);
-    const isStunBasedEffectRollItem = isStunBasedEffectRoll(item.effectiveAttackItem);
+    const isAdjustment = item.effectiveAttackItem.isAdjustment;
+    const isSenseAffectingPower = item.effectiveAttackItem.isSenseAffecting;
+    const isEntangle = item.effectiveAttackItem.isEntangle;
+    const isBodyBasedEffectRollItem = item.effectiveAttackItem.isBodyBasedEffect;
+    const isStunBasedEffectRollItem = item.effectiveAttackItem.isStunBasedEffect;
     const isKillingAttack = item.effectiveAttackItem.doesKillingDamage;
 
     let body;
