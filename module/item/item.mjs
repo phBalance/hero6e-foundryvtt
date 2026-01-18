@@ -47,8 +47,8 @@ import { tagObjectForPersistence } from "../migration.mjs";
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
     Handlebars.registerHelper("itemName", itemName);
-    Handlebars.registerHelper("itemIsManeuver", itemIsManeuver);
-    Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
+    Handlebars.registerHelper("itemIsCombatManeuver", itemIsCombatManeuver);
+    Handlebars.registerHelper("itemIsOptionalCombatManeuver", itemIsOptionalCombatManeuver);
     Handlebars.registerHelper("filterItem", filterItem);
     Handlebars.registerHelper("itemHasBehaviours", itemHasBehaviours);
     Handlebars.registerHelper("itemHasActionBehavior", itemHasActionBehavior);
@@ -108,12 +108,12 @@ function itemName(item) {
     }
 }
 
-function itemIsManeuver(item) {
-    return item.type === "maneuver";
+function itemIsCombatManeuver(item) {
+    return item.isCombatManeuver;
 }
 
-function itemIsOptionalManeuver(item) {
-    return itemIsManeuver(item) && !!getPowerInfo({ item: item })?.behaviors.includes("optional-maneuver");
+function itemIsOptionalCombatManeuver(item) {
+    return item.isCombatManeuver && !!getPowerInfo({ item: item })?.behaviors.includes("optional-maneuver");
 }
 
 function filterItem(item, filterString) {
@@ -215,7 +215,7 @@ function itemPostHitActionString(item) {
             item: item,
         })?.type?.includes("adjustment");
         const isSenseAffecting = item.isSenseAffecting();
-        const isManeuver = itemIsManeuver(item);
+        const isManeuver = item.isCombatManeuver;
 
         // Provide a more specific name
         if (isAdjustment || isSenseAffecting) {
@@ -936,7 +936,7 @@ export class HeroSystem6eItem extends Item {
 
         // turn off items that use END, Charges, MP, etc
 
-        if (this.type !== "maneuver") {
+        if (!this.isCombatManeuver) {
             if (
                 (this.end > 0 && this.system.XMLID !== "STR") ||
                 (this.system.chargeItemModifier && this.parentItem?.system.XMLID !== "MULTIPOWER")
@@ -951,10 +951,9 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
             }
-            ``;
         }
 
-        if (this.type === "maneuver" && this.system.active) {
+        if (this.isCombatManeuver && this.system.active) {
             await this.update({ ["system.active"]: false });
         }
 
@@ -2445,7 +2444,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Combat maneuvers cost 1 END
-        else if (this.type === "maneuver") {
+        else if (this.isCombatManeuver) {
             return 1;
         }
 
@@ -4847,7 +4846,7 @@ export class HeroSystem6eItem extends Item {
                 return true;
             }
 
-            if (this.type === "maneuver") {
+            if (this.isCombatManeuver) {
                 return false;
             }
 
@@ -4885,11 +4884,6 @@ export class HeroSystem6eItem extends Item {
 
         // Favor disable status of associated ActiveEffect
         if (this.effects.size > 0) {
-            // if (ae.disabled === this.system.active) {
-            //     console.log(
-            //         `${this.name} has "active" mismatch between item and AE. Using AE as autorative. This is expeteced when toggling as V12/13 doesn't allow updating Item & AE in one operation.`,
-            //     );
-            // }
             const _disabled = this.effects.contents[0].disabled;
             for (const ae of this.effects) {
                 if (ae.disabled !== _disabled) {
@@ -4904,10 +4898,6 @@ export class HeroSystem6eItem extends Item {
 
             return true;
         }
-
-        // if (this.type === "maneuver" && !this.baseInfo?.behaviors.includes("activatable")) {
-        //     return true;
-        // }
 
         return this.system.active;
     }
@@ -5573,6 +5563,7 @@ export class HeroSystem6eItem extends Item {
         return _duration;
     }
 
+    // PH: FIXME: we have 2 ways of getting this... probably should favour this.system.range
     get rangeForItem() {
         const baseInfo = this.baseInfo;
         if (!baseInfo || !baseInfo.rangeForItem) {
@@ -5781,6 +5772,57 @@ export class HeroSystem6eItem extends Item {
         }
         const xml = `<${this.system.xmlTag}` + primaryXML + secondaryXML + `></${this.system.xmlTag}>`;
         return xml;
+    }
+
+    /**
+     * Does this item use OMCV for attacking?
+     */
+    get usesOmcv() {
+        return this.system.attacksWith === "omcv";
+    }
+
+    /**
+     * Assuming this item is an attack power, is it ranged?
+     */
+    get isRanged() {
+        const range = this.system.range;
+        return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
+    }
+
+    /**
+     * Assuming this item is an attack power, does it have no range?
+     */
+    get isHth() {
+        const range = this.system.range;
+        return range === CONFIG.HERO.RANGE_TYPES.NO_RANGE;
+    }
+
+    /**
+     * Assuming this item is an attack power, is it a ranged power that doesn't use OMCV to hit?
+     */
+    get isRangedNonMental() {
+        return this.isRanged && !this.usesOmcv;
+    }
+
+    /**
+     * Assuming this item is an attack power, does it have no range and doesn't use OMCV to hit?
+     */
+    get isHthNonMental() {
+        return this.isHth && !this.usesOmcv;
+    }
+
+    /**
+     * Is this item a martial art maneuver
+     */
+    get isMartialManeuver() {
+        return this.type === "martialart";
+    }
+
+    /**
+     * Is this item a combat maneuver
+     */
+    get isCombatManeuver() {
+        return this.type === "maneuver";
     }
 
     get isCsl() {
@@ -6230,33 +6272,6 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        // PH: FIXME: Move these functions elsewhere
-        function usesOmcv(attackItem) {
-            return attackItem.system.attacksWith === "omcv";
-        }
-
-        function isRanged(attackItem) {
-            const range = attackItem.system.range;
-            return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
-        }
-
-        function isHth(attackItem) {
-            const range = attackItem.system.range;
-            return range === CONFIG.HERO.RANGE_TYPES.NO_RANGE;
-        }
-
-        function isRangedNonMental(attackItem) {
-            return isRanged(attackItem) && !usesOmcv(attackItem);
-        }
-
-        function isHthNonMental(attackItem) {
-            return isHth(attackItem) && !usesOmcv(attackItem);
-        }
-
-        function isMartialManeuver(attackItem) {
-            return attackItem.type === "martialart";
-        }
-
         // The rest of the CSL types are very different between 5e and 6e.
         if (this.is5e) {
             if (this.system.XMLID !== "COMBAT_LEVELS") {
@@ -6270,40 +6285,40 @@ export class HeroSystem6eItem extends Item {
                     return true;
 
                 case "MENTALRANGED":
-                    return usesOmcv(attackItem) || isRangedNonMental(attackItem);
+                    return attackItem.usesOmcv || attackItem.isRangedNonMental;
 
                 case "HTHMENTAL":
-                    return usesOmcv(attackItem) || isHthNonMental(attackItem);
+                    return attackItem.usesOmcv || attackItem.isHthNonMental;
 
                 case "HTHRANGED":
-                    return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
+                    return attackItem.isHthNonMental || attackItem.isRangedNonMental;
 
                 case "MENTAL":
-                    return usesOmcv(attackItem);
+                    return attackItem.usesOmcv;
 
                 case "RANGED":
-                    return isRangedNonMental(attackItem);
+                    return attackItem.isRangedNonMental;
 
                 case "HTH":
-                    return isHthNonMental(attackItem);
+                    return attackItem.isHthNonMental;
 
                 case "MARTIAL":
-                    return isMartialManeuver(attackItem);
+                    return attackItem.isMartialManeuver;
 
                 case "HTHDCV":
                 case "TWODCV":
                 case "TWOOCV": {
                     for (const type of this.csl5eCslDcvOcvTypes) {
                         if (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.hth) {
-                            if (isHthNonMental(attackItem)) {
+                            if (attackItem.isHthNonMental) {
                                 return true;
                             }
                         } else if (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.ranged) {
-                            if (isRangedNonMental(attackItem)) {
+                            if (attackItem.isRangedNonMental) {
                                 return true;
                             }
                         } else if (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.mental) {
-                            if (usesOmcv(attackItem)) {
+                            if (attackItem.usesOmcv) {
                                 return true;
                             }
                         }
@@ -6314,10 +6329,10 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 case "DCV":
-                    return isHthNonMental(attackItem) || isRangedNonMental(attackItem);
+                    return attackItem.isHthNonMental || attackItem.isRangedNonMental;
 
                 case "DECV":
-                    return usesOmcv(attackItem);
+                    return attackItem.usesOmcv;
 
                 default:
                 // Drop through and be handled outside the switch
@@ -6344,7 +6359,7 @@ export class HeroSystem6eItem extends Item {
             switch (this.system.XMLID) {
                 case "COMBAT_LEVELS":
                     // 6e CSLs are only good for non mental attacks
-                    if (usesOmcv(attackItem)) {
+                    if (attackItem.usesOmcv) {
                         return false;
                     }
 
@@ -6353,9 +6368,9 @@ export class HeroSystem6eItem extends Item {
                         // a non mental combat attack is supported.
                         return true;
                     } else if (this.system.OPTIONID === "RANGED") {
-                        return isRangedNonMental(attackItem);
+                        return attackItem.isRangedNonMental;
                     } else if (this.system.OPTIONID === "HTH") {
-                        return isHthNonMental(attackItem);
+                        return attackItem.isHthNonMental;
                     }
 
                     // The other types of CSLs support a limited number of attacks. We have to check that its
@@ -6373,7 +6388,7 @@ export class HeroSystem6eItem extends Item {
 
                 case "MENTAL_COMBAT_LEVELS":
                     // 6e MCSLs are only good for "mental" attacks
-                    if (!usesOmcv(attackItem)) {
+                    if (!attackItem.usesOmcv) {
                         return false;
                     }
 
@@ -7141,7 +7156,7 @@ export function cloneToEffectiveAttackItem({
     // PH: FIXME: Add a way to create a new power type. Change the name of the function. Check CLUBWEAPON and
     //            probably want to give a warning if CLUBWEAPON is on and the attack is not a killing attack.
     // const clubWeaponActive = originalItem.actor?.items.find(
-    //     (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "CLUBWEAPON" && anItem.isActive,
+    //     (anItem) => anItem.isCombatManeuver && anItem.system.XMLID === "CLUBWEAPON" && anItem.isActive,
     // );
 
     let effectiveItem;

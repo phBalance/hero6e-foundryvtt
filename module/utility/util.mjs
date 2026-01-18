@@ -20,7 +20,7 @@ export function getPowerInfo(options) {
         options.xmlTag = options.item.system.xmlTag;
     }
 
-    if (!options.xmlTag && options.item?.type !== "maneuver") {
+    if (!options.xmlTag && !options.item?.isCombatManeuver) {
         if (!squelch(options.item || xmlid)) {
             console.warn(`${options.item?.actor?.name}/${options.item?.name}/${xmlid} is missing xmlTag`, options.item);
         }
