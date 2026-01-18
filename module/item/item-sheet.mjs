@@ -1,5 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { createModifierOrAdderFromXml } from "./item.mjs";
+import {
+    createModifierOrAdderFromXml,
+    replaceBaseCostForHalfDieAdderXml,
+    replaceBaseCostForPipAdderXml,
+} from "./item.mjs";
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../utility/adjustment.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 import { HeroAdderModel, HeroModifierModel } from "./HeroSystem6eTypeDataModels.mjs";
@@ -38,14 +42,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`;
         }
 
-        // if (
-        //     ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(
-        //         this.item.system.XMLID,
-        //     )
-        // ) {
-        //     return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`;
-        // }
-
         // Trying to see if we can get most items to use the generic power sheet
         if (["skill"].includes(this.item.type)) {
             return `${path}/item-power-sheet.hbs`;
@@ -61,14 +57,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         const data = super.getData();
 
         try {
-            // Grab the item's data.
-            //const itemData = data.data
-
-            // Re-define the template data references.
-            // data.item = itemData
-            // data.data = itemData.data
-            // data.config = CONFIG.HERO
-
             // Grab the item
             const item = data.item;
 
@@ -356,7 +344,16 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                             );
                         }
 
-                        const modifierOrAdderData = createModifierOrAdderFromXml(power.xml);
+                        // We need special exceptions for 1d6-1, 1/2d6, and +1 modifiers as their BASECOST changes
+                        // based on what they're being added to.
+                        let xml = power.xml;
+                        if (formDataObject.xmlid === "MINUSONEPIP" || formDataObject.xmlid === "PLUSONEHALFDIE") {
+                            xml = replaceBaseCostForHalfDieAdderXml(item, xml);
+                        } else if (formDataObject.xmlid === "PLUSONEPIP") {
+                            xml = replaceBaseCostForPipAdderXml(item, xml);
+                        }
+
+                        const modifierOrAdderData = createModifierOrAdderFromXml(xml);
 
                         // Track when added manually for diagnostic purposes
                         modifierOrAdderData.versionHeroSystem6eManuallyCreated = game.system.version;
@@ -364,8 +361,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                         let dataModelObject = null;
                         if (modifierOrAdderData.xmlTag === "ADDER") {
                             dataModelObject = new HeroAdderModel(modifierOrAdderData, { parent: item });
-                        }
-                        if (modifierOrAdderData.xmlTag === "MODIFIER") {
+                        } else if (modifierOrAdderData.xmlTag === "MODIFIER") {
                             dataModelObject = new HeroModifierModel(modifierOrAdderData, { parent: item });
                         }
 
@@ -478,29 +474,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         // Do all the standard things like updating item properies that match the name of input boxes
         await super._updateObject(event, formData);
 
-        // OPTION_ALIAS may need updating
-        // let clearAdderAttacks = false; // Clear all attacks and infer new attacks when OPTIONID is changed
-        // if (this.item.baseInfo?.editOptions?.choices && expandedData.system.OPTIONID) {
-        //     const choiceSelected = this.item.baseInfo.editOptions.choices.find(
-        //         (o) => o.OPTIONID === expandedData.system.OPTIONID,
-        //     );
-        //     if (!choiceSelected) {
-        //         console.error(`Unhandled OPTIONID ${expandedData.system.OPTIONID}`);
-        //     } else {
-        //         // only update OPTION and OPTION_ALIAS when OPTION has changed.
-        //         // This allows for custom OPTION_ALIAS text for things like DEADLYBLOW.
-        //         if (this.item.system.OPTION != choiceSelected.OPTION) {
-        //             this.item.system.OPTION = choiceSelected.OPTION;
-        //             this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
-        //             this.item.system.BASECOST = choiceSelected.BASECOST || this.item.system.BASECOST;
-        //             clearAdderAttacks = true;
-        //         }
-        //     }
-        // }
-
-        // ALIAS should match name
-        //this.item.system.ALIAS = this.item.name;
-
         // Endurance Reserve
         if (expandedData.rec) {
             const ENDURANCERESERVEREC = this.item.findModsByXmlid("ENDURANCERESERVEREC");
@@ -508,30 +481,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 ENDURANCERESERVEREC.LEVELS = parseInt(expandedData.rec) || 1;
                 await this.item.update({ [`system.POWER`]: this.item.system.POWER });
             }
-        }
-
-        // A select list of possible adjustment targets on the character
-        if (
-            (expandedData.reduces || expandedData.enhances) &&
-            (this.item.system.XMLID === "ABSORPTION" ||
-                this.item.system.XMLID === "AID" ||
-                this.item.system.XMLID === "HEALING" ||
-                this.item.system.XMLID === "DISPEL" ||
-                this.item.system.XMLID === "DRAIN" ||
-                this.item.system.XMLID === "SUPPRESS" ||
-                this.item.system.XMLID === "SUCCOR" ||
-                this.item.system.XMLID === "TRANSFER")
-        ) {
-            // let newInputStr;
-            // if (this.item.system.XMLID === "TRANSFER") {
-            //     newInputStr = `${Object.values(expandedData.reduces).join(", ")} -> ${Object.values(
-            //         expandedData.enhances,
-            //     ).join(", ")}`;
-            // } else {
-            //     newInputStr = Object.values(expandedData.reduces || expandedData.enhances).join(", ");
-            //     //newImputStr = Object.values(formData["system.INPUT"]).join(", ");
-            // }
-            // await this.item.update({ "system.INPUT": newInputStr });
         }
 
         // Turn attack toggles into adders

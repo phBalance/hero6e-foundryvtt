@@ -5698,7 +5698,9 @@ export class HeroSystem6eItem extends Item {
             this.system.ADDER = this.system.ADDER.filter((adder) => adder.XMLID !== "MINUSONEPIP");
         } else if (diceParts.d6Less1DieCount && !minusOnePipAdder) {
             // Add the adder
-            const newAdder = createModifierOrAdderFromXml(minusOnePipAdderData.xml);
+            let xml = minusOnePipAdderData.xml;
+            xml = replaceBaseCostForHalfDieAdderXml(this, xml);
+            const newAdder = createModifierOrAdderFromXml(xml);
             this.system.ADDER.push(new HeroAdderModel(newAdder, { parent: this }));
         }
 
@@ -5710,37 +5712,7 @@ export class HeroSystem6eItem extends Item {
         } else if (diceParts.halfDieCount && !halfDieAdder) {
             // Add the adder
             let xml = plusHalfDieAdderData.xml;
-
-            const { baseApPerDie } = calculateApPerDieForItem(this);
-
-            // BASECOST is either 1.5, 3, 5, or 10 depending on the base LEVELS cost
-            let baseCost = 0;
-            switch (baseApPerDie) {
-                case 3:
-                    baseCost = 1.5;
-                    break;
-
-                case 5:
-                    baseCost = 3;
-                    break;
-
-                case 10:
-                    baseCost = 5;
-                    break;
-
-                case 15:
-                    baseCost = 10;
-                    break;
-
-                default:
-                    console.error(
-                        `${this.detailedName()} for ${this.actor.name} has unknown base active points per die`,
-                    );
-                    break;
-            }
-
-            xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
-
+            xml = replaceBaseCostForHalfDieAdderXml(this, xml);
             const newAdder = createModifierOrAdderFromXml(xml);
             this.system.ADDER.push(new HeroAdderModel(newAdder, { parent: this }));
         }
@@ -5753,37 +5725,7 @@ export class HeroSystem6eItem extends Item {
         } else if (diceParts.constant && !onePipAdder) {
             // Add the adder
             let xml = plusOnePipAdderData.xml;
-
-            const { baseApPerDie } = calculateApPerDieForItem(this);
-
-            // BASECOST is either 1,2,3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
-            let baseCost = 0;
-            switch (baseApPerDie) {
-                case 3:
-                    baseCost = 1;
-                    break;
-
-                case 5:
-                    baseCost = 2;
-                    break;
-
-                case 10:
-                    baseCost = 3;
-                    break;
-
-                case 15:
-                    baseCost = 5;
-                    break;
-
-                default:
-                    console.error(
-                        `${this.detailedName()} for ${this.actor.name} has unknown base active points per die`,
-                    );
-                    break;
-            }
-
-            xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
-
+            xml = replaceBaseCostForPipAdderXml(this, xml);
             const newAdder = createModifierOrAdderFromXml(xml);
             this.system.ADDER.push(new HeroAdderModel(newAdder, { parent: this }));
         }
@@ -6541,6 +6483,77 @@ export function createModifierOrAdderFromXml(xml) {
     modifierOrAdderData.xmlTag = xmlDoc.children[0].tagName;
 
     return modifierOrAdderData;
+}
+
+/**
+ * Replace the base cost for a particular item. This is sometimes required because when creating a 1/2 die
+ * or 1d6-1 die adder will have a different base cost based on the item it's applying to. For instance a killing attack
+ * will cost 10 ap and a normal sight flash is 1.5 ap.
+ *
+ * @param {String} xml
+ */
+export function replaceBaseCostForHalfDieAdderXml(item, xml) {
+    const { baseApPerDie } = calculateApPerDieForItem(item);
+
+    // BASECOST is either 1.5, 3, 5, or 10 depending on the base LEVELS cost
+    let baseCost = 0;
+    switch (baseApPerDie) {
+        case 3:
+            baseCost = 1.5;
+            break;
+
+        case 5:
+            baseCost = 3;
+            break;
+
+        case 10:
+            baseCost = 5;
+            break;
+
+        case 15:
+            baseCost = 10;
+            break;
+
+        default:
+            console.error(`${item.detailedName()} for ${item.actor.name} has unknown base active points per die`);
+            break;
+    }
+
+    xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
+
+    return xml;
+}
+
+export function replaceBaseCostForPipAdderXml(item, xml) {
+    const { baseApPerDie } = calculateApPerDieForItem(item);
+
+    // BASECOST is either 1,2,3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
+    let baseCost = 0;
+    switch (baseApPerDie) {
+        case 3:
+            baseCost = 1;
+            break;
+
+        case 5:
+            baseCost = 2;
+            break;
+
+        case 10:
+            baseCost = 3;
+            break;
+
+        case 15:
+            baseCost = 5;
+            break;
+
+        default:
+            console.error(`${item.detailedName()} for ${item.actor.name} has unknown base active points per die`);
+            break;
+    }
+
+    xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
+
+    return xml;
 }
 
 export function getItem(id) {
