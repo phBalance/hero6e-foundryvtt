@@ -242,6 +242,7 @@ Hooks.once("init", async function () {
     FoundryVttActors.unregisterSheet("core", FoundryVttActorSheet);
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheet, {
         makeDefault: true,
+        label: "Default HeroSystem",
     });
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
         makeDefault: false,
@@ -251,14 +252,17 @@ Hooks.once("init", async function () {
             dark: "Dark",
             hc: "High Contrast",
         },
+        label: "HeroSystem v2",
     });
-
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
         makeDefault: false,
+        label: "Savuori",
     });
+
     FoundryVttItems.unregisterSheet("core", FoundryVttItemSheet);
     FoundryVttItems.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
         makeDefault: true,
+        label: "Default HeroSystem",
     });
 
     //Not sure why ActiveEffect.registerSheet is missing.

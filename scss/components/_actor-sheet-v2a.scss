@@ -1,0 +1,263 @@
+.herosystem6e.actor-sheet-v2a {
+    min-height: 310px;
+    min-width: 500px;
+}
+
+.herosystem6e.actor-sheet-v2a.minimizing {
+    min-height: 0;
+}
+
+/************************************************************************
+* Setup Grid with header, navbar and left sidebar
+************************************************************************/
+.herosystem6e.actor-sheet-v2a section.window-content {
+    display: grid;
+    grid-template:
+        "sidebar header" 75px
+        "sidebar nav" max-content
+        "sidebar content" 1fr / 100px 1fr;
+    overflow: hidden;
+    padding: 5px;
+    gap: 2px;
+}
+
+/************************************************************************
+* grid-area: sidebar
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content aside {
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+    padding-right: 5px;
+
+    // border-right: thin solid var(--color-tabs-border);
+
+    .attributes {
+        text-align: center;
+        margin: 1rem 0;
+
+        // box-sizing: border-box;
+        input[type="text"] {
+            width: 35px;
+            min-width: 25px;
+            padding: 1px 3px;
+            margin: 3px 0;
+            text-align: center;
+            line-height: normal;
+            height: var(--form-field-height);
+        }
+
+        fieldset.attribute {
+            margin-left: -1px;
+            padding: 0;
+        }
+
+        ul > li {
+            position: relative;
+            left: -5px;
+            list-style-type: circle;
+            text-align: left;
+            line-height: normal;
+            margin: 0;
+        }
+    }
+
+    button {
+        margin: 2px 0;
+        height: auto;
+    }
+}
+
+/************************************************************************
+* grid-area: header
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content header {
+    grid-area: header;
+
+    input[type="text"] {
+        font-family: Signika, sans-serif;
+        font-size: 30px;
+        font-weight: 500;
+        font-variant-caps: small-caps;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    div.points,
+    div.edition {
+        border: 1px solid var(--color-tabs-border);
+        border-radius: 8px;
+        height: 24px;
+        padding: 2px 4px;
+        font-size: 14px;
+
+        /* margin-top: 2px; */
+        margin: 5px;
+        text-align: center;
+    }
+}
+
+/************************************************************************
+* grid-area: nav
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content nav {
+    grid-area: nav;
+    transition: all 0.1s ease-out;
+    flex-flow: row wrap;
+    overflow: hidden;
+    line-height: inherit;
+
+    .sheet-tabs.tabs {
+        gap: 0;
+    }
+
+    a {
+        margin: 0.25em;
+        padding: 0.25em;
+        text-align: center;
+        border: thin solid var(--color-tabs-border);
+        border-radius: 0.5em;
+        line-height: inherit;
+    }
+
+    a.active {
+        background: var(--content-link-text-color);
+        color: var(--content-link-background);
+    }
+}
+
+/************************************************************************
+* Override nav.tabs
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content nav.sheet-tabs.tabs {
+    gap: 0;
+}
+
+/************************************************************************
+* grid-area: content 
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content section.tab {
+    display: flex;
+    overflow: hidden auto;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 5px;
+
+    .list-controls {
+        .search {
+            display: flex;
+            align-items: center;
+            border-radius: 4px;
+            box-shadow: 0 0 6px var(--herosystem-shadow-45);
+            border: 1px solid var(--herosystem-border);
+            padding-right: 0.25rem;
+            position: relative;
+            background: var(--herosystem-background-card);
+
+            > input {
+                flex: 1;
+                background: none;
+                border: none;
+                padding: 0.5rem 0.5rem 0.5rem 2.25rem;
+                line-height: 1;
+                outline: none;
+
+                --input-box-shadow: none;
+                --input-placeholder-color: var(--herosystem-filter-control-color);
+            }
+        }
+
+        .search::before {
+            content: "\f002";
+            font-family: var(--font-awesome);
+            font-weight: bold;
+            color: var(--color-text-tertiary);
+            position: absolute;
+            left: 0.75rem;
+        }
+
+        .controls {
+            display: flex;
+            padding: 0;
+            align-self: stretch;
+            align-items: stretch;
+
+            button {
+                height: 100%;
+                color: var(--herosystem-filter-control-color);
+                padding: 0 0.375rem;
+            }
+
+            button.unbutton {
+                background: none;
+                margin: 0;
+                border-radius: 0;
+                line-height: normal;
+                box-shadow: none;
+                outline: none;
+                border: none;
+            }
+        }
+    }
+
+    .item-list-container {
+        .item-header {
+            display: flex;
+            align-items: stretch;
+            background-color: var(--herosystem-header-background);
+            color: var(--herosystem-header-text);
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        .item-column {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .item-column.item-cost {
+            width: 42px;
+        }
+
+        .item-column.item-end {
+            width: 50px;
+        }
+
+        .item-column.item-controls {
+            width: 50px;
+        }
+
+        .item-column.item-description {
+            flex: 1;
+            justify-content: left;
+        }
+
+        .item-list {
+            .item-row {
+                display: flex;
+                align-items: stretch;
+                border-bottom: 1px solid var(--herosystem-header-background);
+            }
+        }
+
+        img.item-image {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            border: 1px solid var(--herosystem-table-header-bg-color);
+            border-radius: 4px;
+        }
+    }
+
+    .unlist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+}
