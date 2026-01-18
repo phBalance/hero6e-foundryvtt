@@ -11,7 +11,7 @@
             <th class="sticky"></th>
         </tr>
         {{#each items as |item id|}}
-            {{#if (or (and (itemIsManeuver item) (eq (itemIsOptionalManeuver item) false)) (and (eq (gameConfigValue "optionalManeuvers") true) (itemIsOptionalManeuver item))) }}
+            {{#if (or (and (itemIsCombatManeuver item) (eq (itemIsOptionalCombatManeuver item) false)) (and (eq (gameConfigValue "optionalManeuvers") true) (itemIsOptionalCombatManeuver item))) }}
                 <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}}" data-item-id="{{item._id}}">
                     <td style="min-width: 24px">
                         <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"

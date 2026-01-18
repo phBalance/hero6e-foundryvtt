@@ -2840,7 +2840,7 @@ export class HeroSystem6eActor extends Actor {
                     (item) =>
                         !itemsToUpdate.find((o) => item.id === o._id) &&
                         !itemsToCreate.find((p) => item.system.ID == p.system.ID) &&
-                        item.type !== "maneuver" &&
+                        !item.isCombatManeuver &&
                         item.system.XMLID !== "PERCEPTION",
                 );
                 if (itemsToDelete.length > 0) {
@@ -2933,9 +2933,9 @@ export class HeroSystem6eActor extends Actor {
 
         // If we have no STR then delete COMBAT MANEUVERS
         const hasSTR = this.hasCharacteristic("STR");
-        if (!hasSTR & this.items.find((item) => item.type === "maneuver")) {
+        if (!hasSTR & this.items.find((item) => item.isCombatManeuver)) {
             console.warn(`Deleting COMBAT MANEUVERS because ${this.name} has no STR`);
-            itemToDelete.push(...this.items.filter((item) => item.type === "maneuver"));
+            itemToDelete.push(...this.items.filter((item) => item.isCombatManeuver));
         }
 
         if (itemToDelete.length > 0) {
@@ -2948,7 +2948,7 @@ export class HeroSystem6eActor extends Actor {
         // Remove any is5e FreeStuff mis-matches (happens when you upload 5e over 6e actor, or vice versa)
         const mismatchItems = this.items.filter(
             (item) =>
-                (item.system.XMLID === "PERCEPTION" || item.type === "maneuver") &&
+                (item.system.XMLID === "PERCEPTION" || item.isCombatManeuver) &&
                 (item.system.is5e !== this.system.is5e || !item.baseInfo),
         );
 
@@ -3034,7 +3034,7 @@ export class HeroSystem6eActor extends Actor {
         const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
 
         const maneuverItems = this.items.filter(
-            (item) => item.system.XMLID === XMLID && item.type === "maneuver" && !item.system.ID,
+            (item) => item.system.XMLID === XMLID && item.isCombatManeuver && !item.system.ID,
         );
         if (maneuverItems.length > 0) {
             //console.debug(`${XMLID} already exists`);
@@ -3780,18 +3780,6 @@ export class HeroSystem6eActor extends Actor {
             activatablePowersUsingEnd.reduce((a, c) => a + c.end, 0),
         );
 
-        // const attackPowers = this.items.filter(
-        //     (i) =>
-        //         i.baseInfo.behaviors.includes("to-hit") &&
-        //         (i.type !== "maneuver" || i.system.XMLID === "STRIKE") &&
-        //         i.showAttack,
-        // );
-        // const resourceUsingItems = attackPowers;
-        // const options = {
-        //     effectiveStr: this.system.characteristics.str.value,
-        // };
-        // const resourcesRequired = calculateRequiredResourcesToUse(resourceUsingItems, options);
-
         // Hacky for now, should  get estimated end for attack
         const endForAttack = Math.max(
             1,
@@ -3869,7 +3857,7 @@ export class HeroSystem6eActor extends Actor {
         let results = [];
 
         // Martial Arts
-        results = [...results, ...this.items.filter((item) => item.type === "martialart")];
+        results = [...results, ...this.items.filter((item) => item.isMartialManeuver)];
 
         // Equipment
         results = [
@@ -3884,10 +3872,7 @@ export class HeroSystem6eActor extends Actor {
         ];
 
         // Strike
-        results = [
-            ...results,
-            ...this.items.filter((item) => item.type === "maneuver" && item.system.XMLID === "STRIKE"),
-        ];
+        results = [...results, ...this.items.filter((item) => item.isCombatManeuver && item.system.XMLID === "STRIKE")];
 
         return results;
     }

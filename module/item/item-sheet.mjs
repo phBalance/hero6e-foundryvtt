@@ -211,7 +211,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 data.rec = parseInt(power?.LEVELS) || 0;
             }
 
-            if (item.type === "martialart") {
+            if (item.isMartialManeuver) {
                 data.martialArtsDamageTypeChoices = CONFIG.HERO.martialArtsDamageTypeChoices;
             }
 

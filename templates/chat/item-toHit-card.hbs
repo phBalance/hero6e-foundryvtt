@@ -90,9 +90,7 @@
 
                         <div class="tags description-tiny">
                             {{#each target.defensiveTags as |tag|}}
-                                {{#if (not tag.gmOnly)}}
-                                    <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
-                                {{/if}}
+                                <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
                             {{/each}}
                         </div>
 
@@ -100,14 +98,6 @@
                             {{{ target.hitRollText }}}
                             <span data-visibility="gm">
                                 ({{target.toHitChar}} {{target.value}})
-
-                                <div class="tags description-tiny">
-                                    {{#each target.defensiveTags as |tag|}}
-                                        {{#if tag.gmOnly}}
-                                            <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
-                                        {{/if}}
-                                    {{/each}}
-                                </div>
                             </span>
                         </div>
                     </div>

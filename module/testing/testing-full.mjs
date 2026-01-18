@@ -2555,7 +2555,7 @@ export function registerFullTests(quench) {
                     moveByItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
                     moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
                     haymakerManeuver = actor.items.find(
-                        (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
+                        (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
                     );
                     nerveStrikeItem = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
                     killingStrikeItem = actor.items.find((item) => item.system.ALIAS === "Killing Strike");
@@ -4341,7 +4341,7 @@ export function registerFullTests(quench) {
                     before(function () {
                         // Turn on the haymaker
                         haymakerManeuver = actor.items.find(
-                            (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
+                            (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
                         );
                     });
 
@@ -4729,7 +4729,7 @@ export function registerFullTests(quench) {
                     before(function () {
                         // Turn on the haymaker
                         haymakerManeuver = actor.items.find(
-                            (item) => item.type === "maneuver" && item.system.XMLID === "HAYMAKER",
+                            (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
                         );
                     });
 

@@ -127,7 +127,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
             // Equipment & MartialArts are uncommon.  If there isn't any, then don't show the navigation tab.
             data.hasEquipment = !!data.actor.items.find((o) => o.type === "equipment");
-            data.hasMartialArts = !!data.actor.items.find((o) => o.type === "martialart");
+            data.hasMartialArts = !!data.actor.items.find((o) => o.isMartialManeuver);
 
             // NPC or PC dropdown
             data.isGM = game.user.isGM;
@@ -369,7 +369,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 }
             }
 
-            for (const item of this.actor.items.filter((o) => o.type !== "maneuver")) {
+            for (const item of this.actor.items.filter((o) => !o.isCombatManeuver)) {
                 if (!item.baseInfo) {
                     // Don't bother warning about super old items
                     if (item.system.XMLID) {
@@ -527,7 +527,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             return super._onDropItem(event, data);
         }
 
-        if (item.type === "maneuver") {
+        if (item.isCombatManeuver) {
             ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
             return;
         }

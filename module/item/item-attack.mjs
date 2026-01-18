@@ -309,10 +309,10 @@ export async function processActionToHit(item, formData) {
 
     // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
     const haymakerManeuverActive = item.actor?.items.find(
-        (anItem) => anItem.type === "maneuver" && anItem.system.XMLID === "HAYMAKER" && anItem.isActive,
+        (anItem) => anItem.isCombatManeuver && anItem.system.XMLID === "HAYMAKER" && anItem.isActive,
     );
     if (haymakerManeuverActive) {
-        if (item.type === "martialart" || (item.type === "maneuver" && item.system.XMLID !== "STRIKE")) {
+        if (item.isMartialManeuver || (item.isCombatManeuver && item.system.XMLID !== "STRIKE")) {
             return ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
                 localize: true,
             });
@@ -638,17 +638,11 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
         }
     }
 
-    // PH: FIXME: consolidate and put somewhere
-    function isRanged(attackItem) {
-        const range = attackItem.system.range;
-        return !(range === CONFIG.HERO.RANGE_TYPES.SELF || range === CONFIG.HERO.RANGE_TYPES.NO_RANGE);
-    }
-
     // Does the defender have any CSLs that apply vs this attack?
     let defensiveLevels = 0;
     if (defendingActor) {
         const defendsWith = attackItem.system.defendsWith;
-        const attackIsRanged = isRanged(attackItem);
+        const attackIsRanged = attackItem.isRanged;
         for (const csl of defendingActor.activeCslSkills) {
             let levelsForThisCsl = 0;
             for (const levelUse of csl.system.csl) {
@@ -680,7 +674,6 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
                     name: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
                     value: levelsForThisCsl,
                     title: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
-                    gmOnly: true,
                 });
             }
         }
@@ -1778,7 +1771,7 @@ export async function _onRollDamage(event) {
 
     const haymakerManeuverActiveItem = actor.items.find(
         (item) =>
-            item.type === "maneuver" &&
+            item.isCombatManeuver &&
             item.system.XMLID === "HAYMAKER" &&
             (item.isActive || item.actor?.statuses.has("haymaker") || action.system.statuses.includes("haymaker")),
     );

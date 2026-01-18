@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.2.11 20260117 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.12 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- TWODCV CSLs now provides defense to the appropriate attack types. [#3487](https://github.com/dmdorman/hero6e-foundryvtt/issues/3487)
+
+### Version 4.2.11 20260117
 
 - Fixed for movement when token has no actor. [#3540](https://github.com/dmdorman/hero6e-foundryvtt/issues/3540)
 
