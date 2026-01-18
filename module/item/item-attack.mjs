@@ -783,7 +783,7 @@ async function doSingleTargetActionToHit(action, options) {
     const itemData = item.effectiveAttackItem.system;
 
     const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.attacksWith]?.value);
-    if (!actor.hasStunCharacteristic(itemData.attacksWith.toUpperCase())) {
+    if (!actor.hasCharacteristic(itemData.attacksWith.toUpperCase())) {
         ui.notifications.warn(
             `<b>${item.actor.name}</b> does not have <b>${itemData.attacksWith.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
         );

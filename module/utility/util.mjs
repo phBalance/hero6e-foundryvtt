@@ -130,9 +130,11 @@ export function getPowerInfo(options) {
             }
         } else {
             // This XMLIDs not yet in config.mjs. We should have most of them so this is significant enough to fix.
-            console.error(
-                `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Unable to find power entry.`,
-            );
+            if (!squelch(xmlid)) {
+                console.error(
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Unable to find power entry.`,
+                );
+            }
         }
     }
 
@@ -346,7 +348,7 @@ export async function expireEffects(actor, expiresOn) {
                         content: cardHtml,
                         speaker: ChatMessage.getSpeaker({
                             actor,
-                            token: tokenEducatedGuess(actor),
+                            token: tokenEducatedGuess({ actor }),
                         }),
                     };
                     await ChatMessage.create(chatData);
@@ -516,7 +518,11 @@ export function tokenEducatedGuess(options = {}) {
         return anyToken;
     }
 
-    console.error(`Unable to determine token`, options);
+    if (options.actor?.id) {
+        console.warn(`Unable to find token for ${options.actor.name}`);
+    } else {
+        console.log(`${options.actor?.name} has no id, likely a temporary actor. No associated token is expected.`);
+    }
 
     return null;
 }
