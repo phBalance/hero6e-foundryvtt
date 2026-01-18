@@ -6259,7 +6259,7 @@ export class HeroSystem6eItem extends Item {
 
         // PH: FIXME: This was here before. How does WEAPON_MASTER fit in?
         // // Mental vs Physical
-        // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.system.attacksWith === "omcv") {
+        // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.usesOmcv) {
         //     return false;
         // }
 

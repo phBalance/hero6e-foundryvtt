@@ -841,6 +841,13 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
         return this.attacksWith;
     }
 
+    /**
+     * What does this item use as its attack combat value, OCV or OMCV?
+     *
+     * WARNING: It is invalid to call this on a non attack power and expect it to have a correct value
+     *
+     * @returns {"ocv"|"omcv"}
+     */
     get attacksWith() {
         let _attacksWith = "ocv";
 
