@@ -809,14 +809,14 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         event.preventDefault();
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
-        item.roll(event, { token: this.token });
+        item.roll({ event: this.event, token: this.token });
     }
 
     async _onItemChat(event) {
         event.preventDefault();
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
-        item.chat();
+        item.chat({ event: this.event, token: this.token });
     }
 
     async _onCharacteristicSuccessRoll(event) {
@@ -1043,14 +1043,14 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         event.preventDefault();
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
-        return item.changeClips(event);
+        return item.changeClips({ event: this.event, token: this.token });
     }
 
     async _onItemChangeVpp(event) {
         event.preventDefault();
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
-        return item.changeVpp(event);
+        return item.changeVpp({ event: this.event, token: this.token });
     }
 
     async _onItemEdit(event) {

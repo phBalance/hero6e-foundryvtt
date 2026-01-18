@@ -314,15 +314,10 @@ function _createNewAdjustmentEffect(options) {
     // Educated guess for token
     const _attackerToken = tokenEducatedGuess({
         token: attackerToken,
-        tokenId: action?.current?.attackerTokenId,
+        tokenId: action?.current?.attackerTokenUuid,
         item: attackItem,
     });
     const itemTokenName = _attackerToken?.name || attackItem.actor?.name || "undefined";
-    // canvas.tokens.get(action?.current?.attackerTokenId)?.name ||
-    // item.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id))?.name ||
-    // item.actor?.getActiveTokens()?.[0]?.name ||
-    // item.actor?.name ||
-    // "undefined";
 
     const activeEffect = {
         name: `${attackItem.system.XMLID || "undefined"} 0 ${
@@ -348,7 +343,7 @@ function _createNewAdjustmentEffect(options) {
                 targetDisplay: fromUuidSync(targetPower?.uuid)?.XMLID || potentialCharacteristic,
                 key: targetPower?.system?.XMLID || potentialCharacteristic,
                 itemTokenName,
-                attackerTokenId: _attackerToken?.id,
+                attackerTokenUuid: _attackerToken?.uuid,
                 createTime: game.time.worldTime,
                 initialCostPerActivePoint: determineCostPerActivePoint(
                     potentialCharacteristic,
@@ -411,7 +406,7 @@ export async function performAdjustment(
 
     // for backward compatibility
     const targetActor = targetToken.actor || targetToken;
-    const attackerToken = fromUuidSync(action?.current?.attackerTokenId) || attackItem.actor?.getActiveTokens()?.[0];
+    const attackerToken = fromUuidSync(action?.current?.attackerTokenUuid) || attackItem.actor?.getActiveTokens()?.[0];
 
     const isHealing = attackItem.system.XMLID === "HEALING";
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();

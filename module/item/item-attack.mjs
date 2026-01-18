@@ -213,7 +213,7 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
  */
 export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     const actor = item.actor;
-    const token = getTokenEducatedGuess({ token: options.token, actor: actor });
+    const token = options.token ?? getTokenEducatedGuess({ token: options.token, actor: actor });
     const data = {
         originalItem: item,
         actor: actor,
@@ -300,9 +300,9 @@ export async function getTargetArray(formData) {
     return targetArray;
 }
 
-export async function processActionToHit(item, formData) {
+export async function processActionToHit(item, formData, options = {}) {
     const targetArray = await getTargetArray(formData);
-    const action = Attack.getActionInfo(item, targetArray, formData);
+    const action = Attack.getActionInfo(item, targetArray, { ...formData, ...options });
     if (!action) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
@@ -323,9 +323,9 @@ export async function processActionToHit(item, formData) {
 
     // Does the effective attack item have an AoE?
     if (item.effectiveAttackItem.getAoeModifier()) {
-        await doAoeActionToHit(action, formData);
+        await doAoeActionToHit(action, formData, options);
     } else {
-        await doSingleTargetActionToHit(action, formData);
+        await doSingleTargetActionToHit(action, formData, options);
     }
 
     // turn off haymaker
@@ -484,9 +484,7 @@ export async function doAoeActionToHit(action, options) {
 
     const item = action.system.currentItem;
     const actor = action.system.actor;
-    // const token = action.system.attackerToken;
-    // PH: FIXME: Why are we building a token from the action? It's in the action already.
-    const token = getTokenEducatedGuess({ action, actor });
+    const token = action.system.attackerToken;
     if (!token) {
         return ui.notifications.error(`Unable to find a token on this scene associated with ${actor.name}.`);
     }
@@ -1769,10 +1767,10 @@ export async function _onRollDamage(event) {
     }
 
     const action = actionFromJSON(toHitData.actionData);
-    if (!action?.current.attackerTokenId) {
-        console.warn("expecting action.current.attackerTokenId");
+    if (!action?.current.attackerTokenUuid) {
+        console.warn("expecting action.current.attackerTokenUuid");
     }
-    const token = getTokenEducatedGuess({ action, actor });
+    const token = action.system.attackerToken ?? getTokenEducatedGuess({ action, actor });
     const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
@@ -2238,6 +2236,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
         for (const token of canvas.tokens.controlled) {
             await _onApplyDamageToSpecificToken(item, damageData, action, {
                 tokenId: token.id,
+                targetTokenUuid: token.document.uuid,
                 name: token.name,
                 subTarget: null,
                 targetEntangle: undefined,
@@ -2276,16 +2275,17 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
     $(button).css("color", "#A9A9A9");
 }
 
-export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetToken) {
+export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetData) {
     const damageData = foundry.utils.deepClone(_damageData);
-    const token = getTokenEducatedGuess({ tokenId: targetToken?.tokenId }); // canvas.scene.tokens.get(targetToken.tokenId);
-    if (!token) {
+    const targetToken =
+        fromUuidSync(targetData.targetTokenUuid) ?? getTokenEducatedGuess({ tokenId: targetData?.tokenId }); // canvas.scene.tokens.get(targetToken.tokenId);
+    if (!targetToken) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
 
-    if (!token.actor) {
+    if (!targetToken.actor) {
         return ui.notifications.error(
-            `Actor for ${token.name} is missing.  Unable to apply damage.  You will have to create a new actor & token.`,
+            `Actor for ${targetToken.name} is missing.  Unable to apply damage.  You will have to create a new actor & token.`,
         );
     }
 
@@ -2337,12 +2337,13 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
             if (HexTemplates && hexGrid) {
                 const gridSizeInMeters = game.scenes.current.grid.distance;
-                distance = calculateDistanceBetween(aoeTemplate, token.object.center).gridSpaces * gridSizeInMeters;
+                distance =
+                    calculateDistanceBetween(aoeTemplate, targetToken.object.center).gridSpaces * gridSizeInMeters;
 
                 // NOTE: The grid size is half a hex smaller since the centre hex counts as 1" so template is 1m smaller (see item-attack-application.mjs)
                 pct = distance / (aoeTemplate.distance + 1);
             } else {
-                distance = calculateDistanceBetween(aoeTemplate, token.object.center).distance;
+                distance = calculateDistanceBetween(aoeTemplate, targetToken.object.center).distance;
                 pct = distance / aoeTemplate.distance;
             }
 
@@ -2353,7 +2354,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             damageRoller.removeNHighestRankTerms(termsToRemove);
         } else {
             ui.notifications.warn(
-                `No Area Of Effect template was found, will apply FULL EFFECT to ${targetToken.name}.`,
+                `No Area Of Effect template was found, will apply FULL EFFECT to ${targetData.name}.`,
             );
         }
     }
@@ -2370,24 +2371,24 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     if (item.effectiveAttackItem.system.XMLID === "ENTANGLE") {
-        return _onApplyEntangleToSpecificToken(item, token, damageRoller, action);
+        return _onApplyEntangleToSpecificToken(item, targetToken, damageRoller, action);
     }
 
     // Target an ENTANGLE?
-    const entangleAE = token.actor.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
+    const entangleAE = targetToken.actor.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
     if (entangleAE) {
         // Targeting ENTANGLE based on attack-application checkbox
-        let targetEntangle = targetToken.targetEntangle;
+        let targetEntangle = targetData.targetEntangle;
 
         // If they clicked "Apply Damage" then prompt
         // WHAT? if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
         if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle === undefined) {
             targetEntangle = await Dialog.wait({
                 title: `Confirm Target`,
-                content: `Target ${token.name} or the ENTANGLE effecting ${token.name}?`,
+                content: `Target ${targetToken.name} or the ENTANGLE effecting ${targetToken.name}?`,
                 buttons: {
                     token: {
-                        label: `${token.name}`,
+                        label: `${targetToken.name}`,
                         callback: async function () {
                             return false;
                         },
@@ -2403,7 +2404,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         }
 
         if (targetEntangle && entangleAE) {
-            return _onApplyDamageToEntangle(item, token, damageRoller, entangleAE, action);
+            return _onApplyDamageToEntangle(item, targetToken, damageRoller, entangleAE, action);
         }
     }
 
@@ -2416,9 +2417,9 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Martial Arts also have NNDs which are special AVAD and always/usually PD
     if (!avad && item.system.EFFECT?.includes("NND")) {
-        const pdXml = getPowerInfo({ xmlid: "PD", xmlTag: "PD", actor: token.actor });
-        avad = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdXml.xml, token.actor), {
-            parent: token.actor,
+        const pdXml = getPowerInfo({ xmlid: "PD", xmlTag: "PD", actor: targetToken.actor });
+        avad = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdXml.xml, targetToken.actor), {
+            parent: targetToken.actor,
         });
         avad.system.LEVELS = 1;
 
@@ -2433,7 +2434,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Check for conditional defenses
     const { ignoreDefenseIds, conditionalDefenses } = await getConditionalDefenses(
-        token,
+        targetToken,
         item.effectiveAttackItem,
         avad,
     );
@@ -2444,7 +2445,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     // Some defenses require a roll not just to activate, but on each use: 6e EVERYPHASE, 5e ACTIVATIONROLL, and 5e & 6e ABLATIVE
-    const activatableDefenses = token.actor.items
+    const activatableDefenses = targetToken.actor.items
         .filter(
             (o) =>
                 o.isActive &&
@@ -2481,7 +2482,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // New Defense Stuff
     const { defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, defenseTags } =
-        getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
+        getActorDefensesVsAttack(targetToken.actor, item, { ignoreDefenseIds });
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
@@ -2500,7 +2501,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     damageData.damageNegationValue = damageNegationValue;
     damageData.defenseAvad =
         defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue;
-    damageData.targetToken = token;
+    damageData.targetToken = targetToken;
 
     // VULNERABILITY
     ({
@@ -2542,19 +2543,24 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting();
 
     if (isTransform) {
-        return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
+        return _onApplyTransformationToSpecificToken(item, targetToken, damageDetail, defense, defenseTags, action);
     } else if (isAdjustment) {
-        return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags, action);
+        return _onApplyAdjustmentToSpecificToken(item, targetToken, damageDetail, defense, defenseTags, action);
     } else if (isSenseAffecting) {
-        return _onApplySenseAffectingToSpecificToken(item, token, damageDetail);
+        return _onApplySenseAffectingToSpecificToken(item, targetToken, damageDetail);
     }
 
     // Ablate defenses in the defenseTags, if appropriate.
     // PH: FIXME: Need to consider damage before damage negation for ablative? Check rules.
-    await ablateDefenses(item, { stun: damageDetail.stunDamage, body: damageDetail.bodyDamage }, defenseTags, token);
+    await ablateDefenses(
+        item,
+        { stun: damageDetail.stunDamage, body: damageDetail.bodyDamage },
+        defenseTags,
+        targetToken,
+    );
 
     // AUTOMATION immune to mental powers
-    if (item.effectiveAttackItem.system.class === "mental" && token?.actor?.type === "automaton") {
+    if (item.effectiveAttackItem.system.class === "mental" && targetToken?.actor?.type === "automaton") {
         defenseTags.push({
             name: "AUTOMATON",
             value: "immune",
@@ -2568,13 +2574,13 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // A number of actor types (Base, Vehicle) don't have STUN. Other actor types (e.g. automaton, npc, pc) sometimes don't have
     // STUN. Consider these cases and eliminate the STUN portion of things if it's one of these cases but provide information why.
     if (damageDetail.stun > 0) {
-        const hasStun1 = !!token.actor.items.find(
+        const hasStun1 = !!targetToken.actor.items.find(
             (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
         ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
-        const hasStun2 = !!token.actor.items.find(
+        const hasStun2 = !!targetToken.actor.items.find(
             (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
         ); // Takes No STUN
-        const hasStunCharacteristic = token.actor.hasCharacteristic("STUN");
+        const hasStunCharacteristic = targetToken.actor.hasCharacteristic("STUN");
 
         if (hasStun1) {
             defenseTags.push({
@@ -2615,24 +2621,27 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // See if token has CON.  Notice we check raw actor type from config, not current actor props as
     // this token may have originally been a PC, and changed to a BASE.
     // check if target is stunned.  Must have CON
-    const hasCon = token.actor.hasCharacteristic("CON");
+    const hasCon = targetToken.actor.hasCharacteristic("CON");
     if (damageDetail.stun > 0 && game.settings.get(HEROSYS.module, "stunned") && hasCon) {
         // determine if target was Stunned
-        const CANNOTBESTUNNED = token.actor.items.find(
+        const CANNOTBESTUNNED = targetToken.actor.items.find(
             (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
         );
-        if (damageDetail.stun > token.actor.system.characteristics.con.value && !CANNOTBESTUNNED) {
+        if (damageDetail.stun > targetToken.actor.system.characteristics.con.value && !CANNOTBESTUNNED) {
             damageDetail.effects = damageDetail.effects + "inflicts Stunned; ";
 
             // none: "No Automation",
             // npcOnly: "NPCs Only (end, stun, body)",
             // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
             // all: "PCs and NPCs (end, stun, body)"
-            if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
-                await token.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
-                    overlay: false, // Would like to know if they are prone, and the contrast isn't great.
-                    active: true,
-                });
+            if (automation === "all" || (automation === "npcOnly" && targetToken.actor.type === "npc")) {
+                await targetToken.actor.toggleStatusEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
+                    {
+                        overlay: false, // Would like to know if they are prone, and the contrast isn't great.
+                        active: true,
+                    },
+                );
             }
         }
     }
@@ -2653,7 +2662,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Mind Control
     if (item.effectiveAttackItem.system.XMLID === "MINDCONTROL") {
-        const targetActorEgo = token.actor?.system.characteristics?.ego?.value;
+        const targetActorEgo = targetToken.actor?.system.characteristics?.ego?.value;
         if (targetActorEgo !== undefined) {
             if (damageDetail.stunDamage >= targetActorEgo + 30) {
                 effectsFinal += `EGO+30: Target will perform actions they are violently opposed to doing. Target will believe statements that contradict strongly held personal beliefs or principles (such as Psychological Complications) or that contradict reality under direct observation.`;
@@ -2719,14 +2728,14 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
-        targetToken: token,
+        targetToken: targetToken,
         actionData: actionToJSON(action),
     };
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor, token: targetToken });
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.IC,
@@ -2740,28 +2749,29 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // npcOnly: "NPCs Only (end, stun, body)",
     // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
     // all: "PCs and NPCs (end, stun, body)"
-    if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
+    if (automation === "all" || (automation === "npcOnly" && targetToken.actor.type === "npc")) {
         const changes = {
-            "system.characteristics.body.value": token.actor.system.characteristics.body.value - damageDetail.body,
+            "system.characteristics.body.value":
+                targetToken.actor.system.characteristics.body.value - damageDetail.body,
         };
 
         // See if token has STUN.  Notice we check raw actor type from config, not current actor props as
         // this token may have originally been a PC, and changed to a BASE.
-        const hasSTUN = token.actor.hasCharacteristic("STUN");
+        const hasSTUN = targetToken.actor.hasCharacteristic("STUN");
         if (hasSTUN) {
             changes["system.characteristics.stun.value"] =
-                token.actor.system.characteristics.stun?.value - damageDetail.stun;
+                targetToken.actor.system.characteristics.stun?.value - damageDetail.stun;
         }
 
-        await token.actor.update(changes);
+        await targetToken.actor.update(changes);
     }
 
     const damageChatMessage = ChatMessage.create(chatData);
 
     // Absorption happens after damage is taken unless the GM allows it. This system doesn't allow GM choice.
-    const absorptionItems = token.actor.items.filter((item) => item.system.XMLID === "ABSORPTION");
+    const absorptionItems = targetToken.actor.items.filter((item) => item.system.XMLID === "ABSORPTION");
     if (absorptionItems) {
-        await _performAbsorptionForToken(token, absorptionItems, damageDetail, item);
+        await _performAbsorptionForToken(targetToken, absorptionItems, damageDetail, item);
     }
 
     return damageChatMessage;
@@ -3337,7 +3347,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                         ? token
                         : adjustmentItem.effectiveAttackItem.actor
                               .getActiveTokens()
-                              ?.find((t) => t.id === action?.current?.attackerTokenId) ||
+                              ?.find((t) => t.id === action?.current?.attackerTokenUuid) ||
                               adjustmentItem.effectiveAttackItem.actor.getActiveTokens?.[0],
                     action,
                 ),
@@ -3354,7 +3364,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
     }
 }
 
-async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData) {
+async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, targetToken, damageData) {
     const defenseTags = [];
 
     // We currently only support sense groups, not individual senses
@@ -3409,7 +3419,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     }
 
     // FLASHDEFENSE
-    for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.isActive)) {
+    for (const flashDefense of targetToken.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.isActive)) {
         if (
             senseAffectingItem.effectiveAttackItem.system.OPTIONID === flashDefense.system.OPTIONID ||
             flashDefense.system.OPTIONID.includes(senseAffectingItem.effectiveAttackItem.system.INPUT?.toUpperCase())
@@ -3437,7 +3447,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     // Create new ActiveEffects
     for (const senseGroup of senseGroups) {
         if (senseGroup.bodyDamage > 0) {
-            token.actor.addActiveEffect({
+            targetToken.actor.addActiveEffect({
                 ...senseGroup.statusEffect,
                 name: `${senseAffectingItem.effectiveAttackItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseGroup.XMLID}`,
                 duration: {
@@ -3463,7 +3473,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
         damageData,
 
         // misc
-        targetToken: token,
+        targetToken: targetToken,
         tags: defenseTags,
         attackTags: getAttackTags(senseAffectingItem),
     };
@@ -4542,7 +4552,7 @@ export async function _onModalDamageCard(event) {
  * @returns {Token | TokenDocument}
  */
 export function getTokenEducatedGuess(options = {}) {
-    console.warn("depricated getTokenEducatedGuess");
+    console.warn("deprecated getTokenEducatedGuess, pass actual token from sheets");
     // NOTE: This is a catch in case we've done something stupid as FoundryVTT has 3 types of tokens.
     const isPrototypeToken = options.token instanceof foundry.data.PrototypeToken;
     if (isPrototypeToken) {
@@ -4561,7 +4571,7 @@ export function getTokenEducatedGuess(options = {}) {
     // }
 
     const actor = options.actor ?? options.action?.current.actor;
-    const tokenId = options.action?.current.attackerTokenId ?? options.tokenId ?? "";
+    const tokenId = options.action?.current.attackerTokenUuid ?? options.tokenId ?? "";
     const scene = game.scenes.current;
     const token =
         scene.tokens.get(tokenId) ||
