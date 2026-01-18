@@ -35,7 +35,7 @@ export function combatSkillLevelsForAttack(item) {
             item: cslSkill,
         };
 
-        for (let i = 0; i < parseInt(cslSkill.system.LEVELS || 0); i++) {
+        for (let i = 0; i < cslSkill.system.csl.length; i++) {
             if (detail[cslSkill.system.csl[i]] !== undefined) {
                 detail[cslSkill.system.csl[i]]++;
             } else {

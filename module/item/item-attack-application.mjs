@@ -229,7 +229,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     }
 
                     // CSL radioBoxes names. If we have filtered out the active option, then attempt to pick a reasonable substitute.
-                    for (let c = 0; c < parseInt(csl.item.system.LEVELS || 0); c++) {
+                    for (let c = 0; c < csl.item.system.csl.length; c++) {
                         let value = csl.item.system.csl[c];
                         if (!Object.hasOwn(entry.cslChoices, value)) {
                             if (value === "ocv" && isMentalAttack) {

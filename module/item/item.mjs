@@ -2921,6 +2921,7 @@ export class HeroSystem6eItem extends Item {
 
             case "WEAPON_MASTER":
                 // Weapon Master:  +1d6 (all Ranged Killing Damage weapons)
+                // NOTE: the HD presentation is not good as it can be used for non killing weapons. Show DCs instead.
                 system.ALIAS = "Weapon Master";
                 description = `${system.ALIAS}: +${parseInt(system.LEVELS) * 3}DC (${system.OPTION_ALIAS})`;
                 break;
@@ -5825,10 +5826,18 @@ export class HeroSystem6eItem extends Item {
         return this.type === "maneuver";
     }
 
+    /**
+     * Does this item have CSL like behaviours:
+     * COMBAT_LEVELS are standard 5e/6e CSLs
+     * MENTAL_COMBAT_LEVELS are standard 6e "mental" only CSLs
+     * Overall SKILL_LEVELS can be used for combat so behave like a CSL
+     * WEAPON_MASTER is just a TALENT that is 6 CSLs/level that only affects DCs
+     */
     get isCsl() {
         return (
             this.system.XMLID === "COMBAT_LEVELS" ||
             this.system.XMLID === "MENTAL_COMBAT_LEVELS" ||
+            this.system.XMLID === "WEAPON_MASTER" ||
             (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID === "OVERALL")
         );
     }
@@ -5849,12 +5858,14 @@ export class HeroSystem6eItem extends Item {
     /**
      * Do any (re)initialization required for the CSL. It is safe to call this with an already initialized CSL.
      *
-     * @param {Number} expectedNumEntries
+     * @param {Number} numLevels - number of levels in the CSL like item
      *
      * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
      */
-    initializeCsl(expectedNumEntries) {
+    initializeCsl(numLevelsCouldBeString) {
         const cslUpdates = {};
+        const numLevels = parseInt(numLevelsCouldBeString);
+        const expectedNumEntries = this.system.XMLID === "WEAPON_MASTER" ? 6 * numLevels : numLevels;
 
         // (Re)initialize csl array
         const allowedChoices = this.cslChoices;
@@ -5912,13 +5923,12 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
-     * Must only be called on COMBAT_LEVELS, MENTAL_COMBAT_LEVELS, or SKILL_LEVELS.
+     * Must only be called on COMBAT_LEVELS, MENTAL_COMBAT_LEVELS, SKILL_LEVELS, or WEAPON_MASTER.
      *
-     * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcv_ranged, dcv_hth, dmcv, dc)
+     * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcvRanged, dcvHth, dmcv, dc)
      */
     get cslChoices() {
-        const isSkillLevel = this.system.XMLID === "SKILL_LEVELS";
-        if (isSkillLevel) {
+        if (this.system.XMLID === "SKILL_LEVELS") {
             if (this.system.OPTIONID === "OVERALL") {
                 return {
                     ocv: "ocv",
@@ -5931,6 +5941,11 @@ export class HeroSystem6eItem extends Item {
             } else {
                 return {};
             }
+        } else if (this.system.XMLID === "WEAPON_MASTER") {
+            // Weapon master only grants DC skill levels. 6 provide +3 DC per the usual rules.
+            return {
+                dc: "dc",
+            };
         }
 
         const combatUses = {};
@@ -6257,12 +6272,6 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        // PH: FIXME: This was here before. How does WEAPON_MASTER fit in?
-        // // Mental vs Physical
-        // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.usesOmcv) {
-        //     return false;
-        // }
-
         // SKILL_LEVELS: OVERALL, the 5e 10pt or 6e 12pt, work for any kind of attack but no other form does.
         if (this.system.XMLID === "SKILL_LEVELS") {
             if (this.system.OPTIONID === "OVERALL") {
@@ -6350,9 +6359,6 @@ export class HeroSystem6eItem extends Item {
                 this.system.OPTIONID === "SINGLESINGLE"
             ) {
                 return this.isAttackItemInCslAllowList(attackItem);
-            } else {
-                console.error(`Unhandled CSL ${this.detailedName()}`);
-                return false;
             }
         } else {
             // 6e
@@ -6406,11 +6412,25 @@ export class HeroSystem6eItem extends Item {
                         console.error(`Unhandled MCSL ${this.detailedName()}`);
                         return false;
                     }
+
+                case "WEAPON_MASTER":
+                    // Weapon master doesn't specifically prohibit mental levels in 6e but it would be stupid to use it for that as it
+                    // would be cheaper overall to just buy MCSLs with the same limitations. Regardless, we don't prohibit "mental" powers.
+                    if (this.system.OPTIONID === "ANYHTH") {
+                        return attackItem.isHth;
+                    } else if (this.system.OPTIONID === "ANYRANGED") {
+                        return attackItem.isRanged;
+                    }
+
+                    // The other types of WM support a limited number of attacks. We have to check that attackItem
+                    // in the allow list.
+                    else if (this.system.OPTIONID === "VERYLIMITED" || this.system.OPTIONID === "LIMITED") {
+                        return this.isAttackItemInCslAllowList(attackItem);
+                    }
             }
         }
 
         console.error(`Unhandled CSL ${this.detailedName()}/${this.is5e}`);
-
         return false;
     }
 

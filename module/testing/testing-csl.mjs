@@ -1215,19 +1215,53 @@ export function registerCslTests(quench) {
                                     </SKILL>
                                 </SKILLS>
                                 <PERKS />
-                                <TALENTS />
+                                <TALENTS>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768757931923" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited group]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM Very Limited Group">
+                                        <NOTES />
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1768766256975" BASECOST="0.0" LEVELS="0" ALIAS="Strike" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1768766268472" BASECOST="0.0" LEVELS="0" ALIAS="Basic Strike" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                    </TALENT>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768757961600" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LIMITED" OPTIONID="LIMITED" OPTION_ALIAS="[limited group]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM Limited Group">
+                                        <NOTES />
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1768766284048" BASECOST="0.0" LEVELS="0" ALIAS="Single Target Drain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                        <ADDER XMLID="GENERIC_OBJECT" ID="1768766320426" BASECOST="0.0" LEVELS="0" ALIAS="AoE Drain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                        </ADDER>
+                                    </TALENT>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768757969973" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYHTH" OPTIONID="ANYHTH" OPTION_ALIAS="all HTH Killing Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All HTH KA Weapons">
+                                        <NOTES />
+                                    </TALENT>
+                                    <TALENT XMLID="WEAPON_MASTER" ID="1768757977630" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANYRANGED" OPTIONID="ANYRANGED" OPTION_ALIAS="all Ranged Killing Damage weapons" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="WM All Ranged KA Weapons">
+                                        <NOTES />
+                                    </TALENT>
+                                </TALENTS>
                                 <MARTIALARTS>
                                     <WEAPON_ELEMENT XMLID="WEAPON_ELEMENT" ID="1767638503239" BASECOST="0.0" LEVELS="0" ALIAS="Weapon Element" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                                    <NOTES />
-                                    <ADDER XMLID="BAREHAND" ID="1767638930683" BASECOST="1.0" LEVELS="0" ALIAS="Empty Hand" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
                                         <NOTES />
-                                    </ADDER>
-                                    <ADDER XMLID="BEAMWEAPONS" ID="1767638937367" BASECOST="0.0" LEVELS="0" ALIAS="Beam Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
-                                        <NOTES />
-                                        <ADDER XMLID="LASERPISTOL" ID="1767638937366" BASECOST="1.0" LEVELS="0" ALIAS="Laser Pistols" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                        <NOTES />
+                                        <ADDER XMLID="BAREHAND" ID="1768760282923" BASECOST="1.0" LEVELS="0" ALIAS="Empty Hand" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
                                         </ADDER>
-                                    </ADDER>
+                                        <ADDER XMLID="BEAMWEAPONS" ID="1768760282929" BASECOST="0.0" LEVELS="0" ALIAS="Beam Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                                            <NOTES />
+                                            <ADDER XMLID="LASERPISTOL" ID="1768760282924" BASECOST="1.0" LEVELS="0" ALIAS="Laser Pistols" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                            </ADDER>
+                                        </ADDER>
+                                        <ADDER XMLID="COMMONMELEE" ID="1768760297155" BASECOST="0.0" LEVELS="0" ALIAS="Common Melee Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="NO">
+                                            <NOTES />
+                                            <ADDER XMLID="TWOHANDED" ID="1768760292850" BASECOST="1.0" LEVELS="0" ALIAS="Two-Handed Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                            </ADDER>
+                                            <ADDER XMLID="BLADES" ID="1768760297154" BASECOST="1.0" LEVELS="0" ALIAS="Blades" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                            <NOTES />
+                                            </ADDER>
+                                        </ADDER>
                                     </WEAPON_ELEMENT>
                                     <LIST XMLID="GENERIC_OBJECT" ID="1767638941355" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                                     <NOTES />
@@ -1324,6 +1358,11 @@ export function registerCslTests(quench) {
                     let overallSl;
                     let nonOverallSl;
 
+                    let veryLimitedWm;
+                    let limitedWm;
+                    let allHthWm;
+                    let allRangedWm;
+
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
@@ -1358,6 +1397,11 @@ export function registerCslTests(quench) {
 
                         overallSl = actor.items.find((item) => item.name === "Overall SL");
                         nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
+
+                        veryLimitedWm = actor.items.find((item) => item.name === "WM Very Limited Group");
+                        limitedWm = actor.items.find((item) => item.name === "WM Limited Group");
+                        allHthWm = actor.items.find((item) => item.name === "WM All HTH KA Weapons");
+                        allRangedWm = actor.items.find((item) => item.name === "WM All Ranged KA Weapons");
                     });
 
                     after(async function () {
@@ -1368,6 +1412,24 @@ export function registerCslTests(quench) {
                         describe("cslAppliesTo correctness", function () {
                             it("should return false when not called on a CSL/MCSL/SL", function () {
                                 expect(strike.cslAppliesTo(strike)).to.be.false;
+                            });
+                        });
+
+                        describe("levels to csl array entries", function () {
+                            it("should have the correct number of csl array entries (= LEVELS) - CSL", function () {
+                                expect(hthCsl.system.LEVELS).to.equal(hthCsl.system.csl.length);
+                            });
+
+                            it("should have the correct number of csl array entries (= LEVELS) - MCSL", function () {
+                                expect(allMentalMcsl.system.LEVELS).to.equal(allMentalMcsl.system.csl.length);
+                            });
+
+                            it("should have the correct number of csl array entries (= LEVELS) - Overall SL", function () {
+                                expect(overallSl.system.LEVELS).to.equal(overallSl.system.csl.length);
+                            });
+
+                            it("should have the correct number of csl array entries (6 x LEVELS) - Weapon Master", function () {
+                                expect(6 * allRangedWm.system.LEVELS).to.equal(allRangedWm.system.csl.length);
                             });
                         });
 
@@ -1493,6 +1555,52 @@ export function registerCslTests(quench) {
                                 expect(nonOverallSl.cslAppliesTo(basicShot)).to.be.false;
                             });
                         });
+
+                        describe("Weapon Master", function () {
+                            it("should apply to selected weapon - Very Limited Group", function () {
+                                expect(veryLimitedWm.cslAppliesTo(strike)).to.be.true;
+                            });
+
+                            it("should not apply to a not selected weapon - Very Limited Group", function () {
+                                expect(veryLimitedWm.cslAppliesTo(basicShot)).to.be.false;
+                            });
+
+                            it("should apply to selected weapon - Limited Group", function () {
+                                expect(limitedWm.cslAppliesTo(singleTargetDrain)).to.be.true;
+                            });
+
+                            it("should not apply to a not selected weapon - Limited Group", function () {
+                                expect(limitedWm.cslAppliesTo(strike)).to.be.false;
+                            });
+
+                            it("should apply to HTH killing weapon - All HTH Group", function () {
+                                expect(allHthWm.cslAppliesTo(basicStrike)).to.be.true;
+                            });
+
+                            it("should apply to HTH weapon - All HTH Group", function () {
+                                expect(allHthWm.cslAppliesTo(strike)).to.be.true;
+                            });
+
+                            it("should not apply to Ranged adjustment weapon - All HTH Group", function () {
+                                expect(allHthWm.cslAppliesTo(singleTargetDrain)).to.be.false;
+                            });
+
+                            it("should not apply to Ranged mental weapon - All HTH Group", function () {
+                                expect(allHthWm.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                            });
+
+                            it("should apply to Ranged adjustment weapon - All Ranged Group", function () {
+                                expect(allRangedWm.cslAppliesTo(singleTargetDrain)).to.be.true;
+                            });
+
+                            it("should apply to Ranged mental weapon - All Ranged Group", function () {
+                                expect(allRangedWm.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                            });
+
+                            it("should not apply to normal HTH weapon - All Ranged Group", function () {
+                                expect(allRangedWm.cslAppliesTo(strike)).to.be.false;
+                            });
+                        });
                     });
 
                     describe("Applicability to Attack - cslChoices", function () {
@@ -1604,6 +1712,32 @@ export function registerCslTests(quench) {
                                 // Non-OVERALL Skill Levels should return empty object
                                 const choices = nonOverallSl.cslChoices;
                                 expect(Object.keys(choices)).to.have.length(0);
+                            });
+                        });
+
+                        describe("Weapon Master", function () {
+                            it("should return correct choices for WM with Very Limited Group", function () {
+                                const choices = veryLimitedWm.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for WM with Limited Group", function () {
+                                const choices = limitedWm.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for WM with All HTH", function () {
+                                const choices = allHthWm.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("dc");
+                            });
+
+                            it("should return correct choices for WM with All Ranged", function () {
+                                const choices = allRangedWm.cslChoices;
+                                expect(Object.keys(choices)).to.have.length(1);
+                                expect(choices).to.have.property("dc");
                             });
                         });
                     });
