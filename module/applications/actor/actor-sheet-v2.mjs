@@ -1,7 +1,7 @@
-import { HEROSYS } from "../herosystem6e.mjs";
-import { getActorDefensesVsAttack } from "../utility/defense.mjs";
-import { HeroSystem6eActor } from "./actor.mjs";
-import { HeroSystem6eItem } from "../item/item.mjs";
+import { HEROSYS } from "../../herosystem6e.mjs";
+import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
+import { HeroSystem6eActor } from "../../actor/actor.mjs";
+import { HeroSystem6eItem } from "../../item/item.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
