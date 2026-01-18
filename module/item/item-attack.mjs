@@ -652,13 +652,23 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
         for (const csl of defendingActor.activeCslSkills) {
             let levelsForThisCsl = 0;
             for (const levelUse of csl.system.csl) {
-                // Check if the CSL applies defense. Note the special case for the 5e "DCV" defense because
+                // Check if the CSL applies defense. Note the special case for the 5e "DCV" defense and "TWODCV" because
                 // we only support dcvHth and dcvRanged as the single string.
                 if (
-                    (defendsWith === "dcv" && csl.system.OPTIONID === "DCV") ||
+                    (defendsWith === "dcv" && csl.system.OPTIONID === "DCV") || // +1 DCV for everything
+                    (defendsWith === "dcv" &&
+                        csl.system.OPTIONID === "TWODCV" &&
+                        csl.csl5eCslDcvOcvTypes.find(
+                            (type) =>
+                                (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.hth && !attackIsRanged) ||
+                                (type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.range && attackIsRanged),
+                        )) || // +1 TWODCV for HTH when hth attack or Ranged when ranged attack
                     (defendsWith === "dcv" && levelUse === "dcvHth" && !attackIsRanged) ||
                     (defendsWith === "dcv" && levelUse === "dcvRanged" && attackIsRanged) ||
-                    (levelUse === "dmcv" && defendsWith === "dmcv")
+                    (defendsWith === "dmcv" && levelUse === "dmcv") ||
+                    (defendsWith === "dmcv" &&
+                        csl.system.OPTIONID === "TWODCV" &&
+                        csl.csl5eCslDcvOcvTypes.find((type) => type === CONFIG.HERO.CSL_5E_CV_LEVELS_TYPES.mental))
                 ) {
                     levelsForThisCsl += 1;
                 }
