@@ -2345,7 +2345,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     if (item.effectiveAttackItem.isEntangle) {
-        return _onApplyEntangleToSpecificToken(item, token, damageRoller, action);
+        return _onApplyEntangleToSpecificToken(item, targetToken, damageRoller, action);
     }
 
     // Target an ENTANGLE?
