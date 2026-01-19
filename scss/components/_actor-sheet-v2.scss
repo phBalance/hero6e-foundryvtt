@@ -395,6 +395,10 @@
         div.item-column.item-description.item-depth-2 {
             padding-left: 60px;
         }
+
+        .system-text {
+            color: blue;
+        }
     }
 }
 
@@ -442,6 +446,23 @@
         grid-template-columns:
             minmax(auto, 1fr) /* description */
             min-content /* levels */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* DEFENSES 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.martial-arts {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content /* phase */
+            min-content /* ocv */
+            min-content /* dcv */
             min-content; /* controls */
     }
 }

@@ -316,6 +316,7 @@ Hooks.once("init", async function () {
 
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-defenses-partial-item-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-movements-partial-item-v2.hbs`,
+        `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-martial-partial-item-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-item-name-v2.hbs`,
