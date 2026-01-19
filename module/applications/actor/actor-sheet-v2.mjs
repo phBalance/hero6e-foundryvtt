@@ -144,6 +144,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "attacks":
                     context.items = this.actor.items.filter((item) => item.showAttack);
                     break;
+                case "defenses":
+                    context.items = this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense"));
+                    break;
+                case "movements":
+                    context.items = this.actor.items.filter((item) => item.baseInfo.behaviors.includes("movement"));
+                    break;
                 case "powers":
                     context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
                     break;

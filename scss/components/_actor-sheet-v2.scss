@@ -419,6 +419,20 @@
 }
 
 /************************************************************************
+* DEFENSES 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.defenses {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(auto, 1fr) /* description */
+            min-content /* end */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
 * Powers 
 ************************************************************************/
 .herosystem6e.actor-sheet-v2 .window-content section.tab.powers {

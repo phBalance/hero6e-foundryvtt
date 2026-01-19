@@ -3,5 +3,17 @@
   data-group='primary'
   data-tab='defenses'
 >
-  <h1>Defenses</h1>
+  <section class="item-list-container">
+        <div class="item-header">
+            <div class="item-column item-description">{{localize "ActorSheet.Description"}}</div>
+            <div class="item-column item-end">{{localize "ActorSheet.End"}}</div>
+            <div class="item-column item-controls"></div>
+        </div>
+
+        <ol class="item-list unlist">
+            {{#each items as |item|}}
+                {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-defenses-partial-item-v2.hbs') item }}
+            {{/each}}
+        </ol>
+    </section>
 </section>
