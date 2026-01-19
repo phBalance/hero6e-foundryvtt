@@ -1,0 +1,27 @@
+<li class="item powers draggable expandable-document" data-document-uuid="{{this.uuid}}">
+    <div class="item-row {{css}}">
+        <div class="item-column item-description">
+            
+            <img class="item-image" src="{{this.img}}" alt="{{this.name}}"> 
+
+            <div class="item-description-full">
+                {{#if (and this.childIdx this.parentItem)}}
+                    {{this.childIdx}})
+                {{/if}}
+                {{{itemFullDescription this}}}
+                {{#if this.system.NOTES}}
+                    <div class="item-notes-editable-content"><b>Notes:</b> {{{this.system.NOTES}}}</div>
+                {{/if}}
+            </div>
+            
+        </div>
+        <div class="item-column item-end">
+            {{#if (ne this.system.XMLID "LIST")}}
+                {{this.system.LEVELS}}
+            {{/if}}
+        </div>
+        <div class="item-column item-controls">
+            {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}
+        </div>
+    </div>
+</li>
