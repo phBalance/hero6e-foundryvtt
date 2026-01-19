@@ -211,10 +211,8 @@ function itemHasActionBehavior(item, actionBehavior) {
 
 function itemPostHitActionString(item) {
     try {
-        const isAdjustment = getPowerInfo({
-            item: item,
-        })?.type?.includes("adjustment");
-        const isSenseAffecting = item.isSenseAffecting();
+        const isAdjustment = item.isAdjustment;
+        const isSenseAffecting = item.isSenseAffecting;
         const isManeuver = item.isCombatManeuver;
 
         // Provide a more specific name
@@ -746,7 +744,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Adjustment Powers
-        if (this.baseInfo?.type.includes("adjustment")) {
+        if (this.isAdjustment) {
             const result = this.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
                 _heroValidations.push({
@@ -1501,61 +1499,11 @@ export class HeroSystem6eItem extends Item {
             await this.turnOff();
         }
 
-        // AARON: How much of the rest of this code do we really need?
-
-        // const attr = "system.active";
-        // const newValue = !foundry.utils.getProperty(item, attr);
-        // const firstAE = item.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
-
         switch (this.type) {
-            //     case "defense":
-            //         await item.update({ [attr]: newValue });
-            //         break;
-
-            //     case "power":
-            //     case "equipment":
-            //         {
-            //             // Is this a defense power?  If so toggle active state
-            //             // const configPowerInfo = item.baseInfo;
-            //             // if (
-            //             //     (configPowerInfo && configPowerInfo.type.includes("defense")) ||
-            //             //     configPowerInfo.behaviors.includes("defense") ||
-            //             //     item.type === "equipment"
-            //             // ) {
-            //             //     await item.update({ [attr]: newValue });
-            //             // }
-
-            //             // Check if there is an ActiveEffect associated with this item
-            //             if (firstAE) {
-            //                 const newActiveState = firstAE.disabled;
-            //                 // const effects = item.effects
-            //                 //     .filter((ae) => ae.disabled === newValue)
-            //                 //     .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
-            //                 for (const activeEffect of item.effects) {
-            //                     await onActiveEffectToggle(activeEffect, newActiveState);
-            //                 }
-            //             } else {
-            //                 await item.update({ [attr]: newValue });
-            //             }
-            //         }
-            //         break;
-
             case "martialart":
             case "maneuver":
                 await enforceManeuverLimits(this.actor, this);
                 break;
-
-            // case "talent": // COMBAT_LUCK
-            //     await item.update({ [attr]: newValue });
-            //     break;
-
-            // case "skill": // COMBAT_LEVELS
-            //     await item.update({ [attr]: newValue });
-            //     break;
-
-            // default:
-            //     ui.notifications.warn(`${this.name} toggle may be incomplete`);
-            //     break;
         }
 
         // Generic set VALUE = MAX
@@ -2921,6 +2869,7 @@ export class HeroSystem6eItem extends Item {
 
             case "WEAPON_MASTER":
                 // Weapon Master:  +1d6 (all Ranged Killing Damage weapons)
+                // NOTE: the HD presentation is not good as it can be used for non killing weapons. Show DCs instead.
                 system.ALIAS = "Weapon Master";
                 description = `${system.ALIAS}: +${parseInt(system.LEVELS) * 3}DC (${system.OPTION_ALIAS})`;
                 break;
@@ -3544,7 +3493,7 @@ export class HeroSystem6eItem extends Item {
                 body += 1;
             }
 
-            if (configPowerInfo?.type.includes("adjustment")) {
+            if (this.isAdjustment) {
                 description += " (standard effect: " + parseInt(system.LEVELS * 3) + " points)";
             } else {
                 description += ` (standard effect: ${stun} STUN, ${body} BODY)`;
@@ -4632,7 +4581,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Adjustment
-        if (baseAttackItem.baseInfo?.type.includes("adjustment")) {
+        if (baseAttackItem.isAdjustment) {
             return "POWERDEFENSE";
         }
 
@@ -4647,7 +4596,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Flash
-        if (baseAttackItem.isSenseAffecting()) {
+        if (baseAttackItem.isSenseAffecting) {
             return "FLASHDEFENSE";
         }
 
@@ -4798,6 +4747,45 @@ export class HeroSystem6eItem extends Item {
         );
 
         return false;
+    }
+
+    get doesNormalDamage() {
+        return (
+            !this.isEntangle &&
+            !this.isSenseAffecting &&
+            !this.isAdjustment &&
+            !this.isEffectBased &&
+            !this.doesKillingDamage
+        );
+    }
+
+    get isEntangle() {
+        return this.system.XMLID === "ENTANGLE";
+    }
+
+    get isTransform() {
+        return this.system.XMLID === "TRANSFORM";
+    }
+
+    get isAdjustment() {
+        return this.baseInfo.type.includes("adjustment");
+    }
+
+    get isBodyBasedEffect() {
+        return this.isTransform;
+    }
+
+    get isStunBasedEffect() {
+        return (
+            this.system.XMLID === "MENTALILLUSIONS" ||
+            this.system.XMLID === "MINDCONTROL" ||
+            this.system.XMLID === "MINDSCAN" ||
+            this.system.XMLID === "TELEPATHY"
+        );
+    }
+
+    get isEffectBased() {
+        return this.isBodyBasedEffect || this.isStunBasedEffect;
     }
 
     get weightKg() {
@@ -5100,7 +5088,7 @@ export class HeroSystem6eItem extends Item {
      *
      * @returns {boolean}
      */
-    isSenseAffecting() {
+    get isSenseAffecting() {
         return (
             !!this.baseInfo?.type?.includes("sense-affecting") ||
             (!!this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
@@ -5825,10 +5813,18 @@ export class HeroSystem6eItem extends Item {
         return this.type === "maneuver";
     }
 
+    /**
+     * Does this item have CSL like behaviours:
+     * COMBAT_LEVELS are standard 5e/6e CSLs
+     * MENTAL_COMBAT_LEVELS are standard 6e "mental" only CSLs
+     * Overall SKILL_LEVELS can be used for combat so behave like a CSL
+     * WEAPON_MASTER is just a TALENT that is 6 CSLs/level that only affects DCs
+     */
     get isCsl() {
         return (
             this.system.XMLID === "COMBAT_LEVELS" ||
             this.system.XMLID === "MENTAL_COMBAT_LEVELS" ||
+            this.system.XMLID === "WEAPON_MASTER" ||
             (this.system.XMLID === "SKILL_LEVELS" && this.system.OPTIONID === "OVERALL")
         );
     }
@@ -5849,12 +5845,14 @@ export class HeroSystem6eItem extends Item {
     /**
      * Do any (re)initialization required for the CSL. It is safe to call this with an already initialized CSL.
      *
-     * @param {Number} expectedNumEntries
+     * @param {Number} numLevels - number of levels in the CSL like item
      *
      * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
      */
-    initializeCsl(expectedNumEntries) {
+    initializeCsl(numLevelsCouldBeString) {
         const cslUpdates = {};
+        const numLevels = parseInt(numLevelsCouldBeString);
+        const expectedNumEntries = this.system.XMLID === "WEAPON_MASTER" ? 6 * numLevels : numLevels;
 
         // (Re)initialize csl array
         const allowedChoices = this.cslChoices;
@@ -5886,7 +5884,7 @@ export class HeroSystem6eItem extends Item {
         // Setup targetId
         const allAdders = foundry.utils.deepClone(adders);
         for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
-            const targetId = (this.actor?._cslItems || []).find((item) => {
+            const targetId = (this.actor?.cslItems || []).find((item) => {
                 // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
                 // is thus providing a unique name - other options can potentially have multiple matches of which
                 // we'll end up with the first. This could result in a situation where someone can not match
@@ -5912,13 +5910,12 @@ export class HeroSystem6eItem extends Item {
     }
 
     /**
-     * Must only be called on COMBAT_LEVELS, MENTAL_COMBAT_LEVELS, or SKILL_LEVELS.
+     * Must only be called on COMBAT_LEVELS, MENTAL_COMBAT_LEVELS, SKILL_LEVELS, or WEAPON_MASTER.
      *
-     * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcv_ranged, dcv_hth, dmcv, dc)
+     * @return {Object} A collection of all combat uses for this CSL (ocv, omcv, dcvRanged, dcvHth, dmcv, dc)
      */
     get cslChoices() {
-        const isSkillLevel = this.system.XMLID === "SKILL_LEVELS";
-        if (isSkillLevel) {
+        if (this.system.XMLID === "SKILL_LEVELS") {
             if (this.system.OPTIONID === "OVERALL") {
                 return {
                     ocv: "ocv",
@@ -5931,6 +5928,11 @@ export class HeroSystem6eItem extends Item {
             } else {
                 return {};
             }
+        } else if (this.system.XMLID === "WEAPON_MASTER") {
+            // Weapon master only grants DC skill levels. 6 provide +3 DC per the usual rules.
+            return {
+                dc: "dc",
+            };
         }
 
         const combatUses = {};
@@ -6114,6 +6116,16 @@ export class HeroSystem6eItem extends Item {
                         return +Infinity;
                     }
 
+                case "WEAPON_MASTER":
+                    if (this.system.OPTIONID === "VERYLIMITED") {
+                        return 3; // a 3 point "CSL" equivalent to "TIGHT"
+                    } else if (this.system.OPTIONID === "LIMITED") {
+                        return 10; // a 5 point "CSL" equivalent to "BROAD"
+                    } else {
+                        // All HTH and all Ranged can have unlimited number of custom adders
+                        return +Infinity;
+                    }
+
                 default:
                 // Intentionally fall through
             }
@@ -6245,6 +6257,30 @@ export class HeroSystem6eItem extends Item {
         return cvTypes;
     }
 
+    get cslWeaponMasterWeaponTypes() {
+        if (
+            this.is5e ||
+            this.system.XMLID !== "WEAPON_MASTER" ||
+            !(this.system.OPTIONID === "ANYHTH" || this.system.OPTIONID === "ANYRANGED")
+        ) {
+            return [];
+        }
+
+        // Uses OPTION_ALIAS (free text) to get an array of the recognized types of this CSL.
+        const wmTypes = Object.keys(CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES)
+            .map((wmType) => (this.system.OPTION_ALIAS.toLowerCase().includes(wmType) ? wmType : ""))
+            .filter(Boolean);
+
+        if (wmTypes.length !== 1) {
+            console.warn(
+                `${this.actor?.name} Unknown 6e Weapon Master ANYHTH/ANYRANGED type "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.detailedName()}`,
+                this,
+            );
+        }
+
+        return wmTypes;
+    }
+
     /**
      * Is this item a CSL and does it apply to the given attackItem
      *
@@ -6256,12 +6292,6 @@ export class HeroSystem6eItem extends Item {
             console.error("This is not a CSL", this, attackItem);
             return false;
         }
-
-        // PH: FIXME: This was here before. How does WEAPON_MASTER fit in?
-        // // Mental vs Physical
-        // if (["COMBAT_SKILL", "WEAPON_MASTER"].includes(this.system.XMLID) && attackItem.usesOmcv) {
-        //     return false;
-        // }
 
         // SKILL_LEVELS: OVERALL, the 5e 10pt or 6e 12pt, work for any kind of attack but no other form does.
         if (this.system.XMLID === "SKILL_LEVELS") {
@@ -6350,9 +6380,6 @@ export class HeroSystem6eItem extends Item {
                 this.system.OPTIONID === "SINGLESINGLE"
             ) {
                 return this.isAttackItemInCslAllowList(attackItem);
-            } else {
-                console.error(`Unhandled CSL ${this.detailedName()}`);
-                return false;
             }
         } else {
             // 6e
@@ -6381,10 +6408,9 @@ export class HeroSystem6eItem extends Item {
                         this.system.OPTIONID === "BROAD"
                     ) {
                         return this.isAttackItemInCslAllowList(attackItem);
-                    } else {
-                        console.error(`Unhandled CSL ${this.detailedName()}`);
-                        return false;
                     }
+
+                    break;
 
                 case "MENTAL_COMBAT_LEVELS":
                     // 6e MCSLs are only good for "mental" attacks
@@ -6402,15 +6428,63 @@ export class HeroSystem6eItem extends Item {
                     // in the allow list.
                     if (this.system.OPTIONID === "SINGLE" || this.system.OPTIONID === "TIGHT") {
                         return this.isAttackItemInCslAllowList(attackItem);
-                    } else {
-                        console.error(`Unhandled MCSL ${this.detailedName()}`);
+                    }
+
+                    break;
+
+                case "WEAPON_MASTER":
+                    // Weapon master doesn't specifically prohibit mental levels in 6e but it would be stupid to use it for that as it
+                    // would be cheaper overall to just buy MCSLs with the same limitations. Regardless, we prohibit "mental" powers as
+                    // 6e vol 1 pg. 447 indicates it's made of CSLs which don't allow mental powers.
+                    if (attackItem.usesOmcv) {
                         return false;
                     }
+
+                    if (this.system.OPTIONID === "ANYHTH") {
+                        const weaponTypes = this.cslWeaponMasterWeaponTypes;
+                        if (weaponTypes.length !== 1) {
+                            // Not a correctly specified weapon master talent
+                            return false;
+                        }
+
+                        // Check if the weapon type matches
+                        const weaponType = weaponTypes[0];
+                        if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.killing) {
+                            return attackItem.isHth && attackItem.doesKillingDamage;
+                        } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.normal) {
+                            return attackItem.isHth && attackItem.doesNormalDamage;
+                        } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.explicit) {
+                            return attackItem.isHth && this.isAttackItemInCslAllowList(attackItem);
+                        }
+                    } else if (this.system.OPTIONID === "ANYRANGED") {
+                        const weaponTypes = this.cslWeaponMasterWeaponTypes;
+                        if (weaponTypes.length !== 1) {
+                            // Not a correctly specified weapon master talent
+                            return false;
+                        }
+
+                        // Check if the weapon type matches
+                        const weaponType = weaponTypes[0];
+                        if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.killing) {
+                            return attackItem.isRanged && attackItem.doesKillingDamage;
+                        } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.normal) {
+                            return attackItem.isRanged && attackItem.doesNormalDamage;
+                        } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.explicit) {
+                            return attackItem.isRanged && this.isAttackItemInCslAllowList(attackItem);
+                        }
+                    }
+
+                    // The other types of WM support a limited number of attacks. We have to check that attackItem
+                    // in the allow list.
+                    else if (this.system.OPTIONID === "VERYLIMITED" || this.system.OPTIONID === "LIMITED") {
+                        return this.isAttackItemInCslAllowList(attackItem);
+                    }
+
+                    break;
             }
         }
 
         console.error(`Unhandled CSL ${this.detailedName()}/${this.is5e}`);
-
         return false;
     }
 

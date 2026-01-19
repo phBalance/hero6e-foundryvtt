@@ -3992,7 +3992,7 @@ export function registerFullTests(quench) {
 
                     await actor.uploadFromXml(contents);
                     energyBlastItem = actor.items.find((o) => o.system.XMLID === "ENERGYBLAST");
-                    entangleItem = actor.items.find((o) => o.system.XMLID === "ENTANGLE");
+                    entangleItem = actor.items.find((o) => o.isEntangle);
                     flightItem = actor.items.find((o) => o.system.XMLID === "FLIGHT");
                 });
 

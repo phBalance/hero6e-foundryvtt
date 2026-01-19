@@ -175,7 +175,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     const cslChoices = item.cslChoices;
 
                     // Actual items
-                    for (const attackOrFramework of item.actor._cslItems) {
+                    for (const attackOrFramework of item.actor.cslItems) {
                         // Make no attempt to disqualify frameworks although we could enumerate and exclude if nothing matches
                         if (attackOrFramework.type !== "framework") {
                             // Is this attack a potentially good match? CSL needs to provide ocv to match attacks that use ocv

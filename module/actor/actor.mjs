@@ -2569,33 +2569,6 @@ export class HeroSystem6eActor extends Actor {
             uploadPerformance.validate = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
 
-            // Warn about invalid adjustment targets
-            // for (const item of this.items.filter((item) => item.baseInfo?.type?.includes("adjustment"))) {
-            //     const result = item.splitAdjustmentSourceAndTarget();
-            //     if (!result.valid) {
-            //         await ui.notifications.warn(
-            //             `${this.name} has an unsupported adjustment target "${item.system.INPUT}" for "${
-            //                 item.name
-            //             }". Use characteristic abbreviations or power names separated by commas for automation support.${
-            //                 item.system.XMLID === "TRANSFER"
-            //                     ? ' Source and target lists should be separated by " -> ".'
-            //                     : ""
-            //             }`,
-            //             { console: true, permanent: true },
-            //         );
-            //     } else {
-            //         const maxAllowedEffects = item.numberOfSimultaneousAdjustmentEffects();
-            //         if (
-            //             result.reducesArray.length > maxAllowedEffects.maxReduces ||
-            //             result.enhancesArray.length > maxAllowedEffects.maxEnhances
-            //         ) {
-            //             await ui.notifications.warn(
-            //                 `${this.name} has too many adjustment targets defined for ${item.name}.`,
-            //             );
-            //         }
-            //     }
-            // }
-
             uploadProgressBar.advance(`${this.name}: Processed non characteristics`, 0);
             uploadProgressBar.advance(`${this.name}: Processed all items`, 0);
 
@@ -3458,7 +3431,7 @@ export class HeroSystem6eActor extends Actor {
      *
      * @returns {HeroSystem6eItem[]}
      */
-    get _cslItems() {
+    get cslItems() {
         const priorityCsl = function (item) {
             switch (item.type) {
                 case "power":
@@ -3486,6 +3459,7 @@ export class HeroSystem6eActor extends Actor {
                         (!item.baseInfo.behaviors.includes("optional-maneuver") ||
                             game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
                         !item.system.XMLID.startsWith("__")) ||
+                    item.system.XMLID === "HANDTOHANDATTACK" || // PH: FIXME: Not sure why we're using rollsToHit as it misses this. Might be only exception.
                     (item.baseInfo.type.includes("framework") && // CSL custom adders can specify a framework to indicate all of the framework's children are included.
                         !item.isSeparator && // Ignore separators
                         !(

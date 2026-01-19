@@ -3,6 +3,7 @@
 ### Version 4.2.12 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - TWODCV CSLs now provides defense to the appropriate attack types. [#3487](https://github.com/dmdorman/hero6e-foundryvtt/issues/3487)
+- Weapon Master now behaves like a CSL as it is effectively a CSL. Less expensive forms expect custom adders linking to the powers and all HTH or Ranged versions expect you to modify the "options" in Hero Designer to include the type of weapon that it applies to. Allowed options are "Killing", "Normal", or "Explicit". "Explicit" requires custom adders to be used to specify what exactly it applies to (e.g. all fire related powers, all mental related powers). [#3487](https://github.com/dmdorman/hero6e-foundryvtt/issues/3487)
 
 ### Version 4.2.11 20260117
 

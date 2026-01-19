@@ -13,8 +13,27 @@
         {{#if (eq item.type "talent") }}
             <tr class="item {{#if (not this.isFromBaseActor)}}delta-item{{/if}}" data-item-id="{{item._id}}">
                 <td style="min-width: 24px">
-                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                            height="24" /></div>
+                    {{#if this.isContainer}}
+                        {{#if this.system.collapse}}
+                            <a class="item-image item-control item-expand" title="{{localize "ActorSheet.ExpandItem"}}" >
+                                <i class="fas fa-square-caret-right fa-2x"></i>
+                            </a>
+                        {{else}}
+                            <a class="item-image item-control item-collapse" title="{{localize "ActorSheet.CollapseItem"}}" >
+                                <i class="fas fa-square-caret-down fa-2x"></i>
+                            </a>
+                        {{/if}}
+                    {{else}}
+                        {{#unless this.isSeparator}}
+                            <div class="item-image">
+                                {{#if (actorItemHeroValidation this)}}
+                                    <i class="fa-regular fa-circle-exclamation fa-2xl"></i>
+                                {{else}}
+                                    <img src="{{this.img}}" title="{{this.name}}" width="24" height="24" />
+                                {{/if}}
+                            </div>
+                        {{/unless}}
+                    {{/if}}
                 </td>
                 <td>
                     {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
