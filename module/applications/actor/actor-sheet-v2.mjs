@@ -132,7 +132,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         globalThis.sheet = this;
         context = await super._preparePartContext(partId, context);
         context.tab = context.tabs[partId];
-        //context.items = null;
+        context.actor ??= this.actor;
+        context.gameSystemId ??= game.system.id;
+        context.items = null;
 
         try {
             console.log(`_preparePartContext ${partId}`);
@@ -413,6 +415,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             fixed: true,
             eventName: "click",
         });
+    }
+
+    _onRender(context, options) {
+        super._onRender(context, options);
 
         // item-description-expand chevron expand collapse
         this.element.querySelectorAll('[data-action="toggleDocumentDescription"]').forEach((el) => {
@@ -445,6 +451,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(contents, "text/xml");
+            console.error("debug");
             await this.actor.uploadFromXml(xmlDoc, { file });
         }.bind(this);
         reader.readAsText(file);
