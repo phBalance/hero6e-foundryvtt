@@ -15,6 +15,12 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import {
+    composeMemoizableObjectFunction,
+    composeObjectFunction,
+    restoreComposedMemoizableObjectFunction,
+    restoreComposedObjectFunction,
+} from "../utility/cache.mjs";
+import {
     foundryVttDeleteProperty,
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
@@ -307,12 +313,31 @@ export class HeroSystem6eItem extends Item {
         return super._onCreate(data, options, userId);
     }
 
+    _lazy = {};
+
     prepareData() {
-        this._clearCachedValues();
+        this.clearLazyInitializedValues();
         super.prepareData();
+
+        composeObjectFunction.call(this, "getItemDescription");
+        composeObjectFunction.call(this, "heroValidation");
+
+        composeMemoizableObjectFunction.call(this, "findModsByXmlid");
     }
 
-    _clearCachedValues() {
+    /* --------------------------------------------- */
+
+    /**
+     * Clear cached class collections.
+     * @internal
+     */
+    clearLazyInitializedValues() {
+        restoreComposedObjectFunction.call(this, "getItemDescription");
+        restoreComposedObjectFunction.call(this, "heroValidation");
+        restoreComposedObjectFunction.call(this, "damage");
+
+        restoreComposedMemoizableObjectFunction.call(this, "findModsByXmlid");
+
         this._lazy = {};
     }
 

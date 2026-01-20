@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
+import { composeObjectFunction, restoreComposedObjectFunction } from "../utility/cache.mjs";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
@@ -153,6 +154,8 @@ export class HeroSystem6eActor extends Actor {
     prepareData() {
         this._clearCachedValues();
         super.prepareData();
+
+        composeObjectFunction.call(this, "getActorCharacterAndActivePoints");
     }
 
     /**
@@ -175,6 +178,8 @@ export class HeroSystem6eActor extends Actor {
     }
 
     _clearCachedValues() {
+        restoreComposedObjectFunction.call(this, "getActorCharacterAndActivePoints");
+
         this._lazy = {};
     }
 
