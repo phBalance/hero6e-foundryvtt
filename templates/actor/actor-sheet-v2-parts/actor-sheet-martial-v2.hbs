@@ -3,16 +3,7 @@
   data-group='primary'
   data-tab='martial'
 >
-    <section class="list-controls">
-        <div class="search">
-            <input type="text" placeholder="Search" data-action="search">
-            <ul class="unlist controls">
-                <button type="button" class="unbutton filter-control always-interactive" data-action="clear" data-tooltip="" aria-label="Clear Filters">
-                    <i class="fas fa-xmark"></i>
-                </button>
-            </ul>
-        </div>
-    </section>
+    {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-search-partial-v2.hbs') this }}
     <section class="item-list-container">
         <div class="item-header">
             <div class="item-column item-cost">{{localize "ActorSheet.Cost"}}</div>

@@ -5,7 +5,7 @@
 {{else}}
     {{#if (itemHasBehaviours this "roll" "success")}}
         {{#if this.system.roll}}
-            <button type="button" class="item-rollable" data-roll="{{this.system.roll}}" data-label="{{this._id}}">
+            <button type="button" class="item-rollable" data-action="roll" data-roll="{{this.system.roll}}" data-label="{{this._id}}">
                 {{numberFormat this.system.roll decimals=0 sign=false}}-
             </button>
         {{else}}
