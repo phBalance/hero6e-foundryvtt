@@ -124,6 +124,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-v2.hbs`,
                 scrollable: [""],
             },
+            characteristics: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-characteristics-v2.hbs`,
+                scrollable: [""],
+            },
             equipment: {
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-v2.hbs`,
                 scrollable: [""],
@@ -156,6 +160,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "maneuvers" },
                 { id: "powers" },
                 { id: "equipment" },
+                { id: "characteristics" },
                 { id: "other" },
                 { id: "analysis" },
             ],
@@ -163,6 +168,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             initial: "attacks", // Set the initial tab
         },
     };
+
+    #martialItems = this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem);
+    #equipmentItems = this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem);
 
     async _preparePartContext(partId, context) {
         globalThis.sheet = this;
@@ -182,6 +190,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     this.#prepareContextCharacterPointTooltips(context);
                     break;
                 case "tabs":
+                    if (this.#martialItems.length === 0) {
+                        context.tabs.martial.cssClass = "empty";
+                    }
+                    if (this.#equipmentItems.length === 0) {
+                        context.tabs.equipment.cssClass = "empty";
+                    }
                     break;
                 case "attacks":
                     context.items = this.actor.items.filter((item) => item.showAttack);
@@ -193,7 +207,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     context.items = this.actor.items.filter((item) => item.baseInfo.type.includes("movement"));
                     break;
                 case "martial":
-                    context.items = this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem);
+                    context.items = this.#martialItems;
                     break;
                 case "skills":
                     context.items = this.actor.items.filter((item) => item.type === "skill" && !item.parentItem);
@@ -205,7 +219,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
                     break;
                 case "equipment":
-                    context.items = this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem);
+                    context.items = this.#equipmentItems;
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);

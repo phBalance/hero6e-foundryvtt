@@ -7,7 +7,7 @@
                 <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
             {{/if}}
 
-            <div class="item-description-full">
+            <div class="item-description-full {{this.css.description}}">
                 {{#if (and this.childIdx this.parentItem)}}
                     {{this.childIdx}})
                 {{/if}}
@@ -20,7 +20,7 @@
         </div>
         <div class="item-column item-end">
             {{#if (ne this.system.XMLID "LIST")}}
-                {{this.system.end}}
+                {{this.system.endEstimate}}
             {{/if}}
         </div>
         <div class="item-column item-price">
@@ -41,6 +41,6 @@
 
 {{#if (not this.system.collapse)}}
     {{#each this.childItems }}
-        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs') this }}
+        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-equipment-partial-item-v2.hbs') this }}
     {{/each}}
 {{/if}}

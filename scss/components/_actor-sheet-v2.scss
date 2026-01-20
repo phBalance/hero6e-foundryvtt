@@ -11,6 +11,10 @@
     z-index: 2;
 }
 
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.empty {
+    filter: blur(1px);
+}
+
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/
