@@ -483,6 +483,22 @@
 }
 
 /************************************************************************
+* MANEUVERS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.maneuvers {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(auto, 1fr) /* description */
+            min-content /* phase */
+            min-content /* ocv */
+            min-content /* dcv */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
 * Powers 
 ************************************************************************/
 .herosystem6e.actor-sheet-v2 .window-content section.tab.powers {
