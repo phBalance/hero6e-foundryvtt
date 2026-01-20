@@ -16,10 +16,9 @@
 
 
     {{#if (itemHasActionBehavior this "activatable")}}
-        <input class="item-toggle" type="checkbox"
-            Xname="this.isActive" {{checked this.isActive}} data-dtype="Boolean"
-            data-action="toggle"
-            title="Activation toggle"
+        <input class="Xitem-toggle" type="checkbox"
+            Xname="this.isActive" {{checked this.isActive}} data-action="toggle" data-dtype="Boolean"
+            title="Activation toggle" {{#if this.vppUnSlotted}}disabled{{/if}}
         />
     {{/if}}
 

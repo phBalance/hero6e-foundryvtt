@@ -21,8 +21,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             height: 700,
         },
         actions: {
+            carried: HeroSystemActorSheetV2.#onCarried,
             clear: HeroSystemActorSheetV2.#onClear,
             clips: HeroSystemActorSheetV2.#onClips,
+            configureToken: HeroSystemActorSheetV2.#onConfigureToken,
+            toggle: HeroSystemActorSheetV2.#onToggle,
             roll: HeroSystemActorSheetV2.#onRoll,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             vpp: HeroSystemActorSheetV2.#onVpp,
@@ -33,6 +36,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             //     icon: "fas fa-gear", // You can now add an icon to the header
             //     title: "FOO.form.title",
             contentClasses: ["standard-form"],
+            // controls: [
+            //     {
+            //         action: "configureToken",
+            //         icon: "fa-regular fa-circle-user",
+            //         label: "DOCUMENT.Token",
+            //         visible: true,
+            //         ownership: "OWNER",
+            //     },
+            // ],
             tabs: [
                 {
                     navSelector: ".sheet-navigation",
@@ -42,6 +54,30 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             ],
         },
     };
+
+    static #onConfigureToken() {
+        this.token.sheet.render({ force: true });
+    }
+
+    /*
+        Override Foundry as we want to be able to config both token and prototype token
+    */
+    _getHeaderControls() {
+        const controls = super._getHeaderControls();
+
+        // Add back in configureToken, even for linked tokens
+        if (!controls.find((c) => c.action === "configureToken")) {
+            controls.splice(1, 0, {
+                action: "configureToken",
+                icon: "fa-regular fa-circle-user",
+                label: "DOCUMENT.Token",
+                ownership: "OWNER",
+                visible: true,
+            });
+        }
+
+        return controls;
+    }
 
     get title() {
         return `${this.actor.type.toUpperCase()}: ${this.actor.name}`;
@@ -167,6 +203,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     break;
                 case "powers":
                     context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
+                    break;
+                case "equipment":
+                    context.items = this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem);
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
@@ -552,6 +591,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         return document;
     }
 
+    static async #onCarried(event, target) {
+        event.preventDefault();
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("onCarried: Unable to locate item");
+        }
+        await item.update({ "system.CARRIED": !item.system.CARRIED });
+    }
+
     static async #onClear(event, target) {
         const inputSearch = target.closest("div.search").querySelector("input");
         if (inputSearch) {
@@ -566,7 +614,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static async #onClips(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onClips: Unable to locate roll item");
+            console.error("onClips: Unable to locate item");
         }
         await item.changeClips({ event: this.event, token: this.token });
     }
@@ -574,15 +622,24 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static async #onRoll(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onRoll: Unable to locate roll item");
+            console.error("onRoll: Unable to locate item");
         }
         await item.roll({ event: this.event, token: this.token });
+    }
+
+    static async #onToggle(event, target) {
+        event.preventDefault();
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("onCarried: Unable to locate item");
+        }
+        await item.toggle({ event: this.event, token: this.token });
     }
 
     static async #onVpp(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onVpp: Unable to locate roll item");
+            console.error("onVpp: Unable to locate item");
         }
         await item.changeVpp({ event: this.event, token: this.token });
     }
@@ -590,7 +647,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static async #onToggleItemContainer(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("Unable to locate item");
+            console.error("onToggleItemContainer: Unable to locate item");
         }
         target.closest("li").classList.toggle("collapsed");
     }

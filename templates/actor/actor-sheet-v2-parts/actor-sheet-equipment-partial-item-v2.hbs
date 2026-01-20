@@ -1,20 +1,5 @@
 <li class="item powers draggable expandable-document" data-document-uuid="{{this.uuid}}">
-    <div class="item-row {{this.css.row}}">
-        <div class="item-column item-cost">
-            {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
-                {{this.compoundCostForDisplay}}
-            {{else if this.isSeparator}}
-                {{!-- Show no cost--}}
-            {{else if (eq this.system.XMLID "LIST")}}
-                <span style="opacity: 0.5">{{this.listCost}}</span>
-            {{else}}
-                {{#if (eq this.parentItem.system.XMLID "COMPOUNDPOWER")}}
-                    <span style="opacity: 0.5">{{this.characterPointCostForDisplayPlusSuffix}}</span>
-                {{else}}
-                    {{this.characterPointCostForDisplayPlusSuffix}}
-                {{/if}}
-            {{/if}}
-        </div>
+    <div class="item-row {{css}}">
 
         <div class="item-column item-description item-depth-{{this.childDepth}}">
             
@@ -22,7 +7,7 @@
                 <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
             {{/if}}
 
-            <div class="item-description-full {{this.css.description}}">
+            <div class="item-description-full">
                 {{#if (and this.childIdx this.parentItem)}}
                     {{this.childIdx}})
                 {{/if}}
@@ -35,8 +20,18 @@
         </div>
         <div class="item-column item-end">
             {{#if (ne this.system.XMLID "LIST")}}
-                {{this.system.endEstimate}}
+                {{this.system.end}}
             {{/if}}
+        </div>
+        <div class="item-column item-price">
+            {{this.priceText}}
+        </div>
+        <div class="item-column item-weight">
+            {{this.weightKg}}
+        </div>
+        <div class="item-column item-carried">
+            <input class="item-update" type="checkbox"  name="system.CARRIED"  {{checked
+                    this.system.CARRIED}} data-action="carried" data-dtype="Boolean" />
         </div>
         <div class="item-column item-controls">
             {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}

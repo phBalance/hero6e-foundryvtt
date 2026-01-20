@@ -1225,11 +1225,15 @@ export class HeroSystem6eItem extends Item {
         ChatMessage.create(chatData);
     }
 
-    async turnOn(event) {
+    async turnOn(options) {
+        if (!options.token) {
+            console.error(`turnOn: missing token`);
+        }
+
         const item = this;
 
         // Make sure activeEffects are properly defined
-        await this.setActiveEffects();
+        await this.setActiveEffects(options);
 
         // If this is a constant power where to show the "to-hit" then don't bother spending
         // resources or checking for requires a roll.
@@ -1256,7 +1260,7 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
-        if (!this.actor.canAct(true, event)) {
+        if (!this.actor.canAct(true, options.event)) {
             return;
         }
 
@@ -1372,10 +1376,10 @@ export class HeroSystem6eItem extends Item {
 
         const speaker = ChatMessage.getSpeaker({
             actor: item.actor,
-            token: tokenEducatedGuess({ actor: item.actor }),
+            token: options.token,
         });
 
-        const success = await rollRequiresASkillRollCheck(this, event);
+        const success = await rollRequiresASkillRollCheck(this, options.event);
         if (!success) {
             const chatData = {
                 author: game.user._id,
@@ -1437,6 +1441,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     async turnOff(options = {}) {
+        if (!options.token) {
+            console.error(`turnOn: missing token`);
+        }
+
         const item = this;
 
         if (!this.isActive) {
@@ -1452,7 +1460,7 @@ export class HeroSystem6eItem extends Item {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({
                 actor: item.actor,
-                token: tokenEducatedGuess({ actor: item.actor }),
+                token: options.token,
             });
             const chatData = {
                 author: game.user._id,
@@ -1490,13 +1498,13 @@ export class HeroSystem6eItem extends Item {
      * @param {Event} [event]
      * @returns {Promise<undefined>}
      */
-    async toggle(event) {
+    async toggle(options = {}) {
         let item = this;
 
         if (!item.isActive) {
-            await this.turnOn(event);
+            await this.turnOn(options);
         } else {
-            await this.turnOff();
+            await this.turnOff(options);
         }
 
         switch (this.type) {
@@ -2087,6 +2095,21 @@ export class HeroSystem6eItem extends Item {
     get defendsWith() {
         console.error(`Deprecated`);
         return this.system.defendsWith;
+    }
+
+    get css() {
+        // css for actor-sheet-v2 item-row
+        const row = [];
+
+        // css for actor-sheet-v2 item-description
+        const description = [];
+        if (this.parentItem?.system.XMLID === "VPP") {
+            if (this.vppUnSlotted) {
+                description.push("vpp-unslotted");
+            }
+        }
+
+        return { row: row.join(" "), description: description.join(" ") };
     }
 
     getAllChildren() {

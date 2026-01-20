@@ -321,6 +321,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-skills-partial-item-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-maneuvers-partial-item-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs`,
+        `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-partial-item-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-item-name-v2.hbs`,
     ];
