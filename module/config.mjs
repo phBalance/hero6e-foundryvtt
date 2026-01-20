@@ -340,7 +340,7 @@ HERO.hitLocationSide = Object.freeze({
     Right: "Right",
 });
 
-HERO.ACTIVE_EFFECT_PRIORITY = {
+HERO.ACTIVE_EFFECT_PRIORITY = Object.freeze({
     // FoundryVTT defaults to MODE * 10
     // Lower priorities are performed first
     ADD: 20,
@@ -349,9 +349,9 @@ HERO.ACTIVE_EFFECT_PRIORITY = {
     MULTIPLY: 45, // In HERO this goes mostly last so change value from 10 to 45
     OVERRIDE: 50,
     UPGRADE: 40,
-};
+});
 
-HERO.RANGE_TYPES = {
+HERO.RANGE_TYPES = Object.freeze({
     LIMITED_RANGE: "Limited Range",
     LINE_OF_SIGHT: "Line of Sight",
     NO_RANGE: "No Range",
@@ -359,7 +359,14 @@ HERO.RANGE_TYPES = {
     SELF: "Self",
     SPECIAL: "Special",
     STANDARD: "Standard",
-};
+});
+
+HERO.DURATION_TYPES = Object.freeze({
+    INSTANT: "instant",
+    CONSTANT: "constant",
+    PERSISTENT: "persistent",
+    INHERENT: "inherent",
+});
 
 HERO.martialArtsDamageTypeChoices = [
     {
@@ -928,7 +935,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -952,7 +959,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             type: ["characteristic"],
             behaviors: ["success"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -972,7 +979,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success", "defense"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -992,7 +999,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1010,7 +1017,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1030,7 +1037,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1046,7 +1053,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         base: fixedValueFunction(10),
         type: ["characteristic"],
         behaviors: ["success"],
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -1077,7 +1084,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5),
             type: ["characteristic"],
             behaviors: ["calculated", "calculatedDEX"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1107,7 +1114,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5),
             type: ["characteristic"],
             behaviors: ["defense", "calculated", "calculatedDEX"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1162,7 +1169,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
             behaviors: ["calculated", "calculatedEGO"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1192,7 +1199,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
             behaviors: ["defense", "calculated", "calculatedEGO"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1258,7 +1265,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             type: ["characteristic"],
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1296,7 +1303,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
             behaviors: ["defense"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1343,7 +1350,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: pdEdCostPerLevel,
             type: ["characteristic"],
             behaviors: ["defense"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1390,7 +1397,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1426,7 +1433,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 5),
             type: ["characteristic"],
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1467,7 +1474,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1487,7 +1494,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["characteristic"],
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1544,7 +1551,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(2),
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1566,7 +1573,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         base: fixedValueFunction(2),
         costPerLevel: fixedValueFunction(3),
         behaviors: [],
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -1583,7 +1590,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5),
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1607,7 +1614,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1632,7 +1639,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1657,7 +1664,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1682,7 +1689,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1707,7 +1714,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1732,7 +1739,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1757,7 +1764,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1782,7 +1789,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1807,7 +1814,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1832,7 +1839,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(5), // TODO: Not actually correct ... depends on the setup
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -1859,7 +1866,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         name: "Blazing Away",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
@@ -1885,7 +1892,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Block",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -1912,7 +1919,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Brace",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -1940,7 +1947,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Choke",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -1968,7 +1975,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Club Weapon",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -1996,7 +2003,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Cover",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2024,7 +2031,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Disarm",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2052,7 +2059,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Dive For Cover",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2079,7 +2086,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Dodge",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2107,7 +2114,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Grab",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2146,7 +2153,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Grab By",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2185,7 +2192,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["non-hd", "activatable"],
             name: "Haymaker",
             costPerLevel: fixedValueFunction(0),
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
@@ -2211,7 +2218,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Hipshot",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2237,7 +2244,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         name: "Hurry",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
@@ -2263,7 +2270,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Move By",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2302,7 +2309,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Move Through",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2341,7 +2348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Multiple Attack",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE), // TODO: Not correct for all possible
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2370,7 +2377,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Other Attacks",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE), // TODO: Not correct for all possible.
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2399,7 +2406,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Pulling A Punch",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2426,7 +2433,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         name: "Rapid Fire",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE), // TODO: Not correct for all
         costEnd: true, // Maneuvers that don't use strength cost 1 END
         target: "target's dcv",
@@ -2452,7 +2459,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Roll With A Punch",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2480,7 +2487,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Set",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2509,7 +2516,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Set And Brace",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2536,7 +2543,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Shove",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2564,7 +2571,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Snap Shot",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2592,7 +2599,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Strafe",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2620,7 +2627,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Strike",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2648,7 +2655,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Suppression Fire",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true, // Maneuvers that don't use strength cost 1 END
             target: "target's dcv",
@@ -2686,7 +2693,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         name: "Sweep",
         costPerLevel: fixedValueFunction(0),
         perceivability: "obvious",
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
         target: "target's dcv",
@@ -2712,7 +2719,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Throw",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2740,7 +2747,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Trip",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: false,
             target: "target's dcv",
@@ -2770,7 +2777,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             base: fixedValueFunction(0),
             perceivability: "inobvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -2798,7 +2805,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["movement"],
             behaviors: ["activatable"],
             base: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -2820,7 +2827,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "Target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -2846,7 +2853,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "Target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -2870,7 +2877,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["movement"],
             behaviors: ["activatable"],
             base: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -2888,7 +2895,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["movement"],
         behaviors: ["activatable"],
         base: fixedValueFunction(0),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -2913,7 +2920,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["movement"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -2960,7 +2967,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1),
             type: ["movement"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -2982,7 +2989,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["movement"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -3002,7 +3009,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             type: ["movement"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             rangeText: function (item) {
@@ -3028,7 +3035,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             type: ["movement"],
             behaviors: ["activatable"],
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -3048,7 +3055,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             type: ["movement"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -3071,7 +3078,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3085,7 +3092,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3099,7 +3106,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3114,7 +3121,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
             categorized: true,
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3151,7 +3158,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
         categorized: true,
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -3163,7 +3170,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3178,7 +3185,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3192,7 +3199,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3206,7 +3213,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3220,7 +3227,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3235,7 +3242,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3249,7 +3256,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3263,7 +3270,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3276,7 +3283,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMBAT_LEVELS",
             type: ["skill"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             costEnd: false,
             refreshAttackDialogWhenChanged: true,
@@ -3510,7 +3517,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3524,7 +3531,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3538,7 +3545,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3552,7 +3559,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3566,7 +3573,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3580,7 +3587,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3594,7 +3601,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3608,7 +3615,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3622,7 +3629,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3637,7 +3644,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3651,7 +3658,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3665,7 +3672,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3679,7 +3686,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3694,7 +3701,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3709,7 +3716,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3722,7 +3729,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -3734,7 +3741,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3755,7 +3762,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return baseCost + levels * this.costPerLevel();
             },
             categorized: true,
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3771,7 +3778,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
             categorized: true,
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3786,7 +3793,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3799,7 +3806,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -3811,7 +3818,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -3823,7 +3830,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3837,7 +3844,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3851,7 +3858,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "KNOWLEDGE_SKILL",
             type: ["skill"],
             behaviors: ["success"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3867,7 +3874,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3881,7 +3888,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3895,7 +3902,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3910,7 +3917,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -3923,7 +3930,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MENTAL_COMBAT_LEVELS",
             type: ["skill"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4015,7 +4022,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4030,7 +4037,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
             name: "Musical Instrument Familiarity",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4046,7 +4053,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
             categorized: true,
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4059,7 +4066,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: [],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4070,7 +4077,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: [],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4081,7 +4088,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: [],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4094,7 +4101,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4108,7 +4115,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4120,7 +4127,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4133,7 +4140,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PENALTY_SKILL_LEVELS",
             type: ["skill"],
             behaviors: [],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4254,7 +4261,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success", "non-hd"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4267,7 +4274,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4281,7 +4288,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4295,7 +4302,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4309,7 +4316,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(1),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4324,7 +4331,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4337,7 +4344,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: [],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4348,7 +4355,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4360,7 +4367,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4375,7 +4382,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(1),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4389,7 +4396,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4402,7 +4409,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4414,7 +4421,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4427,7 +4434,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SKILL_LEVELS",
             type: ["skill"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4490,7 +4497,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4503,7 +4510,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4515,7 +4522,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4529,7 +4536,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4550,7 +4557,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return baseCost + levels * this.costPerLevel();
             },
             categorized: true,
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4564,7 +4571,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4579,7 +4586,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4593,7 +4600,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4607,7 +4614,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4621,7 +4628,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4646,7 +4653,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             //     // Additional adders cost 1
             //     return 1;
             // },
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4663,7 +4670,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4676,7 +4683,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: [],
         costPerLevel: fixedValueFunction(2),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -4689,7 +4696,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4704,7 +4711,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: fixedValueFunction(2),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4740,7 +4747,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Additional adders cost 1
                 return 1;
             },
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4756,7 +4763,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill", "enhancer"],
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4770,7 +4777,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill", "enhancer"],
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4784,7 +4791,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill", "enhancer"],
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4798,7 +4805,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill", "enhancer"],
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -4812,7 +4819,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill", "enhancer"],
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5283,7 +5290,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Beast Speech",
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "dmcv",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
@@ -5295,7 +5302,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Berserk Fury",
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true,
@@ -5321,7 +5328,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5335,7 +5342,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "defense"],
             perceivability: "inobvious", // See HS6E volume 1 pg 477.  Based on Resistant Protection which is inobivous
             name: "Combat Luck",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5403,7 +5410,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5414,7 +5421,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "target's dcv",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
@@ -5532,7 +5539,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5583,7 +5590,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5605,7 +5612,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5616,7 +5623,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5627,7 +5634,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "target's dcv",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
@@ -5739,7 +5746,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5750,7 +5757,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5790,7 +5797,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(1),
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
         costEnd: false,
@@ -5801,7 +5808,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(1),
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5826,7 +5833,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5838,7 +5845,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(1),
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5911,7 +5918,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "TRACKLESSSTRIDE",
         type: ["talent"],
         behaviors: ["activatable"],
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true,
@@ -5922,7 +5929,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "TURNUNDEAD",
         type: ["talent"],
         behaviors: ["activatable"],
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -6069,7 +6076,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk", "enhancer"],
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6086,7 +6093,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adjustment", "standard"],
             behaviors: ["activatable"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6123,7 +6130,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adjustment", "attack"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
@@ -6143,7 +6150,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "ARMOR",
         type: ["defense"],
         behaviors: ["activatable", "defense"],
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costPerLevel: fixedValueFunction(3 / 2),
@@ -6160,7 +6167,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6176,7 +6183,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack"],
             behaviors: ["to-hit", "dice", "activatable"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "Target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -6238,7 +6245,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             perceivability: "imperceptible",
             costPerLevel: fixedValueFunction(1),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -6251,7 +6258,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CLINGING",
             type: ["standard"],
             behaviors: ["activatable"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6286,7 +6293,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "defense"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6324,7 +6331,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "defense"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6371,7 +6378,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["defense"],
             behaviors: ["activatable", "defense"],
             //perceivability: "obvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6453,7 +6460,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return is5e ? 10 : 5;
             },
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
@@ -6475,7 +6482,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["body-affecting", "standard"],
             behaviors: ["activatable", "defense"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -6538,7 +6545,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             perceivability: "obvious",
             costPerLevel: fixedValueFunction(0),
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -6553,7 +6560,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adjustment", "attack"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -6572,7 +6579,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(3),
             perceivability: "obvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
@@ -6586,7 +6593,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adjustment", "attack"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -6604,7 +6611,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["body-affecting", "special"],
             behaviors: ["activatable"],
             perceivability: "obvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6629,7 +6636,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "mental"],
             behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "dmcv",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
@@ -6649,7 +6656,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["special"],
             behaviors: [],
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6680,7 +6687,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["special"],
             behaviors: [],
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6708,7 +6715,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
@@ -6727,7 +6734,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "standard"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
@@ -6795,7 +6802,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EXTRALIMBS",
             type: ["standard"],
             behaviors: [],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6810,7 +6817,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "FINDWEAKNESS",
         type: ["sense", "special", "skill"],
         behaviors: ["success"],
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costPerLevel: fixedValueFunction(5),
@@ -6823,7 +6830,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "sense-affecting", "standard"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "Target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -6849,7 +6856,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["defense", "special"],
             behaviors: ["activatable", "defense"],
             perceivability: "inobvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
@@ -6913,7 +6920,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FORCEFIELD", // RESISTANT PROTECTION
             type: ["defense", "standard"],
             behaviors: ["activatable", "defense"],
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             perceivability: "inobvious",
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -6954,7 +6961,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<POWER XMLID="FORCEFIELD" ID="1709334003070" BASECOST="0.0" LEVELS="0" ALIAS="Resistant Protection" POSITION="71" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0"></POWER>`,
         },
         {
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             costEnd: true,
             costPerLevel: fixedValueFunction(1),
             cost: undefined,
@@ -6966,7 +6973,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FORCEWALL", // BARRIER
             type: ["defense", "standard"],
             behaviors: ["to-hit", "defense", "activatable"],
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
             usesStrength: false,
@@ -6990,7 +6997,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<POWER XMLID="FORCEWALL" ID="1711932416775" BASECOST="3.0" LEVELS="0" ALIAS="Barrier" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0"></POWER>`,
         },
         {
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             costPerLevel: fixedValueFunction(5 / 2), // LEVELS are the sum of rPD and rED
             xml: `<POWER XMLID="FORCEWALL" ID="1709342637180" BASECOST="0.0" LEVELS="0" ALIAS="Force Wall" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0"></POWER>`,
         },
@@ -7002,7 +7009,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["body-affecting", "size"],
             behaviors: ["activatable", "defense"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7279,7 +7286,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HANDTOHANDATTACK", // NOTE: Not an attack of its own.
             type: ["attack"],
             behaviors: [],
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
             usesStrength: false,
@@ -7296,7 +7303,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adjustment"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "target's dcv",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
@@ -7314,7 +7321,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HKA",
             type: ["attack"],
             behaviors: ["to-hit", "dice"],
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
@@ -7333,7 +7340,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "to-hit", "dice"],
             costPerLevel: fixedValueFunction(3),
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "area (see text)",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -7351,7 +7358,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "defense", "defaultoff"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "Special",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7371,7 +7378,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["defense", "standard"],
             behaviors: ["activatable", "defense"],
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -7401,7 +7408,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["defense", "special"],
         behaviors: ["activatable", "defense"],
         perceivability: "imperceptible",
-        duration: "persistent",
+        duration: HERO.DURATION_TYPES.PERSISTENT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -7420,7 +7427,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -7439,7 +7446,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["special"],
             behaviors: ["dice"],
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -7461,7 +7468,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             costPerLevel: fixedValueFunction(1),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
@@ -7493,7 +7500,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "mental"],
             behaviors: ["activatable", "to-hit", "dice"],
             perceivability: "imperceptible",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "dmcv",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
@@ -7511,7 +7518,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "mental"],
             behaviors: ["activatable", "to-hit", "dice"],
             perceivability: "imperceptible",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "dmcv",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
@@ -7529,7 +7536,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["mental"],
             behaviors: ["activatable", "to-hit"],
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "dmcv",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: false,
@@ -7546,7 +7553,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["mental", "sense"],
             behaviors: ["activatable", "to-hit", "dice"],
             perceivability: "imperceptible",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "dmcv",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SPECIAL),
             costEnd: true,
@@ -7565,7 +7572,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "defense", "to-hit"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "target’s OCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -7574,7 +7581,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<POWER XMLID="MISSILEDEFLECTION" ID="1709333871556" BASECOST="20.0" LEVELS="0" ALIAS="Deflection" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             costEnd: false,
             xml: `<POWER XMLID="MISSILEDEFLECTION" ID="1709342687977" BASECOST="5.0" LEVELS="0" ALIAS="Missile Deflection" POSITION="49" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THROWN" OPTIONID="THROWN" OPTION_ALIAS="Thrown Objects" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
@@ -7585,7 +7592,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["body-affecting", "standard"],
             behaviors: ["activatable"],
             perceivability: "obvious",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -7690,7 +7697,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "mental"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "DMCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
@@ -7720,7 +7727,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["defense", "special"],
             behaviors: ["activatable", "defense"],
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -7749,7 +7756,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "standard"],
             behaviors: ["to-hit", "activatable"],
             perceivability: "imperceptible",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7774,7 +7781,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["special"],
             behaviors: ["activatable"],
             perceivability: "imperceptible",
-            duration: "persistent",
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -7804,7 +7811,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: fixedValueFunction(15),
             costEnd: true,
@@ -7832,7 +7839,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7847,7 +7854,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["body-affecting", "size"],
             behaviors: ["activatable", "defense"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7875,7 +7882,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["body-affecting", "standard"],
             behaviors: ["activatable"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7895,7 +7902,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SUCCOR",
             type: ["adjustment", "attack"],
             behaviors: ["to-hit", "dice"],
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "target's DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
@@ -7911,7 +7918,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SUMMON",
             type: ["standard"],
             behaviors: ["activatable"],
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "n/a",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1 / 5),
@@ -7925,7 +7932,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["adjustment", "attack"],
         behaviors: ["to-hit", "dice"],
         perceivability: "obvious",
-        duration: "constant",
+        duration: HERO.DURATION_TYPES.CONSTANT,
         target: "target’s DCV",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
         costEnd: true,
@@ -7942,7 +7949,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "standard"],
             behaviors: ["to-hit", "dice", "activatable"],
             perceivability: "obvious",
-            duration: "constant",
+            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "target’s DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costEnd: true,
@@ -7970,7 +7977,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["mental"],
             behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "dmcv",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.LINE_OF_SIGHT),
             costEnd: true,
@@ -7987,7 +7994,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["adjustment", "attack"],
         behaviors: ["to-hit", "dice"],
         perceivability: "obvious",
-        duration: "instant",
+        duration: HERO.DURATION_TYPES.INSTANT,
         target: "target's DCV",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: true,
@@ -8003,7 +8010,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack", "standard"],
             behaviors: ["to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             target: "target's DCV",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: function (item) {
@@ -8041,7 +8048,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack"],
             behaviors: ["non-hd", "to-hit", "dice"],
             perceivability: "obvious",
-            duration: "instant",
+            duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
@@ -8192,7 +8199,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 "targetingBuiltIn",
                 "telescopicBuiltIn",
             ],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8214,7 +8221,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ADJACENT",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8227,7 +8234,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ADJACENTFIXED",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8240,7 +8247,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ANALYZESENSE",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8253,7 +8260,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ANALYZESENSE",
             type: ["sense"],
             behaviors: ["sense"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8267,7 +8274,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONCEALED",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8280,7 +8287,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONCEALED",
             type: ["sense"],
             behaviors: ["sense"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8294,7 +8301,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DETECT",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costPerLevel: fixedValueFunction(1),
@@ -8307,7 +8314,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DETECT",
             type: ["sense", "passive"],
             behaviors: ["activatable", "240DegreeArcBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costPerLevel: fixedValueFunction(1),
@@ -8322,7 +8329,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALSINGLE",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8335,7 +8342,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALSINGLE",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8348,7 +8355,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALGROUP",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8361,7 +8368,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALGROUP",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8374,7 +8381,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALALL",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8387,7 +8394,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIMENSIONALALL",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8400,7 +8407,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DISCRIMINATORY",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8413,7 +8420,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DISCRIMINATORY",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
@@ -8427,7 +8434,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ENHANCEDPERCEPTION",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: function (item) {
@@ -8448,7 +8455,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EXTRA",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(3),
@@ -8462,7 +8469,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HRRP", // High Range Radio Perception
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8482,7 +8489,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 "rangeBuiltIn",
                 "transmitBuiltIn",
             ],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8496,7 +8503,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INCREASEDARC240",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8509,7 +8516,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INCREASEDARC240",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8522,7 +8529,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INCREASEDARC360",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8535,7 +8542,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INCREASEDARC360",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8548,7 +8555,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INFRAREDPERCEPTION",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8566,7 +8573,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INFRAREDPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "240DegreeArcBuiltIn", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8585,7 +8592,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MAKEASENSE",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8598,7 +8605,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MENTALAWARENESS",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             senseGroup: "mental",
             senseType: "passive",
@@ -8613,7 +8620,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MENTALAWARENESS",
             type: ["sense", "passive"],
             behaviors: ["activatable", "240DegreeArcBuiltIn", "senseBuiltIn", "rangeBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             senseGroup: "mental",
             senseType: "passive",
@@ -8627,7 +8634,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MICROSCOPIC",
             type: ["sense"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(3),
             target: "self only",
@@ -8640,7 +8647,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MICROSCOPIC",
             type: ["sense"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(5),
             target: "self only",
@@ -8655,7 +8662,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "NIGHTVISION",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8674,7 +8681,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "NIGHTVISION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "240DegreeArcBuiltIn", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8712,7 +8719,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PARTIALLYPENETRATIVE",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8725,7 +8732,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PENETRATIVE",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8750,7 +8757,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADAR",
             type: ["sense", "active"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8763,7 +8770,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADAR",
             type: ["sense", "active"],
             behaviors: ["activatable", "240DegreeArcBuiltIn", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8776,7 +8783,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADIOPERCEIVETRANSMIT",
             type: ["sense", "active"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8796,7 +8803,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 "rangeBuiltIn",
                 "transmitBuiltIn",
             ],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8809,7 +8816,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADIOPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8822,7 +8829,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RADIOPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "240DegreeArcBuiltIn", "360DegreeArcBuiltIn", "senseBuiltIn", "rangeBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8835,7 +8842,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RANGE",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
@@ -8848,7 +8855,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RANGE",
             type: ["sense"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
@@ -8861,7 +8868,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RAPID",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(3),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8874,7 +8881,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RAPID",
             type: ["sense"],
             behaviors: ["sense"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(3),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8888,7 +8895,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SPATIALAWARENESS",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8901,7 +8908,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SPATIALAWARENESS",
             type: ["sense", "passive"],
             behaviors: ["activatable", "240DegreeArcBuiltIn", "senseBuiltIn", "penetrativeBuiltIn", "targetingBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8917,7 +8924,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TARGETINGSENSE",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8930,7 +8937,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TARGETINGSENSE",
             type: ["sense"],
             behaviors: ["activatable", "targetingBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8943,7 +8950,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TELESCOPIC",
             type: ["sense"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8956,7 +8963,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TELESCOPIC",
             type: ["sense"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(1 / 2),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8969,7 +8976,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRACKINGSENSE",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8982,7 +8989,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRACKINGSENSE",
             type: ["sense", "passive"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8995,7 +9002,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRANSMIT",
             type: ["sense", "active"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -9008,7 +9015,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRANSMIT",
             type: ["sense", "active"],
             behaviors: ["activatable"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -9022,7 +9029,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ULTRASONICPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -9040,7 +9047,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ULTRASONICPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "senseBuiltIn", "rangeBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -9058,7 +9065,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ULTRAVIOLETPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["adder"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -9076,7 +9083,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ULTRAVIOLETPERCEPTION",
             type: ["sense", "passive"],
             behaviors: ["activatable", "240DegreeArcBuiltIn", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
-            duration: "persistent", // Enhanced Senses are typically persistent
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -10707,6 +10714,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // TUNNELING related
+            key: "DEFBONUS",
+            behaviors: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="DEFBONUS" ID="1712964171511" BASECOST="0.0" LEVELS="8" ALIAS="+8 DEF" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // CUSTOMPOWER related
             key: "DEFENSE",
             behaviors: ["adder"],
@@ -11334,6 +11351,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="FIERCENESS" ID="1704506845139" BASECOST="0.0" LEVELS="0" ALIAS="Fierceness of Rivalry" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OUTDO" OPTIONID="OUTDO" OPTION_ALIAS="Seek to Outdo, Embarrass, or Humiliate Rival" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // TUNNELING related
+            key: "FILLIN",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="FILLIN" ID="1712964171509" BASECOST="10.0" LEVELS="0" ALIAS="Fill In" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -12877,6 +12905,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // CLAIRSENTIENCE related
+            key: "MULTIPLEPERCEPTION",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="MULTIPLEPERCEPTION" ID="1768113074917" BASECOST="0.0" LEVELS="1" ALIAS="2 Perception Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // TRANSPORT_FAMILIARITY related
             key: "MUSCLEPOWEREDGROUNDVEHICLES",
             behaviors: ["adder"],
@@ -12944,12 +12983,34 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // CHARGES related
+            key: "NEVERRECOVER",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NEVERRECOVER" ID="1757641366550" BASECOST="-2.0" LEVELS="0" ALIAS="Charges Never Recover" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // WEAPON_FAMILIARITY related
             key: "NINJA",
             behaviors: ["adder"],
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="NINJA" ID="1759094948171" BASECOST="1.0" LEVELS="0" ALIAS="Ninja Weapons" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // AVAD related
+            key: "NND",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NND" ID="1696022407526" BASECOST="-0.5" LEVELS="0" ALIAS="All Or Nothing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -13319,6 +13380,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="PERCEIVEFUTURE" ID="1755060911091" BASECOST="20.0" LEVELS="0" ALIAS="Precognition" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // CLAIRSENTIENCE related
+            key: "PERCEIVEPAST",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="PERCEIVEPAST" ID="1696022407695" BASECOST="20.0" LEVELS="0" ALIAS="Retrocognition" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -15112,6 +15184,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            // LIFESUPPORT related
+            key: "ZEROG",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ZEROG" ID="1738527995863" BASECOST="1.0" LEVELS="0" ALIAS="Safe Environment: Zero Gravity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // DUPLICATION related
@@ -15900,6 +15984,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // ENTANGLE related
+            key: "DOESNOTPREVENTOAF",
+            behaviors: ["modifier"],
+            dcAffecting: fixedValueFunction(false),
+            costPerLevel: fixedValueFunction(0),
+            xml: `<MODIFIER XMLID="DOESNOTPREVENTOAF" ID="1742698456282" BASECOST="-1.0" LEVELS="0" ALIAS="Does Not Prevent The Use Of Accessible Foci" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(undefined, {
         key: "DOESNOTPROVIDEMENTALAWARENESS",
         behaviors: ["modifier"],
@@ -16267,6 +16362,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "INHERENT",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="INHERENT" ID="1730531186124" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "INSTANT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -16282,17 +16387,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INVISIBLE" ID="1693773081515" BASECOST="0.25" LEVELS="0" ALIAS="Invisible Power Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INOBVIOUSINVISIBLEONE" OPTIONID="INOBVIOUSINVISIBLEONE" OPTION_ALIAS="Inobvious Power, Invisible to Mental Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
-        },
-        {},
-    );
-
-    addPower(
-        {
-            key: "INHERENT",
-            behaviors: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="INHERENT" ID="1730531186124" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -16526,6 +16620,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MUSTLAND" ID="1766365309625" BASECOST="-0.5" LEVELS="0" ALIAS="Must Land At The End Of Each Phase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // TELEPORTATION related
+            key: "MUSTPASSTHROUGHSPACE",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="MUSTPASSTHROUGHSPACE" ID="1758288716031" BASECOST="-0.25" LEVELS="0" ALIAS="Must Pass Through Intervening Space" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -16808,6 +16913,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // Adjustment related
+            key: "ONEUSEATATIME",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ONEUSEATATIME" ID="1747979505796" BASECOST="-1.0" LEVELS="0" ALIAS="One Use At A Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "ONEWAYTRANSPARENT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
@@ -16833,6 +16949,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYBETWEENADVENTURES" ID="1762138695886" BASECOST="-0.5" LEVELS="0" ALIAS="VPP Can Only Be Changed Between Adventures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // TELEPORTATION related
+            key: "ONLYFIXED",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ONLYFIXED" ID="1752800595483" BASECOST="-1.0" LEVELS="0" ALIAS="Can Only Teleport To " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FIXED" OPTIONID="FIXED" OPTION_ALIAS="Fixed Locations" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="User's Unequipped Hand " PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -17021,6 +17148,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PHYSICALMANIFESTATION" ID="1737922207843" BASECOST="-0.25" LEVELS="0" ALIAS="Physical Manifestation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "PRECOGNITIONONLY",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="PRECOGNITIONONLY" ID="1696022407697" BASECOST="-1.0" LEVELS="0" ALIAS="Precognition/Retrocognition Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -17232,6 +17369,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<MODIFIER XMLID="RESTRICTEDUSE" ID="1768007214710" BASECOST="-0.25" LEVELS="0" ALIAS="Restricted Use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         undefined,
+    );
+    addPower(
+        {
+            // HEALING related
+            key: "RESURRECTIONONLY",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="RESURRECTIONONLY" ID="1747979425717" BASECOST="-0.5" LEVELS="0" ALIAS="Resurrection Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
     );
     addPower(
         {
@@ -17634,7 +17782,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "VARIABLEEFFECT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(true),
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VARIABLEEFFECT" ID="1759024606902" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Characteristics" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -17644,7 +17792,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "VARIABLEEFFECT2",
         behaviors: ["modifier"],
         costPerLevel: fixedValueFunction(0),
-        dcAffecting: fixedValueFunction(true),
+        dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="VARIABLEEFFECT2" ID="1766281443255" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect (To)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="to [two powers] simultaneously" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
     });
     addPower(
@@ -17653,8 +17801,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "VARIABLEHEALINGMETHOD",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(true),
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VARIABLEHEALINGMETHOD" ID="1764594003039" BASECOST="0.25" LEVELS="0" ALIAS="Variable Healing Method" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "VARIABLELIMITATIONS",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="VARIABLELIMITATIONS" ID="1736654196172" BASECOST="0.0" LEVELS="8" ALIAS="Variable Limitations" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
@@ -17674,7 +17832,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "VARYINGEFFECT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(true),
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VARYINGEFFECT" ID="1696022407789" BASECOST="0.25" LEVELS="0" ALIAS="Varying Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERY" OPTIONID="VERY" OPTION_ALIAS="Very Limited Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},

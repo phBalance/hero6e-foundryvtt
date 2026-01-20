@@ -1201,9 +1201,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Duration
-        if (this.baseInfo.duration) {
-            content += ` Duration: ${this.baseInfo.duration}.`;
-        }
+        content += ` Duration: ${this.system.duration}.`;
 
         if (this.end) {
             content += ` Estimated End: ${this.end}.`;
@@ -1234,7 +1232,10 @@ export class HeroSystem6eItem extends Item {
         // If this is a constant power where to show the "to-hit" then don't bother spending
         // resources or checking for requires a roll.
         // Also don't check VPP as we use "carried" to determine if we can toggle/roll.
-        if (item.system.duration === "constant" && item.baseInfo.behaviors.includes("to-hit")) {
+        if (
+            item.system.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT &&
+            item.baseInfo.behaviors.includes("to-hit")
+        ) {
             await this.setActive(true);
 
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -1678,7 +1679,7 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        if (this.baseInfo?.duration?.toLowerCase() === "instant") {
+        if (this.system.duration === CONFIG.HERO.DURATION_TYPES.INSTANT) {
             return false;
         }
 
@@ -2025,7 +2026,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // persistent duration
-        if (this.baseInfo?.duration === "persistent") {
+        if (this.system.duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT) {
             return true;
         }
 
@@ -5530,25 +5531,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         return end;
-    }
-
-    get duration() {
-        let _duration = this.baseInfo?.duration;
-        if (this.baseInfo?.behaviors.includes("success")) {
-            _duration ??= "instant";
-        }
-
-        if (this.modifiers.find((o) => o.XMLID === "INHERENT")) {
-            return "inherent";
-        }
-        if (this.modifiers.find((o) => o.XMLID === "NONPERSISTENT")) {
-            return "constant";
-        }
-        if (this.modifiers.find((o) => o.XMLID === "PERSISTENT")) {
-            return "persistent";
-        }
-
-        return _duration;
     }
 
     // PH: FIXME: we have 2 ways of getting this... probably should favour this.system.range

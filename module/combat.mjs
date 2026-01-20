@@ -846,8 +846,7 @@ export class HeroSystem6eCombat extends Combat {
                 (item) =>
                     item.isActive === true && // Is the power active?
                     item.type !== "skill" && // Natural skills are always on, but only use resources when used/rolled
-                    item.baseInfo && // Do we have baseInfo for this power
-                    item.baseInfo.duration !== "instant" && // Is the power non instant
+                    item.system.duration !== CONFIG.HERO.DURATION_TYPES.INSTANT && // Is the power non instant
                     (!item.system.MODIFIER?.find(
                         (o) =>
                             (o.XMLID === "COSTSEND" && o.OPTIONID === "ACTIVATE") ||

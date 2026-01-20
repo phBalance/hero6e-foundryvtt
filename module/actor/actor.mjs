@@ -1892,7 +1892,7 @@ export class HeroSystem6eActor extends Actor {
     getActiveConstantItems() {
         const results = [];
         for (const item of this.items.filter((item) => item.isActive)) {
-            if (item.system.duration === "constant") {
+            if (item.system.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT) {
                 results.push(item);
             } else {
                 const NONPERSISTENT = item.modifiers.find((o) => o.XMLID === "NONPERSISTENT");
@@ -1906,19 +1906,19 @@ export class HeroSystem6eActor extends Actor {
 
     getConstantEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary && ae.parent.duration === "constant")
+            .filter((ae) => !ae.isTemporary && ae.parent.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT)
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
     getPersistentEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary && ae.parent.duration === "persistent")
+            .filter((ae) => !ae.isTemporary && ae.parent.duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT)
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
     getInherentEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary && ae.parent.duration === "inherent")
+            .filter((ae) => !ae.isTemporary && ae.parent.duration === CONFIG.HERO.DURATION_TYPES.INHERENT)
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
