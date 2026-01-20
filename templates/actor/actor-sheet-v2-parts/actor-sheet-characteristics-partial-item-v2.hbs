@@ -1,0 +1,79 @@
+<li class="item powers draggable expandable-document" data-document-uuid="{{this.uuid}}">
+    <div class="item-row {{css}}">
+        <div class="item-column item-value">
+            <input name="system.characteristics.{{this.key}}.value" type="number"
+                value="{{this.value}}" data-dtype="Number"
+                class="{{#if (gt this.value this.max)}}over-max{{/if}}{{#if (lt this.value this.max)}} under-max{{/if}}"
+                {{#if this.valueTitle}}disabled{{/if}}
+            >
+        </div>
+
+        <div class="item-column item-max">
+            <input name="system.characteristics.{{this.key}}.max" type="number"
+                class="{{#if (gt this.max this.basePlusLevels)}}over-max{{/if}}{{#if (lt this.max this.baseInt)}}under-max{{/if}}"
+                value="{{this.max}}" data-dtype="Number" {{#if
+                this.maxTitle}}disabled{{/if}}
+            >
+        </div>
+
+        <div class="item-column item-base">
+            {{#unless (eq this.base null)}}
+                {{this.base}}
+            {{/unless}}
+        </div>
+
+        <div class="item-column item-levels">
+            {{#unless (eq characteristic.base null)}}
+                <input name="system.{{this.KEY}}.LEVELS" type="number"
+                value="{{this.levels}}" data-dtype="Number" 
+                {{#if (and (eq @root/actor.is5e true) (includes this.baseInfo.behaviors "calculated"))}}disabled{{/if}}
+                >
+            {{/unless}}
+        </div>
+
+        <div class="item-column item-char">
+            {{toUpperCase this.XMLID}}
+        </div>
+
+        <div class="item-column item-baseB">
+            {{#if (and (eq @root/actor.is5e true) (includes this.baseInfo.behaviors "calculated"))}}
+                {{ calculated5eCharacteristic actor this}}
+                
+            {{else}}
+                {{#if (and (eq @root/actor.is5e true) (includes this.baseInfo.behaviors "figured"))}}
+                    {{ figured5eCharacteristic actor this}}
+                {{else}}
+                    {{#if this.baseInfo}}
+                        {{this.base}}
+                    {{/if}}
+                {{/if}}
+            {{/if}}
+        </div>
+
+        <div class="item-column item-cost"
+            {{#if (and this.characteristicMax (gt this.basePlusLevels this.characteristicMax) )}}title="{{this.basePlusLevels}} exceeds Characteristic Maximum of {{this.characteristicMax}}. Costs double for excess."{{/if}}
+            {{#if this.costTitle}}title="{{this.costTitle}}" {{/if}}
+        >
+            {{#unless (eq this.base null)}}
+                {{this.realCost}}
+            {{/unless}}
+        </div>
+
+        <div class="item-column item-roll">
+            {{#if this.roll}}
+                <button type="button" class="characteristic-roll"
+                    data-label="{{this.key}}" data-action="rollCharacteristicSuccess" data-tooltip="{{this.KEY}} Roll">{{numberFormat this.roll decimals=0
+                    sign=false}}-</button>
+                <button type="button" class="characteristic-full"
+                    data-label="{{this.key}}" data-action="rollCharacteristicFull" data-tooltip="Full {{this.KEY}}">F</button>
+                <button type="button" class="characteristic-casual"
+                    data-label="{{this.key}}" data-action="rollCharacteristicCasual" data-tooltip="Casual {{this.KEY}}">C</button>
+            {{/if}}
+        </div>
+
+        <div class="item-column item-notes">
+            {{this.notes}}
+        </div>
+
+    </div>
+</li>

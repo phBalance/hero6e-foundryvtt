@@ -3,5 +3,23 @@
   data-group='primary'
   data-tab='characteristics'
 >
-  <h1>characteristics</h1>
+    <section class="item-list-container">
+        <div class="item-header">
+            <div class="item-column item-value">{{localize "ActorSheet.Value"}}</div>
+            <div class="item-column item-max">{{localize "ActorSheet.Max"}}</div>
+            <div class="item-column item-base">{{localize "ActorSheet.Base"}}</div>
+            <div class="item-column item-levels">{{localize "ActorSheet.Levels"}}</div>
+            <div class="item-column item-char">{{localize "ActorSheet.Char"}}</div>
+            <div class="item-column item-baseB">{{localize "ActorSheet.Base"}}</div>
+            <div class="item-column item-cost">{{localize "ActorSheet.Cost"}}</div>
+            <div class="item-column item-roll">{{localize "ActorSheet.Roll"}}</div>
+            <div class="item-column item-notes">{{localize "ActorSheet.Notes"}}</div>
+        </div>
+
+        <ol class="item-list unlist">
+            {{#each items as |item|}}
+                {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-characteristics-partial-item-v2.hbs') item }}
+            {{/each}}
+        </ol>
+    </section>
 </section>

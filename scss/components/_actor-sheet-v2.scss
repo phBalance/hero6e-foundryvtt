@@ -541,3 +541,23 @@
             min-content; /* controls */
     }
 }
+
+/************************************************************************
+* CHARACTERISTICS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.characteristics {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* current */
+            min-content /* max */
+            min-content /* base */
+            min-content /* levels */
+            min-content /* char */
+            min-content /* base */
+            min-content /* cost */
+            min-content /* roll */
+            minmax(auto, 1fr); /* notes */
+    }
+}

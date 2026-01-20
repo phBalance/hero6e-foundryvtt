@@ -2,6 +2,7 @@ import { HEROSYS } from "../../herosystem6e.mjs";
 import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
+import { getCharacteristicInfoArrayForActor } from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -27,6 +28,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             configureToken: HeroSystemActorSheetV2.#onConfigureToken,
             toggle: HeroSystemActorSheetV2.#onToggle,
             roll: HeroSystemActorSheetV2.#onRoll,
+            rollCharacteristicSuccess: HeroSystemActorSheetV2.#onRollCharacteristicSuccess,
+            rollCharacteristicFull: HeroSystemActorSheetV2.#onRollCharacteristicFull,
+            rollCharacteristicCasual: HeroSystemActorSheetV2.#onRollCharacteristicCasual,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
@@ -220,6 +224,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     break;
                 case "equipment":
                     context.items = this.#equipmentItems;
+                    break;
+                case "characteristics":
+                    context.items = getCharacteristicInfoArrayForActor(this.actor).map(
+                        (o) => this.actor.system.characteristics[o.key.toLowerCase()],
+                    );
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
@@ -639,6 +648,21 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             console.error("onRoll: Unable to locate item");
         }
         await item.roll({ event: this.event, token: this.token });
+    }
+
+    static async #onRollCharacteristicSuccess(event, target) {
+        const label = target.closest("[data-label]").dataset.label;
+        await this.actor._onCharacteristicSuccessRoll({ event, label, token: this.token });
+    }
+
+    static async #onRollCharacteristicFull(event, target) {
+        const label = target.closest("[data-label]").dataset.label;
+        await this.actor._onCharacteristicFullRoll({ event, label, token: this.token });
+    }
+
+    static async #onRollCharacteristicCasual(event, target) {
+        const label = target.closest("[data-label]").dataset.label;
+        await this.actor._onCharacteristicCasualRoll({ event, label, token: this.token });
     }
 
     static async #onToggle(event, target) {
