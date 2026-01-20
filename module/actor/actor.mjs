@@ -2017,12 +2017,12 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
-    async _onStrengthCharacteristicRoll({ label, token, characteristicValue, flavor }) {
-        console.log("_onStrengthCharacteristicRoll");
+    async _onStrengthCharacteristicRoll(options) {
+        console.log("_onStrengthCharacteristicRoll", options);
     }
 
-    async _onPrimaryNonStrengthCharacteristicRoll({ label, token, characteristicValue, flavor }) {
-        console.log("_onPrimaryNonStrengthCharacteristicRoll");
+    async _onPrimaryNonStrengthCharacteristicRoll(options) {
+        console.log("_onPrimaryNonStrengthCharacteristicRoll", options);
     }
 
     async uploadFromXml(xml, options) {
