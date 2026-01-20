@@ -1201,9 +1201,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Duration
-        if (this.baseInfo.duration) {
-            content += ` Duration: ${this.baseInfo.duration}.`;
-        }
+        content += ` Duration: ${this.system.duration}.`;
 
         if (this.end) {
             content += ` Estimated End: ${this.end}.`;
@@ -5533,27 +5531,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         return end;
-    }
-
-    get duration() {
-        console.error(`Deprecated item.duration called on ${this.detailedName()}. Use item.system.duration`);
-
-        let _duration = this.baseInfo?.duration;
-        if (this.baseInfo?.behaviors.includes("success")) {
-            _duration ??= CONFIG.HERO.DURATION_TYPES.INSTANT;
-        }
-
-        if (this.modifiers.find((o) => o.XMLID === "INHERENT")) {
-            return CONFIG.HERO.DURATION_TYPES.INHERENT;
-        }
-        if (this.modifiers.find((o) => o.XMLID === "NONPERSISTENT")) {
-            return CONFIG.HERO.DURATION_TYPES.CONSTANT;
-        }
-        if (this.modifiers.find((o) => o.XMLID === "PERSISTENT")) {
-            return CONFIG.HERO.DURATION_TYPES.PERSISTENT;
-        }
-
-        return _duration;
     }
 
     // PH: FIXME: we have 2 ways of getting this... probably should favour this.system.range
