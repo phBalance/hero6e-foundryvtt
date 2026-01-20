@@ -541,30 +541,45 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
     }
 
     get duration() {
-        // TODO: implement modifers to change duration
+        const hasContinuous = this.item.findModsByXmlid("CONTINUOUS");
+        const hasPersistent = this.item.findModsByXmlid("PERSISTENT");
+        const hasInherent = this.item.findModsByXmlid("INHERENT");
+        const hasActivationRoll = this.item.findModsByXmlid("ACTIVATIONROLL"); // 5e
+        const hasRequiresASkillRoll = this.item.findModsByXmlid("REQUIRESASKILLROLL"); // 6e
+        const hasConstsEndurance = this.item.findModsByXmlid("COSTSEND");
+        const hasNonPersistent = this.item.findModsByXmlid("NONPERSISTENT");
+        const hasInstant = this.item.findModsByXmlid("INSTANT");
+        let duration = this.item.baseInfo.duration;
 
-        if (this.item.findModsByXmlid("INHERENT")) {
-            return "inherent";
+        if (duration === CONFIG.HERO.DURATION_TYPES.INSTANT && hasContinuous) {
+            duration = CONFIG.HERO.DURATION_TYPES.CONSTANT;
         }
 
-        if (this.item.findModsByXmlid("NONPERSISTENT")) {
-            return "constant";
+        if (duration === CONFIG.HERO.DURATION_TYPES.CONSTANT && hasPersistent) {
+            duration = CONFIG.HERO.DURATION_TYPES.PERSISTENT;
         }
 
-        if (this.item.findModsByXmlid("PERSISTENT")) {
-            return "persistent";
+        if (duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT && hasInherent) {
+            duration = CONFIG.HERO.DURATION_TYPES.INHERENT;
         }
 
-        if (this.item.findModsByXmlid("CONSTANT")) {
-            return "constant";
+        if (duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT && (hasActivationRoll || hasRequiresASkillRoll)) {
+            duration = CONFIG.HERO.DURATION_TYPES.CONSTANT;
         }
 
-        if (this.item.baseInfo === undefined) {
-            console.error("missing baseInfo");
-            return "instant";
+        if (duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT && hasConstsEndurance) {
+            duration = CONFIG.HERO.DURATION_TYPES.CONSTANT;
         }
 
-        return this.item.baseInfo.duration;
+        if (duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT && hasNonPersistent) {
+            duration = CONFIG.HERO.DURATION_TYPES.CONSTANT;
+        }
+
+        if (duration === CONFIG.HERO.DURATION_TYPES.CONSTANT && hasInstant) {
+            duration = CONFIG.HERO.DURATION_TYPES.INSTANT;
+        }
+
+        return duration;
     }
 
     get #rollProps() {
