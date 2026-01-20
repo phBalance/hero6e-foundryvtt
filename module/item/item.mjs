@@ -1234,7 +1234,10 @@ export class HeroSystem6eItem extends Item {
         // If this is a constant power where to show the "to-hit" then don't bother spending
         // resources or checking for requires a roll.
         // Also don't check VPP as we use "carried" to determine if we can toggle/roll.
-        if (item.system.duration === "constant" && item.baseInfo.behaviors.includes("to-hit")) {
+        if (
+            item.system.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT &&
+            item.baseInfo.behaviors.includes("to-hit")
+        ) {
             await this.setActive(true);
 
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -1678,7 +1681,7 @@ export class HeroSystem6eItem extends Item {
             return false;
         }
 
-        if (this.baseInfo?.duration?.toLowerCase() === "instant") {
+        if (this.system.duration === CONFIG.HERO.DURATION_TYPES.INSTANT) {
             return false;
         }
 
@@ -2025,7 +2028,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // persistent duration
-        if (this.baseInfo?.duration === "persistent") {
+        if (this.system.duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT) {
             return true;
         }
 
@@ -5533,19 +5536,21 @@ export class HeroSystem6eItem extends Item {
     }
 
     get duration() {
+        console.error(`Deprecated item.duration called on ${this.detailedName()}. Use item.system.duration`);
+
         let _duration = this.baseInfo?.duration;
         if (this.baseInfo?.behaviors.includes("success")) {
-            _duration ??= "instant";
+            _duration ??= CONFIG.HERO.DURATION_TYPES.INSTANT;
         }
 
         if (this.modifiers.find((o) => o.XMLID === "INHERENT")) {
-            return "inherent";
+            return CONFIG.HERO.DURATION_TYPES.INHERENT;
         }
         if (this.modifiers.find((o) => o.XMLID === "NONPERSISTENT")) {
-            return "constant";
+            return CONFIG.HERO.DURATION_TYPES.CONSTANT;
         }
         if (this.modifiers.find((o) => o.XMLID === "PERSISTENT")) {
-            return "persistent";
+            return CONFIG.HERO.DURATION_TYPES.PERSISTENT;
         }
 
         return _duration;

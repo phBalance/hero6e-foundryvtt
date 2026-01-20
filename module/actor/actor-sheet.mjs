@@ -70,13 +70,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
         data.system = data.actor.system;
 
-        // YUCK: New dataModel branch does not require this
-        // for (const cslItem of this.actor.items.filter((i) =>
-        //     ["COMBAT_LEVELS", "MENTAL_SKILL_LEVELS"].includes(i.system.XMLID),
-        // )) {
-        //     await cslItem.setCombatSkillLevels();
-        // }
-
         // Unlinked actors can end up with duplicate items when prototype actor is re-uploaded.
         // This should NEVER happen, but checking to make sure.
         const kludgeDuplicateItemNames = [];
@@ -126,8 +119,8 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
 
             // Equipment & MartialArts are uncommon.  If there isn't any, then don't show the navigation tab.
-            data.hasEquipment = !!data.actor.items.find((o) => o.type === "equipment");
-            data.hasMartialArts = !!data.actor.items.find((o) => o.isMartialManeuver);
+            data.hasEquipment = !!data.actor.items.find((item) => item.type === "equipment");
+            data.hasMartialArts = !!data.actor.items.find((item) => item.isMartialManeuver);
 
             // NPC or PC dropdown
             data.isGM = game.user.isGM;
@@ -311,7 +304,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             for (const d of defensePowers) {
                 d.disabled = !d.isActive;
                 switch (d.duration) {
-                    case "instant":
+                    case CONFIG.HERO.DURATION_TYPES.INSTANT:
                         // Might Vary
                         switch (d.system.XMLID) {
                             case "FORCEWALL":
@@ -322,13 +315,16 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                         }
 
                         break;
-                    case "constant":
+
+                    case CONFIG.HERO.DURATION_TYPES.CONSTANT:
                         data.allConstantEffects.push(d);
                         break;
-                    case "persistent":
+
+                    case CONFIG.HERO.DURATION_TYPES.PERSISTENT:
                         data.allPersistentEffects.push(d);
                         break;
-                    case "inherent":
+
+                    case CONFIG.HERO.DURATION_TYPES.INHERENT:
                         data.allInherentEffects.push(d);
                         break;
 
