@@ -1,20 +1,5 @@
 <li class="item powers draggable expandable-document" data-document-uuid="{{this.uuid}}">
-    <div class="item-row {{this.css.row}}">
-        <div class="item-column item-cost">
-            {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
-                {{this.compoundCostForDisplay}}
-            {{else if this.isSeparator}}
-                {{!-- Show no cost--}}
-            {{else if (eq this.system.XMLID "LIST")}}
-                <span style="opacity: 0.5">{{this.listCost}}</span>
-            {{else}}
-                {{#if (eq this.parentItem.system.XMLID "COMPOUNDPOWER")}}
-                    <span style="opacity: 0.5">{{this.characterPointCostForDisplayPlusSuffix}}</span>
-                {{else}}
-                    {{this.characterPointCostForDisplayPlusSuffix}}
-                {{/if}}
-            {{/if}}
-        </div>
+    <div class="item-row {{css}}">
 
         <div class="item-column item-description item-depth-{{this.childDepth}}">
             
@@ -38,6 +23,16 @@
                 {{this.system.endEstimate}}
             {{/if}}
         </div>
+        <div class="item-column item-price">
+            {{this.priceText}}
+        </div>
+        <div class="item-column item-weight">
+            {{this.weightKg}}
+        </div>
+        <div class="item-column item-carried">
+            <input class="item-update" type="checkbox"  name="system.CARRIED"  {{checked
+                    this.system.CARRIED}} data-action="carried" data-dtype="Boolean" />
+        </div>
         <div class="item-column item-controls">
             {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}
         </div>
@@ -46,6 +41,6 @@
 
 {{#if (not this.system.collapse)}}
     {{#each this.childItems }}
-        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs') this }}
+        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-equipment-partial-item-v2.hbs') this }}
     {{/each}}
 {{/if}}

@@ -13,6 +13,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
+import { HeroRoller } from "../utility/dice.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -1960,6 +1961,68 @@ export class HeroSystem6eActor extends Actor {
         if (["TELEKINESIS", "NAKEDMODIFIER"].includes(itemData.system.XMLID)) {
             itemData.system.active = false;
         }
+    }
+
+    async _onCharacteristicSuccessRoll({ label, token }) {
+        const heroRoller = new HeroRoller().makeSuccessRoll().addDice(3);
+        await heroRoller.roll();
+
+        const charRoll = this.system.characteristics[label.toLowerCase()].roll;
+        const margin = charRoll - heroRoller.getSuccessTotal();
+        const autoSuccess = heroRoller.getAutoSuccess();
+        const useAutoSuccess = autoSuccess !== undefined;
+        const success = useAutoSuccess ? autoSuccess : margin >= 0;
+
+        const flavor = `${label.toUpperCase()} (${charRoll}-) characteristic roll ${
+            success ? "succeeded" : "failed"
+        } ${useAutoSuccess ? `due to automatic ${autoSuccess ? "success" : "failure"}` : `by ${Math.abs(margin)}`}`;
+
+        const cardHtml = await heroRoller.render(flavor);
+
+        const speaker = ChatMessage.getSpeaker({ actor: this, token });
+
+        const chatData = {
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            rolls: heroRoller.rawRolls(),
+            author: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        return ChatMessage.create(chatData);
+    }
+
+    async _onCharacteristicFullRoll({ label, token }) {
+        const characteristicValue = this.system.characteristics[label.toLocaleLowerCase()].value;
+        const flavor = `Full ${label.toUpperCase()} Roll (${characteristicValue} ${label.toUpperCase()})`;
+        await this._onCharacteristicRoll({ label, token, characteristicValue, flavor });
+    }
+
+    async _onCharacteristicCasualRoll({ label, token }) {
+        const characteristicValue = this.system.characteristics[label.toLocaleLowerCase()].value;
+        const halfCharacteristicValue = roundFavorPlayerAwayFromZero(
+            +(Math.round(characteristicValue / 2 + "e+2") + "e-2"),
+        ); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
+        const flavor = `Casual ${label.toUpperCase()} Roll (${halfCharacteristicValue} ${label.toUpperCase()})`;
+        await this._onCharacteristicRoll({ label, token, halfCharacteristicValue, flavor });
+    }
+
+    async _onCharacteristicRoll({ label, token, characteristicValue, flavor }) {
+        const isStrengthRoll = label.toUpperCase() === "STR";
+        // Strength use consumes resources. No other characteristic roll does.
+        if (isStrengthRoll) {
+            await this._onStrengthCharacteristicRoll({ label, token, characteristicValue, flavor });
+        } else {
+            await this._onPrimaryNonStrengthCharacteristicRoll({ label, token, characteristicValue, flavor });
+        }
+    }
+
+    async _onStrengthCharacteristicRoll(options) {
+        console.log("_onStrengthCharacteristicRoll", options);
+    }
+
+    async _onPrimaryNonStrengthCharacteristicRoll(options) {
+        console.log("_onPrimaryNonStrengthCharacteristicRoll", options);
     }
 
     async uploadFromXml(xml, options) {

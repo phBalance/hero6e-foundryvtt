@@ -2,6 +2,7 @@ import { HEROSYS } from "../../herosystem6e.mjs";
 import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
+import { getCharacteristicInfoArrayForActor } from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -21,9 +22,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             height: 700,
         },
         actions: {
+            carried: HeroSystemActorSheetV2.#onCarried,
             clear: HeroSystemActorSheetV2.#onClear,
             clips: HeroSystemActorSheetV2.#onClips,
+            configureToken: HeroSystemActorSheetV2.#onConfigureToken,
+            toggle: HeroSystemActorSheetV2.#onToggle,
             roll: HeroSystemActorSheetV2.#onRoll,
+            rollCharacteristicSuccess: HeroSystemActorSheetV2.#onRollCharacteristicSuccess,
+            rollCharacteristicFull: HeroSystemActorSheetV2.#onRollCharacteristicFull,
+            rollCharacteristicCasual: HeroSystemActorSheetV2.#onRollCharacteristicCasual,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
@@ -33,6 +40,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             //     icon: "fas fa-gear", // You can now add an icon to the header
             //     title: "FOO.form.title",
             contentClasses: ["standard-form"],
+            // controls: [
+            //     {
+            //         action: "configureToken",
+            //         icon: "fa-regular fa-circle-user",
+            //         label: "DOCUMENT.Token",
+            //         visible: true,
+            //         ownership: "OWNER",
+            //     },
+            // ],
             tabs: [
                 {
                     navSelector: ".sheet-navigation",
@@ -42,6 +58,30 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             ],
         },
     };
+
+    static #onConfigureToken() {
+        this.token.sheet.render({ force: true });
+    }
+
+    /*
+        Override Foundry as we want to be able to config both token and prototype token
+    */
+    _getHeaderControls() {
+        const controls = super._getHeaderControls();
+
+        // Add back in configureToken, even for linked tokens
+        if (!controls.find((c) => c.action === "configureToken")) {
+            controls.splice(1, 0, {
+                action: "configureToken",
+                icon: "fa-regular fa-circle-user",
+                label: "DOCUMENT.Token",
+                ownership: "OWNER",
+                visible: true,
+            });
+        }
+
+        return controls;
+    }
 
     get title() {
         return `${this.actor.type.toUpperCase()}: ${this.actor.name}`;
@@ -88,6 +128,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-v2.hbs`,
                 scrollable: [""],
             },
+            characteristics: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-characteristics-v2.hbs`,
+                scrollable: [""],
+            },
             equipment: {
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-v2.hbs`,
                 scrollable: [""],
@@ -120,6 +164,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "maneuvers" },
                 { id: "powers" },
                 { id: "equipment" },
+                { id: "characteristics" },
                 { id: "other" },
                 { id: "analysis" },
             ],
@@ -127,6 +172,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             initial: "attacks", // Set the initial tab
         },
     };
+
+    #martialItems = this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem);
+    #equipmentItems = this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem);
 
     async _preparePartContext(partId, context) {
         globalThis.sheet = this;
@@ -146,6 +194,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     this.#prepareContextCharacterPointTooltips(context);
                     break;
                 case "tabs":
+                    if (this.#martialItems.length === 0) {
+                        context.tabs.martial.cssClass = "empty";
+                    }
+                    if (this.#equipmentItems.length === 0) {
+                        context.tabs.equipment.cssClass = "empty";
+                    }
                     break;
                 case "attacks":
                     context.items = this.actor.items.filter((item) => item.showAttack);
@@ -157,7 +211,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     context.items = this.actor.items.filter((item) => item.baseInfo.type.includes("movement"));
                     break;
                 case "martial":
-                    context.items = this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem);
+                    context.items = this.#martialItems;
                     break;
                 case "skills":
                     context.items = this.actor.items.filter((item) => item.type === "skill" && !item.parentItem);
@@ -167,6 +221,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     break;
                 case "powers":
                     context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
+                    break;
+                case "equipment":
+                    context.items = this.#equipmentItems;
+                    break;
+                case "characteristics":
+                    context.items = getCharacteristicInfoArrayForActor(this.actor).map(
+                        (o) => this.actor.system.characteristics[o.key.toLowerCase()],
+                    );
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
@@ -552,6 +614,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         return document;
     }
 
+    static async #onCarried(event, target) {
+        event.preventDefault();
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("onCarried: Unable to locate item");
+        }
+        await item.update({ "system.CARRIED": !item.system.CARRIED });
+    }
+
     static async #onClear(event, target) {
         const inputSearch = target.closest("div.search").querySelector("input");
         if (inputSearch) {
@@ -566,7 +637,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static async #onClips(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onClips: Unable to locate roll item");
+            console.error("onClips: Unable to locate item");
         }
         await item.changeClips({ event: this.event, token: this.token });
     }
@@ -574,15 +645,39 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static async #onRoll(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onRoll: Unable to locate roll item");
+            console.error("onRoll: Unable to locate item");
         }
         await item.roll({ event: this.event, token: this.token });
+    }
+
+    static async #onRollCharacteristicSuccess(event, target) {
+        const label = target.closest("[data-label]").dataset.label;
+        await this.actor._onCharacteristicSuccessRoll({ event, label, token: this.token });
+    }
+
+    static async #onRollCharacteristicFull(event, target) {
+        const label = target.closest("[data-label]").dataset.label;
+        await this.actor._onCharacteristicFullRoll({ event, label, token: this.token });
+    }
+
+    static async #onRollCharacteristicCasual(event, target) {
+        const label = target.closest("[data-label]").dataset.label;
+        await this.actor._onCharacteristicCasualRoll({ event, label, token: this.token });
+    }
+
+    static async #onToggle(event, target) {
+        event.preventDefault();
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("onCarried: Unable to locate item");
+        }
+        await item.toggle({ event: this.event, token: this.token });
     }
 
     static async #onVpp(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onVpp: Unable to locate roll item");
+            console.error("onVpp: Unable to locate item");
         }
         await item.changeVpp({ event: this.event, token: this.token });
     }
@@ -590,7 +685,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static async #onToggleItemContainer(event, target) {
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("Unable to locate item");
+            console.error("onToggleItemContainer: Unable to locate item");
         }
         target.closest("li").classList.toggle("collapsed");
     }

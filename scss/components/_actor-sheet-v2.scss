@@ -7,6 +7,14 @@
     min-height: 0;
 }
 
+.herosystem6e.actor-sheet-v2 .controls-dropdown {
+    z-index: 2;
+}
+
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.empty {
+    filter: blur(1px);
+}
+
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/
@@ -399,6 +407,10 @@
         .system-text {
             color: blue;
         }
+
+        .vpp-unslotted {
+            text-decoration: line-through;
+        }
     }
 }
 
@@ -510,5 +522,42 @@
             minmax(auto, 1fr) /* description */
             min-content /* end */
             min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* EQUIPMENT 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.equipment {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(auto, 1fr) /* description */
+            min-content /* end */
+            min-content /* price */
+            min-content /* weight */
+            min-content /* carried */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* CHARACTERISTICS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.characteristics {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* current */
+            min-content /* max */
+            min-content /* base */
+            min-content /* levels */
+            min-content /* char */
+            min-content /* base */
+            min-content /* cost */
+            min-content /* roll */
+            minmax(auto, 1fr); /* notes */
     }
 }
