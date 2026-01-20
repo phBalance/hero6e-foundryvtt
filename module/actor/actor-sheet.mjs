@@ -303,7 +303,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             );
             for (const d of defensePowers) {
                 d.disabled = !d.isActive;
-                switch (d.duration) {
+                switch (d.system.duration) {
                     case CONFIG.HERO.DURATION_TYPES.INSTANT:
                         // Might Vary
                         switch (d.system.XMLID) {
