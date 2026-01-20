@@ -15978,7 +15978,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DOESKB",
             behaviors: ["modifier"],
-            dcAffecting: fixedValueFunction(false),
+            dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOESKB" ID="1735588757282" BASECOST="0.25" LEVELS="0" ALIAS="Does Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
