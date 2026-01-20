@@ -1,4 +1,4 @@
-<li class="item powers draggable expandable-document" data-document-uuid="{{this.uuid}}">
+<li class="item martial-arts draggable expandable-document" data-document-uuid="{{this.uuid}}">
     <div class="item-row {{css}}">
         <div class="item-column item-cost">
             {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
@@ -26,16 +26,33 @@
                 {{#if (and this.childIdx this.parentItem)}}
                     {{this.childIdx}})
                 {{/if}}
-                {{{itemFullDescription this}}}
-                {{#if this.system.NOTES}}
-                    <div class="item-notes-editable-content"><b>Notes:</b> {{{this.system.NOTES}}}</div>
+                {{#if this.system.TEXT}}
+                    <span class="system-text">{{this.system.TEXT}}</span>
+                {{else}}
+                    {{#if (ne this.system.XMLID "LIST")}}
+                        {{this.name}}:
+                    {{/if}}
+                    {{{itemFullDescription this}}}
+                    {{#if this.system.NOTES}}
+                        <div class="item-notes-editable-content"><b>Notes:</b> {{{this.system.NOTES}}}</div>
+                    {{/if}}
                 {{/if}}
             </div>
             
         </div>
-        <div class="item-column item-end">
+        <div class="item-column item-phase">
             {{#if (ne this.system.XMLID "LIST")}}
-                {{this.system.endEstimate}}
+                {{this.system.PHASE}}
+            {{/if}}
+        </div>
+        <div class="item-column item-ocv">
+            {{#if (ne this.system.XMLID "LIST")}}
+                {{this.system.OCV}}
+            {{/if}}
+        </div>
+        <div class="item-column item-dcv">
+            {{#if (ne this.system.XMLID "LIST")}}
+                {{this.system.DCV}}
             {{/if}}
         </div>
         <div class="item-column item-controls">
@@ -46,6 +63,6 @@
 
 {{#if (not this.system.collapse)}}
     {{#each this.childItems }}
-        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-powers-partial-item-v2.hbs') this }}
+        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-martial-partial-item-v2.hbs') this }}
     {{/each}}
 {{/if}}

@@ -72,8 +72,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-movements-v2.hbs`,
                 scrollable: [""],
             },
-            martialArts: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-martial-arts-v2.hbs`,
+            martial: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-martial-v2.hbs`,
                 scrollable: [""],
             },
             skills: {
@@ -115,7 +115,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "attacks" },
                 { id: "defenses" },
                 { id: "movements" },
-                { id: "martial-arts" },
+                { id: "martial" },
                 { id: "skills" },
                 { id: "maneuvers" },
                 { id: "powers" },
@@ -132,8 +132,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         globalThis.sheet = this;
         context = await super._preparePartContext(partId, context);
         context.tab = context.tabs[partId];
+        context.actor ??= this.actor;
+        context.gameSystemId ??= game.system.id;
+        context.items = null;
 
         try {
+            console.log(`_preparePartContext ${partId}`);
             switch (partId) {
                 case "aside":
                     this.#prepareContextDefenseSummary(context);
@@ -141,12 +145,36 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "header":
                     this.#prepareContextCharacterPointTooltips(context);
                     break;
+                case "tabs":
+                    break;
                 case "attacks":
                     context.items = this.actor.items.filter((item) => item.showAttack);
+                    break;
+                case "defenses":
+                    context.items = this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense"));
+                    break;
+                case "movements":
+                    context.items = this.actor.items.filter((item) => item.baseInfo.type.includes("movement"));
+                    break;
+                case "martial":
+                    context.items = this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem);
+                    break;
+                case "skills":
+                    context.items = this.actor.items.filter((item) => item.type === "skill" && !item.parentItem);
+                    break;
+                case "maneuvers":
+                    context.items = this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem);
                     break;
                 case "powers":
                     context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
                     break;
+                default:
+                    console.warn(`unhandled part=${partId}`);
+            }
+
+            // Sort items
+            if (context.items) {
+                context.items = context.items.sort((a, b) => (a.sort || 0) - (b.sort || 0));
             }
         } catch (e) {
             console.error(e);
@@ -177,8 +205,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             context.isGM = game.user.isGM;
             context.gameSystemId = game.system.id;
             context.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
-            context.hasEquipment = !!context.actor.items.find((o) => o.type === "equipment");
-            context.hasMartialArts = !!context.actor.items.find((o) => o.isMartialManeuver);
             context.useHAP = game.settings.get(game.system.id, "HAP");
         } catch (e) {
             console.error(e);
@@ -395,6 +421,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             fixed: true,
             eventName: "click",
         });
+    }
+
+    _onRender(context, options) {
+        super._onRender(context, options);
 
         // item-description-expand chevron expand collapse
         this.element.querySelectorAll('[data-action="toggleDocumentDescription"]').forEach((el) => {
@@ -405,9 +435,32 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             });
         });
 
+        // UPLOAD
+        this.element
+            .querySelector('[data-action="upload"]')
+            ?.addEventListener("change", async (event) => this._uploadCharacterSheet(event), false);
+
+        // SEARCH
         this.element.querySelectorAll('[data-action="search"]').forEach((el) => {
             el.addEventListener("keydown", this._debouncedSearch, { passive: true });
         });
+    }
+
+    async _uploadCharacterSheet(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = async function (event) {
+            const contents = event.target.result;
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(contents, "text/xml");
+            console.error("debug");
+            await this.actor.uploadFromXml(xmlDoc, { file });
+        }.bind(this);
+        reader.readAsText(file);
     }
 
     static SEARCH_DELAY = 200;

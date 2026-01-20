@@ -3,5 +3,20 @@
   data-group='primary'
   data-tab='maneuvers'
 >
-  <h1>maneuvers</h1>
+    {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-search-partial-v2.hbs') this }}
+    <section class="item-list-container">
+        <div class="item-header">
+            <div class="item-column item-description">{{localize "ActorSheet.Description"}}</div>
+            <div class="item-column item-phase">{{localize "ActorSheet.Phase"}}</div>
+            <div class="item-column item-ocv">{{localize "ActorSheet.OCV"}}</div>
+            <div class="item-column item-dcv">{{localize "ActorSheet.DCV"}}</div>
+            <div class="item-column item-controls"></div>
+        </div>
+
+        <ol class="item-list unlist">
+            {{#each items as |item|}}
+                {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-maneuvers-partial-item-v2.hbs') item }}
+            {{/each}}
+        </ol>
+    </section>
 </section>

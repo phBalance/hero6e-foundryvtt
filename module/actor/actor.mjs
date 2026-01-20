@@ -2448,6 +2448,17 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
+            // If a TEXT was previously defined, but now isn't we
+            // need to remove it as for some reason HDC doesn't
+            // specifically include it.
+            for (const item of itemsToUpdate.filter((item) => !item.system.TEXT)) {
+                const itemExisting = this.items.find((o) => o.id === item._id);
+                if (itemExisting.system.TEXT) {
+                    console.warn(`Adding TEXT to ${item.name}/${item.system.XMLID}`);
+                    item.system.TEXT = "";
+                }
+            }
+
             // update existing document, overwriting any MODIFIERS, etc
             await this.updateEmbeddedDocuments("Item", itemsToUpdate);
 
@@ -2470,7 +2481,7 @@ export class HeroSystem6eActor extends Actor {
 
             uploadProgressBar.advance(`${this.name}: applyActiveEffects`, 0);
             for (const item of this.items) {
-                await item.setActiveEffects();
+                await item.setActiveEffects({ render: false });
             }
 
             uploadProgressBar.advance(`${this.name}: applySizeEffect`, 0);

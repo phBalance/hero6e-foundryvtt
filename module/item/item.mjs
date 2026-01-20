@@ -322,7 +322,7 @@ export class HeroSystem6eItem extends Item {
     //     }
     // }
 
-    async setActiveEffects() {
+    async setActiveEffects(options = {}) {
         try {
             // If there is no actor for this item, then this item is most likely in the Items collection and we can ignore active effects for it.
             if (!this.actor) {
@@ -380,10 +380,10 @@ export class HeroSystem6eItem extends Item {
                         {
                             ...activeEffect,
                         },
-                        { diff: false },
+                        { ...options, diff: false },
                     ); // need diff=false because changes is an array
                 } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect], options);
                 }
             }
 
@@ -878,7 +878,7 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
-        await this.setActiveEffects();
+        await this.setActiveEffects(options);
 
         if (this.actor && (this.type === "equipment" || this.system.XMLID === "PENALTY_SKILL_LEVELS")) {
             await this.actor.applyEncumbrancePenalty();

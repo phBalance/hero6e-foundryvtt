@@ -395,6 +395,10 @@
         div.item-column.item-description.item-depth-2 {
             padding-left: 60px;
         }
+
+        .system-text {
+            color: blue;
+        }
     }
 }
 
@@ -414,6 +418,82 @@
             minmax(min-content, 120px) /* res */
             minmax(min-content, 32px) /* end */
             minmax(min-content, 73px) /* aoe - example for second flexible column */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* DEFENSES 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.defenses {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(auto, 1fr) /* description */
+            min-content /* end */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* DEFENSES 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.movements {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(auto, 1fr) /* description */
+            min-content /* levels */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* MARTIAL 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.martial {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content /* phase */
+            min-content /* ocv */
+            min-content /* dcv */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* SKILLS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.skills {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content /* char */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* MANEUVERS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.maneuvers {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            minmax(auto, 1fr) /* description */
+            min-content /* phase */
+            min-content /* ocv */
+            min-content /* dcv */
             min-content; /* controls */
     }
 }

@@ -193,17 +193,13 @@
         <a class="item-nav" data-tab="attacks">Attacks</a>
         <a class="item-nav" data-tab="defenses">Defenses</a>
         <a class="item-nav" data-tab="movement">Movement</a>
-        {{#if hasMartialArts}}
-            <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'martialArts'}}" data-tab="martialArts">MartialArts</a>
-        {{/if}}
-            <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'skill'}}" data-tab="skills">Skills</a>
-            <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'maneuver'}}" data-tab="maneuvers">Maneuvers</a>
-            <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'power'}}" data-tab="powers">Powers</a>
-        {{#if hasEquipment}}
-            <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'equipment'}}" data-tab="equipment">Equipment</a>
-        {{/if}}
-            <a class="item-nav" data-tab="characteristics">Characteristics</a>
-            <a class="item-nav" data-tab="other">Other</a>
+        <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'martialArts'}}" data-tab="martialArts">MartialArts</a>
+        <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'skill'}}" data-tab="skills">Skills</a>
+        <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'maneuver'}}" data-tab="maneuvers">Maneuvers</a>
+        <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'power'}}" data-tab="powers">Powers</a>
+        <a class="item-nav {{actorHeroValidationCssByItemType this.actor 'equipment'}}" data-tab="equipment">Equipment</a>
+        <a class="item-nav" data-tab="characteristics">Characteristics</a>
+        <a class="item-nav" data-tab="other">Other</a>
         {{#if alphaTesting}}
             <a class="item-nav" data-tab="analysis">Analysis</a>
         {{/if}}
