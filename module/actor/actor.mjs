@@ -2266,10 +2266,10 @@ export class HeroSystem6eActor extends Actor {
 
                 if (this.id) {
                     // Update normal values first
-                    await this.update(changesNormal);
+                    await this.update({ ...changesNormal, ...changesFiguredOrCalculated });
 
                     // Then any figured or calculated characteristis
-                    await this.update(changesFiguredOrCalculated);
+                    //await this.update(changesFiguredOrCalculated);
                 }
             }
 

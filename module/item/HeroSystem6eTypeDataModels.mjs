@@ -618,13 +618,21 @@ export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeD
 
                     if (this.ADDER) {
                         for (const adder of this.ADDER) {
-                            adder.debugModelProps();
+                            if (adder.debugModelProps) {
+                                adder.debugModelProps();
+                            } else {
+                                console.error(`debugModelProps is missing`);
+                            }
                         }
                     }
 
                     if (this.MODIFIER) {
                         for (const modifier of this.MODIFIER) {
-                            modifier.debugModelProps();
+                            if (modifier.debugModelProps) {
+                                modifier.debugModelProps();
+                            } else {
+                                console.error(`debugModelProps is missing`);
+                            }
                         }
                     }
 
