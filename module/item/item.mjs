@@ -3951,6 +3951,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         const stunOnly = this.findModsByXmlid("STUNONLY");
+        const noStun = this.modifiers.find((m) => m.XMLID === "LIMITEDPOWER" && m.OPTIONID === "NOSTUN");
         const nnd = this.findModsByXmlid("NND");
         const avld = this.findModsByXmlid("AVLD");
         if (stunOnly || nnd || avld) {
@@ -3962,6 +3963,16 @@ export class HeroSystem6eItem extends Item {
             // NOTE: Does BODY also includes DOES KB
             results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
             results.knockbackMultiplier = 1;
+        }
+
+        if (noStun) {
+            switch (results.stunBodyDamage) {
+                case CONFIG.HERO.stunBodyDamages.stunbody:
+                    results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.bodyonly;
+                    break;
+                default:
+                    console.error(`Unhandled NOSTUN for ${results.stunBodyDamage}`);
+            }
         }
 
         // AVAD

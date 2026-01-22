@@ -1177,6 +1177,14 @@ function getAttackTags(item) {
         attackTags.push(originalItemTag);
     }
 
+    // INPUT (typically PD or ED)
+    if (item.system.INPUT) {
+        attackTags.push({
+            name: item.system.INPUT,
+        });
+        if (!["PD", "ED"].includes(item.system.INPUT)) console.error("unexpected INPUT");
+    }
+
     // Use the effective item to figure out what this attack really is.
     // PH: FIXME: simplify this to effectAttackItem ... probably also used elsewhere
     const baseAttackItem = item.baseInfo.baseEffectDicePartsBundle(item, {}).baseAttackItem;
@@ -1194,14 +1202,6 @@ function getAttackTags(item) {
         if (baseAttackItemTag.name !== originalItemTag?.name && baseAttackItemTag.title !== originalItemTag?.title) {
             attackTags.push(baseAttackItemTag);
         }
-    }
-
-    // Only add in class (which we should probably rename/deprecate) when we don't already have it from the ALIAS/XMLID
-    if (!attackTags.find((tag) => tag.name?.toLowerCase() === baseAttackItem.system.class?.toLowerCase())) {
-        attackTags.push({
-            name: baseAttackItem.system.class || baseAttackItem.name,
-            title: baseAttackItem.system.XMLID,
-        });
     }
 
     if (baseAttackItem.doesKillingDamage) {
@@ -1321,6 +1321,13 @@ function getAttackTags(item) {
                 });
                 break;
             }
+
+            case "LIMITEDPOWER":
+                attackTags.push({
+                    name: `${mod.OPTION_ALIAS}`,
+                    title: `${mod.OPTIONID}\n${mod.ALIAS}\n${mod.XMLID}`,
+                });
+                break;
 
             default: {
                 const _name = `${mod.ALIAS || mod.XMLID} ${parseInt(mod.LEVELS || 0) ? mod.LEVELS : ""}`.trim();
