@@ -1443,7 +1443,7 @@ export class HeroSystem6eItem extends Item {
 
     async turnOff(options = {}) {
         if (!options.token) {
-            console.error(`turnOn: missing token`);
+            console.error(`turnOff: missing token`);
         }
 
         const item = this;
