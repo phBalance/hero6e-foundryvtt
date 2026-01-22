@@ -29,8 +29,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             toggle: HeroSystemActorSheetV2.#onToggle,
             roll: HeroSystemActorSheetV2.#onRoll,
             rollCharacteristicSuccess: HeroSystemActorSheetV2.#onRollCharacteristicSuccess,
-            rollCharacteristicFull: HeroSystemActorSheetV2.#onRollCharacteristicFull,
-            rollCharacteristicCasual: HeroSystemActorSheetV2.#onRollCharacteristicCasual,
+            rollCharacteristicFull: HeroSystemActorSheetV2.#onCharacteristicFullRoll,
+            rollCharacteristicCasual: HeroSystemActorSheetV2.#onCharacteristicCasualRoll,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
@@ -655,12 +655,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         await this.actor._onCharacteristicSuccessRoll({ event, label, token: this.token });
     }
 
-    static async #onRollCharacteristicFull(event, target) {
+    static async #onCharacteristicFullRoll(event, target) {
         const label = target.closest("[data-label]").dataset.label;
         await this.actor._onCharacteristicFullRoll({ event, label, token: this.token });
     }
 
-    static async #onRollCharacteristicCasual(event, target) {
+    static async #onCharacteristicCasualRoll(event, target) {
         const label = target.closest("[data-label]").dataset.label;
         await this.actor._onCharacteristicCasualRoll({ event, label, token: this.token });
     }

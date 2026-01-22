@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
-import { HeroSystem6eItem } from "../item/item.mjs";
+import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
@@ -14,6 +14,9 @@ import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../ut
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
+import { dehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
+import { characteristicValueToDiceParts } from "../utility/damage.mjs";
+import { Attack, actionToJSON } from "../utility/attack.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -1995,7 +1998,7 @@ export class HeroSystem6eActor extends Actor {
     async _onCharacteristicFullRoll({ label, token }) {
         const characteristicValue = this.system.characteristics[label.toLocaleLowerCase()].value;
         const flavor = `Full ${label.toUpperCase()} Roll (${characteristicValue} ${label.toUpperCase()})`;
-        await this._onCharacteristicRoll({ label, token, characteristicValue, flavor });
+        await this._onCharacteristicRoll({ label, token, targetValue: characteristicValue, flavor });
     }
 
     async _onCharacteristicCasualRoll({ label, token }) {
@@ -2004,25 +2007,124 @@ export class HeroSystem6eActor extends Actor {
             +(Math.round(characteristicValue / 2 + "e+2") + "e-2"),
         ); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
         const flavor = `Casual ${label.toUpperCase()} Roll (${halfCharacteristicValue} ${label.toUpperCase()})`;
-        await this._onCharacteristicRoll({ label, token, halfCharacteristicValue, flavor });
+        await this._onCharacteristicRoll({ label, token, targetValue: halfCharacteristicValue, flavor });
     }
 
-    async _onCharacteristicRoll({ label, token, characteristicValue, flavor }) {
+    async _onCharacteristicRoll({ label, token, targetValue, flavor }) {
         const isStrengthRoll = label.toUpperCase() === "STR";
         // Strength use consumes resources. No other characteristic roll does.
         if (isStrengthRoll) {
-            await this._onStrengthCharacteristicRoll({ label, token, characteristicValue, flavor });
+            await this._onStrengthCharacteristicRoll({ label, token, targetValue, flavor });
         } else {
-            await this._onPrimaryNonStrengthCharacteristicRoll({ label, token, characteristicValue, flavor });
+            await this._onPrimaryNonStrengthCharacteristicRoll({ label, token, targetValue, flavor });
         }
     }
 
-    async _onStrengthCharacteristicRoll(options) {
-        console.log("_onStrengthCharacteristicRoll", options);
+    async _onStrengthCharacteristicRoll({ token, targetValue, flavor }) {
+        // STR should have an item for potential damage,
+        // just like a strike and should consume resources
+        const originalStrikeItem = this.items.find((o) => o.system.XMLID === "STRIKE");
+        if (!originalStrikeItem) {
+            return ui.notifications.error(`Unable to find STRIKE item for ${this.actor.name}. Cannot perform attack`);
+        }
+
+        // Create a temporary strike attack linked to a strength item.
+        const { effectiveItem: effectiveAttackItem } = cloneToEffectiveAttackItem({
+            originalItem: originalStrikeItem,
+            effectiveRealCost: originalStrikeItem._realCost,
+            pushedRealPoints: originalStrikeItem._realCost,
+            effectiveStr: targetValue,
+            effectiveStrPushedRealPoints: 0,
+        });
+
+        // Strength use consumes resources. No other characteristic roll does.
+        const {
+            error: resourceError,
+            warning: resourceWarning,
+            resourcesUsedDescription,
+            resourcesUsedDescriptionRenderedRoll,
+        } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveAttackItem, {});
+        if (resourceError) {
+            return ui.notifications.error(`${effectiveAttackItem.name} ${resourceError}`);
+        } else if (resourceWarning) {
+            return ui.notifications.warn(`${effectiveAttackItem.name} ${resourceWarning}`);
+        }
+
+        // NOTE: Characteristic rolls can't have +1 to their roll.
+        const diceParts = characteristicValueToDiceParts(targetValue);
+        const characteristicRoller = new HeroRoller()
+            .makeNormalRoll()
+            .addDice(diceParts.d6Count)
+            .addHalfDice(diceParts.halfDieCount ? 1 : 0);
+
+        await characteristicRoller.roll();
+        const damageRenderedResult = await characteristicRoller.render();
+
+        const action = Attack.getActionInfo(effectiveAttackItem, [], { token });
+
+        const cardData = {
+            flavor,
+            item: effectiveAttackItem,
+            targetEntangle: "true",
+
+            resourcesUsedDescription: resourcesUsedDescription
+                ? `Spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`
+                : "",
+
+            actor: this,
+
+            renderedDamageRoll: damageRenderedResult,
+
+            bodyDamage: characteristicRoller.getBodyTotal(),
+            stunDamage: characteristicRoller.getStunTotal(),
+
+            rollerJSON: characteristicRoller.toJSON(),
+
+            itemJsonStr: dehydrateAttackItem(effectiveAttackItem),
+            actionDataJSON: actionToJSON(action),
+
+            user: game.user,
+        };
+
+        // render card
+        const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
+        const cardHtml = await foundryVttRenderTemplate(template, cardData);
+        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+
+        const chatData = {
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            rolls: characteristicRoller.rawRolls(),
+            author: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        return ChatMessage.create(chatData);
     }
 
-    async _onPrimaryNonStrengthCharacteristicRoll(options) {
-        console.log("_onPrimaryNonStrengthCharacteristicRoll", options);
+    async _onPrimaryNonStrengthCharacteristicRoll({ token, targetValue, flavor }) {
+        // NOTE: Characteristic rolls can't have +1 to their roll.
+        const diceParts = characteristicValueToDiceParts(targetValue);
+        const characteristicRoller = new HeroRoller()
+            .makeBasicRoll()
+            .addDice(diceParts.d6Count)
+            .addHalfDice(diceParts.halfDieCount ? 1 : 0);
+
+        await characteristicRoller.roll();
+
+        const cardHtml = await characteristicRoller.render(flavor);
+
+        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+
+        const chatData = {
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            rolls: characteristicRoller.rawRolls(),
+            author: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        return ChatMessage.create(chatData);
     }
 
     async uploadFromXml(xml, options) {
