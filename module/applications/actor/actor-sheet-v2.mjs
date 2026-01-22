@@ -497,6 +497,23 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             });
         });
 
+        // Edit input buttons
+        // REF: https://foundryvtt.wiki/en/development/api/applicationv2
+        const editableInputButtons = this.element.querySelectorAll(`input[name]:not([name=""]`);
+        for (const input of editableInputButtons) {
+            const attributeName = input.name;
+            if (foundry.utils.getProperty(this.actor, attributeName) !== undefined) {
+                // keep in mind that if your callback is a named function instead of an arrow function expression
+                // you'll need to use `bind(this)` to maintain context
+                input.addEventListener("change", (e) => {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    const newValue = e.currentTarget.value;
+                    this.actor.update({ [`${attributeName}`]: newValue });
+                });
+            }
+        }
+
         // UPLOAD
         this.element
             .querySelector('[data-action="upload"]')

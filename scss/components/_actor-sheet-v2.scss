@@ -560,4 +560,13 @@
             min-content /* roll */
             minmax(auto, 1fr); /* notes */
     }
+
+    input {
+        width: 40px;
+        text-align: center;
+    }
+
+    .item-column.item-notes {
+        text-wrap-mode: nowrap;
+    }
 }
