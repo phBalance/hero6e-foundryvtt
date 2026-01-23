@@ -148,6 +148,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-complications-v2.hbs`,
                 scrollable: [""],
             },
+            background: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-background-v2.hbs`,
+                scrollable: [""],
+            },
             other: {
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
                 scrollable: [""],
@@ -177,6 +181,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "powers" },
                 { id: "equipment" },
                 { id: "characteristics" },
+                { id: "perks" },
+                { id: "talents" },
+                { id: "complications" },
+                { id: "background" },
                 { id: "other" },
                 { id: "analysis" },
             ],
@@ -194,6 +202,18 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         maneuvers: this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem),
         powers: this.actor.items.filter((item) => item.type === "power" && !item.parentItem),
         equipment: this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem),
+        characteristics: getCharacteristicInfoArrayForActor(this.actor)
+            .filter(
+                (baseInfo) =>
+                    !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(baseInfo.key),
+            )
+            .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]),
+        perks: this.actor.items.filter((item) => item.type === "perk" && !item.parentItem),
+        talents: this.actor.items.filter((item) => item.type === "talent" && !item.parentItem),
+        complications: this.actor.items.filter((item) => item.type === "disadvantage" && !item.parentItem),
+        background: Object.keys(this.actor.system.CHARACTER.CHARACTER_INFO)
+            .filter((key) => key.match(/[A-Z_]+/))
+            .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
     };
 
     async _preparePartContext(partId, context) {
@@ -205,7 +225,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         context.items = null;
 
         try {
-            console.log(`_preparePartContext ${partId}`);
             switch (partId) {
                 case "aside":
                     this.#prepareContextDefenseSummary(context);
@@ -217,7 +236,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
 
-                        if (this.#items[tabName].length === 0) {
+                        if (!this.#items[tabName] || this.#items[tabName].length === 0) {
                             context.tabs[tabName].cssClass.push("empty");
                         }
 
@@ -230,38 +249,27 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
                     break;
                 case "attacks":
-                    context.items = this.#items[partId];
-                    break;
                 case "defenses":
-                    context.items = this.#items[partId];
-                    break;
                 case "movements":
-                    context.items = this.#items[partId];
-                    break;
                 case "martial":
-                    context.items = this.#items[partId];
-                    break;
                 case "skills":
-                    context.items = this.#items[partId];
-                    break;
                 case "maneuvers":
-                    context.items = this.#items[partId];
-                    break;
                 case "powers":
-                    context.items = this.#items[partId];
-                    break;
                 case "equipment":
+                case "characteristics":
+                case "perks":
+                case "talents":
+                case "complications":
                     context.items = this.#items[partId];
                     break;
-                case "characteristics":
-                    context.items = getCharacteristicInfoArrayForActor(this.actor)
-                        .filter(
-                            (baseInfo) =>
-                                !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(
-                                    baseInfo.key,
-                                ),
-                        )
-                        .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]);
+                case "background":
+                    context.enriched ??= {};
+                    context.enriched.BACKGROUND = await TextEditor.enrichHTML(
+                        this.actor.system.CHARACTER.CHARACTER_INFO.BACKGROUND,
+                        {
+                            relativeTo: this.document,
+                        },
+                    );
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
@@ -534,7 +542,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // Edit input buttons
         // REF: https://foundryvtt.wiki/en/development/api/applicationv2
-        const editableInputButtons = this.element.querySelectorAll(`input[name]:not([name=""]`);
+        const editableInputButtons = this.element.querySelectorAll(
+            `input[name]:not([name=""], textarea[name]:not([name=""]`,
+        );
         for (const input of editableInputButtons) {
             const attributeName = input.name;
             if (foundry.utils.getProperty(this.actor, attributeName) !== undefined) {
@@ -748,6 +758,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         if (!items || items.length === 0) {
             return "";
         }
+
+        // Make sure these are items
+        if (items[0].constructor.name !== "HeroSystem6eItem") {
+            return "";
+        }
+
         // Need to be careful here as a SKILL in a COMPOUNDPOWER as a piece of EQUIPMENT
         // doesn't show in SKILL tab
         try {

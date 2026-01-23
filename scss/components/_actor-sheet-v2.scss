@@ -607,3 +607,45 @@
         text-wrap-mode: nowrap;
     }
 }
+
+/************************************************************************
+* PERKS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.perks {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* TALENTS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.talents {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* COMPLICATIONS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.complications {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content; /* controls */
+    }
+}

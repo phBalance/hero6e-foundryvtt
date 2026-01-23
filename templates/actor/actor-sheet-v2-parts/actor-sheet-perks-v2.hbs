@@ -1,8 +1,4 @@
-<section
-  class='tab talents {{tab.cssClass}}'
-  data-group='primary'
-  data-tab='talents'
->
+<section class="tab perks {{tab.cssClass}}" data-group="primary" data-tab="perks">
     {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-search-partial-v2.hbs') this }}    
     <section class="item-list-container">
         <div class="item-header">
@@ -13,7 +9,7 @@
 
         <ol class="item-list unlist">
             {{#each items as |item|}}
-                {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-talents-partial-item-v2.hbs') item }}
+                {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-perks-partial-item-v2.hbs') item }}
             {{/each}}
         </ol>
     </section>

@@ -101,6 +101,10 @@
             "powers": "Powers",
             "characteristics": "Characteristics",
             "equipment": "Equipment",
+            "perks": "Perks",
+            "talents": "Talents",
+            "complications": "Complications",
+            "background": "Background",
             "other": "Other",
             "analysis": "Analysis"
         },
