@@ -15,6 +15,38 @@
     filter: blur(1px);
 }
 
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-error {
+    background-color: rgb(255 0 0 / 10%);
+    text-align: left;
+    box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
+}
+
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-info {
+    outline: rgb(0 0 255 / 80%) solid 1px;
+}
+
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-warning {
+    outline: #d6aa28 solid 2px;
+}
+
+.herosystem6e.actor-sheet-v2 .item-row.validation-error > div.item-column {
+    background-color: rgb(255 0 0 / 10%) !important;
+    border-top: 1px solid rgb(255 0 0 / 30%);
+    border-bottom: 1px solid rgb(255 0 0 / 30%);
+}
+
+.herosystem6e.actor-sheet-v2 .item-row.validation-info > div.item-column {
+    background-color: rgb(0 0 255 / 10%) !important;
+    border-top: 1px solid rgb(0 0 255 / 30%);
+    border-bottom: 1px solid rgb(0 0 255 / 30%);
+}
+
+.herosystem6e.actor-sheet-v2 .item-row.validation-warning > div.item-column {
+    background-color: rgb(255 255 0 / 20%) !important;
+    border-top: 1px solid rgb(255 255 0 / 30%);
+    border-bottom: 1px solid rgb(255 255 0 / 30%);
+}
+
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/
@@ -38,6 +70,10 @@
     flex-direction: column;
     padding-right: 5px;
     border-right: thin solid var(--color-tabs-border);
+
+    img.profile-img {
+        object-fit: contain;
+    }
 
     .attributes {
         text-align: center;
@@ -310,6 +346,7 @@
                         flex-shrink: 0;
 
                         img {
+                            object-fit: contain;
                             width: 30px;
                             height: 30px;
                             flex-shrink: 0;
@@ -559,5 +596,56 @@
             min-content /* cost */
             min-content /* roll */
             minmax(auto, 1fr); /* notes */
+    }
+
+    input {
+        width: 40px;
+        text-align: center;
+    }
+
+    .item-column.item-notes {
+        text-wrap-mode: nowrap;
+    }
+}
+
+/************************************************************************
+* PERKS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.perks {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* TALENTS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.talents {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content; /* controls */
+    }
+}
+
+/************************************************************************
+* COMPLICATIONS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.complications {
+    .item-list-container {
+        display: grid;
+        box-sizing: content-box;
+        grid-template-columns:
+            min-content /* costs */
+            minmax(auto, 1fr) /* description */
+            min-content; /* controls */
     }
 }

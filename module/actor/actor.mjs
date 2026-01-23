@@ -174,10 +174,6 @@ export class HeroSystem6eActor extends Actor {
         super.prepareDerivedData();
     }
 
-    /**
-     * Clear cached class collections.
-     * @internal
-     */
     _clearCachedValues() {
         this._lazy = {};
     }

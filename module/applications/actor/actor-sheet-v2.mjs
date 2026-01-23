@@ -22,6 +22,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             height: 700,
         },
         actions: {
+            actorToggle: HeroSystemActorSheetV2.#onActorToggle,
             carried: HeroSystemActorSheetV2.#onCarried,
             clear: HeroSystemActorSheetV2.#onClear,
             clips: HeroSystemActorSheetV2.#onClips,
@@ -136,6 +137,22 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-v2.hbs`,
                 scrollable: [""],
             },
+            perks: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-perks-v2.hbs`,
+                scrollable: [""],
+            },
+            talents: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-talents-v2.hbs`,
+                scrollable: [""],
+            },
+            complications: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-complications-v2.hbs`,
+                scrollable: [""],
+            },
+            background: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-background-v2.hbs`,
+                scrollable: [""],
+            },
             other: {
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
                 scrollable: [""],
@@ -165,6 +182,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "powers" },
                 { id: "equipment" },
                 { id: "characteristics" },
+                { id: "perks" },
+                { id: "talents" },
+                { id: "complications" },
+                { id: "background" },
                 { id: "other" },
                 { id: "analysis" },
             ],
@@ -173,8 +194,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         },
     };
 
-    #martialItems = this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem);
-    #equipmentItems = this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem);
+    _items;
 
     async _preparePartContext(partId, context) {
         globalThis.sheet = this;
@@ -185,7 +205,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         context.items = null;
 
         try {
-            console.log(`_preparePartContext ${partId}`);
             switch (partId) {
                 case "aside":
                     this.#prepareContextDefenseSummary(context);
@@ -194,45 +213,50 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     this.#prepareContextCharacterPointTooltips(context);
                     break;
                 case "tabs":
-                    if (this.#martialItems.length === 0) {
-                        context.tabs.martial.cssClass = "empty";
+                    for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
+                        context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
+
+                        if (!this._items[tabName] || this._items[tabName].length === 0) {
+                            context.tabs[tabName].cssClass.push("empty");
+                        }
+
+                        const hv = this.#heroValidationCssForTab(this._items[tabName]);
+                        if (hv) {
+                            context.tabs[tabName].cssClass.push(hv);
+                        }
+                        context.tabs[tabName].cssClass = context.tabs[tabName].cssClass.join(" ");
                     }
-                    if (this.#equipmentItems.length === 0) {
-                        context.tabs.equipment.cssClass = "empty";
-                    }
+
                     break;
                 case "attacks":
-                    context.items = this.actor.items.filter((item) => item.showAttack);
-                    break;
                 case "defenses":
-                    context.items = this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense"));
-                    break;
                 case "movements":
-                    context.items = this.actor.items.filter((item) => item.baseInfo.type.includes("movement"));
-                    break;
                 case "martial":
-                    context.items = this.#martialItems;
-                    break;
                 case "skills":
-                    context.items = this.actor.items.filter((item) => item.type === "skill" && !item.parentItem);
-                    break;
                 case "maneuvers":
-                    context.items = this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem);
-                    break;
                 case "powers":
-                    context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
-                    break;
                 case "equipment":
-                    context.items = this.#equipmentItems;
-                    break;
                 case "characteristics":
-                    context.items = getCharacteristicInfoArrayForActor(this.actor).map(
-                        (o) => this.actor.system.characteristics[o.key.toLowerCase()],
+                case "perks":
+                case "talents":
+                case "complications":
+                case "other": // really nothing to do
+                    context.items = this._items[partId];
+                    break;
+                case "background":
+                    context.enriched ??= {};
+                    context.enriched.BACKGROUND = await TextEditor.enrichHTML(
+                        this.actor.system.CHARACTER.CHARACTER_INFO.BACKGROUND,
+                        {
+                            relativeTo: this.document,
+                        },
                     );
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
             }
+
+            //this.#heroValidationCssByItemType(context);
 
             // Sort items
             if (context.items) {
@@ -268,6 +292,32 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             context.gameSystemId = game.system.id;
             context.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
             context.useHAP = game.settings.get(game.system.id, "HAP");
+
+            this._items = {
+                attacks: this.actor.items.filter((item) => item.showAttack),
+                defenses: this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense")),
+                movements: this.actor.items.filter((item) => item.baseInfo.type.includes("movement")),
+                martial: this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem),
+                skills: this.actor.items.filter((item) => item.type === "skill" && !item.parentItem),
+                maneuvers: this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem),
+                powers: this.actor.items.filter((item) => item.type === "power" && !item.parentItem),
+                equipment: this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem),
+                characteristics: getCharacteristicInfoArrayForActor(this.actor)
+                    .filter(
+                        (baseInfo) =>
+                            !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(
+                                baseInfo.key,
+                            ),
+                    )
+                    .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]),
+                perks: this.actor.items.filter((item) => item.type === "perk" && !item.parentItem),
+                talents: this.actor.items.filter((item) => item.type === "talent" && !item.parentItem),
+                complications: this.actor.items.filter((item) => item.type === "disadvantage" && !item.parentItem),
+                background: Object.keys(this.actor.system.CHARACTER.CHARACTER_INFO)
+                    .filter((key) => key.match(/[A-Z_]+/))
+                    .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
+                other: [true], // don't consider this empty
+            };
         } catch (e) {
             console.error(e);
         }
@@ -497,6 +547,27 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             });
         });
 
+        // Edit input buttons
+        // REF: https://foundryvtt.wiki/en/development/api/applicationv2
+        const editableInputButtons = this.element.querySelectorAll(
+            `input[name]:not([name=""]), textarea[name]:not([name=""]), select[name]:not([name=""])`,
+        );
+        for (const input of editableInputButtons) {
+            const attributeName = input.name;
+            if (foundry.utils.getProperty(this.actor, attributeName) !== undefined) {
+                // keep in mind that if your callback is a named function instead of an arrow function expression
+                // you'll need to use `bind(this)` to maintain context
+                input.addEventListener("change", (e) => {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    const newValue = e.currentTarget.value;
+                    this.actor.update({ [`${attributeName}`]: newValue });
+                });
+            } else {
+                console.error(`Unhandled INPUT name="${attributeName}`);
+            }
+        }
+
         // UPLOAD
         this.element
             .querySelector('[data-action="upload"]')
@@ -665,6 +736,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         await this.actor._onCharacteristicCasualRoll({ event, label, token: this.token });
     }
 
+    static async #onActorToggle(event, target) {
+        event.preventDefault();
+        const attribute = target.name;
+        const value = foundry.utils.getProperty(this.actor, attribute);
+        if (value === undefined) {
+            console.error(`Unhandled actor.${attribute}`);
+            return;
+        }
+        await this.actor.update({ [`${attribute}`]: !value });
+    }
+
     static async #onToggle(event, target) {
         event.preventDefault();
         const item = this._getEmbeddedDocument(target);
@@ -688,5 +770,53 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             console.error("onToggleItemContainer: Unable to locate item");
         }
         target.closest("li").classList.toggle("collapsed");
+    }
+
+    #heroValidationCssForTab(items) {
+        if (!items || items.length === 0) {
+            return "";
+        }
+
+        // Make sure these are items
+        if (items[0].constructor.name !== "HeroSystem6eItem") {
+            return "";
+        }
+
+        // Need to be careful here as a SKILL in a COMPOUNDPOWER as a piece of EQUIPMENT
+        // doesn't show in SKILL tab
+        try {
+            function getKeyByValue(object, value) {
+                return Object.keys(object).find((key) => object[key] === value);
+            }
+
+            let itemsWithChildren = items;
+            for (const item of items) {
+                itemsWithChildren = [...itemsWithChildren, ...item.childItems];
+                for (const item2 of item.childItems) {
+                    itemsWithChildren = [...itemsWithChildren, ...item2.childItems];
+                    for (const item3 of item2.childItems) {
+                        itemsWithChildren = [...itemsWithChildren, ...item3.childItems];
+                    }
+                }
+            }
+
+            const validationsOfType = itemsWithChildren.reduce((accumulator, currentArray) => {
+                return accumulator.concat(currentArray.heroValidation);
+            }, []);
+
+            if (!validationsOfType) {
+                return "";
+            }
+
+            const severityMax = Math.max(0, ...validationsOfType.map((m) => m.severity ?? 0));
+
+            if (severityMax > 0) {
+                return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        return "";
     }
 }

@@ -3,5 +3,17 @@
   data-group='primary'
   data-tab='other'
 >
-  <h1>other</h1>
+      <div class="form-group">
+        <label>Initiative Characteristic</label>
+        <select name="system.initiativeCharacteristic" data-dtype="text">
+            <option value="dex">DEX</option>
+            <option value="ego" {{#if (eq actor.system.initiativeCharacteristic 'ego' )}}selected{{/if}}>EGO
+            </option>
+        </select>
+    </div>
+
+    <div class="form-group" title="Used to determine when powers with Only In Heroic Identity (OIHID) work.">
+        <label>Heroic Identity</label>
+        <input type="checkbox" name="system.heroicIdentity" data-action="actorToggle" {{checked actor.system.heroicIdentity}}/>
+    </div>
 </section>
