@@ -29,6 +29,24 @@
     outline: #d6aa28 solid 2px;
 }
 
+.herosystem6e.actor-sheet-v2 .item-row.validation-error > div.item-column {
+    background-color: rgb(255 0 0 / 10%) !important;
+    border-top: 1px solid rgb(255 0 0 / 30%);
+    border-bottom: 1px solid rgb(255 0 0 / 30%);
+}
+
+.herosystem6e.actor-sheet-v2 .item-row.validation-info > div.item-column {
+    background-color: rgb(0 0 255 / 10%) !important;
+    border-top: 1px solid rgb(0 0 255 / 30%);
+    border-bottom: 1px solid rgb(0 0 255 / 30%);
+}
+
+.herosystem6e.actor-sheet-v2 .item-row.validation-warning > div.item-column {
+    background-color: rgb(255 255 0 / 20%) !important;
+    border-top: 1px solid rgb(255 255 0 / 30%);
+    border-bottom: 1px solid rgb(255 255 0 / 30%);
+}
+
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/

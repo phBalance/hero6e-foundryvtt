@@ -203,7 +203,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     break;
                 case "tabs":
                     for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
-                        context.tabs[tabName].cssClass = [];
+                        context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
 
                         if (["martial", "equipment"].includes(tabName) && this.#items[tabName].length === 0) {
                             context.tabs[tabName].cssClass.push("empty");

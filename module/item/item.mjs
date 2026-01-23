@@ -780,6 +780,23 @@ export class HeroSystem6eItem extends Item {
         return _heroValidations;
     }
 
+    get validationCss() {
+        function getKeyByValue(object, value) {
+            return Object.keys(object).find((key) => object[key] === value);
+        }
+        const severityMax = Math.max(0, ...this.heroValidation.map((m) => m.severity ?? 0));
+
+        if (severityMax > 0) {
+            return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+        }
+
+        return "";
+    }
+
+    get validationTooltip() {
+        return this.heroValidation.map((m) => m.message).join(", ");
+    }
+
     get pslRangePenaltyOffsetItems() {
         const psls = this.actor.items.filter(
             (pslItem) =>
