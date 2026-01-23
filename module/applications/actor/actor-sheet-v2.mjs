@@ -136,6 +136,18 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-v2.hbs`,
                 scrollable: [""],
             },
+            perks: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-perks-v2.hbs`,
+                scrollable: [""],
+            },
+            talents: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-talents-v2.hbs`,
+                scrollable: [""],
+            },
+            complications: {
+                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-complications-v2.hbs`,
+                scrollable: [""],
+            },
             other: {
                 template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
                 scrollable: [""],
@@ -205,7 +217,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
 
-                        if (["martial", "equipment"].includes(tabName) && this.#items[tabName].length === 0) {
+                        if (this.#items[tabName].length === 0) {
                             context.tabs[tabName].cssClass.push("empty");
                         }
 

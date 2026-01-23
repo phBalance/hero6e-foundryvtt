@@ -1,0 +1,3 @@
+<section class="tab perks {{tab.cssClass}}" data-group="primary" data-tab="perks">
+    <h1>perks</h1>
+</section>
