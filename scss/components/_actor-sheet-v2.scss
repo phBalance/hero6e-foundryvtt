@@ -15,6 +15,20 @@
     filter: blur(1px);
 }
 
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-error {
+    background-color: rgb(255 0 0 / 10%);
+    text-align: left;
+    box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
+}
+
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-info {
+    outline: rgb(0 0 255 / 80%) solid 1px;
+}
+
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-warning {
+    outline: #d6aa28 solid 2px;
+}
+
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/
@@ -38,6 +52,10 @@
     flex-direction: column;
     padding-right: 5px;
     border-right: thin solid var(--color-tabs-border);
+
+    img.profile-img {
+        object-fit: contain;
+    }
 
     .attributes {
         text-align: center;
@@ -310,6 +328,7 @@
                         flex-shrink: 0;
 
                         img {
+                            object-fit: contain;
                             width: 30px;
                             height: 30px;
                             flex-shrink: 0;

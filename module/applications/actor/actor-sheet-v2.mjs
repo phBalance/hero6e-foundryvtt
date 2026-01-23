@@ -173,8 +173,16 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         },
     };
 
-    #martialItems = this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem);
-    #equipmentItems = this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem);
+    #items = {
+        attacks: this.actor.items.filter((item) => item.showAttack),
+        defenses: this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense")),
+        movements: this.actor.items.filter((item) => item.baseInfo.type.includes("movement")),
+        martial: this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem),
+        skills: this.actor.items.filter((item) => item.type === "skill" && !item.parentItem),
+        maneuvers: this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem),
+        powers: this.actor.items.filter((item) => item.type === "power" && !item.parentItem),
+        equipment: this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem),
+    };
 
     async _preparePartContext(partId, context) {
         globalThis.sheet = this;
@@ -194,45 +202,60 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     this.#prepareContextCharacterPointTooltips(context);
                     break;
                 case "tabs":
-                    if (this.#martialItems.length === 0) {
-                        context.tabs.martial.cssClass = "empty";
+                    for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
+                        context.tabs[tabName].cssClass = [];
+
+                        if (["martial", "equipment"].includes(tabName) && this.#items[tabName].length === 0) {
+                            context.tabs[tabName].cssClass.push("empty");
+                        }
+
+                        const hv = this.#heroValidationCssForTab(this.#items[tabName]);
+                        if (hv) {
+                            context.tabs[tabName].cssClass.push(hv);
+                        }
+                        context.tabs[tabName].cssClass = context.tabs[tabName].cssClass.join(" ");
                     }
-                    if (this.#equipmentItems.length === 0) {
-                        context.tabs.equipment.cssClass = "empty";
-                    }
+
                     break;
                 case "attacks":
-                    context.items = this.actor.items.filter((item) => item.showAttack);
+                    context.items = this.#items[partId];
                     break;
                 case "defenses":
-                    context.items = this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense"));
+                    context.items = this.#items[partId];
                     break;
                 case "movements":
-                    context.items = this.actor.items.filter((item) => item.baseInfo.type.includes("movement"));
+                    context.items = this.#items[partId];
                     break;
                 case "martial":
-                    context.items = this.#martialItems;
+                    context.items = this.#items[partId];
                     break;
                 case "skills":
-                    context.items = this.actor.items.filter((item) => item.type === "skill" && !item.parentItem);
+                    context.items = this.#items[partId];
                     break;
                 case "maneuvers":
-                    context.items = this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem);
+                    context.items = this.#items[partId];
                     break;
                 case "powers":
-                    context.items = this.actor.items.filter((item) => item.type === "power" && !item.parentItem);
+                    context.items = this.#items[partId];
                     break;
                 case "equipment":
-                    context.items = this.#equipmentItems;
+                    context.items = this.#items[partId];
                     break;
                 case "characteristics":
-                    context.items = getCharacteristicInfoArrayForActor(this.actor).map(
-                        (o) => this.actor.system.characteristics[o.key.toLowerCase()],
-                    );
+                    context.items = getCharacteristicInfoArrayForActor(this.actor)
+                        .filter(
+                            (baseInfo) =>
+                                !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(
+                                    baseInfo.key,
+                                ),
+                        )
+                        .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]);
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
             }
+
+            //this.#heroValidationCssByItemType(context);
 
             // Sort items
             if (context.items) {
@@ -511,6 +534,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     const newValue = e.currentTarget.value;
                     this.actor.update({ [`${attributeName}`]: newValue });
                 });
+            } else {
+                console.error(`Unhandled INPUT name="${attributeName}`);
             }
         }
 
@@ -705,5 +730,47 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             console.error("onToggleItemContainer: Unable to locate item");
         }
         target.closest("li").classList.toggle("collapsed");
+    }
+
+    #heroValidationCssForTab(items) {
+        if (!items || items.length === 0) {
+            return "";
+        }
+        // Need to be careful here as a SKILL in a COMPOUNDPOWER as a piece of EQUIPMENT
+        // doesn't show in SKILL tab
+        try {
+            function getKeyByValue(object, value) {
+                return Object.keys(object).find((key) => object[key] === value);
+            }
+
+            let itemsWithChildren = items;
+            for (const item of items) {
+                itemsWithChildren = [...itemsWithChildren, ...item.childItems];
+                for (const item2 of item.childItems) {
+                    itemsWithChildren = [...itemsWithChildren, ...item2.childItems];
+                    for (const item3 of item2.childItems) {
+                        itemsWithChildren = [...itemsWithChildren, ...item3.childItems];
+                    }
+                }
+            }
+
+            const validationsOfType = itemsWithChildren.reduce((accumulator, currentArray) => {
+                return accumulator.concat(currentArray.heroValidation);
+            }, []);
+
+            if (!validationsOfType) {
+                return "";
+            }
+
+            const severityMax = Math.max(0, ...validationsOfType.map((m) => m.severity ?? 0));
+
+            if (severityMax > 0) {
+                return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        return "";
     }
 }

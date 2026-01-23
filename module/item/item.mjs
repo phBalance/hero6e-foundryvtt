@@ -307,20 +307,14 @@ export class HeroSystem6eItem extends Item {
         return super._onCreate(data, options, userId);
     }
 
-    // prepareData() {
-    //     if (this.system.debugModelProps) {
-    //         this.system.debugModelProps();
-    //     } else {
-    //         if (this.type === "attack") {
-    //             console.warn(`Invalid item.type = ${this.type} for ${this.actor?.name}`, this);
-    //             return;
-    //         }
-    //         if (this.type === "misc") {
-    //             return; // don't care about misc
-    //         }
-    //         console.error(`Invalid item.type = ${this.type} for ${this.actor?.name}`, this);
-    //     }
-    // }
+    prepareData() {
+        this._clearCachedValues();
+        super.prepareData();
+    }
+
+    _clearCachedValues() {
+        this._lazy = {};
+    }
 
     async setActiveEffects(options = {}) {
         try {
@@ -707,6 +701,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get heroValidation() {
+        if (this._lazy?.heroValidation) {
+            return this._lazy.heroValidation;
+        }
+
         const _heroValidations = [];
 
         if (this.baseInfo) {
@@ -778,6 +776,7 @@ export class HeroSystem6eItem extends Item {
             });
         }
 
+        this._lazy.heroValidation = _heroValidations;
         return _heroValidations;
     }
 
@@ -3968,7 +3967,7 @@ export class HeroSystem6eItem extends Item {
         if (noStun) {
             switch (results.stunBodyDamage) {
                 case CONFIG.HERO.stunBodyDamages.stunbody:
-                    results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.bodyonly;
+                    results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.bodynly;
                     break;
                 default:
                     console.error(`Unhandled NOSTUN for ${results.stunBodyDamage}`);
