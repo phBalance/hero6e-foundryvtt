@@ -22,6 +22,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             height: 700,
         },
         actions: {
+            actorToggle: HeroSystemActorSheetV2.#onActorToggle,
             carried: HeroSystemActorSheetV2.#onCarried,
             clear: HeroSystemActorSheetV2.#onClear,
             clips: HeroSystemActorSheetV2.#onClips,
@@ -193,28 +194,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         },
     };
 
-    #items = {
-        attacks: this.actor.items.filter((item) => item.showAttack),
-        defenses: this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense")),
-        movements: this.actor.items.filter((item) => item.baseInfo.type.includes("movement")),
-        martial: this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem),
-        skills: this.actor.items.filter((item) => item.type === "skill" && !item.parentItem),
-        maneuvers: this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem),
-        powers: this.actor.items.filter((item) => item.type === "power" && !item.parentItem),
-        equipment: this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem),
-        characteristics: getCharacteristicInfoArrayForActor(this.actor)
-            .filter(
-                (baseInfo) =>
-                    !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(baseInfo.key),
-            )
-            .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]),
-        perks: this.actor.items.filter((item) => item.type === "perk" && !item.parentItem),
-        talents: this.actor.items.filter((item) => item.type === "talent" && !item.parentItem),
-        complications: this.actor.items.filter((item) => item.type === "disadvantage" && !item.parentItem),
-        background: Object.keys(this.actor.system.CHARACTER.CHARACTER_INFO)
-            .filter((key) => key.match(/[A-Z_]+/))
-            .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
-    };
+    _items;
 
     async _preparePartContext(partId, context) {
         globalThis.sheet = this;
@@ -236,11 +216,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
 
-                        if (!this.#items[tabName] || this.#items[tabName].length === 0) {
+                        if (!this._items[tabName] || this._items[tabName].length === 0) {
                             context.tabs[tabName].cssClass.push("empty");
                         }
 
-                        const hv = this.#heroValidationCssForTab(this.#items[tabName]);
+                        const hv = this.#heroValidationCssForTab(this._items[tabName]);
                         if (hv) {
                             context.tabs[tabName].cssClass.push(hv);
                         }
@@ -260,7 +240,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "perks":
                 case "talents":
                 case "complications":
-                    context.items = this.#items[partId];
+                case "other": // really nothing to do
+                    context.items = this._items[partId];
                     break;
                 case "background":
                     context.enriched ??= {};
@@ -311,6 +292,32 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             context.gameSystemId = game.system.id;
             context.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
             context.useHAP = game.settings.get(game.system.id, "HAP");
+
+            this._items = {
+                attacks: this.actor.items.filter((item) => item.showAttack),
+                defenses: this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense")),
+                movements: this.actor.items.filter((item) => item.baseInfo.type.includes("movement")),
+                martial: this.actor.items.filter((item) => item.type === "martialart" && !item.parentItem),
+                skills: this.actor.items.filter((item) => item.type === "skill" && !item.parentItem),
+                maneuvers: this.actor.items.filter((item) => item.type === "maneuver" && !item.parentItem),
+                powers: this.actor.items.filter((item) => item.type === "power" && !item.parentItem),
+                equipment: this.actor.items.filter((item) => item.type === "equipment" && !item.parentItem),
+                characteristics: getCharacteristicInfoArrayForActor(this.actor)
+                    .filter(
+                        (baseInfo) =>
+                            !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(
+                                baseInfo.key,
+                            ),
+                    )
+                    .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]),
+                perks: this.actor.items.filter((item) => item.type === "perk" && !item.parentItem),
+                talents: this.actor.items.filter((item) => item.type === "talent" && !item.parentItem),
+                complications: this.actor.items.filter((item) => item.type === "disadvantage" && !item.parentItem),
+                background: Object.keys(this.actor.system.CHARACTER.CHARACTER_INFO)
+                    .filter((key) => key.match(/[A-Z_]+/))
+                    .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
+                other: [true], // don't consider this empty
+            };
         } catch (e) {
             console.error(e);
         }
@@ -543,7 +550,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // Edit input buttons
         // REF: https://foundryvtt.wiki/en/development/api/applicationv2
         const editableInputButtons = this.element.querySelectorAll(
-            `input[name]:not([name=""], textarea[name]:not([name=""]`,
+            `input[name]:not([name=""]), textarea[name]:not([name=""]), select[name]:not([name=""])`,
         );
         for (const input of editableInputButtons) {
             const attributeName = input.name;
@@ -727,6 +734,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     static async #onCharacteristicCasualRoll(event, target) {
         const label = target.closest("[data-label]").dataset.label;
         await this.actor._onCharacteristicCasualRoll({ event, label, token: this.token });
+    }
+
+    static async #onActorToggle(event, target) {
+        event.preventDefault();
+        const attribute = target.name;
+        const value = foundry.utils.getProperty(this.actor, attribute);
+        if (value === undefined) {
+            console.error(`Unhandled actor.${attribute}`);
+            return;
+        }
+        await this.actor.update({ [`${attribute}`]: !value });
     }
 
     static async #onToggle(event, target) {
