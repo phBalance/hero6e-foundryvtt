@@ -6058,7 +6058,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     validations.push({
                         property: "OPTION_ALIAS",
                         message: `Expecting one of these words [${Object.keys(HERO.CSL_WEAPON_MASTER_WEAPON_TYPES).join(", ")}]`,
-                        example: `DCV with HTH and Ranged combat`,
+                        example: `all Ranged Normal Damage weapons`,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
                 }
