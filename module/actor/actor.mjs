@@ -715,7 +715,7 @@ export class HeroSystem6eActor extends Actor {
             if (charPowerInfo.figured5eCharacteristic) {
                 const levels = this.system[charPowerInfo.key].LEVELS;
                 if (levels == null) {
-                    console.error(`${this.name} has ${key}.LEVELS that is ${levels}`);
+                    console.warn(`${this.name} has ${key}.LEVELS that is ${levels}`);
                 }
 
                 // Kludge: we only need to floor SPD as everything is prerounded. If we don't round then
