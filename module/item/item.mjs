@@ -1239,8 +1239,8 @@ export class HeroSystem6eItem extends Item {
         ChatMessage.create(chatData);
     }
 
-    async turnOn(options) {
-        if (!options.token) {
+    async turnOn(options = {}) {
+        if (!options.token && this.actor?.getActiveTokens().length > 0) {
             console.error(`turnOn: missing token`);
         }
 
@@ -1458,7 +1458,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     async turnOff(options = {}) {
-        if (!options.token) {
+        if (!options.token && this.actor?.getActiveTokens().length > 0) {
             console.error(`turnOff: missing token`);
         }
 
@@ -6321,7 +6321,9 @@ export class HeroSystem6eItem extends Item {
      */
     cslAppliesTo(attackItem) {
         if (!this.isCsl) {
-            console.error("This is not a CSL", this, attackItem);
+            if (!this.actor?.name.startsWith("_Quench")) {
+                console.error("This is not a CSL", this, attackItem);
+            }
             return false;
         }
 
