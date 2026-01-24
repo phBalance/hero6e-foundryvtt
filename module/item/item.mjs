@@ -3984,7 +3984,7 @@ export class HeroSystem6eItem extends Item {
         if (noStun) {
             switch (results.stunBodyDamage) {
                 case CONFIG.HERO.stunBodyDamages.stunbody:
-                    results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.bodynly;
+                    results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.bodyonly;
                     break;
                 default:
                     console.error(`Unhandled NOSTUN for ${results.stunBodyDamage}`);
