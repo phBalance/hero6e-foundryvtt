@@ -177,7 +177,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     // Actual items
                     for (const attackOrFramework of item.actor.cslItems) {
                         // Make no attempt to disqualify frameworks although we could enumerate and exclude if nothing matches
-                        if (attackOrFramework.type !== "framework") {
+                        if (attackOrFramework.type !== "framework" && item.system.XMLID !== "WEAPON_MASTER") {
                             // Is this attack a potentially good match? CSL needs to provide ocv to match attacks that use ocv
                             // and omcv for attacks that use omcv.
                             // If it matches neither, then it's probably a purely defensive CSL and it's ok to show no items.
