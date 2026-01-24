@@ -1183,8 +1183,6 @@ function getAttackTags(item) {
             attackTags.push({
                 name: item.system.INPUT,
             });
-        } else {
-            console.warn(`etAttackTags: unexpected INPUT=${item.system.INPUT}`);
         }
     }
 
