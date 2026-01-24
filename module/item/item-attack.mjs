@@ -1179,10 +1179,13 @@ function getAttackTags(item) {
 
     // INPUT (typically PD or ED)
     if (item.system.INPUT) {
-        attackTags.push({
-            name: item.system.INPUT,
-        });
-        if (!["PD", "ED"].includes(item.system.INPUT)) console.error("unexpected INPUT");
+        if (["PD", "ED"].includes(item.system.INPUT)) {
+            attackTags.push({
+                name: item.system.INPUT,
+            });
+        } else {
+            console.warn(`etAttackTags: unexpected INPUT=${item.system.INPUT}`);
+        }
     }
 
     // Use the effective item to figure out what this attack really is.
