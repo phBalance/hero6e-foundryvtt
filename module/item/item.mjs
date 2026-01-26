@@ -14,12 +14,7 @@ import {
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
-import {
-    composeMemoizableObjectFunction,
-    composeObjectFunction,
-    restoreComposedMemoizableObjectFunction,
-    restoreComposedObjectFunction,
-} from "../utility/cache.mjs";
+import { HeroObjectCacheMixin } from "../utility/cache.mjs";
 import {
     foundryVttDeleteProperty,
     getPowerInfo,
@@ -250,7 +245,7 @@ const itemTypeToIcon = {
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
  */
-export class HeroSystem6eItem extends Item {
+export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     static async chatListeners(html) {
         html.on("click", ".roll-damage", this.__onChatCardAction.bind(this));
     }
@@ -313,16 +308,16 @@ export class HeroSystem6eItem extends Item {
         return super._onCreate(data, options, userId);
     }
 
-    _lazy = {};
+    prepareDerivedData() {
+        super.prepareDerivedData();
 
-    prepareData() {
-        this.clearLazyInitializedValues();
-        super.prepareData();
+        this._clearCachedObjectData();
 
-        composeObjectFunction.call(this, "getItemDescription");
-        composeObjectFunction.call(this, "heroValidation");
+        this.composeObjectFunction("getItemDescription");
+        this.composeObjectFunction("heroValidation");
+        this.composeObjectFunction("attackDefenseVs");
 
-        composeMemoizableObjectFunction.call(this, "findModsByXmlid");
+        this.composeMemoizableObjectFunction("findModsByXmlid");
     }
 
     /* --------------------------------------------- */
@@ -331,13 +326,8 @@ export class HeroSystem6eItem extends Item {
      * Clear cached class collections.
      * @internal
      */
-    clearLazyInitializedValues() {
-        restoreComposedObjectFunction.call(this, "getItemDescription");
-        restoreComposedObjectFunction.call(this, "heroValidation");
-        restoreComposedObjectFunction.call(this, "damage");
-
-        restoreComposedMemoizableObjectFunction.call(this, "findModsByXmlid");
-
+    _clearCachedObjectData() {
+        // Clear all the rest
         this._lazy = {};
     }
 
