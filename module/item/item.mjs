@@ -313,10 +313,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         this._clearCachedObjectData();
 
-        this.composeObjectFunction("getItemDescription");
-        this.composeObjectFunction("heroValidation");
-        this.composeObjectFunction("attackDefenseVs");
-
+        this.composeMemoizableObjectFunction("getItemDescription");
+        this.composeMemoizableObjectFunction("heroValidation");
+        this.composeMemoizableObjectFunction("attackDefenseVs");
         this.composeMemoizableObjectFunction("findModsByXmlid");
     }
 

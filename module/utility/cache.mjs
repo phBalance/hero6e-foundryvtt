@@ -52,25 +52,12 @@ export class HeroSystemGenericSharedCache {
 
 export const HeroObjectCacheMixin = (Base) =>
     class HeroObjectCache extends Base {
-        _generateObjectComposerFunction(funcName, originalFunc) {
-            return function (...args) {
-                const cachedValue = foundry.utils.getProperty(this._cache, `composedObjectFunctions.${funcName}`);
-                if (cachedValue && Object.hasOwn(cachedValue, "retValue")) {
-                    foundry.utils.setProperty(
-                        this._cache,
-                        `composedObjectFunctions.${funcName}.cacheHits`,
-                        cachedValue.cacheHits + 1,
-                    );
+        prepareDerivedData() {
+            super.prepareDerivedData();
 
-                    return cachedValue.retValue;
-                }
-
-                const retValue = originalFunc.call(this, ...args);
-
-                foundry.utils.setProperty(this._cache, `composedObjectFunctions.${funcName}.retValue`, retValue);
-
-                return retValue;
-            };
+            // NOTE: Can't define and initialize as an object element as the flows sometimes have prepareDerivedData being called before property initialization
+            this._cache ??= {};
+            this.restoreAllComposedObjectFunctions();
         }
 
         _generateMemoizableObjectComposerFunction(funcName, originalFunc) {
@@ -98,60 +85,6 @@ export const HeroObjectCacheMixin = (Base) =>
 
                 return retValue;
             };
-        }
-
-        prepareDerivedData() {
-            super.prepareDerivedData();
-
-            // NOTE: Can't define and initialize as an object element as the flows sometimes have prepareDerivedData being called before property initialization
-            this._cache ??= {};
-            this.restoreAllComposedObjectFunctions();
-        }
-
-        /**
-         * @param {Function} func - function on the this object
-         */
-        composeObjectFunction(funcName) {
-            const descriptor = foundry.utils.deepClone(
-                Reflect.getOwnPropertyDescriptor(this.constructor.prototype, funcName),
-            );
-            const originalFunc = descriptor.value ?? descriptor.get;
-            foundry.utils.setProperty(this._cache, `composedObjectFunctions.${funcName}`, {
-                origFunc: originalFunc,
-                cacheHits: 0,
-            });
-
-            if (descriptor.value) {
-                descriptor.value = this._generateObjectComposerFunction(funcName, originalFunc);
-            } else if (descriptor.get || descriptor.set) {
-                descriptor.get = this._generateObjectComposerFunction(funcName, originalFunc);
-            } else {
-                console.error(
-                    `Asked to composeObjectFunction for ${funcName} that is not a function or getter - are you sure?`,
-                    descriptor,
-                );
-            }
-
-            Object.defineProperty(this, funcName, descriptor);
-        }
-
-        // PH: FIXME: Not sure if it would be better to just clear out retValue && cacheHits? Perhaps provide a different function.
-        restoreComposedObjectFunction(funcName) {
-            const originalFunc = foundry.utils.getProperty(this._cache, `composedObjectFunctions.${funcName}.origFunc`);
-            if (originalFunc) {
-                const descriptor = foundry.utils.deepClone(
-                    Reflect.getOwnPropertyDescriptor(this.constructor.prototype, funcName),
-                );
-                if (descriptor.value) {
-                    descriptor.value = originalFunc;
-                } else if (descriptor.get) {
-                    descriptor.get = originalFunc;
-                }
-
-                Object.defineProperty(this, funcName, descriptor);
-            }
-
-            foundryVttDeleteProperty(this._cache, `composedObjectFunctions.${funcName}`);
         }
 
         composeMemoizableObjectFunction(funcName) {
