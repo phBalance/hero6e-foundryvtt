@@ -118,7 +118,7 @@ export const HeroObjectCacheMixin = (Base) =>
             }
 
             // Replace the function with the composable function
-            // Object.defineProperty(this, funcName, descriptor);
+            Object.defineProperty(this, funcName, descriptor);
         }
 
         restoreComposedMemoizableObjectFunction(funcName) {
