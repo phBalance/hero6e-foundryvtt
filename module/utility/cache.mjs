@@ -50,6 +50,21 @@ export class HeroSystemGenericSharedCache {
     }
 }
 
+function getPropertyDescriptorUpChain(obj, propName) {
+    let current = obj;
+    while (current != null) {
+        const descriptor = Reflect.getOwnPropertyDescriptor(current, propName);
+        if (descriptor) {
+            return descriptor; // Found the descriptor
+        }
+
+        // Move up the prototype chain
+        current = Reflect.getPrototypeOf(current);
+    }
+
+    return undefined;
+}
+
 export const HeroObjectCacheMixin = (Base) =>
     class HeroObjectCache extends Base {
         prepareDerivedData() {
@@ -63,14 +78,11 @@ export const HeroObjectCacheMixin = (Base) =>
         _generateMemoizableObjectComposerFunction(funcName, originalFunc) {
             return function (...args) {
                 const joinedArgs = args.join("|");
-                const cachedValue = foundry.utils.getProperty(
-                    this._cache,
-                    `composedMemoizableObjectFunctions.${funcName}.${joinedArgs}`,
-                );
+                const cachedValue = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`);
                 if (cachedValue && Object.hasOwn(cachedValue, "retValue")) {
                     foundry.utils.setProperty(
                         this._cache,
-                        `composedMemoizableObjectFunctions.${funcName}.${joinedArgs}.cacheHits`,
+                        `cmofs.${funcName}.${joinedArgs}.cacheHits`,
                         cachedValue.cacheHits + 1,
                     );
                     return cachedValue.retValue;
@@ -78,7 +90,7 @@ export const HeroObjectCacheMixin = (Base) =>
 
                 const retValue = originalFunc.call(this, ...args);
 
-                foundry.utils.setProperty(this._cache, `composedMemoizableObjectFunctions.${funcName}.${joinedArgs}`, {
+                foundry.utils.setProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`, {
                     retValue,
                     cacheHits: 0,
                 });
@@ -89,14 +101,10 @@ export const HeroObjectCacheMixin = (Base) =>
 
         composeMemoizableObjectFunction(funcName) {
             const descriptor = foundry.utils.deepClone(
-                Reflect.getOwnPropertyDescriptor(this.constructor.prototype, funcName),
+                getPropertyDescriptorUpChain(this.constructor.prototype, funcName),
             );
             const originalFunc = descriptor.value ?? descriptor.get;
-            foundry.utils.setProperty(
-                this._cache,
-                `composedMemoizableObjectFunctions.${funcName}.origFunc`,
-                originalFunc,
-            );
+            foundry.utils.setProperty(this._cache, `cmofs.${funcName}.origFunc`, originalFunc);
 
             if (descriptor.value) {
                 descriptor.value = this._generateMemoizableObjectComposerFunction(funcName, originalFunc);
@@ -109,17 +117,15 @@ export const HeroObjectCacheMixin = (Base) =>
                 );
             }
 
-            Object.defineProperty(this, funcName, descriptor);
+            // Replace the function with the composable function
+            // Object.defineProperty(this, funcName, descriptor);
         }
 
         restoreComposedMemoizableObjectFunction(funcName) {
-            const originalFunc = foundry.utils.getProperty(
-                this._cache,
-                `composedMemoizableObjectFunctions.${funcName}.origFunc`,
-            );
+            const originalFunc = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.origFunc`);
             if (originalFunc) {
                 const descriptor = foundry.utils.deepClone(
-                    Reflect.getOwnPropertyDescriptor(this.constructor.prototype, funcName),
+                    getPropertyDescriptorUpChain(this.constructor.prototype, funcName),
                 );
                 if (descriptor.value) {
                     descriptor.value = originalFunc;
@@ -130,11 +136,11 @@ export const HeroObjectCacheMixin = (Base) =>
                 Object.defineProperty(this, funcName, descriptor);
             }
 
-            foundryVttDeleteProperty(this._cache, `composedMemoizableObjectFunctions.${funcName}`);
+            foundryVttDeleteProperty(this._cache, `cmofs.${funcName}`);
         }
 
         restoreAllComposedObjectFunctions() {
-            for (const funcName of Object.keys(this._cache.composedMemoizableObjectFunctions || [])) {
+            for (const funcName of Object.keys(this._cache.cmofs || [])) {
                 this.restoreComposedMemoizableObjectFunction(funcName);
             }
 
