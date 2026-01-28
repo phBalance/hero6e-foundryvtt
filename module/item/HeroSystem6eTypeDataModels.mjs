@@ -432,11 +432,11 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
     prepareDerivedData() {
         super.prepareDerivedData();
 
-        this.composeMemoizableObjectFunction("damage");
-        this.composeMemoizableObjectFunction("description");
-        this.composeMemoizableObjectFunction("dcvDetails");
-        this.composeMemoizableObjectFunction("ocvDetails");
-        this.composeMemoizableObjectFunction("range");
+        // this.composeMemoizableObjectFunction("damage");
+        // this.composeMemoizableObjectFunction("description");
+        // this.composeMemoizableObjectFunction("dcvDetails");
+        // this.composeMemoizableObjectFunction("ocvDetails");
+        // this.composeMemoizableObjectFunction("range");
     }
 
     get description() {
