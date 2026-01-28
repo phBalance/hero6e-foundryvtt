@@ -35,7 +35,7 @@ import {
     isManeuverThatDoesReplaceableDamageType,
     isRangedMartialManeuver,
 } from "../utility/damage.mjs";
-import { getSystemDisplayUnits } from "../utility/units.mjs";
+import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
@@ -720,10 +720,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get heroValidation() {
-        if (this._lazy?.heroValidation) {
-            return this._lazy.heroValidation;
-        }
-
         const _heroValidations = [];
 
         if (this.baseInfo) {
@@ -795,7 +791,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             });
         }
 
-        this._lazy.heroValidation = _heroValidations;
         return _heroValidations;
     }
 
@@ -1168,8 +1163,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Range; and Line of Sight (LOS).
         if (typeof this.baseInfo?.rangeText === "function") {
             content += ` ${this.baseInfo.rangeText(this)}${getSystemDisplayUnits(this.is5e)}.`;
-        } else {
-            switch (this.rangeForItem) {
+        } else if (!["MULTIPOWER", "COMPOUNDPOWER", "LIST"].includes(this.system.XMLID)) {
+            const itemRange = this.system.range;
+            switch (itemRange) {
                 case CONFIG.HERO.RANGE_TYPES.SELF: {
                     if (!this.baseInfo?.type.includes("skill")) {
                         content += " Self.";
@@ -1184,10 +1180,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
                 case CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE:
                     {
-                        let range = this.basePointsPlusAdders * 10;
-                        if (this.actor?.system?.is5e) {
-                            range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
-                        }
+                        const range = getRoundedUpDistanceInSystemUnits(
+                            this.basePointsPlusAdders * 10,
+                            this.actor?.system?.is5e,
+                        );
                         content += ` GM Determined Maximum Range (much less than ${range}${getSystemDisplayUnits(
                             this.is5e,
                         )}).`;
@@ -1205,10 +1201,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
                 case CONFIG.HERO.RANGE_TYPES.STANDARD:
                     {
-                        let range = this.basePointsPlusAdders * 10;
-                        if (this.actor?.system?.is5e) {
-                            range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
-                        }
+                        const range = getRoundedUpDistanceInSystemUnits(
+                            this.basePointsPlusAdders * 10,
+                            this.actor?.system?.is5e,
+                        );
                         content += ` Maximum Range ${range}${getSystemDisplayUnits(this.is5e)}.`;
                     }
                     break;
@@ -1218,13 +1214,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     break;
 
                 default:
-                    // Some items don't really have a range
-                    if (["MULTIPOWER", "COMPOUNDPOWER", "LIST"].includes(this.system.XMLID)) {
-                        break;
-                    }
                     console.error("Unhandled range", this.baseInfo);
-                    if (this.rangeForItem?.toLowerCase()) {
-                        content += ` ${this.rangeForItem.toLowerCase()}`;
+                    if (itemRange?.toLowerCase()) {
+                        content += ` ${itemRange.toLowerCase()}`;
                     }
                     break;
             }
@@ -5600,17 +5592,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         return end;
-    }
-
-    // PH: FIXME: we have 2 ways of getting this... probably should favour this.system.range
-    get rangeForItem() {
-        const baseInfo = this.baseInfo;
-        if (!baseInfo || !baseInfo.rangeForItem) {
-            console.error(`rangeForItem called for ${this.detailedName()} without baseInfo or rangeForItem`);
-            return CONFIG.HERO.RANGE_TYPES.SELF;
-        }
-
-        return baseInfo.rangeForItem(this);
     }
 
     /**

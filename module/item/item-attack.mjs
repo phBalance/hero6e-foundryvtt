@@ -335,7 +335,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
     const baseRangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance, actor);
     let remainingRangePenalty = baseRangePenalty;
 
-    if (attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SELF) {
+    if (attackItem.effectiveAttackItem.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
         // TODO: Should not be able to use this on anyone else. Should add this check well before here (in to hit dialog).
     }
 
@@ -349,8 +349,8 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
     // no range modifiers.
     if (
         !(
-            attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
-            attackItem.effectiveAttackItem.rangeForItem === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            attackItem.effectiveAttackItem.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            attackItem.effectiveAttackItem.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
             noRangeModifiers ||
             normalRange
         )
