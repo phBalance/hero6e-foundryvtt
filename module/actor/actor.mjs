@@ -175,7 +175,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         this._clearCachedObjectData();
 
-        this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
+        // this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
     }
 
     /**

@@ -99,6 +99,12 @@ export const HeroObjectCacheMixin = (Base) =>
             };
         }
 
+        /**
+         * Make the return value of this[funcName] based on the call's arguments be cached. Note, this can only
+         * be used on functions which do not use data from any other object. Unfortunately, this means most objects.
+         *
+         * @param {String} funcName
+         */
         composeMemoizableObjectFunction(funcName) {
             const descriptor = foundry.utils.deepClone(
                 getPropertyDescriptorUpChain(this.constructor.prototype, funcName),

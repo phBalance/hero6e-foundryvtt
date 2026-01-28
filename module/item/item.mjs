@@ -313,15 +313,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         this._clearCachedObjectData();
 
-        this.composeMemoizableObjectFunction("attackDefenseVs");
-        this.composeMemoizableObjectFunction("characterPointCost");
-        this.composeMemoizableObjectFunction("childIdx");
-        this.composeMemoizableObjectFunction("childItems");
-        this.composeMemoizableObjectFunction("findModsByXmlid");
-        this.composeMemoizableObjectFunction("getItemDescription");
-        this.composeMemoizableObjectFunction("heroValidation");
-        this.composeMemoizableObjectFunction("parentItem");
-        this.composeMemoizableObjectFunction("_realCost");
+        // this.composeMemoizableObjectFunction("attackDefenseVs");
+        // this.composeMemoizableObjectFunction("characterPointCost");
+        // this.composeMemoizableObjectFunction("childIdx");
+        // this.composeMemoizableObjectFunction("childItems");
+        // this.composeMemoizableObjectFunction("findModsByXmlid");
+        // this.composeMemoizableObjectFunction("getItemDescription");
+        // this.composeMemoizableObjectFunction("heroValidation");
+        // this.composeMemoizableObjectFunction("parentItem");
+        // this.composeMemoizableObjectFunction("_realCost");
     }
 
     /* --------------------------------------------- */
