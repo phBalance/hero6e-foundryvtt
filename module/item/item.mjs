@@ -14,6 +14,7 @@ import {
     adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
+import { HeroObjectCacheMixin } from "../utility/cache.mjs";
 import {
     foundryVttDeleteProperty,
     getPowerInfo,
@@ -244,7 +245,7 @@ const itemTypeToIcon = {
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
  */
-export class HeroSystem6eItem extends Item {
+export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     static async chatListeners(html) {
         html.on("click", ".roll-damage", this.__onChatCardAction.bind(this));
     }
@@ -307,12 +308,30 @@ export class HeroSystem6eItem extends Item {
         return super._onCreate(data, options, userId);
     }
 
-    prepareData() {
-        this._clearCachedValues();
-        super.prepareData();
+    prepareDerivedData() {
+        super.prepareDerivedData();
+
+        this._clearCachedObjectData();
+
+        this.composeMemoizableObjectFunction("attackDefenseVs");
+        this.composeMemoizableObjectFunction("characterPointCost");
+        this.composeMemoizableObjectFunction("childIdx");
+        this.composeMemoizableObjectFunction("childItems");
+        this.composeMemoizableObjectFunction("findModsByXmlid");
+        this.composeMemoizableObjectFunction("getItemDescription");
+        this.composeMemoizableObjectFunction("heroValidation");
+        this.composeMemoizableObjectFunction("parentItem");
+        this.composeMemoizableObjectFunction("_realCost");
     }
 
-    _clearCachedValues() {
+    /* --------------------------------------------- */
+
+    /**
+     * Clear cached class collections.
+     * @internal
+     */
+    _clearCachedObjectData() {
+        // Clear all the rest
         this._lazy = {};
     }
 

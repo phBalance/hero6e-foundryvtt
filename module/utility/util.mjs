@@ -132,7 +132,7 @@ export function getPowerInfo(options) {
             // This XMLIDs not yet in config.mjs. We should have most of them so this is significant enough to fix.
             if (!squelch(xmlid)) {
                 console.error(
-                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Unable to find power entry.`,
+                    `${actor?.name}/${options.item?.name}/${options.item?.system?.XMLID}/${xmlid}: Unable to find ${is5e ? "5e" : "6e"} power entry.`,
                 );
             }
         }

@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
+import { HeroObjectCacheMixin } from "../utility/cache.mjs";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
@@ -26,7 +27,7 @@ const FoundryVttFilePicker = foundry.applications?.apps?.FilePicker?.implementat
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
  */
-export class HeroSystem6eActor extends Actor {
+export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     static Speed2Segments = [
         [0],
         [7],
@@ -151,7 +152,6 @@ export class HeroSystem6eActor extends Actor {
      * steps, such as to calculate certain item values after actor data prep.
      */
     prepareData() {
-        this._clearCachedValues();
         super.prepareData();
     }
 
@@ -172,9 +172,18 @@ export class HeroSystem6eActor extends Actor {
      */
     prepareDerivedData() {
         super.prepareDerivedData();
+
+        this._clearCachedObjectData();
+
+        this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
     }
 
-    _clearCachedValues() {
+    /**
+     * Clear all cached object data.
+     * @internal
+     */
+    _clearCachedObjectData() {
+        // Clear all the rest
         this._lazy = {};
     }
 

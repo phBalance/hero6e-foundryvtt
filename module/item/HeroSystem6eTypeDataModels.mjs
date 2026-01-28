@@ -2,6 +2,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { getPowerInfo, squelch, hdcTextNumberToNumeric } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
+import { HeroObjectCacheMixin } from "../utility/cache.mjs";
 import {
     getManueverEffectWithPlaceholdersReplaced,
     getFullyQualifiedEffectFormulaFromItem,
@@ -427,7 +428,16 @@ class HeroPowerModel extends HeroItemModCommonModel {
     }
 }
 
-export class HeroSystem6eItemTypeDataModelGetters extends foundry.abstract.TypeDataModel {
+export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(foundry.abstract.TypeDataModel) {
+    prepareDerivedData() {
+        super.prepareDerivedData();
+
+        this.composeMemoizableObjectFunction("damage");
+        this.composeMemoizableObjectFunction("description");
+        this.composeMemoizableObjectFunction("dcvDetails");
+        this.composeMemoizableObjectFunction("ocvDetails");
+    }
+
     get description() {
         try {
             return this.parent.getItemDescription();
@@ -1381,6 +1391,7 @@ export class HeroSystem6eItemMartialArt extends HeroSystem6eItemTypeDataModelPro
         return this.parent.getMakeAttack().stunBodyDamage;
     }
 
+    // PH: This is almost the same as what it is overriding. Remove the options for this function and move things into item to combine.
     get damage() {
         return getFullyQualifiedEffectFormulaFromItem(this.item, { ignoreDeadlyBlow: true });
     }
