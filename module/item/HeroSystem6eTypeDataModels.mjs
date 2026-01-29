@@ -1825,6 +1825,7 @@ export class HeroActorCharacterBasicConfigurationModel extends foundry.abstract.
             BASE_POINTS: new HeroNumberField(),
             DISAD_POINTS: new HeroNumberField(),
             EXPERIENCE: new HeroNumberField(),
+            EXPORT_TEMPLATE: new ObjectField(),
             RULES: new ObjectField(),
             xmlTag: new StringField(),
             _hdcXml: new StringField(),

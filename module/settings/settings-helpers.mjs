@@ -1,5 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { CreateHeroCompendiums } from "../heroCompendiums.mjs";
+import { CampaignRulesSettingsConfig } from "./campaign-rules-settings.mjs";
 
 export let overrideCanAct = false;
 
@@ -313,6 +314,15 @@ export default class SettingsHelpers {
             icon: "fas fa-bars", // A Font Awesome icon used in the submenu button
             type: AutomationMenu, // A FormApplication subclass
             restricted: true, // Restrict this submenu to game master only?
+        });
+
+        game.settings.registerMenu(module, "CampaignRulesMenu", {
+            name: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Name"),
+            label: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Label"),
+            hint: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Hint"),
+            icon: "fas fa-bars",
+            type: CampaignRulesSettingsConfig, // A FormApplication subclass
+            restricted: false, // Restrict this submenu to game master only?
         });
 
         game.settings.register(module, "HexTemplates", {
