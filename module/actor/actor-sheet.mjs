@@ -810,7 +810,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
     async _onCharacteristicSuccessRoll(event) {
         const label = event.currentTarget.closest("[data-label]").dataset.label;
-        await this.actor._onCharacteristicSuccessRoll({ event, label, token: this.token });
+        await this.actor.onCharacteristicSuccessRoll({ event, label, token: this.token });
         // event.preventDefault();
         // const element = event.currentTarget.closest("button");
         // const dataset = element.dataset;
@@ -967,7 +967,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
     async _onPrimaryCharacteristicFullRoll(event) {
         const label = event.currentTarget.closest("[data-label]").dataset.label;
-        await this.actor._onCharacteristicFullRoll({ event, label, token: this.token });
+        await this.actor.onCharacteristicFullRoll({ event, label, token: this.token });
         // event.preventDefault();
         // const element = event.currentTarget.closest("button");
         // const dataset = element.dataset;
@@ -981,7 +981,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
 
     async _onPrimaryCharacteristicCasualRoll(event) {
         const label = event.currentTarget.closest("[data-label]").dataset.label;
-        await this.actor._onCharacteristicCasualRoll({ event, label, token: this.token });
+        await this.actor.onCharacteristicCasualRoll({ event, label, token: this.token });
         // event.preventDefault();
         // const element = event.currentTarget.closest("button");
         // const dataset = element.dataset;
