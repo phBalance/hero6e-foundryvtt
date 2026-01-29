@@ -109,7 +109,7 @@ export function getRoundedDownDistanceInSystemUnits(distanceInMetres, is5e) {
  * @param {boolean} is5e
  * @returns number
  */
-export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres, is5e) {
+export function getRoundedFavorPlayerTowardsZeroDistanceInSystemUnits(distanceInMetres, is5e) {
     if (is5e !== false && is5e !== true) {
         if (!squelch("units5e")) {
             console.warn(`bad is5e parameter, using DefaultEdition`, is5e);
@@ -129,6 +129,8 @@ export function getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres,
  * Return the distance in the nearest rounded up system units.
  * 8.9m is 9m in 6e and 5" in 5e.
  * 9.9m is 10m in 6e and 5" in 5e.
+ *
+ * NOTE: Only works for positive numbers
  *
  * @param {number} distanceInMetres
  * @param {boolean} is5e

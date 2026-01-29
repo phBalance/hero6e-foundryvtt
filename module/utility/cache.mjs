@@ -1,3 +1,5 @@
+import { foundryVttDeleteProperty } from "./util.mjs";
+
 /**
  * A simple in memory cache using objects.
  */
@@ -47,3 +49,109 @@ export class HeroSystemGenericSharedCache {
         this.#invalidated = this.#invalidated + 1;
     }
 }
+
+function getPropertyDescriptorUpChain(obj, propName) {
+    let current = obj;
+    while (current != null) {
+        const descriptor = Reflect.getOwnPropertyDescriptor(current, propName);
+        if (descriptor) {
+            return descriptor; // Found the descriptor
+        }
+
+        // Move up the prototype chain
+        current = Reflect.getPrototypeOf(current);
+    }
+
+    return undefined;
+}
+
+export const HeroObjectCacheMixin = (Base) =>
+    class HeroObjectCache extends Base {
+        prepareDerivedData() {
+            super.prepareDerivedData();
+
+            // NOTE: Can't define and initialize as an object element as the flows sometimes have prepareDerivedData being called before property initialization
+            this._cache ??= {};
+            this.restoreAllComposedObjectFunctions();
+        }
+
+        _generateMemoizableObjectComposerFunction(funcName, originalFunc) {
+            return function (...args) {
+                const joinedArgs = args.join("|");
+                const cachedValue = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`);
+                if (cachedValue && Object.hasOwn(cachedValue, "retValue")) {
+                    foundry.utils.setProperty(
+                        this._cache,
+                        `cmofs.${funcName}.${joinedArgs}.cacheHits`,
+                        cachedValue.cacheHits + 1,
+                    );
+                    return cachedValue.retValue;
+                }
+
+                const retValue = originalFunc.call(this, ...args);
+
+                foundry.utils.setProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`, {
+                    retValue,
+                    cacheHits: 0,
+                });
+
+                return retValue;
+            };
+        }
+
+        /**
+         * Make the return value of this[funcName] based on the call's arguments be cached. Note, this can only
+         * be used on functions which do not use data from any other object. Unfortunately, this means most objects.
+         *
+         * @param {String} funcName
+         */
+        composeMemoizableObjectFunction(funcName) {
+            const descriptor = foundry.utils.deepClone(
+                getPropertyDescriptorUpChain(this.constructor.prototype, funcName),
+            );
+            const originalFunc = descriptor.value ?? descriptor.get;
+            foundry.utils.setProperty(this._cache, `cmofs.${funcName}.origFunc`, originalFunc);
+
+            if (descriptor.value) {
+                descriptor.value = this._generateMemoizableObjectComposerFunction(funcName, originalFunc);
+            } else if (descriptor.get || descriptor.set) {
+                descriptor.get = this._generateMemoizableObjectComposerFunction(funcName, originalFunc);
+            } else {
+                console.error(
+                    `Asked to composeObjectFunction for ${funcName} that is not a function or getter - are you sure?`,
+                    descriptor,
+                );
+            }
+
+            // Replace the function with the composable function
+            Object.defineProperty(this, funcName, descriptor);
+        }
+
+        restoreComposedMemoizableObjectFunction(funcName) {
+            const originalFunc = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.origFunc`);
+            if (originalFunc) {
+                const descriptor = foundry.utils.deepClone(
+                    getPropertyDescriptorUpChain(this.constructor.prototype, funcName),
+                );
+                if (descriptor.value) {
+                    descriptor.value = originalFunc;
+                } else if (descriptor.get) {
+                    descriptor.get = originalFunc;
+                }
+
+                Object.defineProperty(this, funcName, descriptor);
+            }
+
+            foundryVttDeleteProperty(this._cache, `cmofs.${funcName}`);
+        }
+
+        restoreAllComposedObjectFunctions() {
+            for (const funcName of Object.keys(this._cache.cmofs || [])) {
+                this.restoreComposedMemoizableObjectFunction(funcName);
+            }
+
+            for (const funcName of Object.keys(this._cache.restoreComposedObjectFunction || [])) {
+                this.restoreComposedMemoizableObjectFunction(funcName);
+            }
+        }
+    };
