@@ -94,6 +94,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     versionHeroSystem6eCreated: game.system.version,
                     is5e,
                 },
+                flags: {
+                    [`${game.system.id}`]: {
+                        file: {
+                            lastModifiedDate: Date.now(),
+                            uploadedBy: user.name,
+                            name: `[FoundryVTT actor]`,
+                        },
+                    },
+                },
             });
 
             // Characteristic defaults
