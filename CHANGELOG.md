@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.2.12 20260124 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.13 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- A [preview](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) of the new Actor Sheet is available. It has light, dark, and high contrast themes. Here is your chance to preview and provide feedback before we make this the default actor sheet. [#3622](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) [#2275](https://github.com/dmdorman/hero6e-foundryvtt/issues/2275)
+
+### Version 4.2.12 20260124
 
 - TWODCV CSLs now provides defense to the appropriate attack types. [#3487](https://github.com/dmdorman/hero6e-foundryvtt/issues/3487)
 - Weapon Master now behaves like a CSL as it is effectively a CSL. Less expensive forms expect custom adders linking to the powers and all HTH or Ranged versions expect you to modify the "options" in Hero Designer to include the type of weapon that it applies to. Allowed options are "Killing", "Normal", or "Explicit". "Explicit" requires custom adders to be used to specify what exactly it applies to (e.g. all fire related powers, all mental related powers). [#3487](https://github.com/dmdorman/hero6e-foundryvtt/issues/3487)
