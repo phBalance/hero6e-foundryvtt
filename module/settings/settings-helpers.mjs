@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { CreateHeroCompendiums } from "../heroCompendiums.mjs";
-import { CampaignRulesSettingsConfig } from "./campaign-rules-settings.mjs";
+//import { CampaignRulesSettingsConfig } from "./campaign-rules-settings.mjs";
 
 export let overrideCanAct = false;
 
