@@ -12,7 +12,8 @@
 }
 
 .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.empty {
-    filter: blur(1px);
+    // filter: blur(1px);
+    opacity: 0.3;
 }
 
 .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-error {
@@ -603,9 +604,9 @@
         text-align: center;
     }
 
-    .item-column.item-notes {
-        text-wrap-mode: nowrap;
-    }
+    // .item-column.item-notes {
+    //     text-wrap-mode: nowrap;
+    // }
 }
 
 /************************************************************************

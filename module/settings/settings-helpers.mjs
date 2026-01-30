@@ -316,14 +316,14 @@ export default class SettingsHelpers {
             restricted: true, // Restrict this submenu to game master only?
         });
 
-        game.settings.registerMenu(module, "CampaignRulesMenu", {
-            name: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Name"),
-            label: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Label"),
-            hint: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Hint"),
-            icon: "fas fa-bars",
-            type: CampaignRulesSettingsConfig, // A FormApplication subclass
-            restricted: false, // Restrict this submenu to game master only?
-        });
+        // game.settings.registerMenu(module, "CampaignRulesMenu", {
+        //     name: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Name"),
+        //     label: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Label"),
+        //     hint: game.i18n.localize("Settings.CampaignRules.SettingsConfig.Hint"),
+        //     icon: "fas fa-bars",
+        //     type: CampaignRulesSettingsConfig, // A FormApplication subclass
+        //     restricted: false, // Restrict this submenu to game master only?
+        // });
 
         game.settings.register(module, "HexTemplates", {
             name: game.i18n.localize("Settings.HexTemplates.Name"),
