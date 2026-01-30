@@ -1,8 +1,7 @@
 import { HeroApplication } from "../applications/api/application.mjs";
-import { HERO } from "../config.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
-import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
+//import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
