@@ -7,6 +7,46 @@
     min-height: 0;
 }
 
+.herosystem6e.actor-sheet-v2a .controls-dropdown {
+    z-index: 2;
+}
+
+.herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.empty {
+    opacity: 0.3;
+}
+
+.herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.validation-error {
+    background-color: rgb(255 0 0 / 10%);
+    text-align: left;
+    box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
+}
+
+herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.validation-info {
+    outline: rgb(0 0 255 / 80%) solid 1px;
+}
+
+.herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.validation-warning {
+    outline: #d6aa28 solid 2px;
+}
+
+.herosystem6e.actor-sheet-v2a .item-row.validation-error > div.item-column {
+    background-color: rgb(255 0 0 / 10%) !important;
+    border-top: 1px solid rgb(255 0 0 / 30%);
+    border-bottom: 1px solid rgb(255 0 0 / 30%);
+}
+
+.herosystem6e.actor-sheet-v2a .item-row.validation-info > div.item-column {
+    background-color: rgb(0 0 255 / 10%) !important;
+    border-top: 1px solid rgb(0 0 255 / 30%);
+    border-bottom: 1px solid rgb(0 0 255 / 30%);
+}
+
+.herosystem6e.actor-sheet-v2a .item-row.validation-warning > div.item-column {
+    background-color: rgb(255 255 0 / 20%) !important;
+    border-top: 1px solid rgb(255 255 0 / 30%);
+    border-bottom: 1px solid rgb(255 255 0 / 30%);
+}
+
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/
@@ -131,7 +171,7 @@
 /************************************************************************
 * Override nav.tabs
 ************************************************************************/
-.herosystem6e.actor-sheet-v2 .window-content nav.sheet-tabs.tabs {
+.herosystem6e.actor-sheet-v2a .window-content nav.sheet-tabs.tabs {
     gap: 0;
 }
 
@@ -139,7 +179,6 @@
 * grid-area: content 
 ************************************************************************/
 .herosystem6e.actor-sheet-v2a .window-content section.tab {
-    display: flex;
     overflow: hidden auto;
     flex-direction: column;
     gap: 16px;
@@ -230,7 +269,8 @@
         }
 
         .item-column.item-controls {
-            width: 50px;
+            width: 120px;
+            justify-content: end;
         }
 
         .item-column.item-description {
@@ -253,11 +293,133 @@
             border: 1px solid var(--herosystem-table-header-bg-color);
             border-radius: 4px;
         }
+
+        div.item-column.item-description.item-depth-1 {
+            padding-left: 30px;
+        }
+
+        div.item-column.item-description.item-depth-2 {
+            padding-left: 60px;
+        }
     }
 
     .unlist {
         list-style: none;
         padding: 0;
         margin: 0;
+    }
+}
+
+/************************************************************************
+* Attacks 
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content section.tab.attacks {
+    .item-column.item-name {
+        flex: 1;
+        justify-content: left;
+    }
+
+    .item-column.item-ocv,
+    .item-column.item-dcv {
+        width: 28px;
+    }
+
+    .item-column.item-offdef {
+        width: 84px;
+    }
+
+    .item-column.item-dmg {
+        width: 68px;
+    }
+
+    .item-column.item-res {
+        width: 80px;
+    }
+
+    .item-column.item-end {
+        width: 28px;
+    }
+
+    .item-column.item-aoe {
+        width: 73px;
+    }
+}
+
+/************************************************************************
+* MARTIAL 
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content section.tab.martial {
+    .item-column.item-phase,
+    .item-column.item-ocv,
+    .item-column.item-dcv {
+        width: 40px;
+    }
+}
+
+/************************************************************************
+* MANEUVERS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content section.tab.maneuvers {
+    .item-column.item-phase,
+    .item-column.item-ocv,
+    .item-column.item-dcv {
+        width: 40px;
+    }
+}
+
+/************************************************************************
+* CHARACTERISTICS 
+************************************************************************/
+.herosystem6e.actor-sheet-v2a .window-content section.tab.characteristics {
+    box-sizing: content-box;
+
+    .item-column.item-value {
+        width: 53px;
+    }
+
+    .item-column.item-max {
+        width: 45px;
+    }
+
+    .item-column.item-base {
+        width: 32px;
+    }
+
+    .item-column.item-levels {
+        width: 45px;
+    }
+
+    .item-column.item-char {
+        width: 111px;
+    }
+
+    .item-column.item-baseB {
+        width: 33px;
+    }
+
+    .item-column.item-cost {
+        width: 30px;
+    }
+
+    .item-column.item-cost {
+        width: 30px;
+    }
+
+    .item-column.item-roll {
+        width: 100px;
+    }
+
+    .item-column.item-roll {
+        width: 100px;
+    }
+
+    .item-column.item-notes {
+        flex: 1;
+        justify-content: left;
+    }
+
+    input {
+        width: 40px;
+        text-align: center;
     }
 }

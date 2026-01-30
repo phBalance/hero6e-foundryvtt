@@ -1,6 +1,6 @@
-<li class="item powers draggable expandable-document" data-document-uuid="{{this.uuid}}">
-    <div class="item-row {{this.validationCss}}">
-        <div class="item-column item-cost">
+<li class="item powers  expandable-document" data-document-uuid="{{this.uuid}}">
+    <div class="item-row draggable {{this.validationCss}}">
+        <div class="item-column draggable item-cost">
             {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
                 {{this.compoundCostForDisplay}}
             {{else if this.isSeparator}}

@@ -333,7 +333,6 @@ Hooks.once("init", async function () {
     foundryVttLoadTemplates(templatePaths);
 
     ItemVppConfig.initializeTemplate();
-    HeroSystemActorSheetV2.initializeTemplate();
 
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;
