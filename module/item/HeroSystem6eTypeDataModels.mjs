@@ -1819,12 +1819,70 @@ var SubtypeModelMixin = (base) => {
     };
 };
 
+export class HeroActorCharacterBasicConfigurationModel extends foundry.abstract.DataModel {
+    static defineSchema() {
+        return {
+            BASE_POINTS: new HeroNumberField(),
+            DISAD_POINTS: new HeroNumberField(),
+            EXPERIENCE: new HeroNumberField(),
+            EXPORT_TEMPLATE: new ObjectField(),
+            RULES: new ObjectField(),
+            xmlTag: new StringField(),
+            _hdcXml: new StringField(),
+        };
+    }
+}
+
+export class HeroActorCharacterInfoModel extends foundry.abstract.DataModel {
+    static defineSchema() {
+        return {
+            ALTERNATE_IDENTITIES: new StringField(),
+            APPEARANCE: new StringField(),
+            BACKGROUND: new StringField(),
+            CAMPAIGN_NAME: new StringField(),
+            CAMPAIGN_USE: new StringField(),
+            CHARACTER_NAME: new StringField(),
+            EYE_COLOR: new StringField(),
+            GENRE: new StringField(),
+            GM: new StringField(),
+            HAIR_COLOR: new StringField(),
+            HEIGHT: new HeroNumberField(),
+            NOTES1: new StringField(),
+            NOTES2: new StringField(),
+            NOTES3: new StringField(),
+            NOTES4: new StringField(),
+            NOTES5: new StringField(),
+            PERSONALITY: new StringField(),
+            PLAYER_NAME: new StringField(),
+            QUOTE: new StringField(),
+            TACTICS: new StringField(),
+            WEIGHT: new HeroNumberField(),
+            RULES: new ObjectField(),
+            xmlTag: new StringField(),
+            _hdcXml: new StringField(),
+        };
+    }
+}
+
+export class HeroActorCharacterModel extends foundry.abstract.DataModel {
+    static defineSchema() {
+        return {
+            BASIC_CONFIGURATION: new EmbeddedDataField(HeroActorCharacterBasicConfigurationModel),
+            CHARACTER_INFO: new EmbeddedDataField(HeroActorCharacterInfoModel),
+            TEMPLATE: new ObjectField(),
+            version: new StringField(),
+            xmlTag: new StringField(),
+            _hdcXml: new StringField(),
+        };
+    }
+}
+
 export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel) {
     static defineSchema() {
         //const { ObjectField, StringField, ArrayField, EmbeddedDataField } = foundry.data.fields;
         // Note that the return is just a simple object
         return {
-            CHARACTER: new ObjectField(),
+            CHARACTER: new EmbeddedDataField(HeroActorCharacterModel),
 
             // Plan is to eventually use the Actor.Item version of these
             STR: new EmbeddedDataField(HeroItemCharacteristic),

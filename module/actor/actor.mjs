@@ -94,6 +94,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     versionHeroSystem6eCreated: game.system.version,
                     is5e,
                 },
+                flags: {
+                    [`${game.system.id}`]: {
+                        file: {
+                            lastModifiedDate: Date.now(),
+                            uploadedBy: user.name,
+                            name: `[FoundryVTT actor]`,
+                        },
+                    },
+                },
             });
 
             // Characteristic defaults
@@ -1971,7 +1980,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async _onCharacteristicSuccessRoll({ label, token }) {
+    async onCharacteristicSuccessRoll({ label, token }) {
         const heroRoller = new HeroRoller().makeSuccessRoll().addDice(3);
         await heroRoller.roll();
 
@@ -2000,32 +2009,32 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return ChatMessage.create(chatData);
     }
 
-    async _onCharacteristicFullRoll({ label, token }) {
+    async onCharacteristicFullRoll({ label, token }) {
         const characteristicValue = this.system.characteristics[label.toLocaleLowerCase()].value;
         const flavor = `Full ${label.toUpperCase()} Roll (${characteristicValue} ${label.toUpperCase()})`;
-        await this._onCharacteristicRoll({ label, token, targetValue: characteristicValue, flavor });
+        await this.onCharacteristicRoll({ label, token, targetValue: characteristicValue, flavor });
     }
 
-    async _onCharacteristicCasualRoll({ label, token }) {
+    async onCharacteristicCasualRoll({ label, token }) {
         const characteristicValue = this.system.characteristics[label.toLocaleLowerCase()].value;
         const halfCharacteristicValue = roundFavorPlayerAwayFromZero(
             +(Math.round(characteristicValue / 2 + "e+2") + "e-2"),
         ); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
         const flavor = `Casual ${label.toUpperCase()} Roll (${halfCharacteristicValue} ${label.toUpperCase()})`;
-        await this._onCharacteristicRoll({ label, token, targetValue: halfCharacteristicValue, flavor });
+        await this.onCharacteristicRoll({ label, token, targetValue: halfCharacteristicValue, flavor });
     }
 
-    async _onCharacteristicRoll({ label, token, targetValue, flavor }) {
+    async onCharacteristicRoll({ label, token, targetValue, flavor }) {
         const isStrengthRoll = label.toUpperCase() === "STR";
         // Strength use consumes resources. No other characteristic roll does.
         if (isStrengthRoll) {
-            await this._onStrengthCharacteristicRoll({ label, token, targetValue, flavor });
+            await this.onStrengthCharacteristicRoll({ label, token, targetValue, flavor });
         } else {
             await this._onPrimaryNonStrengthCharacteristicRoll({ label, token, targetValue, flavor });
         }
     }
 
-    async _onStrengthCharacteristicRoll({ token, targetValue, flavor }) {
+    async onStrengthCharacteristicRoll({ token, targetValue, flavor }) {
         // STR should have an item for potential damage,
         // just like a strike and should consume resources
         const originalStrikeItem = this.items.find((o) => o.system.XMLID === "STRIKE");

@@ -554,7 +554,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         );
         for (const input of editableInputButtons) {
             const attributeName = input.name;
-            if (foundry.utils.getProperty(this.actor, attributeName) !== undefined) {
+            if (foundry.utils.hasProperty(this.actor, attributeName) !== undefined) {
                 // keep in mind that if your callback is a named function instead of an arrow function expression
                 // you'll need to use `bind(this)` to maintain context
                 input.addEventListener("change", (e) => {
@@ -723,17 +723,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static async #onRollCharacteristicSuccess(event, target) {
         const label = target.closest("[data-label]").dataset.label;
-        await this.actor._onCharacteristicSuccessRoll({ event, label, token: this.token });
+        await this.actor.onCharacteristicSuccessRoll({ event, label, token: this.token });
     }
 
     static async #onCharacteristicFullRoll(event, target) {
         const label = target.closest("[data-label]").dataset.label;
-        await this.actor._onCharacteristicFullRoll({ event, label, token: this.token });
+        await this.actor.onCharacteristicFullRoll({ event, label, token: this.token });
     }
 
     static async #onCharacteristicCasualRoll(event, target) {
         const label = target.closest("[data-label]").dataset.label;
-        await this.actor._onCharacteristicCasualRoll({ event, label, token: this.token });
+        await this.actor.onCharacteristicCasualRoll({ event, label, token: this.token });
     }
 
     static async #onActorToggle(event, target) {

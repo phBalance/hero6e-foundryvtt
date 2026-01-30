@@ -228,6 +228,20 @@
                 "PcEndOnly": "PCs (END) and NPCs (END, STUN, BODY)"
             }
         },
+        "CampaignRules": {
+            "SettingsConfig": {
+                "Name": "Campaign Rules Settings",
+                "Label": "Campaign Rules",
+                "Hint": "Configure Campaign Rules for all actors."
+            }
+            ,
+            "Tabs": {
+                "pointLimits": "PointLimits",
+                "characteristicMaxima": "CharacteristicMaxima",
+                "rules": "Rules",
+                "settings": "Settings"
+            }
+        },
         "CombatMovementOnlyOnActorsPhase": {
             "Name": "Combat Movement Only On Actors Phase",
             "Hint": "This prevents players from moving their tokens when it isn't their turn."
