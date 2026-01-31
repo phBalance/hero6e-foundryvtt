@@ -916,20 +916,20 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * @returns {DragDrop[]}     An array of DragDrop handlers.
      * @private
      */
-    #createDragDropHandlers() {
-        return this.options.dragDrop.map((d) => {
-            d.permissions = {
-                dragstart: this._canDragStart.bind(this),
-                drop: this._canDragDrop.bind(this),
-            };
-            d.callbacks = {
-                dragstart: this._onDragStart.bind(this),
-                dragover: this._onDragOver.bind(this),
-                drop: this._onDrop.bind(this),
-            };
-            return new DragDrop.implementation(d);
-        });
-    }
+    // #createDragDropHandlers() {
+    //     return this.options.dragDrop.map((d) => {
+    //         d.permissions = {
+    //             dragstart: this._canDragStart.bind(this),
+    //             drop: this._canDragDrop.bind(this),
+    //         };
+    //         d.callbacks = {
+    //             dragstart: this._onDragStart.bind(this),
+    //             dragover: this._onDragOver.bind(this),
+    //             drop: this._onDrop.bind(this),
+    //         };
+    //         return new DragDrop.implementation(d);
+    //     });
+    // }
 
     // Optional: Add getter to access the private property
 
