@@ -86,7 +86,6 @@ export const HeroObjectCacheMixin = (Base) =>
          * NOTE: cmofd -> composed memoizable object function data
          * @param {*} funcName
          * @param {*} originalFunc
-         * @returns
          */
         _generateMemoizableObjectComposerFunction(funcName, originalFunc) {
             return function (...args) {
@@ -249,7 +248,7 @@ export function printObjectCacheInfo(obj) {
     console.log(`${obj.name} has ${composedFunctionCount} composed objects`);
     console.log(`Time savings`);
     console.log(`smallest: ${smallestCacheTimeSaving}ms largest: ${largestCacheTimeSaving}ms`);
-    console.log(`Cache hits`);
+    console.log(`Number of cache hits`);
     console.log(`smallest: ${smallestNumberOfCacheHits} largest: ${largestNumberOfCacheHits}`);
 }
 window.printObjectCacheInfo = printObjectCacheInfo;

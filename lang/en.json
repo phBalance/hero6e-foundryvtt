@@ -316,7 +316,7 @@
         },
         "ObjectCaching": {
             "Name": "Object Caching",
-            "Hint": "Speed Up Repetative Operations Through Caching."
+            "Hint": "Speed up repetative operations by caching results."
         },
         "OptionalManeuvers": {
             "Name": "Optional Maneuvers",
