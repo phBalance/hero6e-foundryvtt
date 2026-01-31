@@ -2296,8 +2296,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // Heroic Identity
             changes["system.heroicIdentity"] = retainValuesOnUpload.heroicIdentity;
 
-            // A few critical items.
-            this.system.CHARACTER = heroJson.CHARACTER;
+            // game system version
             this.system.versionHeroSystem6eUpload = game.system.version;
             changes["system.versionHeroSystem6eUpload"] = game.system.version;
 
@@ -3558,16 +3557,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return valueSum;
     }
 
-    get template() {
-        return (
-            this.system.CHARACTER?.TEMPLATE?.name ||
-            this.system.CHARACTER?.TEMPLATE?.extends ||
-            (typeof this.system.CHARACTER?.TEMPLATE === "string" ? this.system.CHARACTER.TEMPLATE : null)
-        );
-    }
-
     get is5e() {
-        const _template = this.template;
+        const _template = this.system.CHARACTER?.TEMPLATE?.extends ?? this.system.CHARACTER?.TEMPLATE?.id;
         let _is5e;
 
         // if (!_template) {
