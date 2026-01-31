@@ -70,7 +70,9 @@
     flex-direction: column;
     padding-right: 5px;
 
-    // border-right: thin solid var(--color-tabs-border);
+    img.profile-img {
+        object-fit: contain;
+    }
 
     .attributes {
         text-align: center;
