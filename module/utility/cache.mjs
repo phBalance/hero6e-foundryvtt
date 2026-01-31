@@ -72,17 +72,19 @@ export const HeroObjectCacheMixin = (Base) =>
 
             // NOTE: Can't define and initialize as an object element as the flows sometimes have prepareDerivedData being called before property initialization
             this._cache ??= {};
-            this.restoreAllComposedObjectFunctions();
+
+            // Clean out any memoized information about this object
+            this.invalidateAllComposedObjectFunctions();
         }
 
         _generateMemoizableObjectComposerFunction(funcName, originalFunc) {
             return function (...args) {
                 const joinedArgs = args.join("|");
-                const cachedValue = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`);
+                const cachedValue = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.memoized.${joinedArgs}`);
                 if (cachedValue && Object.hasOwn(cachedValue, "retValue")) {
                     foundry.utils.setProperty(
                         this._cache,
-                        `cmofs.${funcName}.${joinedArgs}.cacheHits`,
+                        `cmofs.${funcName}.memoized.${joinedArgs}.cacheHits`,
                         cachedValue.cacheHits + 1,
                     );
                     return cachedValue.retValue;
@@ -90,7 +92,7 @@ export const HeroObjectCacheMixin = (Base) =>
 
                 const retValue = originalFunc.call(this, ...args);
 
-                foundry.utils.setProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`, {
+                foundry.utils.setProperty(this._cache, `cmofs.${funcName}.memoized.${joinedArgs}`, {
                     retValue,
                     cacheHits: 0,
                 });
@@ -100,8 +102,7 @@ export const HeroObjectCacheMixin = (Base) =>
         }
 
         /**
-         * Make the return value of this[funcName] based on the call's arguments be cached. Note, this can only
-         * be used on functions which do not use data from any other object. Unfortunately, this means most objects.
+         * Make the return value of this[funcName] based on the call's arguments be cached.
          *
          * @param {String} funcName
          */
@@ -111,7 +112,9 @@ export const HeroObjectCacheMixin = (Base) =>
             );
             const originalFunc = descriptor.value ?? descriptor.get;
             foundry.utils.setProperty(this._cache, `cmofs.${funcName}.origFunc`, originalFunc);
+            foundry.utils.setProperty(this._cache, `cmofs.${funcName}.memoized`, {});
 
+            // Memoize the existing function or getter using a composing/wrapping function
             if (descriptor.value) {
                 descriptor.value = this._generateMemoizableObjectComposerFunction(funcName, originalFunc);
             } else if (descriptor.get || descriptor.set) {
@@ -125,8 +128,33 @@ export const HeroObjectCacheMixin = (Base) =>
 
             // Replace the function with the composable function
             Object.defineProperty(this, funcName, descriptor);
+
+            return descriptor.value || descriptor.get;
         }
 
+        /**
+         * Reset all the memoized information about the funcName but continue to keep it composed.
+         *
+         * @param {String} funcName
+         */
+        invalidateComposedMomoizableObjectFunction(funcName) {
+            foundry.utils.setProperty(this._cache, `cmofs.${funcName}.memoized`, {});
+        }
+
+        /**
+         * Reset all the memoized information for this object but continue to keep any functions composed.
+         */
+        invalidateAllComposedObjectFunctions() {
+            for (const funcName of Object.keys(this._cache.cmofs || [])) {
+                this.invalidateComposedMomoizableObjectFunction(funcName);
+            }
+        }
+
+        /**
+         * Restore the original function so that it is no longer memoized.
+         *
+         * @param {String} funcName
+         */
         restoreComposedMemoizableObjectFunction(funcName) {
             const originalFunc = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.origFunc`);
             if (originalFunc) {
@@ -145,12 +173,11 @@ export const HeroObjectCacheMixin = (Base) =>
             foundryVttDeleteProperty(this._cache, `cmofs.${funcName}`);
         }
 
+        /**
+         * Restore all function on this object that were memoized to their original function.
+         */
         restoreAllComposedObjectFunctions() {
             for (const funcName of Object.keys(this._cache.cmofs || [])) {
-                this.restoreComposedMemoizableObjectFunction(funcName);
-            }
-
-            for (const funcName of Object.keys(this._cache.restoreComposedObjectFunction || [])) {
                 this.restoreComposedMemoizableObjectFunction(funcName);
             }
         }
