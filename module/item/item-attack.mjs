@@ -3965,7 +3965,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     // NOTE: This only supports 1 endurance reserve and won't work with 2 powers drawing from separate endurance reserves.
     let actualStunDamage = 0;
     let actualStunRoller = null;
-    if (useResources && resourcesRequired.totalEnd > actorEndurance) {
+    if (useResources && resourcesRequired.totalEnd > Math.max(0, actorEndurance)) {
         // Automation or other actor without STUN?
         const hasSTUN = actor.hasCharacteristic("STUN");
         if (!hasSTUN) {
