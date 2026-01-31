@@ -67,6 +67,10 @@ function getPropertyDescriptorUpChain(obj, propName) {
 
 export const HeroObjectCacheMixin = (Base) =>
     class HeroObjectCache extends Base {
+        static get cachingEnabled() {
+            return game.settings.get(game.system.id, "ObjectCaching");
+        }
+
         prepareDerivedData() {
             super.prepareDerivedData();
 
@@ -121,6 +125,11 @@ export const HeroObjectCacheMixin = (Base) =>
          * @param {String} funcName
          */
         composeMemoizableObjectFunction(funcName) {
+            // Is object caching enabled?
+            if (!HeroObjectCache.cachingEnabled) {
+                return;
+            }
+
             // Is this a temporary object or is this a data model of an object? If so, do not compose it since our prepareDerivedData
             // function invoked when data changes.
             if (this._id == null && this.item?._id == null) {

@@ -314,6 +314,10 @@
                 "Constant": "Constant"
             }
         },
+        "ObjectCaching": {
+            "Name": "Object Caching",
+            "Hint": "Speed Up Repetative Operations Through Caching."
+        },
         "OptionalManeuvers": {
             "Name": "Optional Maneuvers",
             "Hint": "Add the optional maneuvers to the maneuvers tab."
