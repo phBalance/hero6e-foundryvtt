@@ -86,7 +86,7 @@ export const HeroObjectCacheMixin = (Base) =>
          */
         _generateMemoizableObjectComposerFunction(funcName, originalFunc) {
             return function (...args) {
-                const joinedArgs = args.join("|");
+                const joinedArgs = JSON.stringify(args);
                 const cachedInfo = foundry.utils.getProperty(this._cache, `cmofd.${funcName}.${joinedArgs}`);
                 if (cachedInfo && Object.hasOwn(cachedInfo, "retValue")) {
                     foundry.utils.setProperty(
@@ -161,7 +161,7 @@ export const HeroObjectCacheMixin = (Base) =>
          *
          * @param {String} funcName
          */
-        invalidateComposedMomoizableObjectFunction(funcName) {
+        invalidateComposedMemoizableObjectFunction(funcName) {
             foundryVttDeleteProperty(this._cache, `cmofd.${funcName}`);
         }
 
@@ -200,7 +200,7 @@ export const HeroObjectCacheMixin = (Base) =>
          * Restore all function on this object that were memoized to their original function.
          */
         restoreAllComposedObjectFunctions() {
-            for (const funcName of Object.keys(this._cache.cmofs || [])) {
+            for (const funcName of Object.keys(this._cache.cmofs || {})) {
                 this.restoreComposedMemoizableObjectFunction(funcName);
             }
 
@@ -215,7 +215,7 @@ export function printObjectCacheInfo(obj) {
     let smallestNumberOfCacheHits = +Infinity;
     let largestNumberOfCacheHits = 0;
 
-    for (const funcName of Object.keys(obj._cache.cmofd || [])) {
+    for (const funcName of Object.keys(obj._cache?.cmofd || {})) {
         composedFunctionCount++;
 
         for (const funcArgs of Object.keys(obj._cache.cmofd[funcName])) {
@@ -223,13 +223,15 @@ export function printObjectCacheInfo(obj) {
 
             if (data.time < smallestCacheTimeSaving) {
                 smallestCacheTimeSaving = data.time;
-            } else if (data.time > largestCacheTimeSaving) {
+            }
+            if (data.time > largestCacheTimeSaving) {
                 largestCacheTimeSaving = data.time;
             }
 
             if (data.cacheHits < smallestNumberOfCacheHits) {
                 smallestNumberOfCacheHits = data.cacheHits;
-            } else if (data.cacheHits > largestNumberOfCacheHits) {
+            }
+            if (data.cacheHits > largestNumberOfCacheHits) {
                 largestNumberOfCacheHits = data.cacheHits;
             }
         }
