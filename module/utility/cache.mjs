@@ -102,11 +102,27 @@ export const HeroObjectCacheMixin = (Base) =>
         }
 
         /**
-         * Make the return value of this[funcName] based on the call's arguments be cached.
+         * Make the return value of this[funcName] based on the call's arguments be cached. Also track interesting statistics about
+         * caching.
+         *
+         * NOTE: This will be ignored when called on a non database object because invalidation of the cache relies on calling update()
+         *       on objects. Right now we generally only have effective items and already temporary things related to the actor sheet.
          *
          * @param {String} funcName
          */
         composeMemoizableObjectFunction(funcName) {
+            // Is this a temporary object or is this a data model of an object? If so, do not compose it since our prepareDerivedData
+            // function invoked when data changes.
+            if (this._id == null && this.item?._id == null) {
+                return;
+            }
+
+            // If we have already composed this function, don't compose again
+            if (foundry.utils.getProperty(this._cache, `cmofs.${funcName}`)) {
+                return;
+            }
+
+            // Start composing/wrapping this object
             const descriptor = foundry.utils.deepClone(
                 getPropertyDescriptorUpChain(this.constructor.prototype, funcName),
             );
@@ -128,8 +144,6 @@ export const HeroObjectCacheMixin = (Base) =>
 
             // Replace the function with the composable function
             Object.defineProperty(this, funcName, descriptor);
-
-            return descriptor.value || descriptor.get;
         }
 
         /**
