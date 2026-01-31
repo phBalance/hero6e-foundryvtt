@@ -5,7 +5,7 @@ import { getCharacteristicInfoArrayForActor } from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
-const { DragDrop } = foundry.applications.ux;
+//const { DragDrop } = foundry.applications.ux;
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 
