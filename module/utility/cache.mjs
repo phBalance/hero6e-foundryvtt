@@ -67,32 +67,47 @@ function getPropertyDescriptorUpChain(obj, propName) {
 
 export const HeroObjectCacheMixin = (Base) =>
     class HeroObjectCache extends Base {
+        static get cachingEnabled() {
+            return game.settings.get(game.system.id, "ObjectCaching");
+        }
+
         prepareDerivedData() {
             super.prepareDerivedData();
 
             // NOTE: Can't define and initialize as an object element as the flows sometimes have prepareDerivedData being called before property initialization
             this._cache ??= {};
-            this.restoreAllComposedObjectFunctions();
+
+            // Clean out any memoized information about this object
+            this.invalidateAllComposedObjectFunctions();
         }
 
+        /**
+         * NOTE: cmofs -> composed memoizable object functions
+         * NOTE: cmofd -> composed memoizable object function data
+         * @param {*} funcName
+         * @param {*} originalFunc
+         */
         _generateMemoizableObjectComposerFunction(funcName, originalFunc) {
             return function (...args) {
-                const joinedArgs = args.join("|");
-                const cachedValue = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`);
-                if (cachedValue && Object.hasOwn(cachedValue, "retValue")) {
+                const joinedArgs = JSON.stringify(args);
+                const cachedInfo = foundry.utils.getProperty(this._cache, `cmofd.${funcName}.${joinedArgs}`);
+                if (cachedInfo && Object.hasOwn(cachedInfo, "retValue")) {
                     foundry.utils.setProperty(
                         this._cache,
-                        `cmofs.${funcName}.${joinedArgs}.cacheHits`,
-                        cachedValue.cacheHits + 1,
+                        `cmofd.${funcName}.${joinedArgs}.cacheHits`,
+                        cachedInfo.cacheHits + 1,
                     );
-                    return cachedValue.retValue;
+                    return cachedInfo.retValue;
                 }
 
+                const callStartTime = Date.now();
                 const retValue = originalFunc.call(this, ...args);
+                const callEndTime = Date.now();
 
-                foundry.utils.setProperty(this._cache, `cmofs.${funcName}.${joinedArgs}`, {
+                foundry.utils.setProperty(this._cache, `cmofd.${funcName}.${joinedArgs}`, {
                     retValue,
                     cacheHits: 0,
+                    time: callEndTime - callStartTime,
                 });
 
                 return retValue;
@@ -100,18 +115,40 @@ export const HeroObjectCacheMixin = (Base) =>
         }
 
         /**
-         * Make the return value of this[funcName] based on the call's arguments be cached. Note, this can only
-         * be used on functions which do not use data from any other object. Unfortunately, this means most objects.
+         * Make the return value of this[funcName] based on the call's arguments be cached. Also track interesting statistics about
+         * caching.
+         *
+         * NOTE: This will be ignored when called on a non database object because invalidation of the cache relies on calling update()
+         *       on objects. Right now we generally only have effective items and already temporary things related to the actor sheet.
          *
          * @param {String} funcName
          */
         composeMemoizableObjectFunction(funcName) {
+            // Is object caching enabled?
+            if (!HeroObjectCache.cachingEnabled) {
+                return;
+            }
+
+            // Is this a temporary object or is this a data model of an object? If so, do not compose it since our prepareDerivedData
+            // function invoked when data changes.
+            if (this._id == null && this.item?._id == null) {
+                return;
+            }
+
+            // If we have already composed this function, don't compose again
+            if (foundry.utils.getProperty(this._cache, `cmofs.${funcName}`)) {
+                return;
+            }
+
+            // Start composing/wrapping this object
             const descriptor = foundry.utils.deepClone(
                 getPropertyDescriptorUpChain(this.constructor.prototype, funcName),
             );
             const originalFunc = descriptor.value ?? descriptor.get;
             foundry.utils.setProperty(this._cache, `cmofs.${funcName}.origFunc`, originalFunc);
+            foundry.utils.setProperty(this._cache, `cmofd.${funcName}`, {});
 
+            // Memoize the existing function or getter using a composing/wrapping function
             if (descriptor.value) {
                 descriptor.value = this._generateMemoizableObjectComposerFunction(funcName, originalFunc);
             } else if (descriptor.get || descriptor.set) {
@@ -127,6 +164,27 @@ export const HeroObjectCacheMixin = (Base) =>
             Object.defineProperty(this, funcName, descriptor);
         }
 
+        /**
+         * Reset all the memoized information about the funcName but continue to keep it composed.
+         *
+         * @param {String} funcName
+         */
+        invalidateComposedMemoizableObjectFunction(funcName) {
+            foundryVttDeleteProperty(this._cache, `cmofd.${funcName}`);
+        }
+
+        /**
+         * Reset all the memoized information for this object but continue to keep any functions composed.
+         */
+        invalidateAllComposedObjectFunctions() {
+            foundryVttDeleteProperty(this._cache, `cmofd`);
+        }
+
+        /**
+         * Restore the original function so that it is no longer memoized.
+         *
+         * @param {String} funcName
+         */
         restoreComposedMemoizableObjectFunction(funcName) {
             const originalFunc = foundry.utils.getProperty(this._cache, `cmofs.${funcName}.origFunc`);
             if (originalFunc) {
@@ -143,15 +201,54 @@ export const HeroObjectCacheMixin = (Base) =>
             }
 
             foundryVttDeleteProperty(this._cache, `cmofs.${funcName}`);
+            foundryVttDeleteProperty(this._cache, `cmofd.${funcName}`);
         }
 
+        /**
+         * Restore all function on this object that were memoized to their original function.
+         */
         restoreAllComposedObjectFunctions() {
-            for (const funcName of Object.keys(this._cache.cmofs || [])) {
+            for (const funcName of Object.keys(this._cache.cmofs || {})) {
                 this.restoreComposedMemoizableObjectFunction(funcName);
             }
 
-            for (const funcName of Object.keys(this._cache.restoreComposedObjectFunction || [])) {
-                this.restoreComposedMemoizableObjectFunction(funcName);
-            }
+            foundryVttDeleteProperty(this._cache, `cmofd`);
         }
     };
+
+export function printObjectCacheInfo(obj) {
+    let composedFunctionCount = 0;
+    let smallestCacheTimeSaving = +Infinity;
+    let largestCacheTimeSaving = 0;
+    let smallestNumberOfCacheHits = +Infinity;
+    let largestNumberOfCacheHits = 0;
+
+    for (const funcName of Object.keys(obj._cache?.cmofd || {})) {
+        composedFunctionCount++;
+
+        for (const funcArgs of Object.keys(obj._cache.cmofd[funcName])) {
+            const data = obj._cache.cmofd[funcName][funcArgs];
+
+            if (data.time < smallestCacheTimeSaving) {
+                smallestCacheTimeSaving = data.time;
+            }
+            if (data.time > largestCacheTimeSaving) {
+                largestCacheTimeSaving = data.time;
+            }
+
+            if (data.cacheHits < smallestNumberOfCacheHits) {
+                smallestNumberOfCacheHits = data.cacheHits;
+            }
+            if (data.cacheHits > largestNumberOfCacheHits) {
+                largestNumberOfCacheHits = data.cacheHits;
+            }
+        }
+    }
+
+    console.log(`${obj.name} has ${composedFunctionCount} composed objects`);
+    console.log(`Time savings`);
+    console.log(`smallest: ${smallestCacheTimeSaving}ms largest: ${largestCacheTimeSaving}ms`);
+    console.log(`Number of cache hits`);
+    console.log(`smallest: ${smallestNumberOfCacheHits} largest: ${largestNumberOfCacheHits}`);
+}
+window.printObjectCacheInfo = printObjectCacheInfo;

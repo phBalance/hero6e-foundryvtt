@@ -494,6 +494,16 @@ export default class SettingsHelpers {
             requiresReload: false,
         });
 
+        game.settings.register(module, "ObjectCaching", {
+            name: game.i18n.localize("Settings.ObjectCaching.Name"),
+            hint: game.i18n.localize("Settings.ObjectCaching.Hint"),
+            scope: "client",
+            config: true,
+            type: Boolean,
+            default: true,
+            requiresReload: true,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: game.i18n.localize("Settings.AlphaTesting.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.Hint"),
