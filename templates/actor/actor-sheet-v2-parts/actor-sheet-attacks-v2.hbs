@@ -17,9 +17,9 @@
             <div class="item-column item-controls"></div>
         </div>
 
-        <ol class="item-list attacks-list">
+        <ol class="item-list attacks-list unlist">
             {{#each items as |item|}}
-                <li class="item attack draggable expandable-document" data-document-uuid="{{this.uuid}}">
+                <li class="item attack draggable unlist" data-document-uuid="{{this.uuid}}">
                     <div class="item-row {{this.validationCss}}">
                         <div class="item-column item-name"
                             data-tooltip="{{this.validationTooltip}}"
@@ -64,12 +64,13 @@
                             <a class="fa-solid fa-angle-{{ifThen abilityContext.expanded "down" "right"}}" data-action="toggleDocumentDescription"></a>
                         </div>
                     </div>
-
-                        <div class="item-description-expandable">
-                            <div class="item-description-content">
-                                {{{itemFullDescription item}}}
-                            </div>
+                    {{!-- 
+                    <div class="item-description-expandable">
+                        <div class="item-description-content">
+                            {{{itemFullDescription item}}}
                         </div>
+                    </div> 
+                    --}}
                 </li>
             {{/each}}
         </ol>

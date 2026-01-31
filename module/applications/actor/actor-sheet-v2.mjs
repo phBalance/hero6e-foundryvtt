@@ -1,4 +1,3 @@
-import { HEROSYS } from "../../herosystem6e.mjs";
 import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
@@ -6,17 +5,25 @@ import { getCharacteristicInfoArrayForActor } from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
+//const { DragDrop } = foundry.applications.ux;
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 
 export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorSheetV2) {
+    // Dynamic PARTS based on system.id
+    static {
+        Hooks.once("init", async function () {
+            HeroSystemActorSheetV2.initializeTemplate();
+        });
+    }
+
     static DEFAULT_OPTIONS = {
         //id: "foo-form",
         // form: {
         //     //handler: TemplateApplication.#onSubmit,
         //     closeOnSubmit: false, // do not close when submitted
         // },
-        classes: ["herosystem6e", "actor-sheet-v2"],
+        classes: ["herosystem6e", "actor-sheet-v2a"],
         position: {
             width: 800,
             height: 700,
@@ -58,6 +65,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 },
             ],
         },
+        //dragDrop: [{ dragSelector: ".draggable", dropSelector: null }],
     };
 
     static #onConfigureToken() {
@@ -89,12 +97,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static initializeTemplate() {
+        // HEROSYS.module isn't defined yet so using game.system.id
+        const systemId = game.system.id;
+
         HeroSystemActorSheetV2.PARTS = {
             aside: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-aside-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-aside-v2.hbs`,
             },
             header: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-header-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-header-v2.hbs`,
             },
             tabs: {
                 // Foundry-provided generic template
@@ -102,63 +113,63 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 // classes: ['sysclass'], // Optionally add extra classes to the part for extra customization
             },
             attacks: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-attacks-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-attacks-v2.hbs`,
                 scrollable: [""],
             },
             defenses: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-defenses-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-defenses-v2.hbs`,
                 scrollable: [""],
             },
             movements: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-movements-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-movements-v2.hbs`,
                 scrollable: [""],
             },
             martial: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-martial-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-martial-v2.hbs`,
                 scrollable: [""],
             },
             skills: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-skills-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-skills-v2.hbs`,
                 scrollable: [""],
             },
             maneuvers: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-maneuvers-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-maneuvers-v2.hbs`,
                 scrollable: [""],
             },
             powers: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-powers-v2.hbs`,
                 scrollable: [""],
             },
             characteristics: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-characteristics-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-characteristics-v2.hbs`,
                 scrollable: [""],
             },
             equipment: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-equipment-v2.hbs`,
                 scrollable: [""],
             },
             perks: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-perks-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-perks-v2.hbs`,
                 scrollable: [""],
             },
             talents: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-talents-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-talents-v2.hbs`,
                 scrollable: [""],
             },
             complications: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-complications-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-complications-v2.hbs`,
                 scrollable: [""],
             },
             background: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-background-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-background-v2.hbs`,
                 scrollable: [""],
             },
             other: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
                 scrollable: [""],
             },
             analysis: {
-                template: `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-analysis-v2.hbs`,
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-analysis-v2.hbs`,
                 scrollable: [""],
             },
         };
@@ -575,8 +586,86 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // SEARCH
         this.element.querySelectorAll('[data-action="search"]').forEach((el) => {
-            el.addEventListener("keydown", this._debouncedSearch, { passive: true });
+            el.addEventListener("keydown", this.#debouncedSearch, { passive: true });
         });
+
+        // DRAG
+        //this.#dragDrop.forEach((d) => d.bind(this.element));
+    }
+
+    /**
+     * Define whether a user is able to begin a dragstart workflow for a given drag selector
+     * @param {string} selector       The candidate HTML selector for dragging
+     * @returns {boolean}             Can the current user drag this selector?
+     * @protected
+     */
+    _canDragStart() {
+        // game.user fetches the current user
+        return true;
+        //return this.isOwner;
+    }
+
+    /**
+     * Define whether a user is able to conclude a drag-and-drop workflow for a given drop selector
+     * @param {string} selector       The candidate HTML selector for the drop target
+     * @returns {boolean}             Can the current user drop on this selector?
+     * @protected
+     */
+    _canDragDrop() {
+        // game.user fetches the current user
+        return true;
+        //return this.isOwner;
+    }
+
+    /**
+     * Callback actions which occur at the beginning of a drag start workflow.
+     * @param {DragEvent} event       The originating DragEvent
+     * @protected
+     */
+    _onDragStart(event) {
+        const el = event.currentTarget;
+        console.log(event, el);
+
+        if ("link" in event.target.dataset) {
+            console.error(`_onDragStart link early out`);
+            return;
+        }
+
+        // Extract the data you need
+        let dragData = null;
+
+        if (!dragData) {
+            console.error(`_onDragStart no dragData`);
+            return;
+        }
+
+        // Set data transfer
+        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+    }
+
+    /**
+     * Callback actions which occur when a dragged element is over a drop target.
+     * @param {DragEvent} event       The originating DragEvent
+     * @protected
+     */
+    _onDragOver(event) {
+        console.log(event);
+    }
+
+    /**
+     * Callback actions which occur when a dragged element is dropped on a target.
+     * @param {DragEvent} event       The originating DragEvent
+     * @protected
+     */
+    async _onDrop(event) {
+        console.log(event);
+        //const data = TextEditor.getDragEventData(event);
+        // Handle different data types
+        // switch (
+        //     data.type
+        //     // write your cases
+        // ) {
+        // }
     }
 
     async _uploadCharacterSheet(event) {
@@ -598,7 +687,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static SEARCH_DELAY = 200;
 
-    _debouncedSearch = foundry.utils.debounce(this.#onSearch.bind(this), this.constructor.SEARCH_DELAY);
+    #debouncedSearch = foundry.utils.debounce(this.#onSearch.bind(this), this.constructor.SEARCH_DELAY);
 
     #onSearch(ev) {
         const filter = ev.target.value;
@@ -819,4 +908,36 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         return "";
     }
+
+    //#dragDrop = this.#createDragDropHandlers();
+
+    /**
+     * Create drag-and-drop workflow handlers for this Application.
+     * @returns {DragDrop[]}     An array of DragDrop handlers.
+     * @private
+     */
+    // #createDragDropHandlers() {
+    //     return this.options.dragDrop.map((d) => {
+    //         d.permissions = {
+    //             dragstart: this._canDragStart.bind(this),
+    //             drop: this._canDragDrop.bind(this),
+    //         };
+    //         d.callbacks = {
+    //             dragstart: this._onDragStart.bind(this),
+    //             dragover: this._onDragOver.bind(this),
+    //             drop: this._onDrop.bind(this),
+    //         };
+    //         return new DragDrop.implementation(d);
+    //     });
+    // }
+
+    // Optional: Add getter to access the private property
+
+    /**
+     * Returns an array of DragDrop instances
+     * @type {DragDrop[]}
+     */
+    // get dragDrop() {
+    //     return this.#dragDrop;
+    // }
 }
