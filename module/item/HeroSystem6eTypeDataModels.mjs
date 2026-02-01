@@ -1846,16 +1846,50 @@ export class HeroActorCharacterInfoModel extends foundry.abstract.DataModel {
     }
 }
 
+export class HeroActorTemplateModel extends foundry.abstract.DataModel {
+    static defineSchema() {
+        return {
+            version: new StringField(),
+            extends: new StringField(),
+            id: new StringField(),
+            originalPath: new StringField(),
+            MAINAPP: new ObjectField(),
+            CHARACTERISTICS: new ObjectField(),
+            SKILLS: new ObjectField(),
+            SKILL_ENHANCERS: new ObjectField(),
+            MARTIAL_ARTS: new ObjectField(),
+            PERKS: new ObjectField(),
+            TALENTS: new ObjectField(),
+            POWERS: new ObjectField(),
+            MODIFIERS: new ObjectField(),
+            DISADVANTAGES: new ObjectField(),
+            _name: new StringField(),
+        };
+    }
+
+    get name() {
+        return this.extends ?? this._name ?? this.originalPath;
+    }
+}
+
 export class HeroActorCharacterModel extends foundry.abstract.DataModel {
     static defineSchema() {
         return {
             BASIC_CONFIGURATION: new EmbeddedDataField(HeroActorCharacterBasicConfigurationModel),
             CHARACTER_INFO: new EmbeddedDataField(HeroActorCharacterInfoModel),
-            TEMPLATE: new ObjectField(),
+            TEMPLATE: new EmbeddedDataField(HeroActorTemplateModel), // Most HDC files this is a string
             version: new StringField(),
             xmlTag: new StringField(),
             _hdcXml: new StringField(),
         };
+    }
+
+    static migrateData(source) {
+        // Most TEMPLATEs are just a string but sometimes they are an object.
+        // So we are coercing strings to the object as ObjectField can't be a simple string.
+        if (typeof source.TEMPLATE === "string") {
+            source.TEMPLATE = { _name: source.TEMPLATE };
+        }
     }
 }
 
