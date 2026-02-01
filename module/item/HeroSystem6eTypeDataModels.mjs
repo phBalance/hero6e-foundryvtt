@@ -1901,6 +1901,7 @@ export class HeroActorCharacterModel extends foundry.abstract.DataModel {
     static migrateData(source) {
         // Most TEMPLATEs are just a string but sometimes they are an object.
         // So we are coercing strings to the object as ObjectField can't be a simple string.
+        // TODO: With Millennium cityCity check to see if this item/skill really works, if not we should delete these.
         if (typeof source.TEMPLATE === "string") {
             source.TEMPLATE = { _name: source.TEMPLATE };
         }
