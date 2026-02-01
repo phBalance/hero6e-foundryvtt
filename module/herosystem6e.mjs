@@ -44,7 +44,6 @@ import {
     HeroSystem6eItemDisadvantage,
     HeroSystem6eItemComplication,
     HeroItemCharacteristic,
-    HeroSystem6eItemDepricated,
 } from "./item/HeroSystem6eTypeDataModels.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 
@@ -216,7 +215,7 @@ Hooks.once("init", async function () {
     });
 
     Object.assign(CONFIG.Item.dataModels, {
-        // The keys are the types defined in our template.json
+        // The keys are the types defined in our system.json
         power: HeroSystem6eItemPower,
         equipment: HeroSystem6eItemEquipment,
         skill: HeroSystem6eItemSkill,
@@ -227,8 +226,6 @@ Hooks.once("init", async function () {
         disadvantage: HeroSystem6eItemDisadvantage,
         complication: HeroSystem6eItemComplication,
         characteristic: HeroItemCharacteristic,
-        attack: HeroSystem6eItemDepricated,
-        movement: HeroSystem6eItemDepricated,
     });
 
     HeroRuler.initialize();

@@ -432,11 +432,12 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
     prepareDerivedData() {
         super.prepareDerivedData();
 
-        // this.composeMemoizableObjectFunction("damage");
-        // this.composeMemoizableObjectFunction("description");
-        // this.composeMemoizableObjectFunction("dcvDetails");
-        // this.composeMemoizableObjectFunction("ocvDetails");
-        // this.composeMemoizableObjectFunction("range");
+        this.composeMemoizableObjectFunction("damage");
+        this.composeMemoizableObjectFunction("description");
+        this.composeMemoizableObjectFunction("dcvDetails");
+        this.composeMemoizableObjectFunction("effect");
+        this.composeMemoizableObjectFunction("ocvDetails");
+        this.composeMemoizableObjectFunction("range");
     }
 
     get description() {
@@ -1800,25 +1801,6 @@ export class HeroCharacteristicsModel extends foundry.abstract.DataModel {
     }
 }
 
-// class HeroActorCharacteristicSpd extends HeroCharacteristicsModel {
-//     static defineSchema() {
-//         return {
-//             value: new HeroNumberField({ integer: false }),
-//         };
-//     }
-// }
-
-var SubtypeModelMixin = (base) => {
-    return class HeroSystem6eSystemModel extends base {
-        /** @type {SubtypeMetadata} */
-        static get metadata() {
-            return {
-                embedded: {},
-            };
-        }
-    };
-};
-
 export class HeroActorCharacterBasicConfigurationModel extends foundry.abstract.DataModel {
     static defineSchema() {
         return {
@@ -1911,10 +1893,8 @@ export class HeroActorCharacterModel extends foundry.abstract.DataModel {
     }
 }
 
-export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel) {
+export class HeroActorModel extends HeroObjectCacheMixin(foundry.abstract.TypeDataModel) {
     static defineSchema() {
-        //const { ObjectField, StringField, ArrayField, EmbeddedDataField } = foundry.data.fields;
-        // Note that the return is just a simple object
         return {
             CHARACTER: new EmbeddedDataField(HeroActorCharacterModel),
 
@@ -1957,6 +1937,10 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
             initiativeCharacteristic: new StringField(),
             _hdcXml: new StringField(),
         };
+    }
+
+    prepareDerivedData() {
+        super.prepareDerivedData();
     }
 
     #cachedParsedXml = new TimeClearedCache();
@@ -2009,34 +1993,5 @@ export class HeroActorModel extends SubtypeModelMixin(foundry.abstract.DataModel
         } catch (e) {
             console.error(e);
         }
-    }
-}
-
-export class PcModel extends HeroActorModel {
-    static get metadata() {
-        return foundry.utils.mergeObject(super.metadata, {
-            type: "pc",
-        });
-    }
-}
-
-export class NpcModel extends HeroActorModel {
-    static get metadata() {
-        return foundry.utils.mergeObject(super.metadata, {
-            type: "npc",
-        });
-    }
-}
-
-export class HeroSystem6eItemDepricated extends HeroItemModCommonModel {
-    static get metadata() {
-        return foundry.utils.mergeObject(super.metadata, {
-            type: "depricated",
-        });
-    }
-    static defineSchema() {
-        return {
-            ...super.defineSchema(),
-        };
     }
 }
