@@ -19,6 +19,7 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { dehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
 import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { Attack, actionToJSON } from "../utility/attack.mjs";
+import { PresenceAttackApplication } from "../applications/apps/presence-attack.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -2011,6 +2012,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             speaker: speaker,
         };
         return ChatMessage.create(chatData);
+    }
+
+    async presenceAttack({ token }) {
+        return new PresenceAttackApplication({ actor: this, token }).render({ force: true });
     }
 
     async onCharacteristicSuccessRoll({ label, token }) {

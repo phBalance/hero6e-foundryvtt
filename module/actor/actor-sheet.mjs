@@ -1,8 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "./actor.mjs";
-
 import { getActorDefensesVsAttack } from "../utility/defense.mjs";
-import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 
@@ -1274,7 +1272,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     }
 
     async _onPresenceAttack() {
-        presenceAttackPopOut(this.actor);
+        this.actor.presenceAttack({ token: this.token });
     }
 
     async _onFullHealth() {

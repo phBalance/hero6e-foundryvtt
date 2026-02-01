@@ -90,7 +90,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static #onPresenceAttack() {
-        console.error("#onPresenceAttack not implemented");
+        this.actor.presenceAttack({ token: this.token });
     }
 
     static #onConfigureToken() {
