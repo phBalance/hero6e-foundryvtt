@@ -432,11 +432,12 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
     prepareDerivedData() {
         super.prepareDerivedData();
 
-        // this.composeMemoizableObjectFunction("damage");
-        // this.composeMemoizableObjectFunction("description");
-        // this.composeMemoizableObjectFunction("dcvDetails");
-        // this.composeMemoizableObjectFunction("ocvDetails");
-        // this.composeMemoizableObjectFunction("range");
+        this.composeMemoizableObjectFunction("damage");
+        this.composeMemoizableObjectFunction("description");
+        this.composeMemoizableObjectFunction("dcvDetails");
+        this.composeMemoizableObjectFunction("effect");
+        this.composeMemoizableObjectFunction("ocvDetails");
+        this.composeMemoizableObjectFunction("range");
     }
 
     get description() {
@@ -1902,6 +1903,10 @@ export class HeroActorModel extends foundry.abstract.TypeDataModel {
             initiativeCharacteristic: new StringField(),
             _hdcXml: new StringField(),
         };
+    }
+
+    prepareDerivedData() {
+        super.prepareDerivedData();
     }
 
     #cachedParsedXml = new TimeClearedCache();

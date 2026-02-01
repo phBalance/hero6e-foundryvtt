@@ -311,28 +311,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     prepareDerivedData() {
         super.prepareDerivedData();
 
-        this._clearCachedObjectData();
-
-        // this.composeMemoizableObjectFunction("attackDefenseVs");
-        // this.composeMemoizableObjectFunction("characterPointCost");
-        // this.composeMemoizableObjectFunction("childIdx");
-        // this.composeMemoizableObjectFunction("childItems");
-        // this.composeMemoizableObjectFunction("findModsByXmlid");
-        // this.composeMemoizableObjectFunction("getItemDescription");
-        // this.composeMemoizableObjectFunction("heroValidation");
-        // this.composeMemoizableObjectFunction("parentItem");
-        // this.composeMemoizableObjectFunction("_realCost");
-    }
-
-    /* --------------------------------------------- */
-
-    /**
-     * Clear cached class collections.
-     * @internal
-     */
-    _clearCachedObjectData() {
-        // Clear all the rest
-        this._lazy = {};
+        this.composeMemoizableObjectFunction("attackDefenseVs");
+        this.composeMemoizableObjectFunction("characterPointCost");
+        this.composeMemoizableObjectFunction("childIdx");
+        this.composeMemoizableObjectFunction("childItems");
+        this.composeMemoizableObjectFunction("findModsByXmlid");
+        this.composeMemoizableObjectFunction("getItemDescription");
+        this.composeMemoizableObjectFunction("heroValidation");
+        this.composeMemoizableObjectFunction("parentItem");
+        this.composeMemoizableObjectFunction("_realCost");
     }
 
     async setActiveEffects(options = {}) {
