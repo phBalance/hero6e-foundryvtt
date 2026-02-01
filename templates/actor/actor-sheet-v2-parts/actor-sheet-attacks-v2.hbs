@@ -30,7 +30,12 @@
                                 <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
                             {{/if}}
                             <div class="name">
-                                <div class="label">{{this.name}}</div>
+                                <div class="label">
+                                    {{#if (eq item.parentItem.system.XMLID "COMPOUNDPOWER")}}
+                                        {{{item.parentItem.name}}}: 
+                                    {{/if}}
+                                    {{this.name}}
+                                </div>
                                 <div class="keywords">{{this.system.XMLID}}</div>
                             </div>
                         </div>
