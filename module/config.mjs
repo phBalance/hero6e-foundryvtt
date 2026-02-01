@@ -7660,7 +7660,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="NOHITLOCATIONS" ID="1709333986337" BASECOST="10.0" LEVELS="0" ALIAS="No Hit Locations" POSITION="66" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
-        undefined,
+        {},
     );
 
     addPower(
