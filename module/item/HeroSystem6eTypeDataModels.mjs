@@ -1859,7 +1859,7 @@ export class HeroActorCharacterModel extends foundry.abstract.DataModel {
     }
 }
 
-export class HeroActorModel extends foundry.abstract.TypeDataModel {
+export class HeroActorModel extends HeroObjectCacheMixin(foundry.abstract.TypeDataModel) {
     static defineSchema() {
         return {
             CHARACTER: new EmbeddedDataField(HeroActorCharacterModel),
