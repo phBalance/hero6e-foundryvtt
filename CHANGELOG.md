@@ -3,6 +3,7 @@
 ### Version 4.2.13 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Martial maneuvers with weapons now have weapon advantages, such as AP, applied against defender's defenses. [#3664](https://github.com/dmdorman/hero6e-foundryvtt/issues/3664)
+- Fixed issue with maneuvers that use velocity. [#3676](https://github.com/dmdorman/hero6e-foundryvtt/issues/3676)
 
 ### Version 4.2.12 20260124
 

@@ -225,16 +225,13 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
     if ((item.system.effect || "").match(/v\/\d+/)) {
-        // Educated guess for token
-        const token2 =
-            actor.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-            actor.getActiveTokens()[0];
-        if (token.id !== token2.id) {
-            console.error("token mismatch");
-        }
+        // TODO: We don't have any targetToken data
+        // Also calculateVelocityInSystemUnits is a v12 holdover and should be reworked
+        //  to leverage v13 native ruler.
+        const targetToken = undefined;
 
         data.showVelocity = true;
-        data.velocity = calculateVelocityInSystemUnits(item.actor, token2);
+        data.velocity = calculateVelocityInSystemUnits(item.actor, token, targetToken);
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
@@ -4532,7 +4529,9 @@ export async function _onModalDamageCard(event) {
  * @returns {Token | TokenDocument}
  */
 export function getTokenEducatedGuess(options = {}) {
-    console.warn("deprecated getTokenEducatedGuess, pass actual token from sheets");
+    console.warn(
+        "deprecated getTokenEducatedGuess, pass actual token from sheets, although may be needed when called from actorSheet sidebar.",
+    );
     // NOTE: This is a catch in case we've done something stupid as FoundryVTT has 3 types of tokens.
     const isPrototypeToken = options.token instanceof foundry.data.PrototypeToken;
     if (isPrototypeToken) {
