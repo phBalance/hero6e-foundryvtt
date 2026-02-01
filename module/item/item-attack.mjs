@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo, whisperUserTargetsForActor } from "../utility/util.mjs";
+import { getPowerInfo, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
@@ -199,7 +199,7 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
  */
 export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     const actor = item.actor;
-    const token = options.token ?? getTokenEducatedGuess({ token: options.token, actor: actor });
+    const token = options.token ?? tokenEducatedGuess({ token: options.token, actor: actor });
     const data = {
         originalItem: item,
         actor: actor,
@@ -1401,7 +1401,7 @@ export async function _onRollKnockback(event) {
 
     const kbOptions = { ...button.dataset };
     const { item } = rehydrateActorAndAttackItem(kbOptions);
-    const token = getTokenEducatedGuess({ tokenId: kbOptions.targetTokenId });
+    const token = tokenEducatedGuess({ tokenId: kbOptions.targetTokenId });
     const knockbackResultTotal = kbOptions.knockbackResultTotal;
     if (!item || !token || !knockbackResultTotal) {
         return ui.notifications.error(`Knockback details are not available.`);
@@ -1752,7 +1752,7 @@ export async function _onRollDamage(event) {
     if (!action?.current.attackerTokenUuid) {
         console.warn("expecting action.current.attackerTokenUuid");
     }
-    const token = action.system.attackerToken ?? getTokenEducatedGuess({ action, actor });
+    const token = action.system.attackerToken ?? tokenEducatedGuess({ action, actor });
     const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
@@ -2257,7 +2257,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
 export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetData) {
     const damageData = foundry.utils.deepClone(_damageData);
     const targetToken =
-        fromUuidSync(targetData.targetTokenUuid) ?? getTokenEducatedGuess({ tokenId: targetData?.tokenId }); // canvas.scene.tokens.get(targetToken.tokenId);
+        fromUuidSync(targetData.targetTokenUuid) ?? tokenEducatedGuess({ tokenId: targetData?.tokenId }); // canvas.scene.tokens.get(targetToken.tokenId);
     if (!targetToken) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
@@ -3436,7 +3436,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, targetT
                     [game.system.id]: {
                         bodyDamage: senseGroup.bodyDamage,
                         XMLID: senseAffectingItem.system.XMLID,
-                        source: getTokenEducatedGuess({ actor: senseAffectingItem.actor })?.name,
+                        source: tokenEducatedGuess({ actor: senseAffectingItem.actor })?.name,
                         expiresOn: "segmentEnd",
                     },
                 },
@@ -4512,56 +4512,4 @@ export async function _onModalDamageCard(event) {
     };
     const d = new Dialog(data, { form: { closeOnSubmit: false } });
     await d.render(true);
-}
-
-/**
- * Given information, find the best guess for the token in the scene which we should use.
- *
- * NOTE: Typically we want the token that is making an attack or receiving the attack so that we can
- *       make distance calculations.
- *
- * @param {Object} options
- * @param {action} options.action
- * @param {HeroSystem6eActor} options.actor
- * @param {Token | TokenDocument} options.token
- * @param {string} options.tokenId we should really get rid of this.
- *
- * @returns {Token | TokenDocument}
- */
-export function getTokenEducatedGuess(options = {}) {
-    console.warn(
-        "deprecated getTokenEducatedGuess, pass actual token from sheets, although may be needed when called from actorSheet sidebar.",
-    );
-    // NOTE: This is a catch in case we've done something stupid as FoundryVTT has 3 types of tokens.
-    const isPrototypeToken = options.token instanceof foundry.data.PrototypeToken;
-    if (isPrototypeToken) {
-        console.error("Ignoring provided PrototypeToken");
-        delete options.token;
-    }
-
-    // If we passed in a Token or TokenDocument, consider it authorative
-    if (options.token) {
-        return options.token;
-    }
-
-    // action will be our next best bet, although tokenId is pretty good too
-    // if (!options.action && !options.tokenId) {
-    //     console.warn(`Unable to find action in getTokenEducatedGuess`);
-    // }
-
-    const actor = options.actor ?? options.action?.current.actor;
-    const tokenId = options.action?.current.attackerTokenUuid ?? options.tokenId ?? "";
-    const scene = game.scenes.current;
-    const token =
-        scene.tokens.get(tokenId) ||
-        actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-        actor?.getActiveTokens()[0];
-    if (!token) {
-        if (actor.id) {
-            console.warn(`Unable to find token for ${actor.name}`);
-        } else {
-            console.log(`${actor.name} has no id, likely a temporary actor. No associated token is expected.`);
-        }
-    }
-    return token;
 }

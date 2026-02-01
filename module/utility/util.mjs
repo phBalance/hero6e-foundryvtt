@@ -487,15 +487,42 @@ export function toHHMMSS(secs) {
         .join(":");
 }
 
+/**
+ * Given information, find the best guess for the token in the scene which we should use.
+ *
+ * NOTE: Typically we want the token that is making an attack or receiving the attack so that we can
+ *       make distance calculations.
+ *
+ * @param {Object} options
+ * @param {action} options.action
+ * @param {HeroSystem6eActor} options.actor
+ * @param {Token | TokenDocument} options.token
+ * @param {string} options.tokenId we should really get rid of this.
+ *
+ * @returns {Token | TokenDocument}
+ */
 export function tokenEducatedGuess(options = {}) {
-    console.warn("deprecated tokenEducatedGuess, pass actual token from sheets");
-    // TokenId
-    const token = options.token || canvas.tokens.get(options.tokenId);
-    if (token) {
-        return token;
+    const isPrototypeToken = options.token instanceof foundry.data.PrototypeToken;
+    if (isPrototypeToken) {
+        console.error("Ignoring provided PrototypeToken");
+        delete options.token;
     }
 
-    // Actor from Item
+    // If we passed in a Token or TokenDocument, consider it authoritative
+    if (options.token) {
+        return options.token;
+    }
+    console.warn("Pass actual token when possible");
+
+    // Token id/uuid
+    options.tokenId = options.action?.current.attackerTokenUuid;
+    options.token ??= fromUuidSync(options.tokenId);
+    options.token ??= canvas.tokens.get(options.tokenId);
+    if (options.token) {
+        return options.token;
+    }
+
+    // ActorId
     options.actorId ??= options.item?.actor?.id;
 
     // Actor in combat should provide a token
@@ -504,23 +531,24 @@ export function tokenEducatedGuess(options = {}) {
         return canvas.tokens.get(combatant.tokenId);
     }
 
-    // Controlled token of provided actor
+    // Actor
+    options.actor ??= options.action?.current.actor;
     options.actor ??= game.actors.get(options.actorId);
-    const controlledToken = options.actor
-        ?.getActiveTokens()
-        .find((t) => canvas.tokens.controlled.find((c) => c.id === t.id));
-    if (controlledToken) {
-        return controlledToken;
+
+    // Controlled token of provided actor
+    options.token ??= options.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id));
+    if (options.token) {
+        return options.token;
     }
 
     // Any token on this canvas for Actor
-    const anyToken = options.actor?.getActiveTokens()?.[0];
-    if (anyToken) {
-        return anyToken;
+    options.token ??= options.actor?.getActiveTokens()?.[0];
+    if (options.token) {
+        return options.token;
     }
 
     if (options.actor?.id) {
-        console.warn(`Unable to find token for ${options.actor.name}`);
+        console.warn(`Unable to find token for ${options.actor?.name}`);
     } else {
         console.log(`${options.actor?.name} has no id, likely a temporary actor. No associated token is expected.`);
     }

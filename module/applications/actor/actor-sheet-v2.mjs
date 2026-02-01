@@ -29,16 +29,20 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             height: 700,
         },
         actions: {
+            actorDescription: HeroSystemActorSheetV2.#onActorDescription,
             actorToggle: HeroSystemActorSheetV2.#onActorToggle,
             carried: HeroSystemActorSheetV2.#onCarried,
             clear: HeroSystemActorSheetV2.#onClear,
             clips: HeroSystemActorSheetV2.#onClips,
             configureToken: HeroSystemActorSheetV2.#onConfigureToken,
-            toggle: HeroSystemActorSheetV2.#onToggle,
+            fullHealth: HeroSystemActorSheetV2.#onFullHealth,
+            presenceAttack: HeroSystemActorSheetV2.#onPresenceAttack,
+            recovery: HeroSystemActorSheetV2.#onRecovery,
             roll: HeroSystemActorSheetV2.#onRoll,
             rollCharacteristicSuccess: HeroSystemActorSheetV2.#onRollCharacteristicSuccess,
             rollCharacteristicFull: HeroSystemActorSheetV2.#onCharacteristicFullRoll,
             rollCharacteristicCasual: HeroSystemActorSheetV2.#onCharacteristicCasualRoll,
+            toggle: HeroSystemActorSheetV2.#onToggle,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
@@ -67,6 +71,27 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         },
         //dragDrop: [{ dragSelector: ".draggable", dropSelector: null }],
     };
+
+    static async #onActorDescription() {
+        await this.actor.actorDescriptionToChat({ token: this.token });
+    }
+
+    static async #onFullHealth() {
+        const confirmed = await Dialog.confirm({
+            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
+            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content"),
+        });
+        if (!confirmed) return;
+        return this.actor.FullHealth();
+    }
+
+    static #onRecovery() {
+        this.actor.TakeRecovery({ asAction: true, token: this.token });
+    }
+
+    static #onPresenceAttack() {
+        console.error("#onPresenceAttack not implemented");
+    }
 
     static #onConfigureToken() {
         this.token.sheet.render({ force: true });

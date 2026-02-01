@@ -2,12 +2,8 @@ import { HeroRoller } from "./dice.mjs";
 import { calculateDistanceBetween } from "./range.mjs";
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import {
-    addRangeIntoToHitRoll,
-    dehydrateAttackItem,
-    getTokenEducatedGuess,
-    rehydrateAttackItem,
-} from "../item/item-attack.mjs";
+import { addRangeIntoToHitRoll, dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
+import { tokenEducatedGuess } from "../utility/util.mjs";
 
 // PH: FIXME: Need to confirm this will work with v12
 const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
@@ -443,7 +439,7 @@ export class Attack {
             return null;
         }
 
-        const attackerToken = options.token ?? getTokenEducatedGuess({ actor: item.actor, ...options });
+        const attackerToken = options.token ?? tokenEducatedGuess({ actor: item.actor, ...options });
         const system = {
             actor: item.actor,
             attackerToken,
