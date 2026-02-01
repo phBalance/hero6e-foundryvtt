@@ -1863,12 +1863,12 @@ export class HeroActorTemplateModel extends foundry.abstract.DataModel {
             POWERS: new ObjectField(),
             MODIFIERS: new ObjectField(),
             DISADVANTAGES: new ObjectField(),
-            name: new StringField(),
+            _name: new StringField(),
         };
     }
 
     get name() {
-        return this.extends ?? this.id;
+        return this.extends ?? this._name ?? this.originalPath;
     }
 }
 
@@ -1888,7 +1888,7 @@ export class HeroActorCharacterModel extends foundry.abstract.DataModel {
         // Most TEMPLATEs are just a string but sometimes they are an object.
         // So we are coercing strings to the object as ObjectField can't be a simple string.
         if (typeof source.TEMPLATE === "string") {
-            source.TEMPLATE = { id: source.TEMPLATE };
+            source.TEMPLATE = { _name: source.TEMPLATE };
         }
     }
 }

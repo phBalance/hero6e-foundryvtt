@@ -186,6 +186,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         this.composeMemoizableObjectFunction("analyzeEndurance");
         this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
+
+        this.system.debugModelProps();
     }
 
     /**
