@@ -11,8 +11,8 @@ function isHexTemplatesEnabled() {
 
 function currentSceneUsesHexGrid() {
     return !(
-        game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
-        game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
+        game.scenes.current?.grid.type === CONST.GRID_TYPES.GRIDLESS ||
+        game.scenes.current?.grid.type === CONST.GRID_TYPES.SQUARE
     );
 }
 
