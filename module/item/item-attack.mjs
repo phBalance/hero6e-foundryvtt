@@ -2437,7 +2437,12 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
                 o.baseInfo.behaviors.includes("defense"),
         )
         .filter((defense) => !ignoreDefenseIds.includes(defense.id))
-        .filter((defense) => getItemDefenseVsAttack(defense, item, { attackDefenseVs: item.attackDefenseVs }) !== null);
+        .filter(
+            (defense) =>
+                getItemDefenseVsAttack(defense, item.effectiveAttackItem, {
+                    attackDefenseVs: item.effectiveAttackItem.attackDefenseVs,
+                }) !== null,
+        );
 
     for (const defense of activatableDefenses) {
         const rar = defense.findModsByXmlid("EVERYPHASE") || defense.findModsByXmlid("ACTIVATIONROLL");
@@ -2464,7 +2469,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // New Defense Stuff
     const { defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, defenseTags } =
-        getActorDefensesVsAttack(targetToken.actor, item, { ignoreDefenseIds });
+        getActorDefensesVsAttack(targetToken.actor, item.effectiveAttackItem, { ignoreDefenseIds });
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
