@@ -1,8 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "./actor.mjs";
-
 import { getActorDefensesVsAttack } from "../utility/defense.mjs";
-import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 
@@ -1274,7 +1272,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     }
 
     async _onPresenceAttack() {
-        presenceAttackPopOut(this.actor);
+        this.actor.presenceAttack({ token: this.token });
     }
 
     async _onFullHealth() {
@@ -1287,34 +1285,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     }
 
     async _onActorDescription() {
-        let content = `${this.actor.system.CHARACTER?.CHARACTER_INFO?.APPEARANCE || ""}`;
-        const perceivable = [];
-        for (let item of this.actor.items.filter((item) => item.isActive || item.isActivatable() === false)) {
-            const p = item.isPerceivable(false); // inobivous is not included
-            if (p) {
-                perceivable.push(
-                    `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
-                );
-            }
-        }
-        if (perceivable.length > 0) {
-            perceivable.sort();
-            content += "<ul>";
-            for (let p of perceivable) {
-                content += `<li>${p}</li>`;
-            }
-            content += "</ul>";
-        }
-
-        const token = this.actor.token;
-        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
-        const chatData = {
-            author: game.user._id,
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-            content: content,
-            speaker: speaker,
-        };
-        return ChatMessage.create(chatData);
+        await this.actor.actorDescriptionToChat({ token: this.token });
     }
 
     async _uploadCharacterSheet(event) {

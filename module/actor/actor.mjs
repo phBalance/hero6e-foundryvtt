@@ -7,6 +7,7 @@ import {
     getCharacteristicInfoArrayForActor,
     squelch,
     whisperUserTargetsForActor,
+    tokenEducatedGuess,
 } from "../utility/util.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
@@ -18,6 +19,7 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { dehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
 import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { Attack, actionToJSON } from "../utility/attack.mjs";
+import { PresenceAttackApplication } from "../applications/apps/presence-attack.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -1979,6 +1981,41 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (["TELEKINESIS", "NAKEDMODIFIER"].includes(itemData.system.XMLID)) {
             itemData.system.active = false;
         }
+    }
+
+    async actorDescriptionToChat({ token }) {
+        token ??= tokenEducatedGuess({ actor: this, token });
+        let content = `${this.system.CHARACTER?.CHARACTER_INFO?.APPEARANCE || ""}`;
+        const perceivable = [];
+        for (let item of this.items.filter((item) => item.isActive || item.isActivatable() === false)) {
+            const p = item.isPerceivable(false); // inobivous is not included
+            if (p) {
+                perceivable.push(
+                    `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
+                );
+            }
+        }
+        if (perceivable.length > 0) {
+            perceivable.sort();
+            content += "<ul>";
+            for (let p of perceivable) {
+                content += `<li>${p}</li>`;
+            }
+            content += "</ul>";
+        }
+
+        const speaker = ChatMessage.getSpeaker({ actor: this, token });
+        const chatData = {
+            author: game.user._id,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            content: content,
+            speaker: speaker,
+        };
+        return ChatMessage.create(chatData);
+    }
+
+    async presenceAttack({ token }) {
+        return new PresenceAttackApplication({ actor: this, token }).render({ force: true });
     }
 
     async onCharacteristicSuccessRoll({ label, token }) {
