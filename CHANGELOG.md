@@ -2,6 +2,7 @@
 
 ### Version 4.2.13 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Martial maneuvers with weapons now have weapon advantages, such as AP, applied against defender's defenses. [#3664](https://github.com/dmdorman/hero6e-foundryvtt/issues/3664)
 - A [preview](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) of the new Actor Sheet is available. It has light, dark, and high contrast themes. Here is your chance to preview and provide feedback before we make this the default actor sheet. [#3622](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) [#2275](https://github.com/dmdorman/hero6e-foundryvtt/issues/2275)
 
 ### Version 4.2.12 20260124
