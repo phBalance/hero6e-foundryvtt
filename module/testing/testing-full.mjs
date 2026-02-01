@@ -5269,15 +5269,11 @@ export function registerFullTests(quench) {
                 let actor;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                });
 
-                    await actor.uploadFromXml(contents);
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("should match the cost breakdown of HD", function () {
@@ -5293,7 +5289,7 @@ export function registerFullTests(quench) {
 
                 it("name", async function () {
                     console.log("name");
-                    assert.equal(actor.name, "Amadeus");
+                    assert.equal(actor.name.includes("Amadeus"), true);
                 });
 
                 it("realCost", async function () {
