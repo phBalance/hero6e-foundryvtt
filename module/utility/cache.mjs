@@ -65,6 +65,12 @@ function getPropertyDescriptorUpChain(obj, propName) {
     return undefined;
 }
 
+/**
+ * Add object caching functionality to this Base class.
+ *
+ * @param {*} Base
+ * @returns HeroObjectCache
+ */
 export const HeroObjectCacheMixin = (Base) =>
     class HeroObjectCache extends Base {
         static get cachingEnabled() {
@@ -84,6 +90,7 @@ export const HeroObjectCacheMixin = (Base) =>
         /**
          * NOTE: cmofs -> composed memoizable object functions
          * NOTE: cmofd -> composed memoizable object function data
+         *
          * @param {*} funcName
          * @param {*} originalFunc
          */
@@ -131,7 +138,7 @@ export const HeroObjectCacheMixin = (Base) =>
 
             // Is this a temporary object or is this a data model of an object? If so, do not compose it since our prepareDerivedData
             // function invoked when data changes.
-            if (this._id == null && this.item?._id == null) {
+            if (this._id == null && this.parent?._id == null) {
                 return;
             }
 
