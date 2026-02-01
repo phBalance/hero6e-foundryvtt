@@ -1280,6 +1280,20 @@ export class HeroSystem6eItemSkill extends HeroSystem6eItemTypeDataModelProps {
             active: new BooleanField({ initial: true, nullable: true }), // should be part of  HeroSystem6eItemTypeDataModelProps and not needed here
         };
     }
+
+    static migrateData(source) {
+        // Some old (possibly manually created SKILLS) have LEVELS defined incorrectly by current requirements.
+        // These are so old that we don't even have XMLID's, so these skills likely don't work.
+        // Keeping migration for now to avoid errors. https://github.com/dmdorman/hero6e-foundryvtt/issues/3675
+        if (source.LEVELS !== undefined && isNaN(source.LEVELS)) {
+            if (typeof source.LEVELS === "object") {
+                if (source.LEVELS.value !== undefined) {
+                    source.LEVELS = source.LEVELS.value;
+                    return;
+                }
+            }
+        }
+    }
 }
 
 export class HeroSystem6eItemPerk extends HeroSystem6eItemTypeDataModelProps {
