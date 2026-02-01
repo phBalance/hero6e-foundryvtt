@@ -1292,7 +1292,6 @@ export class HeroSystem6eItemSkill extends HeroSystem6eItemTypeDataModelProps {
                     return;
                 }
             }
-            debugger;
         }
     }
 }
