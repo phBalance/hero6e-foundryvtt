@@ -10,7 +10,12 @@ import {
     penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
-import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
+import {
+    currentSceneUsesHexGrid,
+    getGridSizeInMeters,
+    getRoundedDownDistanceInSystemUnits,
+    getSystemDisplayUnits,
+} from "../utility/units.mjs";
 import {
     HeroSystem6eItem,
     RequiresACharacteristicRollCheck,
@@ -2290,7 +2295,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         if (aoeTemplate) {
             // Distance from center
             if (
-                game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE &&
+                game.scenes.current?.grid.type === CONST.GRID_TYPES.SQUARE &&
                 game.settings.get("core", "gridDiagonals") !== CONST.GRID_DIAGONALS.EXACT
             ) {
                 ui.notifications.warn(
@@ -2308,14 +2313,11 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
             // 5e distance measurements are not the same as 6e which just uses euclidian measurements. If the game
             // is being played with 5e measurements use them to figure the distance correctly.
-            const HexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
-            const hexGrid = !(
-                game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
-                game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
-            );
+            const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+            const hexGrid = currentSceneUsesHexGrid();
 
-            if (HexTemplates && hexGrid) {
-                const gridSizeInMeters = game.scenes.current.grid.distance;
+            if (hexTemplates && hexGrid) {
+                const gridSizeInMeters = getGridSizeInMeters();
                 distance =
                     calculateDistanceBetween(aoeTemplate, targetToken.object.center).gridSpaces * gridSizeInMeters;
 
@@ -3540,7 +3542,7 @@ async function _calcDamage(damageRoller, item, options) {
         }
 
         // Knocked out targets take double STUN damage from attacks
-        const targetActor = (game.scenes.current.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
+        const targetActor = (game.scenes.current?.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
         if (targetActor?.statuses.has("knockedOut")) {
             const preStun = stun;
             stun *= 2;
