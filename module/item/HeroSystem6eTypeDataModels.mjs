@@ -1907,7 +1907,7 @@ export class HeroActorCharacterModel extends foundry.abstract.DataModel {
         }
 
         // Super Old HDC files store template in a different location
-        else if (typeof source.BASIC_CONFIGURATION.TEMPLATE === "string") {
+        else if (typeof source.BASIC_CONFIGURATION?.TEMPLATE === "string") {
             source.TEMPLATE = { _name: source.BASIC_CONFIGURATION.TEMPLATE };
         }
     }
