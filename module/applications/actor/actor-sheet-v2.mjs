@@ -244,6 +244,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             switch (partId) {
                 case "aside":
                     this.#prepareContextDefenseSummary(context);
+                    context.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
                     break;
                 case "header":
                     this.#prepareContextCharacterPointTooltips(context);
@@ -590,15 +591,29 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         );
         for (const input of editableInputButtons) {
             const attributeName = input.name;
-            if (foundry.utils.hasProperty(this.actor, attributeName) !== undefined) {
+            if (foundry.utils.hasProperty(this.actor, attributeName)) {
                 // keep in mind that if your callback is a named function instead of an arrow function expression
                 // you'll need to use `bind(this)` to maintain context
-                input.addEventListener("change", (e) => {
+                input.addEventListener("change", async (e) => {
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     const newValue = e.currentTarget.value;
-                    this.actor.update({ [`${attributeName}`]: newValue });
+                    await this.actor.update({ [`${attributeName}`]: newValue });
                 });
+            } else if (attributeName.startsWith("endReserve")) {
+                const endItem = this.actor.items.find(
+                    (item) => item.id === attributeName.match(/endReserve\.([a-zA-z0-9]+)\.value/)?.[1],
+                );
+                if (endItem) {
+                    input.addEventListener("change", async (e) => {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        const newValue = e.currentTarget.value;
+                        await endItem.update({ "system.value": newValue });
+                    });
+                } else {
+                    console.error(`Unhandled INPUT name="${attributeName}`);
+                }
             } else {
                 console.error(`Unhandled INPUT name="${attributeName}`);
             }
