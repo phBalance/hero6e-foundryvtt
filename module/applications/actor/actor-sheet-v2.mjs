@@ -189,6 +189,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-background-v2.hbs`,
                 scrollable: [""],
             },
+            effects: {
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-effects-v2.hbs`,
+                scrollable: [""],
+            },
+            conditions: {
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-conditions-v2.hbs`,
+                scrollable: [""],
+            },
             other: {
                 template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
                 scrollable: [""],
@@ -222,6 +230,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "talents" },
                 { id: "complications" },
                 { id: "background" },
+                { id: "effects" },
+                { id: "conditions" },
                 { id: "other" },
                 { id: "analysis" },
             ],
@@ -353,6 +363,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 background: Object.keys(this.actor.system.CHARACTER.CHARACTER_INFO)
                     .filter((key) => key.match(/[A-Z_]+/))
                     .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
+                effects: Array.from(this.actor.allApplicableEffects()),
+                conditions: this.actor.statuses,
                 other: [true], // don't consider this empty
             };
         } catch (e) {
@@ -903,6 +915,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     #heroValidationCssForTab(items) {
         if (!items || items.length === 0) {
+            return "";
+        }
+
+        // Expecting an Array
+        if (items.constructor.name !== "Array") {
             return "";
         }
 

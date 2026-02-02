@@ -105,6 +105,8 @@
             "talents": "Talents",
             "complications": "Complications",
             "background": "Background",
+            "effects": "Effects",
+            "conditions": "Conditions",
             "other": "Other",
             "analysis": "Analysis"
         },
