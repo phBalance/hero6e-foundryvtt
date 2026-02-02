@@ -1,7 +1,7 @@
 import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
-import { getCharacteristicInfoArrayForActor } from "../../utility/util.mjs";
+import { getCharacteristicInfoArrayForActor, tokenEducatedGuess } from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -104,7 +104,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const controls = super._getHeaderControls();
 
         // Add back in configureToken, even for linked tokens
-        if (!controls.find((c) => c.action === "configureToken")) {
+        if (!controls.find((c) => c.action === "configureToken") && this.token) {
             controls.splice(1, 0, {
                 action: "configureToken",
                 icon: "fa-regular fa-circle-user",
@@ -189,6 +189,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-background-v2.hbs`,
                 scrollable: [""],
             },
+            effects: {
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-effects-v2.hbs`,
+                scrollable: [""],
+            },
+            conditions: {
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-conditions-v2.hbs`,
+                scrollable: [""],
+            },
             other: {
                 template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-other-v2.hbs`,
                 scrollable: [""],
@@ -203,7 +211,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     #token;
 
     get token() {
-        return this.document.token ?? this.#token;
+        return this.document.token ?? this.#token ?? tokenEducatedGuess({ actor: this.actor });
     }
 
     static TABS = {
@@ -222,6 +230,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "talents" },
                 { id: "complications" },
                 { id: "background" },
+                { id: "effects" },
+                { id: "conditions" },
                 { id: "other" },
                 { id: "analysis" },
             ],
@@ -244,6 +254,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             switch (partId) {
                 case "aside":
                     this.#prepareContextDefenseSummary(context);
+                    context.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
                     break;
                 case "header":
                     this.#prepareContextCharacterPointTooltips(context);
@@ -352,6 +363,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 background: Object.keys(this.actor.system.CHARACTER.CHARACTER_INFO)
                     .filter((key) => key.match(/[A-Z_]+/))
                     .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
+                effects: Array.from(this.actor.allApplicableEffects()),
+                conditions: this.actor.statuses,
                 other: [true], // don't consider this empty
             };
         } catch (e) {
@@ -553,7 +566,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         await super._onFirstRender(context, options);
 
         // Keep track of token; needed for linked actors
-        this.#token = options.token;
+        this.#token = options.token ?? tokenEducatedGuess({ actor: this.actor });
 
         // General right click on row
         this._createContextMenu(this._getDocumentListContextOptions, "[data-document-uuid]", {
@@ -590,15 +603,29 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         );
         for (const input of editableInputButtons) {
             const attributeName = input.name;
-            if (foundry.utils.hasProperty(this.actor, attributeName) !== undefined) {
+            if (foundry.utils.hasProperty(this.actor, attributeName)) {
                 // keep in mind that if your callback is a named function instead of an arrow function expression
                 // you'll need to use `bind(this)` to maintain context
-                input.addEventListener("change", (e) => {
+                input.addEventListener("change", async (e) => {
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     const newValue = e.currentTarget.value;
-                    this.actor.update({ [`${attributeName}`]: newValue });
+                    await this.actor.update({ [`${attributeName}`]: newValue });
                 });
+            } else if (attributeName.startsWith("endReserve")) {
+                const endItem = this.actor.items.find(
+                    (item) => item.id === attributeName.match(/endReserve\.([a-zA-z0-9]+)\.value/)?.[1],
+                );
+                if (endItem) {
+                    input.addEventListener("change", async (e) => {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        const newValue = e.currentTarget.value;
+                        await endItem.update({ "system.value": newValue });
+                    });
+                } else {
+                    console.error(`Unhandled INPUT name="${attributeName}`);
+                }
             } else {
                 console.error(`Unhandled INPUT name="${attributeName}`);
             }
@@ -888,6 +915,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     #heroValidationCssForTab(items) {
         if (!items || items.length === 0) {
+            return "";
+        }
+
+        // Expecting an Array
+        if (items.constructor.name !== "Array") {
             return "";
         }
 
