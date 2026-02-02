@@ -1,19 +1,17 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 
-import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits, gridUnitsToMeters } from "./utility/units.mjs";
+import {
+    currentSceneUsesHexGrid,
+    getRoundedUpDistanceInSystemUnits,
+    getSystemDisplayUnits,
+    gridUnitsToMeters,
+} from "./utility/units.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttMeasuredTemplate = foundry.canvas?.placeables?.MeasuredTemplate || MeasuredTemplate;
 
 function isHexTemplatesEnabled() {
     return game.settings.get(HEROSYS.module, "HexTemplates");
-}
-
-function currentSceneUsesHexGrid() {
-    return !(
-        game.scenes.current?.grid.type === CONST.GRID_TYPES.GRIDLESS ||
-        game.scenes.current?.grid.type === CONST.GRID_TYPES.SQUARE
-    );
 }
 
 export default class HeroSystem6eMeasuredTemplate extends FoundryVttMeasuredTemplate {
