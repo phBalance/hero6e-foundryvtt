@@ -10,7 +10,12 @@ import {
     isManeuverThatDoesNormalDamage,
     isRangedCombatManeuver,
 } from "../utility/damage.mjs";
-import { convertSystemUnitsToMetres, getSystemDisplayUnits, gridUnitsToMeters } from "../utility/units.mjs";
+import {
+    convertSystemUnitsToMetres,
+    currentSceneUsesHexGrid,
+    getSystemDisplayUnits,
+    gridUnitsToMeters,
+} from "../utility/units.mjs";
 
 /**
  * 5e HEX type and NORMAL are convered to RADIUS
@@ -753,16 +758,13 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor.is5e);
 
-        const HexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
-        const hexGrid = !(
-            game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
-            game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
-        );
+        const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+        const hexGrid = currentSceneUsesHexGrid();
 
         // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
         //       for distance we need to subtract 0.5"/1m from the radius.
         // NOTE: MeasuredTemplates assume that the distance is in grid units.
-        const distanceInMeters = aoeValue * sizeConversionToMeters - (HexTemplates && hexGrid ? 1 : 0);
+        const distanceInMeters = aoeValue * sizeConversionToMeters - (hexTemplates && hexGrid ? 1 : 0);
         const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
 
         const effectiveAttackItemOriginalItemId = getEffectiveItemOriginalItemId(item.effectiveAttackItem);
@@ -781,7 +783,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     aoeType,
                     aoeValue,
                     sizeConversionToMeters,
-                    usesHexTemplate: HexTemplates && hexGrid,
+                    usesHexTemplate: hexTemplates && hexGrid,
                     is5e: item.effectiveAttackItem.is5e,
                 },
             },

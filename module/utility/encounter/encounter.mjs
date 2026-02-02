@@ -4,15 +4,17 @@ export class HeroEncounter {
     constructor() {}
 
     static get tokensFriendly() {
-        return game.scenes.current.tokens.filter((t) => t.actor && t.disposition === CONST.TOKEN_DISPOSITIONS.FRIENDLY);
+        return game.scenes.current?.tokens.filter(
+            (t) => t.actor && t.disposition === CONST.TOKEN_DISPOSITIONS.FRIENDLY,
+        );
     }
 
     static get tokensPc() {
-        return game.scenes.current.tokens.filter((t) => t.actor?.type === "pc");
+        return game.scenes.current?.tokens.filter((t) => t.actor?.type === "pc");
     }
 
     static get tokensHostile() {
-        return game.scenes.current.tokens.filter((t) => t.actor && t.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE);
+        return game.scenes.current?.tokens.filter((t) => t.actor && t.disposition === CONST.TOKEN_DISPOSITIONS.HOSTILE);
     }
 
     static difficulty(friendlyActor, hostileActor) {
