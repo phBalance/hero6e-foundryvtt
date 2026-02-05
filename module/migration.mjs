@@ -368,7 +368,7 @@ async function fixupCslChoices4_2_14(actor) {
 
         // Initialize csl array making sure that the selectedChoice is a valid allowedChoices.
         const allowedChoices = item.cslChoices;
-        const selectedChoices = foundry.utils.deepClone(item.system._source.csl);
+        const selectedChoices = foundry.utils.deepClone(item.system._source.csl || []); // NOTE: Very old items won't even have a csl array
         const expectedNumEntries = Math.max(selectedChoices.length, item.system.LEVELS);
         selectedChoices.length = expectedNumEntries; // Truncate or expand the array as required
 
