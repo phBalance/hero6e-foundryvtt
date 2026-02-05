@@ -860,6 +860,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription6e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription6e.type ??= [];
                 powerDescription6e.xmlTag ??= xml.children[0].tagName.toUpperCase();
+            } else {
+                throw new Error(`Invalid XML provided for 6e power description with key ${powerDescription6e.key}`);
             }
         }
         if (!powerDescription6e.key) {
@@ -907,6 +909,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription5e.type ??= [];
                 powerDescription5e.xmlTag ??= xml.children[0].tagName.toUpperCase();
+            } else {
+                throw new Error(`Invalid XML provided for 5e power description with key ${powerDescription5e.key}`);
             }
         }
         if (!powerDescription5e.key) {
