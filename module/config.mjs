@@ -16221,6 +16221,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "GLIDING",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="GLIDING" ID="1770257261114" BASECOST="-1.0" LEVELS="0" ALIAS="Gliding" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        undefined, // In 5e it's a movement type separate from flight. In 6e it's a modifier to flight.
+    );
+    addPower(
+        {
             key: "GRADUALEFFECT",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
