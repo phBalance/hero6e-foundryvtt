@@ -860,6 +860,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription6e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription6e.type ??= [];
                 powerDescription6e.xmlTag ??= xml.children[0].tagName.toUpperCase();
+            } else {
+                throw new Error(`Invalid XML provided for 6e power description with key ${powerDescription6e.key}`);
             }
         }
         if (!powerDescription6e.key) {
@@ -907,6 +909,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription5e.type ??= [];
                 powerDescription5e.xmlTag ??= xml.children[0].tagName.toUpperCase();
+            } else {
+                throw new Error(`Invalid XML provided for 5e power description with key ${powerDescription5e.key}`);
             }
         }
         if (!powerDescription5e.key) {
@@ -16214,6 +16218,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<MODIFIER XMLID="GESTURES" ID="1727749190389" BASECOST="-0.25" LEVELS="0" ALIAS="Gestures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
+    );
+    addPower(
+        {
+            key: "GLIDING",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="GLIDING" ID="1770257261114" BASECOST="-1.0" LEVELS="0" ALIAS="Gliding" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        undefined, // In 5e it's a movement type separate from flight. In 6e it's a modifier to flight.
     );
     addPower(
         {
