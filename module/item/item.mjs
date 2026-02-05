@@ -5908,12 +5908,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 // is thus providing a unique name - other options can potentially have multiple matches of which
                 // we'll end up with the first. This could result in a situation where someone can not match
                 // the attack they actually want.
-                const aliasToMatch = `^${customAdder.ALIAS}$`;
+                // NOTE: We do allow a case insensitve match
+                const aliasToMatch = customAdder.ALIAS.toLowerCase();
 
                 return (
-                    `${item.name}`.match(new RegExp(aliasToMatch, "i")) ||
-                    `${item.system.ALIAS}`.match(new RegExp(aliasToMatch, "i")) ||
-                    `${item.system.XMLID}`.match(new RegExp(aliasToMatch, "i"))
+                    item.name.toLowerCase() === aliasToMatch ||
+                    item.system.ALIAS?.toLowerCase() === aliasToMatch ||
+                    item.system.XMLID?.toLowerCase() === aliasToMatch
                 );
             })?.id;
 

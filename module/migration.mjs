@@ -241,7 +241,16 @@ export async function migrateWorld() {
         "Weapon Master",
         async (actor) => await migrateTo4_2_12(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.9`, "background: #1111FF; color: #FFFFFF");
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.12`, "background: #1111FF; color: #FFFFFF");
+
+    await migrateToVersion(
+        "4.2.14",
+        lastMigration,
+        getAllActorsInGame(),
+        "Combat Skill Levels",
+        async (actor) => await migrateTo4_2_14(actor),
+    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.14`, "background: #1111FF; color: #FFFFFF");
 
     // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
     await migrateToVersion(
@@ -328,6 +337,89 @@ async function commitItemsCollectionMigrateDataChanges(item) {
         delete flags[game.system.id][needToPersistToDb];
         await item.update({ "==system": system, "==flags": flags });
     }
+}
+
+async function migrateTo4_2_14(actor) {
+    try {
+        await fixupCslChoices4_2_14(actor);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// Many CSLs have invalid choices in their internal structure. Fix them.
+// Note that this is very similar to fixupCslChoices_4_2_9 except it has bug fixes that caused the
+// 4.2.9 migration to not run properly for some actors/items
+async function fixupCslChoices4_2_14(actor) {
+    const itemUpdates = [];
+
+    for (const item of actor.items) {
+        if (!item.isCsl) {
+            continue;
+        }
+
+        // We have a bug in isCsl right now that shows all SKILL_LEVELS as CSLs. Work around it for the time being.
+        if (item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID !== "OVERALL") {
+            continue;
+        }
+
+        const cslUpdates = {};
+        let changes = false;
+
+        // Initialize csl array making sure that the selectedChoice is a valid allowedChoices.
+        const allowedChoices = item.cslChoices;
+        const selectedChoices = foundry.utils.deepClone(item.system._source.csl || []); // NOTE: Very old items won't even have a csl array
+        const expectedNumEntries = Math.max(selectedChoices.length, item.system.LEVELS);
+        selectedChoices.length = expectedNumEntries; // Truncate or expand the array as required
+
+        // Make sure none of the selectedChoices are outside the possibleChoices set. If they are,
+        // just set them to the first option of the possibleChoices (because who knows what is best).
+        for (let i = 0; i < expectedNumEntries; ++i) {
+            if (allowedChoices[selectedChoices[i]] === undefined) {
+                selectedChoices[i] = Object.keys(allowedChoices)[0];
+                changes = true;
+            }
+        }
+        cslUpdates["system.csl"] = selectedChoices;
+
+        // Setup targetId
+        const allAdders = foundry.utils.deepClone(item.system._source.ADDER);
+        for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
+            const targetId = (item.actor?.cslItems || []).find((item) => {
+                // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
+                // is thus providing a unique name - other options can potentially have multiple matches of which
+                // we'll end up with the first. This could result in a situation where someone can not match
+                // the attack they actually want.
+                // NOTE: We do allow a case insensitve match
+                const aliasToMatch = customAdder.ALIAS.toLowerCase();
+
+                return (
+                    item.name.toLowerCase() === aliasToMatch ||
+                    item.system.ALIAS?.toLowerCase() === aliasToMatch ||
+                    item.system.XMLID?.toLowerCase() === aliasToMatch
+                );
+            })?.id;
+
+            if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
+                console.warn(`Failed to match custom adder ${customAdder.ALIAS} for CSL ${item.detailedName()}.`);
+            }
+
+            if (customAdder.targetId !== targetId) {
+                customAdder.targetId = targetId;
+                changes = true;
+            }
+        }
+        cslUpdates["system.ADDER"] = allAdders;
+
+        if (changes) {
+            cslUpdates._id = item._id;
+            itemUpdates.push(cslUpdates);
+        }
+    }
+
+    return itemUpdates.length > 0
+        ? Item.implementation.updateDocuments(itemUpdates, { parent: actor })
+        : Promise.resolve(true);
 }
 
 async function migrateTo4_2_12(actor) {
