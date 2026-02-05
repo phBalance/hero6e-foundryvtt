@@ -2786,14 +2786,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 break;
 
             case "PENALTY_SKILL_LEVELS":
-                description = (system.NAME || system.ALIAS) + ": +" + system.LEVELS + " " + system.OPTION_ALIAS;
-
-                // Penalty details
-                switch (this.pslPenaltyType) {
-                    case CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range:
-                        description = description.replace("a specific negative OCV modifier", "range OCV penalties");
-                        break;
+                if (is5e) {
+                    description = `${system.ALIAS}: +${system.LEVELS} vs ${system.INPUT} with ${system.OPTION_ALIAS}`;
+                } else {
+                    description = `+${system.LEVELS} ${system.OPTION_ALIAS}`;
                 }
+
                 break;
 
             case "RKA":
