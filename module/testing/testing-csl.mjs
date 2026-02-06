@@ -1443,7 +1443,7 @@ export function registerCslTests(quench) {
                     let allRangedExplicitWm;
 
                     before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
 
                         singleTargetMentalBlast = actor.items.find(
                             (item) => item.name === "Single Target Mental Blast",
@@ -2324,7 +2324,7 @@ export function registerCslTests(quench) {
                     let pslRangeSingle;
 
                     before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
 
                         pslRangeSingle = actor.items.find((item) => item.name === "Single Target Ego Attack");
                     });
