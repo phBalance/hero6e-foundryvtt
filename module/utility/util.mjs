@@ -512,15 +512,15 @@ export function tokenEducatedGuess(options = {}) {
     if (options.token) {
         return options.token;
     }
-    console.warn("Pass actual token when possible");
 
     // Token id/uuid
-    options.tokenId = options.action?.current.attackerTokenUuid;
+    options.tokenId ??= options.action?.current.attackerTokenUuid;
     options.token ??= fromUuidSync(options.tokenId);
     options.token ??= canvas.tokens.get(options.tokenId);
     if (options.token) {
         return options.token;
     }
+    console.warn("Pass actual token when possible");
 
     // ActorId
     options.actorId ??= options.item?.actor?.id;
