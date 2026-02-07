@@ -21,7 +21,7 @@ export async function createQuenchActor({ quench, contents, is5e, actorType = "p
     await Actor.deleteDocuments(oldQuenchActors.map((m) => m.id));
 
     if (is5e === undefined) {
-        throw "missing is5e";
+        throw new Error("missing is5e");
     }
 
     // Create new actor for this test
@@ -37,6 +37,9 @@ export async function createQuenchActor({ quench, contents, is5e, actorType = "p
         // Is this a full actor
         if (contents.includes("CHARACTER_NAME")) {
             await actor.uploadFromXml(contents.replace(CHARACTER_NAME, `CHARACTER_NAME="${quenchName}"`));
+            if (actor.is5e !== is5e) {
+                throw new Error(`${actor.name} has mismatched is5e`);
+            }
         } // Likely item contents
         else {
             // Add item
