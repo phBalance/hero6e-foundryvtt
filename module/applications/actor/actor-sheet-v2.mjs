@@ -299,6 +299,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                         },
                     );
                     break;
+                case "effects":
+                    context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects());
+                    context.allConstantEffects = this.actor.getConstantEffects();
+                    context.allPersistentEffects = this.actor.getPersistentEffects();
+                    context.allInherentEffects = this.actor.getInherentEffects();
+                    context.allMiscEffects = this.actor.getMiscEffects();
+                    break;
                 default:
                     console.warn(`unhandled part=${partId}`);
             }
