@@ -375,7 +375,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     .filter((key) => key.match(/[A-Z_]+/))
                     .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
                 effects: Array.from(this.actor.allApplicableEffects()),
-                conditions: this.actor.statuses,
+                conditions: this.actor.statuses.size > 0,
                 other: [true], // don't consider this empty
             };
         } catch (e) {
