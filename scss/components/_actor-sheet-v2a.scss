@@ -108,6 +108,17 @@
         margin: 2px 0;
         height: auto;
     }
+
+    fieldset.defenses {
+        gap: 0;
+        padding: 0;
+
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    }
 }
 
 /************************************************************************
@@ -150,6 +161,7 @@
     flex-flow: row wrap;
     overflow: hidden;
     line-height: inherit;
+    justify-content: left;
 
     .sheet-tabs.tabs {
         gap: 0;
@@ -162,6 +174,7 @@
         border: thin solid var(--color-tabs-border);
         border-radius: 0.5em;
         line-height: inherit;
+        width: 100px; // Characteristics is the longest tab
     }
 
     a.active {
