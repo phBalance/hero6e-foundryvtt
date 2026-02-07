@@ -8,13 +8,13 @@ $c-miss: $c-failure;
 
 .herosystem6e {
     --herosystem-blue: #286293;
-    --herosystem-table-header-bg-color: var(--table-header-bg-color);
+    --herosystem-table-header-bg-color: #cac7bf; // var(--table-header-bg-color); opacity+sticky is a problem
     --herosystem-shadow-45: rgb(0 0 0 / 45%);
     --herosystem-border: var(--herosystem-blue);
     --herosystem-background-card: #f8f4f1;
     --herosystem-text-light-6: #666;
     --herosystem-filter-control-color: #999;
-    --herosystem-header-background: var(--table-header-bg-color);
+    --herosystem-header-background: #cac7bf; // var(--table-header-bg-color); opacity+sticky is a problem
     --herosystem-item-row-border: rgb(var(--herosystem-blue) / 20%);
     --herosystem-header-text: var(--table-header-text-color);
 }
