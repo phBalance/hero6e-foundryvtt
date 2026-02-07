@@ -3,5 +3,20 @@
   data-group='primary'
   data-tab='analysis'
 >
-  <h1>analysis</h1>
+
+    <div class="item-list-container">
+        <li class="item-header">
+            <div class="item-column item-name">Top Active Point Item</div>
+            <div class="item-column item-ap">AP</div> 
+        </li>
+        <ol class="item-list unlist">
+            {{#each analysis.activePointSummary as |item id|}}
+                <div class="item-row">
+                    <div class="item-column item-name">{{item.name}}</div>
+                    <div class="item-column item-ap">{{item.activePoints}}</div>
+                </div>
+            {{/each}}
+        </ol>
+    </div>
+
 </section>

@@ -5,7 +5,7 @@
   data-tab='conditions'
 >
     <fieldset class="status-effects">
-    <legend>{{localize "StatusConditions"}}</legend>
+        <legend>{{localize "StatusConditions"}}</legend>
         <div class="status-container">
             {{#each statuses as |status id|}}
                 <button type="button" class="status-control {{status.active}}" data-status-id="{{id}}" data-tooltip-html="{{status.tooltip}}" data-action="toggleStatus">

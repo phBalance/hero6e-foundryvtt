@@ -310,6 +310,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "conditions":
                     context.statuses = await this._prepareStatusEffects();
                     break;
+                case "analysis":
+                    context.analysis = await this._prepareAnalysis();
+                    break;
                 default:
                     console.warn(`unhandled part=${partId}`);
             }
@@ -376,6 +379,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
                 effects: Array.from(this.actor.allApplicableEffects()),
                 conditions: this.actor.statuses.size > 0,
+                analysis: this.actor.items.find((item) => item.system.activePoints > 0),
                 other: [true], // don't consider this empty
             };
         } catch (e) {
@@ -1016,6 +1020,60 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         return statusInfo;
+    }
+
+    async _prepareAnalysis() {
+        const analysis = {};
+        // Active Point Summary
+        analysis.activePointSummary = [];
+        for (const powerInfo of getCharacteristicInfoArrayForActor(this.actor)) {
+            const char = this.actor.system.characteristics[powerInfo.key.toLowerCase()];
+            if (!char) {
+                console.error(`${powerInfo.key} not found in actor.system.characteristics`);
+                continue;
+            }
+            let valueTop = Math.max(char.value, char.max);
+            let activePoints = valueTop * (powerInfo?.cost || 0);
+            if (activePoints > 0) {
+                analysis.activePointSummary.push({
+                    name: powerInfo.name,
+                    activePoints: activePoints,
+                });
+            }
+        }
+
+        for (const item of this.actor.items.filter((o) => !o.isCombatManeuver)) {
+            if (!item.baseInfo) {
+                // Don't bother warning about super old items
+                if (item.system.XMLID) {
+                    console.warn(`${item?.system?.XMLID} (${item?.name}) has no powerInfo`);
+                }
+                continue;
+            }
+
+            const activePoints = item.activePoints;
+            if (activePoints > 0) {
+                let name = item.name;
+                if (item.name.toUpperCase().indexOf(item.system.XMLID) == -1) {
+                    name += ` (${item.system.XMLID})`;
+                }
+
+                if (!item.system.XMLID.startsWith("__")) {
+                    analysis.activePointSummary.push({
+                        name: name,
+                        activePoints: activePoints,
+                    });
+                }
+            }
+        }
+
+        analysis.activePointSummary.sort((a, b) => b.activePoints - a.activePoints);
+        let topActivePoints = analysis.activePointSummary?.[0]?.activePoints;
+        analysis.activePointSummary = analysis.activePointSummary.filter(
+            (o) => o.activePoints >= topActivePoints * 0.5,
+        );
+
+        return analysis;
     }
 
     //#dragDrop = this.#createDragDropHandlers();
