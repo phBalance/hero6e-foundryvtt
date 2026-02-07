@@ -443,28 +443,30 @@ HERO.mindScanChoices = [
 ];
 
 // NOTE: Expecting strings to be lower case
+// NOTE: This is not exhaustive, just what is mentioned in the book as examples
 HERO.PENALTY_SKILL_LEVELS_TYPES = Object.freeze({
-    // Range Skill Levels (RSLs), which off set the
-    // Range Modifier (they have no value at pointblank
-    // range)
-    range: "range",
+    // armor penalties to DCV
+    armor: "armor",
 
-    // Targeting Skill Levels, which off set the penalty
+    // Encumbrance penalties to DCV
+    encumbrance: "encumbrance",
+
+    // Counteract the DCV penalty for being prone
+    groundfighting: "groundFighting",
+
+    // Targeting Skill Levels, which offset only the OCV penalty
     // for targeting any and all Hit Locations
     location: "hitLocation",
 
-    // Encumbrance
-    encumbrance: "encumbrance",
+    // Range Skill Levels, which offset only the Range Modifier
+    range: "range",
 
-    // fighting underwater
-    underwater: "underwater",
-
-    // Targeting Skill Levels, which off set the penalty
+    // Targeting Skill Levels, which offset the penalty
     // for targeting any and all Hit Locations
     throwing: "throwing",
 
-    // armor penalties to DCV
-    armor: "armor",
+    // fighting underwater FIXME: This should probably be" environment X" where X is the environment
+    underwater: "underwater",
 });
 
 // NOTE: Expecting strings to be lower case
