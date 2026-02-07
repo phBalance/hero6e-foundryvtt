@@ -3,8 +3,11 @@
     min-width: 500px;
 }
 
-.herosystem6e.actor-sheet-v2a.minimizing {
+.herosystem6e.actor-sheet-v2a.minimizing,
+.herosystem6e.actor-sheet-v2a.maximizing,
+.herosystem6e.actor-sheet-v2a.minimized {
     min-height: 0;
+    min-width: 0;
 }
 
 .herosystem6e.actor-sheet-v2a .controls-dropdown {
