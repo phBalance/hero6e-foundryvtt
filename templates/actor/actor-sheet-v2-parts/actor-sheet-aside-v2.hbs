@@ -75,7 +75,8 @@
                     </fieldset>
                 {{/if}}
 
-                <ul class="defenses">
+                <fieldset class="defenses">
+                    <legend class="box-title" data-tooltip="Defense Overview">Defenses</legend>
                     <li title="{{defense.PDtags}}"><span>PD={{defense.PD}}</span></li>
                     <li title="{{defense.rPDtags}}"><span>rPD={{defense.rPD}}</span></li>
                     <li title="{{defense.EDtags}}"><span>ED={{defense.ED}}</span></li>
@@ -94,7 +95,7 @@
 
                     <li title="{{defense.POWDtags}}"><span>POWD={{defense.POWD}}</span></li>
                     {{#if defense.rPOWD}}<li title="{{defense.rPOWDtags}}"><span>rPOWD={{defense.rPOWD}}</span></li>{{/if}}
-                </ul>
+                </fieldset>
 
                 <div class="sidebar-actions flexrow flex-group-center">
                     <button type="button" data-action="recovery">Take Recovery</button>

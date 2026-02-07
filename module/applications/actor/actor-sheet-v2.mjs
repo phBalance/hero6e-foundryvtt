@@ -44,6 +44,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             rollCharacteristicCasual: HeroSystemActorSheetV2.#onCharacteristicCasualRoll,
             toggle: HeroSystemActorSheetV2.#onToggle,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
+            toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
         //tag: "form", // The default is "div"
@@ -299,6 +300,19 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                         },
                     );
                     break;
+                case "effects":
+                    context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects());
+                    context.allConstantEffects = this.actor.getConstantEffects();
+                    context.allPersistentEffects = this.actor.getPersistentEffects();
+                    context.allInherentEffects = this.actor.getInherentEffects();
+                    context.allMiscEffects = this.actor.getMiscEffects();
+                    break;
+                case "conditions":
+                    context.statuses = await this._prepareStatusEffects();
+                    break;
+                case "analysis":
+                    context.analysis = await this._prepareAnalysis();
+                    break;
                 default:
                     console.warn(`unhandled part=${partId}`);
             }
@@ -364,7 +378,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     .filter((key) => key.match(/[A-Z_]+/))
                     .filter((key) => this.actor.system.CHARACTER.CHARACTER_INFO[key]),
                 effects: Array.from(this.actor.allApplicableEffects()),
-                conditions: this.actor.statuses,
+                conditions: this.actor.statuses.size > 0,
+                analysis: this.actor.items.find((item) => item.system.activePoints > 0),
                 other: [true], // don't consider this empty
             };
         } catch (e) {
@@ -913,6 +928,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         target.closest("li").classList.toggle("collapsed");
     }
 
+    static async #onToggleStatus(event, target) {
+        const status = target.dataset.statusId;
+        await this.actor.toggleStatusEffect(status);
+    }
+
     #heroValidationCssForTab(items) {
         if (!items || items.length === 0) {
             return "";
@@ -964,6 +984,96 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         return "";
+    }
+
+    async _prepareStatusEffects() {
+        /** @type {Record<string, StatusInfo>} */
+        const statusInfo = {};
+        for (const status of CONFIG.statusEffects) {
+            // Only display if it would show in the token HUD *and* it has an assigned _id
+            //if (!status._id || !ActiveEffect.implementation.validHud(status, this.actor)) continue;
+            statusInfo[status.id] = {
+                _id: status._id,
+                name: status.name,
+                img: status.img,
+                disabled: false,
+                active: "",
+            };
+
+            if (status.rule) {
+                const page = await fromUuid(status.rule);
+                statusInfo[status.id].tooltip = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
+                    page.text.content,
+                    { relativeTo: this.actor },
+                );
+            }
+        }
+
+        // If the actor has the status and it's not from the canonical statusEffect
+        // Then we want to force more individual control rather than allow toggleStatusEffect
+        for (const effect of this.actor.allApplicableEffects()) {
+            for (const id of effect.statuses) {
+                if (!(id in statusInfo)) continue;
+                statusInfo[id].active = "active";
+                if (!Object.values(statusInfo).some((s) => s._id === effect._id)) statusInfo[id].disabled = true;
+            }
+        }
+
+        return statusInfo;
+    }
+
+    async _prepareAnalysis() {
+        const analysis = {};
+        // Active Point Summary
+        analysis.activePointSummary = [];
+        for (const powerInfo of getCharacteristicInfoArrayForActor(this.actor)) {
+            const char = this.actor.system.characteristics[powerInfo.key.toLowerCase()];
+            if (!char) {
+                console.error(`${powerInfo.key} not found in actor.system.characteristics`);
+                continue;
+            }
+            let valueTop = Math.max(char.value, char.max);
+            let activePoints = valueTop * (powerInfo?.cost || 0);
+            if (activePoints > 0) {
+                analysis.activePointSummary.push({
+                    name: powerInfo.name,
+                    activePoints: activePoints,
+                });
+            }
+        }
+
+        for (const item of this.actor.items.filter((o) => !o.isCombatManeuver)) {
+            if (!item.baseInfo) {
+                // Don't bother warning about super old items
+                if (item.system.XMLID) {
+                    console.warn(`${item?.system?.XMLID} (${item?.name}) has no powerInfo`);
+                }
+                continue;
+            }
+
+            const activePoints = item.activePoints;
+            if (activePoints > 0) {
+                let name = item.name;
+                if (item.name.toUpperCase().indexOf(item.system.XMLID) == -1) {
+                    name += ` (${item.system.XMLID})`;
+                }
+
+                if (!item.system.XMLID.startsWith("__")) {
+                    analysis.activePointSummary.push({
+                        name: name,
+                        activePoints: activePoints,
+                    });
+                }
+            }
+        }
+
+        analysis.activePointSummary.sort((a, b) => b.activePoints - a.activePoints);
+        let topActivePoints = analysis.activePointSummary?.[0]?.activePoints;
+        analysis.activePointSummary = analysis.activePointSummary.filter(
+            (o) => o.activePoints >= topActivePoints * 0.5,
+        );
+
+        return analysis;
     }
 
     //#dragDrop = this.#createDragDropHandlers();
