@@ -44,6 +44,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             rollCharacteristicCasual: HeroSystemActorSheetV2.#onCharacteristicCasualRoll,
             toggle: HeroSystemActorSheetV2.#onToggle,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
+            toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
         //tag: "form", // The default is "div"
@@ -305,6 +306,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     context.allPersistentEffects = this.actor.getPersistentEffects();
                     context.allInherentEffects = this.actor.getInherentEffects();
                     context.allMiscEffects = this.actor.getMiscEffects();
+                    break;
+                case "conditions":
+                    context.statuses = await this._prepareStatusEffects();
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
@@ -920,6 +924,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         target.closest("li").classList.toggle("collapsed");
     }
 
+    static async #onToggleStatus(event, target) {
+        const status = target.dataset.statusId;
+        await this.actor.toggleStatusEffect(status);
+    }
+
     #heroValidationCssForTab(items) {
         if (!items || items.length === 0) {
             return "";
@@ -971,6 +980,42 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         return "";
+    }
+
+    async _prepareStatusEffects() {
+        /** @type {Record<string, StatusInfo>} */
+        const statusInfo = {};
+        for (const status of CONFIG.statusEffects) {
+            // Only display if it would show in the token HUD *and* it has an assigned _id
+            //if (!status._id || !ActiveEffect.implementation.validHud(status, this.actor)) continue;
+            statusInfo[status.id] = {
+                _id: status._id,
+                name: status.name,
+                img: status.img,
+                disabled: false,
+                active: "",
+            };
+
+            if (status.rule) {
+                const page = await fromUuid(status.rule);
+                statusInfo[status.id].tooltip = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
+                    page.text.content,
+                    { relativeTo: this.actor },
+                );
+            }
+        }
+
+        // If the actor has the status and it's not from the canonical statusEffect
+        // Then we want to force more individual control rather than allow toggleStatusEffect
+        for (const effect of this.actor.allApplicableEffects()) {
+            for (const id of effect.statuses) {
+                if (!(id in statusInfo)) continue;
+                statusInfo[id].active = "active";
+                if (!Object.values(statusInfo).some((s) => s._id === effect._id)) statusInfo[id].disabled = true;
+            }
+        }
+
+        return statusInfo;
     }
 
     //#dragDrop = this.#createDragDropHandlers();
