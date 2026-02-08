@@ -17669,6 +17669,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "NOTTHROUGHMINDLINK",
+            behaviors: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="NOTTHROUGHMINDLINK" ID="1770526728849" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Be Used Through Mind Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "NOTURNMODE",
             behaviors: ["modifier"],
             costPerLevel: fixedValueFunction(0),
