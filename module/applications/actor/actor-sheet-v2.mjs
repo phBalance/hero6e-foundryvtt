@@ -43,6 +43,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             rollCharacteristicFull: HeroSystemActorSheetV2.#onCharacteristicFullRoll,
             rollCharacteristicCasual: HeroSystemActorSheetV2.#onCharacteristicCasualRoll,
             toggle: HeroSystemActorSheetV2.#onToggle,
+            toggleChevron: HeroSystemActorSheetV2.#onToggleChevron,
             toggleEffect: HeroSystemActorSheetV2.#onToggleEffect,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
@@ -659,6 +660,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             } else {
                 console.error(`Unhandled INPUT name="${attributeName}`);
             }
+
+            this.setChevronStatus(this.element);
         }
 
         // UPLOAD
@@ -925,6 +928,59 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             console.error("onToggle: Unable to locate item");
         }
         await item.toggle({ event: this.event, token: this.token });
+    }
+
+    chevronCollapsedStatus = {};
+    async setChevronStatus(target) {
+        // Loop thru all the item chevrons and expand/collapse their children
+        for (const [key, value] of Object.entries(this.chevronCollapsedStatus)) {
+            const item = fromUuidSync(key);
+            if (!item) {
+                console.error("unable to find item");
+                continue;
+            }
+
+            const formElement = target.closest("form");
+            const parentElement = formElement.querySelector(`li[data-document-uuid="${item.uuid}"]`);
+            if (!parentElement) {
+                console.error("unable to find parentEl");
+                continue;
+            }
+            if (value) {
+                parentElement.classList.add("collapsed");
+            } else {
+                parentElement.classList.remove("collapsed");
+            }
+
+            const listElement = parentElement.closest("ol.item-list");
+            if (!listElement) {
+                console.error("unable to find itemList");
+                continue;
+            }
+
+            for (const child of item.childItems) {
+                const childElement = listElement.querySelector(`li[data-document-uuid="${child.uuid}"]`);
+                if (!childElement) {
+                    console.error("unable to find item child element");
+                    continue;
+                }
+                if (value) {
+                    childElement.classList.add("collapsed-child");
+                } else {
+                    childElement.classList.remove("collapsed-child");
+                }
+            }
+        }
+    }
+
+    static async #onToggleChevron(event, target) {
+        const item = this._getEmbeddedDocument(target);
+        if (!item) {
+            console.error("onToggleChevron: Unable to locate item");
+        }
+        this.chevronCollapsedStatus[item.uuid] = !this.chevronCollapsedStatus[item.uuid];
+        await this.setChevronStatus(target);
+        //target.closest("li").classList.toggle("collapsed");
     }
 
     static async #onToggleEffect(event, target) {
