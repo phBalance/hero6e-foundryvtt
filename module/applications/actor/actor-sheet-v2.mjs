@@ -240,7 +240,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "conditions" },
                 { id: "other" },
                 { id: "analysis" },
-                { id: "invalid" },
+                { id: "invalid", cssClass: "validation-error" },
             ],
             labelPrefix: "ActorSheet.Tabs", // Optional. Prepended to the id to generate a localization key
             initial: "attacks", // Set the initial tab
@@ -281,6 +281,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass.join(" ");
                     }
 
+                    if (this._items["invalid"].length === 0) {
+                        delete context.tabs["invalid"];
+                    }
+
                     break;
                 case "attacks":
                 case "defenses":
@@ -295,6 +299,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "talents":
                 case "complications":
                 case "other": // really nothing to do
+                case "invalid":
                     context.items = this._items[partId];
                     break;
                 case "background":
@@ -390,6 +395,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 conditions: this.actor.statuses.size > 0,
                 analysis: this.actor.items.find((item) => item.system.activePoints > 0),
                 other: [true], // don't consider this empty
+                invalid: this.actor.invalidItems,
             };
         } catch (e) {
             console.error(e);
