@@ -109,7 +109,7 @@ export function registerAutomatonTests(quench) {
                     });
 
                     it("should have the correct template", function () {
-                        expect.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Automaton.hdt");
+                        expect(actor.system.CHARACTER.TEMPLATE.name).to.equal("builtIn.Automaton.hdt");
                     });
                 });
 

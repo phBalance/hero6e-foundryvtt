@@ -2342,59 +2342,75 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // keep track independently of item.system.is5e as targetType can reload it
             // Assume true for those super old HDC files
             uploadProgressBar.advance(`${this.name}: is5e`, 0);
-            let _is5e = true;
 
-            const template =
-                heroJson.CHARACTER?.TEMPLATE?.extends ||
-                heroJson.CHARACTER?.TEMPLATE ||
-                heroJson.CHARACTER?.BASIC_CONFIGURATION?.TEMPLATE;
+            // let _is5e = true;
 
-            if (typeof template === "string") {
-                if (template.includes("builtIn.") && !template.includes("6E.")) {
-                    // 5E
-                    _is5e = this.system.is5e = true;
-                } else if (template.includes("builtIn.") && template.includes("6E.")) {
-                    // 6E
-                    _is5e = this.system.is5e = false;
-                } else {
-                    console.error(`Unrecognized template ${template}`);
-                }
-            }
+            // const template =
+            //     heroJson.CHARACTER?.TEMPLATE?.extends ||
+            //     heroJson.CHARACTER?.TEMPLATE ||
+            //     heroJson.CHARACTER?.BASIC_CONFIGURATION?.TEMPLATE;
 
-            // Update actor type
-            const targetType = template
-                ?.match(/\.(ai|automaton|base|computer|heroic|normal|superheroic|vehicle|standardsuper)[56.]/i)?.[1]
-                .toLowerCase()
-                .replace("base", "base2")
-                .replace("normal", "pc")
-                .replace("superheroic", "pc")
-                .replace("heroic", "pc")
-                .replace("standardsuper", "pc"); // super old HDC
+            // if (typeof template === "string") {
+            //     if (template.includes("builtIn.") && !template.includes("6E.")) {
+            //         // 5E
+            //         _is5e = this.system.is5e = true;
+            //     } else if (template.includes("builtIn.") && template.includes("6E.")) {
+            //         // 6E
+            //         _is5e = this.system.is5e = false;
+            //     } else {
+            //         console.error(`Unrecognized template ${template}`);
+            //     }
+            // }
+
+            // // Update actor type
+            // const targetType = template
+            //     ?.match(/\.(ai|automaton|base|computer|heroic|normal|superheroic|vehicle|standardsuper)[56.]/i)?.[1]
+            //     .toLowerCase()
+            //     .replace("base", "base2")
+            //     .replace("normal", "pc")
+            //     .replace("superheroic", "pc")
+            //     .replace("heroic", "pc")
+            //     .replace("standardsuper", "pc"); // super old HDC
 
             if (this.id) {
-                // Delete maneuvers (or any other item) when changing is5e
-                const itemsToDeleteIs5e = this.items.filter((i) => i.system.is5e !== _is5e).map((m) => m.id);
-                if (itemsToDeleteIs5e.length > 0) {
-                    console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
-                    await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e);
-                }
-
                 // We can't delay this with the changes array because any items based on this actor needs this value.
                 // Specifically compound power is a problem if we don't set is5e properly for a 5e actor.
                 await this.update({
                     ...changes,
-                    "system.is5e": _is5e,
+                    //"system.is5e": _is5e,
                     "system.CHARACTER.BASIC_CONFIGURATION": heroJson.CHARACTER.BASIC_CONFIGURATION,
                     "system.CHARACTER.CHARACTER_INFO": heroJson.CHARACTER.CHARACTER_INFO,
                     "system.CHARACTER.TEMPLATE": heroJson.CHARACTER.TEMPLATE,
                     "system.CHARACTER.version": heroJson.CHARACTER.version,
                 });
+                changes = {};
+
+                if (this.is5e !== this.system.is5e) {
+                    if (this.name.startsWith("_Quench")) {
+                        console.error(`${this.name} is5e mismatch`);
+                    }
+                    await this.update({ "system.is5e": this.is5e });
+                }
+
+                const targetType = this._templateType
+                    ?.match(/(ai|automaton|base|computer|heroic|normal|superheroic|vehicle|standardsuper)/i)?.[1]
+                    .toLowerCase()
+                    .replace("base", "base2")
+                    .replace("normal", "pc")
+                    .replace("superheroic", "pc")
+                    .replace("heroic", "pc")
+                    .replace("standardsuper", "pc"); // super old HDC
 
                 if (targetType && this.type.replace("npc", "pc") !== targetType) {
                     await this.update({ type: targetType, [`==system`]: this.system });
                 }
 
-                changes = {};
+                // Delete maneuvers (or any other item) when changing is5e
+                const itemsToDeleteIs5e = this.items.filter((i) => i.system.is5e !== this.is5e).map((m) => m.id);
+                if (itemsToDeleteIs5e.length > 0) {
+                    console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
+                    await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e);
+                }
             }
 
             // CHARACTERISTICS

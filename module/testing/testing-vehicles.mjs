@@ -213,11 +213,11 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the correct template", function () {
-                        expect.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Vehicle6E.hdt");
+                        expect(actor.system.CHARACTER.TEMPLATE.name).to.equal("builtIn.Vehicle6E.hdt");
                     });
 
                     it("is5e", function () {
-                        expect.equal(actor.is5e, false);
+                        expect(actor.is5e).to.be.false;
                     });
                 });
 
@@ -508,11 +508,11 @@ export function registerVehicleTests(quench) {
                     });
 
                     it("should have the correct template", function () {
-                        expect.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Vehicle.hdt");
+                        expect(actor.system.CHARACTER.TEMPLATE.name).to.equal("builtIn.Vehicle.hdt");
                     });
 
                     it("is5e", function () {
-                        expect.equal(actor.is5e, true);
+                        expect(actor.is5e).to.be.true;
                     });
                 });
             });
