@@ -306,6 +306,35 @@
             }
         }
 
+        li.item {
+            // max-height: auto;
+            // transform: scaleY(1);
+            // transition: all 5.25s ease-out;
+
+            a.item-chevron {
+                transition: all 0.1s ease-out;
+            }
+        }
+
+        li.item.collapsed {
+            a.item-chevron {
+                transform: rotate(-90deg);
+                transition: all 0.1s ease-out;
+            }
+        }
+
+        li.item.collapsed-child {
+            display: none;
+
+            // max-height: 0;
+            // overflow: hidden;
+            // transform: scaleY(0);
+            // border: none;
+            // padding: 0;
+            // margin: 0;
+            // transition: all 5.25s ease-in;
+        }
+
         img.item-image {
             width: 30px;
             height: 30px;
