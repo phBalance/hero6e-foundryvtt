@@ -8617,6 +8617,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "MAKEASENSE",
+            type: ["sense"],
+            behaviors: ["adder"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
+            costPerLevel: fixedValueFunction(0),
+            target: "self only",
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            xml: `<POWER XMLID="MAKEASENSE" ID="1770520746455" BASECOST="2.0" LEVELS="0" ALIAS="Sense" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DANGER_SENSE" OPTIONID="DANGER_SENSE" OPTION_ALIAS="Danger Sense" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "MENTALAWARENESS",
             type: ["sense", "passive"],
             behaviors: ["adder"],
@@ -14207,6 +14220,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SIEGETOWER" ID="1759094977633" BASECOST="1.0" LEVELS="0" ALIAS="Siege Tower" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // Senses related
+            key: "SIGHTGROUP",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SIGHTGROUP" ID="1770523341156" BASECOST="5.0" LEVELS="0" ALIAS="Sight Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
