@@ -886,7 +886,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
     get attacksWith() {
         let _attacksWith = "ocv";
 
-        if (this.baseInfo.type.includes("mental")) {
+        if (this.baseInfo?.type.includes("mental")) {
             _attacksWith = "omcv";
         }
 

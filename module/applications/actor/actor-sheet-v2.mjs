@@ -43,6 +43,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             rollCharacteristicFull: HeroSystemActorSheetV2.#onCharacteristicFullRoll,
             rollCharacteristicCasual: HeroSystemActorSheetV2.#onCharacteristicCasualRoll,
             toggle: HeroSystemActorSheetV2.#onToggle,
+            toggleEffect: HeroSystemActorSheetV2.#onToggleEffect,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
             vpp: HeroSystemActorSheetV2.#onVpp,
@@ -206,6 +207,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-analysis-v2.hbs`,
                 scrollable: [""],
             },
+            invalid: {
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-invalid-v2.hbs`,
+                scrollable: [""],
+            },
         };
     }
 
@@ -235,6 +240,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "conditions" },
                 { id: "other" },
                 { id: "analysis" },
+                { id: "invalid", cssClass: "validation-error" },
             ],
             labelPrefix: "ActorSheet.Tabs", // Optional. Prepended to the id to generate a localization key
             initial: "attacks", // Set the initial tab
@@ -275,6 +281,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass.join(" ");
                     }
 
+                    if (this._items["invalid"].length === 0) {
+                        delete context.tabs["invalid"];
+                    }
+
                     break;
                 case "attacks":
                 case "defenses":
@@ -289,6 +299,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "talents":
                 case "complications":
                 case "other": // really nothing to do
+                case "invalid":
                     context.items = this._items[partId];
                     break;
                 case "background":
@@ -301,7 +312,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     );
                     break;
                 case "effects":
-                    context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects());
+                    context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects())
+                        .filter((o) => o.duration.duration > 0 || o.statuses.size)
+                        .sort((a, b) => a.name.localeCompare(b.name));
                     context.allConstantEffects = this.actor.getConstantEffects();
                     context.allPersistentEffects = this.actor.getPersistentEffects();
                     context.allInherentEffects = this.actor.getInherentEffects();
@@ -335,8 +348,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const context = await super._prepareContext(options);
 
         try {
-            // Early out if we are uploading (if we continue we might run into issues requiring ?. optional chaining)
-            if (this.actor.flags[game.system.id].uploading) {
+            // Early out if we are uploading (if we continue we will likely run into issues
+            // requiring ?. optional chaining)
+            if (this.actor.flags[game.system.id]?.uploading) {
                 return context;
             }
 
@@ -356,8 +370,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
             this._items = {
                 attacks: this.actor.items.filter((item) => item.showAttack),
-                defenses: this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense")),
-                movements: this.actor.items.filter((item) => item.baseInfo.type.includes("movement")),
+                defenses: this.actor.items.filter((item) => item.baseInfo?.behaviors.includes("defense")),
+                movements: this.actor.items.filter((item) => item.baseInfo?.type.includes("movement")),
                 martial: this.actor.items.filter((item) => item.isMartialManeuver && !item.parentItem),
                 skills: this.actor.items.filter((item) => item.type === "skill" && !item.parentItem),
                 maneuvers: this.actor.items.filter((item) => item.isCombatManeuver && !item.parentItem),
@@ -367,7 +381,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     .filter(
                         (baseInfo) =>
                             !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(
-                                baseInfo.key,
+                                baseInfo?.key,
                             ),
                     )
                     .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]),
@@ -381,6 +395,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 conditions: this.actor.statuses.size > 0,
                 analysis: this.actor.items.find((item) => item.system.activePoints > 0),
                 other: [true], // don't consider this empty
+                invalid: this.actor.invalidItems,
             };
         } catch (e) {
             console.error(e);
@@ -907,9 +922,18 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         event.preventDefault();
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onCarried: Unable to locate item");
+            console.error("onToggle: Unable to locate item");
         }
         await item.toggle({ event: this.event, token: this.token });
+    }
+
+    static async #onToggleEffect(event, target) {
+        event.preventDefault();
+        const effect = this._getEmbeddedDocument(target);
+        if (!effect) {
+            console.error("onToggleEffect: Unable to locate effect");
+        }
+        await effect.update({ disabled: !effect.disabled });
     }
 
     static async #onVpp(event, target) {

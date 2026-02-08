@@ -107,6 +107,10 @@ export function registerAutomatonTests(quench) {
                     it("should have the STUN characteristic", function () {
                         expect(actor.hasCharacteristic("STUN")).to.be.true;
                     });
+
+                    it("should have the correct template", function () {
+                        expect(actor.system.CHARACTER.TEMPLATE.name).to.equal("builtIn.Automaton.hdt");
+                    });
                 });
 
                 describe("5e Cannot Take STUN - BODY damage removes ability", async function () {

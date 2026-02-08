@@ -113,7 +113,8 @@
             "effects": "Effects",
             "conditions": "Conditions",
             "other": "Other",
-            "analysis": "Analysis"
+            "analysis": "Analysis",
+            "invalid": "Invalid"
         },
         "Talent": "Talent",
         "Type": "Type",

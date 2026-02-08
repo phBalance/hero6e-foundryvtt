@@ -194,6 +194,12 @@ function itemHasActionBehavior(item, actionBehavior) {
             return false;
         }
 
+        if (item.constructor.name !== "HeroSystem6eItem") {
+            // Most likely a actorsheetv2 active effect
+            //console.debug(`itemHasActionBehavior has unknown item`);
+            return false;
+        }
+
         if (actionBehavior === "to-hit") {
             return item.rollsToHit();
         } else if (actionBehavior === "activatable") {
@@ -721,7 +727,21 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     _heroValidations.push(...v2.map((m) => ({ ...m, itemId: this.id })));
                 }
             }
+        } else {
+            _heroValidations.push({
+                property: "XMLID",
+                message: `${this.system.XMLID} does not appear to be a proper ${this.is5e ? `5e` : `6e`} ${this.type}`,
+                severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+            });
         }
+
+        // if (this.actor?.system.is5e !== this.system.is5e) {
+        //     _heroValidations.push({
+        //         property: "XMLID",
+        //         message: `${this.system.XMLID} is ${this.system.is5e ? `5e` : `6e`} yet actor is ${this.actor.system.is5e ? `5e` : `6e`}`,
+        //         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+        //     });
+        // }
 
         function invalidAdjustmentMessageBasedOnInput(item) {
             switch (item.system.XMLID) {
@@ -1558,7 +1578,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
     }
 
-    isAblativeDefense() {
+    get isAblativeDefense() {
         return !!this.findModsByXmlid("ABLATIVE");
     }
 
@@ -4815,7 +4835,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get isAdjustment() {
-        return this.baseInfo.type.includes("adjustment");
+        return this.baseInfo?.type.includes("adjustment");
     }
 
     get isBodyBasedEffect() {
@@ -6517,10 +6537,86 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // If migration is interrupted or ITEM is on sidebar (actorless) it may have been skipped.
         // SEE: migration.mjs:commitActorAndItemMigrateDataChangesByActor
 
+        this.migrateData_missingOPTIONID(source);
+        this.migrateData_missingXMLID(source);
         this.migrateData_4_0_26(source);
         this.migrateData_4_2_5(source);
 
         return super.migrateData(source);
+    }
+
+    static migrateData_missingOPTIONID(source) {
+        try {
+            // Super old HDC files don't use OPTIONID.
+
+            // Early out for when we have an OPTIONID, no need to traverse all the ADDERs and such
+            if (source.system?.OPTIONID) return;
+
+            // Making an educated guess so "most" of our code references OPTIONID.
+            if (source.system?.OPTION && !source.system?.OPTIONID) {
+                foundry.utils.mergeObject(source, { "system.OPTIONID": source.system.OPTION.toUpperCase() });
+                // Choosing not to persist at this time, but if item is edited, it will be persisted.
+            }
+
+            function recursiveOptionId(data) {
+                if (!data) return;
+
+                for (const mod of data.MODIFIER || []) {
+                    if (mod.OPTION && !mod.OPTIONID) {
+                        mod.OPTIONID = mod.OPTION.toUpperCase();
+                    }
+                }
+                for (const adder of data.ADDER || []) {
+                    if (adder.OPTION && !adder.OPTIONID) {
+                        adder.OPTIONID = adder.OPTION.toUpperCase();
+                    }
+                }
+                for (const power of data.POWER || []) {
+                    if (power.OPTION && !power.OPTIONID) {
+                        power.OPTIONID = power.OPTION.toUpperCase();
+                    }
+                }
+
+                // recurse part
+                for (const mod of data.MODIFIER || []) {
+                    const mod2 = recursiveOptionId(mod);
+                    if (mod2?.OPTION && !mod2.OPTIONID) {
+                        mod2.OPTIONID = mod2.OPTION.toUpperCase();
+                    }
+                }
+                for (const adder of data.ADDER || []) {
+                    const adder2 = recursiveOptionId(adder);
+                    if (adder2?.OPTION && !adder2.OPTIONID) {
+                        adder2.OPTIONID = adder2.OPTION.toUpperCase();
+                    }
+                }
+                for (const power of data.POWER || []) {
+                    const power2 = recursiveOptionId(power);
+                    if (power2?.OPTION && !power2.OPTIONID) {
+                        power2.OPTIONID = power2.OPTION.toUpperCase();
+                    }
+                }
+            }
+
+            return recursiveOptionId(source.system);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    static migrateData_missingXMLID(source) {
+        // Invalid (super old) items are hard for us to handle,
+        // So invalidate them.  Simple invalidation is a bad type.
+        // Implemented in 4.2.14 in Feb 2026.
+        // Careful as source may be a list of updates instead of the entire item
+        // so checking to see if name was included.
+        if (source.name && source.system?.XMLID == null && !source.type.startsWith("_")) {
+            source.type = `_${source.type}`;
+            // Unable to persist because you can't write an invalid item type to the DB.
+        }
+
+        // We discussed deleting these item, or even the entire actor when
+        // the upload version is older than 3.0.75 (or non-existent).
     }
 
     static migrateData_4_2_5(source) {

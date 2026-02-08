@@ -1,6 +1,39 @@
 {{!-- {{log "actor-sheet-effects-partial-item" effects}} --}}
 {{#if effects}}
-    <tr class="activeEffects {{css}}" data-tooltip="{{localize title}}">
+
+<section class="item-list-container">
+    <div class="item-header" data-tooltip="{{localize title}}">
+        <div class="item-column item-description">{{localize headerName}}</div>
+        <div class="item-column item-controls"></div>
+    </div>
+
+    <ol class="item-list unlist">
+        {{#each effects as |effect key|}}
+            <li class="item effects" data-document-uuid="{{this.uuid}}">
+                <div class="item-row {{css}}">
+                    <div class="item-column item-description">
+                        
+                        {{#if (ne this.system.XMLID "LIST")}}
+                            <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
+                        {{/if}}
+
+                        <div class="item-description-full {{this.css.description}}">
+                            {{this.nameExtended}}
+                        </div>
+                        
+                    </div>
+                    <div class="item-column item-controls">
+                        <input class="effect-toggle" data-action="toggleEffect" type="checkbox" {{checked (not
+                        this.disabled)}} data-dtype="Boolean" data-action="toggle" />
+                        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}
+                    </div>
+                </div>
+            </li>
+        {{/each}}
+    </ol>
+</section>
+
+    {{!-- <tr class="activeEffects {{css}}" data-tooltip="{{localize title}}">
         <th></th>
         <th class="left">{{localize headerName}}</th>
         <th>Active</th>
@@ -26,6 +59,6 @@
                 </a>
             </td>
         </tr>
-    {{/each}}
+    {{/each}} --}}
     
 {{/if}}

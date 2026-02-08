@@ -6319,6 +6319,10 @@ export function registerFullTests(quench) {
                     it("should have the correct template type", function () {
                         assert.equal(actor._templateType, "Superheroic");
                     });
+
+                    it("should have the correct template", function () {
+                        assert.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Superheroic.hdt");
+                    });
                 });
             });
 
