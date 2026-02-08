@@ -6,6 +6,7 @@
 - The "Presence Attack" dialog has been converted to Application V2 and follows the light/dark application theme.
 - Actors that were upload prior to version 3.0.75 may have items/powers/skill/etc that we no longer support. These unsupported items will show in the INVALID tab for reference, but they are unusable. Re-uploading the HDC file should resolve most issues.
 - Improved support for older HDC formats.
+- The WF: off hand skill/off hand defense talent is now implemented. Having the skill enabled is how to simulate having a weapon in your off hand. [#3703](https://github.com/dmdorman/hero6e-foundryvtt/issues/3703)
 
 ### Version 4.2.13 20260201
 

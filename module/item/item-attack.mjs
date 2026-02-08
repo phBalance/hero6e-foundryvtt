@@ -1,7 +1,11 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+
 import { getPowerInfo, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
+
+import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
+import { getOffHandDefenseDcv } from "../actor/actor-utils.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
@@ -30,7 +34,6 @@ import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
-import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -624,11 +627,12 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
         }
     }
 
+    const defendsWith = attackItem.system.defendsWith;
+    const attackIsRanged = attackItem.isRanged;
+
     // Does the defender have any CSLs that apply vs this attack?
-    let defensiveLevels = 0;
+    let defensiveCslLevels = 0;
     if (defendingActor) {
-        const defendsWith = attackItem.system.defendsWith;
-        const attackIsRanged = attackItem.isRanged;
         for (const csl of defendingActor.activeCslSkills) {
             let levelsForThisCsl = 0;
             for (const levelUse of csl.system.csl) {
@@ -655,7 +659,7 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
             }
 
             if (levelsForThisCsl) {
-                defensiveLevels += levelsForThisCsl;
+                defensiveCslLevels += levelsForThisCsl;
                 defensiveTags.push({
                     name: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
                     value: levelsForThisCsl,
@@ -664,7 +668,22 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
             }
         }
     }
-    targetDefenseValue += defensiveLevels;
+    targetDefenseValue += defensiveCslLevels;
+
+    // Does the character have an Off Hand Defense activated and this a hand-to-hand attack?
+    if (defendingActor && defendsWith === "dcv" && !attackIsRanged) {
+        const offHandDcvBonus = getOffHandDefenseDcv(defendingActor);
+        if (offHandDcvBonus > 0) {
+            const offHandDefenseName = `${defendingActor.is5e ? "WF: Off Hand" : "Off Hand Defense"}`;
+            const tagString = `${offHandDefenseName} ${offHandDcvBonus.signedStringHero()} HTH DCV`;
+            defensiveTags.push({
+                name: tagString,
+                value: offHandDcvBonus,
+                title: tagString,
+            });
+        }
+        targetDefenseValue += offHandDcvBonus;
+    }
 
     return { targetDefenseValue, defensiveTags };
 }
