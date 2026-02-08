@@ -10,7 +10,7 @@
         There may be occasions where the automation is incorrect or insufficient, requiring minor edits.
     </p>
 
-    <table>
+    <div>
         {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-effects-partial-item-v2.hbs') 
             effects=this.allTemporaryEffects headerName="ActorSheet.ActiveEffectTemporary" css="temporary-effects" 
             title="ActorSheet.ActiveEffectTemporaryTitle"}}
@@ -30,6 +30,6 @@
         {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-effects-partial-item-v2.hbs') 
             effects=this.allMiscEffects headerName="ActorSheet.ActiveEffectMisc" css="misc-effects" 
             title="ActorSheet.ActiveEffectMiscTitle"}}
-    </table>
+    </div>
 
 </section>

@@ -211,6 +211,14 @@ export function registerVehicleTests(quench) {
                         const hasFlightPower = !!actor.items.find((item) => item.system.XMLID === "FLIGHT");
                         expect(hasFlightPower).to.be.true;
                     });
+
+                    it("should have the correct template", function () {
+                        expect.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Vehicle6E.hdt");
+                    });
+
+                    it("is5e", function () {
+                        expect.equal(actor.is5e, false);
+                    });
                 });
 
                 describe("5e Test Vehicle", async function () {
@@ -497,6 +505,14 @@ export function registerVehicleTests(quench) {
                     it("should have FTL power", function () {
                         const ftlPower = actor.items.find((item) => item.system.XMLID === "FTL");
                         expect(!!ftlPower).to.be.true;
+                    });
+
+                    it("should have the correct template", function () {
+                        expect.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Vehicle.hdt");
+                    });
+
+                    it("is5e", function () {
+                        expect.equal(actor.is5e, true);
                     });
                 });
             });

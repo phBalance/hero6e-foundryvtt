@@ -206,6 +206,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-analysis-v2.hbs`,
                 scrollable: [""],
             },
+            invalid: {
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-invalid-v2.hbs`,
+                scrollable: [""],
+            },
         };
     }
 
@@ -235,6 +239,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 { id: "conditions" },
                 { id: "other" },
                 { id: "analysis" },
+                { id: "invalid" },
             ],
             labelPrefix: "ActorSheet.Tabs", // Optional. Prepended to the id to generate a localization key
             initial: "attacks", // Set the initial tab
@@ -335,8 +340,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const context = await super._prepareContext(options);
 
         try {
-            // Early out if we are uploading (if we continue we might run into issues requiring ?. optional chaining)
-            if (this.actor.flags[game.system.id].uploading) {
+            // Early out if we are uploading (if we continue we will likely run into issues
+            // requiring ?. optional chaining)
+            if (this.actor.flags[game.system.id]?.uploading) {
                 return context;
             }
 
@@ -356,8 +362,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
             this._items = {
                 attacks: this.actor.items.filter((item) => item.showAttack),
-                defenses: this.actor.items.filter((item) => item.baseInfo.behaviors.includes("defense")),
-                movements: this.actor.items.filter((item) => item.baseInfo.type.includes("movement")),
+                defenses: this.actor.items.filter((item) => item.baseInfo?.behaviors.includes("defense")),
+                movements: this.actor.items.filter((item) => item.baseInfo?.type.includes("movement")),
                 martial: this.actor.items.filter((item) => item.isMartialManeuver && !item.parentItem),
                 skills: this.actor.items.filter((item) => item.type === "skill" && !item.parentItem),
                 maneuvers: this.actor.items.filter((item) => item.isCombatManeuver && !item.parentItem),
@@ -367,7 +373,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     .filter(
                         (baseInfo) =>
                             !["FLIGHT", "GLIDING", "FTL", "SWINGING", "TUNNELING", "TELEPORTATION"].includes(
-                                baseInfo.key,
+                                baseInfo?.key,
                             ),
                     )
                     .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]),

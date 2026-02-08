@@ -3596,7 +3596,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     get is5e() {
-        const _template = this.system.CHARACTER?.TEMPLATE?.extends ?? this.system.CHARACTER?.TEMPLATE?.id;
+        const _template = this.system.CHARACTER?.TEMPLATE?.name;
         let _is5e;
 
         // if (!_template) {
@@ -3618,7 +3618,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (!squelch(this.id)) {
                 console.error(`${this.name} is5e mismatch.  Template=${_template}`);
             }
-            return this.system.is5e;
+            return _is5e;
         }
 
         if (this.system.is5e == null) {
@@ -3651,43 +3651,47 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * @returns {HeroSystem6eItem[]}
      */
     get cslItems() {
-        const priorityCsl = function (item) {
-            switch (item.type) {
-                case "power":
-                    return 1;
-                case "equipment":
-                    return 1;
-                case "martialart":
-                    return 2;
-                case "maneuver":
-                    return 9;
-                default:
-                    return 99;
-            }
-        };
+        try {
+            const priorityCsl = function (item) {
+                switch (item.type) {
+                    case "power":
+                        return 1;
+                    case "equipment":
+                        return 1;
+                    case "martialart":
+                        return 2;
+                    case "maneuver":
+                        return 9;
+                    default:
+                        return 99;
+                }
+            };
 
-        const _sortCslItems = function (a, b) {
-            const priorityA = priorityCsl(a);
-            const priorityB = priorityCsl(b);
-            return priorityA - priorityB;
-        };
-        return this.items
-            .filter(
-                (item) =>
-                    (item.rollsToHit() &&
-                        (!item.baseInfo.behaviors.includes("optional-maneuver") ||
-                            game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
-                        !item.system.XMLID.startsWith("__")) ||
-                    item.system.XMLID === "HANDTOHANDATTACK" || // PH: FIXME: Not sure why we're using rollsToHit as it misses this. Might be only exception.
-                    (item.baseInfo.type.includes("framework") && // CSL custom adders can specify a framework to indicate all of the framework's children are included.
-                        !item.isSeparator && // Ignore separators
-                        !(
-                            item.system.XMLID === "LIST" &&
-                            ["skill", "talent", "perk", "disadvantage"].includes(item.type)
-                        )), // Ignore LISTs in the skills, talents, perks, and disads section as they can't have attacks
-            )
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .sort(_sortCslItems);
+            const _sortCslItems = function (a, b) {
+                const priorityA = priorityCsl(a);
+                const priorityB = priorityCsl(b);
+                return priorityA - priorityB;
+            };
+            return this.items
+                .filter(
+                    (item) =>
+                        (item.rollsToHit() &&
+                            (!item.baseInfo.behaviors.includes("optional-maneuver") ||
+                                game.settings.get(HEROSYS.module, "optionalManeuvers")) &&
+                            !item.system.XMLID.startsWith("__")) ||
+                        item.system.XMLID === "HANDTOHANDATTACK" || // PH: FIXME: Not sure why we're using rollsToHit as it misses this. Might be only exception.
+                        (item.baseInfo.type.includes("framework") && // CSL custom adders can specify a framework to indicate all of the framework's children are included.
+                            !item.isSeparator && // Ignore separators
+                            !(
+                                item.system.XMLID === "LIST" &&
+                                ["skill", "talent", "perk", "disadvantage"].includes(item.type)
+                            )), // Ignore LISTs in the skills, talents, perks, and disads section as they can't have attacks
+                )
+                .sort(_sortCslItems);
+        } catch (e) {
+            console.error(`${this.name} has unhandled error in cslItems`);
+            throw new Error(e);
+        }
     }
 
     /**
@@ -3701,7 +3705,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // NOTE: Older HD used "Main" as the template type - not sure what it means
         // Stringify the TEMPLATE for our best chance.
         try {
-            const template = this.system.CHARACTER?.TEMPLATE || this.system.CHARACTER?.BASIC_CONFIGURATION?.TEMPLATE;
+            const template = this.system.CHARACTER?.TEMPLATE.name;
             if (!template) return templateType;
 
             const stringifiedTemplate = JSON.stringify(template);
@@ -3745,7 +3749,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 if (this.id && this.system.CHARACTER && !window[game.system.id]?.squelch?.templateType) {
                     console.warn(
                         `Unknown template type for ${this.name}.`,
-                        this.system.CHARACTER?.TEMPLATE,
+                        this.system.CHARACTER?.TEMPLATE?.name,
                         this.system.BASIC_CONFIGURATION?.TEMPLATE,
                     );
                     window[game.system.id] ??= {

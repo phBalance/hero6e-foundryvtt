@@ -9230,7 +9230,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         xml: `<DISAD XMLID="MONEYDISAD" ID="1709445487703" BASECOST="0.0" LEVELS="0" ALIAS="Money" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></DISAD>`,
     });
 
-    // CAUTION: 5e Normal Characteristic Maxima is a disadvantage, but XML defines it as an ADDER
+    // CAUTION: 5e Normal Characteristic Maxima is a disadvantage, but Hero Designer defines it as an ADDER
     // NOTE: AGE doesn't exist as a normal disadvantage in HD - you find it on the characteristics tab behind a checkbox
     addPower(undefined, {
         // AGE related
