@@ -729,7 +729,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         } else {
             _heroValidations.push({
                 property: "XMLID",
-                message: `${this.system.XMLID} does not appear to be a proper ${this.is5e ? `5e` : `6e`} ${this.type}`,
+                message: `${this.detailedName()} does not appear to be a proper ${this.is5e ? `5e` : `6e`} ${this.type}`,
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
             });
         }
@@ -3213,7 +3213,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     }
 
                     // Provide a basic description
-                    const _desc = system.OPTION_ALIAS || system.ALIAS || system.EFFECT || "";
+                    const _desc = system.OPTION_ALIAS || system.ALIAS || system.EFFECT || this.name || "";
                     description = (system.INPUT ? system.INPUT + " " : "") + _desc;
 
                     // Provide dice if this is an attack
