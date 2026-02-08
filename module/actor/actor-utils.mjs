@@ -6,7 +6,7 @@
  *
  * @param {HeroSystem6eActor} defendingActor
  *
- * @returns number - Bonus to DCV against Hand-To-Hand attacks
+ * @returns {number} - Bonus to DCV against Hand-To-Hand attacks
  */
 export function getOffHandDefenseDcv(defendingActor) {
     let offHandDcvBonus = 0;
@@ -30,9 +30,7 @@ export function getOffHandDefenseDcv(defendingActor) {
             const activeOffHandDefenseItems = defendingActor.items.filter(
                 (item) => item.system.XMLID === "OFFHANDDEFENSE" && item.isActive,
             );
-            if (activeOffHandDefenseItems.length) {
-                offHandDcvBonus += activeOffHandDefenseItems.length;
-            }
+            offHandDcvBonus += activeOffHandDefenseItems.length;
         }
     }
 
