@@ -5889,6 +5889,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     initializeCsl(numLevelsCouldBeString) {
         const cslUpdates = {};
         const numLevels = parseInt(numLevelsCouldBeString);
+
+        // Weaponmaster adds +3 Damage Classes, but you need 2 csl DC for +1 real DC
         const expectedNumEntries = this.system.XMLID === "WEAPON_MASTER" ? 6 * numLevels : numLevels;
 
         // (Re)initialize csl array

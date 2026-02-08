@@ -628,29 +628,6 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
         }
     }
 
-    // WEAPON MASTER (also check that item is present as a custom ADDER)
-    // PH: FIXME: 6e only? Cost seems to indicate that this is additive to the actual base damage in the case of the damage doubling rule
-    const weaponMaster = item.actor?.items.find((item) => item.system.XMLID === "WEAPON_MASTER");
-    if (weaponMaster) {
-        const weaponMatch = (weaponMaster.system.ADDER || []).find((o) => o.XMLID === "ADDER" && o.ALIAS === item.name);
-        if (weaponMatch) {
-            const weaponMasterDcBonus = 3 * Math.max(1, parseInt(weaponMaster.system.LEVELS) || 1);
-            const weaponMasterDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, weaponMasterDcBonus);
-            const formula = dicePartsToFullyQualifiedEffectFormula(baseAttackItem, weaponMasterDiceParts);
-
-            addedDamageBundle.diceParts = addDiceParts(
-                baseAttackItem,
-                addedDamageBundle.diceParts,
-                weaponMasterDiceParts,
-            );
-            addedDamageBundle.tags.push({
-                value: `${formula}`,
-                name: "Weapon Master",
-                title: `${weaponMasterDcBonus}DC -> ${formula}`,
-            });
-        }
-    }
-
     // DEADLYBLOW
     // Only check if it has been turned off
     // PH: FIXME: This function should not be changing the item.system. Please fix me by moving this to somewhere in the user flow.

@@ -4899,16 +4899,7 @@ export function registerFullTests(quench) {
 
                 before(async function () {
                     previousSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
-
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
                     bigSwordItem = actor.items.find((item) => item.system.XMLID === "HKA" && item.name === "Big Sword");
                     littleSwordItem = actor.items.find(
                         (item) => item.system.XMLID === "HKA" && item.name === "Little Sword",
@@ -4916,6 +4907,7 @@ export function registerFullTests(quench) {
                 });
 
                 after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                     await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
