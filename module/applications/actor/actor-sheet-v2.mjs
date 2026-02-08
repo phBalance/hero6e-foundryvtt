@@ -43,6 +43,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             rollCharacteristicFull: HeroSystemActorSheetV2.#onCharacteristicFullRoll,
             rollCharacteristicCasual: HeroSystemActorSheetV2.#onCharacteristicCasualRoll,
             toggle: HeroSystemActorSheetV2.#onToggle,
+            toggleEffect: HeroSystemActorSheetV2.#onToggleEffect,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
             vpp: HeroSystemActorSheetV2.#onVpp,
@@ -306,7 +307,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     );
                     break;
                 case "effects":
-                    context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects());
+                    context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects())
+                        .filter((o) => o.duration.duration > 0 || o.statuses.size)
+                        .sort((a, b) => a.name.localeCompare(b.name));
                     context.allConstantEffects = this.actor.getConstantEffects();
                     context.allPersistentEffects = this.actor.getPersistentEffects();
                     context.allInherentEffects = this.actor.getInherentEffects();
@@ -913,9 +916,18 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         event.preventDefault();
         const item = this._getEmbeddedDocument(target);
         if (!item) {
-            console.error("onCarried: Unable to locate item");
+            console.error("onToggle: Unable to locate item");
         }
         await item.toggle({ event: this.event, token: this.token });
+    }
+
+    static async #onToggleEffect(event, target) {
+        event.preventDefault();
+        const effect = this._getEmbeddedDocument(target);
+        if (!effect) {
+            console.error("onToggleEffect: Unable to locate effect");
+        }
+        await effect.update({ disabled: !effect.disabled });
     }
 
     static async #onVpp(event, target) {

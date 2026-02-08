@@ -194,6 +194,12 @@ function itemHasActionBehavior(item, actionBehavior) {
             return false;
         }
 
+        if (item.constructor.name !== "HeroSystem6eItem") {
+            // Most likely a actorsheetv2 active effect
+            //console.debug(`itemHasActionBehavior has unknown item`);
+            return false;
+        }
+
         if (actionBehavior === "to-hit") {
             return item.rollsToHit();
         } else if (actionBehavior === "activatable") {
