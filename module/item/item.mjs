@@ -6606,11 +6606,19 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     static migrateData_missingXMLID(source) {
         // Invalid (super old) items are hard for us to handle,
-        // So invalidate them.  Simple invalidation is a bad type.
+        // So invalidate them.  Simple invalidation is to make this a invalid Item.type.
         // Implemented in 4.2.14 in Feb 2026.
         // Careful as source may be a list of updates instead of the entire item
-        // so checking to see if name was included.
-        if (source.name && source.system?.XMLID == null && !source.type.startsWith("_")) {
+        // so checking to see if name/img/ownership/ect was included.
+        if (
+            source.name &&
+            source.img &&
+            source.ownership &&
+            source.sort &&
+            source._stats &&
+            source.system?.XMLID == null &&
+            !source.type.startsWith("_")
+        ) {
             source.type = `_${source.type}`;
             // Unable to persist because you can't write an invalid item type to the DB.
         }

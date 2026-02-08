@@ -619,15 +619,11 @@ export function registerFullTests(quench) {
                     let actor;
 
                     before(async function () {
-                        actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    });
 
-                        await actor.uploadFromXml(contents);
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("com.max", async function () {
@@ -724,15 +720,11 @@ export function registerFullTests(quench) {
                     let actor;
 
                     before(async function () {
-                        actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    });
 
-                        await actor.uploadFromXml(contents);
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("com.max", async function () {
@@ -1298,19 +1290,15 @@ export function registerFullTests(quench) {
                 let actor;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                });
 
-                    await actor.uploadFromXml(contents);
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("name", async function () {
-                    assert.equal(actor.name, "civilian6e");
+                    expect(actor.name).to.contain("civilian6e");
                 });
 
                 it("str.max", async function () {
@@ -3982,18 +3970,16 @@ export function registerFullTests(quench) {
                 let flightItem;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
                     await actor.uploadFromXml(contents);
                     energyBlastItem = actor.items.find((o) => o.system.XMLID === "ENERGYBLAST");
                     entangleItem = actor.items.find((o) => o.isEntangle);
                     flightItem = actor.items.find((o) => o.system.XMLID === "FLIGHT");
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("Description", async function () {
@@ -7600,7 +7586,7 @@ export function registerFullTests(quench) {
                     let constantToInstantItem;
 
                     before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
 
                         instantItem = actor.items.find((item) => item.name === "Instant");
                         instantToConstantItemViaContinuous = actor.items.find(
