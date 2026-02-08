@@ -9772,22 +9772,17 @@ export function registerUploadTests(quench) {
                             </SKILL>
                     `;
                     let item;
+                    let actor;
 
                     before(async function () {
-                        const actor = new HeroSystem6eActor(
-                            {
-                                name: "Quench Actor",
-                                type: "pc",
-                            },
-                            {},
-                        );
-                        actor.system.is5e = false;
-
+                        actor = await createQuenchActor({ quench: this, is5e: true });
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
+                    });
 
-                        actor.items.set(item.system.XMLID, item);
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
 
                     it("description", function () {

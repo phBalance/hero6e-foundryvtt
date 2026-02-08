@@ -196,7 +196,6 @@ function itemHasActionBehavior(item, actionBehavior) {
 
         if (item.constructor.name !== "HeroSystem6eItem") {
             // Most likely a actorsheetv2 active effect
-            //console.debug(`itemHasActionBehavior has unknown item`);
             return false;
         }
 
