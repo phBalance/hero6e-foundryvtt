@@ -169,6 +169,9 @@ export function registerBaseTests(quench) {
                     });
 
                     it("should NOT have the DEF characteristic", function () {
+                        // Shows an error in the log, which is expected.
+                        // TODO: Improve actor.hasCharacteristic such that is doesn't REQUIRE baseInfo (if possible)
+                        // shouldhavetheBASESIZEcharacteristic/Natural DEF/DEF/DEF: Unable to find 6e power entry.
                         expect(actor.hasCharacteristic("DEF")).to.be.false;
                     });
 
