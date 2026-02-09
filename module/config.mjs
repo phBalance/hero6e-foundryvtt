@@ -853,15 +853,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         if (powerDescription6e.xml) {
             powerDescription6e.xml = powerDescription6e.xml.replace(/\n/g, "").trim();
             const parser = new DOMParser();
-            let xml = parser.parseFromString(powerDescription6e.xml.trim(), "text/xml");
+            const xml = parser.parseFromString(powerDescription6e.xml.trim(), "text/xml");
 
             // Add power properties based on valid XML.
             // NOTE: Chrome will parse partially valid XML, Firefox will not
             // which is why we are checking for parsererror.
             if (xml.getElementsByTagName("parsererror").length === 0) {
+                // PH: FIXME: Remove these... everything should have it.
                 powerDescription6e.key ??= xml.children[0].getAttribute("XMLID");
                 powerDescription6e.name ??= xml.children[0].getAttribute("ALIAS");
-                powerDescription6e.type ??= [];
                 powerDescription6e.xmlTag ??= xml.children[0].tagName.toUpperCase();
             } else {
                 throw new Error(`Invalid XML provided for 6e power description with key ${powerDescription6e.key}`);
@@ -905,12 +905,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         if (powerDescription5e.xml) {
             powerDescription5e.xml = powerDescription5e.xml.replace(/\n/g, "").trim();
             const parser = new DOMParser();
-            let xml = parser.parseFromString(powerDescription5e.xml.trim(), "text/xml");
+            const xml = parser.parseFromString(powerDescription5e.xml.trim(), "text/xml");
 
             if (xml.getElementsByTagName("parsererror").length === 0) {
+                // PH: FIXME: Remove these... everything should have it.
                 powerDescription5e.key ??= xml.children[0].getAttribute("XMLID");
                 powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
-                powerDescription5e.type ??= [];
                 powerDescription5e.xmlTag ??= xml.children[0].tagName.toUpperCase();
             } else {
                 throw new Error(`Invalid XML provided for 5e power description with key ${powerDescription5e.key}`);
@@ -8231,7 +8231,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ADJACENT",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8244,7 +8244,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ADJACENTFIXED",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8257,7 +8257,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ANALYZESENSE",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8284,7 +8284,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CONCEALED",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8311,7 +8311,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DETECT",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8339,7 +8339,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DIMENSIONALSINGLE",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8365,7 +8365,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DIMENSIONALGROUP",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8391,7 +8391,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DIMENSIONALALL",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8417,7 +8417,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DISCRIMINATORY",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8465,7 +8465,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "EXTRA",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             target: "self only",
@@ -8479,7 +8479,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "HRRP", // High Range Radio Perception
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8513,7 +8513,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "INCREASEDARC240",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8539,7 +8539,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "INCREASEDARC360",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8565,7 +8565,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "INFRAREDPERCEPTION",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8602,7 +8602,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MAKEASENSE",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8628,7 +8628,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MENTALAWARENESS",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8658,7 +8658,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MICROSCOPIC",
-            type: ["sense"],
+            type: ["adder", "sense"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(3),
@@ -8685,7 +8685,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "NIGHTVISION",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8722,7 +8722,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(undefined, {
         key: "NRAYPERCEPTION",
-        type: ["adder"],
+        type: ["adder", "sense"],
         behaviors: ["adder"],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
@@ -8731,7 +8731,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     });
     addPower(undefined, {
         key: "NRAYPERCEPTION",
-        type: ["activatable", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+        type: ["activatable", "sense", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
         behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
         target: "self only",
@@ -8742,7 +8742,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PARTIALLYPENETRATIVE",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8755,7 +8755,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PENETRATIVE",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8769,6 +8769,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             // DAMAGENEGATION related
             key: "PHYSICAL",
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             costPerLevel: fixedValueFunction(5),
             target: "self only",
@@ -8780,7 +8781,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RADAR",
-            type: ["sense", "active"],
+            type: ["active", "adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8806,7 +8807,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RADIOPERCEIVETRANSMIT",
-            type: ["sense", "active"],
+            type: ["active", "adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8839,7 +8840,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RADIOPERCEPTION",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8865,7 +8866,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RANGE",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8891,7 +8892,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "RAPID",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(3),
@@ -8918,7 +8919,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "SPATIALAWARENESS",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8947,7 +8948,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TARGETINGSENSE",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -8973,7 +8974,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TELESCOPIC",
-            type: ["sense"],
+            type: ["adder", "sense"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(1 / 2),
@@ -8999,7 +9000,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TRACKINGSENSE",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -9025,7 +9026,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TRANSMIT",
-            type: ["sense", "active"],
+            type: ["adder", "sense", "active"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -9052,7 +9053,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ULTRASONICPERCEPTION",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -9088,7 +9089,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ULTRAVIOLETPERCEPTION",
-            type: ["sense", "passive"],
+            type: ["adder", "sense", "passive"],
             behaviors: ["adder"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
@@ -9550,6 +9551,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CUSTOMPOWER related
             key: "ADJUSTMENT",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="ADJUSTMENT" ID="1762720037829" BASECOST="0.0" LEVELS="0" ALIAS="Adjustment Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -10136,6 +10138,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CUSTOMPOWER related
             key: "BODYAFFECTING",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="BODYAFFECTING" ID="1762720038983" BASECOST="0.0" LEVELS="0" ALIAS="Body-Affecting Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -10826,6 +10829,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TUNNELING related
             key: "DEFBONUS",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="DEFBONUS" ID="1712964171511" BASECOST="0.0" LEVELS="8" ALIAS="+8 DEF" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
         },
@@ -10836,6 +10840,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // COMPUTER_PROGRAMMING and CUSTOMPOWER related
             key: "DEFENSE",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="DEFENSE" ID="1762720039464" BASECOST="0.0" LEVELS="0" ALIAS="Defense Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -11601,6 +11606,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // FORCEFIELD related
             key: "FLASHDEFENSE",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(3 / 2),
             xml: `<ADDER XMLID="FLASHDEFENSE" ID="1736295402655" BASECOST="0.0" LEVELS="1" ALIAS="Flash Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="2.0" SELECTED="YES"></ADDER>`,
         },
@@ -12277,6 +12283,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // ANIMAL_HANDLER related
             key: "INSECTS",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INSECTS" ID="1762052685705" BASECOST="2.0" LEVELS="0" ALIAS="Insects &amp; Anthropods" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -12287,6 +12294,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // LIFESUPPORT related
             key: "INTENSECOLD",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INTENSECOLD" ID="1762058852157" BASECOST="2.0" LEVELS="0" ALIAS="Safe in Intense Cold" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -12319,6 +12327,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // LIFESUPPORT related
             key: "INTENSEHEAT",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INTENSEHEAT" ID="1762058852755" BASECOST="2.0" LEVELS="0" ALIAS="Safe in Intense Heat" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -12329,6 +12338,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // PSYCHOLOGICALLIMITATION related
             key: "INTENSITY",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INTENSITY" ID="1709447166359" BASECOST="0.0" LEVELS="0" ALIAS="Intensity Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MODERATE" OPTIONID="MODERATE" OPTION_ALIAS="Moderate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -12339,6 +12349,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // WEAPON_FAMILIARITY related
             key: "IONBLASTER",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="IONBLASTER" ID="1759095002574" BASECOST="1.0" LEVELS="0" ALIAS="Ion Blasters" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -12794,6 +12805,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // LIFESUPPORT related
             key: "LOWPRESSUREVACUUM",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="LOWPRESSUREVACUUM" ID="1762058850828" BASECOST="2.0" LEVELS="0" ALIAS="Safe in Low Pressure/Vacuum" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -12889,6 +12901,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         // TRANSPARENT related
         key: "MD",
         behaviors: ["adder"],
+        type: ["adder"],
         costPerLevel: fixedValueFunction(0),
         xml: `<ADDER XMLID="MD" ID="1752364670270" BASECOST="0.25" LEVELS="0" ALIAS="Mental" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
@@ -14300,6 +14313,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         // MEGASCALE related
         key: "SCALEDOWN",
         behaviors: ["adder"],
+        type: ["adder"],
         costPerLevel: fixedValueFunction(0),
         xml: `<ADDER XMLID="SCALEDOWN" ID="1760373299835" BASECOST="0.25" LEVELS="0" ALIAS="Can Be Scaled Down" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="1&quot; = 1km" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
@@ -14341,6 +14355,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // AOE/EXPLOSION related
             key: "SELECTIVETARGET",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SELECTIVETARGET" ID="1735841902155" BASECOST="0.25" LEVELS="0" ALIAS="Selective" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14351,6 +14366,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // LIFESUPPORT related
             key: "SELFCONTAINEDBREATHING",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SELFCONTAINEDBREATHING" ID="1762105296913" BASECOST="10.0" LEVELS="0" ALIAS="Self-Contained Breathing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14361,6 +14377,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // DANGER_SENSE and presumably other senses related
             key: "SENSE",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SENSE" ID="1732478113494" BASECOST="2.0" LEVELS="0" ALIAS="Function as a Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14371,6 +14388,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CUSTOMPOWER related
             key: "SENSEAFFECTING",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SENSEAFFECTING" ID="1762720041051" BASECOST="0.0" LEVELS="0" ALIAS="Sense-Affecting Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14381,6 +14399,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // DISTINCTIVEFEATURES related
             key: "SENSING",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SENSING" ID="1754364265112" BASECOST="0.0" LEVELS="0" ALIAS="Sensing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Detectable By Commonly-Used Senses" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14391,6 +14410,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // DANGER_SENSE related
             key: "SENSITIVITY",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SENSITIVITY" ID="1732478113499" BASECOST="5.0" LEVELS="0" ALIAS="Sensitivity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OUT_OF_COMBAT" OPTIONID="OUT_OF_COMBAT" OPTION_ALIAS="out of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14425,6 +14445,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CUSTOMPOWER related
             key: "SENSORY",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SENSORY" ID="1762720041548" BASECOST="0.0" LEVELS="0" ALIAS="Sensory Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14534,6 +14555,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CUSTOMPOWER related
             key: "SIZE",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SIZE" ID="1762720042221" BASECOST="0.0" LEVELS="0" ALIAS="Size Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14544,6 +14566,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TRANSPORT_FAMILIARITY related
             key: "SKATEBOARDING",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SKATEBOARDING" ID="1770523624872" BASECOST="1.0" LEVELS="0" ALIAS="Skateboarding" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14565,6 +14588,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TRANSPORT_FAMILIARITY related
             key: "SKIING",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SKIING" ID="1770523625701" BASECOST="1.0" LEVELS="0" ALIAS="Skiing (snow)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14597,6 +14621,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // LIFESUPPORT related
             key: "SLEEPING",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SLEEPING" ID="1762058850253" BASECOST="1.0" LEVELS="0" ALIAS="Sleeping:" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="WEEK" OPTIONID="WEEK" OPTION_ALIAS="Character only has to sleep 8 hours per week" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -14802,6 +14827,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CUSTOMPOWER related
             key: "SPECIAL",
             behaviors: ["adder"],
+            type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="SPECIAL" ID="1762720043206" BASECOST="0.0" LEVELS="0" ALIAS="Special Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
@@ -15836,6 +15862,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ABLATIVE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ABLATIVE" ID="1730531163233" BASECOST="-1.0" LEVELS="0" ALIAS="Ablative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BODYORSTUN" OPTIONID="BODYORSTUN" OPTION_ALIAS="BODY or STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15848,6 +15875,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // EXTRATIME related
             key: "ACTIVATEONLY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             cost: function () {
                 // TODO: HACK, should properly support this instead of hiding cost calc in EXTRATIME
@@ -15863,6 +15891,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACTIVATIONROLL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ACTIVATIONROLL" ID="1707283846531" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15874,6 +15903,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACV",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ACV" ID="1596334078859" BASECOST="0.0" LEVELS="0" ALIAS="Alternate Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONMENTALOMCV" OPTIONID="NONMENTALOMCV" OPTION_ALIAS="uses OMCV against DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15884,6 +15914,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "AFFECTSDESOLID",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="AFFECTSDESOLID" ID="1759024085234" BASECOST="0.5" LEVELS="0" ALIAS="Affects Desolidified" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANY" OPTIONID="ANY" OPTION_ALIAS="Any form of Desolidification" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15894,6 +15925,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "AFFECTSPHYSICALWORLD",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="AFFECTSPHYSICALWORLD" ID="1759029285770" BASECOST="2.0" LEVELS="0" ALIAS="Affects Physical World" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15905,6 +15937,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TRANSFORM related
             key: "ALLORNOTHING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ALLORNOTHING" ID="1764594003100" BASECOST="-0.5" LEVELS="0" ALIAS="All Or Nothing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15915,6 +15948,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ALTEREDDUPLICATES",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ALTEREDDUPLICATES" ID="1688216130571" BASECOST="0.25" LEVELS="0" ALIAS="Altered Duplicates" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="QUARTER" OPTIONID="QUARTER" OPTION_ALIAS="25%" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15925,6 +15959,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ALTEREDSHAPE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ALTEREDSHAPE" ID="1767000514617" BASECOST="0.0" LEVELS="0" ALIAS="Altered Shape" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CONE" OPTIONID="CONE" OPTION_ALIAS="Cone" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15936,6 +15971,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Typically part of SIDEEFFECTS
             key: "ALWAYSOCCURS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             cost: function (heroModifier /*, item*/) {
                 const sideEffectCost = parseFloat(
                     heroModifier.parent.XMLID === "SIDEEFFECTS" ? heroModifier.parent.BASECOST : 0,
@@ -15954,6 +15990,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ALWAYSDIRECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ALWAYSDIRECT" ID="1730530836005" BASECOST="-0.25" LEVELS="0" ALIAS="Always Direct" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15964,6 +16001,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ALWAYSON",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ALWAYSON" ID="1730531186125" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15975,6 +16013,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // SUMMON related
             key: "AMICABLE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="AMICABLE" ID="1737923610788" BASECOST="0.25" LEVELS="0" ALIAS="Amicable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FRIENDLY" OPTIONID="FRIENDLY" OPTION_ALIAS="Friendly" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -15985,6 +16024,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "AOE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             cost: function (modifier) {
                 const levels = parseInt(modifier.LEVELS) || 0;
@@ -16081,6 +16121,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ARMORPIERCING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="ARMORPIERCING" ID="1712696642037" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16094,6 +16135,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // SUMMON related
             key: "ARRIVESONOWN",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ARRIVESONOWN" ID="1767550887837" BASECOST="-0.5" LEVELS="0" ALIAS="Arrives Under Own Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16104,6 +16146,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "AUTOFIRE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0), // FIXME: extra costs for AVLD and REDUCEDEND
             cost: function (modifier, item) {
                 let cost = parseFloat(modifier.BASECOST);
@@ -16128,6 +16171,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "AVAD",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="AVAD" ID="1737923097808" BASECOST="0.0" LEVELS="0" ALIAS="Attack Versus Alternate Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYVERY" OPTIONID="VERYVERY" OPTION_ALIAS="Very Common -&gt; Very Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16137,6 +16181,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "AVLD",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(true),
         xml: `<MODIFIER XMLID="AVLD" ID="1735536296325" BASECOST="0.75" LEVELS="0" ALIAS="Attack Versus Limited Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16146,6 +16191,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BACKLASH",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="BACKLASH" ID="1759025241244" BASECOST="0.5" LEVELS="0" ALIAS="Backlash" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16156,6 +16202,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BASEDONCON",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="BASEDONCON" ID="1762138803705" BASECOST="-1.0" LEVELS="0" ALIAS="Based on CON" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PD" OPTIONID="PD" OPTION_ALIAS="Defense: PD" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -16166,6 +16213,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BEAM",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="BEAM" ID="1642201338928" BASECOST="-0.25" LEVELS="0" ALIAS="Beam" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16177,6 +16225,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CLARISENTIENCE related
             key: "BLACKOUT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="BLACKOUT" ID="1755906498927" BASECOST="-0.5" LEVELS="0" ALIAS="Blackout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16187,6 +16236,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         // SHAPESHIFT related
         key: "BODYONLY",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(true),
         xml: `<MODIFIER XMLID="BODYONLY" ID="1663423869228" BASECOST="-0.5" LEVELS="0" ALIAS="Affects Body Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16194,6 +16244,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "BOECV",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(true),
         xml: `<MODIFIER XMLID="BOECV" ID="1735536316398" BASECOST="1.0" LEVELS="0" ALIAS="Based On EGO Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTAL" OPTIONID="MENTAL" OPTION_ALIAS="Mental Defense applies" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16203,6 +16254,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // ENTANGLE related
             key: "BOTHDAMAGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="BOTHDAMAGE" ID="1760248050455" BASECOST="0.25" LEVELS="0" ALIAS="Entangle And Character Both Take Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16214,6 +16266,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CANBEMISSILEDEFLECTED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANBEMISSILEDEFLECTED" ID="1767000509402" BASECOST="-0.25" LEVELS="0" ALIAS="Can Be Missile Deflected" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16224,6 +16277,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CANNOTATTACK",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTATTACK" ID="1700709064472" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Attack Through Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMUNICATE" OPTIONID="COMMUNICATE" OPTION_ALIAS="neither the character nor his target can use the link to attack each other mentally, but they can communicate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16234,6 +16288,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CANNOTBEUSEDWITHMPA",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTBEUSEDWITHMPA" ID="1767000521234" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Be Used With Multiple-Power Attacks" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16244,6 +16299,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CANNOTDODAMAGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTDODAMAGE" ID="1730530836004" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Do Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16255,6 +16311,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // BARRIER related
             key: "CANNOTENGLOBE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTENGLOBE" ID="1762720614620" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Englobe" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16266,6 +16323,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Movement related
             key: "CANNOTHOVER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTHOVER" ID="1766366300234" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Hover" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2M" OPTIONID="2M" OPTION_ALIAS="must move at least 2m per Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16277,6 +16335,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // DESOLIDIFICATION related
             key: "CANNOTPASSTHROUGHSOLID",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTPASSTHROUGHSOLID" ID="1708756543951" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Pass Through Solid Objects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16288,6 +16347,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Attack power related
             key: "CANNOTUSETARGETING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTUSETARGETING" ID="1739696908630" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Use Targeting" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16298,6 +16358,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CHARGES",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             cost: function (modifierModel /* , item */) {
                 // Charges has some unusual cost capping. If they are not recoverable, continuous, or boostable charges then
@@ -16349,6 +16410,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // FLIGHT related
             key: "COMBATACCELERATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="COMBATACCELERATION" ID="1762138576490" BASECOST="0.25" LEVELS="0" ALIAS="combat acceleration/deceleration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16359,6 +16421,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONCENTRATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CONCENTRATION" ID="1727749190399" BASECOST="-0.5" LEVELS="0" ALIAS="Concentration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ZERO" OPTIONID="ZERO" OPTION_ALIAS="0 DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16369,6 +16432,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONDITIONALPOWER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CONDITIONALPOWER" ID="1732312708337" BASECOST="-0.25" LEVELS="0" ALIAS="Conditional Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UNCOMMON" OPTIONID="UNCOMMON" OPTION_ALIAS="Power does not work in Uncommon Circumstances" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16380,6 +16444,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // INCANTATIONS related
             key: "CONSTANT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CONSTANT" ID="1762135620312" BASECOST="1.0" LEVELS="0" ALIAS="Requires Incantations throughout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16390,6 +16455,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONTINUOUS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="CONTINUOUS" ID="1713378099716" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16400,6 +16466,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONTINUOUSCONCENTRATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             cost: function (modifier) {
                 // Must Concentrate throughout use of Constant Power x2
@@ -16418,6 +16485,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // VPP framework related
             key: "COSMIC",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="COSMIC" ID="1663758701677" BASECOST="2.0" LEVELS="0" ALIAS="Cosmic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -16428,6 +16496,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COSTSEND",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="COSTSEND" ID="1728919937538" BASECOST="-0.25" LEVELS="0" ALIAS="Costs Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ACTIVATE" OPTIONID="ACTIVATE" OPTION_ALIAS="Only Costs END to Activate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16438,6 +16507,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COSTSENDONLYTOACTIVATE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="COSTSENDONLYTOACTIVATE" ID="1759025402295" BASECOST="0.25" LEVELS="0" ALIAS="Costs Endurance Only To Activate" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16448,6 +16518,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COSTSENDTOMAINTAIN",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="COSTSENDTOMAINTAIN" ID="1726627718650" BASECOST="-0.5" LEVELS="0" ALIAS="Costs END To Maintain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="Full END Cost" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16458,6 +16529,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CREWSERVED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CREWSERVED" ID="1703219832667" BASECOST="-0.25" LEVELS="0" ALIAS="Crew-Served" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2" OPTIONID="2" OPTION_ALIAS="2 people" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16468,6 +16540,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CUMULATIVE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="CUMULATIVE" ID="1714280316745" BASECOST="0.5" LEVELS="0" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16478,6 +16551,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DAMAGEOVERTIME",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DAMAGEOVERTIME" ID="1738533900123" BASECOST="1.0" LEVELS="0" ALIAS="Damage Over Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16488,6 +16562,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DAMAGESHIELD",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DAMAGESHIELD" ID="1735588757286" BASECOST="0.5" LEVELS="0" ALIAS="Damage Shield" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16498,6 +16573,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DECREASEDACCELERATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="DECREASEDACCELERATION" ID="1766366300240" BASECOST="-0.25" LEVELS="0" ALIAS="Decreased Acceleration/Deceleration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="4M" OPTIONID="4M" OPTION_ALIAS="3-4m" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16508,6 +16584,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DECREASEDREUSE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="DECREASEDREUSE" ID="1730531391045" BASECOST="1.5" LEVELS="0" ALIAS="Decreased Re-use Duration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1TURN" OPTIONID="1TURN" OPTION_ALIAS="1 Turn" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16518,6 +16595,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DELAYEDEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="DELAYEDEFFECT" ID="1764073515655" BASECOST="0.25" LEVELS="0" ALIAS="Delayed Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16528,6 +16606,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DELAYEDRETURNRATE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="DELAYEDRETURNRATE" ID="1737065759130" BASECOST="1.0" LEVELS="0" ALIAS="Delayed Return Rate" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINUTE" OPTIONID="MINUTE" OPTION_ALIAS="points return at the rate of 5 per Minute" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16537,6 +16616,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "DELAYEDRETURNRATE2",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="DELAYEDRETURNRATE2" ID="1758854747958" BASECOST="0.5" LEVELS="0" ALIAS="Delayed Return Rate (Points Gained)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FIVEMINUTES" OPTIONID="FIVEMINUTES" OPTION_ALIAS="points return at the rate of 5 per 5 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16545,6 +16625,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DECREASEDSTUNMULTIPLIER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(-1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="DECREASEDSTUNMULTIPLIER" ID="1735749243169" BASECOST="0.0" LEVELS="1" ALIAS="-1 Decreased STUN Multiplier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16555,6 +16636,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DIFFICULTTOALTER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="DIFFICULTTOALTER" ID="1767000435166" BASECOST="-0.25" LEVELS="0" ALIAS="Difficult to Alter" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALF" OPTIONID="HALF" OPTION_ALIAS="simple changes take a Half Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16565,6 +16647,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DIFFICULTTODISPEL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             cost: (modifier /* , item */) => {
                 const levels = parseInt(modifier.LEVELS);
 
@@ -16580,6 +16663,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DIFFICULTTOOPERATE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="DIFFICULTTOOPERATE" ID="1766366192217" BASECOST="-0.25" LEVELS="0" ALIAS="Difficult to Operate" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16590,6 +16674,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DOESBODY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOESBODY" ID="1735589197022" BASECOST="1.0" LEVELS="0" ALIAS="Does BODY" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16600,6 +16685,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DOESKB",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOESKB" ID="1735588757282" BASECOST="0.25" LEVELS="0" ALIAS="Does Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16611,6 +16697,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // ENTANGLE related
             key: "DOESNOTPREVENTOAF",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(false),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOESNOTPREVENTOAF" ID="1742698456282" BASECOST="-1.0" LEVELS="0" ALIAS="Does Not Prevent The Use Of Accessible Foci" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16620,6 +16707,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "DOESNOTPROVIDEMENTALAWARENESS",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="DOESNOTPROVIDEMENTALAWARENESS" ID="1762135601080" BASECOST="-0.25" LEVELS="0" ALIAS="Does Not Provide Mental Awareness" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16629,6 +16717,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // HEALING related
             key: "DOESNOTWORKONSOMEDAMAGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOESNOTWORKONSOMEDAMAGE" ID="1737210056942" BASECOST="-0.75" LEVELS="0" ALIAS="Does Not Work On Some Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="[Common attack]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16639,6 +16728,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DOUBLEENDCOST",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOUBLEENDCOST" ID="1764547146527" BASECOST="-0.5" LEVELS="0" ALIAS="Double Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -16649,6 +16739,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DOUBLEKB",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DOUBLEKB" ID="1735589197028" BASECOST="0.75" LEVELS="0" ALIAS="Double Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOTIMES" OPTIONID="TWOTIMES" OPTION_ALIAS="2x KB" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16659,6 +16750,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DROPPED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="DROPPED" ID="1767000444603" BASECOST="-0.5" LEVELS="0" ALIAS="Dropped" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16670,6 +16762,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EFFECTS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="EFFECTS" ID="1762138619922" BASECOST="1.0" LEVELS="0" ALIAS="Hide effects of Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16679,6 +16772,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "ENDRESERVEOREND",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="ENDRESERVEOREND" ID="1760248770731" BASECOST="0.25" LEVELS="0" ALIAS="Power Can Draw END from Character or END Reserve" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16687,6 +16781,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EXTRATIME",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             cost: function (modifier, item) {
                 const baseCost = parseFloat(modifier.BASECOST);
@@ -16710,6 +16805,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // SUMMON related
             key: "EXPANDEDCLASS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="EXPANDEDCLASS" ID="1737924150569" BASECOST="0.25" LEVELS="0" ALIAS="Expanded Class of Beings" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="Very Limited Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16720,6 +16816,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EXPANDEDEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 2), // HD shows BASECOST -0.5 (limitation), but this is really an advantage +1/2
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="EXPANDEDEFFECT" ID="1732212865433" BASECOST="-0.5" LEVELS="2" ALIAS="Expanded Effect (x2 Characteristics or Powers simultaneously)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16729,6 +16826,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "EXPLOSION",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         cost: function (modifier, item) {
             const baseCost = parseFloat(modifier.BASECOST);
@@ -16779,6 +16877,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EYECONTACTREQUIRED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="EYECONTACTREQUIRED" ID="1762138788577" BASECOST="-0.5" LEVELS="0" ALIAS="Eye Contact Required" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -16790,6 +16889,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FOCUS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="FOCUS" ID="1442342142790" BASECOST="-0.5" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OIF" OPTIONID="OIF" OPTION_ALIAS="OIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No"></MODIFIER>`,
@@ -16800,6 +16900,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FUELDEPENDENT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="FUELDEPENDENT" ID="1766366139886" BASECOST="0.0" LEVELS="0" ALIAS="Fuel Dependent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16810,6 +16911,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FULLPOWER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="FULLPOWER" ID="1767550494693" BASECOST="0.0" LEVELS="0" ALIAS="Must Be Used At Full Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16820,6 +16922,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FULLREVERSE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="FULLREVERSE" ID="1766366148488" BASECOST="0.25" LEVELS="0" ALIAS="Full Reverse" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16831,6 +16934,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GESTURES",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="GESTURES" ID="1727749190389" BASECOST="-0.25" LEVELS="0" ALIAS="Gestures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16841,6 +16945,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GLIDING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="GLIDING" ID="1770257261114" BASECOST="-1.0" LEVELS="0" ALIAS="Gliding" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16851,6 +16956,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GRADUALEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="GRADUALEFFECT" ID="1762135460636" BASECOST="-1.25" LEVELS="0" ALIAS="Gradual Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1HOUR" OPTIONID="1HOUR" OPTION_ALIAS="1 Hour" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16862,6 +16968,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HALFRANGEMODIFIER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="HALFRANGEMODIFIER" ID="1766317008792" BASECOST="0.25" LEVELS="0" ALIAS="Half Range Modifier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16872,6 +16979,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HANDTOHANDATTACK",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="HANDTOHANDATTACK" ID="1711934557552" BASECOST="-0.25" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16882,6 +16990,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HARDENED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="HARDENED" ID="1712344562459" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16893,6 +17002,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "IMPENETRABLE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16904,6 +17014,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TRANSFORM related
             key: "IMPROVEDTARGETGROUP",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="IMPROVEDTARGETGROUP" ID="1764594003040" BASECOST="0.25" LEVELS="0" ALIAS="Improved Results Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16914,6 +17025,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INACCURATE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             dcAffecting: fixedValueFunction(true),
             costPerLevel: fixedValueFunction(0),
             xml: `<MODIFIER XMLID="INACCURATE" ID="1762135625354" BASECOST="-0.25" LEVELS="0" ALIAS="Inaccurate" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALF" OPTIONID="HALF" OPTION_ALIAS="1/2 OCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16924,6 +17036,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCANTATIONS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INCANTATIONS" ID="1727749190392" BASECOST="-0.25" LEVELS="0" ALIAS="Incantations" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16934,6 +17047,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCREASEDEND",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             cost: function (modifier, item) {
@@ -16955,6 +17069,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCREASEDMAXRANGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INCREASEDMAXRANGE" ID="1766317008855" BASECOST="0.0" LEVELS="2" ALIAS="Increased Maximum Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16965,6 +17080,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INCREASEDSTUNMULTIPLIER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INCREASEDSTUNMULTIPLIER" ID="1642201338997" BASECOST="0.0" LEVELS="1" ALIAS="+1 Increased STUN Multiplier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16977,6 +17093,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INDEPENDENT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INDEPENDENT" ID="1737919880443" BASECOST="-2.0" LEVELS="0" ALIAS="Independent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16986,6 +17103,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INDIRECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INDIRECT" ID="1760248513216" BASECOST="0.25" LEVELS="0" ALIAS="Indirect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CHARACTERINDIRECT" OPTIONID="CHARACTERINDIRECT" OPTION_ALIAS="Source Point is the Character, path is indirect, but the same with every use" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -16996,6 +17114,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INHERENT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INHERENT" ID="1730531186124" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17006,6 +17125,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INSTANT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INSTANT" ID="1767000542433" BASECOST="-0.5" LEVELS="0" ALIAS="Instant" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17016,6 +17136,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INVISIBLE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="INVISIBLE" ID="1693773081515" BASECOST="0.25" LEVELS="0" ALIAS="Invisible Power Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INOBVIOUSINVISIBLEONE" OPTIONID="INOBVIOUSINVISIBLEONE" OPTION_ALIAS="Inobvious Power, Invisible to Mental Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17028,6 +17149,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Movement related
             key: "LEAVESATRAIL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LEAVESATRAIL" ID="1766316538588" BASECOST="-0.25" LEVELS="0" ALIAS="Leaves A Trail" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17039,6 +17161,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Movement related
             key: "LEVITATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LEVITATION" ID="1766366118689" BASECOST="-0.5" LEVELS="0" ALIAS="Levitation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17049,6 +17172,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITED" ID="1770498982804" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Class Of Powers Available" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SLIGHTLY" OPTIONID="SLIGHTLY" OPTION_ALIAS="Slightly Limited" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -17059,6 +17183,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDBODYPARTS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDBODYPARTS" ID="1730530831066" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Body Parts" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Hands/arms" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17069,6 +17194,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDCLASSOFMINDS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDCLASSOFMINDS" ID="1770498987360" BASECOST="-0.5" LEVELS="0" ALIAS="Limited Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SUBSET" OPTIONID="SUBSET" OPTION_ALIAS="[Subset of a class]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -17079,6 +17205,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDCOVERAGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDCOVERAGE" ID="1770498977978" BASECOST="0.0" LEVELS="0" ALIAS="Limited Coverage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NEARLY360" OPTIONID="NEARLY360" OPTION_ALIAS="Nearly 360 Degrees" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -17089,6 +17216,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDEFFECT" ID="1770498973692" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -17100,6 +17228,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Vehicle movement related
             key: "LIMITEDMANEUVERABILITY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDMANEUVERABILITY" ID="1766316538585" BASECOST="-0.5" LEVELS="0" ALIAS="Limited Maneuverability" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TURN" OPTIONID="TURN" OPTION_ALIAS="Only 1 turn per Phase at Combat speed; only 1 turn per Turn at Noncombat speed" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17110,6 +17239,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDPOWER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDPOWER" ID="1770498969063" BASECOST="0.0" LEVELS="0" ALIAS="Limited Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1" OPTIONID="1" OPTION_ALIAS="Power loses less than a fourth of its effectiveness" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -17120,6 +17250,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDRANGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDRANGE" ID="1746303340671" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17130,6 +17261,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDSPECIALEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDSPECIALEFFECT" ID="1770498963742" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Special Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYCOMMON" OPTIONID="VERYCOMMON" OPTION_ALIAS="Very Common SFX" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -17141,6 +17273,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TRANSFORM related
             key: "LIMITEDTARGET",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDTARGET" ID="1764594003046" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Target" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SLIGHTLY" OPTIONID="SLIGHTLY" OPTION_ALIAS="([Slightly Limited]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17151,6 +17284,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LINGERING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LINGERING" ID="1767550887835" BASECOST="0.25" LEVELS="0" ALIAS="Lingering" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PHASE" OPTIONID="PHASE" OPTION_ALIAS="+1 Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17161,6 +17295,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LINKED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LINKED" ID="1737924019237" BASECOST="-0.5" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMPOUNDPOWER" OPTIONID="COMPOUNDPOWER" OPTION_ALIAS="" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1737241269418"></MODIFIER>`,
@@ -17172,6 +17307,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // MINDCONTROL related
             key: "LITERAL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LITERAL" ID="1767417218968" BASECOST="-0.25" LEVELS="0" ALIAS="Literal Interpretation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17183,6 +17319,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIMITEDTYPES",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LIMITEDTYPES" ID="1702648349818" BASECOST="-0.5" LEVELS="0" ALIAS="Only Works On Limited Types Of Objects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LIMITED" OPTIONID="LIMITED" OPTION_ALIAS="Limited Group of Objects" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="metallic objects" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17193,6 +17330,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LOCKOUT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LOCKOUT" ID="1762721165810" BASECOST="-0.5" LEVELS="0" ALIAS="Lockout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17203,6 +17341,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LOS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="LOS" ID="1710708665903" BASECOST="0.5" LEVELS="0" ALIAS="Line Of Sight" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17215,6 +17354,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Mental powers related
             key: "MANDATORYEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MANDATORYEFFECT" ID="1762138776945" BASECOST="-0.25" LEVELS="0" ALIAS="Mandatory Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TEN" OPTIONID="TEN" OPTION_ALIAS="EGO +10" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -17225,6 +17365,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MASS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="MASS" ID="1737920596086" BASECOST="0.0" LEVELS="0" ALIAS="Mass" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONE" OPTIONID="NONE" OPTION_ALIAS="No Mass" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17236,6 +17377,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // "Mental" power related
             key: "MDADDSTOEGO",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="MDADDSTOEGO" ID="1767546334674" BASECOST="-0.5" LEVELS="0" ALIAS="Mental Defense Adds To EGO" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17246,6 +17388,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MEGASCALE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MEGASCALE" ID="1759093947856" BASECOST="0.0" LEVELS="5" ALIAS="MegaScale" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" SCALE="1&quot; = 10,000 km"></MODIFIER>`,
@@ -17256,6 +17399,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MOBILE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="MOBILE" ID="1737907241760" BASECOST="0.25" LEVELS="0" ALIAS="Mobile" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17266,6 +17410,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MODIFIER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MODIFIER" ID="1736876900984" BASECOST="0.0" LEVELS="0" ALIAS="Custom Modifier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17277,6 +17422,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // VULNERABILITY related
             key: "MULTIPLIER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MULTIPLIER" ID="1707069728157" BASECOST="0.0" LEVELS="0" ALIAS="Vulnerability Multiplier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFSTUN" OPTIONID="HALFSTUN" OPTION_ALIAS="1 1/2 x STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17288,6 +17434,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // SUMMON related
             key: "MUSTINHABITLOCALEs",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MUSTINHABITLOCALEs" ID="1767550887838" BASECOST="-0.5" LEVELS="0" ALIAS="Summoned Being Must Inhabit Locale" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17299,6 +17446,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // movement related
             key: "MUSTLAND",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MUSTLAND" ID="1766365309625" BASECOST="-0.5" LEVELS="0" ALIAS="Must Land At The End Of Each Phase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17310,6 +17458,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TELEPORTATION related
             key: "MUSTPASSTHROUGHSPACE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="MUSTPASSTHROUGHSPACE" ID="1758288716031" BASECOST="-0.25" LEVELS="0" ALIAS="Must Pass Through Intervening Space" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17320,6 +17469,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "NND",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(true),
         xml: `<MODIFIER XMLID="NND" ID="1735536656343" BASECOST="1.0" LEVELS="0" ALIAS="No Normal Defense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STANDARD" OPTIONID="STANDARD" OPTION_ALIAS="[Standard]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17328,6 +17478,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOBACKWARDS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOBACKWARDS" ID="1766316538587" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Move Backwards" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17338,6 +17489,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOBARRIERS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOBARRIERS" ID="1726539977732" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Form Barriers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17348,6 +17500,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOCONSCIOUSCONTROL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOCONSCIOUSCONTROL" ID="1737065783478" BASECOST="-2.0" LEVELS="0" ALIAS="No Conscious Control" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17358,6 +17511,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NODEFINCREASE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             editOptions: {
@@ -17412,6 +17566,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "NOFIGURED",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="NOFIGURED" ID="1737921312173" BASECOST="-0.5" LEVELS="0" ALIAS="No Figured Characteristics" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17421,6 +17576,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // MOVEMENT related
             key: "NOGRAVITYPENALTY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOGRAVITYPENALTY" ID="1737921008650" BASECOST="0.5" LEVELS="0" ALIAS="No Gravity Penalty" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17431,6 +17587,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOKB",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOKB" ID="1736707259863" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17441,6 +17598,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NONCOMBATACCELERATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NONCOMBATACCELERATION" ID="1762138607072" BASECOST="1.0" LEVELS="0" ALIAS="Noncombat acceleration/deceleration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17451,6 +17609,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NONONCOMBAT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NONONCOMBAT" ID="1732310748386" BASECOST="-0.25" LEVELS="0" ALIAS="no Noncombat movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17462,6 +17621,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Defense related
             key: "NONRESISTANT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NONRESISTANT" ID="1767546443542" BASECOST="-0.25" LEVELS="0" ALIAS="Nonresistant DEF" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17472,6 +17632,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NONSELECTIVETARGET",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NONSELECTIVETARGET" ID="1767000562554" BASECOST="-0.25" LEVELS="0" ALIAS="Nonselective Target" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17482,6 +17643,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NONPERSISTENT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NONPERSISTENT" ID="1737923746352" BASECOST="-0.25" LEVELS="0" ALIAS="Nonpersistent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17492,6 +17654,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NORANGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NORANGE" ID="1727749190370" BASECOST="-0.5" LEVELS="0" ALIAS="No Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17502,6 +17665,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NORANGEMODIFIER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NORANGEMODIFIER" ID="1759025100942" BASECOST="0.5" LEVELS="0" ALIAS="No Range Modifier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17512,6 +17676,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NORMALRANGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NORMALRANGE" ID="1710649513411" BASECOST="-0.25" LEVELS="0" ALIAS="Normal Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17523,6 +17688,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // VPP related
             key: "NOSKILLROLL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOSKILLROLL" ID="1646155910707" BASECOST="1.0" LEVELS="0" ALIAS="No Skill Roll Required" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No"></MODIFIER>`,
@@ -17533,6 +17699,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOSTRBONUS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOSTRBONUS" ID="1612300735512" BASECOST="-0.5" LEVELS="0" ALIAS="No STR Bonus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17543,6 +17710,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOSTRINCREASE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOSTRINCREASE" ID="1762009637587" BASECOST="-1" LEVELS="0" ALIAS="No STR Increase" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17555,6 +17723,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOTELEPORT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 4),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOTELEPORT" ID="1733613873292" BASECOST="0.0" LEVELS="1" ALIAS="Cannot Be Escaped With Teleportation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17565,6 +17734,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOTTHROUGHMINDLINK",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOTTHROUGHMINDLINK" ID="1770526728849" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Be Used Through Mind Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17575,6 +17745,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOTURNMODE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOTURNMODE" ID="1762138614150" BASECOST="0.25" LEVELS="0" ALIAS="No Turn Mode" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17586,6 +17757,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Stretching related
             key: "NOVELOCITYDAMAGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOVELOCITYDAMAGE" ID="1767550437808" BASECOST="-0.25" LEVELS="0" ALIAS="No Velocity Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17597,6 +17769,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "OIHID",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="OIHID" ID="1712092697365" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Heroic Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17608,6 +17781,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Adjustment related
             key: "ONEUSEATATIME",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONEUSEATATIME" ID="1747979505796" BASECOST="-1.0" LEVELS="0" ALIAS="One Use At A Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17618,6 +17792,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONEWAYTRANSPARENT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONEWAYTRANSPARENT" ID="1752365017933" BASECOST="1.0" LEVELS="0" ALIAS="One-Way Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17628,6 +17803,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYAGAINSTLIMITEDTYPE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYAGAINSTLIMITEDTYPE" ID="1737921699851" BASECOST="-1.0" LEVELS="0" ALIAS="Only Works Against" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RARE" OPTIONID="RARE" OPTION_ALIAS="Rare attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17638,6 +17814,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYBETWEENADVENTURES",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYBETWEENADVENTURES" ID="1762138695886" BASECOST="-0.5" LEVELS="0" ALIAS="VPP Can Only Be Changed Between Adventures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -17649,6 +17826,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TELEPORTATION related
             key: "ONLYFIXED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYFIXED" ID="1752800595483" BASECOST="-1.0" LEVELS="0" ALIAS="Can Only Teleport To " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FIXED" OPTIONID="FIXED" OPTION_ALIAS="Fixed Locations" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="User's Unequipped Hand " PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17659,6 +17837,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYINGIVENCIRCUMSTANCE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYINGIVENCIRCUMSTANCE" ID="1762138692049" BASECOST="-0.5" LEVELS="0" ALIAS="VPP Powers Can Be Changed Only In Given Circumstance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -17669,6 +17848,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYONAPPROPRIATETERRAIN",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYONAPPROPRIATETERRAIN" ID="1762138763375" BASECOST="-1.0" LEVELS="0" ALIAS="Only On Appropriate Terrain" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SNOWANDICE" OPTIONID="SNOWANDICE" OPTION_ALIAS="Only on snow and ice" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -17679,6 +17859,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYONSURFACE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYONSURFACE" ID="1762134206075" BASECOST="-0.25" LEVELS="0" ALIAS="Only When In Contact With The Ground" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17689,6 +17870,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYOTHERS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYOTHERS" ID="1762720154745" BASECOST="-0.5" LEVELS="0" ALIAS="Only to Aid Others" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17699,6 +17881,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYSELF",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYSELF" ID="1762720132110" BASECOST="-1.0" LEVELS="0" ALIAS="Only to Aid Self" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17709,6 +17892,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYTHROUGHOTHERS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYTHROUGHOTHERS" ID="1755906478205" BASECOST="-0.5" LEVELS="0" ALIAS="Only Through The Senses Of Others" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17719,6 +17903,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYTOCREATELIGHT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYTOCREATELIGHT" ID="1767000555587" BASECOST="-1.0" LEVELS="0" ALIAS="Only To Create Light" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17729,6 +17914,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYTOSTARTING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYTOSTARTING" ID="1762134212498" BASECOST="-0.5" LEVELS="0" ALIAS="Only Restores To Starting Values" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17738,6 +17924,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "ONLYWITHGOD",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="ONLYWITHGOD" ID="1762134202676" BASECOST="-0.5" LEVELS="0" ALIAS="Only When Serving The God's Purposes" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17746,6 +17933,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ONLYWITHMINDLINK",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ONLYWITHMINDLINK" ID="1762712202603" BASECOST="-1.0" LEVELS="0" ALIAS="Only With Others Who Have Mind Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17757,6 +17945,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CONTACT related
             key: "ORGANIZATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ORGANIZATION" ID="1709496795426" BASECOST="2.0" LEVELS="0" ALIAS="Organization Contact" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17766,6 +17955,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "OTHERSONLY",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="OTHERSONLY" ID="1762138755473" BASECOST="-0.5" LEVELS="0" ALIAS="Others Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -17776,6 +17966,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TRANSFORM related
             key: "PARTIALTRANSFORM",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PARTIALTRANSFORM" ID="1760247883417" BASECOST="0.5" LEVELS="0" ALIAS="Partial Transform" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17786,6 +17977,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PDAPPLIES",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PDAPPLIES" ID="1762134218816" BASECOST="-1.0" LEVELS="0" ALIAS="PD Applies" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17796,6 +17988,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PENETRATING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(1 / 2),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="PENETRATING" ID="1712697142089" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17806,6 +17999,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PERSISTENT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PERSISTENT" ID="1125625176030" BASECOST="0.5" LEVELS="0" ALIAS="Persistent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17816,6 +18010,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PERSONALIMMUNITY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PERSONALIMMUNITY" ID="1624916935311" BASECOST="0.25" LEVELS="0" ALIAS="Personal Immunity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17827,6 +18022,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // MULTIFORM related
             key: "PERSONALITYLOSS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PERSONALITYLOSS" ID="1737922788428" BASECOST="-2.0" LEVELS="0" ALIAS="Personality Loss" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TURN" OPTIONID="TURN" OPTION_ALIAS="First Roll After 1 Turn" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17837,6 +18033,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PHYSICALMANIFESTATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PHYSICALMANIFESTATION" ID="1737922207843" BASECOST="-0.25" LEVELS="0" ALIAS="Physical Manifestation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17847,6 +18044,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PRECOGNITIONONLY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="PRECOGNITIONONLY" ID="1696022407697" BASECOST="-1.0" LEVELS="0" ALIAS="Precognition/Retrocognition Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17858,6 +18056,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RANGEBASEDONSTR",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             descriptionModifier: function (mod, item) {
@@ -17875,6 +18074,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RANGED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RANGED" ID="1710708659774" BASECOST="0.5" LEVELS="0" ALIAS="Ranged" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="Ranged" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17886,6 +18086,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Ranged Recombination
             key: "RANGEDRECOMBINATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RANGEDRECOMBINATION" ID="1688216130560" BASECOST="0.5" LEVELS="0" ALIAS="Ranged Recombination" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17897,6 +18098,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // DUPLICATION related
             key: "RAPIDDUPLICATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RAPIDDUPLICATION" ID="1688216130501" BASECOST="0.0" LEVELS="6" ALIAS="Rapid Duplication (can create 64 Duplicates per Half Phase)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17907,6 +18109,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RAPIDNONCOMBATMOVEMENT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RAPIDNONCOMBATMOVEMENT" ID="1762663728109" BASECOST="0.25" LEVELS="0" ALIAS="rapid Noncombat movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17917,6 +18120,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         // Movement related
         key: "RESTRICTEDPATH",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="RESTRICTEDPATH" ID="1762138740833" BASECOST="-1.0" LEVELS="0" ALIAS="Restricted Path" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -17925,6 +18129,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REALARMOR",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REALARMOR" ID="1737919032283" BASECOST="-0.25" LEVELS="0" ALIAS="Real Armor" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17936,6 +18141,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // MULTIFORM related
             key: "REVERSION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REVERSION" ID="1737922434229" BASECOST="0.0" LEVELS="0" ALIAS="Reversion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17946,6 +18152,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REALWEAPON",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REALWEAPON" ID="1736116897598" BASECOST="-0.25" LEVELS="0" ALIAS="Real Weapon" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17956,6 +18163,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REDUCEDBYRANGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REDUCEDBYRANGE" ID="1762105547940" BASECOST="-0.25" LEVELS="0" ALIAS="Reduced By Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17966,6 +18174,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REDUCEDEND",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             cost: function (modifier, item) {
                 // Reduced endurance is double the cost if it's applying against a power with autofire
@@ -17983,6 +18192,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REDUCEDPENETRATION",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REDUCEDPENETRATION" ID="1736707573869" BASECOST="-0.25" LEVELS="0" ALIAS="Reduced Penetration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -17993,6 +18203,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REGENEXTRATIME",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REGENEXTRATIME" ID="1125625181954" BASECOST="-1.25" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" OPTION="TURN" OPTIONID="TURN" OPTION_ALIAS="1 Turn (Post-Segment 12)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18003,6 +18214,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RESISTANT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RESISTANT" ID="1738367323412" BASECOST="0.5" LEVELS="0" ALIAS="Resistant" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18013,6 +18225,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RESTRAINABLE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RESTRAINABLE" ID="1736707497175" BASECOST="-0.5" LEVELS="0" ALIAS="Restrainable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18023,6 +18236,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REQUIREDHANDS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             minimumLimitation: -0.25,
@@ -18034,6 +18248,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REQUIRESASKILLROLL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             minimumLimitation: -0.25,
@@ -18045,6 +18260,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REQUIRESLIGHT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="REQUIRESLIGHT" ID="1766365315705" BASECOST="-0.25" LEVELS="0" ALIAS="Requires Light To Use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18056,6 +18272,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // ENDURANCERESERVE related
             key: "RESTRICTEDUSE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RESTRICTEDUSE" ID="1768007214710" BASECOST="-0.25" LEVELS="0" ALIAS="Restricted Use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18067,6 +18284,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // HEALING related
             key: "RESURRECTIONONLY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RESURRECTIONONLY" ID="1747979425717" BASECOST="-0.5" LEVELS="0" ALIAS="Resurrection Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18077,6 +18295,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RITUAL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RITUAL" ID="1766365346109" BASECOST="-0.25" LEVELS="0" ALIAS="Ritual" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2" OPTIONID="2" OPTION_ALIAS="2 casters" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18089,6 +18308,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Teleport related
             key: "SAFEBLINDTELEPORT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SAFEBLINDTELEPORT" ID="1734150398776" BASECOST="0.25" LEVELS="0" ALIAS="Safe Blind Teleport" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18100,6 +18320,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Movement related
             key: "SAFEBLINDTRAVEL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SAFEBLINDTRAVEL" ID="1767841144908" BASECOST="0.25" LEVELS="0" ALIAS="Safe Blind Travel" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18110,6 +18331,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SECTIONAL_DEFENSES",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SECTIONAL_DEFENSES" ID="1762138737417" BASECOST="-2.0" LEVELS="0" ALIAS="Sectional Defenses" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SHORTVEST" OPTIONID="SHORTVEST" OPTION_ALIAS="Short Vest (Protects Locations 12-13" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -18121,6 +18343,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CHANGEENVIRONMENT/DARKNESS (anything AOE by default) related
             key: "SELECTIVETARGET",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SELECTIVETARGET" ID="1757220854359" BASECOST="0.5" LEVELS="0" ALIAS="Selective Target" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18131,6 +18354,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SELFONLY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SELFONLY" ID="1716495880091" BASECOST="-0.5" LEVELS="0" ALIAS="Self Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18141,6 +18365,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SENSEAFFECTEDASMORETHANONESENSE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SENSEAFFECTEDASMORETHANONESENSE" ID="1738018247799" BASECOST="-0.5" LEVELS="0" ALIAS="Sense Affected As More Than One Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYCOMMON" OPTIONID="VERYCOMMON" OPTION_ALIAS="[very common Sense]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18151,6 +18376,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SETEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SETEFFECT" ID="1767000456766" BASECOST="-1.0" LEVELS="0" ALIAS="Set Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18161,6 +18387,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SFXONLY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SFXONLY" ID="1762138619920" BASECOST="-1.0" LEVELS="0" ALIAS="SFX Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18171,6 +18398,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SIDEEFFECTS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SIDEEFFECTS" ID="1737923914185" BASECOST="-0.25" LEVELS="0" ALIAS="Side Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINOR" OPTIONID="MINOR" OPTION_ALIAS="Minor Side Effect" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18181,6 +18409,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SIDEWAYSMANEUVERABILITY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SIDEWAYSMANEUVERABILITY" ID="1766366155500" BASECOST="0.5" LEVELS="0" ALIAS="Sideways Maneuverability" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="full velocity" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18191,6 +18420,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SOURCEONLY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SOURCEONLY" ID="1763266213674" BASECOST="-1.0" LEVELS="0" ALIAS="Source Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18202,6 +18432,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // SUMMON related
             key: "SPECIFICBEING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SPECIFICBEING" ID="1767550694169" BASECOST="1.0" LEVELS="0" ALIAS="Specific Being" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18213,6 +18444,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CUSTOMPOWER related
             key: "SPELL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SPELL" ID="1688217018497" BASECOST="-0.5" LEVELS="0" ALIAS="Spell" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18223,6 +18455,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SPIRIT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SPIRIT" ID="1709496795428" BASECOST="1.0" LEVELS="0" ALIAS="Spirit Contact" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18234,6 +18467,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Vehicle Movement related
             key: "STALLVELOCITY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="STALLVELOCITY" ID="1766366139840" BASECOST="-0.25" LEVELS="0" ALIAS="Stall Velocity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALF" OPTIONID="HALF" OPTION_ALIAS="1/2 Vehicle's Maximum Combat Velocity" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18244,6 +18478,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STICKY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="STICKY" ID="1735536581282" BASECOST="0.5" LEVELS="0" ALIAS="Sticky" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STANDARD" OPTIONID="STANDARD" OPTION_ALIAS="Standard" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18254,6 +18489,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STOPSWHENKOD",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="STOPSWHENKOD" ID="1762138720872" BASECOST="-0.25" LEVELS="0" ALIAS="Stops Working If Mentalist Is Knocked Out" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -18264,6 +18500,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STRMINIMUM",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="STRMINIMUM" ID="1736116903579" BASECOST="-0.25" LEVELS="0" ALIAS="STR Minimum" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1-5" OPTIONID="1-5" OPTION_ALIAS="1-5" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18274,6 +18511,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STUNONLY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="STUNONLY" ID="1732058577233" BASECOST="0.0" LEVELS="0" ALIAS="STUN Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18284,6 +18522,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SUBJECTTORANGEMODIFIER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="SUBJECTTORANGEMODIFIER" ID="1762138702806" BASECOST="-0.25" LEVELS="0" ALIAS="Subject To Range Modifier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -18295,6 +18534,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TAKEOFFLANDING",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="TAKEOFFLANDING" ID="1766366102958" BASECOST="-1.0" LEVELS="0" ALIAS="Takeoff/Landing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18305,6 +18545,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TAKESNODAMAGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="TAKESNODAMAGE" ID="1726627613967" BASECOST="1.0" LEVELS="0" ALIAS="Takes No Damage From Attacks" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STRONLY" OPTIONID="STRONLY" OPTION_ALIAS="All Attacks, STR only to break out" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18315,6 +18556,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TELEPATHIC",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="TELEPATHIC" ID="1735977286708" BASECOST="0.25" LEVELS="0" ALIAS="Telepathic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18326,6 +18568,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // GESTURES related
             key: "THROUGHOUT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             cost: function (modifierModel /*, item */) {
                 // This has no cost itself; it's a 2x cost multiplier. Just pretend the cost of this modifier is
                 // the cost of its parent with any additional adders that it may have.
@@ -18347,6 +18590,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TIMEDELAY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="TIMEDELAY" ID="1762138585408" BASECOST="0.25" LEVELS="0" ALIAS="Time Delay" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18357,6 +18601,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TIMELIMIT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="TIMELIMIT" ID="1738525037034" BASECOST="0.25" LEVELS="0" ALIAS="Time Limit" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="Extra Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18367,6 +18612,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TRANSDIMENSIONAL",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="TRANSDIMENSIONAL" ID="1738534122034" BASECOST="0.5" LEVELS="0" ALIAS="Transdimensional" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18376,6 +18622,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "TRANSPARENT",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="TRANSPARENT" ID="1752359726500" BASECOST="0.0" LEVELS="0" ALIAS="Transparent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18384,6 +18631,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TRIGGER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             minimumLimitation: 0.25,
@@ -18395,6 +18643,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TURNMODE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="TURNMODE" ID="1762138699386" BASECOST="-0.25" LEVELS="0" ALIAS="Turn Mode" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
@@ -18406,6 +18655,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "UNCONTROLLED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="UNCONTROLLED" ID="1735590455734" BASECOST="0.5" LEVELS="0" ALIAS="Uncontrolled" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18416,6 +18666,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "UNIFIEDPOWER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="UNIFIEDPOWER" ID="1737919110593" BASECOST="-0.25" LEVELS="0" ALIAS="Unified Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18426,6 +18677,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "UOO",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: (modifier) => {
                 const isUsableAsAttack = modifier.OPTIONID === "UAA";
@@ -18440,6 +18692,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // MOVEMENT related
             key: "USABLEAS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="USABLEAS" ID="1737922876396" BASECOST="0.25" LEVELS="0" ALIAS="Usable [As Second Mode Of Movement]" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18451,6 +18704,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // MOVEMENT related
             key: "USABLEUNDERWATER",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="USABLEUNDERWATER" ID="1762138567288" BASECOST="0.25" LEVELS="0" ALIAS="Usable Underwater" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18462,6 +18716,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VARIABLEADVANTAGE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="VARIABLEADVANTAGE" ID="1735590455736" BASECOST="0.5" LEVELS="0" ALIAS="Variable Advantage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18473,6 +18728,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // Adjustment related
             key: "VARIABLEEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VARIABLEEFFECT" ID="1759024606902" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Characteristics" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18483,6 +18739,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         // TRANSFER related
         key: "VARIABLEEFFECT2",
         behaviors: ["modifier"],
+        type: ["modifier"],
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         xml: `<MODIFIER XMLID="VARIABLEEFFECT2" ID="1766281443255" BASECOST="0.5" LEVELS="0" ALIAS="Variable Effect (To)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="to [two powers] simultaneously" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18492,6 +18749,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // TRANSFORM related
             key: "VARIABLEHEALINGMETHOD",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VARIABLEHEALINGMETHOD" ID="1764594003039" BASECOST="0.25" LEVELS="0" ALIAS="Variable Healing Method" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18502,6 +18760,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VARIABLELIMITATIONS",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VARIABLELIMITATIONS" ID="1736654196172" BASECOST="0.0" LEVELS="8" ALIAS="Variable Limitations" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No"></MODIFIER>`,
@@ -18512,6 +18771,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VARIABLESFX",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="VARIABLESFX" ID="1735590455741" BASECOST="0.25" LEVELS="0" ALIAS="Variable Special Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LIMITED" OPTIONID="LIMITED" OPTION_ALIAS="Limited Group of SFX" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18523,6 +18783,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // CHANGEENVIRONMENT related
             key: "VARYINGEFFECT",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VARYINGEFFECT" ID="1696022407789" BASECOST="0.25" LEVELS="0" ALIAS="Varying Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERY" OPTIONID="VERY" OPTION_ALIAS="Very Limited Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18533,6 +18794,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VERSUSEGO",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VERSUSEGO" ID="1726539977733" BASECOST="0.25" LEVELS="0" ALIAS="Works Against EGO, Not STR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18543,6 +18805,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VISIBLE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VISIBLE" ID="1731124293164" BASECOST="-0.25" LEVELS="0" ALIAS="Visible" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18553,6 +18816,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VULNERABLE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="VULNERABLE" ID="1737906231719" BASECOST="-0.5" LEVELS="0" ALIAS="Vulnerable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Gravity" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18565,6 +18829,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // SUMMON related
             key: "WEAKWILLED",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="WEAKWILLED" ID="1767550887809" BASECOST="0.25" LEVELS="0" ALIAS="Weak-Willed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MINUS2" OPTIONID="MINUS2" OPTION_ALIAS="-2 on EGO Rolls" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18575,6 +18840,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "WINDOWOFOPPORTUNITY",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="WINDOWOFOPPORTUNITY" ID="1767000501368" BASECOST="0.0" LEVELS="0" ALIAS="Window Of Opportunity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
@@ -18587,6 +18853,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             // VPP related
             key: "ZEROPHASE",
             behaviors: ["modifier"],
+            type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="ZEROPHASE" ID="1646155910706" BASECOST="1.0" LEVELS="0" ALIAS="Powers Can Be Changed As A Zero-Phase Action" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No"></MODIFIER>`,
