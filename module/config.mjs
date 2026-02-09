@@ -5790,7 +5790,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             xml: `<TALENT XMLID="OFFHANDDEFENSE" ID="1709160002394" BASECOST="2.0" LEVELS="0" ALIAS="Off-Hand Defense" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
-        {},
+        undefined, // 5e uses WEAPONFAMILARITY OFFHAND
     );
 
     addPower(
@@ -13633,6 +13633,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         xml: `<ADDER XMLID="OFFENSIVE" ID="1759024542182" BASECOST="0.25" LEVELS="0" ALIAS="Offensive" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
     });
     addPower(
+        undefined, // In 6e OFFHANDDEFENSE talent
         {
             // WEAPON_FAMILIARITY related
             key: "OFFHAND",
@@ -13641,7 +13642,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="OFFHAND" ID="1759094959897" BASECOST="1.0" LEVELS="0" ALIAS="Off Hand" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
-        {},
     );
     addPower(
         {
