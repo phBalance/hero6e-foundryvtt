@@ -5,9 +5,10 @@ import { getCharacteristicInfoArrayForActor, tokenEducatedGuess } from "../../ut
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
-//const { DragDrop } = foundry.applications.ux;
+const { DragDrop } = foundry.applications.ux;
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
+// REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
 
 export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorSheetV2) {
     // Dynamic PARTS based on system.id
@@ -72,8 +73,35 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 },
             ],
         },
-        //dragDrop: [{ dragSelector: ".draggable", dropSelector: null }],
+        dragDrop: [
+            {
+                //dragSelector: '[data-drag="true"]',
+                dropSelector: "a[data-tab]", //".drop-zone",
+            },
+        ],
     };
+
+    #dragDrop;
+
+    constructor(options = {}) {
+        super(options);
+        this.#dragDrop = this.#createDragDropHandlers();
+    }
+
+    #createDragDropHandlers() {
+        return this.options.dragDrop.map((d) => {
+            d.permissions = {
+                dragstart: this._canDragStart.bind(this),
+                drop: this._canDragDrop.bind(this),
+            };
+            d.callbacks = {
+                dragstart: this._onDragStart.bind(this),
+                dragover: this._onDragOver.bind(this),
+                drop: this._onDrop.bind(this),
+            };
+            return new DragDrop(d);
+        });
+    }
 
     static async #onActorDescription() {
         await this.actor.actorDescriptionToChat({ token: this.token });
@@ -616,7 +644,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     _onRender(context, options) {
+        // The ActorSheetV2 super handles DragDrop with the .draggable class of items.
+        // This includes dragging items to actor sheet and dragging withing item-list.
         super._onRender(context, options);
+
+        // We will add additional DragDrop support for dragging items to different tabs.
+        this.#dragDrop.forEach((d) => d.bind(this.element));
 
         // item-description-expand chevron expand collapse
         this.element.querySelectorAll('[data-action="toggleDocumentDescription"]').forEach((el) => {
@@ -674,8 +707,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             el.addEventListener("keydown", this.#debouncedSearch, { passive: true });
         });
 
-        // DRAG
-        //this.#dragDrop.forEach((d) => d.bind(this.element));
+        // DRAGDROP
+        //this.dragDrop.bind(this.element);
     }
 
     /**
@@ -685,9 +718,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * @protected
      */
     _canDragStart() {
-        // game.user fetches the current user
-        return true;
-        //return this.isOwner;
+        return this.actor.isOwner;
     }
 
     /**
@@ -697,9 +728,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * @protected
      */
     _canDragDrop() {
-        // game.user fetches the current user
-        return true;
-        //return this.isOwner;
+        return this.actor.isOwner;
     }
 
     /**
@@ -707,25 +736,34 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * @param {DragEvent} event       The originating DragEvent
      * @protected
      */
-    _onDragStart(event) {
-        const el = event.currentTarget;
-        console.log(event, el);
-
-        if ("link" in event.target.dataset) {
-            console.error(`_onDragStart link early out`);
-            return;
+    async _onDragStart(event) {
+        await super._onDragStart(event);
+        const element = event.currentTarget.closest("[data-document-uuid]");
+        if (element) {
+            const uuid = element.dataset.documentUuid;
+            const item = fromUuidSync(uuid);
+            const dragData = item.toDragData();
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
         }
 
-        // Extract the data you need
-        let dragData = null;
+        // const el = event.currentTarget;
+        // console.log(event, el);
 
-        if (!dragData) {
-            console.error(`_onDragStart no dragData`);
-            return;
-        }
+        // if ("link" in event.target.dataset) {
+        //     console.error(`_onDragStart link early out`);
+        //     return;
+        // }
 
-        // Set data transfer
-        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        // // Extract the data you need
+        // let dragData = null;
+
+        // if (!dragData) {
+        //     console.error(`_onDragStart no dragData`);
+        //     return;
+        // }
+
+        // // Set data transfer
+        // event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
     }
 
     /**
@@ -733,9 +771,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * @param {DragEvent} event       The originating DragEvent
      * @protected
      */
-    _onDragOver(event) {
-        console.log(event);
-    }
+    // _onDragOver(event) {
+    //     console.log(event);
+    // }
 
     /**
      * Callback actions which occur when a dragged element is dropped on a target.
@@ -744,13 +782,70 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      */
     async _onDrop(event) {
         console.log(event);
-        //const data = TextEditor.getDragEventData(event);
+        const data = TextEditor.getDragEventData(event);
         // Handle different data types
-        // switch (
-        //     data.type
-        //     // write your cases
-        // ) {
-        // }
+        switch (data.type) {
+            case "Item":
+                await this._onDropItem(event, data);
+                break;
+        }
+    }
+
+    async _onDropItem(event, data) {
+        const target = event.currentTarget;
+        const targetTab = target.closest("[data-tab]")?.dataset?.tab;
+        if (!targetTab) {
+            return; // This is not a data-tab
+        }
+
+        // Stop propagation to the generic actor sheet.
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        const targetType = targetTab.replace(/s$/, "");
+
+        const validItemTypeChanges = ["skill", "perk", "talent", "power", "equipment"];
+
+        // Is this a valid target tab
+        if (!validItemTypeChanges?.includes(targetType)) {
+            console.warn(`${targetTab} is not a valid drop target`);
+            return;
+        }
+
+        const item = await fromUuid(data.uuid);
+        if (!item) {
+            console.error(`Missing item`);
+            return;
+        }
+
+        if (!validItemTypeChanges.includes(item.type)) {
+            console.error(`${item.name} has unsupported type= ${item.type}`);
+            return;
+        }
+
+        if (targetType === item.type) {
+            console.error(`${item.name} has identical type= ${item.type}, no action taken.`);
+            return;
+        }
+
+        // Most things can become a power or equipment.
+        // Or change from power/equipment to native type.
+        if (["power", "equipment"].includes(targetType) || item.baseInfo.type.includes(targetType)) {
+            const preType = item.type;
+            if (item.system.PARENTID) {
+                await item.update({
+                    "system.PARENTID": null,
+                });
+            }
+            await item.update({
+                type: targetType,
+                "==system": foundry.utils.mergeObject(item.system, { PARENTID: null }),
+            });
+            ui.notifications.info(`${item.name} was changed from type=${preType} to type=${item.type}`);
+            return;
+        }
+
+        console.error(`Failed to change ${item.name} type.`);
     }
 
     async _uploadCharacterSheet(event) {
