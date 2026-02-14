@@ -1,8 +1,9 @@
 # Releases
 
-### Version 4.2.15 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.15 20260214 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed toggle issues with movement powers with "usable as" modifier. [#3724](https://github.com/dmdorman/hero6e-foundryvtt/issues/3724)
+- Fixed inability to apply damage to named tokens during some AOE attacks. [#3725](https://github.com/dmdorman/hero6e-foundryvtt/issues/3725)
 
 ### Version 4.2.14 20260208
 
