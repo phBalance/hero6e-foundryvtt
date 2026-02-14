@@ -2335,15 +2335,16 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
             const hexGrid = currentSceneUsesHexGrid();
 
+            const targetTokenCenter = targetToken.center ?? targetToken.object.center;
+
             if (hexTemplates && hexGrid) {
                 const gridSizeInMeters = getGridSizeInMeters();
-                distance =
-                    calculateDistanceBetween(aoeTemplate, targetToken.object.center).gridSpaces * gridSizeInMeters;
+                distance = calculateDistanceBetween(aoeTemplate, targetTokenCenter).gridSpaces * gridSizeInMeters;
 
                 // NOTE: The grid size is half a hex smaller since the centre hex counts as 1" so template is 1m smaller (see item-attack-application.mjs)
                 pct = distance / (aoeTemplate.distance + 1);
             } else {
-                distance = calculateDistanceBetween(aoeTemplate, targetToken.object.center).distance;
+                distance = calculateDistanceBetween(aoeTemplate, targetTokenCenter).distance;
                 pct = distance / aoeTemplate.distance;
             }
 

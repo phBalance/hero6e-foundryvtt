@@ -340,55 +340,63 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
             // ACTIVE EFFECTS
             if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
-                const activeEffect =
-                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
-                    this.effects.find((ae) => !ae.system.XMLID) ??
-                    {};
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.LEVELS}`;
-                activeEffect.img = this.baseInfo?.img ?? "icons/svg/upgrade.svg";
-                activeEffect.description = this.system.description;
-                activeEffect.origin = this.uuid;
-                activeEffect.changes = [
-                    {
-                        key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
-                        value: parseInt(this.system.LEVELS),
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                ];
-                for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
-                    let foundMatch = false;
-                    for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
-                        if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
-                            activeEffect.changes.push({
-                                key: `system.characteristics.${movementKey.toLowerCase()}.max`,
-                                value: parseInt(this.system.LEVELS),
-                                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                                priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                            });
-                            foundMatch = true;
+                try {
+                    console.log(`setActiveEffects movement`);
+                    const activeEffect =
+                        this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                        this.effects.find((ae) => !ae.system.XMLID) ??
+                        {};
+                    activeEffect.name =
+                        (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.LEVELS}`;
+                    activeEffect.img = this.baseInfo?.img ?? "icons/svg/upgrade.svg";
+                    activeEffect.description = this.system.description;
+                    activeEffect.origin = this.uuid;
+                    const changes = [
+                        {
+                            key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                            value: parseInt(this.system.LEVELS),
+                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                            priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                        },
+                    ];
+                    for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
+                        console.log(usableas?.XMLID, usableas?.ALIAS, usableas);
+                        let foundMatch = false;
+                        for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
+                            console.log(movementKey);
+                            if (
+                                usableas.ALIAS?.match(new RegExp(movementKey, "i")) ||
+                                usableas.COMMENTS?.match(new RegExp(movementKey, "i"))
+                            ) {
+                                changes.push({
+                                    key: `system.characteristics.${movementKey.toLowerCase()}.max`,
+                                    value: parseInt(this.system.LEVELS),
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                                });
+                                foundMatch = true;
+                            }
+                        }
+                        if (!foundMatch) {
+                            ui.notifications.warn(
+                                `${this.name} has unknown USABLE AS "${usableas.ALIAS}. Expected format is "Usable as Swimming"`,
+                            );
+                            console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
                         }
                     }
-                    if (!foundMatch) {
-                        ui.notifications.warn(
-                            `${this.name} has unknown USABLE AS "${usableas.ALIAS}. Expected format is "Usable as Swimming"`,
-                        );
-                        console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
-                    }
-                }
-                activeEffect.transfer = true;
-                activeEffect.disabled ??= !this.system.active;
-                activeEffect.system ??= { XMLID: this.system.XMLID };
+                    activeEffect.transfer = true;
+                    activeEffect.disabled ??= !this.system.active;
+                    activeEffect.system ??= { XMLID: this.system.XMLID };
+                    activeEffect.changes = changes;
 
-                if (activeEffect.update) {
-                    await activeEffect.update(
-                        {
-                            ...activeEffect,
-                        },
-                        { ...options, diff: false },
-                    ); // need diff=false because changes is an array
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect], options);
+                    if (activeEffect.update) {
+                        // Need to be careful because changes is an array
+                        await activeEffect.update({ name: activeEffect.name, changes }, options);
+                    } else {
+                        await this.createEmbeddedDocuments("ActiveEffect", [activeEffect], options);
+                    }
+                } catch (e) {
+                    console.error(e);
                 }
             }
 
