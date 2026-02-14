@@ -578,6 +578,9 @@ function validatePowers() {
 
     // All powers that have a duration are lowercase
     const powersWithDurationThatIsUppercase = this.filter((power) => power.duration?.toLowerCase() !== power.duration);
+    if (powersWithDurationThatIsUppercase.length > 0) {
+        console.warn(`Powers without a lowercase duration: `, powersWithDurationThatIsUppercase);
+    }
     numViolations += powersWithDurationThatIsUppercase.length;
 
     // Has range property and is not framework/compound/adder/modifier
@@ -598,15 +601,13 @@ function validatePowers() {
     // A power (not modifier or adder) without duration property?
     const powersWithoutDurationProperty = this.filter(
         (power) =>
-            !(power.behaviors.includes("adder") || power.behaviors.includes("modifier")) &&
-            !power.duration &&
-            (power.type.includes("adjustment ") ||
-                (power.type.includes("attack") && !power.type.includes("martial")) ||
-                power.type.includes("defense") ||
-                power.type.includes("movement") ||
-                power.type.includes("body-affecting") ||
-                power.type.includes("standard") ||
-                power.type.includes("skill")),
+            !(
+                power.behaviors.includes("adder") ||
+                power.behaviors.includes("modifier") ||
+                power.type.includes("compound") ||
+                power.type.includes("framework") ||
+                power.type.includes("disadvantage")
+            ) && !power.duration,
     );
     if (powersWithoutDurationProperty.length > 0) {
         console.warn(`Powers without duration property: `, powersWithoutDurationProperty);
@@ -5007,6 +5008,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ACCESS",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5019,6 +5021,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "Advanced Tech",
         type: ["perk"],
         behaviors: [],
+        duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5036,6 +5039,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ANONYMITY",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5050,6 +5054,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMPUTER_LINK",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5063,6 +5068,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONTACT",
             type: ["perk"],
             behaviors: ["success"],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5076,6 +5082,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CUSTOMPERK",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5090,6 +5097,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEEP_COVER",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5103,6 +5111,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "FALSEIDENTITY",
         type: ["perk"],
         behaviors: [],
+        duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
         name: "False Identity",
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -5115,6 +5124,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FAVOR",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5128,6 +5138,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FOLLOWER",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(1 / 5),
             cost: function (item) {
                 const basePoints = parseInt(item.system.BASEPOINTS) || 0;
@@ -5152,6 +5163,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FRINGE_BENEFIT",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -5165,6 +5177,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "GROUNDS",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -5178,6 +5191,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LOCATION",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(0), // TODO: Not correct ... needs function
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -5192,6 +5206,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MONEY",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -5206,6 +5221,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "REPUTATION",
             type: ["perk", "disadvantage"],
             behaviors: ["success"],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             name: "Positive Reputation",
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -5223,6 +5239,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RESOURCE_POOL",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(1),
             name: "Resource Points",
             target: "self only",
@@ -5238,6 +5255,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "VEHICLE_BASE",
             type: ["perk"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(1 / 5),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -5246,15 +5264,35 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            key: "WELL_CONNECTED",
+            type: ["perk", "enhancer"],
+            behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
+            costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.CONSTANT,
+            target: "self only",
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            costEnd: false,
+            xml: `<WELL_CONNECTED XMLID="WELL_CONNECTED" ID="1710994081842" BASECOST="3.0" LEVELS="0" ALIAS="Well-Connected" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></WELL_CONNECTED>`,
+        },
+        {},
+    );
 })();
 
 (function addTalentsToPowerList() {
+    // FIXME ... need to:
+    // 1) Check for behaviours (sense talents need sense and some need activatable etc)
+    // 2) Check for name property. Should it be removed because we get it from XML?
     addPower(
         {
             key: "ABSOLUTE_RANGE_SENSE",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable", "240DegreeArcBuiltIn"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from DETECT (sense) power
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5265,9 +5303,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ABSOLUTE_TIME_SENSE",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from DETECT (sense) power
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5279,8 +5318,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "AMBIDEXTERITY",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from PENALTY_SKILL_LEVELS
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5292,8 +5332,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ANIMALFRIENDSHIP",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["success"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.CONSTANT, // This is built from ANIMAL_HANDLER skill and PRE
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5305,36 +5346,43 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "BEASTSPEECH",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["dice", "to-hit"],
         name: "Beast Speech",
-        duration: HERO.DURATION_TYPES.INSTANT,
+        duration: HERO.DURATION_TYPES.INSTANT, // This is built from the TELEPATHY power
         target: "dmcv",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
+        usesStrength: false,
         costPerLevel: fixedValueFunction(0),
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="BEASTSPEECH" ID="1709164944911" BASECOST="15.0" LEVELS="0" ALIAS="Beast Speech" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
     addPower(undefined, {
         key: "BERSERKFURY",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "adjustment"],
+        behaviors: ["dice", "to-hit"],
         name: "Berserk Fury",
-        duration: HERO.DURATION_TYPES.INSTANT,
+        duration: HERO.DURATION_TYPES.INSTANT, // This is built from the AID power
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true,
+        usesStrength: false,
         costPerLevel: fixedValueFunction(0),
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="BERSERKFURY" ID="1709164947152" BASECOST="16.0" LEVELS="0" ALIAS="Berserk Fury" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
     addPower(
         {
             key: "BUMP_OF_DIRECTION",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable", "240DegreeArcBuiltIn"],
+            costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from DETECT (sense) power
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
-            costPerLevel: fixedValueFunction(0),
             xml: `<TALENT XMLID="BUMP_OF_DIRECTION" ID="1709159939134" BASECOST="3.0" LEVELS="0" ALIAS="Bump Of Direction" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
         {},
@@ -5343,9 +5391,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "COMBATARCHERY",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.CONSTANT,
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from COMBAT_LEVELS
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5359,7 +5407,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["activatable", "defense"],
             perceivability: "inobvious", // See HS6E volume 1 pg 477.  Based on Resistant Protection which is inobivous
             name: "Combat Luck",
-            duration: HERO.DURATION_TYPES.CONSTANT,
+            duration: HERO.DURATION_TYPES.CONSTANT, // This is built from detect (sense) power but has activation roll
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5392,8 +5440,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "COMBATREADY",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from SKILL_LEVELS
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5402,8 +5451,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "COMBAT_SENSE",
-            type: ["talent"],
+            type: ["talent", "sense", "passive"],
             behaviors: ["success"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from detect (sense) power
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5415,8 +5465,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "COMBATSHOOTING",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from COMBAT_LEVELS
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5425,9 +5476,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "COMBATSPELLCASTING",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.CONSTANT,
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from COMBAT_LEVELS
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5435,13 +5486,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     });
     addPower(undefined, {
         key: "CRIPPLINGBLOW",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "adjustment"],
+        behaviors: ["dice", "to-hit"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.INSTANT,
+        duration: HERO.DURATION_TYPES.INSTANT, // This is built from DRAIN
         target: "target's dcv",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="CRIPPLINGBLOW" ID="1709164962720" BASECOST="16.0" LEVELS="0" ALIAS="Crippling Blow" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
     addPower(
@@ -5450,6 +5504,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             costPerLevel: fixedValueFunction(1),
+            duration: HERO.DURATION_TYPES.CONSTANT, // This is built from who knows what
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5461,8 +5516,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DANGER_SENSE",
-            type: ["talent"],
+            type: ["talent", "sense", "passive"],
             behaviors: ["success"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from detect (sense) power
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5475,8 +5531,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DEADLYBLOW",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Deadly Blow",
+            duration: HERO.DURATION_TYPES.INSTANT, // This is built from Killing Attack
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5553,21 +5610,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(undefined, {
         key: "DIVINEFAVOR",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "special"],
+        behaviors: ["dice"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.PERSISTENT,
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from LUCK
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="DIVINEFAVOR" ID="1709164973071" BASECOST="10.0" LEVELS="0" ALIAS="Divine Favor" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
     addPower(
         {
             key: "DOUBLE_JOINTED",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.CONSTANT, // This is built from CONTORTIONIST and BREAKFALL skills
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5580,8 +5641,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EIDETIC_MEMORY",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["success"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from INT
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5593,8 +5655,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ENVIRONMENTAL_MOVEMENT",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.CONSTANT, // This is built from PENALTY_SKILL_LEVELS
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5604,10 +5667,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(undefined, {
         key: "EVASIVE",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "body-affecting", "standard"],
+        behaviors: ["success"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.INSTANT,
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from DESOLIDIFICATION with an activation roll
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5617,8 +5680,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "FTLPILOT",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["success"],
         costPerLevel: fixedValueFunction(0),
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from NAVIGATION and TRANSPORT_FAMILIARITY
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5627,20 +5691,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "FASCINATION",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["dice"], // FIXME: This is a presence attack ... should that be a behaviour of its own?
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.PERSISTENT,
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from PRE
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="FASCINATION" ID="1709164981287" BASECOST="10.0" LEVELS="0" ALIAS="Fascination" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
     addPower(undefined, {
         key: "FEARLESS",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.PERSISTENT,
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is build from POWERDEFENSE and MENTALDEFENSE
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5648,22 +5715,26 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     });
     addPower(undefined, {
         key: "FOLLOWTHROUGHATTACK",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "attack"],
+        behaviors: ["activatable", "dice"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.INSTANT,
+        duration: HERO.DURATION_TYPES.INSTANT, // This is built from HKA with a trigger
         target: "target's dcv",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
         costEnd: false,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(true),
         xml: `<TALENT XMLID="FOLLOWTHROUGHATTACK" ID="1709164984595" BASECOST="10.0" LEVELS="0" ALIAS="Follow-Through Attack" POSITION="27" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
 
     addPower(undefined, {
         key: "HOTSHOTPILOT",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
-        name: "Hotshot Pilot",
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from COMBAT_PILOTING and COMBAT_LEVELS
+        name: "Hotshot Pilot", // FIXME: Can this be removed now that we have xml?
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5672,12 +5743,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(undefined, {
         key: "INSPIRE",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "adjustment"],
+        behaviors: ["dice", "to-hit"],
         costPerLevel: fixedValueFunction(0),
+        duration: HERO.DURATION_TYPES.INSTANT, // This is built AID
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="INSPIRE" ID="1709164986910" BASECOST="11.0" LEVELS="0" ALIAS="Inspire" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
 
@@ -5686,6 +5761,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         costPerLevel: fixedValueFunction(0),
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is 5 points reserved for later mental powers
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5694,9 +5770,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "LIGHTNING_CALCULATOR",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from detect (sense) power
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5708,7 +5785,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIGHTNING_REFLEXES_ALL",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(1),
             cost: function (item) {
                 const levels = parseInt(item.system.LEVELS);
@@ -5724,6 +5801,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return levels * this.costPerLevel(); // ALL ACTIONS
             },
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from DEX
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5736,9 +5814,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "LIGHTNING_REFLEXES_SINGLE",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(1),
-        name: "Lightning Reflexes",
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from DEX
+        name: "Lightning Reflexes", // FIXME: Remove as we have xml?
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5747,9 +5826,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "LIGHTSLEEP",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from enhanced senses
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5760,10 +5840,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(undefined, {
         key: "MAGESIGHT",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "sense", "passive"],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.PERSISTENT,
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from detect
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5772,9 +5852,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "MOUNTEDWARRIOR",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.CONSTANT,
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from COMBAT_LEVELS
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5787,20 +5867,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from DCV
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             xml: `<TALENT XMLID="OFFHANDDEFENSE" ID="1709160002394" BASECOST="2.0" LEVELS="0" ALIAS="Off-Hand Defense" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
         },
-        undefined, // 5e uses WEAPONFAMILARITY OFFHAND
+        undefined, // 5e uses WEAPON_FAMILIARITY: OFF HAND
     );
 
     addPower(
         {
             key: "PERFECT_PITCH",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from detect (sense) power
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5812,9 +5894,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "RAPIDARCHERY",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(1),
-        duration: HERO.DURATION_TYPES.INSTANT,
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from COMBAT_LEVELS
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
         costEnd: false,
@@ -5822,21 +5904,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     });
     addPower(undefined, {
         key: "RAPIDHEALING",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "adjustment"],
+        behaviors: ["dice", "to-hit"],
         costPerLevel: fixedValueFunction(1),
-        duration: HERO.DURATION_TYPES.PERSISTENT,
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from HEALING
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="RAPIDHEALING" ID="1709165009140" BASECOST="5.0" LEVELS="0" ALIAS="Rapid Healing" POSITION="39" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
     addPower(
         {
             key: "RESISTANCE",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(1),
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from SKILL_LEVELS
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5848,9 +5934,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "SHAPECHANGING",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costPerLevel: fixedValueFunction(0),
-        duration: HERO.DURATION_TYPES.INSTANT,
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from MULTIFORM
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5862,7 +5948,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(1),
-            duration: HERO.DURATION_TYPES.INSTANT,
+            duration: HERO.DURATION_TYPES.CONSTANT, // This is built from INVISIBILITY
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5877,7 +5963,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "SKILLMASTER",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built from SKILL_LEVELS
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5887,8 +5974,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "SPEED_READING",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable", "240DegreeArcBuiltIn"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from ANALYZE sense
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5899,19 +5987,24 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(undefined, {
         key: "SPELLAUGMENTATION",
-        type: ["talent"],
-        behaviors: [],
+        type: ["talent", "adjustment"],
+        behaviors: ["dice", "to-hit"],
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from AID with charge
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
+        usesStrength: false,
         costPerLevel: fixedValueFunction(2),
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<TALENT XMLID="SPELLAUGMENTATION" ID="1709165017535" BASECOST="12.0" LEVELS="0" ALIAS="Spell Augmentation" POSITION="45" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></TALENT>`,
     });
     addPower(
         {
             key: "STRIKING_APPEARANCE",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from PRE
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5935,7 +6028,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "TRACKLESSSTRIDE",
         type: ["talent"],
         behaviors: ["activatable"],
-        duration: HERO.DURATION_TYPES.CONSTANT,
+        duration: HERO.DURATION_TYPES.CONSTANT, // This is built with GLIDING
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: true,
@@ -5946,7 +6039,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "TURNUNDEAD",
         type: ["talent"],
         behaviors: ["activatable"],
-        duration: HERO.DURATION_TYPES.PERSISTENT,
+        duration: HERO.DURATION_TYPES.PERSISTENT, // This is built with PRE
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
         costEnd: false,
@@ -5957,8 +6050,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "UNIVERSAL_TRANSLATOR",
-            type: ["talent"],
-            behaviors: [],
+            type: ["talent", "sense", "passive"],
+            behaviors: ["activatable", "240DegreeArcBuiltIn"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built with DETECT
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -5972,7 +6066,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "WEAPON_MASTER",
             type: ["talent"],
-            behaviors: [""],
+            behaviors: ["activatable"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // This is built with COMBAT_LEVELS
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6086,21 +6181,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         undefined,
     );
-
-    addPower(
-        {
-            key: "WELL_CONNECTED",
-            type: ["perk", "enhancer"],
-            behaviors: [],
-            costPerLevel: fixedValueFunction(0),
-            duration: HERO.DURATION_TYPES.CONSTANT,
-            target: "self only",
-            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
-            costEnd: false,
-            xml: `<WELL_CONNECTED XMLID="WELL_CONNECTED" ID="1710994081842" BASECOST="3.0" LEVELS="0" ALIAS="Well-Connected" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO"></WELL_CONNECTED>`,
-        },
-        {},
-    );
 })();
 
 (function addPowersToPowerList() {
@@ -6182,6 +6262,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "AUTOMATON",
             type: ["automaton", "special"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // All automaton powers are inherent
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
             duration: HERO.DURATION_TYPES.PERSISTENT,
@@ -6294,6 +6375,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CUSTOMPOWER",
             type: ["custom", "activatable"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.CONSTANT, // FIXME: This is probably not a default duration
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -6594,6 +6676,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DOESNOTBLEED",
             type: ["automaton", "special"],
             behaviors: ["activatable"],
+            duration: HERO.DURATION_TYPES.INHERENT, // All automaton powers are inherent
             costPerLevel: fixedValueFunction(3),
             perceivability: "obvious",
             duration: HERO.DURATION_TYPES.PERSISTENT,
@@ -7625,6 +7708,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "NAKEDMODIFIER",
             type: ["special"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INSTANT, // Naked advantages make something instant
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7670,6 +7754,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "NOHITLOCATIONS",
             type: ["automaton"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.INHERENT, // All automaton powers are inherent
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
@@ -7680,34 +7765,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(
-        {
-            key: "PARTIALLYPENETRATIVE",
-            type: ["sense"],
-            behaviors: [],
-            target: "self only",
-            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
-            costEnd: true,
-            costPerLevel: fixedValueFunction(0),
-            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
-            xml: `<POWER XMLID="PARTIALLYPENETRATIVE" ID="1738470412569" BASECOST="10.0" LEVELS="0" ALIAS="Partially Penetrative" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
-        },
-        {},
-    );
-    addPower(
-        {
-            key: "PENETRATIVE",
-            type: ["sense"],
-            behaviors: [],
-            target: "self only",
-            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
-            costEnd: true,
-            costPerLevel: fixedValueFunction(0),
-            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
-            xml: `<POWER XMLID="PENETRATIVE" ID="1738469314018" BASECOST="15.0" LEVELS="0" ALIAS="Penetrative" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
-        },
-        {},
-    );
     addPower(
         {
             key: "POSSESSION",
@@ -8084,6 +8141,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EXTRADC",
             type: ["martial"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(4),
@@ -8165,6 +8223,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 return HERO.RANGE_TYPES.SELF;
             },
+            duration: HERO.DURATION_TYPES.INSTANT,
             costEnd: true,
             usesStrength: false, // TODO: Not all of these are attacks
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
@@ -8179,6 +8238,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RANGEDDC",
             type: ["martial"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(4),
@@ -8192,6 +8252,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "WEAPON_ELEMENT",
             type: ["martial"],
             behaviors: [],
+            duration: HERO.DURATION_TYPES.PERSISTENT,
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8736,8 +8797,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     });
     addPower(undefined, {
         key: "NRAYPERCEPTION",
-        type: ["activatable", "sense", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
+        type: ["sense", "senseBuiltIn", "rangeBuiltIn", "targetingBuiltIn"],
         behaviors: ["activatable"],
+        duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
         costPerLevel: fixedValueFunction(0),
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8749,7 +8811,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PARTIALLYPENETRATIVE",
             type: ["adder", "sense"],
             behaviors: ["adder"],
-            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8759,10 +8820,24 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "PARTIALLYPENETRATIVE",
+            type: ["sense"],
+            behaviors: ["activatable", "sense"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
+            target: "self only",
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            costEnd: true,
+            costPerLevel: fixedValueFunction(0),
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            xml: `<POWER XMLID="PARTIALLYPENETRATIVE" ID="1738470412569" BASECOST="10.0" LEVELS="0" ALIAS="Partially Penetrative" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "PENETRATIVE",
             type: ["adder", "sense"],
             behaviors: ["adder"],
-            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: fixedValueFunction(0),
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
@@ -8770,6 +8845,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         undefined,
     );
+    addPower(
+        {
+            key: "PENETRATIVE",
+            type: ["sense"],
+            behaviors: ["activatable", "sense"],
+            duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
+            target: "self only",
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            costEnd: true,
+            costPerLevel: fixedValueFunction(0),
+            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            xml: `<POWER XMLID="PENETRATIVE" ID="1738469314018" BASECOST="15.0" LEVELS="0" ALIAS="Penetrative" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+        },
+        {},
+    );
+
     addPower(
         {
             // DAMAGENEGATION related
