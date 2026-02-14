@@ -5272,7 +5272,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             costPerLevel: fixedValueFunction(0),
-            duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6265,7 +6264,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: HERO.DURATION_TYPES.INHERENT, // All automaton powers are inherent
             costPerLevel: fixedValueFunction(0),
             perceivability: "inobvious",
-            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
@@ -6679,7 +6677,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: HERO.DURATION_TYPES.INHERENT, // All automaton powers are inherent
             costPerLevel: fixedValueFunction(3),
             perceivability: "obvious",
-            duration: HERO.DURATION_TYPES.PERSISTENT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
