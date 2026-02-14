@@ -2521,15 +2521,7 @@ export function registerFullTests(quench) {
                 before(async function () {
                     previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
                     hthAttack14d6NoStrMinimum = actor.items.find(
                         (item) =>
@@ -2554,6 +2546,8 @@ export function registerFullTests(quench) {
 
                 after(async function () {
                     await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 // Verify the cost of powers
@@ -3130,18 +3124,8 @@ export function registerFullTests(quench) {
                 let threeDcTransform;
                 let eightDcTransform;
 
-                beforeEach(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                before(async function () {
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
                     threeDcEnergyBlast = actor.items.find(
                         (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "Little",
@@ -3161,6 +3145,14 @@ export function registerFullTests(quench) {
                     eightDcTransform = actor.items.find(
                         (item) => item.system.XMLID === "TRANSFORM" && item.name !== "Little",
                     );
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
+                });
+
+                beforeEach(async function () {
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
                 });
 
                 afterEach(async function () {
@@ -3459,19 +3451,8 @@ export function registerFullTests(quench) {
                 let martialStrikeManeuverItem;
                 let customMartialFourDcManeuverItem;
 
-                beforeEach(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
-
+                before(async function () {
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
                     rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
                     hkaItem = actor.items.find((item) => item.system.XMLID === "HKA");
 
@@ -3484,6 +3465,14 @@ export function registerFullTests(quench) {
                     customMartialFourDcManeuverItem = actor.items.find(
                         (item) => item.system.XMLID === "MANEUVER" && item.name === "Custom 4DC attack",
                     );
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
+                });
+
+                beforeEach(async function () {
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
                 });
 
                 afterEach(async function () {
@@ -3972,7 +3961,6 @@ export function registerFullTests(quench) {
                 before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    await actor.uploadFromXml(contents);
                     energyBlastItem = actor.items.find((o) => o.system.XMLID === "ENERGYBLAST");
                     entangleItem = actor.items.find((o) => o.isEntangle);
                     flightItem = actor.items.find((o) => o.system.XMLID === "FLIGHT");
@@ -4158,15 +4146,8 @@ export function registerFullTests(quench) {
                 let rkaPlusHalfItem;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    await actor.uploadFromXml(contents);
                     ebPlusOneItem = actor.items.find(
                         (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
                     );
@@ -4181,6 +4162,10 @@ export function registerFullTests(quench) {
                     );
                     hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
                     rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 describe("Energy Blast", function () {
@@ -6486,17 +6471,14 @@ export function registerFullTests(quench) {
                 let infraredPerceptionItem;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
                     lifeSupportItem = actor.items.find((item) => item.system.XMLID === "LIFESUPPORT");
                     infraredPerceptionItem = actor.items.find((item) => item.system.XMLID === "INFRAREDPERCEPTION");
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 // This is 10 active points with 1.25 of limitations so 4 real points and .4 character points.

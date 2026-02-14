@@ -5282,9 +5282,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 })();
 
 (function addTalentsToPowerList() {
-    // FIXME ... need to:
-    // 1) Check for behaviours (sense talents need sense and some need activatable etc)
-    // 2) Check for name property. Should it be removed because we get it from XML?
     addPower(
         {
             key: "ABSOLUTE_RANGE_SENSE",
