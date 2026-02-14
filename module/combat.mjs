@@ -1218,7 +1218,7 @@ export class HeroSystem6eCombat extends Combat {
                             await endReserveItem.update({
                                 "system.value": newValue,
                             });
-                            recoveryText += `${endReserveItem.name} +${delta} END`;
+                            recoveryText += `${recoveryText ? " " : ""}${endReserveItem.name} +${delta} END.`;
                         }
                     }
                 }
