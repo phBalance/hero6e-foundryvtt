@@ -89,17 +89,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     #createDragDropHandlers() {
-        return this.options.dragDrop.map((d) => {
-            d.permissions = {
+        return this.options.dragDrop.map((dragDropHandler) => {
+            dragDropHandler.permissions = {
                 dragstart: this._canDragStart.bind(this),
                 drop: this._canDragDrop.bind(this),
             };
-            d.callbacks = {
+            dragDropHandler.callbacks = {
                 dragstart: this._onDragStart.bind(this),
                 dragover: this._onDragOver.bind(this),
                 drop: this._onDrop.bind(this),
             };
-            return new DragDrop(d);
+            return new DragDrop(dragDropHandler);
         });
     }
 
@@ -648,7 +648,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // This includes dragging items to actor sheet and dragging withing item-list.
         super._onRender(context, options);
 
-        // We will add additional DragDrop support for dragging items to different tabs.
+        // We will add additional DragDrop support for dragging items between different tabs (which represent different item.type).
         this.#dragDrop.forEach((d) => d.bind(this.element));
 
         // item-description-expand chevron expand collapse
@@ -784,9 +784,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         console.log(event);
         const data = TextEditor.getDragEventData(event);
         // Handle different data types
-        switch (data.type) {
+        switch (data?.type) {
             case "Item":
                 await this._onDropItem(event, data);
+                break;
+
+            default:
+                console.warn(`Unhandled _onDrop type=${data?.type}`);
                 break;
         }
     }
@@ -839,7 +843,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             }
             await item.update({
                 type: targetType,
-                "==system": foundry.utils.mergeObject(item.system, { PARENTID: null }),
+                "==system": item.system,
             });
             ui.notifications.info(`${item.name} was changed from type=${preType} to type=${item.type}`);
             return;
