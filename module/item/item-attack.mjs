@@ -2335,7 +2335,12 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
             const hexGrid = currentSceneUsesHexGrid();
 
+            // Unclear why we need this (token vs prototypetoken?, different code paths?)
+            // https://github.com/dmdorman/hero6e-foundryvtt/issues/3725
             const targetTokenCenter = targetToken.center ?? targetToken.object.center;
+            if (targetToken.object?.center) {
+                console.warn(`targetToken.object.center was unexpected`);
+            }
 
             if (hexTemplates && hexGrid) {
                 const gridSizeInMeters = getGridSizeInMeters();

@@ -2,6 +2,8 @@
 
 ### Version 4.2.15 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Fixed toggle issues with movement powers with "usable as" modifier. [#3724](https://github.com/dmdorman/hero6e-foundryvtt/issues/3724)
+
 ### Version 4.2.14 20260208
 
 - A [preview](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) of the new Actor Sheet is available. It has light, dark, and high contrast themes. Here is your chance to preview and provide feedback before we make this the default actor sheet. [#3622](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) [#2275](https://github.com/dmdorman/hero6e-foundryvtt/issues/2275)
