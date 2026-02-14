@@ -37,6 +37,7 @@ export default [
                 DefaultTokenConfig: "readonly",
                 Dialog: "readonly",
                 Die: "readonly",
+                DragDrop: "readonly",
                 dragRuler: "readonly",
                 FilePicker: "readonly",
                 fromUuid: "readonly",

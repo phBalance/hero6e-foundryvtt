@@ -5,7 +5,7 @@ import { getCharacteristicInfoArrayForActor, tokenEducatedGuess } from "../../ut
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
-const { DragDrop } = foundry.applications.ux;
+const FoundryVttDragDrop = foundry.applications.ux?.DragDrop || DragDrop; // V12 compatibility
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
@@ -99,7 +99,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 dragover: this._onDragOver.bind(this),
                 drop: this._onDrop.bind(this),
             };
-            return new DragDrop(dragDropHandler);
+            return new FoundryVttDragDrop(dragDropHandler);
         });
     }
 

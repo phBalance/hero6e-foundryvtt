@@ -241,16 +241,19 @@ Hooks.once("init", async function () {
         makeDefault: true,
         label: "Default HeroSystem",
     });
-    FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
-        makeDefault: false,
-        themes: {
-            "": "Default",
-            light: "Light",
-            dark: "Dark",
-            hc: "High Contrast",
-        },
-        label: "HeroSystem v2",
-    });
+    if (isGameV13OrLater()) {
+        // V12 is missing ActorSheetV2._prepareTabs etal
+        FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
+            makeDefault: false,
+            themes: {
+                "": "Default",
+                light: "Light",
+                dark: "Dark",
+                hc: "High Contrast",
+            },
+            label: "HeroSystem v2",
+        });
+    }
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
         makeDefault: false,
         label: "Savuori",
