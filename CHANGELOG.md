@@ -1,6 +1,11 @@
 # Releases
 
-### Version 4.2.15 20260214 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.16 20260214 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- We encourage you upgrade to FoundryVTT v13. We are no longer testing with FoundryVTT v12.
+- The [preview](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) of Actor Sheet V2 is now only V13 compatible.
+
+### Version 4.2.15 20260214
 
 - Fixed toggle issues with movement powers with "usable as" modifier. [#3724](https://github.com/dmdorman/hero6e-foundryvtt/issues/3724)
 - Fixed inability to apply damage to named tokens during some AOE attacks. [#3725](https://github.com/dmdorman/hero6e-foundryvtt/issues/3725)
