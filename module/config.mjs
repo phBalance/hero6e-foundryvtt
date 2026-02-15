@@ -4257,7 +4257,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "SINGLE":
-                        return 2;
+                        return 1.5;
                     case "TIGHT":
                         return 2;
                     case "ALL":
