@@ -312,6 +312,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                             context.tabs[tabName].cssClass.push("empty");
                         }
 
+                        // 5e disadvantages
+                        if (tabName === "complications" && this.actor.is5e) {
+                            context.tabs[tabName].label = "Disadvantages";
+                        }
+
                         const hv = this.#heroValidationCssForTab(this._items[tabName]);
                         if (hv) {
                             context.tabs[tabName].cssClass.push(hv);
