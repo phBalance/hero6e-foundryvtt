@@ -3380,11 +3380,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -3392,7 +3392,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({
@@ -3433,11 +3433,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -3445,7 +3445,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({
@@ -3992,11 +3992,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const validations = [];
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -4004,7 +4004,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({
@@ -6124,11 +6124,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -6136,7 +6136,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({

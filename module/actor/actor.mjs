@@ -2268,6 +2268,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 1 + // Final save
                 1 + // Restore retained damage
                 1 + // CSL assignment
+                1 + // PSL assignment
                 1 + // debugModelProps
                 1; // Not really sure why we need an extra +1
 
@@ -2995,7 +2996,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadProgressBar.advance(`${this.name}: Linking Combat Skill Levels`, 0);
             const cslInitializationUpdates = [];
             for (const csl of this.allCslSkills) {
-                const cslChangesToLink = csl.linkCslBasedOnCustomAdders(csl.system._source.ADDER);
+                const cslChangesToLink = csl.linkBasedOnCustomAdders(csl.system._source.ADDER, this.cslItems);
                 if (csl._id != null) {
                     cslChangesToLink._id = csl._id;
                     cslInitializationUpdates.push(cslChangesToLink);
@@ -3007,6 +3008,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await Item.implementation.updateDocuments(cslInitializationUpdates, { parent: this });
             }
             uploadProgressBar.advance(`${this.name}: Linked Combat Skill Levels`, 1);
+
+            uploadProgressBar.advance(`${this.name}: Linking Penalty Skill Levels`, 0);
+            const pslInitializationUpdates = [];
+            for (const psl of this.allPslSkills) {
+                const pslChangesToLink = psl.linkBasedOnCustomAdders(psl.system._source.ADDER, this.pslItems);
+                if (psl._id != null) {
+                    pslChangesToLink._id = psl._id;
+                    pslInitializationUpdates.push(pslChangesToLink);
+                } else {
+                    foundry.utils.mergeObject(psl, pslChangesToLink);
+                }
+            }
+            if (pslInitializationUpdates.length > 0) {
+                await Item.implementation.updateDocuments(pslInitializationUpdates, { parent: this });
+            }
+            uploadProgressBar.advance(`${this.name}: Linked Penalty Skill Levels`, 1);
 
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);
@@ -3660,9 +3677,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return roundFavorPlayerTowardsZero(this._activePoints);
     }
 
+    // PH: FIXME: Any similarity that we want to refactor with the cslItems
+    // PH: FIXME: Any filtering and sorting required
+    get pslItems() {
+        return this.items;
+    }
+
     /**
      * Return an array of the actor's items that could be a match. They will either be single items or framework that contains
-     * potentially multiplie items.
+     * potentially multiple items.
      *
      * @returns {HeroSystem6eItem[]}
      */
@@ -4096,6 +4119,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         results = [...results, ...this.items.filter((item) => item.isCombatManeuver && item.system.XMLID === "STRIKE")];
 
         return results;
+    }
+
+    get allPslSkills() {
+        return this.items.filter((item) => item.isPsl);
+    }
+
+    get activePslSkills() {
+        return this.allPslSkills.filter((item) => item.isActive);
     }
 
     static migrateData(source) {

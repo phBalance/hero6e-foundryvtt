@@ -830,22 +830,28 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get pslRangePenaltyOffsetItems() {
+        return this.pslTypeOffsetItems(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range);
+    }
+
+    // PH: FIXME: some similarity to CSLs
+    pslTypeOffsetItems(pslType) {
         const psls = this.actor.items.filter(
             (pslItem) =>
-                pslItem.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range &&
+                pslItem.pslPenaltyType === pslType &&
                 (pslItem.system.OPTIONID === "ALL" ||
                     pslItem.adders.find(
                         (adder) => adder.ALIAS.toLowerCase().trim() === this.name.toLowerCase().trim(),
                     )) &&
-                pslItem.isActive != false,
+                pslItem.isActive !== false,
         );
+
         return psls;
     }
 
     get pslPenaltyType() {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
-        // 5e uses INPUT.  6e uses OPTION_ALIAS (free text)
+        // 5e uses INPUT. 6e uses OPTION_ALIAS (free text)
         const _pslPenaltyType = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
             .map((psl) => psl.toLowerCase())
             .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
@@ -900,7 +906,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
             // Update CSLs if their ADDER array has changed (in any way)
             if (changes.system.ADDER != null) {
-                const relinkChanges = this.linkCslBasedOnCustomAdders(changes.system.ADDER);
+                const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.cslItems || []);
                 foundry.utils.mergeObject(changes, relinkChanges);
             }
         }
@@ -5862,6 +5868,140 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
+     * Link the item's custom adders to other items
+     *
+     * @param {HeroAdderModel[]} adders - All system.ADDER which will not be mutated
+     *
+     * @returns {Object} updates - an accumulator of changes to commit to the database
+     */
+    linkBasedOnCustomAdders(adders, potentialMatchingItems) {
+        const updates = {};
+
+        // Setup targetId
+        const allAdders = foundry.utils.deepClone(adders);
+        const customAdders = allAdders.filter((a) => a.XMLID === "ADDER");
+        for (const customAdder of customAdders) {
+            const targetId = potentialMatchingItems.find((item) => {
+                // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
+                // is thus providing a unique name - other options can potentially have multiple matches of which
+                // we'll end up with the first. This could result in a situation where someone can not match
+                // the attack they actually want.
+                // NOTE: We do allow a case insensitve match
+                const aliasToMatch = customAdder.ALIAS.toLowerCase();
+
+                return (
+                    item.name.toLowerCase() === aliasToMatch ||
+                    item.system.ALIAS?.toLowerCase() === aliasToMatch ||
+                    item.system.XMLID?.toLowerCase() === aliasToMatch
+                );
+            })?.id;
+
+            if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
+                console.warn(`Failed to match custom adder ${customAdder.ALIAS} for ${this.detailedName()}.`);
+            }
+
+            customAdder.targetId = targetId;
+        }
+        updates["system.ADDER"] = allAdders;
+
+        return updates;
+    }
+
+    /**
+     * Get all valid custom link adders for this item
+     *
+     * @returns HeroAdderModel[]
+     */
+    get customLinkAdders() {
+        const customLinkAdders = this.adders.filter(
+            (adder) => adder.XMLID === "ADDER" && adder.BASECOST === 0 && adder.ALIAS,
+        );
+
+        return customLinkAdders;
+    }
+
+    /**
+     * Typically custom adders put into an item (e.g. CSL, PSL) just point to an item. However, we also allow
+     * frameworks (MP, EC, VPP, and lists) to be pointed to as a shorthand for all the framework's slots. If any of the
+     * adders point to a framework, expand it out to all of the slots of that framework.
+     *
+     * Return the expanded array of items that are valid for this item.
+     */
+    get customLinkAddersToExpandedItems() {
+        const allowedItems = this.customLinkAddersToItems
+            .filter(Boolean) // Remove any unfound adder -> item mappings
+            .map((matchingItem) => {
+                const isFrameworkItem = matchingItem.baseInfo?.type.includes("framework");
+                if (isFrameworkItem) {
+                    // All children
+                    return matchingItem.childItems;
+                }
+
+                return matchingItem;
+            })
+            .filter(Boolean)
+            .flat();
+
+        return allowedItems;
+    }
+
+    /**
+     * Return an array of custom adders to their matching item. It is possible for the array to have
+     * undefined elements if there is no match.
+     *
+     * @returns HeroSystem6eItem|undefined[]
+     */
+    get customLinkAddersToItems() {
+        return this.customLinkAdders.map((customLinkAdder) => {
+            return this.actor?.items.find((item) => item.id === customLinkAdder.targetId);
+        });
+    }
+
+    /**
+     * Return an array of custom adders which don't match to an item.
+     *
+     * @returns HeroAdderModel[]
+     */
+    get customLinkAddersWithoutItems() {
+        return this.customLinkAdders
+            .map((customLinkAdder) => {
+                const found = this.actor?.items.find((item) => item.id === customLinkAdder.targetId);
+                return found ? undefined : customLinkAdder;
+            })
+            .filter(Boolean);
+    }
+
+    /**
+     * Is the attack item listed in one of this item's custom link adders? If so, true else false.
+     *
+     * @param {HeroSystem6eItem} attackItem
+     *
+     * @returns boolean
+     */
+    isAttackItemInCustomLinkAddersAllowList(attackItem) {
+        const lookingForId = attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
+        const attackMatchesCustomAdder = !!this.customLinkAddersToExpandedItems.find(
+            (item) => item.id === lookingForId,
+        );
+        if (attackMatchesCustomAdder) {
+            return true;
+        }
+
+        // As a convenience we automatically associate any CSLs which are in a compound power
+        // to be considered attached to attack items inside the compound power.
+        const isInCompoundItem = attackItem.parentItem?.system.XMLID === "COMPOUNDPOWER";
+        if (isInCompoundItem) {
+            // All attacks in this compound power
+            const cslInSameCompoundPower = !!attackItem.parentItem.childItems.find((item) => item.id === this.id);
+            if (cslInSameCompoundPower) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Does this item have CSL like behaviours:
      * COMBAT_LEVELS are standard 5e/6e CSLs
      * MENTAL_COMBAT_LEVELS are standard 6e "mental" only CSLs
@@ -5882,7 +6022,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // 1. The CSL doesn't need to have custom adders because it supports an Infinite number of potential adders
         // 2. Are there no adders when they need to be provided for the CSL to work?
         // 3. We allow CSLs in COMPOUNDPOWERS to automatically work for all attacks within the COMPOUNDPOWER.
-        const cslCustomAdders = this.customCslAdders;
+        const cslCustomAdders = this.customLinkAdders;
         return (
             this.maxCustomCslAdders === +Infinity ||
             cslCustomAdders.length > 0 ||
@@ -5917,45 +6057,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
         }
         cslUpdates["system.csl"] = selectedChoices;
-
-        return cslUpdates;
-    }
-
-    /**
-     * Link the CSL's custom adders to other items
-     *
-     * @param {HeroAdderModel[]} adders - All system.ADDER which will not be mutated
-     *
-     * @returns {Object} cslUpdates - an accumulator of changes to commit to the database
-     */
-    linkCslBasedOnCustomAdders(adders) {
-        const cslUpdates = {};
-
-        // Setup targetId
-        const allAdders = foundry.utils.deepClone(adders);
-        for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
-            const targetId = (this.actor?.cslItems || []).find((item) => {
-                // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
-                // is thus providing a unique name - other options can potentially have multiple matches of which
-                // we'll end up with the first. This could result in a situation where someone can not match
-                // the attack they actually want.
-                // NOTE: We do allow a case insensitve match
-                const aliasToMatch = customAdder.ALIAS.toLowerCase();
-
-                return (
-                    item.name.toLowerCase() === aliasToMatch ||
-                    item.system.ALIAS?.toLowerCase() === aliasToMatch ||
-                    item.system.XMLID?.toLowerCase() === aliasToMatch
-                );
-            })?.id;
-
-            if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
-                console.warn(`Failed to match custom adder ${customAdder.ALIAS} for CSL ${this.detailedName()}.`);
-            }
-
-            customAdder.targetId = targetId;
-        }
-        cslUpdates["system.ADDER"] = allAdders;
 
         return cslUpdates;
     }
@@ -6103,18 +6204,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Get all valid custom adders related to CSLs
-     * @returns HeroAdderModel[]
-     */
-    get customCslAdders() {
-        const customCslAdders = this.adders.filter(
-            (adder) => adder.XMLID === "ADDER" && adder.BASECOST === 0 && adder.ALIAS,
-        );
-
-        return customCslAdders;
-    }
-
-    /**
      * Returns the maximum number of attacks the CSL can be applied against
      * @returns Number
      */
@@ -6187,92 +6276,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Return an array of custom adders to their matching item. It is possible for the array to have
-     * undefined elements if there is no match.
-     *
-     * @returns HeroSystem6eItem|undefined[]
-     */
-    get customCslAddersToItems() {
-        return this.customCslAdders.map((customCslAdder) => {
-            return this.actor?.items.find((item) => item.id === customCslAdder.targetId);
-        });
-    }
-
-    /**
-     * Return an array of custom adders which don't match to an item.
-     *
-     * @returns HeroAdderModel[]
-     */
-    get customCslAddersWithoutItems() {
-        return this.customCslAdders
-            .map((customCslAdder) => {
-                const found = this.actor?.items.find((item) => item.id === customCslAdder.targetId);
-                return found ? undefined : customCslAdder;
-            })
-            .filter(Boolean);
-    }
-
-    /**
-     * Typically custom adders put into a CSL just point to an item. However, we also allow
-     * frameworks (MP, EC, VPP, and lists) to be pointed to as a shorthand for all the framework's slots. If any of the
-     * adders point to a framework, expand it out to all of the slots of that framework.
-     *
-     * Return the expanded array of items that are valid for this CSL.
-     *
-     * @param {HeroAdderModel} customCslAdders
-     */
-    get customCslAddersToExpandedItems() {
-        const allowedItems = this.customCslAddersToItems
-            .filter(Boolean) // Remove any unfound adder -> item mappings
-            .map((matchingItem) => {
-                const isFrameworkItem = matchingItem.baseInfo?.type.includes("framework");
-                if (isFrameworkItem) {
-                    // All children
-                    return matchingItem.childItems;
-                }
-
-                return matchingItem;
-            })
-            .filter(Boolean)
-            .flat();
-
-        return allowedItems;
-    }
-
-    /**
-     * Is the attack item listed in one of this item's (which must be a CSL) custom adders? If so, true else false.
-     *
-     * @param {HeroSystem6eItem} attackItem
-     * @returns boolean
-     */
-    isAttackItemInCslAllowList(attackItem) {
-        const lookingForId = attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
-        const attackMatchesCustomAdder = !!this.customCslAddersToExpandedItems.find((item) => item.id === lookingForId);
-        if (attackMatchesCustomAdder) {
-            return true;
-        }
-
-        // As a convenience we automatically associate any CSLs which are in a compound power
-        // to be considered attached to attack items inside the compound power.
-        const isInCompoundItem = attackItem.parentItem?.system.XMLID === "COMPOUNDPOWER";
-        if (isInCompoundItem) {
-            // All attacks in this compound power
-            const cslInSameCompoundPower = !!attackItem.parentItem.childItems.find((item) => item.id === this.id);
-            if (cslInSameCompoundPower) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Are there any items which are not allowed that are the target of custom adders?
      *
      * @returns boolean
      */
     get notAllowedItemsInCustomAdders() {
-        return this.customCslAddersToExpandedItems.filter((item) => !this.cslAppliesTo(item));
+        return this.customLinkAddersToExpandedItems.filter((item) => !this.cslAppliesTo(item));
     }
 
     get csl5eCslDcvOcvTypes() {
@@ -6432,7 +6441,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 this.system.OPTIONID === "SINGLE" ||
                 this.system.OPTIONID === "SINGLESINGLE"
             ) {
-                return this.isAttackItemInCslAllowList(attackItem);
+                return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
             }
         } else {
             // 6e
@@ -6460,7 +6469,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         this.system.OPTIONID === "TIGHT" ||
                         this.system.OPTIONID === "BROAD"
                     ) {
-                        return this.isAttackItemInCslAllowList(attackItem);
+                        return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
                     }
 
                     break;
@@ -6480,7 +6489,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     // The other types of MCSLs support a limited number of attacks. We have to check that attackItem
                     // in the allow list.
                     if (this.system.OPTIONID === "SINGLE" || this.system.OPTIONID === "TIGHT") {
-                        return this.isAttackItemInCslAllowList(attackItem);
+                        return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
                     }
 
                     break;
@@ -6507,7 +6516,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.normal) {
                             return attackItem.isHth && attackItem.doesNormalDamage;
                         } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.explicit) {
-                            return attackItem.isHth && this.isAttackItemInCslAllowList(attackItem);
+                            return attackItem.isHth && this.isAttackItemInCustomLinkAddersAllowList(attackItem);
                         }
                     } else if (this.system.OPTIONID === "ANYRANGED") {
                         const weaponTypes = this.cslWeaponMasterWeaponTypes;
@@ -6523,14 +6532,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.normal) {
                             return attackItem.isRanged && attackItem.doesNormalDamage;
                         } else if (weaponType === CONFIG.HERO.CSL_WEAPON_MASTER_WEAPON_TYPES.explicit) {
-                            return attackItem.isRanged && this.isAttackItemInCslAllowList(attackItem);
+                            return attackItem.isRanged && this.isAttackItemInCustomLinkAddersAllowList(attackItem);
                         }
                     }
 
                     // The other types of WM support a limited number of attacks. We have to check that attackItem
                     // in the allow list.
                     else if (this.system.OPTIONID === "VERYLIMITED" || this.system.OPTIONID === "LIMITED") {
-                        return this.isAttackItemInCslAllowList(attackItem);
+                        return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
                     }
 
                     break;
@@ -6539,6 +6548,31 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         console.error(`Unhandled CSL ${this.detailedName()}/${this.is5e}`);
         return false;
+    }
+
+    get isPsl() {
+        return this.system.XMLID === "PENALTY_SKILL_LEVELS";
+    }
+
+    pslAppliesTo(attackItem) {
+        if (!this.isPsl) {
+            if (!this.actor?.name.startsWith("_Quench")) {
+                console.error("This is not a PSL", this, attackItem);
+            }
+            return false;
+        }
+
+        switch (this.system.OPTIONID) {
+            case "SINGLE":
+            case "THREE":
+            case "TIGHT":
+                return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
+
+            case "ALL":
+                return true;
+        }
+
+        console.error(`Unknown OPTIONID ${this.system.OPTIONID} for ${this.detailedName()}`);
     }
 
     get combatSkillLevelsForAttack() {
