@@ -406,5 +406,12 @@
         "label": "Teleport"
       }
     }
+  },
+
+  "DOCUMENT": {
+    "ActorType": {
+      "Name": "Configure Actor Type",
+      "Hint": "Change the type of this actor. This will change the default characteristics and items that are created for this actor. It will not automatically convert existing items to the new type, but it will allow you to create new items of the new type. Note that changing the type may cause some issues with existing items that are not compatible with the new type. It is recommended to only change the type when creating a new actor or when you are okay with manually updating existing items."
+    }
   }
 }

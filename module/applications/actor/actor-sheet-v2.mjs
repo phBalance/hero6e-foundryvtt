@@ -40,6 +40,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             carried: HeroSystemActorSheetV2.#onCarried,
             clear: HeroSystemActorSheetV2.#onClear,
             clips: HeroSystemActorSheetV2.#onClips,
+            configureActorType: HeroSystemActorSheetV2.#onConfigureActorType,
             configureToken: HeroSystemActorSheetV2.#onConfigureToken,
             fullHealth: HeroSystemActorSheetV2.#onFullHealth,
             presenceAttack: HeroSystemActorSheetV2.#onPresenceAttack,
@@ -61,15 +62,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             //     icon: "fas fa-gear", // You can now add an icon to the header
             //     title: "FOO.form.title",
             contentClasses: ["standard-form"],
-            // controls: [
-            //     {
-            //         action: "configureToken",
-            //         icon: "fa-regular fa-circle-user",
-            //         label: "DOCUMENT.Token",
-            //         visible: true,
-            //         ownership: "OWNER",
-            //     },
-            // ],
+            controls: [
+                {
+                    action: "configureActorType",
+                    icon: "fal fa-user-robot",
+                    label: "Actor type",
+                    ownership: "OWNER",
+                },
+            ],
             tabs: [
                 {
                     navSelector: ".sheet-navigation",
@@ -127,6 +127,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static #onPresenceAttack() {
         this.actor.presenceAttack({ token: this.token });
+    }
+
+    static #onConfigureActorType() {
+        this.actor.changeType();
     }
 
     static #onConfigureToken() {
