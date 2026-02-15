@@ -2288,6 +2288,16 @@ export function registerCslTests(quench) {
                     let pslThrowingSingle;
                     let pslArmorPenaltiesSingle;
 
+                    let pslHitLocationTight;
+                    let pslRangeTight;
+                    let pslThrowingTight;
+                    let pslArmorPenaltiesTight;
+
+                    let pslHitLocationAll;
+                    let pslRangeAll;
+                    let pslThrowingAll;
+                    let pslArmorPenaltiesAll;
+
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
@@ -2297,6 +2307,20 @@ export function registerCslTests(quench) {
                         pslArmorPenaltiesSingle = actor.items.find(
                             (item) => item.name === "PSL Armor Penalties w/ Single",
                         );
+
+                        pslHitLocationTight = actor.items.find(
+                            (item) => item.name === "PSL Hit Location w/ Tight Group",
+                        );
+                        pslRangeTight = actor.items.find((item) => item.name === "PSL Range w/ Tight Group");
+                        pslThrowingTight = actor.items.find((item) => item.name === "PSL Throwing w/ Tight Group");
+                        pslArmorPenaltiesTight = actor.items.find(
+                            (item) => item.name === "PSL Armor Penalties w/ Tight Group",
+                        );
+
+                        pslHitLocationAll = actor.items.find((item) => item.name === "PSL Hit Location w/ All");
+                        pslRangeAll = actor.items.find((item) => item.name === "PSL Range w/ All");
+                        pslThrowingAll = actor.items.find((item) => item.name === "PSL Throwing w/ All");
+                        pslArmorPenaltiesAll = actor.items.find((item) => item.name === "PSL Armor Penalties w/ All");
                     });
 
                     after(async function () {
@@ -2326,6 +2350,72 @@ export function registerCslTests(quench) {
                             expect(pslArmorPenaltiesSingle.system.description).to.equal(
                                 "Penalty Skill Levels: +4 vs armor penalties to DCV with a single attack (Strike)",
                             );
+                        });
+
+                        it("should have a correct description - hit location tight group", function () {
+                            expect(pslHitLocationTight.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs Hit Location modifiers with a tight group of attacks (Ranged Martial Maneuvers Style)",
+                            );
+                        });
+
+                        it("should have a correct description - range tight group", function () {
+                            expect(pslRangeTight.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs Range Modifier with a tight group of attacks (Drain Multipower)",
+                            );
+                        });
+
+                        it("should have a correct description - throwing tight group", function () {
+                            expect(pslThrowingTight.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs Throwing modifiers with a tight group of attacks (Grab; Martial Grab; Passing Throw)",
+                            );
+                        });
+
+                        it("should have a correct description - armor penalties tight group", function () {
+                            expect(pslArmorPenaltiesTight.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs armor penalties to DCV with a tight group of attacks (Hand-to-Hand Martial Maneuver Style)",
+                            );
+                        });
+
+                        it("should have a correct description - hit location all attacks", function () {
+                            expect(pslHitLocationAll.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs Hit Location modifiers with All Attacks",
+                            );
+                        });
+
+                        it("should have a correct description - range all attacks", function () {
+                            expect(pslRangeAll.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs Range Modifier with All Attacks",
+                            );
+                        });
+
+                        it("should have a correct description - throwing all attacks", function () {
+                            expect(pslThrowingAll.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs Throwing modifiers with All Attacks",
+                            );
+                        });
+
+                        it("should have a correct description - armor penalties all attacks", function () {
+                            expect(pslArmorPenaltiesAll.system.description).to.equal(
+                                "Penalty Skill Levels: +1 vs armor penalties to DCV with All Attacks",
+                            );
+                        });
+                    });
+
+                    describe("costs", function () {
+                        it("should have the right cost for single target PSL", function () {
+                            expect(pslRangeSingle.characterPointCost).to.equal(1.5);
+                        });
+
+                        it("should have the right cost for single target PSL - for character sheet display", function () {
+                            expect(pslRangeSingle.characterPointCostForDisplay).to.equal(2);
+                        });
+
+                        it("should have the right cost for tight group PSL", function () {
+                            expect(pslRangeTight.characterPointCost).to.equal(2);
+                        });
+
+                        it("should have the right cost for All target PSL", function () {
+                            expect(pslRangeAll.characterPointCost).to.equal(3);
                         });
                     });
                 });
@@ -2913,6 +3003,24 @@ export function registerCslTests(quench) {
                             expect(pslThrowingAll.system.description).to.equal(
                                 "+1 to offset negative Throwing OCV modifier with all attacks",
                             );
+                        });
+                    });
+
+                    describe("costs", function () {
+                        it("should have the right cost for single target PSL", function () {
+                            expect(pslRangeSingle.characterPointCost).to.equal(1);
+                        });
+
+                        it("should have the right cost for single target PSL - character sheet display", function () {
+                            expect(pslRangeSingle.characterPointCostForDisplay).to.equal(1);
+                        });
+
+                        it("should have the right cost for tight group PSL", function () {
+                            expect(pslRangeTight.characterPointCost).to.equal(2);
+                        });
+
+                        it("should have the right cost for All target PSL", function () {
+                            expect(pslRangeAll.characterPointCost).to.equal(3);
                         });
                     });
                 });
