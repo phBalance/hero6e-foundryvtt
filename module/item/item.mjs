@@ -852,18 +852,20 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
 
         // 5e uses INPUT. 6e uses OPTION_ALIAS (free text)
-        const _pslPenaltyType = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
+        const pslPenaltyTypeKey = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
             .map((psl) => psl.toLowerCase())
             .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
 
-        if (!_pslPenaltyType) {
+        if (!pslPenaltyTypeKey) {
             console.warn(
                 `Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.name}`,
                 this,
             );
+
+            return "Unknown PSL key";
         }
 
-        return _pslPenaltyType;
+        return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES[pslPenaltyTypeKey];
     }
 
     setCarried() {
@@ -6554,6 +6556,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.system.XMLID === "PENALTY_SKILL_LEVELS";
     }
 
+    psls(penaltyType) {
+        return this.allPsls.filter((psl) => psl.pslPenaltyType === penaltyType);
+    }
+
+    get allPsls() {
+        return (this.actor?.activePslSkills || []).filter((psl) => psl.pslAppliesTo(this));
+    }
+
     pslAppliesTo(attackItem) {
         if (!this.isPsl) {
             if (!this.actor?.name.startsWith("_Quench")) {
@@ -6564,8 +6574,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         switch (this.system.OPTIONID) {
             case "SINGLE":
-            case "THREE":
-            case "TIGHT":
+            case "THREE": // 6e
+            case "TIGHT": // 5e
                 return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
 
             case "ALL":
