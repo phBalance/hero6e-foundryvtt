@@ -3598,12 +3598,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return this.getActorCharacterAndActivePoints().realCost;
     }
 
-    pslPentaltyItems(penaltyType) {
+    pslPenaltyItems(penaltyType) {
         return this.items.filter((item) => item.pslPenaltyType === penaltyType);
     }
 
-    pslPentaltyValue(penaltyType) {
-        const psls = this.pslPentaltyItems(penaltyType);
+    pslPenaltyValue(penaltyType) {
+        const psls = this.pslPenaltyItems(penaltyType);
         const valueSum = psls.reduce(
             (accumulator, currentValue) => accumulator + parseInt(currentValue.system.LEVELS) || 0,
             0,
