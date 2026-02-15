@@ -40,6 +40,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             carried: HeroSystemActorSheetV2.#onCarried,
             clear: HeroSystemActorSheetV2.#onClear,
             clips: HeroSystemActorSheetV2.#onClips,
+            configureActorType: HeroSystemActorSheetV2.#onConfigureActorType,
             configureToken: HeroSystemActorSheetV2.#onConfigureToken,
             fullHealth: HeroSystemActorSheetV2.#onFullHealth,
             presenceAttack: HeroSystemActorSheetV2.#onPresenceAttack,
@@ -61,15 +62,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             //     icon: "fas fa-gear", // You can now add an icon to the header
             //     title: "FOO.form.title",
             contentClasses: ["standard-form"],
-            // controls: [
-            //     {
-            //         action: "configureToken",
-            //         icon: "fa-regular fa-circle-user",
-            //         label: "DOCUMENT.Token",
-            //         visible: true,
-            //         ownership: "OWNER",
-            //     },
-            // ],
+            controls: [
+                {
+                    action: "configureActorType",
+                    icon: "fal fa-user-robot",
+                    label: "Actor type",
+                    ownership: "OWNER",
+                },
+            ],
             tabs: [
                 {
                     navSelector: ".sheet-navigation",
@@ -127,6 +127,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static #onPresenceAttack() {
         this.actor.presenceAttack({ token: this.token });
+    }
+
+    static #onConfigureActorType() {
+        this.actor.changeType();
     }
 
     static #onConfigureToken() {
@@ -308,6 +312,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                             context.tabs[tabName].cssClass.push("empty");
                         }
 
+                        // 5e disadvantages
+                        if (tabName === "complications" && this.actor.is5e) {
+                            context.tabs[tabName].label = "Disadvantages";
+                        }
+
                         const hv = this.#heroValidationCssForTab(this._items[tabName]);
                         if (hv) {
                             context.tabs[tabName].cssClass.push(hv);
@@ -344,6 +353,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                             relativeTo: this.document,
                         },
                     );
+                    context.metricUnits = game.settings.get(game.system.id, "metricUnits");
                     break;
                 case "effects":
                     context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects())
@@ -673,14 +683,30 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         for (const input of editableInputButtons) {
             const attributeName = input.name;
             if (foundry.utils.hasProperty(this.actor, attributeName)) {
-                // keep in mind that if your callback is a named function instead of an arrow function expression
-                // you'll need to use `bind(this)` to maintain context
-                input.addEventListener("change", async (e) => {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    const newValue = e.currentTarget.value;
-                    await this.actor.update({ [`${attributeName}`]: newValue });
-                });
+                if (attributeName.endsWith("HEIGHT")) {
+                    input.addEventListener("change", async (e) => {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        const metricUnits = game.settings.get(game.system.id, "metricUnits");
+                        const newValue = e.currentTarget.value / (metricUnits ? 2.54 : 1);
+                        await this.actor.update({ [`${attributeName}`]: newValue });
+                    });
+                } else if (attributeName.endsWith("WEIGHT")) {
+                    input.addEventListener("change", async (e) => {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        const metricUnits = game.settings.get(game.system.id, "metricUnits");
+                        const newValue = e.currentTarget.value / (metricUnits ? 0.45359237 : 1);
+                        await this.actor.update({ [`${attributeName}`]: newValue });
+                    });
+                } else {
+                    input.addEventListener("change", async (e) => {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        const newValue = e.currentTarget.value;
+                        await this.actor.update({ [`${attributeName}`]: newValue });
+                    });
+                }
             } else if (attributeName.startsWith("endReserve")) {
                 const endItem = this.actor.items.find(
                     (item) => item.id === attributeName.match(/endReserve\.([a-zA-z0-9]+)\.value/)?.[1],

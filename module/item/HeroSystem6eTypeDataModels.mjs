@@ -1860,6 +1860,26 @@ export class HeroActorCharacterInfoModel extends foundry.abstract.DataModel {
             _hdcXml: new StringField(),
         };
     }
+
+    get height() {
+        // HEIGHT is stored in inches in the HDC XML, so we convert to cm if metric units is enabled.
+        const metricUnits = game.settings.get(game.system.id, "metricUnits");
+        return metricUnits ? this.HEIGHT * 2.54 : this.HEIGHT;
+    }
+    // set height(value) {
+    //     const metricUnits = game.settings.get(game.system.id, "metricUnits");
+    //     this.HEIGHT = metricUnits ? value / 2.54 : value;
+    // }
+
+    get weight() {
+        // WEIGHT is stored in pounds in the HDC XML, so we convert to kg if metric units is enabled.
+        const metricUnits = game.settings.get(game.system.id, "metricUnits");
+        return metricUnits ? Math.round(this.WEIGHT * 0.45359237) : this.WEIGHT;
+    }
+    // set weight(value) {
+    //     const metricUnits = game.settings.get(game.system.id, "metricUnits");
+    //     this.WEIGHT = metricUnits ? value / 0.45359237 : value;
+    // }
 }
 
 export class HeroActorTemplateModel extends foundry.abstract.DataModel {
