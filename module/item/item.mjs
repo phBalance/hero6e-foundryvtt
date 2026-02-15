@@ -84,6 +84,10 @@ function itemHasDefenseActiveEffect(item) {
 
 // Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
 function itemFullDescription(item) {
+    if (item.name === "LIST" && item.system.XMLID === "LIST") {
+        return "";
+    }
+
     let desc = item.system.description;
     if (item.system.NAME) {
         desc = `<i>${item.system.NAME}:</i> ${item.system.description}`;
@@ -4754,7 +4758,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // A backpack from MiscEquipment.hdp is a CUSTOMPOWER
         if (this.system.description.match(/can hold \d+kg/i)) return true;
 
-        return this.baseInfo?.isContainer;
+        return !!this.baseInfo?.isContainer;
     }
 
     get isSeparator() {
