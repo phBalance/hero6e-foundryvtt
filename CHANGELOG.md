@@ -1,6 +1,12 @@
 # Releases
 
-### Version 4.2.16 20260214 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.17 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- PSL improvements.
+  - They now support custom adders to link to attacks. [#3736](https://github.com/dmdorman/hero6e-foundryvtt/issues/3736)
+  - Hit locations offsets now supported. [#2734](https://github.com/dmdorman/hero6e-foundryvtt/issues/2734) [#2802](https://github.com/dmdorman/hero6e-foundryvtt/issues/2802)
+
+### Version 4.2.16 20260214
 
 - We encourage you upgrade to FoundryVTT v13. We will no longer be testing with FoundryVTT v12.
 - The [preview](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) of Actor Sheet V2 is now only v13 compatible.
