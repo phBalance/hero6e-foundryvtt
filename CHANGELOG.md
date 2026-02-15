@@ -5,6 +5,7 @@
 - PSL improvements.
   - They now support custom adders to link to attacks. [#3736](https://github.com/dmdorman/hero6e-foundryvtt/issues/3736)
   - Hit locations offsets now supported. [#2734](https://github.com/dmdorman/hero6e-foundryvtt/issues/2734) [#2802](https://github.com/dmdorman/hero6e-foundryvtt/issues/2802)
+  - Editing of 5e PSLs now supports correct OPTIONS. [#2799](https://github.com/dmdorman/hero6e-foundryvtt/issues/2799)
 
 ### Version 4.2.16 20260214
 

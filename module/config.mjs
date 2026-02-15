@@ -4254,6 +4254,39 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1709161534055" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="44" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="to offset a specific negative OCV modifier with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
         {
+            editOptions: {
+                showAttacks: true,
+                editableOption_ALIAS: false,
+                choices: [
+                    {
+                        OPTIONID: "SINGLE",
+                        OPTION: "SINGLE",
+                        OPTION_ALIAS: "a single attack",
+                    },
+                    {
+                        OPTIONID: "TIGHT",
+                        OPTION: "TIGHT",
+                        OPTION_ALIAS: "a tight group of attacks",
+                    },
+                    {
+                        OPTIONID: "ALL",
+                        OPTION: "ALL",
+                        OPTION_ALIAS: "all attacks",
+                    },
+                ],
+                choicesInput: [
+                    { INPUT: "Hit Location modifiers" },
+                    { INPUT: "Range Modifier" },
+                    { INPUT: "Throwing modifiers" },
+                    { INPUT: "Armor penalties to DCV" },
+                ],
+                penaltyChoices: {
+                    hitLocation: "Hit Location modifiers",
+                    range: "Range Modifier",
+                    throwing: "Throwing modifiers",
+                    armor: "Armor penalties to DCV",
+                },
+            },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "SINGLE":
