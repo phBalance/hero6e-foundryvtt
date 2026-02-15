@@ -84,6 +84,10 @@ function itemHasDefenseActiveEffect(item) {
 
 // Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
 function itemFullDescription(item) {
+    if (item.name === "LIST" && item.system.XMLID === "LIST") {
+        return "";
+    }
+
     let desc = item.system.description;
     if (item.system.NAME) {
         desc = `<i>${item.system.NAME}:</i> ${item.system.description}`;
