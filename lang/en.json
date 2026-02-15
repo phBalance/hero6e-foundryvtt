@@ -311,6 +311,10 @@
             "Name": "Long-term Endurance",
             "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation. When an actor's average END use per turn exceeds double their REC, max END is lowered."
         },
+        "MetricUnits": {
+            "Name": "Use Metric Units",
+            "Hint": "Display actor sheet background height and weight in metric units (meters) instead of imperial units (feet)."
+        },
         "NonStandardStunMultiplierForKillingAttack": {
             "Name": "Custom Killing Attack STUN Multiplier",
             "Label": "STUN Multipler Override",

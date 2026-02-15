@@ -504,6 +504,16 @@ export default class SettingsHelpers {
             requiresReload: true,
         });
 
+        game.settings.register(module, "metricUnits", {
+            name: game.i18n.localize("Settings.MetricUnits.Name"),
+            hint: game.i18n.localize("Settings.MetricUnits.Hint"),
+            scope: "client",
+            config: true,
+            type: Boolean,
+            default: true,
+            requiresReload: false,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: game.i18n.localize("Settings.AlphaTesting.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.Hint"),
