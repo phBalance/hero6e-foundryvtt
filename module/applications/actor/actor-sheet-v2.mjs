@@ -1,7 +1,12 @@
 import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
-import { getCharacteristicInfoArrayForActor, tokenEducatedGuess } from "../../utility/util.mjs";
+import {
+    getPowerInfo,
+    getCharacteristicInfoArrayForActor,
+    tokenEducatedGuess,
+    whisperUserTargetsForActor,
+} from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -795,16 +800,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
     }
 
-    async _onDropItem(event, data) {
-        const target = event.currentTarget;
-        const targetTab = target.closest("[data-tab]")?.dataset?.tab;
-        if (!targetTab) {
-            return; // This is not a data-tab
-        }
-
+    async _onDropItemOnTab(event, data, item, targetTab) {
         // Stop propagation to the generic actor sheet.
         event.preventDefault();
         event.stopImmediatePropagation();
+
+        if (!item) {
+            console.error(`Missing item`);
+            return;
+        }
 
         const targetType = targetTab.replace(/s$/, "");
 
@@ -816,40 +820,236 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return;
         }
 
-        const item = await fromUuid(data.uuid);
-        if (!item) {
-            console.error(`Missing item`);
-            return;
-        }
-
         if (!validItemTypeChanges.includes(item.type)) {
             console.error(`${item.name} has unsupported type= ${item.type}`);
             return;
         }
 
-        if (targetType === item.type) {
-            console.error(`${item.name} has identical type= ${item.type}, no action taken.`);
+        if (!item.actor) {
+            console.error(`${item.name} is missing parent actor`);
             return;
         }
+
+        // if (targetType === item.type) {
+        //     console.error(`${item.name} has identical type= ${item.type}, no action taken.`);
+        //     return;
+        // }
 
         // Most things can become a power or equipment.
         // Or change from power/equipment to native type.
         if (["power", "equipment"].includes(targetType) || item.baseInfo.type.includes(targetType)) {
             const preType = item.type;
             if (item.system.PARENTID) {
-                await item.update({
-                    "system.PARENTID": null,
-                });
+                item.system.PARENTID = null;
             }
             await item.update({
                 type: targetType,
                 "==system": item.system,
             });
+
+            // change type of any children to match new parent type
+            async function changeChildType(item, newType) {
+                for (const child of item.childItems) {
+                    if (child.type !== newType) {
+                        await child.update({
+                            type: newType,
+                            "==system": child.system,
+                        });
+                        await changeChildType(child, newType);
+                    }
+                }
+            }
+            await changeChildType(item, targetType);
+
             ui.notifications.info(`${item.name} was changed from type=${preType} to type=${item.type}`);
             return;
         }
 
         console.error(`Failed to change ${item.name} type.`);
+    }
+
+    async _onDropItem(event, data) {
+        if (!this.actor.isOwner) {
+            console.warn(`not owner`);
+            return false;
+        }
+
+        const item = await fromUuid(data.uuid);
+        if (!item) {
+            console.error(`Missing item`);
+            return;
+        }
+
+        const target = event.currentTarget;
+        const targetTab = target.closest("[data-tab]")?.dataset?.tab;
+        if (targetTab) {
+            return this._onDropItemOnTab(event, data, item, targetTab);
+        }
+
+        const dropTarget = event.target.closest("[data-document-uuid]");
+
+        const sameActor = item.actor?.id === this.actor.id;
+        if (sameActor) {
+            // we are dragging in or out of a parent item
+            if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
+                const parentItem = await fromUuid(dropTarget?.dataset.documentUuid);
+                if (!item.system.PARENTID && parentItem?.isContainer) {
+                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${parentItem.name}</b>`);
+                    await item.update({ "system.PARENTID": parentItem.system.ID });
+                } else if (item.system.PARENTID && !parentItem?.system.PARENTID) {
+                    ui.notifications.info(
+                        `<b>${item.name}</b> was removed from parent <b>${item.parentItem.name}</b>.`,
+                    );
+                    await item.update({ "system.-=PARENTID": null, type: item.parentItem.type });
+                } else if (!item.isContainer && parentItem?.isContainer) {
+                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${parentItem.name}</b>`);
+                    await item.update({ "system.PARENTID": parentItem.system.ID });
+                }
+            }
+
+            return super._onDropItem(event, item);
+        }
+
+        if (item.isCombatManeuver) {
+            ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
+            return;
+        }
+
+        // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
+        const baseInfoCheck = getPowerInfo({
+            xmlid: item.system.XMLID,
+            is5e: this.actor.is5e,
+            xmlTag: item.xmlTag,
+        });
+        if (!baseInfoCheck) {
+            ui.notifications.error(
+                `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
+            );
+            return;
+        }
+
+        await this.DropItemFramework(item);
+    }
+
+    async DropItemFramework(item, parentId) {
+        const itemData = item.toObject();
+
+        // Create new system.ID
+        itemData.system.ID = new Date().getTime();
+
+        // Remove system.PARENTID
+        delete itemData.system.PARENTID;
+        if (parentId) {
+            itemData.system.PARENTID = parentId;
+        }
+        delete itemData.system.childIdx; // Not really used as of 3.0.100, but good to clean up any older items
+
+        // Handle item sorting within the same Actor
+        // TODO: Allow drag/drop to change order
+        if (this.actor.uuid === item.parent?.uuid) return this._onSortItem(event, itemData);
+
+        if (itemData.system.is5e !== undefined && itemData.system.is5e !== this.actor.is5e) {
+            ui.notifications.warn(
+                `${itemData.name} is a ${itemData.system.is5e ? "5e" : "6e"} item.  ${this.actor.name} is a ${
+                    this.actor.system.is5e ? "5e" : "6e"
+                } actor.  Mixing 5e/6e may have unpredictable results.`,
+            );
+        }
+
+        // Create the owned item
+        await this._onDropItemCreate(itemData, itemData.system.PARENTID);
+
+        const actor = this.actor;
+        const token = actor.token;
+        const dropName = token?.name || actor.getActiveTokens()?.[0]?.name || actor.name;
+        const dragName =
+            item.actor?.token?.name ||
+            item.actor?.getActiveTokens()?.[0]?.name ||
+            item.actor?.name ||
+            item.compendium?.name ||
+            (item.uuid.startsWith("Item.") ? "ItemSidebar" : null);
+        const chatData = {
+            author: game.user._id,
+            whisper: [...whisperUserTargetsForActor(actor), ...whisperUserTargetsForActor(item.actor)],
+        };
+
+        // Delete original if equipment and it belonged to an actor (as opposed to item sidebar or compendium)?
+        if (item.type === "equipment" && item.actor) {
+            item.delete();
+            chatData.content = `<b>${item.name}</b> was transferred from <b>${dragName}</b> to <b>${dropName}</b>.`;
+        } else {
+            chatData.content = `<b>${item.name}</b> was copied from <b>${dragName}</b> to <b>${dropName}</b>.`;
+        }
+        ChatMessage.create(chatData);
+
+        // Is this a parent item with children?
+        for (const child of item.childItems) {
+            await this.DropItemFramework(child, itemData.system.ID);
+        }
+    }
+
+    async _onDropItemCreate(itemData) {
+        const itemDataArray = itemData instanceof Array ? itemData : [itemData];
+        for (const i of itemDataArray) {
+            // Make sure newly dropped items are not active
+            if (i.system.active) {
+                i.system.active = false;
+            }
+            // Remove all active effects
+            i.effects = [];
+        }
+
+        // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
+        for (const itemData of itemDataArray) {
+            const baseInfoCheck = getPowerInfo({
+                xmlid: itemData.system.XMLID,
+                is5e: this.actor.is5e,
+                xmlTag: itemData.xmlTag,
+            });
+            if (!baseInfoCheck) {
+                ui.notifications.error(
+                    `${itemData.system.XMLID} is not valid for ${this.actor.is5e ? "5e" : "6e"}. "${itemData.name}" was not transferred to ${this.actor.name} `,
+                );
+                return;
+            }
+        }
+
+        // STACKABLE EQUIPMENT: If this is EQUIPMENT and destination has similar, and it has full CHARGES then add the charges.
+        if (itemDataArray.length === 1) {
+            const stackItem = itemDataArray[0];
+            if (stackItem.type === "equipment") {
+                stackItem.system.MODIFIER ??= [];
+                const CHARGES = stackItem.system.MODIFIER.find((o) => o.XMLID === "CHARGES");
+                const chargesMax = parseInt(CHARGES?.OPTION_ALIAS);
+                const charges = stackItem.system._charges ?? chargesMax;
+                if (chargesMax > 0 && charges === chargesMax) {
+                    const existingItem = this.actor.items.find(
+                        (o) =>
+                            o.type === "equipment" &&
+                            o.system.XMLID === stackItem.system.XMLID &&
+                            o.system.ALIAS === stackItem.system.ALIAS &&
+                            o.system.NAME === stackItem.system.NAME &&
+                            o.findModsByXmlid("CHARGES"),
+                    );
+                    if (existingItem) {
+                        const chargeItemModifier = existingItem.system.chargeItemModifier;
+                        if (chargeItemModifier) {
+                            ui.notifications.warn(
+                                `Adding <b>${chargesMax}</b> charges to <b>${existingItem.name}</b> instead of a new item.`,
+                            );
+                            await existingItem.system.setChargesAndSave(existingItem.system.numCharges + chargesMax);
+                        } else {
+                            console.error(`Unable to locate chargeItemModifier`, existingItem);
+                        }
+
+                        return [existingItem];
+                    }
+                }
+            }
+        }
+
+        const newItems = await this.actor.createEmbeddedDocuments("Item", itemDataArray);
+        return newItems;
     }
 
     async _uploadCharacterSheet(event) {
