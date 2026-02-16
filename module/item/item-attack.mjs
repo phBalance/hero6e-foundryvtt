@@ -772,7 +772,7 @@ async function doSingleTargetActionToHit(action, options) {
     // as aiming an attack, pulling a trigger, or using a Power with the
     // Gestures Limitation.
     // Not all token types (base) will have STR
-    if (actor && actor.system.characteristics.str && (item.system.usesStrength || item.findModsByXmlid("GESTURES"))) {
+    if (actor && actor.hasCharacteristic("STR") && (item.system.usesStrength || item.findModsByXmlid("GESTURES"))) {
         if (parseInt(actor.system.characteristics.str.value) <= 0) {
             if (
                 !(await RequiresACharacteristicRollCheck(
@@ -794,7 +794,7 @@ async function doSingleTargetActionToHit(action, options) {
     // offensive action, or to remain in the face of anything even
     // remotely threatening.
     // Not all token types (base) will have PRE
-    if (actor && actor.system.characteristics.pre && parseInt(actor.system.characteristics.pre.value) <= 0) {
+    if (actor && actor.hasCharacteristic("PRE") && parseInt(actor.system.characteristics.pre.value) <= 0) {
         if (
             !(await RequiresACharacteristicRollCheck(
                 actor,
