@@ -862,7 +862,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 this,
             );
 
-            return "Unknown PSL key";
+            return "";
         }
 
         return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES[pslPenaltyTypeKey];
@@ -909,6 +909,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             // Update CSLs if their ADDER array has changed (in any way)
             if (changes.system.ADDER != null) {
                 const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.cslItems || []);
+                foundry.utils.mergeObject(changes, relinkChanges);
+            }
+        }
+
+        // PSLs have multiple fields which are linked. Do that linking.
+        if (this.isPsl) {
+            // Update CSLs if their ADDER array has changed (in any way)
+            if (changes.system.ADDER != null) {
+                const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.pslItems || []);
                 foundry.utils.mergeObject(changes, relinkChanges);
             }
         }
@@ -6278,11 +6287,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Are there any items which are not allowed that are the target of custom adders?
+     * Are there any items which are not allowed that are the target of this PSL's custom adders?
      *
      * @returns boolean
      */
-    get notAllowedItemsInCustomAdders() {
+    get notAllowedItemsInCslCustomAdders() {
         return this.customLinkAddersToExpandedItems.filter((item) => !this.cslAppliesTo(item));
     }
 
@@ -6347,6 +6356,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * Is this item a CSL and does it apply to the given attackItem
      *
      * @param {HeroSystem6eItem} attackItem
+     *
      * @returns boolean
      */
     cslAppliesTo(attackItem) {
@@ -6564,6 +6574,22 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return (this.actor?.activePslSkills || []).filter((psl) => psl.pslAppliesTo(this));
     }
 
+    /**
+     * Are there any items which are not allowed that are the target of this PSL's custom adders?
+     *
+     * @returns boolean
+     */
+    get notAllowedItemsInPslCustomAdders() {
+        return this.customLinkAddersToExpandedItems.filter((item) => !this.pslAppliesTo(item));
+    }
+
+    /**
+     * Is this item a PSL and does it apply to the given attackItem?
+     *
+     * @param {HeroSystem6eItem} attackItem
+     *
+     * @returns boolean
+     */
     pslAppliesTo(attackItem) {
         if (!this.isPsl) {
             if (!this.actor?.name.startsWith("_Quench")) {
@@ -6572,17 +6598,51 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return false;
         }
 
-        switch (this.system.OPTIONID) {
-            case "SINGLE":
-            case "THREE": // 6e
-            case "TIGHT": // 5e
-                return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
-
-            case "ALL":
-                return true;
+        if (this.system.OPTIONID === "SINGLE" || this.system.OPTIONID === "THREE" || this.system.OPTIONID === "TIGHT") {
+            return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
+        } else if (this.system.OPTIONID === "ALL") {
+            return true;
         }
 
         console.error(`Unknown OPTIONID ${this.system.OPTIONID} for ${this.detailedName()}`);
+        return false;
+    }
+
+    /**
+     * Returns the maximum number of attacks the CSL can be applied against
+     *
+     * @returns Number
+     */
+    get maxCustomPslAdders() {
+        if (this.is5e) {
+            if (this.system.XMLID === "PENALTY_SKILL_LEVELS") {
+                switch (this.system.OPTIONID) {
+                    case "SINGLE":
+                        return 1;
+                    case "TIGHT":
+                        return 3; // To match CSLs
+                    case "ALL":
+                        // No restrictions
+                        return +Infinity;
+                }
+            }
+        } else {
+            // 6e
+            if (this.system.XMLID === "PENALTY_SKILL_LEVELS") {
+                switch (this.system.OPTIONID) {
+                    case "SINGLE":
+                        return 1;
+                    case "THREE":
+                        return 3;
+                    case "ALL":
+                        // No restrictions
+                        return +Infinity;
+                }
+            }
+        }
+
+        console.error(`Unhandled PSL ${this.detailedName()}/${this.is5e}`);
+        return 0;
     }
 
     get combatSkillLevelsForAttack() {
