@@ -903,13 +903,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // CSLs have multiple fields which are linked. Do that linking.
         if (this.isCsl) {
             // Reinitialize CSLs if their LEVELS have changed
-            if (changes.system.LEVELS != null && changes.system.LEVELS !== this.system.LEVELS) {
+            if (changes.system?.LEVELS != null && changes.system?.LEVELS !== this.system?.LEVELS) {
                 const reinitializationChanges = this.initializeCsl(changes.system.LEVELS);
                 foundry.utils.mergeObject(changes, reinitializationChanges);
             }
 
             // Update CSLs if their ADDER array has changed (in any way)
-            if (changes.system.ADDER != null) {
+            if (changes.system?.ADDER != null) {
                 const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.cslItems || []);
                 foundry.utils.mergeObject(changes, relinkChanges);
             }
@@ -917,8 +917,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // PSLs have multiple fields which are linked. Do that linking.
         if (this.isPsl) {
-            // Update CSLs if their ADDER array has changed (in any way)
-            if (changes.system.ADDER != null) {
+            // Update PSLs if their ADDER array has changed (in any way)
+            if (changes.system?.ADDER != null) {
                 const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.pslItems || []);
                 foundry.utils.mergeObject(changes, relinkChanges);
             }
