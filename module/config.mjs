@@ -3305,7 +3305,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             refreshAttackDialogWhenChanged: true,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
-                showAttacks: true,
+                showAttacks: fixedValueFunction(true),
                 editableOption_ALIAS: true,
                 choices: [
                     {
@@ -3952,7 +3952,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             refreshAttackDialogWhenChanged: true,
             editOptions: {
-                showAttacks: true,
+                showAttacks: fixedValueFunction(true),
                 editableOption_ALIAS: true,
                 choices: [
                     {
@@ -4161,7 +4161,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             editOptions: {
-                showAttacks: true,
+                showAttacks: function (item) {
+                    // DPSLs do not have attacks/linked custom adders
+                    if (item.system.OPTIONID === "SINGLEDCV" || item.system.OPTIONID === "GROUPDCV") {
+                        return false;
+                    }
+
+                    return true;
+                },
                 editableOption_ALIAS: true,
                 choices: [
                     {
@@ -4272,7 +4279,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             editOptions: {
-                showAttacks: true,
+                showAttacks: fixedValueFunction(true),
                 editableOption_ALIAS: false,
                 choices: [
                     {
@@ -6168,7 +6175,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             editOptions: {
-                showAttacks: true,
+                showAttacks: fixedValueFunction(true),
                 editableOption_ALIAS: true,
                 choices: [
                     {
