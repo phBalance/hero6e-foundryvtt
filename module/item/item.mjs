@@ -849,7 +849,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get pslPenaltyType() {
-        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
+        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") {
+            return "";
+        }
 
         // 5e uses INPUT. 6e uses OPTION_ALIAS (free text)
         const pslPenaltyTypeKey = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
@@ -6634,6 +6636,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         } else {
             // 6e
             if (this.system.XMLID === "PENALTY_SKILL_LEVELS") {
+                // 6e Defensive PSLs don't apply to any attacks so they need no custom adders
+                if (this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") {
+                    return 0;
+                }
+
                 switch (this.system.OPTIONID) {
                     case "SINGLE":
                         return 1;

@@ -4207,27 +4207,44 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     validations.push({
                         property: "OPTION_ALIAS",
                         message: `Expecting one of these words [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
-                        example: `to offset range penalty OCV modifier with any single attack`,
+                        example: `to offset negative Range OCV modifiers with all attacks`,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
                 }
 
-                // Attack specified
-                if (item.system.OPTIONID !== "ALL") {
-                    const firstValidAttack = item.adders.find(
-                        (adder) =>
-                            adder.ALIAS &&
-                            item.actor?.items.find(
-                                (item) => adder.ALIAS.toLowerCase().trim() === item.name.toLowerCase().trim(),
-                            ),
-                    );
-                    if (!firstValidAttack) {
-                        validations.push({
-                            property: "AttacksIncluded",
-                            message: `Expecting one or more custom adders with names matching specific attacks this PSL works with.`,
-                            severity: HERO.VALIDATION_SEVERITY.WARNING,
-                        });
-                    }
+                // Ensure that all custom adders are mapped to objects
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        example: `Strike`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Some PSLs have limits on the number of supported attacks
+                // Custom adders are how we track how many attacks that this CSL applies to.
+                const customAdders = item.customLinkAdders;
+                const maxCustomAdders = item.maxCustomPslAdders;
+                if (customAdders.length > maxCustomAdders) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Expecting PSL to have ${maxCustomAdders} or fewer attacks. Consider consolidating related attacks into a list or multipower`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Ensure that all of the defined custom adders are supported
+                const notAllowedItemsInPslCustomAdders = item.notAllowedItemsInPslCustomAdders;
+                if (notAllowedItemsInPslCustomAdders.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `${notAllowedItemsInPslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInPslCustomAdders.map((item) => item.name).join(", ")}`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
                 }
 
                 return validations;
