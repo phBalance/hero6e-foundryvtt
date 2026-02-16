@@ -20,16 +20,23 @@
         <ol class="item-list attacks-list unlist">
             {{#each items as |item|}}
                 <li class="item attack draggable unlist" data-document-uuid="{{this.uuid}}">
-                    <div class="item-row {{this.validationCss}}">
+                    <div class="item-row {{this.validationCss}}"
+                    {{#if this.validationTooltip}}
+                        data-tooltip="{{this.validationTooltip}}"
+                    {{/if}}
+                    >
                         <div class="item-column item-name"
-                            data-tooltip="{{this.validationTooltip}}"
+                            
+                            
                         >
                             {{#if this.validationTooltip}}
                                 <i class="fa-regular fa-circle-exclamation fa-2xl"></i>
                             {{else}}
                                 <img class="item-image" src="{{this.img}}" alt="{{this.name}}">
                             {{/if}}
-                            <div class="name">
+                            <div class="name"
+                                data-tooltip="{{itemFullDescription this}}"
+                            >
                                 <div class="label">
                                     {{#if (eq item.parentItem.system.XMLID "COMPOUNDPOWER")}}
                                         {{{item.parentItem.name}}}: 
