@@ -3677,19 +3677,33 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return roundFavorPlayerTowardsZero(this._activePoints);
     }
 
-    // PH: FIXME: Any similarity that we want to refactor with the cslItems
-    // PH: FIXME: Any filtering and sorting required
+    /**
+     * Return an array of the actor's attack items that could be a match for this PSL.
+     * They will either be single items or framework that contains potentially multiple items.
+     *
+     * @returns {HeroSystem6eItem[]}
+     */
     get pslItems() {
-        return this.items;
+        return this.sortedAttackItemsForCslPsl;
     }
 
     /**
-     * Return an array of the actor's items that could be a match. They will either be single items or framework that contains
-     * potentially multiple items.
+     * Return an array of the actor's attack items that could be a match for this CSL.
+     * They will either be single items or framework that contains potentially multiple items.
      *
      * @returns {HeroSystem6eItem[]}
      */
     get cslItems() {
+        return this.sortedAttackItemsForCslPsl;
+    }
+
+    /**
+     * Return an array of the actor's attack items that could be a match CSLs and PSLs.
+     * They will either be single items or framework that contains potentially multiple items.
+     *
+     * @returns {HeroSystem6eItem[]}
+     */
+    get sortedAttackItemsForCslPsl() {
         try {
             const priorityCsl = function (item) {
                 switch (item.type) {

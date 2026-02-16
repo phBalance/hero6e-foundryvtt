@@ -4155,7 +4155,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PENALTY_SKILL_LEVELS",
             type: ["skill"],
-            behaviors: [],
+            behaviors: ["activatable"],
             duration: HERO.DURATION_TYPES.CONSTANT,
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),

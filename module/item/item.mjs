@@ -829,47 +829,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.heroValidation.map((m) => m.message).join(", ");
     }
 
-    get pslRangePenaltyOffsetItems() {
-        return this.pslTypeOffsetItems(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range);
-    }
-
-    // PH: FIXME: some similarity to CSLs
-    pslTypeOffsetItems(pslType) {
-        const psls = this.actor.items.filter(
-            (pslItem) =>
-                pslItem.pslPenaltyType === pslType &&
-                (pslItem.system.OPTIONID === "ALL" ||
-                    pslItem.adders.find(
-                        (adder) => adder.ALIAS.toLowerCase().trim() === this.name.toLowerCase().trim(),
-                    )) &&
-                pslItem.isActive !== false,
-        );
-
-        return psls;
-    }
-
-    get pslPenaltyType() {
-        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") {
-            return "";
-        }
-
-        // 5e uses INPUT. 6e uses OPTION_ALIAS (free text)
-        const pslPenaltyTypeKey = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
-            .map((psl) => psl.toLowerCase())
-            .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
-
-        if (!pslPenaltyTypeKey) {
-            console.warn(
-                `Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.name}`,
-                this,
-            );
-
-            return "";
-        }
-
-        return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES[pslPenaltyTypeKey];
-    }
-
     setCarried() {
         if (this.system.CARRIED && this.system.active === undefined && this.end === 0) {
             this.system.active ??= true;
@@ -6574,6 +6533,28 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     get allPsls() {
         return (this.actor?.activePslSkills || []).filter((psl) => psl.pslAppliesTo(this));
+    }
+
+    get pslPenaltyType() {
+        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") {
+            return "";
+        }
+
+        // 5e uses INPUT. 6e uses OPTION_ALIAS (free text)
+        const pslPenaltyTypeKey = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
+            .map((psl) => psl.toLowerCase())
+            .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
+
+        if (!pslPenaltyTypeKey) {
+            console.warn(
+                `Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.name}`,
+                this,
+            );
+
+            return "";
+        }
+
+        return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES[pslPenaltyTypeKey];
     }
 
     /**
