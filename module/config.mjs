@@ -3380,11 +3380,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -3392,7 +3392,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({
@@ -3404,11 +3404,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all of the defined custom adders are supported
-                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
-                if (notAllowedItemsInCustomAdders.length > 0) {
+                const notAllowedItemsInCslCustomAdders = item.notAllowedItemsInCslCustomAdders;
+                if (notAllowedItemsInCslCustomAdders.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        message: `${notAllowedItemsInCslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCslCustomAdders.map((item) => item.name).join(", ")}`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -3433,11 +3433,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -3445,7 +3445,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({
@@ -3457,11 +3457,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all of the defined custom adders are supported
-                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
-                if (notAllowedItemsInCustomAdders.length > 0) {
+                const notAllowedItemsInCslCustomAdders = item.notAllowedItemsInCslCustomAdders;
+                if (notAllowedItemsInCslCustomAdders.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        message: `${notAllowedItemsInCslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCslCustomAdders.map((item) => item.name).join(", ")}`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -3992,11 +3992,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const validations = [];
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -4004,7 +4004,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({
@@ -4016,11 +4016,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all of the defined custom adders are supported
-                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
-                if (notAllowedItemsInCustomAdders.length > 0) {
+                const notAllowedItemsInCslCustomAdders = item.notAllowedItemsInCslCustomAdders;
+                if (notAllowedItemsInCslCustomAdders.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        message: `${notAllowedItemsInCslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCslCustomAdders.map((item) => item.name).join(", ")}`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -4205,7 +4205,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Penalty Type
                 if (!item.pslPenaltyType) {
                     validations.push({
-                        property: item.is5e ? "INPUT" : "OPTION_ALIAS",
+                        property: "OPTION_ALIAS",
                         message: `Expecting one of these words [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
                         example: `to offset range penalty OCV modifier with any single attack`,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
@@ -4254,6 +4254,89 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1709161534055" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="44" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="to offset a specific negative OCV modifier with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
         {
+            editOptions: {
+                showAttacks: true,
+                editableOption_ALIAS: false,
+                choices: [
+                    {
+                        OPTIONID: "SINGLE",
+                        OPTION: "SINGLE",
+                        OPTION_ALIAS: "a single attack",
+                    },
+                    {
+                        OPTIONID: "TIGHT",
+                        OPTION: "TIGHT",
+                        OPTION_ALIAS: "a tight group of attacks",
+                    },
+                    {
+                        OPTIONID: "ALL",
+                        OPTION: "ALL",
+                        OPTION_ALIAS: "all attacks",
+                    },
+                ],
+                choicesInput: [
+                    { INPUT: "Hit Location modifiers" },
+                    { INPUT: "Range Modifier" },
+                    { INPUT: "Throwing modifiers" },
+                    { INPUT: "Armor penalties to DCV" },
+                ],
+                penaltyChoices: {
+                    hitLocation: "Hit Location modifiers",
+                    range: "Range Modifier",
+                    throwing: "Throwing modifiers",
+                    armor: "Armor penalties to DCV",
+                },
+            },
+            heroValidation: function (item) {
+                const validations = [];
+
+                // Penalty Type
+                if (!item.pslPenaltyType) {
+                    validations.push({
+                        property: "INPUT",
+                        message: `Expecting one of these words [${Object.keys(HERO.PENALTY_SKILL_LEVELS_TYPES).join(", ")}].`,
+                        example: `to offset range penalty OCV modifier with any single attack`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Ensure that all custom adders are mapped to objects
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        example: `Strike`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Some PSLs have limits on the number of supported attacks
+                // Custom adders are how we track how many attacks that this CSL applies to.
+                const customAdders = item.customLinkAdders;
+                const maxCustomAdders = item.maxCustomPslAdders;
+                if (customAdders.length > maxCustomAdders) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Expecting PSL to have ${maxCustomAdders} or fewer attacks. Consider consolidating related attacks into a list or multipower`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                // Ensure that all of the defined custom adders are supported
+                const notAllowedItemsInPslCustomAdders = item.notAllowedItemsInPslCustomAdders;
+                if (notAllowedItemsInPslCustomAdders.length > 0) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `${notAllowedItemsInPslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInPslCustomAdders.map((item) => item.name).join(", ")}`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
+
+                return validations;
+            },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "SINGLE":
@@ -6124,11 +6207,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all custom adders are mapped to objects
-                const customCslAddersWithoutItems = item.customCslAddersWithoutItems;
-                if (customCslAddersWithoutItems.length > 0) {
+                const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
+                if (customLinkAddersWithoutItems.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customCslAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
+                        message: `Some custom adders do not match any attack item NAME, ALIAS, or XMLID. Check ${customLinkAddersWithoutItems.map((adder) => `"${adder.ALIAS}"`).join(", ")} for correct spelling`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -6136,7 +6219,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Some CSLs have limits on the number of supported attacks
                 // Custom adders are how we track how many attacks that this CSL applies to.
-                const customAdders = item.customCslAdders;
+                const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomCslAdders;
                 if (customAdders.length > maxCustomAdders) {
                     validations.push({
@@ -6148,11 +6231,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Ensure that all of the defined custom adders are supported
-                const notAllowedItemsInCustomAdders = item.notAllowedItemsInCustomAdders;
-                if (notAllowedItemsInCustomAdders.length > 0) {
+                const notAllowedItemsInCslCustomAdders = item.notAllowedItemsInCslCustomAdders;
+                if (notAllowedItemsInCslCustomAdders.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `${notAllowedItemsInCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCustomAdders.map((item) => item.name).join(", ")}`,
+                        message: `${notAllowedItemsInCslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInCslCustomAdders.map((item) => item.name).join(", ")}`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });

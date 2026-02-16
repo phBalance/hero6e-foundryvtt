@@ -206,7 +206,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     // If there are any custom adders which don't point to real powers include in the list so that
                     // users can uncheck it and make the custom adder go away without having to delete the adder directly
                     // as that's not intuitive.
-                    for (const incorrectCustomAdder of item.customCslAddersWithoutItems) {
+                    for (const incorrectCustomAdder of item.customLinkAddersWithoutItems) {
                         const name = `${incorrectCustomAdder.ALIAS} (Invalid)`;
                         data.attacks.push({
                             id: null,

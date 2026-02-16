@@ -11,7 +11,6 @@ import {
     calculateDicePartsForItem,
     calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
-    penaltySkillLevelsForAttack,
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import {
@@ -468,6 +467,48 @@ async function addAttackCslsIntoToHitRoll(action, attackHeroRoller) {
     Attack.makeActionActiveEffects(action);
 }
 
+async function addAttackHitLocationsIntoToHitRoll(item, attackHeroRoller, options) {
+    let remainingAimOcvPenalty = 0;
+
+    if (game.settings.get(HEROSYS.module, "hit locations") && options.aim && options.aim !== "none") {
+        const aimTargetLocation =
+            game.settings.get(HEROSYS.module, "hitLocTracking") === "all" && options.aimSide !== "none"
+                ? `${options.aimSide} ${options.aim}`
+                : options.aim;
+
+        // Figure out the OCV penalty for the hit location or special hit locations.
+        const locationAimOcvPenalty = CONFIG.HERO.hitLocations[options.aim]?.ocvMod || 0;
+        remainingAimOcvPenalty = locationAimOcvPenalty;
+        if (remainingAimOcvPenalty) {
+            attackHeroRoller.addNumber(remainingAimOcvPenalty, `Placed Shot: ${aimTargetLocation}`);
+        }
+
+        // Penalty Skill Levels
+        // PH: FIXME: need to consider both the item and the effectiveAttackItem
+        for (const psl of item.psls(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.location)) {
+            // Requires A Roll? Only include if successful.
+            // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
+            //            presumably, also not be active for the next phase.
+            if (!(await rollRequiresASkillRollCheck(psl))) {
+                continue;
+            }
+
+            const pslHitLocationMaxOffset = psl.system.LEVELS;
+            const pslHitLocationOffset = Math.min(pslHitLocationMaxOffset, -remainingAimOcvPenalty);
+            remainingAimOcvPenalty += pslHitLocationOffset;
+            attackHeroRoller.addNumber(
+                pslHitLocationOffset,
+                psl.name,
+                pslHitLocationOffset === 0
+                    ? `${pslHitLocationMaxOffset} max placed shot offset -> ${pslHitLocationOffset} actual offset`
+                    : "",
+            );
+        }
+    }
+
+    return remainingAimOcvPenalty;
+}
+
 export async function doAoeActionToHit(action, options) {
     if (!action) {
         return ui.notifications.error(`Attack details are no longer available.`);
@@ -855,35 +896,9 @@ async function doSingleTargetActionToHit(action, options) {
     }
 
     // Called shot penalties
-    const noHitLocationsPower = !!item.effectiveAttackItem.system.noHitLocations;
-    if (
-        game.settings.get(HEROSYS.module, "hit locations") &&
-        options.aim &&
-        options.aim !== "none" &&
-        !noHitLocationsPower
-    ) {
-        const aimTargetLocation =
-            game.settings.get(HEROSYS.module, "hitLocTracking") === "all" && options.aimSide !== "none"
-                ? `${options.aimSide} ${options.aim}`
-                : options.aim;
-
-        // Figure out the OCV penalty for the hit location or special hit locations.
-        const aimOcvPenalty = CONFIG.HERO.hitLocations[options.aim]?.ocvMod || 0;
-        if (aimOcvPenalty) {
-            attackHeroRoller.addNumber(aimOcvPenalty, aimTargetLocation);
-        }
-
-        // Penalty Skill Levels
-        // PH: FIXME: need to consider both the item and the effectiveAttackItem
-        if (options.usePsl) {
-            const pslHit = penaltySkillLevelsForAttack(item).find(
-                (o) => o.pslPenaltyType === CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.location && o.system.checked,
-            );
-            if (pslHit) {
-                let pslValue = Math.min(pslHit.system.LEVELS, Math.abs(aimOcvPenalty));
-                attackHeroRoller.addNumber(pslValue, pslHit.name);
-            }
-        }
+    const itemUsesHitLocations = !item.effectiveAttackItem.system.noHitLocations;
+    if (itemUsesHitLocations) {
+        await addAttackHitLocationsIntoToHitRoll(item.effectiveAttackItem, attackHeroRoller, options);
     }
 
     // This is the actual roll to hit. In order to provide for a die roll

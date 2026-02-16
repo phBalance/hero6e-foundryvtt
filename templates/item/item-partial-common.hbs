@@ -32,17 +32,23 @@
 {{/unless}}
 
 {{#if (isdefined system.INPUT)}}
-<div class="form-group {{#if (itemHeroValidationForProperty this.item "INPUT")}}validation{{/if}}" 
-    title="{{itemHeroValidationForProperty this.item "INPUT"}}"
-    >
-    <label>
-        INPUT
-        {{#if (itemHeroValidationForProperty this.item "INPUT")}}
-            <i class="fa-regular fa-circle-exclamation"></i>
+    <div class="form-group {{#if (itemHeroValidationForProperty this.item "INPUT")}}validation{{/if}}" 
+        title="{{itemHeroValidationForProperty this.item "INPUT"}}"
+        >
+        <label>
+            INPUT
+            {{#if (itemHeroValidationForProperty this.item "INPUT")}}
+                <i class="fa-regular fa-circle-exclamation"></i>
+            {{/if}}
+        </label>
+        {{#if editOptions.choicesInput}}
+            <select name="system.INPUT" data-dtype="text">
+                {{selectOptions editOptions.choicesInput selected=system.INPUT valueAttr="INPUT" labelAttr="INPUT"}}
+            </select>
+        {{else}}
+            <input type="text" name="system.INPUT" value="{{system.INPUT}}" data-dtype="text" />
         {{/if}}
-</label>
-    <input type="text" name="system.INPUT" value="{{system.INPUT}}" data-dtype="text" />
-</div>
+    </div>
 {{/if}}
 
 {{#if (isdefined system.OPTION)}}
@@ -55,8 +61,8 @@
         </div>
 
         <div class="form-group">
-        <label>OPTIONID</label>
-        <input disabled type="text" value="{{system.OPTIONID}}" data-dtype="text" />
+            <label>OPTIONID</label>
+            <input disabled type="text" value="{{system.OPTIONID}}" data-dtype="text" />
         </div>
 
         <div class="form-group {{#if (itemHeroValidationForProperty this.item "OPTION_ALIAS")}}validation{{/if}}" 
@@ -121,12 +127,12 @@
 {{/if}}
 
 {{#if penaltyChoices}}
-<div class="form-group">
-    <label>PENALTY</label>
-    <div class="form-fields">
-        {{item.pslPenaltyType}}
+    <div class="form-group">
+        <label>PENALTY</label>
+        <div class="form-fields">
+            {{item.pslPenaltyType}}
+        </div>
     </div>
-</div>
 {{/if}}
 
 {{! COMBAT SKILL LEVELS}}

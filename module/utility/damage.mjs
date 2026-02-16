@@ -57,20 +57,6 @@ export function combatSkillLevelsForAttack(item) {
     return results;
 }
 
-export function penaltySkillLevelsForAttack(item) {
-    console.error(`Deprecating penaltySkillLevelsForAttack`);
-    if (!item.actor) return [];
-
-    const psls = item.actor.items.filter(
-        (itm) =>
-            ["PENALTY_SKILL_LEVELS"].includes(itm.system.XMLID) &&
-            itm.adders.find((adder) => adder.ALIAS === item.name) &&
-            itm.isActive != false,
-    );
-
-    return psls;
-}
-
 const zeroDiceParts = Object.freeze({
     dc: 0,
     d6Count: 0,

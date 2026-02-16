@@ -1910,6 +1910,8 @@ export function registerCslTests(quench) {
             });
 
             describe("Penalty Skill Levels", function () {
+                this.timeout(20000);
+
                 describe("5e", async function () {
                     const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
@@ -2298,6 +2300,13 @@ export function registerCslTests(quench) {
                     let pslThrowingAll;
                     let pslArmorPenaltiesAll;
 
+                    let singleTargetDrainBody;
+                    let strike;
+                    let basicStrike;
+                    let basicShot;
+                    let defensiveShot;
+                    let offensiveRangedDisarm;
+
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
@@ -2321,6 +2330,13 @@ export function registerCslTests(quench) {
                         pslRangeAll = actor.items.find((item) => item.name === "PSL Range w/ All");
                         pslThrowingAll = actor.items.find((item) => item.name === "PSL Throwing w/ All");
                         pslArmorPenaltiesAll = actor.items.find((item) => item.name === "PSL Armor Penalties w/ All");
+
+                        singleTargetDrainBody = actor.items.find((item) => item.name === "Single Target Drain BODY");
+                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                        defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
+                        offensiveRangedDisarm = actor.items.find((item) => item.name === "Offensive Ranged Disarm");
                     });
 
                     after(async function () {
@@ -2416,6 +2432,32 @@ export function registerCslTests(quench) {
 
                         it("should have the right cost for All target PSL", function () {
                             expect(pslRangeAll.characterPointCost).to.equal(3);
+                        });
+                    });
+
+                    describe("Applicability To Attack - pslAppliesTo", function () {
+                        it("should apply single PSL to power because it's listed - pslHitLocationSingle", function () {
+                            expect(pslHitLocationSingle.pslAppliesTo(strike)).to.be.true;
+                        });
+
+                        it("should not apply single PSL to power because it's not listed - pslHitLocationSingle", function () {
+                            expect(pslHitLocationSingle.pslAppliesTo(basicStrike)).to.be.false;
+                        });
+
+                        it("should apply tight group PSL to power because it's contained - pslHitLocationTight", function () {
+                            expect(pslHitLocationTight.pslAppliesTo(basicShot)).to.be.true;
+                            expect(pslHitLocationTight.pslAppliesTo(defensiveShot)).to.be.true;
+                            expect(pslHitLocationTight.pslAppliesTo(offensiveRangedDisarm)).to.be.true;
+                        });
+
+                        it("should not apply tight group PSL to power because it's not contained - pslHitLocationTight", function () {
+                            expect(pslHitLocationTight.pslAppliesTo(basicStrike)).to.be.false;
+                        });
+
+                        it("should apply all attack PSL to power because it's listed - pslThrowingAll", function () {
+                            expect(pslThrowingAll.pslAppliesTo(strike)).to.be.true;
+                            expect(pslThrowingAll.pslAppliesTo(basicStrike)).to.be.true;
+                            expect(pslThrowingAll.pslAppliesTo(singleTargetDrainBody)).to.be.true;
                         });
                     });
                 });
@@ -2918,6 +2960,13 @@ export function registerCslTests(quench) {
                     let pslThrowingTight;
                     let pslThrowingAll;
 
+                    let singleTargetDrain;
+                    let strike;
+                    let basicStrike;
+                    let basicShot;
+                    let defensiveShot;
+                    let offensiveShot;
+
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
 
@@ -2944,6 +2993,13 @@ export function registerCslTests(quench) {
                             (item) => item.name === "PSL Throwing OCV Modifier w/ 3 maneuvers or tight group",
                         );
                         pslThrowingAll = actor.items.find((item) => item.name === "PSL Throwing OCV Modifier w/ All");
+
+                        singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
+                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                        defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
+                        offensiveShot = actor.items.find((item) => item.name === "Offensive Shot");
                     });
 
                     after(async function () {
@@ -3021,6 +3077,32 @@ export function registerCslTests(quench) {
 
                         it("should have the right cost for All target PSL", function () {
                             expect(pslRangeAll.characterPointCost).to.equal(3);
+                        });
+                    });
+
+                    describe("Applicability To Attack - pslAppliesTo", function () {
+                        it("should apply single PSL to power because it's listed - pslRangeSingle", function () {
+                            expect(pslRangeSingle.pslAppliesTo(singleTargetDrain)).to.be.true;
+                        });
+
+                        it("should not apply single PSL to power because it's not listed - pslRangeSingle", function () {
+                            expect(pslRangeSingle.pslAppliesTo(basicStrike)).to.be.false;
+                        });
+
+                        it("should apply tight group PSL to power because it's contained - pslRangeTight", function () {
+                            expect(pslRangeTight.pslAppliesTo(basicShot)).to.be.true;
+                            expect(pslRangeTight.pslAppliesTo(defensiveShot)).to.be.true;
+                            expect(pslRangeTight.pslAppliesTo(offensiveShot)).to.be.true;
+                        });
+
+                        it("should not apply tight group PSL to power because it's not contained - pslRangeTight", function () {
+                            expect(pslRangeTight.pslAppliesTo(basicStrike)).to.be.false;
+                        });
+
+                        it("should apply all attack PSL to power because it's listed - pslRangeAll", function () {
+                            expect(pslRangeAll.pslAppliesTo(strike)).to.be.true;
+                            expect(pslRangeAll.pslAppliesTo(basicStrike)).to.be.true;
+                            expect(pslRangeAll.pslAppliesTo(singleTargetDrain)).to.be.true;
                         });
                     });
                 });
