@@ -829,45 +829,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.heroValidation.map((m) => m.message).join(", ");
     }
 
-    get pslRangePenaltyOffsetItems() {
-        return this.pslTypeOffsetItems(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range);
-    }
-
-    // PH: FIXME: some similarity to CSLs
-    pslTypeOffsetItems(pslType) {
-        const psls = this.actor.items.filter(
-            (pslItem) =>
-                pslItem.pslPenaltyType === pslType &&
-                (pslItem.system.OPTIONID === "ALL" ||
-                    pslItem.adders.find(
-                        (adder) => adder.ALIAS.toLowerCase().trim() === this.name.toLowerCase().trim(),
-                    )) &&
-                pslItem.isActive !== false,
-        );
-
-        return psls;
-    }
-
-    get pslPenaltyType() {
-        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") return null;
-
-        // 5e uses INPUT. 6e uses OPTION_ALIAS (free text)
-        const pslPenaltyTypeKey = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
-            .map((psl) => psl.toLowerCase())
-            .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
-
-        if (!pslPenaltyTypeKey) {
-            console.warn(
-                `Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.name}`,
-                this,
-            );
-
-            return "";
-        }
-
-        return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES[pslPenaltyTypeKey];
-    }
-
     setCarried() {
         if (this.system.CARRIED && this.system.active === undefined && this.end === 0) {
             this.system.active ??= true;
@@ -901,13 +862,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // CSLs have multiple fields which are linked. Do that linking.
         if (this.isCsl) {
             // Reinitialize CSLs if their LEVELS have changed
-            if (changes.system.LEVELS != null && changes.system.LEVELS !== this.system.LEVELS) {
+            if (changes.system?.LEVELS != null && changes.system?.LEVELS !== this.system?.LEVELS) {
                 const reinitializationChanges = this.initializeCsl(changes.system.LEVELS);
                 foundry.utils.mergeObject(changes, reinitializationChanges);
             }
 
             // Update CSLs if their ADDER array has changed (in any way)
-            if (changes.system.ADDER != null) {
+            if (changes.system?.ADDER != null) {
                 const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.cslItems || []);
                 foundry.utils.mergeObject(changes, relinkChanges);
             }
@@ -915,8 +876,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // PSLs have multiple fields which are linked. Do that linking.
         if (this.isPsl) {
-            // Update CSLs if their ADDER array has changed (in any way)
-            if (changes.system.ADDER != null) {
+            // Update PSLs if their ADDER array has changed (in any way)
+            if (changes.system?.ADDER != null) {
                 const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.pslItems || []);
                 foundry.utils.mergeObject(changes, relinkChanges);
             }
@@ -6574,6 +6535,28 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return (this.actor?.activePslSkills || []).filter((psl) => psl.pslAppliesTo(this));
     }
 
+    get pslPenaltyType() {
+        if (this.system.XMLID !== "PENALTY_SKILL_LEVELS") {
+            return "";
+        }
+
+        // 5e uses INPUT. 6e uses OPTION_ALIAS (free text)
+        const pslPenaltyTypeKey = Object.keys(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES)
+            .map((psl) => psl.toLowerCase())
+            .find((o) => (this.system.OPTION_ALIAS + this.system.INPUT).toLowerCase().includes(o));
+
+        if (!pslPenaltyTypeKey) {
+            console.warn(
+                `Unknown PSL type "${this.system.INPUT}" or "${this.system.OPTION_ALIAS} for ${this.parentItem?.name}/${this.name}`,
+                this,
+            );
+
+            return "";
+        }
+
+        return CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES[pslPenaltyTypeKey];
+    }
+
     /**
      * Are there any items which are not allowed that are the target of this PSL's custom adders?
      *
@@ -6581,6 +6564,22 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      */
     get notAllowedItemsInPslCustomAdders() {
         return this.customLinkAddersToExpandedItems.filter((item) => !this.pslAppliesTo(item));
+    }
+
+    get isPslValidHeroValidation() {
+        // If there are no mapped attacks, and there need to be, then the PSL won't work. The rules are:
+        // 1. The PSL doesn't need to have custom adders because it supports an Infinite number of potential adders
+        // 2. Are there no adders when they need to be provided for the PSL to work? DPSLs do not use custom adders.
+        // 3. We allow PSLs in COMPOUNDPOWERS to automatically work for all attacks within the COMPOUNDPOWER.
+        const pslCustomAdders = this.customLinkAdders;
+        return (
+            this.maxCustomPslAdders === +Infinity ||
+            (!(this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") &&
+                pslCustomAdders.length > 0) ||
+            ((this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") &&
+                pslCustomAdders.length === 0) ||
+            this.parentItem?.system.XMLID === "COMPOUNDPOWER"
+        );
     }
 
     /**
@@ -6595,6 +6594,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (!this.actor?.name.startsWith("_Quench")) {
                 console.error("This is not a PSL", this, attackItem);
             }
+            return false;
+        }
+
+        // 6e Defensive PSLs don't apply to any attacks
+        if (this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") {
             return false;
         }
 
@@ -6629,6 +6633,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         } else {
             // 6e
             if (this.system.XMLID === "PENALTY_SKILL_LEVELS") {
+                // 6e Defensive PSLs don't apply to any attacks so they need no custom adders
+                if (this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") {
+                    return 0;
+                }
+
                 switch (this.system.OPTIONID) {
                     case "SINGLE":
                         return 1;

@@ -366,17 +366,32 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
 
         // PENALTY_SKILL_LEVELS (range)
         // PH: FIXME: PSLs for maneuver and PSLs for a weapon. What kind of stacking is possible?
-        for (const pslItem of attackItem.effectiveAttackItem.pslRangePenaltyOffsetItems) {
+        for (const pslItem of attackItem.effectiveAttackItem.psls(CONFIG.HERO.PENALTY_SKILL_LEVELS_TYPES.range)) {
+            // Requires A Roll? Only include if successful.
+            // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
+            //            presumably, also not be active for the next phase.
+            // if (!(await rollRequiresASkillRollCheck(pslItem))) {
+            //     continue;
+            // }
+
             const pslOffsets = Math.min(parseInt(pslItem.system.LEVELS), -remainingRangePenalty);
             remainingRangePenalty += pslOffsets;
-            attackHeroRoller.addNumber(pslOffsets, "Penalty Skill Levels");
+            attackHeroRoller.addNumber(
+                pslOffsets,
+                "Penalty Skill Levels",
+                `${pslItem.name} ${pslItem.system.LEVELS.signedStringHero()} offset`,
+            );
         }
 
         // Some maneuvers have a built in RANGE value (like PSLs). These are only possible from the maneuver item.
         const maneuverRangeOffset = parseInt(attackItem.system.RANGE || 0);
         const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
         remainingRangePenalty += maneuverRangeOffsets;
-        attackHeroRoller.addNumber(maneuverRangeOffsets, "Maneuver bonus");
+        attackHeroRoller.addNumber(
+            maneuverRangeOffsets,
+            "Maneuver bonus",
+            `${attackItem.name} RANGE ${maneuverRangeOffset.signedStringHero()}`,
+        );
 
         // Brace (+2 OCV only to offset the Range Modifier)
         const braceManeuver = attackItem.actor.items.find(
@@ -385,7 +400,11 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
         if (braceManeuver) {
             const braceOffsets = Math.min(braceManeuver.baseInfo?.maneuverDesc?.ocv || 0, -remainingRangePenalty);
             remainingRangePenalty += braceOffsets;
-            attackHeroRoller.addNumber(braceOffsets, "Brace modifier");
+            attackHeroRoller.addNumber(
+                braceOffsets,
+                "Brace modifier",
+                `Brace maneuver ${braceManeuver.baseInfo?.maneuverDesc?.ocv.signedStringHero()} offset`,
+            );
         }
 
         // If we have half range penalty modifier, the halving, as with all Hero System calculations, must happen after all additions and subtractions.

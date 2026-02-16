@@ -168,7 +168,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 data.reduces = reduces ? reduces.split(",").map((target) => target.toUpperCase().trim()) : [];
             }
 
-            if (configPowerInfo?.editOptions?.showAttacks) {
+            if (configPowerInfo?.editOptions?.showAttacks?.(item)) {
                 // Enumerate attacks
                 data.attacks = [];
                 if (item.actor) {
