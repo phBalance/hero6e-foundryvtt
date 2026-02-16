@@ -6598,6 +6598,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return false;
         }
 
+        // 6e Defensive PSLs don't apply to any attacks
+        if (this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") {
+            return false;
+        }
+
         if (this.system.OPTIONID === "SINGLE" || this.system.OPTIONID === "THREE" || this.system.OPTIONID === "TIGHT") {
             return this.isAttackItemInCustomLinkAddersAllowList(attackItem);
         } else if (this.system.OPTIONID === "ALL") {

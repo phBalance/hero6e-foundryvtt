@@ -2741,10 +2741,10 @@ export function registerCslTests(quench) {
                             <SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1770426388665" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="34" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="to offset negative Throwing OCV modifier with all attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1770420325426" NAME="PSL Throwing OCV Modifier w/ All" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                             <NOTES />
                             </SKILL>
-                            <SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1770420025004" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLEDCV" OPTIONID="SINGLEDCV" OPTION_ALIAS="to offset a specific negative DCV modifier imposed by any single specific condition" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1770420325426" NAME="PSL XXX DCV Modifier with single condition" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1770420025004" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLEDCV" OPTIONID="SINGLEDCV" OPTION_ALIAS="to offset a specific negative DCV modifier imposed by groundfighting" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1770420325426" NAME="PSL Groundfighting DCV Modifier" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                             <NOTES />
                             </SKILL>
-                            <SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1770420033357" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="GROUPDCV" OPTIONID="GROUPDCV" OPTION_ALIAS="to offset a specific negative DCV modifier imposed by a group of conditions" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1770420325426" NAME="PSL XXX DCV Modifier with group of conditions" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1770420033357" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="GROUPDCV" OPTIONID="GROUPDCV" OPTION_ALIAS="to offset a specific negative DCV modifier imposed by groundfighting, encumbrance, underwater" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1770420325426" NAME="PSL Groundfighting, Encumbrance, and Underwater DCV Modifier" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                             <NOTES />
                             </SKILL>
                             <LIST XMLID="GENERIC_OBJECT" ID="1770426653323" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="37" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
@@ -2959,6 +2959,8 @@ export function registerCslTests(quench) {
                     let pslThrowingSingle;
                     let pslThrowingTight;
                     let pslThrowingAll;
+                    let dpslSingle;
+                    let dpslGroup;
 
                     let singleTargetDrain;
                     let strike;
@@ -2993,6 +2995,11 @@ export function registerCslTests(quench) {
                             (item) => item.name === "PSL Throwing OCV Modifier w/ 3 maneuvers or tight group",
                         );
                         pslThrowingAll = actor.items.find((item) => item.name === "PSL Throwing OCV Modifier w/ All");
+
+                        dpslSingle = actor.items.find((item) => item.name === "PSL Groundfighting DCV Modifier");
+                        dpslGroup = actor.items.find(
+                            (item) => item.name === "PSL Groundfighting, Encumbrance, and Underwater DCV Modifier",
+                        );
 
                         singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
                         strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
@@ -3060,6 +3067,18 @@ export function registerCslTests(quench) {
                                 "+1 to offset negative Throwing OCV modifier with all attacks",
                             );
                         });
+
+                        it("should have a correct description - groundfighting", function () {
+                            expect(dpslSingle.system.description).to.equal(
+                                "+1 to offset a specific negative DCV modifier imposed by groundfighting",
+                            );
+                        });
+
+                        it("should have a correct description - groundfighting, encumbrance, underwater", function () {
+                            expect(dpslGroup.system.description).to.equal(
+                                "+1 to offset a specific negative DCV modifier imposed by groundfighting, encumbrance, underwater",
+                            );
+                        });
                     });
 
                     describe("costs", function () {
@@ -3077,6 +3096,14 @@ export function registerCslTests(quench) {
 
                         it("should have the right cost for All target PSL", function () {
                             expect(pslRangeAll.characterPointCost).to.equal(3);
+                        });
+
+                        it("should have the right cost for single DPSL", function () {
+                            expect(dpslSingle.characterPointCost).to.equal(2);
+                        });
+
+                        it("should have the right cost for group DPSL", function () {
+                            expect(dpslGroup.characterPointCost).to.equal(3);
                         });
                     });
 
@@ -3103,6 +3130,18 @@ export function registerCslTests(quench) {
                             expect(pslRangeAll.pslAppliesTo(strike)).to.be.true;
                             expect(pslRangeAll.pslAppliesTo(basicStrike)).to.be.true;
                             expect(pslRangeAll.pslAppliesTo(singleTargetDrain)).to.be.true;
+                        });
+
+                        it("should not apply any DPSL to attack - dpslSingle", function () {
+                            expect(dpslSingle.pslAppliesTo(strike)).to.be.false;
+                            expect(dpslSingle.pslAppliesTo(basicStrike)).to.be.false;
+                            expect(dpslSingle.pslAppliesTo(singleTargetDrain)).to.be.false;
+                        });
+
+                        it("should not apply any DPSL to attack - dpslGroup", function () {
+                            expect(dpslGroup.pslAppliesTo(strike)).to.be.false;
+                            expect(dpslGroup.pslAppliesTo(basicStrike)).to.be.false;
+                            expect(dpslGroup.pslAppliesTo(singleTargetDrain)).to.be.false;
                         });
                     });
                 });
