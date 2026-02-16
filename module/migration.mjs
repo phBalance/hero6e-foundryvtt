@@ -252,6 +252,15 @@ export async function migrateWorld() {
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.14`, "background: #1111FF; color: #FFFFFF");
 
+    await migrateToVersion(
+        "4.2.17",
+        lastMigration,
+        getAllActorsInGame(),
+        "Penalty Skill Levels",
+        async (actor) => await migrateTo4_2_17(actor),
+    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.17`, "background: #1111FF; color: #FFFFFF");
+
     // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
     await migrateToVersion(
         game.system.version,
@@ -337,6 +346,66 @@ async function commitItemsCollectionMigrateDataChanges(item) {
         delete flags[game.system.id][needToPersistToDb];
         await item.update({ "==system": system, "==flags": flags });
     }
+}
+
+async function migrateTo4_2_17(actor) {
+    try {
+        await fixupPslChoices4_2_17(actor);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// PSLs, prior to this, did not have links. Add them.
+async function fixupPslChoices4_2_17(actor) {
+    const itemUpdates = [];
+
+    for (const item of actor.items) {
+        if (!item.isPsl) {
+            continue;
+        }
+
+        const pslUpdates = {};
+        let changes = false;
+
+        // Setup targetId
+        const allAdders = foundry.utils.deepClone(item.system._source.ADDER);
+        for (const customAdder of allAdders.filter((a) => a.XMLID === "ADDER")) {
+            const targetId = (item.actor?.pslItems || []).find((item) => {
+                // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
+                // is thus providing a unique name - other options can potentially have multiple matches of which
+                // we'll end up with the first. This could result in a situation where someone can not match
+                // the attack they actually want.
+                // NOTE: We do allow a case insensitve match
+                const aliasToMatch = customAdder.ALIAS.toLowerCase();
+
+                return (
+                    item.name.toLowerCase() === aliasToMatch ||
+                    item.system.ALIAS?.toLowerCase() === aliasToMatch ||
+                    item.system.XMLID?.toLowerCase() === aliasToMatch
+                );
+            })?.id;
+
+            if (!targetId && customAdder.BASECOST === 0 && customAdder.ALIAS) {
+                console.warn(`Failed to match custom adder ${customAdder.ALIAS} for PSL ${item.detailedName()}.`);
+            }
+
+            if (customAdder.targetId !== targetId) {
+                customAdder.targetId = targetId;
+                changes = true;
+            }
+        }
+        pslUpdates["system.ADDER"] = allAdders;
+
+        if (changes) {
+            pslUpdates._id = item._id;
+            itemUpdates.push(pslUpdates);
+        }
+    }
+
+    return itemUpdates.length > 0
+        ? Item.implementation.updateDocuments(itemUpdates, { parent: actor })
+        : Promise.resolve(true);
 }
 
 async function migrateTo4_2_14(actor) {
