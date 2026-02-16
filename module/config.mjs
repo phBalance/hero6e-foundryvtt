@@ -4219,6 +4219,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     });
                 }
 
+                // If there are no mapped attacks then the PSL won't work
+                if (!item.isPslValidHeroValidation) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `There are no attacks associated with this PSL.`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
+
                 // Ensure that all custom adders are mapped to objects
                 const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
                 if (customLinkAddersWithoutItems.length > 0) {
@@ -4231,7 +4241,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Some PSLs have limits on the number of supported attacks
-                // Custom adders are how we track how many attacks that this CSL applies to.
+                // Custom adders are how we track how many attacks that this PSL applies to.
                 const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomPslAdders;
                 if (customAdders.length > maxCustomAdders) {
@@ -4248,7 +4258,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (notAllowedItemsInPslCustomAdders.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `${notAllowedItemsInPslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInPslCustomAdders.map((item) => item.name).join(", ")}`,
+                        message: `${notAllowedItemsInPslCustomAdders.length} linked attacks are not valid for this type of PSL. Remove the link to ${notAllowedItemsInPslCustomAdders.map((item) => item.name).join(", ")}`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });
@@ -4324,6 +4334,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     });
                 }
 
+                // If there are no mapped attacks then the PSL won't work
+                if (!item.isPslValidHeroValidation) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `There are no attacks associated with this PSL.`,
+                        example: ``,
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
+
                 // Ensure that all custom adders are mapped to objects
                 const customLinkAddersWithoutItems = item.customLinkAddersWithoutItems;
                 if (customLinkAddersWithoutItems.length > 0) {
@@ -4336,7 +4356,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 // Some PSLs have limits on the number of supported attacks
-                // Custom adders are how we track how many attacks that this CSL applies to.
+                // Custom adders are how we track how many attacks that this PSL applies to.
                 const customAdders = item.customLinkAdders;
                 const maxCustomAdders = item.maxCustomPslAdders;
                 if (customAdders.length > maxCustomAdders) {
@@ -4353,7 +4373,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (notAllowedItemsInPslCustomAdders.length > 0) {
                     validations.push({
                         property: "ALIAS",
-                        message: `${notAllowedItemsInPslCustomAdders.length} linked attacks are not valid for this type of CSL. Remove the link to ${notAllowedItemsInPslCustomAdders.map((item) => item.name).join(", ")}`,
+                        message: `${notAllowedItemsInPslCustomAdders.length} linked attacks are not valid for this type of PSL. Remove the link to ${notAllowedItemsInPslCustomAdders.map((item) => item.name).join(", ")}`,
                         example: ``,
                         severity: HERO.VALIDATION_SEVERITY.WARNING,
                     });

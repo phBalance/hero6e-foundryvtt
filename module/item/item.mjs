@@ -6585,6 +6585,22 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.customLinkAddersToExpandedItems.filter((item) => !this.pslAppliesTo(item));
     }
 
+    get isPslValidHeroValidation() {
+        // If there are no mapped attacks, and there need to be, then the PSL won't work. The rules are:
+        // 1. The PSL doesn't need to have custom adders because it supports an Infinite number of potential adders
+        // 2. Are there no adders when they need to be provided for the PSL to work? DPSLs do not use custom adders.
+        // 3. We allow PSLs in COMPOUNDPOWERS to automatically work for all attacks within the COMPOUNDPOWER.
+        const pslCustomAdders = this.customLinkAdders;
+        return (
+            this.maxCustomPslAdders === +Infinity ||
+            (!(this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") &&
+                pslCustomAdders.length > 0) ||
+            ((this.system.OPTIONID === "SINGLEDCV" || this.system.OPTIONID === "GROUPDCV") &&
+                pslCustomAdders.length === 0) ||
+            this.parentItem?.system.XMLID === "COMPOUNDPOWER"
+        );
+    }
+
     /**
      * Is this item a PSL and does it apply to the given attackItem?
      *
