@@ -2549,6 +2549,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
                 break;
 
+            case "MENTALILLUSIONS":
+                {
+                    const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
+                    description = `${system.ALIAS} ${diceFormula} points`;
+                }
+                break;
+
             case "FORCEFIELD":
             case "ARMOR":
             case "DAMAGERESISTANCE":

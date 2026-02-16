@@ -9207,7 +9207,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["sense"],
             behaviors: ["activatable"],
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
-            costPerLevel: fixedValueFunction(1 / 2),
+            costPerLevel: function (item) {
+                // Cost depends on the sense. If it's a sense group then it's 3 cp per 2 levels. For a single sense it's 1 cp per 2 levels.
+                if (item.system.OPTIONID.includes("GROUP")) {
+                    return 3 / 2;
+                }
+
+                return 1 / 2;
+            },
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             xml: `<POWER XMLID="TELESCOPIC" ID="1763943753376" BASECOST="0.0" LEVELS="1" ALIAS="Telescopic" POSITION="83" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -17797,6 +17804,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="NOGRAVITYPENALTY" ID="1737921008650" BASECOST="0.5" LEVELS="0" ALIAS="No Gravity Penalty" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "NOGROWTHMOMENTUM",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="NOGROWTHMOMENTUM" ID="1771268457993" BASECOST="-0.25" LEVELS="0" ALIAS="No Growth Momentum" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
