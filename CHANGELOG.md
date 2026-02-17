@@ -7,6 +7,7 @@
   - Hit location offsets now supported. [#2734](https://github.com/dmdorman/hero6e-foundryvtt/issues/2734) [#2802](https://github.com/dmdorman/hero6e-foundryvtt/issues/2802)
   - Editing of 5e PSLs now supports correct OPTIONS. [#2799](https://github.com/dmdorman/hero6e-foundryvtt/issues/2799)
 - Check that actor type has PRE and STR before requiring PRE and STR roll for acting. [#3739](https://github.com/dmdorman/hero6e-foundryvtt/issues/3739)
+- AUTOMATON's with TAKES NO STUN and lose abilities each time an attack does BODY now automates removal of a random ability. [#3722](https://github.com/dmdorman/hero6e-foundryvtt/issues/3722)
 
 ### Version 4.2.16 20260214
 

@@ -1,0 +1,16 @@
+{{log "HEROSYS remove-power-from-automaton" this}}
+
+<p>
+    This Automaton TAKES NO STUN, instead, it looses one of its powers, STR, SPD or a normal sense.
+    The likely candidates for removal are included in the select box below in random order.
+    It is recommended to select the first/default one.
+    The GM has the final decision in determining which one to remove.
+
+    Caution: Removed powers are deleted which cannot be undone.  You will have to drag a new copy of the actor/item from
+    the actor sidebar to restore the lost power.
+
+</p>
+
+<select name="powerToRemove">
+    {{selectOptions choices valueAttr="key" labelAttr="label"}}
+</select>

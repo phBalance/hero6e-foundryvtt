@@ -296,6 +296,8 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment-item.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-invalid.hbs`,
 
+        `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`,
+
         `systems/${HEROSYS.module}/templates/chat/defense-tags-partial.hbs`,
 
         `systems/${HEROSYS.module}/templates/combat/header.hbs`,
