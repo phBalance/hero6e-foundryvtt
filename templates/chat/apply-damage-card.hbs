@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS apply-damage-card' this }} --}}
+{{ log 'HEROSYS apply-damage-card' this }}
 <div class="hero chat-card apply-damage-card" {{#if
   tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
@@ -90,6 +90,17 @@
         <div class="description-tiny">{{ knockbackMessage }}</div>
       {{/if}}
 
+    </div>
+  {{/if}}
+
+  {{#if (gt bodyDamageEffective 0)}}
+    <div class="card-section" data-visibility="gm">
+      GM should select a random power, STR, or SPD to remove from <b>{{targetTokenDocument.name}}</b>.
+      <button class="roll-powerToRemove" 
+      data-target-token-uuid="{{targetTokenDocument.uuid}}"
+      >
+          Select power to remove
+      </button>
     </div>
   {{/if}}
 </div>

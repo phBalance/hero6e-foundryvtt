@@ -48,6 +48,7 @@ export async function chatListeners(_html) {
     html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
     html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
     html.on("click", "i.modal-damage-card, span.modal-damage-card", this._onModalDamageCard.bind(this));
+    html.on("click", "button.roll-powerToRemove", this._onRollPowerToRemove.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -1532,6 +1533,123 @@ export async function _onRollKnockback(event) {
     });
 }
 
+export async function _onRollPowerToRemove(event) {
+    const button = event.currentTarget;
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
+
+    const targetToken = await fromUuid(button.dataset.targetTokenUuid);
+    if (!targetToken) {
+        return ui.notifications.error(`Target token not found.`);
+    }
+
+    const actor = targetToken.actor;
+    if (!actor) {
+        return ui.notifications.error(`${targetToken.name} token does not have an actor.`);
+    }
+
+    if (!actor.isOwner) {
+        return ui.notifications.error(`You do not have permission to modify ${targetToken.name}.`);
+    }
+
+    if (actor.linked) {
+        return ui.notifications.error(`${targetToken.name} is linked. Unlink the token to use this feature.`);
+    }
+
+    // You can't remove automation from an automaton.
+    const unremoveablePowerXmlids = ["AUTOMATON"];
+
+    const choices = [];
+    const powersToRemove = actor.items.filter(
+        (item) => item.type === "power" && !unremoveablePowerXmlids.includes(item.system.XMLID),
+    );
+    for (const power of powersToRemove) {
+        choices.push({
+            key: power.id,
+            label: `${power.name}${!power.name.toUpperCase().includes(power.system.XMLID.toUpperCase()) ? ` (${power.system.XMLID})` : ``}`,
+        });
+    }
+    if (actor.system.characteristics.str.value > 10) {
+        //powersToRemove.push({ name: "STR", type: "characteristic" });
+        choices.push({ key: "STR", label: "10 STR" });
+    }
+    if (actor.system.characteristics.spd.value > 1) {
+        //powersToRemove.push({ name: "SPD", type: "characteristic" });
+        choices.push({ key: "SPD", label: "1 SPD" });
+    }
+
+    if (choices.length === 0) {
+        return ui.notifications.warn(`${targetToken.name} has no obvious removable powers or characteristics.`);
+    }
+
+    // Fisher-Yates Shuffle
+    function shuffle(array) {
+        let currentIndex = array.length,
+            randomIndex;
+
+        // While there remain elements to shuffle.
+        while (currentIndex !== 0) {
+            // Pick a remaining element.
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+
+        return array;
+    }
+    shuffle(choices);
+
+    const template = `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`;
+    const content = await foundryVttRenderTemplate(template, { choices });
+
+    //let content = `GM should select a random power, STR, or SPD to remove from Embalmed Cadaver.`;
+
+    const powerToRemoveId = await foundry.applications.api.DialogV2.prompt({
+        window: { title: `Remove power from ${targetToken.name}` },
+        content,
+        ok: {
+            label: "Remove Power",
+            callback: (event, button) => button.form.elements.powerToRemove.value,
+        },
+    });
+
+    let chatContent = null;
+    if (powerToRemoveId === "STR") {
+        event.target.textContent = "Removed 10 STR";
+        event.target.style.color = "darkgray";
+        chatContent = "Removed 10 STR";
+        await actor.update({ "system.characteristics.str.value": actor.system.characteristics.str.value - 10 });
+    } else if (powerToRemoveId === "SPD") {
+        event.target.textContent = "Removed 1 SPD";
+        event.target.style.color = "darkgray";
+        chatContent = "Removed 1 SPD";
+        await actor.update({ "system.characteristics.spd.value": actor.system.characteristics.spd.value - 1 });
+    } else {
+        const item = actor.items.get(powerToRemoveId);
+        if (item) {
+            event.target.textContent = `Removed ${item.name}`;
+            event.target.style.color = "darkgray";
+            chatContent = `Removed power ${item.name}`;
+            await item.delete();
+        } else {
+            return ui.notifications.error(`Selected power not found.`);
+        }
+    }
+
+    if (chatContent) {
+        const chatData = {
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            author: game.user._id,
+            content: chatContent,
+            speaker: ChatMessage.getSpeaker({ actor, token: targetToken }),
+            whipser: whisperUserTargetsForActor(actor),
+            blind: true,
+        };
+        await ChatMessage.create(chatData);
+    }
+}
+
 async function createTemporaryKnockbackItem(actor, knockbackDice) {
     const knockbackAttackXml = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${knockbackDice}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -2768,7 +2886,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
-        targetToken: targetToken,
+        targetTokenDocument: targetToken?.document ?? targetToken,
         actionData: actionToJSON(action),
     };
 
