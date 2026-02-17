@@ -13376,6 +13376,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // RESTRAINABLE related
+            key: "NOTVSGRABORENTANGLE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NOTVSGRABORENTANGLE" ID="1771297964617" BASECOST="0.25" LEVELS="0" ALIAS="Only by means other than Grabs and Entangles" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // SURVIVAL related
             key: "MOUNTAIN",
             behaviors: ["adder"],
@@ -16826,6 +16837,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // Applies to constant powers
+        key: "DELAYEDEND",
+        behaviors: ["modifier"],
+        type: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(false),
+        xml: `<MODIFIER XMLID="DELAYEDEND" ID="1771297018223" BASECOST="0.25" LEVELS="0" ALIAS="Delayed Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TURN" OPTIONID="TURN" OPTION_ALIAS="once per Turn" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
     addPower(
         {
             key: "DELAYEDRETURNRATE",
@@ -18827,7 +18847,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(true),
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="TIMEDELAY" ID="1762138585408" BASECOST="0.25" LEVELS="0" ALIAS="Time Delay" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -18838,8 +18858,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["modifier"],
             type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(true),
+            dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="TIMELIMIT" ID="1738525037034" BASECOST="0.25" LEVELS="0" ALIAS="Time Limit" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EXTRAPHASE" OPTIONID="EXTRAPHASE" OPTION_ALIAS="Extra Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TIMEMODIFIERS",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="TIMEMODIFIERS" ID="1771297470511" BASECOST="-0.5" LEVELS="0" ALIAS="Time Modifiers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
