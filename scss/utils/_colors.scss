@@ -11,7 +11,8 @@ $c-miss: $c-failure;
     --herosystem-table-header-bg-color: #cac7bf; // var(--table-header-bg-color); opacity+sticky is a problem
     --herosystem-shadow-45: rgb(0 0 0 / 45%);
     --herosystem-border: var(--herosystem-blue);
-    --herosystem-background-card: #f8f4f1;
+    --herosystem-search-background: var(--color-light-1); // #f7f3e8 // #f8f4f1;
+    --herosystem-search-text: var(--color-dark-1);
     --herosystem-text-light-6: #666;
     --herosystem-filter-control-color: #999;
     --herosystem-header-background: #cac7bf; // var(--table-header-bg-color); opacity+sticky is a problem
@@ -20,8 +21,10 @@ $c-miss: $c-failure;
 }
 
 .herosystem6e.theme-dark {
-    --herosystem-table-header-bg-color: var(--color-cool-4);
+    --herosystem-table-header-bg-color: var(--color-cool-4); // #333
     --background: black;
+    --herosystem-search-background: var(--color-dark-3); // 333
+    --herosystem-search-text: var(--color-light-1); // #f7f3e8
 }
 
 // ref: https://venngage.com/tools/accessible-color-palette-generator
