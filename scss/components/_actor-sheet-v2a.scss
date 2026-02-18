@@ -221,7 +221,7 @@ input.over-max {
             border: 1px solid var(--herosystem-border);
             padding-right: 0.25rem;
             position: relative;
-            background: var(--herosystem-background-card);
+            background: var(--herosystem-search-background);
 
             > input {
                 flex: 1;
@@ -230,6 +230,7 @@ input.over-max {
                 padding: 0.5rem 0.5rem 0.5rem 2.25rem;
                 line-height: 1;
                 outline: none;
+                color: var(--herosystem-search-text);
 
                 --input-box-shadow: none;
                 --input-placeholder-color: var(--herosystem-filter-control-color);
