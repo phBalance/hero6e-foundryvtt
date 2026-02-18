@@ -64,6 +64,17 @@
 }
 
 /************************************************************************
+* Input coloring for characteristics over/under max
+************************************************************************/
+input.under-max {
+    background-color: rgb(255 0 0 / 20%);
+}
+
+input.over-max {
+    background-color: rgb(0 255 0 / 20%);
+}
+
+/************************************************************************
 * grid-area: sidebar
 ************************************************************************/
 .herosystem6e.actor-sheet-v2a .window-content aside {
