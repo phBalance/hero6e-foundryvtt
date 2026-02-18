@@ -1,0 +1,26 @@
+{{ log 'HEROSYS item-sheet-v2' this }}
+<form class="{{cssClass}} item-sheet scrollable" autocomplete="off" data-id="{{source._id}}">
+
+    <header class="sheet-header">
+        <h3 class="item-name">
+            <input name="name" type="text" value="{{item.name}}" placeholder="Name" disabled/>
+        </h3>
+    </header>
+
+    <hr\>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+
+        {{!-- Common --}}
+        {{> (getModulePath 'item/item-sheet-v2/item-partial-common-v2.hbs') }}
+
+        {{!-- Active Points --}}
+        {{> (getModulePath 'item/item-sheet-v2/item-partial-active-points-v2.hbs') }}
+
+        {{!-- Adders & Modifiers --}}
+        {{> (getModulePath 'item/item-sheet-v2/item-partial-adders-modifiers-v2.hbs') }}
+        
+    </section>
+
+</form>
