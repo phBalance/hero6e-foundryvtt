@@ -8,7 +8,9 @@
             >
         </div>
 
-        <div class="item-column item-max">
+        <div class="item-column item-max {{#if this.maxTitle}}characteristic-locked{{/if}}"
+            data-tooltip="{{{this.maxTitle}}}"
+        >
             <input name="system.characteristics.{{this.key}}.max" type="number"
                 class="{{#if (gt this.max this.basePlusLevels)}}over-max{{/if}}{{#if (lt this.max this.baseInt)}}under-max{{/if}}"
                 value="{{this.max}}" data-dtype="Number" {{#if
