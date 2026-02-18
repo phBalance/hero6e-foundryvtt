@@ -46,6 +46,7 @@ import {
     HeroItemCharacteristic,
 } from "./item/HeroSystem6eTypeDataModels.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
+import { HeroSystemItemSheetV2 } from "./applications/item/item-sheet-v2.mjs";
 
 //import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
 
@@ -264,6 +265,9 @@ Hooks.once("init", async function () {
         makeDefault: true,
         label: "Default HeroSystem",
     });
+    FoundryVttItems.registerSheet("herosystem6e", HeroSystemItemSheetV2, {
+        label: "HeroSystem V2",
+    });
 
     //Not sure why ActiveEffect.registerSheet is missing.
     FoundryVttDocumentSheetConfig.registerSheet(ActiveEffect, "herosystem6e", HeroSystemActiveEffectConfig, {
@@ -312,6 +316,10 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/item/item-partial-active-points.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-partial-adders-modifiers.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
+
+        `systems/${HEROSYS.module}/templates/item/item-sheet-v2/item-partial-common-v2.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-sheet-v2/item-partial-active-points-v2.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-sheet-v2/item-partial-adders-modifiers-v2.hbs`,
 
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
         `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
