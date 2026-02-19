@@ -38,7 +38,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     //             value: new foundry.data.fields.StringField({ required: true, label: "EFFECT.ChangeValue" }),
     //             mode: new foundry.data.fields.NumberField({
     //                 integer: true,
-    //                 initial: CONST.ACTIVE_EFFECT_MODES.ADD,
+    //                 initial: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
     //                 label: "EFFECT.ChangeMode",
     //             }),
     //             priority: new foundry.data.fields.NumberField(),
@@ -64,13 +64,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.dmcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
@@ -88,13 +88,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
                         key: "system.characteristics.dmcv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ],
@@ -108,25 +108,25 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.ocv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
                         key: "system.characteristics.omcv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
                         key: "system.characteristics.dmcv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ],
@@ -140,13 +140,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.ocv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ],
@@ -156,8 +156,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "asleep",
                 img: "icons/svg/sleep.svg",
                 // changes: [
-                //     { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
-                //     { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
+                //     { key: "system.characteristics.ocv.value", value: 0.5, mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY },
+                //     { key: "system.characteristics.dcv.value", value: 0.5, mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY }
                 // ]
             },
             proneEffect: {
@@ -168,7 +168,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
@@ -181,13 +181,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.ocv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
@@ -247,7 +247,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: -2,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
@@ -260,7 +260,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: -2,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
@@ -293,7 +293,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
@@ -324,7 +324,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
@@ -337,7 +337,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.dcv.max",
                         value: -5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ],
@@ -362,13 +362,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.ocv.max",
                         value: 0,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
@@ -423,13 +423,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     {
                         key: "system.characteristics.ocv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
