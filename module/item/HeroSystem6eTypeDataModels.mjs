@@ -1295,6 +1295,8 @@ export class HeroSystem6eItemSkill extends HeroSystem6eItemTypeDataModelProps {
                 }
             }
         }
+
+        return source;
     }
 }
 
@@ -1932,6 +1934,8 @@ export class HeroActorCharacterModel extends foundry.abstract.DataModel {
         else if (typeof source.BASIC_CONFIGURATION?.TEMPLATE === "string") {
             source.TEMPLATE = { _name: source.BASIC_CONFIGURATION.TEMPLATE };
         }
+
+        return source;
     }
 }
 
