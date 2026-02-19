@@ -1,12 +1,30 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
+const { ArrayField, EmbeddedDataField, NumberField, StringField } = foundry.data.fields;
+
+class HeroSystem6eActiveEffectsChanges extends foundry.abstract.DataModel {
+    /** @inheritdoc */
+    static defineSchema() {
+        return {
+            // Required base schema fields
+            type: new StringField(),
+            phase: new StringField(),
+            priority: new NumberField({ integer: true, min: 0 }),
+
+            // Hero system additions
+            key: new StringField(),
+            value: new NumberField(),
+        };
+    }
+}
+
 export class HeroSystem6eActorActiveEffectsSystemData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
-        const fields = foundry.data.fields;
         return {
+            changes: new ArrayField(new EmbeddedDataField(HeroSystem6eActiveEffectsChanges)),
             // Make sure active-effect-config.hbs has all these fields so they don't get lost during editing
-            XMLID: new fields.StringField(),
+            XMLID: new StringField(),
         };
     }
 }
