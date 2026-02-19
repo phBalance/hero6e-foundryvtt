@@ -320,6 +320,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/item/item-sheet-v2/item-partial-common-v2.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-sheet-v2/item-partial-active-points-v2.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-sheet-v2/item-partial-adders-modifiers-v2.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-sheet-v2/item-sheet-actions-partial-v2.hbs`,
 
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
         `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
