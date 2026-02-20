@@ -122,7 +122,12 @@ function equal(value1, value2) {
 }
 
 function objectNumKeys(obj) {
-    return Object.keys(obj).length;
+    try {
+        return Object.keys(obj).length;
+    } catch (e) {
+        console.error(e);
+        return 0;
+    }
 }
 
 /**

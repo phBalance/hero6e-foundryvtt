@@ -60,5 +60,8 @@
 /* Styles for Notes */
 @include meta.load-css("components/notes");
 
-/* Styles for Notes */
+/* Styles for Active Effects */
 @include meta.load-css("components/active-effects");
+
+/* Styles for Item Attack Application */
+@include meta.load-css("components/item-attack");
