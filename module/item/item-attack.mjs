@@ -1668,9 +1668,22 @@ export async function _onRollPowerToRemove(event) {
     } else {
         const item = actor.items.get(powerToRemoveId);
         if (item) {
-            event.target.textContent = `Removed ${item.name}`;
-            event.target.style.color = "darkgray";
-            chatContent = `Removed power ${item.name}`;
+            const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
+            const message = ChatMessage.get(messageId);
+            if (message) {
+                const parsedMessageContent = document.createElement("div");
+                parsedMessageContent.innerHTML = message.content;
+                const button = parsedMessageContent.querySelector(`button.roll-powerToRemove`);
+                if (button) {
+                    button.textContent = `Removed ${item.name}`;
+                    button.style.color = "darkgray";
+                    await message.update({ content: parsedMessageContent.innerHTML });
+                }
+                chatContent = `Removed power ${item.name}`;
+            } else {
+                console.error(`Could not find chat message for power removal button.`);
+            }
+
             await item.delete();
         } else {
             return ui.notifications.error(`Selected power not found.`);
