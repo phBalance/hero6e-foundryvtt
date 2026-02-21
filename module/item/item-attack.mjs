@@ -1685,8 +1685,7 @@ export async function _onRollPowerToRemove(event) {
             author: game.user._id,
             content: chatContent,
             speaker: ChatMessage.getSpeaker({ actor, token: targetToken }),
-            whipser: whisperUserTargetsForActor(actor),
-            blind: true,
+            whisper: whisperUserTargetsForActor(actor),
         };
         await ChatMessage.create(chatData);
     }
