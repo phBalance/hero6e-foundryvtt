@@ -537,6 +537,7 @@ export function tokenEducatedGuess(options = {}) {
 
     // Actor
     options.actor ??= options.action?.current.actor;
+    options.actor ??= fromUuidSync(options.actorId);
     options.actor ??= game.actors.get(options.actorId);
 
     // Controlled token of provided actor

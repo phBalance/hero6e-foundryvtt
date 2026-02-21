@@ -1502,7 +1502,12 @@ export async function _onRollKnockback(event) {
 
     const kbOptions = { ...button.dataset };
     const { item } = rehydrateActorAndAttackItem(kbOptions);
-    const token = tokenEducatedGuess({ tokenId: kbOptions.targetTokenId });
+    if (!kbOptions.targetTokenId) {
+        console.warn(`No targetTokenId provided for knockback roll.`);
+        // We can likely proceed using kbOptions.actorUuid to find the token,
+        // but it is better to use a specific tokenId.
+    }
+    const token = tokenEducatedGuess({ tokenId: kbOptions.targetTokenId, actor: fromUuidSync(kbOptions.actorUuid) });
     const knockbackResultTotal = kbOptions.knockbackResultTotal;
     if (!item || !token || !knockbackResultTotal) {
         return ui.notifications.error(`Knockback details are not available.`);
