@@ -7583,6 +7583,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: true,
+            activeEffect: function (item) {
+                const ae = {
+                    transfer: true,
+                };
+                ae.name = `${item.system.ALIAS || item.system.XMLID || item.name}: ${item.system.XMLID} ${item.is5e ? item.system.LEVELS : item.system.OPTIONID}`;
+                ae.img = "icons/svg/invisible.svg";
+                ae.changes = [];
+                ae.statuses ??= new Set();
+                ae.statuses.add("invisible");
+                ae.system = {
+                    XMLID: this.key,
+                };
+                return ae;
+            },
             defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;

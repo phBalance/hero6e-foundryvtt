@@ -9,6 +9,7 @@
 - Check that actor type has PRE and STR before requiring PRE and STR roll for acting. [#3739](https://github.com/dmdorman/hero6e-foundryvtt/issues/3739)
 - AUTOMATON's with TAKES NO STUN and lose abilities each time an attack does BODY now automates removal of a random ability. [#3722](https://github.com/dmdorman/hero6e-foundryvtt/issues/3722)
 - More [Actor Sheet V2](https://github.com/dmdorman/hero6e-foundryvtt/issues/3622) improvements and Item Sheet V2 improvements. These will soon become the default sheets.
+- Minor INVISIBILITY improvements. [#3760](https://github.com/dmdorman/hero6e-foundryvtt/issues/3760)
 
 ### Version 4.2.16 20260214
 
