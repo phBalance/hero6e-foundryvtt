@@ -3,7 +3,7 @@
   tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
   <header class="card-header flexrow">
-    <h3>{{item.name}} vs {{targetToken.name}}{{#if targetEntangle}} [ENTANGLE]{{/if}}</h3>
+    <h3>{{item.name}} vs {{targetTokenDocument.name}}{{#if targetEntangle}} [ENTANGLE]{{/if}}</h3>
   </header>
 
   <div>
@@ -75,13 +75,13 @@
 
       {{#if (gte knockbackResultTotalWithShrinking 0)}}
         <div data-visibility="gm">
-          <button class="roll-knockback" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-target-token-id="{{targetToken.id}}"
+          <button class="roll-knockback" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-target-token-id="{{targetTokenDocument.id}}"
             data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}">
             {{ knockbackMessage }}
           </button>
         </div>
         <div data-visibility="!gm">
-          <button class="roll-knockback" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-target-token-id="{{targetToken.id}}"
+          <button class="roll-knockback" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-target-token-id="{{targetTokenDocument.id}}"
             data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}" disabled title="Only a GM can perform KB">
             {{ knockbackMessage }}
           </button>
