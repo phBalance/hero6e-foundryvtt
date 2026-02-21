@@ -742,6 +742,16 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         //this.dragDrop.bind(this.element);
     }
 
+    _postRender(context, options) {
+        super._postRender(context, options);
+
+        // Somewhere between _onRender and _postRender Foundry disables inputs for non-owners.
+        // Re-enable search inputs here for non-owners.
+        if (!this.actor.isOwner) {
+            this.element.querySelectorAll(`input[data-action="search"]`).forEach((el) => (el.disabled = false));
+        }
+    }
+
     /**
      * Define whether a user is able to begin a dragstart workflow for a given drag selector
      * @param {string} selector       The candidate HTML selector for dragging
@@ -1132,7 +1142,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             {
                 name: "Edit",
                 icon: '<i class="fa-solid fa-fw fa-edit"></i>',
-                condition: () => this.actor.isOwner,
+                //condition: () => this.actor.isOwner,
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
                     await document.sheet.render({ force: true });
