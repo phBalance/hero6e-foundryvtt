@@ -539,7 +539,7 @@ async function addAttackHitLocationsIntoToHitRoll(item, attackHeroRoller, option
     return remainingAimOcvPenalty;
 }
 
-async function doAoePlaceTemplate(action, formData, options) {
+async function doAoePlaceTemplate(action) {
     const effectiveItem = action.system.currentItem;
     const actor = action.system.actor;
     const attackerToken = action.system.attackerToken;
