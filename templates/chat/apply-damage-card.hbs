@@ -93,7 +93,7 @@
     </div>
   {{/if}}
 
-  {{#if (gt bodyDamageEffective 0)}}
+  {{#if showRemovePowerFromAutomaton}}
     <div class="card-section" data-visibility="gm">
       GM should select a random power, STR, or SPD to remove from <b>{{targetTokenDocument.name}}</b>.
       <button class="roll-powerToRemove" 

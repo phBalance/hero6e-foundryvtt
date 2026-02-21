@@ -1645,8 +1645,6 @@ export async function _onRollPowerToRemove(event) {
     const template = `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`;
     const content = await foundryVttRenderTemplate(template, { choices });
 
-    //let content = `GM should select a random power, STR, or SPD to remove from Embalmed Cadaver.`;
-
     const powerToRemoveId = await foundry.applications.api.DialogV2.prompt({
         window: { title: `Remove power from ${targetToken.name}` },
         content,
@@ -2772,15 +2770,14 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // A number of actor types (Base, Vehicle) don't have STUN. Other actor types (e.g. automaton, npc, pc) sometimes don't have
     // STUN. Consider these cases and eliminate the STUN portion of things if it's one of these cases but provide information why.
+    const hasStun1 = !!targetToken.actor.items.find(
+        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
+    ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
+    const hasStun2 = !!targetToken.actor.items.find(
+        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
+    ); // Takes No STUN
+    const hasStunCharacteristic = targetToken.actor.hasCharacteristic("STUN");
     if (damageDetail.stun > 0) {
-        const hasStun1 = !!targetToken.actor.items.find(
-            (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
-        ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
-        const hasStun2 = !!targetToken.actor.items.find(
-            (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
-        ); // Takes No STUN
-        const hasStunCharacteristic = targetToken.actor.hasCharacteristic("STUN");
-
         if (hasStun1) {
             defenseTags.push({
                 name: "TAKES NO STUN",
@@ -2929,6 +2926,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         attackTags: getAttackTags(item),
         targetTokenDocument: targetToken?.document ?? targetToken,
         actionData: actionToJSON(action),
+        showRemovePowerFromAutomaton: hasStun1 && damageDetail.body > 0,
     };
 
     // render card
