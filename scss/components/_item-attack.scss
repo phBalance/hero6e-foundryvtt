@@ -1,0 +1,26 @@
+#item-attack-form-application-v2 {
+    color: blue;
+
+    .form-group {
+        clear: both;
+        display: flex;
+        flex-flow: row wrap;
+        margin: 3px 0;
+        align-items: center;
+
+        > label {
+            flex: 2;
+        }
+
+        > * {
+            flex: 3;
+        }
+    }
+
+    .noflexwrap input[type="text"],
+    .noflexwrap input[type="number"] {
+        width: auto;
+        margin-right: 5px;
+        margin-left: -7px;
+    }
+}

@@ -258,7 +258,7 @@
 {{/if}}
 
 
-{{#if (isdefined item.system.CHARACTERISTIC)}}
+{{#if (and config (isdefined item.system.CHARACTERISTIC))}}
 <div class="form-group">
     <label>CHARACTERISTIC</label>
     <select name="system.CHARACTERISTIC" data-dtype="text">

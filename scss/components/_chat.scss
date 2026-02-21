@@ -242,3 +242,19 @@
     object-fit: contain;
     width: 36px;
 }
+
+.chat-message .owner-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+
+.chat-message .template-button {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
+
+    button.remove-template {
+        width: fit-content;
+    }
+}

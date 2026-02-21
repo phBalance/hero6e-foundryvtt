@@ -18,7 +18,7 @@ import {
 } from "../utility/units.mjs";
 
 /**
- * 5e HEX type and NORMAL are convered to RADIUS
+ * 5e HEX type and NORMAL are converted to RADIUS
  */
 const heroAoeTypeToFoundryAoeTypeConversions = {
     any: "rect",

@@ -26,6 +26,7 @@ import {
     rollAblativeActivationCheck,
 } from "../item/item.mjs";
 import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/item-attack-application.mjs";
+import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-application-v2.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
@@ -243,7 +244,12 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
-    await new ItemAttackFormApplication(data).render(true);
+    //await
+    if (options.allInOne) {
+        await new ItemAttackFormApplicationV2(data).render(true);
+    } else {
+        await new ItemAttackFormApplication(data).render(true);
+    }
 }
 
 export async function getTargetArray(formData) {
@@ -314,7 +320,11 @@ export async function processActionToHit(item, formData, options = {}) {
 
     // Does the effective attack item have an AoE?
     if (item.effectiveAttackItem.getAoeModifier()) {
-        await doAoeActionToHit(action, formData, options);
+        if (options.allInOne) {
+            await doAoePlaceTemplate(action, formData, options);
+        } else {
+            await doAoeActionToHit(action, formData, options);
+        }
     } else {
         await doSingleTargetActionToHit(action, formData, options);
     }
@@ -527,6 +537,38 @@ async function addAttackHitLocationsIntoToHitRoll(item, attackHeroRoller, option
     }
 
     return remainingAimOcvPenalty;
+}
+
+async function doAoePlaceTemplate(action) {
+    const effectiveItem = action.system.currentItem;
+    const actor = action.system.actor;
+    const attackerToken = action.system.attackerToken;
+    if (!attackerToken) {
+        return ui.notifications.error(`Unable to find a token on this scene associated with ${actor.name}.`);
+    }
+    const aoe = effectiveItem.aoeAttackParameters;
+    if (!aoe) {
+        return ui.notifications.error(`Attack AoE template was not found.`);
+    }
+    const levels = aoe.value;
+    const aoeText = ` (${levels}${getSystemDisplayUnits(effectiveItem.actor.is5e)})`;
+
+    const cardData = {
+        effectiveItem,
+        attackTags: getAttackTags(effectiveItem),
+        aoeText,
+    };
+    const template = `systems/${HEROSYS.module}/templates/chat/item-toHitAoe-placeTemplate-card.hbs`;
+    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+
+    const chatData = {
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        author: game.user._id,
+        content: cardHtml,
+        speaker: ChatMessage.getSpeaker({ actor: actor, token: attackerToken }),
+    };
+
+    await ChatMessage.create(chatData);
 }
 
 export async function doAoeActionToHit(action, options) {
@@ -1643,8 +1685,7 @@ export async function _onRollPowerToRemove(event) {
             author: game.user._id,
             content: chatContent,
             speaker: ChatMessage.getSpeaker({ actor, token: targetToken }),
-            whipser: whisperUserTargetsForActor(actor),
-            blind: true,
+            whisper: whisperUserTargetsForActor(actor),
         };
         await ChatMessage.create(chatData);
     }

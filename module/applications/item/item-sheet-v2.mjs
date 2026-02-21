@@ -58,6 +58,8 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
     }
 
     _onRender(context, options) {
+        globalThis.item = this.item;
+
         super._onRender(context, options);
 
         // Edit input buttons
