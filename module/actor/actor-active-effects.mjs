@@ -550,6 +550,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
             let totalSeconds = parseInt(remaining, 10);
 
+            if (totalSeconds < 0) {
+                console.warn(`Active Effect ${this.name} has negative remaining duration.`);
+                totalSeconds = 0;
+            }
+
             const days = Math.floor(totalSeconds / (3600 * 24)); // 3600 seconds in an hour, 24 hours in a day
             totalSeconds %= 3600 * 24; // Remaining seconds after calculating days
 

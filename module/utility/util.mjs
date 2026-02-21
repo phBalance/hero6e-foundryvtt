@@ -346,7 +346,7 @@ export async function expireEffects(actor, expiresOn) {
                 // May need to revisit and make exception for statuses (like prone/recovery)
 
                 if (ae.parent instanceof HeroSystem6eActor) {
-                    const cardHtml = `${ae.name.replace(/\d+ segments remaining/, "")} has expired.`;
+                    const cardHtml = `${ae.name.replace(/\d+ segments remaining/, "")} from ${ae.flags.hero6efoundryvttv2.source} has expired.`;
                     const chatData = {
                         //author: game.user._id,
                         content: cardHtml,
