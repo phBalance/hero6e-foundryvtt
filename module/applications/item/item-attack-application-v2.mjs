@@ -5,17 +5,11 @@ import { calculateRequiredResourcesToUse, processActionToHit } from "../../item/
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
 import {
-    calculateReduceOrPushRealCost,
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     isRangedCombatManeuver,
 } from "../../utility/damage.mjs";
-import {
-    convertSystemUnitsToMetres,
-    currentSceneUsesHexGrid,
-    getSystemDisplayUnits,
-    gridUnitsToMeters,
-} from "../../utility/units.mjs";
+import { getSystemDisplayUnits } from "../../utility/units.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -40,15 +34,15 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         Hooks.on("updateItem", ItemAttackFormApplicationV2.#updateItemHandler.bind(this));
     }
 
-    static async #targetTokenHandler(user, token, targeted) {
+    static async #targetTokenHandler() {
         window.setTimeout(() => this.refresh(), 1);
     }
 
-    static async #controlTokenHandler(token, controlled) {
+    static async #controlTokenHandler() {
         window.setTimeout(() => this.refresh(), 1);
     }
 
-    static async #updateItemHandler(item, change, options, userId) {
+    static async #updateItemHandler(item) {
         if (this.data.actor?.id === item.actor?.id && item.baseInfo?.refreshAttackDialogWhenChanged) {
             this.refresh();
         }
@@ -518,62 +512,62 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
      *  PH: FIXME: How should pushing play with HTH Attack and Naked Advantages? I assume that they don't interact.
      * @param {Object} formData
      */
-    #processReduceOrPush(formData) {
-        // Limit the item's reduce or push
-        const desiredEffectiveItemRealCost = formData.effectiveRealCost || 0;
+    // #processReduceOrPush(formData) {
+    //     // Limit the item's reduce or push
+    //     const desiredEffectiveItemRealCost = formData.effectiveRealCost || 0;
 
-        ({ effectiveRealCost: this.data.effectiveRealCost, pushedRealPoints: this.data.pushedRealPoints } =
-            calculateReduceOrPushRealCost(this.data.originalItem._realCost, desiredEffectiveItemRealCost));
+    //     ({ effectiveRealCost: this.data.effectiveRealCost, pushedRealPoints: this.data.pushedRealPoints } =
+    //         calculateReduceOrPushRealCost(this.data.originalItem._realCost, desiredEffectiveItemRealCost));
 
-        if (this.data.effectiveRealCost < desiredEffectiveItemRealCost) {
-            ui.notifications.warn(
-                "Pushing a power is limited to the lesser of 10 character points or the original total character points",
-            );
-        } else if (this.data.effectiveRealCost > desiredEffectiveItemRealCost) {
-            ui.notifications.warn("The minimum power cost is 1 character point");
-        }
+    //     if (this.data.effectiveRealCost < desiredEffectiveItemRealCost) {
+    //         ui.notifications.warn(
+    //             "Pushing a power is limited to the lesser of 10 character points or the original total character points",
+    //         );
+    //     } else if (this.data.effectiveRealCost > desiredEffectiveItemRealCost) {
+    //         ui.notifications.warn("The minimum power cost is 1 character point");
+    //     }
 
-        // Limit strength's push
-        // PH: FIXME: Should be working with limited strength and not desired strength
-        const desiredStrengthRealCost = formData.effectiveStr || 0;
-        if (this.data.effectiveStr > 0) {
-            ({ effectiveRealCost: this.data.effectiveStr, pushedRealPoints: this.data.effectiveStrPushedRealPoints } =
-                calculateReduceOrPushRealCost(this.data.str, desiredStrengthRealCost));
+    //     // Limit strength's push
+    //     // PH: FIXME: Should be working with limited strength and not desired strength
+    //     const desiredStrengthRealCost = formData.effectiveStr || 0;
+    //     if (this.data.effectiveStr > 0) {
+    //         ({ effectiveRealCost: this.data.effectiveStr, pushedRealPoints: this.data.effectiveStrPushedRealPoints } =
+    //             calculateReduceOrPushRealCost(this.data.str, desiredStrengthRealCost));
 
-            if (this.data.effectiveStr < desiredStrengthRealCost) {
-                ui.notifications.warn(
-                    "Pushing strength is limited to the lesser of 10 character points or the original total character points",
-                );
-            }
-        } else {
-            this.data.effectiveStrPushedRealPoints = 0;
-        }
-    }
+    //         if (this.data.effectiveStr < desiredStrengthRealCost) {
+    //             ui.notifications.warn(
+    //                 "Pushing strength is limited to the lesser of 10 character points or the original total character points",
+    //             );
+    //         }
+    //     } else {
+    //         this.data.effectiveStrPushedRealPoints = 0;
+    //     }
+    // }
 
     /**
      * Determine what Hand-to-Hand and Naked Advantages should be enabled.
      *
      * @param {Object} formData
      */
-    #processFormDataForHthAndNa(formData) {
-        // Restructure HTH Attacks
-        Object.entries(formData).forEach(([key, value]) => {
-            const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
-            if (!match) {
-                return;
-            }
+    // #processFormDataForHthAndNa(formData) {
+    //     // Restructure HTH Attacks
+    //     Object.entries(formData).forEach(([key, value]) => {
+    //         const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
+    //         if (!match) {
+    //             return;
+    //         }
 
-            this.data.hthAttackItems[match[1]]._canUseForAttack = value;
-        });
+    //         this.data.hthAttackItems[match[1]]._canUseForAttack = value;
+    //     });
 
-        // Restructure Naked Advantages
-        Object.entries(formData).forEach(([key, value]) => {
-            const match = key.match(/^nakedAdvantagesItems.(.*)._canUseForAttack$/);
-            if (!match) {
-                return;
-            }
+    //     // Restructure Naked Advantages
+    //     Object.entries(formData).forEach(([key, value]) => {
+    //         const match = key.match(/^nakedAdvantagesItems.(.*)._canUseForAttack$/);
+    //         if (!match) {
+    //             return;
+    //         }
 
-            this.data.nakedAdvantagesItems[match[1]]._canUseForAttack = value;
-        });
-    }
+    //         this.data.nakedAdvantagesItems[match[1]]._canUseForAttack = value;
+    //     });
+    // }
 }
