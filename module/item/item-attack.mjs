@@ -1580,6 +1580,24 @@ export async function _onRollKnockback(event) {
     });
 }
 
+// Fisher-Yates Shuffle
+function fisherYatesShuffle(array) {
+    let currentIndex = array.length,
+        randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex !== 0) {
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+}
+
 export async function _onRollPowerToRemove(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
@@ -1605,22 +1623,23 @@ export async function _onRollPowerToRemove(event) {
     // You can't remove automation from an automaton.
     const unremoveablePowerXmlids = ["AUTOMATON"];
 
-    const choices = [];
-    const powersToRemove = actor.items.filter(
-        (item) => item.type === "power" && !unremoveablePowerXmlids.includes(item.system.XMLID),
-    );
-    for (const power of powersToRemove) {
-        choices.push({
-            key: power.id,
-            label: `${power.name}${!power.name.toUpperCase().includes(power.system.XMLID.toUpperCase()) ? ` (${power.system.XMLID})` : ``}`,
+    // TODO: consider things that aren't carried (VPP). An inactive power should probably still be considered and is.
+    // TODO: Compound powers should not allow parts of the power to be removed presumably.
+    const choices = actor.items
+        .filter((item) => item.type === "power" && !unremoveablePowerXmlids.includes(item.system.XMLID))
+        .map((power) => {
+            return {
+                key: power.id,
+                label: `${power.name}${!power.name.toUpperCase().includes(power.system.XMLID.toUpperCase()) ? ` (${power.system.XMLID})` : ``}`,
+            };
         });
-    }
+
+    // NOTE: For STR and SPD dropping to 0, it isn't excluded by the RAW, but is probably not what they want since it can effectively
+    //       cripple the automaton.
     if (actor.system.characteristics.str.value > 10) {
-        //powersToRemove.push({ name: "STR", type: "characteristic" });
         choices.push({ key: "STR", label: "10 STR" });
     }
     if (actor.system.characteristics.spd.value > 1) {
-        //powersToRemove.push({ name: "SPD", type: "characteristic" });
         choices.push({ key: "SPD", label: "1 SPD" });
     }
 
@@ -1628,24 +1647,7 @@ export async function _onRollPowerToRemove(event) {
         return ui.notifications.warn(`${targetToken.name} has no obvious removable powers or characteristics.`);
     }
 
-    // Fisher-Yates Shuffle
-    function shuffle(array) {
-        let currentIndex = array.length,
-            randomIndex;
-
-        // While there remain elements to shuffle.
-        while (currentIndex !== 0) {
-            // Pick a remaining element.
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex--;
-
-            // And swap it with the current element.
-            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-        }
-
-        return array;
-    }
-    shuffle(choices);
+    fisherYatesShuffle(choices);
 
     const template = `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`;
     const content = await foundryVttRenderTemplate(template, { choices });
@@ -1659,17 +1661,28 @@ export async function _onRollPowerToRemove(event) {
         },
     });
 
+    // If the user has just closed the dialog without selecting something, we're done.
+    if (powerToRemoveId == null) {
+        return;
+    }
+
     let chatContent = null;
     if (powerToRemoveId === "STR") {
         event.target.textContent = "Removed 10 STR";
         event.target.style.color = "darkgray";
         chatContent = "Removed 10 STR";
-        await actor.update({ "system.characteristics.str.value": actor.system.characteristics.str.value - 10 });
+        await actor.update({
+            "system.characteristics.str.value": actor.system.characteristics.str.value - 10,
+            "system.characteristics.str.max": actor.system.characteristics.str.max - 10,
+        });
     } else if (powerToRemoveId === "SPD") {
         event.target.textContent = "Removed 1 SPD";
         event.target.style.color = "darkgray";
         chatContent = "Removed 1 SPD";
-        await actor.update({ "system.characteristics.spd.value": actor.system.characteristics.spd.value - 1 });
+        await actor.update({
+            "system.characteristics.spd.value": actor.system.characteristics.spd.value - 1,
+            "system.characteristics.spd.max": actor.system.characteristics.spd.max - 1,
+        });
     } else {
         const item = actor.items.get(powerToRemoveId);
         if (item) {

@@ -90,7 +90,7 @@ function itemHasDefenseActiveEffect(item) {
 
 // Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
 function itemFullDescription(item) {
-    if (item.name === "LIST" && item.system.XMLID === "LIST") {
+    if (item.isSeparator) {
         return "";
     }
 
