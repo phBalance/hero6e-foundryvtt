@@ -54,6 +54,10 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
         // the super defines source (roughly item.source), but we want the actual item for getters and such
         context.item = this.item;
 
+        if (this.item.isMartialManeuver) {
+            context.martialArtsDamageTypeChoices = CONFIG.HERO.martialArtsDamageTypeChoices;
+        }
+
         return context;
     }
 

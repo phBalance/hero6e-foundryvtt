@@ -1366,7 +1366,7 @@ export class HeroSystem6eItemMartialArt extends HeroSystem6eItemTypeDataModelPro
         return {
             ...super.defineSchema(),
 
-            ACTIVECOST: new StringField(),
+            ACTIVECOST: new HeroNumberField(),
             ADDSTR: new BooleanField({ initial: null, nullable: true }),
             CATEGORY: new StringField(),
             CUSTOM: new StringField(),
