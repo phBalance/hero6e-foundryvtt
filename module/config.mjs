@@ -3305,7 +3305,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             refreshAttackDialogWhenChanged: true,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
-                showAttacks: fixedValueFunction(true),
+                showAttacks: function (item) {
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "ALL") {
+                        return false;
+                    }
+
+                    return true;
+                },
                 editableOption_ALIAS: true,
                 choices: [
                     {
@@ -3952,7 +3959,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             refreshAttackDialogWhenChanged: true,
             editOptions: {
-                showAttacks: fixedValueFunction(true),
+                showAttacks: function (item) {
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "BROAD") {
+                        return false;
+                    }
+
+                    return true;
+                },
                 editableOption_ALIAS: true,
                 choices: [
                     {
@@ -4167,6 +4181,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         return false;
                     }
 
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "ALL") {
+                        return false;
+                    }
+
                     return true;
                 },
                 editableOption_ALIAS: true,
@@ -4289,7 +4308,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             editOptions: {
-                showAttacks: fixedValueFunction(true),
+                showAttacks: function (item) {
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "ALL") {
+                        return false;
+                    }
+
+                    return true;
+                },
+
                 editableOption_ALIAS: false,
                 choices: [
                     {
