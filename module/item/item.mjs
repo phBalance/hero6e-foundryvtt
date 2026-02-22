@@ -2550,6 +2550,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 description = `${system.ALIAS}`;
                 break;
 
+            case "TELEPATHY":
             case "MINDSCAN":
                 {
                     const diceFormula = getEffectFormulaFromItem(this, { ignoreDeadlyBlow: true });
