@@ -4096,7 +4096,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                     return true;
                 },
-                editableOption_ALIAS: true,
+                editableOption_ALIAS: false,
                 choices: [
                     {
                         OPTIONID: "SINGLE",
@@ -7237,7 +7237,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
-                editableOption_ALIAS: true,
+                editableOption_ALIAS: false,
                 choices: [
                     {
                         OPTIONID: "HEARINGGROUP",
