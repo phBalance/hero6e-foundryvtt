@@ -3305,7 +3305,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             refreshAttackDialogWhenChanged: true,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
-                showAttacks: fixedValueFunction(true),
+                showAttacks: function (item) {
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "ALL") {
+                        return false;
+                    }
+
+                    return true;
+                },
                 editableOption_ALIAS: true,
                 choices: [
                     {
@@ -3419,6 +3426,135 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<SKILL XMLID="COMBAT_LEVELS" ID="1709161485197" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No"></SKILL>`,
         },
         {
+            editOptions: {
+                showAttacks: function (item) {
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "ALL") {
+                        return false;
+                    }
+
+                    return true;
+                },
+                editableOption_ALIAS: false,
+
+                choices: [
+                    {
+                        OPTIONID: "SINGLESINGLE",
+                        OPTION: "SINGLESINGLE",
+                        OPTION_ALIAS: "with any single attack with one specific weapon",
+                    },
+                    {
+                        OPTIONID: "SINGLESTRIKE",
+                        OPTION: "SINGLESTRIKE",
+                        OPTION_ALIAS: "with any single strike",
+                    },
+                    {
+                        OPTIONID: "SINGLE",
+                        OPTION: "SINGLE",
+                        OPTION_ALIAS: "with any single attack",
+                    },
+                    {
+                        OPTIONID: "STRIKE",
+                        OPTION: "STRIKE",
+                        OPTION_ALIAS: "with any strike",
+                    },
+                    {
+                        OPTIONID: "MAGIC",
+                        OPTION: "MAGIC",
+                        OPTION_ALIAS: "with magic",
+                    },
+                    {
+                        OPTIONID: "MARTIAL",
+                        OPTION: "MARTIAL",
+                        OPTION_ALIAS: "with martial maneuvers",
+                    },
+                    {
+                        OPTIONID: "HTHDCV",
+                        OPTION: "HTHDCV",
+                        OPTION_ALIAS: "DCV with ranged combat",
+                    },
+                    {
+                        OPTIONID: "HTHDCV",
+                        OPTION: "HTHDCV",
+                        OPTION_ALIAS: "DCV with HTH combat",
+                    },
+                    {
+                        OPTIONID: "DECV",
+                        OPTION: "DECV",
+                        OPTION_ALIAS: "DECV versus all mental attacks",
+                    },
+                    {
+                        OPTIONID: "HTH",
+                        OPTION: "HTH",
+                        OPTION_ALIAS: "with HTH combat",
+                    },
+                    {
+                        OPTIONID: "RANGED",
+                        OPTION: "RANGED",
+                        OPTION_ALIAS: "with ranged combat",
+                    },
+                    {
+                        OPTIONID: "MENTAL",
+                        OPTION: "MENTAL",
+                        OPTION_ALIAS: "with mental combat",
+                    },
+                    {
+                        OPTIONID: "DCV",
+                        OPTION: "DCV",
+                        OPTION_ALIAS: "with DCV",
+                    },
+                    {
+                        OPTIONID: "TWOOCV",
+                        OPTION: "TWOOCV",
+                        OPTION_ALIAS: "OCV with HTH and ranged",
+                    },
+                    {
+                        OPTIONID: "TWOOCV",
+                        OPTION: "TWOOCV",
+                        OPTION_ALIAS: "OCV with HTH and mental",
+                    },
+                    {
+                        OPTIONID: "TWOOCV",
+                        OPTION: "TWOOCV",
+                        OPTION_ALIAS: "OCV with mental and ranged",
+                    },
+                    {
+                        OPTIONID: "TWODCV",
+                        OPTION: "TWODCV",
+                        OPTION_ALIAS: "TWODCV with HTH and ranged",
+                    },
+                    {
+                        OPTIONID: "TWODCV",
+                        OPTION: "TWODCV",
+                        OPTION_ALIAS: "TWODCV with HTH and mental",
+                    },
+                    {
+                        OPTIONID: "TWODCV",
+                        OPTION: "TWODCV",
+                        OPTION_ALIAS: "TWODCV with mental and ranged",
+                    },
+                    {
+                        OPTIONID: "HTHRANGED",
+                        OPTION: "HTHRANGED",
+                        OPTION_ALIAS: "with HTH and ranged combat",
+                    },
+                    {
+                        OPTIONID: "HTHMENTAL",
+                        OPTION: "HTHMENTAL",
+                        OPTION_ALIAS: "with HTH and mental combat",
+                    },
+                    {
+                        OPTIONID: "MENTALRANGED",
+                        OPTION: "MENTALRANGED",
+                        OPTION_ALIAS: "with Mental and ranged combat",
+                    },
+                    {
+                        OPTIONID: "ALL",
+                        OPTION: "ALL",
+                        OPTION_ALIAS: "with all combat",
+                    },
+                ],
+            },
             heroValidation: function (item) {
                 const validations = [];
 
@@ -3952,8 +4088,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             refreshAttackDialogWhenChanged: true,
             editOptions: {
-                showAttacks: fixedValueFunction(true),
-                editableOption_ALIAS: true,
+                showAttacks: function (item) {
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "BROAD") {
+                        return false;
+                    }
+
+                    return true;
+                },
+                editableOption_ALIAS: false,
                 choices: [
                     {
                         OPTIONID: "SINGLE",
@@ -4167,6 +4310,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         return false;
                     }
 
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "ALL") {
+                        return false;
+                    }
+
                     return true;
                 },
                 editableOption_ALIAS: true,
@@ -4289,7 +4437,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             editOptions: {
-                showAttacks: fixedValueFunction(true),
+                showAttacks: function (item) {
+                    // "ALL" doesn't need have linked custom adders
+                    if (item.system.OPTIONID === "ALL") {
+                        return false;
+                    }
+
+                    return true;
+                },
+
                 editableOption_ALIAS: false,
                 choices: [
                     {
@@ -7081,7 +7237,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             editOptions: {
-                editableOption_ALIAS: true,
+                editableOption_ALIAS: false,
                 choices: [
                     {
                         OPTIONID: "HEARINGGROUP",
