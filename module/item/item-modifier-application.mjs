@@ -3,9 +3,13 @@ import { HEROSYS } from "../herosystem6e.mjs";
 export class ItemModifierFormApplication extends FormApplication {
     constructor(data) {
         super();
-        this.data = data;
         this.options.title = `Edit ${data.mod.XMLID} of ${data.item.system.XMLID}`;
-        globalThis.mod = this.data.mod;
+
+        this.data = data;
+        this.data.modOrig = this.data.mod;
+        this.data.mod = this.data.mod._source;
+
+        globalThis.mod = this.data.modOrig; // Global mod is the database view and not the in process changes
     }
 
     async updateItem() {
@@ -27,16 +31,14 @@ export class ItemModifierFormApplication extends FormApplication {
     }
 
     getData() {
-        console.log(this.data.mod);
+        console.log(this.data.modOrig._source);
         const data = this.data;
 
-        if (!this.data.mod.baseInfo) {
+        if (!this.data.modOrig.baseInfo) {
             ui.notifications.error(`${this.data?.mod?.XMLID} missing baseInfo`, this);
         }
 
-        globalThis.mod = this.data.mod;
-
-        data.editOptions = this.data.mod.baseInfo?.editOptions;
+        data.editOptions = foundry.utils.deepClone(this.data.modOrig.baseInfo?.editOptions);
         return data;
     }
 
@@ -46,19 +48,12 @@ export class ItemModifierFormApplication extends FormApplication {
 
     async _render(...args) {
         await super._render(...args);
-
-        // CSL can cause differences in form size.
-        // if (this.position && this.rendered) {
-        //     this.setPosition({ height: "auto" });
-        // }
     }
 
     async _updateObject(event, formData) {
         console.log(event, formData);
         const expandedData = foundry.utils.expandObject(formData);
         this.data.mod = foundry.utils.mergeObject(this.data.mod, expandedData.mod);
-
-        //this.data.mod.LEVELS = expandedData.mod.LEVELS;
 
         if (this.data.editOptions?.choices) {
             const choiceSelected = this.data.editOptions.choices.find((o) => o.OPTIONID === this.data.mod.OPTIONID);
@@ -68,11 +63,10 @@ export class ItemModifierFormApplication extends FormApplication {
         }
 
         await this.data.item.update({
-            [`system.${this.data.mod.xmlTag}`]: this.data.item.system[this.data.mod.xmlTag],
+            [`system.${this.data.mod.xmlTag}`]: foundry.utils.deepClone(
+                this.data.item._source.system[this.data.mod.xmlTag],
+            ),
         });
-
-        // For some reason item.onUpdate isn't getting called when updating an array
-        this.data.item.render();
 
         // Show any changes from dropdowns
         this.render();
