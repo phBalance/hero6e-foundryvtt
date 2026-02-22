@@ -23,6 +23,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("increment", increment);
     Handlebars.registerHelper("indexOf", indexOf);
     Handlebars.registerHelper("isdefined", isDefined);
+    Handlebars.registerHelper("hasProperty", hasProperty);
     Handlebars.registerHelper("is_active_segment", isActiveSegment);
     Handlebars.registerHelper("notEqual", notEqual);
     Handlebars.registerHelper("signedString", signedString);
@@ -104,6 +105,18 @@ function concat() {
 
 function isDefined(value) {
     return value !== undefined;
+}
+
+function hasProperty(actorOrItem, attributeName) {
+    if (!actorOrItem || !attributeName) {
+        console.error(`hasProperty call is missing parameters`);
+        return false;
+    }
+    try {
+        return foundry.utils.hasProperty(actorOrItem, attributeName);
+    } catch (e) {
+        throw new Error(e);
+    }
 }
 
 // Typically to determine if DEADLYBLOW applies to a specific attack

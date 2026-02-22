@@ -580,6 +580,10 @@ input.over-max {
             flex: 2;
         }
 
+        > input[type="checkbox"] {
+            flex: 0 0 20px;
+        }
+
         > * {
             flex: 3;
         }

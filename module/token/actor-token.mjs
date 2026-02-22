@@ -317,9 +317,6 @@ export class HeroSystem6eToken extends FoundryVttToken {
             if (!effect?.img) continue;
 
             // If Knocked out we want to override tint to match token tint (red = defeated)
-            if (overlayEffect?.statuses.has("knockedOut")) {
-                console.log("knockedOut");
-            }
             const promise =
                 effect === overlayEffect
                     ? this._drawOverlay(
