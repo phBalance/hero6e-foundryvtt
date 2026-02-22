@@ -827,7 +827,9 @@ export class HeroSystem6eCombat extends Combat {
             }
 
             for (const ae of combatant.actor.temporaryEffects.filter((ae) => ae._prepareDuration().duration)) {
-                tempContent += `<li>${ae.name} fades in ${toHHMMSS(ae._prepareDuration().remaining)} ${ae.flags[game.system.id]?.expiresOn}</li>`;
+                const remaining = ae._prepareDuration().remaining;
+                const remainingText = remaining > 0 ? `in ${toHHMMSS(remaining)}` : "0s";
+                tempContent += `<li>${ae.name} fades ${remainingText} ${ae.flags[game.system.id]?.expiresOn ?? ""}</li>`;
             }
             if (tempContent) {
                 startContent += `Has the following temporary effects: <ul>${tempContent}</ul>`;
