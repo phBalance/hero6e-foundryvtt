@@ -919,7 +919,6 @@ async function _outOfCombatRecovery(actor, multiplier) {
 // If compendium is created you have to reload to get the new application class.
 // This is known issue https://discord.com/channels/170995199584108546/670336275496042502/1255649814096511107
 Hooks.once("setup", function () {
-    console.log(`Hooks.on "setup"`);
     // Apply custom application for Compendiums for parent/child features
     game.packs.filter((p) => p.metadata.type === "Item").forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
 });

@@ -51,7 +51,7 @@ export class HeroSystem6eCombat extends Combat {
             ? this.getFlag(game.system.id, "segment")
             : this.combatant?.getFlag(game.system.id, "segment");
         if (segment == undefined) {
-            console.warn(`segment is ${segment}`);
+            console.log(`segment is ${segment}`);
         }
         return segment ?? 12;
     }
