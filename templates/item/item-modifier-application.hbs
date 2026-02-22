@@ -23,8 +23,8 @@
         {{#if editOptions.choices}}
             <div class="form-group">
                 <label>option</label>
-                <select name="mod.OPTIONID" data-dtype="text">
-                    {{selectOptions editOptions.choices selected=mod.OPTIONID valueAttr="OPTIONID" labelAttr="OPTION_ALIAS"}}
+                <select name="mod.OPTION" data-dtype="text">
+                    {{selectOptions editOptions.choices selected=mod.OPTIONID valueAttr="OPTION" labelAttr="OPTION_ALIAS"}}
                 </select>
             </div>
 
@@ -34,51 +34,44 @@
             </div>
 
             <div class="form-group">
-                <label>OPTION</label>
-                <input disabled type="text" value="{{mod.OPTION}}" data-dtype="text" />
-            </div>
-
-            <div class="form-group">
                 <label>OPTION_ALIAS</label>
                 <input disabled type="text" value="{{mod.OPTION_ALIAS}}" data-dtype="text" />
             </div>
         {{else}}
-
             {{#if (isdefined mod.OPTIONID)}}
-            <div class="form-group">
-                <label>OPTIONID</label>
-                <input type="text" name="mod.OPTIONID" value="{{mod.OPTIONID}}" data-dtype="text" />
-            </div>
+                <div class="form-group">
+                    <label>OPTIONID</label>
+                    <input type="text" name="mod.OPTIONID" value="{{mod.OPTIONID}}" data-dtype="text" />
+                </div>
             {{/if}}
 
             {{#if (isdefined mod.OPTION)}}
-            <div class="form-group">
-                <label>OPTION</label>
-                <input type="text" name="mod.OPTION" value="{{mod.OPTION}}" data-dtype="text" />
-            </div>
+                <div class="form-group">
+                    <label>OPTION</label>
+                    <input type="text" name="mod.OPTION" value="{{mod.OPTION}}" data-dtype="text" />
+                </div>
             {{/if}}
 
             {{#if (isdefined mod.OPTION_ALIAS)}}
-            <div class="form-group">
-                <label>OPTION_ALIAS</label>
-                <input type="text" name="mod.OPTION_ALIAS" value="{{mod.OPTION_ALIAS}}" data-dtype="text" />
-            </div>
+                <div class="form-group">
+                    <label>OPTION_ALIAS</label>
+                    <input type="text" name="mod.OPTION_ALIAS" value="{{mod.OPTION_ALIAS}}" data-dtype="text" />
+                </div>
             {{/if}}
 
             {{#if (isdefined mod.ROLLALIAS)}}
-            <div class="form-group">
-                <label>ROLLALIAS</label>
-                <input type="text" name="mod.ROLLALIAS" value="{{mod.ROLLALIAS}}" data-dtype="text" />
-            </div>
+                <div class="form-group">
+                    <label>ROLLALIAS</label>
+                    <input type="text" name="mod.ROLLALIAS" value="{{mod.ROLLALIAS}}" data-dtype="text" />
+                </div>
             {{/if}}
-
         {{/if}}
 
         {{#if (isdefined mod.COMMENTS)}}
-        <div class="form-group">
-            <label>COMMENTS</label>
-            <input type="text" name="mod.COMMENTS" value="{{mod.COMMENTS}}" data-dtype="text" />
-        </div>
+            <div class="form-group">
+                <label>COMMENTS</label>
+                <input type="text" name="mod.COMMENTS" value="{{mod.COMMENTS}}" data-dtype="text" />
+            </div>
         {{/if}}
 
         <div class="form-group">
@@ -88,20 +81,18 @@
 
         {{!-- ADDERS --}}
         {{#if mod.ADDER}}
-        <hr\>
-        <table>
-        <tr class="active-effects adders">
-            <th class="left">Adders</th>
-            <th>Cost</th>
-            {{!-- <th>Add</th> --}}
-            </td>
-        </tr>
-        {{#each mod.ADDER as |adder XMLID|}}
-        <tr>
-            <td class="left">{{adder.ALIAS}}</td>
-            <td>{{adder.BASECOST}}</td>
-        </tr>
-        {{/each}}
+            <hr\>
+            <table>
+            <tr class="active-effects adders">
+                <th class="left">Adders</th>
+                <th>Cost</th>
+            </tr>
+            {{#each mod.ADDER as |adder XMLID|}}
+                <tr>
+                    <td class="left">{{adder.ALIAS}}</td>
+                    <td>{{adder.BASECOST}}</td>
+                </tr>
+            {{/each}}
         {{/if}}
         </table>
 
