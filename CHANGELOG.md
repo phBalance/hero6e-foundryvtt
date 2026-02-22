@@ -1,6 +1,7 @@
 # Releases
 
 ### Version 4.2.18 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
 - Minor INVISIBILITY improvements. [#3760](https://github.com/dmdorman/hero6e-foundryvtt/issues/3760)
 
 ### Version 4.2.17 20260221
