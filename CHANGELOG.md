@@ -2,6 +2,7 @@
 
 ### Version 4.2.18 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Actors that were upload prior to version 3.0.75 may have items/powers/skill/etc that we no longer support. These items are now deleted as they are unusable. This includes invalid items from the sidebar that may have been manually created. Compendiums remain untouched.
 - Minor INVISIBILITY improvements. [#3760](https://github.com/dmdorman/hero6e-foundryvtt/issues/3760)
 
 ### Version 4.2.17 20260221

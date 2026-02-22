@@ -261,6 +261,22 @@ export async function migrateWorld() {
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.17`, "background: #1111FF; color: #FFFFFF");
 
+    await migrateToVersion(
+        "4.2.18",
+        lastMigration,
+        getAllActorsInGame(),
+        "Penalty Skill Levels",
+        async (actor) => await migrateTo4_2_18(actor),
+    );
+    await migrateToVersion(
+        "4.2.18",
+        lastMigration,
+        Array.from(game.items.invalidDocumentIds).map((id) => game.items.getInvalid(id)),
+        "Invalid Item Types",
+        async (item) => await deleteItemsWithInvalidTypesFromSideBar4_2_18(item),
+    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.18`, "background: #1111FF; color: #FFFFFF");
+
     // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
     await migrateToVersion(
         game.system.version,
@@ -345,6 +361,54 @@ async function commitItemsCollectionMigrateDataChanges(item) {
         const { system, flags } = item.toObject();
         delete flags[game.system.id][needToPersistToDb];
         await item.update({ "==system": system, "==flags": flags });
+    }
+}
+
+async function migrateTo4_2_18(actor) {
+    try {
+        await deleteItemsWithInvalidTypesFromActor4_2_18(actor);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// These document types are no longer supported.
+// The types starting with underscores have been invalidated in item.migrateData.
+const invalidItemTypesToDelete4_2_18 = ["attack", "defense", "movement", "misc"];
+
+async function deleteItemsWithInvalidTypesFromActor4_2_18(actor) {
+    try {
+        for (const itemId of actor.items.invalidDocumentIds) {
+            const item = actor.items.getInvalid(itemId);
+            if (invalidItemTypesToDelete4_2_18.includes(item.type) || item.type.startsWith("_")) {
+                console.warn(
+                    `Deleting item ${actor.name}/${item.name} with invalid type ${item.type} found during 4.2.18 migration`,
+                );
+                await item.delete();
+            } else {
+                console.error(
+                    `Unexpected item ${actor.name}/${item.name} with invalid type=${item.type} found during 4.2.18 migration`,
+                );
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function deleteItemsWithInvalidTypesFromSideBar4_2_18(item) {
+    try {
+        if (invalidItemTypesToDelete4_2_18.includes(item.type) || item.type.startsWith("_")) {
+            console.warn(
+                `Deleting item ${item.name} with invalid type ${item.type} found during 4.2.18 migration:`,
+                item,
+            );
+            await item.delete();
+        } else {
+            console.error(`Unexpected item with invalid type=${item.type} found during 4.2.18 migration:`, item);
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 
