@@ -345,16 +345,16 @@
 {{/if}}
 
 
-{{#if (and config (isdefined item.system.CHARACTERISTIC))}}
+{{#if (isdefined item.system.CHARACTERISTIC)}}
 <div class="form-group">
     <label>CHARACTERISTIC</label>
-    <select name="system.CHARACTERISTIC" data-dtype="text">
-        {{#if item.actor.system.is5e}}
-            {{selectOptions config.skillCharacteristics5e selected=item.system.CHARACTERISTIC}}
-        {{else}}
-            {{selectOptions config.skillCharacteristics selected=item.system.CHARACTERISTIC}}
-        {{/if}}
-    </select>
+    {{#if skillCharacteristicOptions}}
+        <select name="system.CHARACTERISTIC" data-dtype="text">
+            {{selectOptions skillCharacteristicOptions selected=item.system.CHARACTERISTIC}}
+        </select>
+    {{else}}
+        missing skillCharacteristicOptions
+    {{/if}}
 </div>
 {{/if}}
 
