@@ -269,6 +269,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     // occur for the client which requested the operation. Modifications to the pending document before it is
     // persisted should be performed with this.updateSource().
     async _preCreate(data, options, userId) {
+        // Manually created items from the sidebar are missing XMLID,
+        // which is required for baseInfo, etc.
+        if (!data.system?.XMLID) {
+            ui.notifications.error(
+                `Items must have an XMLID. Consider dragging an item from HeroItems compendium. The "Create Item" button will be removed in a future release.`,
+            );
+            return false;
+        }
         await super._preCreate(data, options, userId);
 
         // Initialize new CSLs
