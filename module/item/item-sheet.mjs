@@ -55,6 +55,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
     /** @override */
     getData() {
         const data = super.getData();
+        this.data = data;
 
         try {
             // Grab the item
@@ -490,6 +491,26 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         // Do all the standard things like updating item properies that match the name of input boxes
         await super._updateObject(event, formData);
 
+        // Were there editOptions and did any of those system values change? If so, update the selected option
+        const choices = this.data.item.baseInfo?.editOptions?.choices;
+        if (choices) {
+            // Deal with OPTION which might have changed
+            const choice = choices.find((choice) => choice.OPTION === expandedData.system.OPTION);
+            for (const key of Object.keys(choice)) {
+                if (this.data.system[key] !== choice[key]) {
+                    // Update everything and we're done with the loop.
+                    await this.item.update(
+                        Object.keys(choice).reduce((accum, key) => {
+                            accum[`system.${key}`] = choice[key];
+                            return accum;
+                        }, {}),
+                    );
+
+                    break;
+                }
+            }
+        }
+
         // Endurance Reserve
         if (expandedData.rec) {
             const ENDURANCERESERVEREC = this.item.findModsByXmlid("ENDURANCERESERVEREC");
@@ -540,18 +561,6 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                 }
             }
         }
-
-        // Clear all attacks from ADDERs
-        // DEBUG: 5e uses SINGLESINGLE OPTIONID which isn't currently handled properly.
-        // commenting out the clear attacks until we have a better solution.
-        // if (clearAdderAttacks) {
-        //     // this.item.system.ADDER = (this.item.system.ADDER || []).filter(
-        //     //     (o) => o.XMLID != "ADDER" || !parseFloat(o.BASECOST) == 0,
-        //     // );
-        //     await this.item.update({
-        //         [`system.ADDER`]: [],
-        //     });
-        // }
 
         // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
         // Generally rely on HBS to enforce valid combinations.
