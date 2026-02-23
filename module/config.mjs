@@ -5920,7 +5920,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EIDETIC_MEMORY",
             type: ["talent"],
-            behaviors: ["success"],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
             duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from INT
             target: "self only",
