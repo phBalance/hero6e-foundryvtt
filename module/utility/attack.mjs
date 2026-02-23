@@ -215,7 +215,7 @@ export class Attack {
         const index = data.action.maneuver.attackKeys.length;
         const attackKey = `attack-${index}`;
         const itemKey = Attack.findStrikeKey(data.effectiveItem);
-        const targetKey = data.action.targetedTokens?.length ? data.action.targetedTokens[0].id : "NONE";
+        const targetKey = data.action.system.targetedTokens?.length ? data.action.system.targetedTokens[0].id : "NONE";
         const multipleAttackKeys = { itemKey, attackKey, targetKey };
         data.action.maneuver[attackKey] = multipleAttackKeys;
         data.action.maneuver.attackKeys.push(multipleAttackKeys);
