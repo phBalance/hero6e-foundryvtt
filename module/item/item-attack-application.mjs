@@ -381,7 +381,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             this.#setAoeAndHitLocationDataForEffectiveItem();
 
-            this.data.action = Attack.getActionInfo(
+            this.data.action = Attack.buildActionInfo(
                 this.data.effectiveItem,
                 this.data.targets,
                 { ...this.data.formData, token: this.data.token }, // use formData to include player options from the form

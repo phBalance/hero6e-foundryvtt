@@ -432,7 +432,15 @@ export class Attack {
         return maneuver;
     }
 
-    static getActionInfo(item, targetedTokens, options) {
+    /**
+     * Build an action object
+     *
+     * @param {*} item
+     * @param {*} targetedTokens
+     * @param {*} options
+     * @returns
+     */
+    static buildActionInfo(item, targetedTokens, options) {
         // do I need to safety things here?
         if (!item) {
             console.error("There is no attack item!");

@@ -314,7 +314,7 @@ export class GenericRoller {
             return;
         }
 
-        const action = Attack.getActionInfo(item, [], {});
+        const action = Attack.buildActionInfo(item, [], {});
 
         if (["NORMAL", "KILLING"].includes(damageType)) {
             cardHtml += `
