@@ -28,7 +28,7 @@
     </div>
 
     {{!-- BEGIN multiple-attack-section --}}
-    <div class="multiple-attack-section" {{#unless action.current.isMultipleAttack}} style="display: none;"{{/unless}}>  
+    <div class="multiple-attack-section" {{#unless action.current.isMultipleAttackManeuver}} style="display: none;"{{/unless}}>  
       {{!-- multiple attack selection --}}
       {{#if action.current.missed}}
         <div>Attack number {{action.current.missed.execute}} missed {{action.current.missed.targetName}} with {{action.current.missed.itemName}} in a multiple attack: (todo:)remaining attacks forfeit END and charges to no effect.</div>
@@ -103,7 +103,7 @@
     {{!-- END multiple-attack-section --}}
 
     {{!-- BEGIN standard-attack-section --}}
-    <div class="standard-attack-section" {{#if (or action.current.isMultipleAttack action.current.isHaymakerAttack) }}style="display: none;"{{/if}} >
+    <div class="standard-attack-section" {{#if action.current.isMultipleAttackManeuver}}style="display: none;"{{/if}} >
 
       {{#each action.current.cvModifiers as |modifier|}}
         <div {{#unless modifier.cvMod.ocv }}style="display: none;"{{/unless}}>
@@ -416,7 +416,7 @@
       </button>
     {{/if}}
 
-    {{#if action.maneuver.isMultipleAttack}}
+    {{#if action.maneuver.isMultipleAttackManeuver}}
 
       {{#if action.current.missed}}
         <button type="submit" name="missedMultiattack"  >
@@ -428,7 +428,7 @@
       {{else}}
         <button type="submit" name="executeMultiattack"  {{#unless action.maneuver.attack-1}}disabled
                 title="The Multiple Attack is not set up." {{/unless}}>      {{!-- TODO: this needs to be more rigorous --}}
-          {{#if action.current.isMultipleAttack}}
+          {{#if action.current.isMultipleAttackManeuver}}
             Begin Multiple Attacks
           {{else}}
             Continue Multiple Attacks 
@@ -437,7 +437,7 @@
       {{/if}}
       
       
-      {{#if (ne action.maneuver.isMultipleAttack action.current.isMultipleAttack)}}
+      {{#if (ne action.maneuver.isMultipleAttackManeuver action.current.isMultipleAttack)}}
         <button type="submit" name="cancelMultiattack">
           Cancel Remaining Multiple Attacks
         </button>

@@ -399,8 +399,10 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             // todo: figure out how to adjust the title when we want it to
             // if (this.data.action.maneuver.isMultipleAttack) {
             //     this.options.title = `${(this.data.token || this.data.actor).name} multiple attack`;
-            // } else if (this.data.action.maneuver.isHaymakerAttack) {
-            //     this.options.title = `${(this.data.token || this.data.actor).name} haymaker attack`;
+            // } else if (this.data.action.maneuver.isSweep) {
+            //     this.options.title = `${(this.data.token || this.data.actor).name} sweep attack`;
+            // } else if (this.data.action.maneuver.isRapidFire) {
+            //     this.options.title = `${(this.data.token || this.data.actor).name} rapid fire attack`;
             // } else {
             //     this.options.title = `${(this.data.token || this.data.actor).name} attack`;
             // }

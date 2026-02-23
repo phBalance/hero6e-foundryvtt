@@ -391,9 +391,11 @@ export class ItemAttackFormApplication extends FormApplication {
             // and doesn't change afterwards even if we come through here again
             // todo: figure out how to adjust the title when we want it to
             if (this.data.action.maneuver.isMultipleAttack) {
-                this.options.title = `${(this.data.token || this.data.actor).name} ${this.data.originalItem.is5e ? "sweep attack" : "multiple attack"}`;
-            } else if (this.data.action.maneuver.isHaymakerAttack) {
-                this.options.title = `${(this.data.token || this.data.actor).name} haymaker attack`;
+                this.options.title = `${(this.data.token || this.data.actor).name} multiple attack`;
+            } else if (this.data.action.maneuver.isSweep) {
+                this.options.title = `${(this.data.token || this.data.actor).name} sweep attack`;
+            } else if (this.data.action.maneuver.isRapidFire) {
+                this.options.title = `${(this.data.token || this.data.actor).name} rapid fire attack`;
             } else {
                 this.options.title = `${(this.data.token || this.data.actor).name} attack`;
             }
