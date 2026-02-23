@@ -2112,7 +2112,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         await characteristicRoller.roll();
         const damageRenderedResult = await characteristicRoller.render();
 
-        const action = Attack.getActionInfo(effectiveAttackItem, [], { token });
+        const action = Attack.buildActionInfo(effectiveAttackItem, [], { token });
 
         const cardData = {
             flavor,
