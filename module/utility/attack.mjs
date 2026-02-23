@@ -5,7 +5,6 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { addRangeIntoToHitRoll, dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { tokenEducatedGuess } from "../utility/util.mjs";
 
-// PH: FIXME: Need to confirm this will work with v12
 const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
 
 // PH: TODO: Actually define the type of an action
@@ -294,12 +293,6 @@ export class Attack {
         return attack;
     }
 
-    // PH: FIXME: Remove this
-    static getHaymakerAttackInfo(item, targetedTokens, options, system) {
-        const attack = Attack.getAttackInfo(item, targetedTokens, options, system);
-        return attack;
-    }
-
     static getMultipleAttackManeuverInfo(item, targetedTokens, options, system) {
         // TODO: need to adjust DCV
         const maneuver = {
@@ -348,33 +341,12 @@ export class Attack {
         return maneuver;
     }
 
-    // PH: FIXME: Remove this
-    static getHaymakerManeuverInfo(item, targetedTokens, options, system) {
-        const attacks = [Attack.getHaymakerAttackInfo(item, targetedTokens, options, system)];
-        return {
-            attackerTokenUuid: system.attackerToken?.uuid ?? null,
-            isHaymakerAttack: true,
-            attacks,
-            itemId: item.id,
-            cvModifiers: [],
-        };
-    }
-
-    // PH: FIXME: Remove this
     static getManeuverInfo(item, targetedTokens, options, system) {
         const isMultipleAttack = item.system.XMLID === "MULTIPLEATTACK" || item.system.XMLID === "SWEEP";
-        const isHaymakerAttack = item.system.XMLID === "HAYMAKER";
-        // todo: Combined Attack
-        // todo: martial maneuver plus a weapon
-        // todo: Compound Power
-        // answer: probably a specialized use case of multiple attack
-
         if (isMultipleAttack) {
             return Attack.getMultipleAttackManeuverInfo(item, targetedTokens, options, system);
         }
-        if (isHaymakerAttack) {
-            return Attack.getHaymakerManeuverInfo(item, targetedTokens, options, system);
-        }
+
         return {
             attackerTokenUuid: system.attackerToken?.uuid ?? null,
             attacks: [Attack.getAttackInfo(item, targetedTokens, options, system)],
@@ -383,7 +355,6 @@ export class Attack {
         };
     }
 
-    // PH: FIXME: Remove this
     static getCurrentManeuverInfo(maneuver, options, system) {
         if (options?.execute !== undefined && maneuver.isMultipleAttack) {
             let lastAttackHit = true;
