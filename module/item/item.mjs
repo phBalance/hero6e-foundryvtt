@@ -616,6 +616,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         await activeEffect.delete();
                     }
                 }
+            } else {
+                // Remove MOBILITY effect
+                const activeEffect = this.effects.find((ae) => ae.system.XMLID === "MOBILITY");
+                if (activeEffect) {
+                    await activeEffect.delete();
+                }
             }
 
             // CUSTOMPOWER LIGHT
