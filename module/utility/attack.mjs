@@ -362,7 +362,7 @@ export class Attack {
 
     // PH: FIXME: Remove this
     static getManeuverInfo(item, targetedTokens, options, system) {
-        const isMultipleAttack = item.system.XMLID === "MULTIPLEATTACK";
+        const isMultipleAttack = item.system.XMLID === "MULTIPLEATTACK" || item.system.XMLID === "SWEEP";
         const isHaymakerAttack = item.system.XMLID === "HAYMAKER";
         // todo: Combined Attack
         // todo: martial maneuver plus a weapon
