@@ -6,6 +6,7 @@
 - You can no longer "Create Items" from the sidebar. You can drag pre-configured items from the HeroItems compendium.
 - Minor INVISIBILITY improvements. [#3760](https://github.com/dmdorman/hero6e-foundryvtt/issues/3760)
 - Bulky modifier effect is now removed when not present in current HDC upload. [#3738](https://github.com/dmdorman/hero6e-foundryvtt/issues/3738)
+- Copy/Paste tokens with "Append Incrementing Number" property now ensure unique numbers [#3759](https://github.com/dmdorman/hero6e-foundryvtt/issues/3759)
 
 ### Version 4.2.17 20260221
 

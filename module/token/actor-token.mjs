@@ -14,9 +14,9 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         await super._preCreate(data, options, user);
 
         // Make sure the number is not duplicated
-        if (data.appendNumber) {
-            const initialNumber = parseInt(this.name.match(/\((\d+)\)/)?.[1]);
-            if (initialNumber) {
+        if (this.actor?.prototypeToken?.appendNumber) {
+            const initialNumber = parseInt(this.name.match(/\((\d+)\)/)?.[1]) || 1;
+            if (initialNumber > 0) {
                 const baseName = this.name.replace(this.name.match(/\((\d+)\)/)?.[0], "").trim();
                 for (let n = initialNumber; n < initialNumber + 100; n++) {
                     const sisterToken = canvas.scene.tokens.find((t) => t.name === `${baseName} (${n})`);
