@@ -5,6 +5,7 @@
 - Actors that were upload prior to version 3.0.75 may have items/powers/skill/etc that we no longer support. These items are now deleted as they are unusable. This includes invalid items from the sidebar that may have been manually created. Compendiums remain untouched.
 - You can no longer "Create Items" from the sidebar. You can drag pre-configured items from the HeroItems compendium.
 - Minor INVISIBILITY improvements. [#3760](https://github.com/dmdorman/hero6e-foundryvtt/issues/3760)
+- Bulky modifier effect is now removed when not present in current HDC upload. [#3738](https://github.com/dmdorman/hero6e-foundryvtt/issues/3738)
 
 ### Version 4.2.17 20260221
 
