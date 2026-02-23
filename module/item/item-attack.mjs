@@ -299,7 +299,7 @@ export async function getTargetArray(formData) {
 
 export async function processActionToHit(item, formData, options = {}) {
     const targetArray = await getTargetArray(formData);
-    const action = Attack.getActionInfo(item, targetArray, { ...formData, ...options });
+    const action = Attack.buildActionInfo(item, targetArray, { ...formData, ...options });
     if (!action) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }

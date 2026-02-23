@@ -2456,9 +2456,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
         maneuverDesc: {
             phase: "1",
-            ocv: "-1/x",
-            dcv: "+x1/2",
-            effects: "Strike, normal STUN damage, ½ BODY damage",
+            ocv: "-2/x",
+            dcv: "-1/2",
+            effects: "Make multiple ranged attacks",
             dc: "0",
             attack: true,
             addStr: false,
@@ -5920,7 +5920,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EIDETIC_MEMORY",
             type: ["talent"],
-            behaviors: ["success"],
+            behaviors: ["activatable"],
             costPerLevel: fixedValueFunction(0),
             duration: HERO.DURATION_TYPES.PERSISTENT, // This is built from INT
             target: "self only",

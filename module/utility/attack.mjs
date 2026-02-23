@@ -5,7 +5,6 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { addRangeIntoToHitRoll, dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { tokenEducatedGuess } from "../utility/util.mjs";
 
-// PH: FIXME: Need to confirm this will work with v12
 const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
 
 // PH: TODO: Actually define the type of an action
@@ -13,7 +12,6 @@ const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
 export class Attack {
     static async makeActionActiveEffects(action) {
         const cvModifiers = action.current.cvModifiers;
-        // const item = action.system.item[action.current.itemId];
 
         const actor = action.system.actor;
         Attack.removeActionActiveEffects(actor);
@@ -171,6 +169,7 @@ export class Attack {
                 cvModifier.modifier = modifierString;
             }
         }
+
         return cvModifier;
     }
 
@@ -201,11 +200,11 @@ export class Attack {
         return { cvMod, XMLID, name, id };
     }
 
-    static findStrikeKey(item) {
+    static findStrikeKey(actor) {
         // todo: if there is some character that doesn't have a STRIKE maneuver, then this find will fail.
         // if the character has been loaded from an HDC then they will have the default maneuvers
         // if they have not been loaded from and HDC they won't have multiple attack and shouldn't get here.
-        const strike = item.actor.items.find((item) => "STRIKE" === item.system.XMLID);
+        const strike = actor.items.find((item) => "STRIKE" === item.system.XMLID);
         return strike?.id;
     }
 
@@ -215,8 +214,8 @@ export class Attack {
         }
         const index = data.action.maneuver.attackKeys.length;
         const attackKey = `attack-${index}`;
-        const itemKey = Attack.findStrikeKey(data.item);
-        const targetKey = data.action.targetedTokens?.length ? data.action.targetedTokens[0].id : "NONE";
+        const itemKey = Attack.findStrikeKey(data.actor);
+        const targetKey = data.action.system.targetedTokens?.length ? data.action.system.targetedTokens[0].id : "NONE";
         const multipleAttackKeys = { itemKey, attackKey, targetKey };
         data.action.maneuver[attackKey] = multipleAttackKeys;
         data.action.maneuver.attackKeys.push(multipleAttackKeys);
@@ -225,6 +224,7 @@ export class Attack {
             data.formData[`${attackKeys.attackKey}-target`] = attackKeys.targetKey;
             data.formData[attackKeys.attackKey] = attackKeys.itemKey;
         });
+
         return true;
     }
 
@@ -256,6 +256,7 @@ export class Attack {
             data.formData[`${attackKeys.attackKey}-target`] = attackKeys.targetKey;
             data.formData[attackKeys.attackKey] = attackKeys.itemKey;
         });
+
         return true;
     }
 
@@ -277,6 +278,7 @@ export class Attack {
                 ),
             );
         }
+
         return target;
     }
 
@@ -291,23 +293,26 @@ export class Attack {
             targets,
             cvModifiers: [],
         };
+
         return attack;
     }
 
-    // PH: FIXME: Remove this
-    static getHaymakerAttackInfo(item, targetedTokens, options, system) {
-        const attack = Attack.getAttackInfo(item, targetedTokens, options, system);
-        return attack;
-    }
+    static buildMultipleAttackManeuverInfo(item, targetedTokens, options, system) {
+        const isMultipleAttack = item.system.XMLID === "MULTIPLEATTACK";
+        const isRapidFire = item.system.XMLID === "RAPIDFIRE";
+        const isSweep = item.system.XMLID === "SWEEP";
 
-    static getMultipleAttackManeuverInfo(item, targetedTokens, options, system) {
         // TODO: need to adjust DCV
         const maneuver = {
             attackerTokenUuid: system.attackerToken?.uuid ?? null,
-            isMultipleAttack: true,
+            isMultipleAttackManeuver: isMultipleAttack || isRapidFire || isSweep,
+            isMultipleAttack,
+            isRapidFire,
+            isSweep,
             itemId: item.id,
             cvModifiers: [],
         };
+
         if (options) {
             const keys = [];
             let count = 0;
@@ -322,8 +327,9 @@ export class Attack {
                 count++;
             }
         }
+
         // Initialize multiple attack to the default option values
-        const itemKey = Attack.findStrikeKey(item);
+        const itemKey = Attack.findStrikeKey(item.actor);
 
         maneuver.attackKeys ??= targetedTokens.map((target, index) => {
             return {
@@ -348,33 +354,14 @@ export class Attack {
         return maneuver;
     }
 
-    // PH: FIXME: Remove this
-    static getHaymakerManeuverInfo(item, targetedTokens, options, system) {
-        const attacks = [Attack.getHaymakerAttackInfo(item, targetedTokens, options, system)];
-        return {
-            attackerTokenUuid: system.attackerToken?.uuid ?? null,
-            isHaymakerAttack: true,
-            attacks,
-            itemId: item.id,
-            cvModifiers: [],
-        };
-    }
-
-    // PH: FIXME: Remove this
-    static getManeuverInfo(item, targetedTokens, options, system) {
+    static buildManeuverInfo(item, targetedTokens, options, system) {
         const isMultipleAttack = item.system.XMLID === "MULTIPLEATTACK";
-        const isHaymakerAttack = item.system.XMLID === "HAYMAKER";
-        // todo: Combined Attack
-        // todo: martial maneuver plus a weapon
-        // todo: Compound Power
-        // answer: probably a specialized use case of multiple attack
+        const isRapidFire = item.system.XMLID === "RAPIDFIRE";
+        const isSweep = item.system.XMLID === "SWEEP";
+        if (isMultipleAttack || isSweep || isRapidFire) {
+            return Attack.buildMultipleAttackManeuverInfo(item, targetedTokens, options, system);
+        }
 
-        if (isMultipleAttack) {
-            return Attack.getMultipleAttackManeuverInfo(item, targetedTokens, options, system);
-        }
-        if (isHaymakerAttack) {
-            return Attack.getHaymakerManeuverInfo(item, targetedTokens, options, system);
-        }
         return {
             attackerTokenUuid: system.attackerToken?.uuid ?? null,
             attacks: [Attack.getAttackInfo(item, targetedTokens, options, system)],
@@ -383,9 +370,8 @@ export class Attack {
         };
     }
 
-    // PH: FIXME: Remove this
     static getCurrentManeuverInfo(maneuver, options, system) {
-        if (options?.execute !== undefined && maneuver.isMultipleAttack) {
+        if (options?.execute !== undefined && maneuver.isMultipleAttackManeuver) {
             let lastAttackHit = true;
             if (!options.continueMultiattack) {
                 options?.rolledResult?.forEach((roll) => {
@@ -411,7 +397,7 @@ export class Attack {
             const attackKeys = maneuver[attackKey];
             const maneuverItem = system.attackerToken.actor.items.get(attackKeys.itemKey);
             const maneuverTarget = system.targetedTokens.find((token) => token.id === attackKeys.targetKey);
-            const current = this.getManeuverInfo(maneuverItem, [maneuverTarget], options, system);
+            const current = this.buildManeuverInfo(maneuverItem, [maneuverTarget], options, system);
             current.execute = execute;
             current.step = attackKey;
 
@@ -429,10 +415,19 @@ export class Attack {
             current.cvModifiers.push(maneuver.cvMod);
             return current;
         }
+
         return maneuver;
     }
 
-    static getActionInfo(item, targetedTokens, options) {
+    /**
+     * Build an action object
+     *
+     * @param {*} item
+     * @param {*} targetedTokens
+     * @param {*} options
+     * @returns
+     */
+    static buildActionInfo(item, targetedTokens, options) {
         // do I need to safety things here?
         if (!item) {
             console.error("There is no attack item!");
@@ -469,7 +464,7 @@ export class Attack {
             system.token[id] = targetedTokens[i];
         }
 
-        const maneuver = Attack.getManeuverInfo(item, targetedTokens, options, system);
+        const maneuver = Attack.buildManeuverInfo(item, targetedTokens, options, system);
         const current = Attack.getCurrentManeuverInfo(maneuver, options, system); // get current attack as a 'maneuver' with just the currently executing attack options
         const action = {
             maneuver,
@@ -495,12 +490,6 @@ export function actionToJSON(action) {
 
             item: {}, // PH: FIXME: This is a map. That is problematic for items which are not in the database since it's based on id. Turn into a proper Map
             tokens: {}, // PH: FIXME: This is a map. Problematic as ids are not unique and can sometimes be undefined
-            // tokenObjs: action.system.token.map((token) => tokenToTokenObj(token)),
-            //             Object.fromEntries(
-            //     Object.entries(obj).map(
-            //       ([k, v], i) => [k, fn(v, k, i)]
-            //     )
-            //   )
         },
     };
 
