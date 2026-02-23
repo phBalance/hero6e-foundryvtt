@@ -387,6 +387,19 @@ export class ItemAttackFormApplication extends FormApplication {
                 { ...this.data.formData, token: this.data.token }, // use formData to include player options from the form
             );
 
+            const manueverItem = this.data.effectiveItem;
+            this.data.multiAttackItems ??= this.data.action.maneuver.isMultipleAttackManeuver
+                ? this.data.originalItem.actor.items.filter(filterIgnoreCompoundAndFrameworkItems).filter((item) => {
+                      return (
+                          (item.baseInfo.type.includes("attack") || item.baseInfo.type.includes("maneuver")) && // Is attack or maneuver?
+                          (manueverItem.system.XMLID === "MULTIPLEATTACK" || // 6e Multipleattack allows both HTH and Ranged
+                              (manueverItem.system.XMLID === "SWEEP" && item.isHth) || // 5e Sweep is HTH only
+                              (manueverItem.system.XMLID === "RAPIDFIRE" && item.isRanged)) && // 5e Rapid Fire is Ranged only
+                          !item.system.XMLID.startsWith("__") // No internal placeholder powers/items
+                      );
+                  })
+                : [];
+
             // the title seems to be fixed when the form is initialized,
             // and doesn't change afterwards even if we come through here again
             // todo: figure out how to adjust the title when we want it to
@@ -643,8 +656,6 @@ export class ItemAttackFormApplication extends FormApplication {
         if (event.submitter?.name === "continueMultiattack") {
             this.data.formData.continueMultiattack = true;
         } else if (event.submitter?.name === "executeMultiattack") {
-            // TODO: cancel a missed and continue anyway
-
             const begin = this.data.action.current.execute === undefined;
             // we pressed the button to execute multiple attacks
             // the first time does not get a roll, but sets up the first attack
@@ -674,9 +685,13 @@ export class ItemAttackFormApplication extends FormApplication {
             await this.close();
             return;
         } else if (event.submitter?.name === "cancelMultiattack") {
-            // TODO: saves the end cost for the remaining attacks
+            this.data.formData.continueMultiattack = false;
+
+            // PH: FIXME: Do we have to do anything to action to clear it out? Should we just "delete" it?
+
             canvas.tokens.activate();
             await this.close();
+
             return;
         } else if (event.submitter?.name === "aoe") {
             return this._spawnAreaOfEffect();
