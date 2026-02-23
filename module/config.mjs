@@ -2456,9 +2456,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
         maneuverDesc: {
             phase: "1",
-            ocv: "-1/x",
-            dcv: "+x1/2",
-            effects: "Strike, normal STUN damage, ½ BODY damage",
+            ocv: "-2/x",
+            dcv: "-1/2",
+            effects: "Make multiple ranged attacks",
             dc: "0",
             attack: true,
             addStr: false,
