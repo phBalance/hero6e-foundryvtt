@@ -378,10 +378,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         },
                     ];
                     for (const usableas of this.modifiers.filter((o) => o.XMLID === "USABLEAS")) {
-                        console.log(usableas?.XMLID, usableas?.ALIAS, usableas);
                         let foundMatch = false;
                         for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
-                            console.log(movementKey);
                             if (
                                 usableas.ALIAS?.match(new RegExp(movementKey, "i")) ||
                                 usableas.COMMENTS?.match(new RegExp(movementKey, "i"))
@@ -754,11 +752,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (v) {
                     _heroValidations.push(...v.map((m) => ({ ...m, itemId: this.id })));
                 }
-
-                for (const modifier of this.modifiers.filter((m) => m.baseInfo?.heroValidation)) {
-                    const v2 = modifier.baseInfo.heroValidation(modifier);
-                    _heroValidations.push(...v2.map((m) => ({ ...m, itemId: this.id })));
-                }
+            }
+            for (const modifier of this.modifiers.filter((m) => m.baseInfo?.heroValidation)) {
+                const v2 = modifier.baseInfo.heroValidation(modifier);
+                _heroValidations.push(...v2.map((m) => ({ ...m, itemId: this.id })));
             }
         } else {
             _heroValidations.push({

@@ -19129,6 +19129,31 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "USABLEAS",
             behaviors: ["modifier"],
             type: ["modifier"],
+            heroValidation: function (modifier) {
+                const validations = [];
+                const usableAs = modifier;
+                let foundMatch = false;
+
+                for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
+                    if (
+                        usableAs.ALIAS?.match(new RegExp(movementKey, "i")) ||
+                        usableAs.COMMENTS?.match(new RegExp(movementKey, "i"))
+                    ) {
+                        foundMatch = true;
+                    }
+                }
+
+                if (!foundMatch) {
+                    validations.push({
+                        property: "ALIAS",
+                        message: `Unable to determine USABLEAS movement type. Expecting ${Object.keys(CONFIG.HERO.movementPowers).join(", ")}.`,
+                        example: `Usable as swimming`,
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                        modifierID: modifier.ID,
+                    });
+                }
+                return validations;
+            },
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(true),
             xml: `<MODIFIER XMLID="USABLEAS" ID="1737922876396" BASECOST="0.25" LEVELS="0" ALIAS="Usable [As Second Mode Of Movement]" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
