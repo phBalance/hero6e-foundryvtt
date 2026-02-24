@@ -45,6 +45,7 @@ import {
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
+import { AttackAction } from "../utility/attack-action.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
@@ -6818,14 +6819,21 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     async placeTemplate(message) {
-        if (!this.aoe) throw Error("Attempted to create template with non-aoe item");
-        return this.placeItemTemplate({ message });
+        if (!this.getAoeModifier()) throw Error("Attempted to create template with non-aoe item");
+        return this.placeItemTemplate(message);
     }
 
-    async placeItemTemplate(options = {}) {
-        const message = options.message;
-
+    async placeItemTemplate(message) {
         if (!canvas.ready) throw Error("No canvas");
+
+        const parsedMessageContent = document.createElement("div");
+        parsedMessageContent.innerHTML = message.content;
+
+        const attackActionJson = parsedMessageContent.querySelector("[data-attack-action]")?.dataset?.attackAction;
+        if (!attackActionJson) {
+            throw new Error("missing attackAction");
+        }
+        const attackAction = AttackAction.fromJSON(attackActionJson);
 
         const areaOfEffect = this.aoeAttackParameters;
         if (!areaOfEffect) throw Error("No aoeAttackParameters");
@@ -6859,7 +6867,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 [game.system.id]: {
                     messageId: message?.id,
                     purpose: "AoE",
-                    item: this,
+                    attackAction,
                 },
             },
         };
