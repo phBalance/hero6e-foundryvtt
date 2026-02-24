@@ -1,0 +1,36 @@
+{{ log 'HEROSYS item-attack-allinone-card-v2' this }}
+<div class="hero chat-card item-card item-attack-allinone-card-v2" data-attack-action="{{toJSON attackAction}}">
+
+    <span class="flavor-text">
+
+        {{!-- Attack Name --}}
+        <header class="card-header attack flexrow">
+            <img src="{{attackAction.effectiveItem.img}}" title="{{attackAction.effectiveItem.name}}" width="36" height="36" />
+            <h3 class="item-name">{{{itemName attackAction.effectiveItem}}}</h3>
+        </header>
+
+        <div class="tags">
+            {{#each attackAction.attackTags as |tag id|}}
+            <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+            {{/each}}
+        </div>
+        <hr>
+    </span>
+
+    <section class="owner-buttons">
+        <div class="template-button">
+            <button class="place-template" data-action="place-template"
+            data-tooltip="Left click to lock position.">
+                Place {{attackAction.aoeText}} template
+            </button>
+            <button class="remove-template" data-action="remove-template">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+        <div class="template-button">
+            <button class="roll-template-placement" data-action="roll-template-placement">
+                Roll template placement
+            </button>
+        </div>
+    </section>
+</div>

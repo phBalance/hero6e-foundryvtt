@@ -31,6 +31,7 @@ import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
+import { AttackAction } from "../utility/attack-action.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
@@ -50,6 +51,10 @@ export async function chatListeners(_html) {
     html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
     html.on("click", "i.modal-damage-card, span.modal-damage-card", this._onModalDamageCard.bind(this));
     html.on("click", "button.roll-powerToRemove", this._onRollPowerToRemove.bind(this));
+
+    html.on("click", `button[data-action="place-template"]`, this._onPlaceTemplate.bind(this));
+    html.on("click", `button[data-action="remove-template"]`, this._onRemoveTemplate.bind(this));
+    html.on("click", `button[data-action="roll-template-placement"]`, this._onRollTemplatePlacement.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -320,11 +325,7 @@ export async function processActionToHit(item, formData, options = {}) {
 
     // Does the effective attack item have an AoE?
     if (item.effectiveAttackItem.getAoeModifier()) {
-        if (options.allInOne) {
-            await doAoePlaceTemplate(action, formData, options);
-        } else {
-            await doAoeActionToHit(action, formData, options);
-        }
+        await doAoeActionToHit(action, formData, options);
     } else {
         await doSingleTargetActionToHit(action, formData, options);
     }
@@ -333,6 +334,27 @@ export async function processActionToHit(item, formData, options = {}) {
     await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
         active: false,
     });
+}
+
+export async function processActionToHitV2(attackAction) {
+    attackAction.targetTokens = Array.from(game.user.targets);
+
+    // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
+    const haymakerManeuverActive = attackAction.actor?.items.find(
+        (anItem) => anItem.isCombatManeuver && anItem.system.XMLID === "HAYMAKER" && anItem.isActive,
+    );
+    if (haymakerManeuverActive) {
+        if (
+            attackAction.effectiveItem.isMartialManeuver ||
+            (attackAction.effectiveItem.isCombatManeuver && attackAction.effectiveItem.system.XMLID !== "STRIKE")
+        ) {
+            return ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
+                localize: true,
+            });
+        }
+    }
+
+    await allInOneV2(attackAction);
 }
 
 /**
@@ -539,33 +561,29 @@ async function addAttackHitLocationsIntoToHitRoll(item, attackHeroRoller, option
     return remainingAimOcvPenalty;
 }
 
-async function doAoePlaceTemplate(action) {
-    const effectiveItem = action.system.currentItem;
-    const actor = action.system.actor;
-    const attackerToken = action.system.attackerToken;
-    if (!attackerToken) {
-        return ui.notifications.error(`Unable to find a token on this scene associated with ${actor.name}.`);
+async function allInOneV2(attackAction) {
+    if (!attackAction) {
+        new Error("attackAction not defined");
     }
-    const aoe = effectiveItem.aoeAttackParameters;
-    if (!aoe) {
-        return ui.notifications.error(`Attack AoE template was not found.`);
-    }
-    const levels = aoe.value;
-    const aoeText = ` (${levels}${getSystemDisplayUnits(effectiveItem.actor.is5e)})`;
+
+    // const aoe = attackAction.effectiveItem.aoeAttackParameters;
+    // if (!aoe) {
+    //     return ui.notifications.error(`Attack AoE template was not found.`);
+    // }
+    // const levels = aoe.value;
+    // const aoeText = ` (${levels}${getSystemDisplayUnits(attackAction.effectiveItem.actor.is5e)})`;
 
     const cardData = {
-        effectiveItem,
-        attackTags: getAttackTags(effectiveItem),
-        aoeText,
+        attackAction,
     };
-    const template = `systems/${HEROSYS.module}/templates/chat/item-toHitAoe-placeTemplate-card.hbs`;
+    const template = `systems/${HEROSYS.module}/templates/chat/item-attack-allinone-card-v2.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.IC,
         author: game.user._id,
         content: cardHtml,
-        speaker: ChatMessage.getSpeaker({ actor: actor, token: attackerToken }),
+        speaker: ChatMessage.getSpeaker({ actor: attackAction.actor, token: attackAction.attackerToken }),
     };
 
     await ChatMessage.create(chatData);
@@ -1718,6 +1736,37 @@ export async function _onRollPowerToRemove(event) {
         };
         await ChatMessage.create(chatData);
     }
+}
+
+export async function _onPlaceTemplate(event) {
+    // Remove any previous tempaltes
+    await _onRemoveTemplate(event);
+
+    // Get attackAction
+    const attackActionJson = event.target.closest("[data-attack-action]")?.dataset?.attackAction;
+    if (!attackActionJson) {
+        throw new Error("missing attackAction");
+    }
+    const attackAction = AttackAction.fromJSON(attackActionJson);
+
+    // Get message
+    const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
+    const message = ChatMessage.get(messageId);
+
+    // Place template preview on canvas
+    await attackAction.effectiveItem.placeTemplate(message);
+}
+export async function _onRemoveTemplate(event) {
+    const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
+    const templateIds =
+        canvas.scene?.templates.filter((t) => t.flags[game.system.id]?.messageId === messageId).map((t) => t.id) ?? [];
+    //button.disabled = true;
+    await canvas.scene?.deleteEmbeddedDocuments("MeasuredTemplate", templateIds);
+    //button.disabled = false;
+    return;
+}
+export async function _onRollTemplatePlacement(event, target) {
+    console.error(event, target);
 }
 
 async function createTemporaryKnockbackItem(actor, knockbackDice) {
