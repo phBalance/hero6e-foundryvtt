@@ -171,7 +171,7 @@ async function skillRoll(item, actor, target) {
     }
 
     const formElement = target[0].querySelector("form");
-    const formData = new FormDataExtended(formElement)?.object;
+    const formData = new foundry.applications.ux.FormDataExtended(formElement)?.object;
     const skillRoller = new HeroRoller().addDice(3);
 
     // SkillMods
