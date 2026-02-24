@@ -76,7 +76,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                     position: { width: 480 },
                     ok: {
                         label: "COMPENDIUM.Create",
-                        callback: (_event, button) => new FormDataExtended(button.form).object,
+                        callback: (_event, button) => new foundry.applications.ux.FormDataExtended(button.form).object,
                     },
                     render: handleRender,
                 });
@@ -121,7 +121,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                             label: game.i18n.localize("COMPENDIUM.Create"),
                             callback: async (html) => {
                                 const form = html.find("#compendium-create")[0];
-                                const fd = new FormDataExtended(form);
+                                const fd = new foundry.applications.ux.FormDataExtended(form);
                                 const metadata = fd.object;
 
                                 if (metadata.upload) {

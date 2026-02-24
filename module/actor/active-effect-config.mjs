@@ -178,7 +178,7 @@ export class HeroSystemActiveEffectConfig extends FoundryVttActiveEffectConfig {
     }
 
     _getSubmitData(updateData = {}) {
-        const fd = new FormDataExtended(this.form, { editors: this.editors, disabled: true });
+        const fd = new foundry.applications.ux.FormDataExtended(this.form, { editors: this.editors, disabled: true });
         let data = foundry.utils.expandObject(fd.object);
         if (updateData) foundry.utils.mergeObject(data, updateData);
         data.changes = Array.from(Object.values(data.changes || {}));

@@ -1175,7 +1175,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                     label: "Create",
                     callback: async function (html) {
                         const formElement = html[0].querySelector("form");
-                        const formData = new FormDataExtended(formElement);
+                        const formData = new foundry.applications.ux.FormDataExtended(formElement);
                         const formDataObject = formData.object;
                         if (formDataObject.xmlid === "none") return;
 
