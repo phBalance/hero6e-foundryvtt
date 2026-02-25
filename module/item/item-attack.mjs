@@ -605,7 +605,7 @@ export async function doAoeActionToHit(action, options) {
         .addNumber(hitCharacteristic, item.system.attacksWith)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
-        .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
+        .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
     const aoeTemplate = getAoeTemplateForBaseItem(item);
     if (!aoeTemplate) {
@@ -919,7 +919,7 @@ async function doSingleTargetActionToHit(action, options) {
         .addNumber(hitCharacteristic, itemData.attacksWith)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
-        .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
+        .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
     const isAoE = item.effectiveAttackItem.getAoeModifier();
     const aoeTemplate = isAoE ? getAoeTemplateForBaseItem(item) : null;
