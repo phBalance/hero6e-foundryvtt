@@ -265,7 +265,7 @@ export async function migrateWorld() {
         "4.2.18",
         lastMigration,
         getAllActorsInGame(),
-        "Penalty Skill Levels",
+        "Delete Invalid Item Types and Migrate Maneuvers",
         async (actor) => await migrateTo4_2_18(actor),
     );
     await migrateToVersion(
@@ -367,6 +367,7 @@ async function commitItemsCollectionMigrateDataChanges(item) {
 async function migrateTo4_2_18(actor) {
     try {
         await deleteItemsWithInvalidTypesFromActor4_2_18(actor);
+        await migrateSeveralManeuver4_2_18(actor);
     } catch (e) {
         console.error(e);
     }
@@ -377,6 +378,8 @@ async function migrateTo4_2_18(actor) {
 const invalidItemTypesToDelete4_2_18 = ["attack", "defense", "movement", "misc"];
 
 async function deleteItemsWithInvalidTypesFromActor4_2_18(actor) {
+    const deletingItemPromises = [];
+
     try {
         for (const itemId of actor.items.invalidDocumentIds) {
             const item = actor.items.getInvalid(itemId);
@@ -384,7 +387,7 @@ async function deleteItemsWithInvalidTypesFromActor4_2_18(actor) {
                 console.warn(
                     `Deleting item ${actor.name}/${item.name} with invalid type ${item.type} found during 4.2.18 migration`,
                 );
-                await item.delete();
+                deletingItemPromises.push(item.delete());
             } else {
                 console.error(
                     `Unexpected item ${actor.name}/${item.name} with invalid type=${item.type} found during 4.2.18 migration`,
@@ -394,6 +397,60 @@ async function deleteItemsWithInvalidTypesFromActor4_2_18(actor) {
     } catch (e) {
         console.error(e);
     }
+
+    return Promise.all(deletingItemPromises);
+}
+
+async function addHeroSystemManeuver(actor, maneuverName) {
+    const powerList = actor.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+    const maneuver = powerList.find((baseInfo) => baseInfo.key === maneuverName && baseInfo.type?.includes("maneuver"));
+
+    // NOTE: It's bad form to use the functions outside the migration, but going to do it anyways.
+    return maneuver ? actor.addManeuver(maneuver) : undefined;
+}
+
+/**
+ * There were some issues with the descriptions of BRACE, MULTIPLEATTACK, RAPIDFIRE, SET, and SETANDBRACE
+ * @param {*} actor
+ */
+async function migrateSeveralManeuver4_2_18(actor) {
+    const createPromises = [];
+
+    try {
+        const braceItem = actor.items.find((item) => item.system.XMLID === "BRACE");
+        if (braceItem) {
+            await braceItem.delete();
+            createPromises.push(addHeroSystemManeuver(actor, "BRACE"));
+        }
+
+        const multipleAttackItem = actor.items.find((item) => item.system.XMLID === "MULTIPLEATTACK");
+        if (multipleAttackItem) {
+            await multipleAttackItem.delete();
+            createPromises.push(addHeroSystemManeuver(actor, "MULTIPLEATTACK"));
+        }
+
+        const rapidFireItem = actor.items.find((item) => item.system.XMLID === "RAPIDFIRE");
+        if (rapidFireItem) {
+            await rapidFireItem.delete();
+            createPromises.push(addHeroSystemManeuver(actor, "RAPIDFIRE"));
+        }
+
+        const setItem = actor.items.find((item) => item.system.XMLID === "SET");
+        if (setItem) {
+            await setItem.delete();
+            createPromises.push(addHeroSystemManeuver(actor, "SET"));
+        }
+
+        // Remove the set and brace as it's not in the combat maneuvers table (it's just in the action table)
+        const setAndBraceItem = actor.items.find((item) => item.system.XMLID === "SETANDBRACE");
+        if (setAndBraceItem) {
+            await setAndBraceItem.delete();
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+    return Promise.all(createPromises);
 }
 
 async function deleteItemsWithInvalidTypesFromSideBar4_2_18(item) {
