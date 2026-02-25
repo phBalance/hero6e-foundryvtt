@@ -2916,7 +2916,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                             : "";
 
                     if (isRangedMartialManeuver(this)) {
-                        const range = parseInt(system.RANGE || 0);
+                        const range = system.RANGE;
                         description += `, Range ${range.signedStringHero()}`;
                     }
                 }

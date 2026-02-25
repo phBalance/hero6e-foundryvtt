@@ -3257,12 +3257,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const XMLID = maneuver.key;
 
         const maneuverDetails = maneuver.maneuverDesc;
-        const PHASE = maneuverDetails.phase;
-        const OCV = maneuverDetails.ocv;
+        const ADDSTR = maneuverDetails.addStr;
+        const DC = maneuverDetails.dc;
         const DCV = maneuverDetails.dcv;
         const EFFECT = maneuverDetails.effects;
-        const DC = maneuverDetails.dc;
-        const ADDSTR = maneuverDetails.addStr;
+        const OCV = maneuverDetails.ocv;
+        const PHASE = maneuverDetails.phase;
+        const RANGE = maneuverDetails.range || "0";
         const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
         const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
 
@@ -3290,13 +3291,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             name,
             type: "maneuver",
             system: {
-                PHASE,
-                OCV,
-                DCV,
-                DC,
-                EFFECT,
                 active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
                 description: EFFECT,
+                is5e: this.is5e,
+                ADDSTR,
+                DC,
+                DCV,
+                DISPLAY: name, // Not sure we should allow editing of basic maneuvers
+                EFFECT,
+                OCV,
+                PHASE,
+                RANGE,
+                USEWEAPON,
+                WEAPONEFFECT,
                 XMLID,
                 // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
                 // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
@@ -3305,11 +3312,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
                 //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
                 //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
-                DISPLAY: name, // Not sure we should allow editing of basic maneuvers
-                ADDSTR,
-                USEWEAPON,
-                WEAPONEFFECT,
-                is5e: this.is5e,
             },
         };
 
@@ -3393,7 +3395,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (jsonChild.XMLID === "RANGED" && jsonChild.xmlTag === "ADDER") {
                 jsonChild.XMLID = "RANGE";
                 jsonChild.errors ??= [];
-                jsonChild.errors.push("RANGE ranamed to RANGED");
+                jsonChild.errors.push("RANGE renamed to RANGED");
             }
 
             // Items should have an XMLID

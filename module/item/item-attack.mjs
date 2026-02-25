@@ -416,7 +416,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
             );
         }
 
-        // Some maneuvers have a built in RANGE value (like PSLs). These are only possible from the maneuver item.
+        // Some maneuvers have a built in RANGE value (like range a PSL). These are only possible from the maneuver item.
         const maneuverRangeOffset = parseInt(attackItem.system.RANGE || 0);
         const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
         remainingRangePenalty += maneuverRangeOffsets;
@@ -431,12 +431,13 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
             (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
         );
         if (braceManeuver) {
-            const braceOffsets = Math.min(braceManeuver.baseInfo?.maneuverDesc?.ocv || 0, -remainingRangePenalty);
+            const braceRangeOffset = braceManeuver.system.RANGE;
+            const braceOffsets = Math.min(braceRangeOffset, -remainingRangePenalty);
             remainingRangePenalty += braceOffsets;
             attackHeroRoller.addNumber(
                 braceOffsets,
                 "Brace modifier",
-                `Brace maneuver ${braceManeuver.baseInfo?.maneuverDesc?.ocv.signedStringHero()} offset`,
+                `Brace maneuver ${braceRangeOffset.signedStringHero()} offset`,
             );
         }
 
@@ -623,7 +624,7 @@ export async function doAoeActionToHit(action, options) {
         .addNumber(hitCharacteristic, item.system.attacksWith)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
-        .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
+        .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
     const aoeTemplate = getAoeTemplateForBaseItem(item);
     if (!aoeTemplate) {
@@ -937,7 +938,7 @@ async function doSingleTargetActionToHit(action, options) {
         .addNumber(hitCharacteristic, itemData.attacksWith)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
-        .addNumber(-parseInt(setManeuver?.baseInfo?.maneuverDesc?.ocv || 0), "Set Maneuver");
+        .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
     const isAoE = item.effectiveAttackItem.getAoeModifier();
     const aoeTemplate = isAoE ? getAoeTemplateForBaseItem(item) : null;

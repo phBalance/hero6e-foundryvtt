@@ -1942,13 +1942,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "0",
-                ocv: "+2",
-                dcv: "1/2",
+                ocv: "0",
+                dcv: "x1/2",
                 effects: "+2 OCV only to offset the Range Modifier",
                 dc: "0",
                 attack: false,
                 addStr: false,
                 useWeapon: false,
+                range: "+2",
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
         },
@@ -2372,7 +2373,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             maneuverDesc: {
                 phase: "1",
                 ocv: "var",
-                dcv: "1/2",
+                dcv: "x1/2",
                 effects: "Attack one or more targets multiple times",
                 dc: "0",
                 attack: true,
@@ -2457,7 +2458,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         maneuverDesc: {
             phase: "1",
             ocv: "-2/x",
-            dcv: "-1/2",
+            dcv: "x1/2",
             effects: "Make multiple ranged attacks",
             dc: "0",
             attack: true,
@@ -2513,35 +2514,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 ocv: "+1",
                 dcv: "+0",
                 effects: "Take extra time to aim a Ranged attack at a target",
-                dc: "0",
-                attack: false,
-                addStr: false,
-                useWeapon: false,
-            },
-            baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
-        },
-        {},
-    );
-    // Do we really need this? Why not just check SET and BRACE?
-    // If removed the migrations will generate a warning because SETANDBRACE is no longer defined.
-    addPower(
-        {
-            key: "SETANDBRACE",
-            type: ["maneuver"],
-            behaviors: ["non-hd", "activatable"],
-            name: "Set And Brace",
-            costPerLevel: fixedValueFunction(0),
-            perceivability: "obvious",
-            duration: HERO.DURATION_TYPES.INSTANT,
-            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
-            costEnd: true, // Maneuvers that don't use strength cost 1 END
-            target: "target's dcv",
-            ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
-            maneuverDesc: {
-                phase: "1",
-                ocv: "+3",
-                dcv: "1/2",
-                effects: "Take extra time to aim a Ranged attack at a target, +2 OCV only to offset the Range Modifier",
                 dc: "0",
                 attack: false,
                 addStr: false,
