@@ -2373,7 +2373,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             maneuverDesc: {
                 phase: "1",
                 ocv: "var",
-                dcv: "1/2",
+                dcv: "x1/2",
                 effects: "Attack one or more targets multiple times",
                 dc: "0",
                 attack: true,
@@ -2458,7 +2458,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         maneuverDesc: {
             phase: "1",
             ocv: "-2/x",
-            dcv: "-1/2",
+            dcv: "x1/2",
             effects: "Make multiple ranged attacks",
             dc: "0",
             attack: true,
