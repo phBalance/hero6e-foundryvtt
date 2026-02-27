@@ -2094,6 +2094,22 @@ export function registerFullTests(quench) {
                     let hka5DcItem;
                     let hka4DcItem;
 
+                    let moveByItem;
+                    let moveThroughItem;
+                    let nerveStrikeItem;
+                    let killingStrikeItem;
+                    let martialStrikeItem;
+                    let martialFlashItem;
+                    let sacrificeStrikeItem;
+
+                    beforeEach(async function () {
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                    });
+
+                    afterEach(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+                    });
+
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
@@ -2104,18 +2120,20 @@ export function registerFullTests(quench) {
                         hka4DcItem = actor.items.find(
                             (item) => item.system.XMLID === "HKA" && item.system.NAME === "1d6+1",
                         );
+
+                        moveByItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
+                        moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
+
+                        nerveStrikeItem = actor.items.find((o) => o.system.ALIAS === "Nerve Strike");
+                        killingStrikeItem = actor.items.find((o) => o.system.ALIAS === "Killing Strike");
+
+                        martialStrikeItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
+                        martialFlashItem = actor.items.find((o) => o.system.ALIAS === "Martial Flash");
+                        sacrificeStrikeItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
                     });
 
                     after(async function () {
                         await deleteQuenchActor({ quench: this, actor });
-                    });
-
-                    beforeEach(async function () {
-                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-                    });
-
-                    afterEach(async function () {
-                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                     });
 
                     // Verify the cost of powers
@@ -2139,10 +2157,7 @@ export function registerFullTests(quench) {
                             // Added DCs: velocity 30"/3 -> 10DC => +10DC
                             // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
                             assert.equal(
-                                getEffectFormulaFromItem(
-                                    actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
-                                    { effectiveStr: 20, velocity: 30 },
-                                ),
+                                getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 30 }),
                                 "14d6",
                             );
                         });
@@ -2152,10 +2167,7 @@ export function registerFullTests(quench) {
                             // Added DCs: velocity 90"/3 -> 30DC => +30DC
                             // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
                             assert.equal(
-                                getEffectFormulaFromItem(
-                                    actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
-                                    { effectiveStr: 20, velocity: 90 },
-                                ),
+                                getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 90 }),
                                 "34d6",
                             );
                         });
@@ -2165,10 +2177,7 @@ export function registerFullTests(quench) {
                             // Added DCs: velocity 10"/5 -> 3DC => +3DC
                             // Base + Added = 2DC + 3DC (doubling rule does not apply) = 4 DC. Move By is 5AP/die => 4d6
                             assert.equal(
-                                getEffectFormulaFromItem(
-                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                    { effectiveStr: 20, velocity: 10 },
-                                ),
+                                getEffectFormulaFromItem(moveByItem, { effectiveStr: 20, velocity: 10 }),
                                 "4d6",
                             );
                         });
@@ -2178,10 +2187,7 @@ export function registerFullTests(quench) {
                             // Added DCs: velocity 90"/5 -> 18DC => +18DC
                             // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
                             assert.equal(
-                                getEffectFormulaFromItem(
-                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                    { effectiveStr: 20, velocity: 90 },
-                                ),
+                                getEffectFormulaFromItem(moveByItem, { effectiveStr: 20, velocity: 90 }),
                                 "20d6",
                             );
                         });
@@ -2191,10 +2197,11 @@ export function registerFullTests(quench) {
                             // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 -> +4DC) + velocity (10"/5 -> +2DC) => +6DC
                             // Base + Added = 5DC + 6DC (doubling rule does not apply) = 11 DC. HKA is 15AP/die => 4d6-1K
                             assert.equal(
-                                getFullyQualifiedEffectFormulaFromItem(
-                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                    { effectiveStr: 20, velocity: 10, maWeaponItem: hka5DcItem },
-                                ),
+                                getFullyQualifiedEffectFormulaFromItem(moveByItem, {
+                                    effectiveStr: 20,
+                                    velocity: 10,
+                                    maWeaponItem: hka5DcItem,
+                                }),
                                 "4d6-1K",
                             );
                         });
@@ -2204,10 +2211,11 @@ export function registerFullTests(quench) {
                             // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 with 5 STR minimum -> +3DC) + velocity (10"/5 -> +2DC) => +5DC
                             // Base + Added = 4DC + 5DC (doubling rule does not apply) = 9 DC. HKA is 15AP/die => 3d6K
                             assert.equal(
-                                getFullyQualifiedEffectFormulaFromItem(
-                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                    { effectiveStr: 20, velocity: 10, maWeaponItem: hka4DcItem },
-                                ),
+                                getFullyQualifiedEffectFormulaFromItem(moveByItem, {
+                                    effectiveStr: 20,
+                                    velocity: 10,
+                                    maWeaponItem: hka4DcItem,
+                                }),
                                 "3d6K",
                             );
                         });
@@ -2218,10 +2226,7 @@ export function registerFullTests(quench) {
                             // Base DCs: Nerve Strike 4DC (aka 2d6), EXTRADC +11DC => 15DC.
                             // Added DCs: Does not use STR => +0 DC
                             // Base + Added = 15DC. Nerve Strike is an NND (10AP/die) => 7½d6
-                            assert.equal(
-                                actor.items.find((o) => o.system.ALIAS === "Nerve Strike").system.damage,
-                                "7½d6",
-                            );
+                            assert.equal(nerveStrikeItem.system.damage, "7½d6");
                         });
 
                         it("should have the correct damage for Killing Strike", function () {
@@ -2229,10 +2234,7 @@ export function registerFullTests(quench) {
                             // Base: STR +14 DC (STR 70) => +14 DC  =>  14DC
                             // Base + Added = 7C + 14DC (doubling rule clamps the strength added DC) = 14DC. Killing strike is 14AP/die => 4½d6
                             // NOTE: HD gets 5d6K as it seems to be more than doubling the equivalent HKA. Math rounding problems in HD?
-                            assert.equal(
-                                actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage,
-                                "4½d6K",
-                            );
+                            assert.equal(killingStrikeItem.system.damage, "4½d6K");
                         });
 
                         it("should have the correct damage for Martial Strike", function () {
@@ -2240,8 +2242,34 @@ export function registerFullTests(quench) {
                                 // Base DCs: STR +14 DC (STR 70),  EXTRADC +11DC => +25 DC
                                 // Added DCs: Martial Strike 2DC =>  +2 DC
                                 // Base + Added = 25DC + 2DC (doubling rule does not apply) = 27DC. Martial Strike is 5AP/die => 27d6
-                                actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage,
+                                martialStrikeItem.system.damage,
                                 "27d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Strike with 0 STR", function () {
+                            assert.equal(
+                                // Base DCs: STR +0 DC (STR 0),  EXTRADC +11DC => +11 DC
+                                // Added DCs: Martial Strike 2DC =>  +2 DC
+                                // Base + Added = 11DC + 2DC (doubling rule does not apply) = 13DC. Martial Strike is 5AP/die => 13d6
+                                getFullyQualifiedEffectFormulaFromItem(martialStrikeItem, {
+                                    effectiveStr: 0,
+                                    velocity: 10,
+                                }),
+                                "13d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Strike with -10 STR", function () {
+                            assert.equal(
+                                // Base DCs: STR -2 DC (STR -10),  EXTRADC +11DC => +9 DC
+                                // Added DCs: Martial Strike 2DC =>  +2 DC
+                                // Base + Added = 9DC + 2DC (doubling rule does not apply) = 13DC. Martial Strike is 5AP/die => 11d6
+                                getFullyQualifiedEffectFormulaFromItem(martialStrikeItem, {
+                                    effectiveStr: -10,
+                                    velocity: 10,
+                                }),
+                                "11d6",
                             );
                         });
 
@@ -2249,25 +2277,15 @@ export function registerFullTests(quench) {
                             // Base DCs: Martial Flash 4DC (aka 2d6), EXTRADC +11DC => 15DC.
                             // Added DCs: Does not use STR => +0 DC
                             // Base + Added = 15DC. Martial Flash is a 5AP/die => 15d6
-                            assert.equal(
-                                actor.items.find((o) => o.system.ALIAS === "Martial Flash").system.damage,
-                                "15d6",
-                            );
+                            assert.equal(martialFlashItem.system.damage, "15d6");
                         });
 
                         it("should have the correct damage for Sacrifice Strike", function () {
                             // Base DCs:  STR +14 DC (STR 70),  EXTRADC +11DC =>  25DC
                             // Added: Sacrifice Strike 4DC =>  4DC
                             // Base + Added = 15DC + 4DC (doubling rule does not apply) = 29DC. Sacrifice Strike is 5AP/die => 29d6
-                            assert.equal(
-                                actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike").system.damage,
-                                "29d6",
-                            );
+                            assert.equal(sacrificeStrikeItem.system.damage, "29d6");
                         });
-
-                        it.skip("should have the correct damage for Martial Strike with 0 STR", function () {});
-
-                        it.skip("should have the correct damage for Martial Strike with -10 STR", function () {});
                     });
 
                     describe("Maneuvers with CSLs", function () {
