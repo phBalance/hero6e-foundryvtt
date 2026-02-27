@@ -1797,7 +1797,7 @@ export async function _onRollTemplatePlacement(event) {
     const attackAction = getAttackActionFromDomObject(event.target);
 
     const distance = calculateDistanceBetween(aoeTemplate, attackAction.attackerToken).distance;
-    const dcvTargetNumber = distance > (attackAction.actor.is5e ? 1 : 2) ? 3 : 0;
+    //const dcvTargetNumber = distance > (attackAction.actor.is5e ? 1 : 2) ? 3 : 0;
 
     const hitCharacteristic = attackAction.actor.system.characteristics.ocv.value;
 
