@@ -484,7 +484,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             new AttackAction({
                 ...formData.object,
                 effectiveItem: this.data.effectiveItem,
-                attackerToken: this.data.token,
+                attackerTokenUuid: this.data.token.uuid,
             }),
         );
     }

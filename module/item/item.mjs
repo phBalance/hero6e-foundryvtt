@@ -2263,6 +2263,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return itemData;
     }
 
+    get actor() {
+        // Additional support to get the actor of an effectiveItem
+        return this.id ? super.actor : fromUuidSync(this.system.originalItemUuid)?.actor;
+    }
+
     /**
      * Retrieves the parent item of the current item based on the `PARENTID` property.
      *
@@ -7566,13 +7571,14 @@ export function cloneToEffectiveAttackItem({
     //            probably want to give a warning if CLUBWEAPON is on and the attack is not a killing attack.
     // const clubWeaponActive = originalItem.actor?.items.find(
     //     (anItem) => anItem.isCombatManeuver && anItem.system.XMLID === "CLUBWEAPON" && anItem.isActive,
-    // );
+    // );`
 
     let effectiveItem;
     const effectiveItemData = originalItem.toObject(false);
     effectiveItemData._id = null;
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
+    effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
 
     // PH: FIXME: Doesn't include TK
     // PH: FIXME: Doesn't include items with STR minima
