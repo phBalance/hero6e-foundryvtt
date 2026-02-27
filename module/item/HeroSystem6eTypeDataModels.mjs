@@ -563,7 +563,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
         const hasConstsEndurance = this.item.findModsByXmlid("COSTSEND");
         const hasNonPersistent = this.item.findModsByXmlid("NONPERSISTENT");
         const hasInstant = this.item.findModsByXmlid("INSTANT");
-        let duration = this.item.baseInfo.duration;
+        let duration = this.item.baseInfo?.duration;
 
         if (duration === CONFIG.HERO.DURATION_TYPES.INSTANT && hasContinuous) {
             duration = CONFIG.HERO.DURATION_TYPES.CONSTANT;
@@ -1059,6 +1059,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             _charges: new HeroNumberField({ initial: 0, integer: true }),
             _clips: new HeroNumberField({ initial: 1, integer: true }),
             ablative: new HeroNumberField({ initial: 0, integer: true }), // Store # of times threshold has been exceeded
+            originalItemUuid: new StringField(),
         };
     }
 

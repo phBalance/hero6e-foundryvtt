@@ -14,12 +14,12 @@ export class AttackAction {
         this._aim = value;
     }
 
-    _attackerToken = null;
-    get attackerToken() {
-        return this._attackerToken;
+    _attackerTokenUuid = null;
+    get attackerTokenUuid() {
+        return this._attackerTokenUuid;
     }
-    set attackerToken(value) {
-        this._attackerToken = value;
+    set attackerTokenUuid(value) {
+        this._attackerTokenUuid = value;
     }
     _attackMods = [];
     get attackMods() {
@@ -55,28 +55,35 @@ export class AttackAction {
         this._effectiveRealCost = value;
     }
 
-    _targetTokens = [];
-    get targetTokens() {
-        return this._targetTokens;
+    _targetTokenIds = [];
+    get targetTokenIds() {
+        return this._targetTokenIds;
     }
-    set targetTokens(value) {
+    set targetTokenIds(value) {
         if (value.constructor?.name !== "Array") {
             throw new Error("targetTokens expecting an Array");
         }
         for (const token of value) {
-            if (token.constructor?.name !== "HeroSystem6eToken") {
-                throw new Error("targetTokens elements expecting a HeroSystem6eToken");
+            if (token.constructor?.name !== "Number") {
+                throw new Error("targetTokenIds elements expecting a Number");
             }
         }
-        this._targetTokens = value;
+        this._targetTokenIds = value;
     }
 
-    _message;
-    get message() {
-        return this._message;
+    // For convenience, doesn't seem necessary.
+    // The message should be avail from the "event" of
+    // subsequent listen handlers.
+    _messageId;
+    get messageId() {
+        return this._messageId;
     }
-    set message(value) {
-        this._message = value;
+    set messageId(value) {
+        this._messageId = value;
+    }
+
+    get attackerToken() {
+        return fromUuidSync(this.attackerTokenUuid);
     }
 
     get actor() {
@@ -90,8 +97,8 @@ export class AttackAction {
         this.effectiveItem = data.effectiveItem ?? this.effectiveItem;
         this.effectiveRealCost = data.effectiveRealCost ?? this.effectiveRealCost;
         this.attackMods = data.attackMods ?? this.attackMods;
-        this.attackerToken = data.attackerToken ?? this.attackerToken;
-        this.targetTokens = data.targetTokens ?? this.targetTokens;
+        this.attackerTokenUuid = data.attackerTokenUuid ?? this.attackerTokenUuid;
+        this.targetTokenIds = data.targetTokenIds ?? this.targetTokenIds;
     }
 
     _data = {};
@@ -99,10 +106,6 @@ export class AttackAction {
     get data() {
         return this._data;
     }
-
-    // get toJSON() {
-    //     return JSON.stringify(this);
-    // }
 
     static fromJSON(jsonData) {
         if (jsonData.constructor.name === "String") {
@@ -117,5 +120,18 @@ export class AttackAction {
             newAttackAction._effectiveItem = new HeroSystem6eItem(newAttackAction._effectiveItem);
         }
         return newAttackAction;
+    }
+
+    async saveToMessage() {
+        const message = ChatMessage.get(this.messageId);
+        if (!message) {
+            throw new Error(`missing message`);
+        }
+
+        const parsedMessageContent = document.createElement("div");
+        parsedMessageContent.innerHTML = message.content;
+        const el = parsedMessageContent.querySelector(`[data-attack-action]`);
+        el.dataset.attackAction = JSON.stringify(this);
+        await message.update({ content: parsedMessageContent.innerHTML });
     }
 }

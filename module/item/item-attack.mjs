@@ -337,7 +337,7 @@ export async function processActionToHit(item, formData, options = {}) {
 }
 
 export async function processActionToHitV2(attackAction) {
-    attackAction.targetTokens = Array.from(game.user.targets);
+    //attackAction.targetTokens = Array.from(game.user.targets).map((t) => t.id);
 
     // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
     const haymakerManeuverActive = attackAction.actor?.items.find(
@@ -353,6 +353,8 @@ export async function processActionToHitV2(attackAction) {
             });
         }
     }
+
+    //
 
     await allInOneV2(attackAction);
 }
@@ -468,8 +470,8 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
  * @param {*} action
  * @param {HeroRoller} attackHeroRoller
  */
-async function addAttackCslsIntoToHitRoll(action, attackHeroRoller) {
-    const item = action.system.currentItem;
+async function addAttackCslsIntoToHitRoll(action, attackHeroRoller, _item) {
+    const item = _item ?? action.system.currentItem;
 
     const skillLevelMods = {};
     for (const csl of combatSkillLevelsForAttack(item).details) {
@@ -587,7 +589,11 @@ async function allInOneV2(attackAction) {
         speaker: ChatMessage.getSpeaker({ actor: attackAction.actor, token: attackAction.attackerToken }),
     };
 
-    await ChatMessage.create(chatData);
+    const message = await ChatMessage.create(chatData);
+
+    // For convenience, doesn't seem necessary
+    attackAction.messageId = message.id;
+    await attackAction.saveToMessage();
 }
 
 export async function doAoeActionToHit(action, options) {
@@ -1739,16 +1745,21 @@ export async function _onRollPowerToRemove(event) {
     }
 }
 
+function getAttackActionFromDomObject(target) {
+    // Get attackAction
+    const attackActionJson = target.closest("[data-attack-action]")?.dataset?.attackAction;
+    if (!attackActionJson) {
+        throw new Error("missing attackAction");
+    }
+    return AttackAction.fromJSON(attackActionJson);
+}
+
 export async function _onPlaceTemplate(event) {
     // Remove any previous tempaltes
     await _onRemoveTemplate(event);
 
     // Get attackAction
-    const attackActionJson = event.target.closest("[data-attack-action]")?.dataset?.attackAction;
-    if (!attackActionJson) {
-        throw new Error("missing attackAction");
-    }
-    const attackAction = AttackAction.fromJSON(attackActionJson);
+    const attackAction = getAttackActionFromDomObject(event.target);
 
     // Get message
     const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
@@ -1766,8 +1777,47 @@ export async function _onRemoveTemplate(event) {
     //button.disabled = false;
     return;
 }
-export async function _onRollTemplatePlacement(event, target) {
-    console.error(event, target);
+export async function _onRollTemplatePlacement(event) {
+    const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
+    const templateIds =
+        canvas.scene?.templates.filter((t) => t.flags[game.system.id]?.messageId === messageId).map((t) => t.id) ?? [];
+    if (templateIds.length === 0) {
+        throw new Error("No template found");
+    }
+    if (templateIds.length > 1) {
+        throw new Error("Multiple templates not supported");
+    }
+
+    const aoeTemplate = canvas.scene?.templates.map((t) => t.flags[game.system.id]?.messageId === messageId);
+    if (!aoeTemplate) {
+        throw new Error("No template found");
+    }
+
+    // Get attackAction
+    const attackAction = getAttackActionFromDomObject(event.target);
+
+    const distance = calculateDistanceBetween(aoeTemplate, attackAction.attackerToken).distance;
+    const dcvTargetNumber = distance > (attackAction.actor.is5e ? 1 : 2) ? 3 : 0;
+
+    const hitCharacteristic = attackAction.actor.system.characteristics.ocv.value;
+
+    const attackHeroRoller = new HeroRoller()
+        .makeSuccessRoll()
+        .addNumber(11, "Base to hit")
+        .addNumber(hitCharacteristic, attackAction.effectiveItem.system.attacksWith);
+
+    // Range modifiers
+    addRangeIntoToHitRoll(distance, attackAction.effectiveItem, attackAction.actor, attackHeroRoller);
+
+    // Combat Skill Levels
+    await addAttackCslsIntoToHitRoll(null, attackHeroRoller, attackAction.effectiveItem);
+
+    // This is the actual roll to hit. In order to provide for a die roll
+    // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
+    // and lastly we subtract the die roll. The value returned is the maximum DCV hit
+    // (so we can be sneaky and not tell the target's DCV out loud).
+    attackHeroRoller.addDice(-3);
+    await attackHeroRoller.roll();
 }
 
 async function createTemporaryKnockbackItem(actor, knockbackDice) {
