@@ -1143,6 +1143,32 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     return { actorStrengthItem, baseEffectiveStrength, str };
 }
 
+// PH: FIXME: Need to add a bunch of test cases for this stuff.
+// if (hthAttack.is5e) {
+//     // 5e rules state that STR adds to HTHATTACKs without considering advantages on the HTHATTACK.
+//     // See FRed pg 408
+//     // xxx;
+
+//     non advantaged STR with non advantaged HTH (probably already have this)
+//     non advantaged STR with advantaged HTH
+//     advantaged STR with non advantaged HTH
+//     advantaged STR with advantaged HTH
+// tests with double damage limit if appropriate
+// tests with STR and Move Through/movement with STR
+// moveby with multiple HTH attacks (to show the bug with moveby STR calculation pulled out multiple times doesn't happen)
+
+// } else {
+//     // 6e rules state that STR adds to HTHATTACKs in the normal way.
+//     non advantaged STR with non advantaged HTH
+//     non advantaged STR with advantaged HTH
+//     advantaged STR with non advantaged HTH
+//     advantaged STR with advantaged HTH
+// tests with double damage limit if appropriate
+// tests with STR and Move Through/movement with STR
+// moveby with multiple HTH attacks (to show the bug with moveby STR calculation pulled out multiple times doesn't happen)
+
+// }
+
 export function maneuverBaseEffectDicePartsBundle(item, options) {
     const baseDicePartsBundle = {
         diceParts: zeroDiceParts,
@@ -1150,94 +1176,56 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
         baseAttackItem: null,
     };
 
-    // If unarmed combat
     if (isManeuverThatIsUsingAnEmptyHand(item, options)) {
-        // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage
+        // For Haymaker (with Strike presumably) and Martial Maneuvers, STR is the main weapon and the maneuver is additional damage.
+        // If we have Hand-to-Hand attacks then we will treat that as the base attack item
         if (isNonKillingStrengthBasedManeuver(item)) {
-            const { actorStrengthItem, str } = addStrengthToBundle(item, options, baseDicePartsBundle, false);
+            // Hand-to-Hand Attacks can only be added to maneuvers that deal normal damage (not killing, NND, grabbing, etc) but
+            // that filtering is done elsewhere
+            const hthAttackItems =
+                item.system._active.linkedAssociated
+                    ?.map((info) => info.item)
+                    .filter((power) => power.system.XMLID === "HANDTOHANDATTACK") || [];
 
-            // Hand-to-Hand Attacks can only be added to maneuvers that deal normal damage (not killing, NND, move through/by, grabbing, etc)
-            if (isManeuverThatDoesNormalDamage(item)) {
-                const hthAttackItems =
-                    item.system._active.linkedAssociated
-                        ?.map((info) => info.item)
-                        .filter((power) => power.system.XMLID === "HANDTOHANDATTACK") || [];
+            // PH: FIXME: If we have multiple Hand-to-Hand attack items being combined, how should we be combining them? We should
+            //            probably be checking that they all can be combined somehow. For the time being, the first one in this list
+            //            will be the base attack item
 
-                // PH: FIXME: Need to convert options.hthAttackItem over to using item.system._active.linked
-                // and change all the tests too
+            hthAttackItems.forEach((hthAttack) => {
+                const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDicePartsBundle(
+                    hthAttack,
+                    options,
+                );
 
-                hthAttackItems.forEach((hthAttack) => {
-                    const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDicePartsBundle(
-                        hthAttack,
-                        options,
-                    );
+                baseDicePartsBundle.diceParts = addDiceParts(item, baseDicePartsBundle.diceParts, hthAttackDiceParts);
+                baseDicePartsBundle.tags.push(...tags);
 
-                    // PH: FIXME: This only works for situations where we can "absorb" all of the HTH attack into
-                    //            the base attack
-                    // Since this HTH Attack is effectively absorbed into the strength, we use the STR's DC.
-                    hthAttackDiceParts.dc =
-                        (hthAttackDiceParts.dc / (1 + hthAttack._advantagesAffectingDc)) *
-                        (1 + actorStrengthItem._advantagesAffectingDc);
+                // Any STRDC modifiers such as MOVEBY for this maneuver? If yes, then make sure the effect of the HTH Attack
+                // is also similarly modified.
+                const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
+                if (strMatch) {
+                    const divisor = parseInt(strMatch[1]);
+                    const hthDc = hthAttack.dcRaw / divisor;
 
-                    // PH: FIXME: Need to add a bunch of test cases for this stuff.
-                    // if (hthAttack.is5e) {
-                    //     // 5e rules state that STR adds to HTHATTACKs without considering advantages on the HTHATTACK.
-                    //     // See FRed pg 408
-                    //     // xxx;
+                    // NOTE: intentionally using fractional DC here.
+                    const hthDiceParts = calculateDicePartsFromDcForItem(hthAttack, hthDc);
+                    const formula = dicePartsToFullyQualifiedEffectFormula(hthAttack, hthDiceParts);
 
-                    //     non advantaged STR with non advantaged HTH (probably already have this)
-                    //     non advantaged STR with advantaged HTH
-                    //     advantaged STR with non advantaged HTH
-                    //     advantaged STR with advantaged HTH
-                    // tests with double damage limit if appropriate
-                    // tests with STR and Move Through/movement with STR
-                    // moveby with multiple HTH attacks (to show the bug with moveby STR calculation pulled out multiple times doesn't happen)
-
-                    // } else {
-                    //     // 6e rules state that STR adds to HTHATTACKs in the normal way.
-                    //     non advantaged STR with non advantaged HTH
-                    //     non advantaged STR with advantaged HTH
-                    //     advantaged STR with non advantaged HTH
-                    //     advantaged STR with advantaged HTH
-                    // tests with double damage limit if appropriate
-                    // tests with STR and Move Through/movement with STR
-                    // moveby with multiple HTH attacks (to show the bug with moveby STR calculation pulled out multiple times doesn't happen)
-
-                    // }
-
-                    baseDicePartsBundle.diceParts = addDiceParts(
+                    baseDicePartsBundle.diceParts = subtractDiceParts(
                         item,
                         baseDicePartsBundle.diceParts,
-                        hthAttackDiceParts,
+                        hthDiceParts,
                     );
-                    baseDicePartsBundle.tags.push(...tags);
+                    baseDicePartsBundle.tags.push({
+                        value: `-(${formula})`,
+                        name: `${item.name} STR (${hthAttack.name})`,
+                        title: `HTH Attack divided to ${hthDc} DC due to ${item.name} -> -(${formula})`,
+                    });
+                }
+            });
 
-                    // Any STRDC modifiers such as MOVEBY?
-                    const strMatch = (item.system.EFFECT || "").match(/\[STRDC\]\/(\d+)/);
-                    if (strMatch) {
-                        // It doesn't make sense to halve negative strength
-                        if (str >= 0) {
-                            const divisor = parseInt(strMatch[1]);
-                            const hthDc = hthAttack.dcRaw / divisor;
-
-                            // NOTE: intentionally using fractional DC here.
-                            const hthDiceParts = calculateDicePartsFromDcForItem(hthAttack, hthDc);
-                            const formula = dicePartsToFullyQualifiedEffectFormula(hthAttack, hthDiceParts);
-
-                            baseDicePartsBundle.diceParts = subtractDiceParts(
-                                item,
-                                baseDicePartsBundle.diceParts,
-                                hthDiceParts,
-                            );
-                            baseDicePartsBundle.tags.push({
-                                value: `-(${formula})`,
-                                name: `${item.name} STR (${hthAttack.name})`,
-                                title: `HTH Attack divided to ${hthDc} DC due to ${item.name} -> -(${formula})`,
-                            });
-                        }
-                    }
-                });
-            }
+            // STR is the base attack in the case of there being no Hand-to-Hand attacks
+            addStrengthToBundle(item, options, baseDicePartsBundle, false);
         } else {
             const rawItemBaseDc = parseInt(item.system.DC);
             let itemBaseDc = rawItemBaseDc;
