@@ -58,23 +58,24 @@ export class HeroSystem6eTemplateLayer extends foundry.canvas.layers.TemplateLay
         template.refresh();
     }
 
-    _onMouseWheel(event) {
-        // Abort if there's no hovered template
-        const template = this.hover;
-        if (!template || !canvas.scene || !canvas.grid.isSquare) {
-            return super._onMouseWheel(event);
-        }
+    // Careful with V2 as the SHIFT rotate isn't working for small increments
+    // _onMouseWheel(event) {
+    //     // Abort if there's no hovered template
+    //     const template = this.hover;
+    //     if (!template || !canvas.scene || !canvas.grid.isSquare) {
+    //         return super._onMouseWheel(event);
+    //     }
 
-        // Determine the incremental angle of rotation from event data
-        const shapeType = template.document.t;
-        const distance = template.document.distance ?? 5;
-        const increment = event.shiftKey || distance <= 30 ? 15 : 5;
-        const coneMultiplier = shapeType === "cone" ? 3 : 1;
-        const snap = increment * coneMultiplier;
-        const delta = snap * Math.sign(event.deltaY);
+    //     // Determine the incremental angle of rotation from event data
+    //     const shapeType = template.document.t;
+    //     const distance = template.document.distance ?? 5;
+    //     const increment = event.shiftKey || distance <= 30 ? 15 : 5;
+    //     const coneMultiplier = shapeType === "cone" ? 3 : 1;
+    //     const snap = increment * coneMultiplier;
+    //     const delta = snap * Math.sign(event.deltaY);
 
-        return template.rotate(template.document.direction + delta, snap);
-    }
+    //     return template.rotate(template.document.direction + delta, snap);
+    // }
 
     _onDragLeftStart(event) {
         // Prevent normal drag operations when a preview is active
