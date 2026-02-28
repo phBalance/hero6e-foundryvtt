@@ -2263,10 +2263,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return itemData;
     }
 
-    get actor() {
-        // Additional support to get the actor of an effectiveItem
-        return this.id ? super.actor : fromUuidSync(this.system.originalItemUuid)?.actor;
-    }
+    // get actor() {
+    //     // Additional support to get the actor of an effectiveItem
+    //     // NOT WORKING FOR MANEUVERS (which may not have an id)
+    //     return this.id ? super.actor : fromUuidSync(this.system.originalItemUuid)?.actor;
+    // }
 
     /**
      * Retrieves the parent item of the current item based on the `PARENTID` property.
@@ -6027,7 +6028,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // 1. The CSL doesn't need to have custom adders because it supports an Infinite number of potential adders
         // 2. Are there no adders when they need to be provided for the CSL to work?
         // 3. We allow CSLs in COMPOUNDPOWERS to automatically work for all attacks within the COMPOUNDPOWER.
-        const cslCustomAdders = this.custosmLinkAdders;
+        const cslCustomAdders = this.customLinkAdders;
         return (
             this.maxCustomCslAdders === +Infinity ||
             cslCustomAdders.length > 0 ||
