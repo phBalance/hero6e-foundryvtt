@@ -7579,7 +7579,10 @@ export function cloneToEffectiveAttackItem({
     effectiveItemData._id = null;
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
-    effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
+
+    // updateSource seems to overrite _active
+    // so may need to make everything an updateSource?
+    //effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
 
     // PH: FIXME: Doesn't include TK
     // PH: FIXME: Doesn't include items with STR minima
