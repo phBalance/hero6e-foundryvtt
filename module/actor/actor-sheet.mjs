@@ -7,6 +7,7 @@ import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsFor
 // v13 has namespaced these. When we remove this backwards compatibility then the eslint exception can be cleaned up.
 const FoundryVttTextEditor = foundry.applications.ux?.TextEditor.implementation || TextEditor;
 const FoundryVttActorSheet = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
+const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
 
 export class HeroSystemActorSheet extends FoundryVttActorSheet {
     /** @override */
@@ -1175,7 +1176,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                     label: "Create",
                     callback: async function (html) {
                         const formElement = html[0].querySelector("form");
-                        const formData = new foundry.applications.ux.FormDataExtended(formElement);
+                        const formData = new FoundryVttFormDataExtended(formElement);
                         const formDataObject = formData.object;
                         if (formDataObject.xmlid === "none") return;
 

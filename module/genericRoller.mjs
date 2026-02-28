@@ -5,6 +5,7 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
 
 export class GenericRoller {
     static Initialize() {
@@ -105,7 +106,7 @@ export class GenericRoller {
             content: template,
             callback: async function (html) {
                 const form = html.find("form")[0];
-                return new foundry.applications.ux.FormDataExtended(form).object;
+                return new FoundryVttFormDataExtended(form).object;
             },
         }).catch(() => {
             // Promise is rejected most likely from user choosing close
@@ -192,7 +193,7 @@ export class GenericRoller {
             content: template,
             callback: async function (html) {
                 const form = html.find("form")[0];
-                return new foundry.applications.ux.FormDataExtended(form).object;
+                return new FoundryVttFormDataExtended(form).object;
             },
         }).catch(() => {
             // Promise is rejected most likely from user choosing close

@@ -5,6 +5,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
 
 export function isAgilitySkill(item) {
     return item.system.CHARACTERISTIC === "DEX";
@@ -171,7 +172,7 @@ async function skillRoll(item, actor, target) {
     }
 
     const formElement = target[0].querySelector("form");
-    const formData = new foundry.applications.ux.FormDataExtended(formElement)?.object;
+    const formData = new FoundryVttFormDataExtended(formElement)?.object;
     const skillRoller = new HeroRoller().addDice(3);
 
     // SkillMods

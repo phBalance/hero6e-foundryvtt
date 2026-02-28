@@ -107,6 +107,7 @@ function isDefined(value) {
     return value !== undefined;
 }
 
+/// Is attributeName defined in the schema HeroSystem6eTypeDataModel
 function hasProperty(actorOrItem, attributeName) {
     if (!actorOrItem || !attributeName) {
         console.error(`hasProperty call is missing parameters`);
