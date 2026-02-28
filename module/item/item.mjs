@@ -5890,7 +5890,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
                 // is thus providing a unique name - other options can potentially have multiple matches of which
                 // we'll end up with the first. This could result in a situation where someone can not match
-                // the attack they actually want.
+                // the attack they acstually want.
                 // NOTE: We do allow a case insensitve match
                 const aliasToMatch = customAdder.ALIAS.toLowerCase();
 
@@ -6027,7 +6027,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // 1. The CSL doesn't need to have custom adders because it supports an Infinite number of potential adders
         // 2. Are there no adders when they need to be provided for the CSL to work?
         // 3. We allow CSLs in COMPOUNDPOWERS to automatically work for all attacks within the COMPOUNDPOWER.
-        const cslCustomAdders = this.customLinkAdders;
+        const cslCustomAdders = this.custosmLinkAdders;
         return (
             this.maxCustomCslAdders === +Infinity ||
             cslCustomAdders.length > 0 ||
