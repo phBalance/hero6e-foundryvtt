@@ -2263,10 +2263,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return itemData;
     }
 
-    get actor() {
-        // Additional support to get the actor of an effectiveItem
-        return this.id ? super.actor : fromUuidSync(this.system.originalItemUuid)?.actor;
-    }
+    // get actor() {
+    //     // Additional support to get the actor of an effectiveItem
+    //     // NOT WORKING FOR MANEUVERS (which may not have an id)
+    //     return this.id ? super.actor : fromUuidSync(this.system.originalItemUuid)?.actor;
+    // }
 
     /**
      * Retrieves the parent item of the current item based on the `PARENTID` property.
@@ -5890,7 +5891,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 // A match has the exact name, ALIAS, or XMLID (ignoring case). The most precise
                 // is thus providing a unique name - other options can potentially have multiple matches of which
                 // we'll end up with the first. This could result in a situation where someone can not match
-                // the attack they actually want.
+                // the attack they acstually want.
                 // NOTE: We do allow a case insensitve match
                 const aliasToMatch = customAdder.ALIAS.toLowerCase();
 
@@ -7578,7 +7579,10 @@ export function cloneToEffectiveAttackItem({
     effectiveItemData._id = null;
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
-    effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
+
+    // updateSource seems to overrite _active
+    // so may need to make everything an updateSource?
+    //effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
 
     // PH: FIXME: Doesn't include TK
     // PH: FIXME: Doesn't include items with STR minima

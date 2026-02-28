@@ -1222,7 +1222,7 @@ async function doSingleTargetActionToHit(action, options) {
 
         item,
         itemJsonStr: dehydrateAttackItem(item), // PH: FIXME: Can remove some things like item etc because they're in the actionData.
-        originalUuid: item.id || foundry.utils.parseUuid(item.system._active.__originalUuid).id,
+        originalUuid: item.id || foundry.utils.parseUuid(item.system._active?.__originalUuid)?.id,
 
         adjustment,
         senseAffecting,
