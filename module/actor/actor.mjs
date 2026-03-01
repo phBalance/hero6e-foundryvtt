@@ -2295,6 +2295,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 });
             }
 
+            let changes = {};
+
             // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
             const characterName =
                 heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME ||
@@ -2303,27 +2305,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
             this.name = characterName;
-            if (this._id) {
-                uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
-                await this.update({ ["name"]: characterName });
+            changes["name"] = characterName;
+            uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
 
-                // Flags
-                await this.setFlag(game.system.id, "uploading", true);
-                await this.setFlag(game.system.id, "file", {
-                    lastModifiedDate: options?.file?.lastModified,
-                    name: options?.file?.name,
-                    size: options?.file?.size,
-                    type: options?.file?.type,
-                    webkitRelativePath: options?.file?.webkitRelativePath,
-                    uploadedBy: game.user.name,
-                });
-            }
+            // Flags (add them into the change set to cut down on update calls)
+            changes[`flags.${game.system.id}.uploading`] = true;
+            changes[`flags.${game.system.id}.file`] = {
+                lastModifiedDate: options?.file?.lastModified,
+                name: options?.file?.name,
+                size: options?.file?.size,
+                type: options?.file?.type,
+                webkitRelativePath: options?.file?.webkitRelativePath,
+                uploadedBy: game.user.name,
+            };
 
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /// NOW LOAD THE HDC STUFF
-
-            let promiseArray = [];
-            let changes = {};
 
             // Need to get the base64 image before we delete IMAGE, deepClone doesn't work as expected.
             uploadProgressBar.advance(`${this.name}: Preprocess image`, 0);
@@ -2941,10 +2938,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Save all our changes (unless temporary actor/quench)
             if (this.id) {
-                promiseArray.push(this.update(changes));
+                await this.update(changes);
             }
-
-            await Promise.all(promiseArray);
 
             uploadPerformance.nonItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
