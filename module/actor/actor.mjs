@@ -481,19 +481,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         if (options.hideChatMessage || !options.render) return;
 
-        if (content) {
+        if (!options.quenchCreate && content) {
             const chatData = {
                 author: game.user.id,
-                whisper: whisperUserTargetsForActor(this), //ChatMessage.getWhisperRecipients("GM"),
+                whisper: whisperUserTargetsForActor(this),
                 speaker: ChatMessage.getSpeaker({ actor: this }),
                 blind: true,
                 content: content,
             };
-            await ChatMessage.create(chatData);
+
+            // Fire and forget
+            ChatMessage.create(chatData);
         }
 
         // Chat card about entering/leaving heroic identity
         if (
+            !options.quenchCreate &&
             changed.system?.heroicIdentity !== undefined &&
             this.system.heroicIdentity !== undefined &&
             changed.system.heroicIdentity !== this.system.heroicIdentity
@@ -509,7 +512,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 content: content,
                 speaker: speaker,
             };
-            await ChatMessage.create(chatData);
+
+            // Fire and forget
+            ChatMessage.create(chatData);
         }
     }
 
@@ -2279,8 +2284,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
 
             // Let GM know actor is being uploaded (unless it is a quench test; missing ID)
-            if (this.id) {
-                await ChatMessage.create({
+            if (!options.quenchUpload && this.id) {
+                // Fire and forget
+                ChatMessage.create({
                     style: CONST.CHAT_MESSAGE_STYLES.IC,
                     author: game.user._id,
                     speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -3058,8 +3064,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             //console.log("Upload Performance", uploadPerformance);
 
-            // Let GM know actor was uploaded (unless it is a quench test; missing ID)
-            if (this.id) {
+            // Let GM know actor was uploaded (unless it is a quench test or missing ID)
+            if (!options.quenchUpload && this.id) {
+                // Fire and forget
                 ChatMessage.create({
                     style: CONST.CHAT_MESSAGE_STYLES.IC,
                     author: game.user._id,
