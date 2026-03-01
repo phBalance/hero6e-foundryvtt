@@ -2081,9 +2081,7 @@ export function registerFullTests(quench) {
                 let hka5DcItem;
                 let hka4DcItem;
 
-                beforeEach(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-
+                before(async function () {
                     actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
                     hka5DcItem = actor.items.find(
@@ -2095,9 +2093,15 @@ export function registerFullTests(quench) {
                     );
                 });
 
-                afterEach(async function () {
+                after(async function () {
                     await deleteQuenchActor({ quench: this, actor });
+                });
 
+                beforeEach(async function () {
+                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                });
+
+                afterEach(async function () {
                     await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                 });
 
