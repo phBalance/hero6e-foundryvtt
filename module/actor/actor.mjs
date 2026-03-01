@@ -3255,7 +3255,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async addManeuver(maneuver) {
+    buildManeuverData(maneuver) {
         const name = maneuver.name;
         const XMLID = maneuver.key;
 
@@ -3269,26 +3269,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const RANGE = maneuverDetails.range || "0";
         const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
         const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
-
-        const maneuverItems = this.items.filter(
-            (item) => item.system.XMLID === XMLID && item.isCombatManeuver && !item.system.ID,
-        );
-        if (maneuverItems.length > 0) {
-            //console.debug(`${XMLID} already exists`);
-
-            // Make sure we only have one
-            const itemsToDelete = maneuverItems.splice(1);
-
-            if (itemsToDelete.length > 0) {
-                console.error(`Deleted ${itemsToDelete.length} ${XMLID} items`);
-                await this.deleteEmbeddedDocuments(
-                    "Item",
-                    itemsToDelete.map((o) => o.id),
-                );
-            }
-
-            return;
-        }
 
         const itemData = {
             name,
@@ -3318,8 +3298,29 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             },
         };
 
-        if (!itemData.name) {
-            console.error("Missing name", itemData);
+        return itemData;
+    }
+
+    async addManeuver(maneuver) {
+        const itemData = this.buildManeuverData(maneuver);
+
+        const maneuverItems = this.items.filter(
+            (item) => item.system.XMLID === itemData.system.XMLID && item.isCombatManeuver && !item.system.ID,
+        );
+        if (maneuverItems.length > 0) {
+            //console.debug(`${itemData.system.XMLID} already exists`);
+
+            // Make sure we only have one
+            const itemsToDelete = maneuverItems.splice(1);
+
+            if (itemsToDelete.length > 0) {
+                console.error(`Deleted ${itemsToDelete.length} ${itemData.system.XMLID} items`);
+                await this.deleteEmbeddedDocuments(
+                    "Item",
+                    itemsToDelete.map((o) => o.id),
+                );
+            }
+
             return;
         }
 
@@ -3338,12 +3339,31 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     async addHeroSystemManeuvers() {
-        const powerList = this.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-        const maneuverPromises = powerList
+        // Delete all existing maneuvers
+        const existingManeuverIds = this.items
             .filter((power) => power.type?.includes("maneuver"))
-            .map(async (maneuver) => this.addManeuver(maneuver));
+            .map((item) => item.id);
+        if (existingManeuverIds.length) {
+            await this.deleteEmbeddedDocuments("Item", existingManeuverIds, { render: false, renderSheet: false });
+        }
 
-        return Promise.all(maneuverPromises);
+        // Add the maneuvers for this system
+        const powerList = this.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+        const maneuverItemsData = powerList
+            .filter((power) => power.type?.includes("maneuver"))
+            .map((maneuver) => this.buildManeuverData(maneuver));
+
+        // Create based on this being a database object or not
+        if (this.id) {
+            return this.createEmbeddedDocuments("Item", maneuverItemsData, { render: false, renderSheet: false });
+        } else {
+            maneuverItemsData.forEach((itemData) => {
+                const item = new HeroSystem6eItem(itemData, {
+                    parent: this,
+                });
+                this.items.set(item.system.XMLID, item);
+            });
+        }
     }
 
     static _xmlToJsonNode(json, children) {
