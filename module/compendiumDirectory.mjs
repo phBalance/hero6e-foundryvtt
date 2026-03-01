@@ -5,6 +5,7 @@ import { getPowerInfo } from "./utility/util.mjs";
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttCompendiumDirectory = foundry.applications?.sidebar?.tabs?.CompendiumDirectory || CompendiumDirectory;
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
 
 export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirectory {
     constructor(...args) {
@@ -76,7 +77,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                     position: { width: 480 },
                     ok: {
                         label: "COMPENDIUM.Create",
-                        callback: (_event, button) => new foundry.applications.ux.FormDataExtended(button.form).object,
+                        callback: (_event, button) => new FoundryVttFormDataExtended(button.form).object,
                     },
                     render: handleRender,
                 });
@@ -121,7 +122,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                             label: game.i18n.localize("COMPENDIUM.Create"),
                             callback: async (html) => {
                                 const form = html.find("#compendium-create")[0];
-                                const fd = new foundry.applications.ux.FormDataExtended(form);
+                                const fd = new FoundryVttFormDataExtended(form);
                                 const metadata = fd.object;
 
                                 if (metadata.upload) {

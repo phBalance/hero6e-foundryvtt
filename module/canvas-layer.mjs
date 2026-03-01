@@ -19,44 +19,44 @@ export class HeroSystem6eTemplateLayer extends foundry.canvas.layers.TemplateLay
     /*  Event Listeners and Handlers                */
     /* -------------------------------------------- */
 
-    _onDragLeftMove(event) {
-        if (!canvas.ready || !canvas.scene || !canvas.grid.isSquare) {
-            return super._onDragLeftMove(event);
-        }
+    // _onDragLeftMove(event) {
+    //     if (!canvas.ready || !canvas.scene || !canvas.grid.isSquare) {
+    //         return super._onDragLeftMove(event);
+    //     }
 
-        const { destination, preview: template, origin } = event.interactionData;
-        if (!template || template.destroyed) {
-            return;
-        } else if (template.document.t === "rect") {
-            return super._onDragLeftMove(event);
-        } else if (!template.flags?.[game.system.id]?.messageId) {
-            return super._onDragLeftMove(event);
-        }
+    //     const { destination, preview: template, origin } = event.interactionData;
+    //     if (!template || template.destroyed) {
+    //         return;
+    //     } else if (template.document.t === "rect") {
+    //         return super._onDragLeftMove(event);
+    //     } else if (!template.flags?.[game.system.id]?.messageId) {
+    //         return super._onDragLeftMove(event);
+    //     }
 
-        const dimensions = canvas.dimensions;
+    //     const dimensions = canvas.dimensions;
 
-        // Snap the destination to the grid
-        const { x, y } = canvas.grid.getSnappedPoint(destination, { mode: template.snappingMode });
-        destination.x = x;
-        destination.y = y;
-        const ray = new foundry.canvas.geometry.Ray(origin, destination);
-        const ratio = dimensions.size / dimensions.distance;
-        const document = template.document;
+    //     // Snap the destination to the grid
+    //     const { x, y } = canvas.grid.getSnappedPoint(destination, { mode: template.snappingMode });
+    //     destination.x = x;
+    //     destination.y = y;
+    //     const ray = new foundry.canvas.geometry.Ray(origin, destination);
+    //     const ratio = dimensions.size / dimensions.distance;
+    //     const document = template.document;
 
-        // Update the shape data
-        if (["cone", "circle"].includes(document.t)) {
-            const snapAngle = Math.PI / 4;
-            document.direction = Math.toDegrees(Math.floor((ray.angle + Math.PI * 0.125) / snapAngle) * snapAngle);
-        } else {
-            document.direction = Math.toDegrees(ray.angle);
-        }
+    //     // Update the shape data
+    //     if (["cone", "circle"].includes(document.t)) {
+    //         const snapAngle = Math.PI / 4;
+    //         document.direction = Math.toDegrees(Math.floor((ray.angle + Math.PI * 0.125) / snapAngle) * snapAngle);
+    //     } else {
+    //         document.direction = Math.toDegrees(ray.angle);
+    //     }
 
-        const increment = Math.max(ray.distance / ratio, dimensions.distance);
-        document.distance = Math.ceil(increment / dimensions.distance) * dimensions.distance;
+    //     const increment = Math.max(ray.distance / ratio, dimensions.distance);
+    //     document.distance = Math.ceil(increment / dimensions.distance) * dimensions.distance;
 
-        // Draw the pending shape
-        template.refresh();
-    }
+    //     // Draw the pending shape
+    //     template.refresh();
+    // }
 
     // Careful with V2 as the SHIFT rotate isn't working for small increments
     // _onMouseWheel(event) {
@@ -77,17 +77,17 @@ export class HeroSystem6eTemplateLayer extends foundry.canvas.layers.TemplateLay
     //     return template.rotate(template.document.direction + delta, snap);
     // }
 
-    _onDragLeftStart(event) {
-        // Prevent normal drag operations when a preview is active
-        if (this.#previewListeners) return;
-        return super._onDragLeftStart(event);
-    }
+    // _onDragLeftStart(event) {
+    //     // Prevent normal drag operations when a preview is active
+    //     if (this.#previewListeners) return;
+    //     return super._onDragLeftStart(event);
+    // }
 
-    _onDragLeftCancel(event) {
-        // Prevent normal drag operations when a preview is active
-        if (this.#previewListeners) return;
-        return super._onDragLeftCancel(event);
-    }
+    // _onDragLeftCancel(event) {
+    //     // Prevent normal drag operations when a preview is active
+    //     if (this.#previewListeners) return;
+    //     return super._onDragLeftCancel(event);
+    // }
 
     #activatePreviewListeners(preview, initialLayer) {
         let lastMove = Date.now(); // Throttle 50ms

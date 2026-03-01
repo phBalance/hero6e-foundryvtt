@@ -548,10 +548,14 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             const elapsed = wt - start;
             const remaining = d.seconds - elapsed;
 
-            let totalSeconds = parseInt(remaining, 10);
+            let totalSeconds = parseInt(remaining);
 
             if (totalSeconds < 0) {
-                console.warn(`Active Effect ${this.name} has negative remaining duration.`);
+                console.warn(
+                    `Active Effect ${this.name} has negative remaining duration = ${totalSeconds}.`,
+                    this.duration,
+                    wt,
+                );
                 totalSeconds = 0;
             }
 

@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActiveEffectConfig = foundry.applications?.sheets?.ActiveEffectConfig || ActiveEffectConfig;
+const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
 
 export class HeroSystemActiveEffectConfig extends FoundryVttActiveEffectConfig {
     // V12 static get defaultOptions is replaced by V13 static DEFAULT_OPTIONS = {}
@@ -178,7 +179,7 @@ export class HeroSystemActiveEffectConfig extends FoundryVttActiveEffectConfig {
     }
 
     _getSubmitData(updateData = {}) {
-        const fd = new foundry.applications.ux.FormDataExtended(this.form, { editors: this.editors, disabled: true });
+        const fd = new FoundryVttFormDataExtended(this.form, { editors: this.editors, disabled: true });
         let data = foundry.utils.expandObject(fd.object);
         if (updateData) foundry.utils.mergeObject(data, updateData);
         data.changes = Array.from(Object.values(data.changes || {}));

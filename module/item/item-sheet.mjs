@@ -10,6 +10,7 @@ import { HeroAdderModel, HeroModifierModel } from "./HeroSystem6eTypeDataModels.
 
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
+const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -344,7 +345,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     label: "Create",
                     callback: async function (html) {
                         const formElement = html[0].querySelector("form");
-                        const formData = new foundry.applications.ux.FormDataExtended(formElement);
+                        const formData = new FoundryVttFormDataExtended(formElement);
                         const formDataObject = formData.object;
                         if (formDataObject.xmlid === "none") return;
 

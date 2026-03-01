@@ -1040,7 +1040,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             XMLID: new StringField(),
             SHOW_ACTIVE_COST: new BooleanField({ initial: null, nullable: true }),
             INCLUDE_NOTES_IN_PRINTOUT: new BooleanField({ initial: null, nullable: true }),
-            _active: new ObjectField(), // action  (consider renaming)
+            _active: new ObjectField(), // action  (consider renaming); We don't store anything in the database, but handy to have it initilized
             _hdcXml: new StringField(),
             is5e: new BooleanField({ initial: null, nullable: true }),
             xmlTag: new StringField(),
@@ -1059,7 +1059,9 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             _charges: new HeroNumberField({ initial: 0, integer: true }),
             _clips: new HeroNumberField({ initial: 1, integer: true }),
             ablative: new HeroNumberField({ initial: 0, integer: true }), // Store # of times threshold has been exceeded
-            originalItemUuid: new StringField(),
+
+            //attackActions: new SetField( new ObjectField()),  // Maybe not
+            //templates: new SetField( new ObjectField()), // Reference for continus END cost
         };
     }
 
@@ -1344,7 +1346,7 @@ export class HeroSystem6eItemManeuver extends HeroSystem6eItemTypeDataModelGette
             ADDER: new ArrayField(new EmbeddedDataField(HeroAdderModel)),
             MODIFIER: new ArrayField(new EmbeddedDataField(HeroModifierModel2)),
 
-            _active: new ObjectField(), // action
+            _active: new ObjectField(), // action; We don't store anything in the database, but handy to have it initilized
             is5e: new BooleanField({ initial: null, nullable: true }),
             active: new BooleanField({ initial: null, nullable: true }),
         };

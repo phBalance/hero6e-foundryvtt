@@ -720,14 +720,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 this.system.active ??= true;
             }
 
-            // MOVED INVISIBILITY AE to CONFIG.mjs
-            // if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
-            //     // Invisibility status effect for SIGHTGROUP?
-            //     if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-            //         this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
-            //     }
-            // }
-
             // Sanity check for duplicate effects
             for (const ae1 of this.effects) {
                 if (
@@ -6873,7 +6865,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 [game.system.id]: {
                     messageId: message?.id,
                     purpose: "AoE",
-                    attackAction,
+                    effectiveItem: JSON.stringify(attackAction.effectiveItem),
                 },
             },
         };

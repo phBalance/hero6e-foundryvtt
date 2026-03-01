@@ -1,6 +1,14 @@
 export class AttackAction {
     constructor(data) {
+        // Don't need "setData", move all that code here
         this.setData(data);
+
+        //this.toHitData = data;
+        //Object.freeze(this.toHitData);
+
+        // Get rid of most setters as we want the toHitData immutable.
+
+        // May want an array of targets so we can "fix targets, yet keep things immutable.
     }
 
     _aim = null;
@@ -74,6 +82,7 @@ export class AttackAction {
     // For convenience, doesn't seem necessary.
     // The message should be avail from the "event" of
     // subsequent listen handlers.
+    // PETER thinks I should get rid of storing _messageId here.
     _messageId;
     get messageId() {
         return this._messageId;
@@ -101,7 +110,10 @@ export class AttackAction {
         this.targetTokenIds = data.targetTokenIds ?? this.targetTokenIds;
     }
 
-    _data = {};
+    _data = {
+        // toHit: array per target
+        // damageCalculated,damageApplied, knockbackApplied
+    };
 
     get data() {
         return this._data;
@@ -111,6 +123,11 @@ export class AttackAction {
         if (jsonData.constructor.name === "String") {
             jsonData = JSON.parse(jsonData);
         }
+
+        // REFER to Dice
+        // static fromJSON(json) {
+        // return HeroRoller.fromData(JSON.parse(json));
+        // static fromData(dataObj) {
 
         // Create a new instance and assign properties
         const newAttackAction = new AttackAction();

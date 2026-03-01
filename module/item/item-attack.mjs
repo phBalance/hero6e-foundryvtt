@@ -354,8 +354,6 @@ export async function processActionToHitV2(attackAction) {
         }
     }
 
-    //
-
     await allInOneV2(attackAction);
 }
 
@@ -418,7 +416,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
             );
         }
 
-        // Some maneuvers have a built in RANGE value (like range a PSL). These are only possible from the maneuver item.
+        // Some maneuvers have a built in RANGE value (like a range PSL). These are only possible from the maneuver item.
         const maneuverRangeOffset = parseInt(attackItem.system.RANGE || 0);
         const maneuverRangeOffsets = Math.min(maneuverRangeOffset, -remainingRangePenalty);
         remainingRangePenalty += maneuverRangeOffsets;
@@ -593,7 +591,7 @@ async function allInOneV2(attackAction) {
 
     // For convenience, doesn't seem necessary
     attackAction.messageId = message.id;
-    await attackAction.saveToMessage();
+    //await attackAction.saveToMessage();
 }
 
 export async function doAoeActionToHit(action, options) {
@@ -1756,6 +1754,8 @@ function getAttackActionFromDomObject(target) {
 
 export async function _onPlaceTemplate(event) {
     // Remove any previous tempaltes
+    // AUTOFIRE? May not want to remove template.
+    // Some way to keep track of the number of valid templates for this attack.
     await _onRemoveTemplate(event);
 
     // Get attackAction
