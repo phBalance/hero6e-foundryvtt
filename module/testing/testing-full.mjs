@@ -1561,7 +1561,7 @@ export function registerFullTests(quench) {
                         {},
                     );
 
-                    await actor.uploadFromXml(contents);
+                    await actor.uploadFromXml(contents, { quenchUpload: true });
                 });
 
                 it("should default to the basic name when there is no name provided in the HDC", async function () {
@@ -1900,16 +1900,13 @@ export function registerFullTests(quench) {
                 let parentItem;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
 
-                    await actor.uploadFromXml(contents);
                     parentItem = actor.items.find((o) => o.system.XMLID === "COMPOUNDPOWER");
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 it("Name Compound", async function () {
@@ -3711,15 +3708,7 @@ export function registerFullTests(quench) {
                 let snapShotManeuverItem;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
                     rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
                     basicShotManeuverItem = actor.items.find(
@@ -3728,18 +3717,12 @@ export function registerFullTests(quench) {
                     snapShotManeuverItem = actor.items.find((item) => item.system.XMLID === "SNAPSHOT");
                 });
 
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
+                });
+
                 beforeEach(async function () {
                     previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Ranged Martial Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
                 });
 
                 afterEach(async function () {
@@ -5361,15 +5344,7 @@ export function registerFullTests(quench) {
                 // let nakedStrAp;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
                     strikeManeuver = actor.items.find((item) => item.system.XMLID === "STRIKE");
 
@@ -5381,17 +5356,21 @@ export function registerFullTests(quench) {
                     // );
                 });
 
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
+                });
+
                 // PH: FIXME: TODO:
                 describe("Costs are correct for character", function () {
-                    it("should have the correct total cost", function () {});
+                    it.skip("should have the correct total cost", function () {});
                 });
 
                 describe("Costs are correct for AoE Naked Advantage", function () {
-                    it("should have the correct total cost", function () {});
+                    it.skip("should have the correct total cost", function () {});
                 });
 
                 describe("Costs are correct for AP Naked Advantage", function () {
-                    it("should have the correct total cost", function () {});
+                    it.skip("should have the correct total cost", function () {});
                 });
 
                 describe("Maneuvers with AoE Naked Advantage", function () {
@@ -5512,15 +5491,7 @@ export function registerFullTests(quench) {
                 let mysticFlash;
 
                 before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        {},
-                    );
-
-                    await actor.uploadFromXml(contents);
+                    actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
                     hearingFlash = actor.items.find(
                         (item) => item.system.XMLID === "FLASH" && item.system.OPTIONID === "HEARINGGROUP",
@@ -5529,6 +5500,10 @@ export function registerFullTests(quench) {
                     mysticFlash = actor.items.find(
                         (item) => item.system.XMLID === "FLASH" && item.system.OPTIONID === "MENTALGROUP",
                     );
+                });
+
+                after(async function () {
+                    await deleteQuenchActor({ quench: this, actor });
                 });
 
                 describe("total costs", function () {
