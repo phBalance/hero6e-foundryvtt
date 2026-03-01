@@ -99,7 +99,11 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
                             : e.currentTarget.value;
                     await this.item.update({ [`${attributeName}`]: newValue });
 
-                    const newName = this.item.system.NAME || this.item.system.ALIAS || this.item.system.XMLID;
+                    const newName =
+                        this.item.system.NAME ||
+                        this.item.system.DISPLAY ||
+                        this.item.system.ALIAS ||
+                        this.item.system.XMLID;
                     if (newName && newName !== this.item.name) {
                         console.log(`Updating item name to ${newName}`);
                         await this.item.update({ name: newName });
