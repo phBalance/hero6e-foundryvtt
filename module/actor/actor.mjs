@@ -2273,7 +2273,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 1 + // debugModelProps
                 1; // Not really sure why we need an extra +1
 
-            const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess);
+            const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, {
+                suppressUi: options.quenchUpload,
+            });
             uploadPerformance.itemsToCreateEstimate = xmlItemsToProcess - 6;
 
             // Let GM know actor is being uploaded (unless it is a quench test; missing ID)
