@@ -2323,17 +2323,23 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.actor?.token?.baseActor;
     }
 
-    // You would think there would be a built in property, perhaps in token.delta
-    // to determine this, but I was unable to find one.
+    // You would think there would be a foundry getter
+    // to determine if the item is from the baseActor, or one that was created/modified on
+    // the unlinked token.
     get isFromBaseActor() {
-        if (!this.baseActor) {
-            return true;
+        try {
+            if (!this.actor?.token) {
+                return true;
+            }
+
+            return !this.actor.token.delta._source.items.find((i) => i._id === this._id);
+        } catch (e) {
+            console.error(e);
         }
+        return true;
 
-        return this.baseActor?.items.find((o) => o.id === this.id) ? true : false;
-
-        // FIXME: This doesn't quite work. QUANTITY?
-        // return this.baseActor?.items.find((o) => o.id === this.id && o.toXML() === this.toXML()) ? true : false;
+        // You can restore all items to match the prototype baseActor by doing this:
+        // actor.token.delta.items.restoreDocuments(actor.token.delta._source.items.map(i=> i._id))
     }
 
     get modifiers() {
