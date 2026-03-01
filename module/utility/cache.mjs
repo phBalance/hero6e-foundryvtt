@@ -65,6 +65,15 @@ function getPropertyDescriptorUpChain(obj, propName) {
     return undefined;
 }
 
+let cachedObjectCachingSetting = null;
+function objectCachingEnabled() {
+    if (cachedObjectCachingSetting == null) {
+        cachedObjectCachingSetting = game.settings.get(game.system.id, "ObjectCaching");
+    }
+
+    return cachedObjectCachingSetting;
+}
+
 /**
  * Add object caching functionality to this Base class.
  *
@@ -73,10 +82,6 @@ function getPropertyDescriptorUpChain(obj, propName) {
  */
 export const HeroObjectCacheMixin = (Base) =>
     class HeroObjectCache extends Base {
-        static get cachingEnabled() {
-            return game.settings.get(game.system.id, "ObjectCaching");
-        }
-
         prepareDerivedData() {
             super.prepareDerivedData();
 
@@ -132,7 +137,7 @@ export const HeroObjectCacheMixin = (Base) =>
          */
         composeMemoizableObjectFunction(funcName) {
             // Is object caching enabled?
-            if (!HeroObjectCache.cachingEnabled) {
+            if (!objectCachingEnabled()) {
                 return;
             }
 

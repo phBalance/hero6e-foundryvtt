@@ -1440,7 +1440,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             whisper: whisperUserTargetsForActor(item.actor),
             speaker,
         };
-        await ChatMessage.create(chatData);
+        // Fire and forget
+        ChatMessage.create(chatData);
 
         // A continuing charges use is tracked by an active effect. Start it.
         await _startIfIsAContinuingCharge(this);
@@ -1473,7 +1474,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             await activateManeuver(this);
         }
 
-        await this.setActive(true);
+        return this.setActive(true);
     }
 
     async turnOff(options = {}) {
@@ -1498,6 +1499,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 actor: item.actor,
                 token: options.token,
             });
+
             const chatData = {
                 author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
@@ -1505,10 +1507,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 whisper: whisperUserTargetsForActor(item.actor),
                 speaker,
             };
-            await ChatMessage.create(chatData);
+
+            // Fire and forget
+            ChatMessage.create(chatData);
         }
 
-        await this.setActive(false);
+        return this.setActive(false);
     }
 
     async setActive(value) {

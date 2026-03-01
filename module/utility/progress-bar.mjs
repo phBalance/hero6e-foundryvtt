@@ -9,12 +9,18 @@ class HeroProgressBarV13 {
      * @param {number} max
      * @param {number} [startCount]
      */
-    constructor(message, max, startCount = 0) {
+    constructor(message, max, { startCount = 0, suppressUi = false } = {}) {
         this._message = message;
         this._max = max;
         this._count = startCount;
         this._inProgress = true;
-        this._progressBar = ui.notifications.info(message, { progress: true });
+        this._suppressUi = suppressUi;
+        this._progressBar = suppressUi
+            ? null
+            : ui.notifications.info(message, {
+                  progress: !suppressUi,
+                  console: !!CONFIG.debug.HERO?.ui?.progress, // PH: FIXME: Remove the separate console.debug perhaps
+              });
         this._performance = [];
         this._performance.push({ timestamp: Date.now(), message: "constructor", pct: 0 });
 
@@ -56,7 +62,7 @@ class HeroProgressBarV13 {
 
         const percentage = this._count / this._max;
 
-        this._progressBar.update({ pct: percentage, message: message });
+        this._progressBar?.update({ pct: percentage, message: this._suppressUi ? null : message });
         this._performance.at(-1).delta = Date.now() - this._performance.at(-1).timestamp;
         this._performance.push({ timestamp: Date.now(), message: message, pct: percentage });
 
@@ -75,7 +81,7 @@ class HeroProgressBarV13 {
             this._inProgress = false;
 
             // Set to 100% which will cause Foundry to fade out the progress bar.
-            this._progressBar.update({ pct: 1, message: message });
+            this._progressBar?.update({ pct: 1, message: this._suppressUi ? null : message });
             this._performance.push({ timestamp: Date.now(), message: "close", pct: 1 });
 
             --HeroProgressBarV13.#concurrentProgressBarCount;

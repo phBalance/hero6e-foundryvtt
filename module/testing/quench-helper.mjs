@@ -30,13 +30,15 @@ export async function createQuenchActor({ quench, contents, is5e, actorType = "p
             name: quenchName,
             type: actorType,
         },
-        { is5e },
+        { is5e, quenchCreate: true },
     );
 
     if (contents) {
         // Is this a full actor
         if (contents.includes("CHARACTER_NAME")) {
-            await actor.uploadFromXml(contents.replace(CHARACTER_NAME, `CHARACTER_NAME="${quenchName}"`));
+            await actor.uploadFromXml(contents.replace(CHARACTER_NAME, `CHARACTER_NAME="${quenchName}"`), {
+                quenchUpload: true,
+            });
             if (actor.is5e !== is5e) {
                 throw new Error(`${actor.name} has mismatched is5e`);
             }
