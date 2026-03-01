@@ -6865,7 +6865,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 [game.system.id]: {
                     messageId: message?.id,
                     purpose: "AoE",
-                    attackAction,
+                    effectiveItem: JSON.stringify(attackAction.effectiveItem),
                 },
             },
         };
