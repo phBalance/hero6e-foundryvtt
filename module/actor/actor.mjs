@@ -116,7 +116,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 });
             }
 
-            if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
+            // Create unless this is specifically for a quench create (and not the quench upload)
+            if (!options.quenchCreate && (this.type === "pc" || this.type === "npc" || this.type === "automaton")) {
                 await this.addFreeStuff();
             }
 

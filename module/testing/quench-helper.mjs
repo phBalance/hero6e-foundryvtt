@@ -30,7 +30,7 @@ export async function createQuenchActor({ quench, contents, is5e, actorType = "p
             name: quenchName,
             type: actorType,
         },
-        { is5e },
+        { is5e, quenchCreate: true },
     );
 
     if (contents) {
