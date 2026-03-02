@@ -54,24 +54,23 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         //TODO: Add user configuration for initial prototype settings
 
-        // Only updateSource when is5e is undefined.
+        // Only updateSource when is5e is undefined or null.
         // When is5e is defined then we are likely drag/drop to/drop a
         // compendium and all this data already exists so don't overwrite.
         if (this.system.is5e == undefined) {
             HEROSYS.log(false, "_preCreate");
-            let prototypeToken = {
+
+            const actorChanges = {};
+            actorChanges.prototypeToken = {
                 displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
                 displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
             };
 
             if (this.type !== "npc") {
-                prototypeToken = {
-                    ...prototypeToken,
-                    actorLink: true,
-                    disposition: CONST.TOKEN_DISPOSITIONS.FRIENDLY,
-                    displayBars: CONST.TOKEN_DISPLAY_MODES.ALWAYS,
-                    displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
-                };
+                actorChanges.prototypeToken.actorLink = true;
+                actorChanges.prototypeToken.disposition = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
+                actorChanges.prototypeToken.displayBars = CONST.TOKEN_DISPLAY_MODES.ALWAYS;
+                actorChanges.prototypeToken.displayName = CONST.TOKEN_DISPLAY_MODES.HOVER;
             }
 
             const is5e =
@@ -83,41 +82,43 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Set XMLID for characteristics
             // Used with conditional defenses, also for future baseInfo calls
+            actorChanges.system = {};
             for (const key of Object.keys(this.system).filter((o) => o.match(/[A-Z]/))) {
                 const char = this.system[key];
                 if (char instanceof HeroItemCharacteristic && !char.XMLID) {
-                    this.updateSource({ [`system.${key}.XMLID`]: key, [`system.${key}.xmlTag`]: key });
+                    actorChanges.system[key] = {};
+                    actorChanges.system[key].XMLID = key;
+                    actorChanges.system[key].xmlTag = key;
                 }
             }
 
-            this.updateSource({
-                prototypeToken: prototypeToken,
-                system: {
-                    versionHeroSystem6eCreated: game.system.version,
-                    is5e,
-                },
-                flags: {
-                    [`${game.system.id}`]: {
-                        file: {
-                            lastModifiedDate: Date.now(),
-                            uploadedBy: user.name,
-                            name: `[FoundryVTT actor]`,
-                        },
+            actorChanges.system.versionHeroSystem6eCreated = game.system.version;
+            actorChanges.system.is5e = is5e;
+
+            actorChanges.flags = {
+                [game.system.id]: {
+                    file: {
+                        lastModifiedDate: Date.now(),
+                        uploadedBy: user.name,
+                        name: `[FoundryVTT actor]`,
                     },
                 },
-            });
+            };
 
             // Characteristic defaults
             for (const charBaseInfo of getCharacteristicInfoArrayForActor(this)) {
                 const base = this.system.characteristics[charBaseInfo.key.toLowerCase()]?.base || 0;
-                this.updateSource({
-                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.value`]: base,
-                    [`system.characteristics.${charBaseInfo.key.toLowerCase()}.max`]: base,
-                });
+                actorChanges.system.characteristics ??= {};
+                actorChanges.system.characteristics[charBaseInfo.key.toLowerCase()] = {
+                    value: base,
+                    max: base,
+                };
             }
 
-            // Create unless this is specifically for a quench create (and not the quench upload)
-            if (!options.quenchCreate && (this.type === "pc" || this.type === "npc" || this.type === "automaton")) {
+            this.updateSource(actorChanges);
+
+            // Create free stuff unless this is specifically for a quench create
+            if (!options.quenchCreate) {
                 await this.addFreeStuff();
             }
 
@@ -2295,6 +2296,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 });
             }
 
+            let changes = {};
+
             // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
             const characterName =
                 heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME ||
@@ -2303,27 +2306,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
             this.name = characterName;
-            if (this._id) {
-                uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
-                await this.update({ ["name"]: characterName });
+            changes["name"] = characterName;
+            uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
 
-                // Flags
-                await this.setFlag(game.system.id, "uploading", true);
-                await this.setFlag(game.system.id, "file", {
-                    lastModifiedDate: options?.file?.lastModified,
-                    name: options?.file?.name,
-                    size: options?.file?.size,
-                    type: options?.file?.type,
-                    webkitRelativePath: options?.file?.webkitRelativePath,
-                    uploadedBy: game.user.name,
-                });
-            }
+            // Flags (add them into the change set to cut down on update calls)
+            changes[`flags.${game.system.id}.uploading`] = true;
+            changes[`flags.${game.system.id}.file`] = {
+                lastModifiedDate: options?.file?.lastModified,
+                name: options?.file?.name,
+                size: options?.file?.size,
+                type: options?.file?.type,
+                webkitRelativePath: options?.file?.webkitRelativePath,
+                uploadedBy: game.user.name,
+            };
 
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /// NOW LOAD THE HDC STUFF
-
-            let promiseArray = [];
-            let changes = {};
 
             // Need to get the base64 image before we delete IMAGE, deepClone doesn't work as expected.
             uploadProgressBar.advance(`${this.name}: Preprocess image`, 0);
@@ -2941,10 +2939,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Save all our changes (unless temporary actor/quench)
             if (this.id) {
-                promiseArray.push(this.update(changes));
+                await this.update(changes);
             }
-
-            await Promise.all(promiseArray);
 
             uploadPerformance.nonItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
