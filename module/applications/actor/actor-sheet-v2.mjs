@@ -285,7 +285,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         },
     };
 
-    _items;
+    _items = {};
 
     async _preparePartContext(partId, context) {
         globalThis.sheet = this;
@@ -324,7 +324,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass.join(" ");
                     }
 
-                    if (this._items["invalid"].length === 0) {
+                    if (!this._items["invalid"]?.length) {
                         delete context.tabs["invalid"];
                     }
 
