@@ -61,6 +61,12 @@
     overflow: hidden;
     padding: 5px;
     gap: 2px;
+
+    button {
+        --button-size: 24px;
+
+        height: auto;
+    }
 }
 
 /************************************************************************
@@ -289,7 +295,7 @@ input.over-max {
             align-items: center;
             justify-content: center;
             position: relative;
-            padding: 0.3rem 0.5rem;
+            padding: 2px;
         }
 
         .item-column.item-cost {
@@ -360,8 +366,8 @@ input.over-max {
         }
 
         img.item-image {
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             flex-shrink: 0;
             border: 1px solid var(--herosystem-table-header-bg-color);
             border-radius: 4px;
@@ -486,6 +492,7 @@ input.over-max {
     input {
         width: 40px;
         text-align: center;
+        height: 24px;
     }
 }
 
@@ -564,8 +571,8 @@ input.over-max {
     header {
         img {
             object-fit: contain;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
         }
     }
 
