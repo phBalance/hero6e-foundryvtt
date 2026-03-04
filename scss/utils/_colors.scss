@@ -8,16 +8,22 @@ $c-miss: $c-failure;
 
 .herosystem6e {
     --herosystem-blue: #286293;
-    --herosystem-table-header-bg-color: #cac7bf; // var(--table-header-bg-color); opacity+sticky is a problem
+    --herosystem-table-header-bg-color: var(--table-header-bg-color);
     --herosystem-shadow-45: rgb(0 0 0 / 45%);
     --herosystem-border: var(--herosystem-blue);
     --herosystem-search-background: var(--color-light-1); // #f7f3e8 // #f8f4f1;
     --herosystem-search-text: var(--color-dark-1);
     --herosystem-text-light-6: #666;
     --herosystem-filter-control-color: #999;
-    --herosystem-header-background: #cac7bf; // var(--table-header-bg-color); opacity+sticky is a problem
+    --herosystem-header-background: var(--table-header-bg-color);
     --herosystem-item-row-border: rgb(var(--herosystem-blue) / 20%);
     --herosystem-header-text: var(--table-header-text-color);
+}
+
+.herosystem6e.theme-light {
+    // opacity+sticky is a problem
+    --herosystem-table-header-bg-color: #cac7bf;
+    --herosystem-header-background: #cac7bf;
 }
 
 .herosystem6e.theme-dark {

@@ -3,6 +3,9 @@
   data-group='primary'
   data-tab='defenses'
 >
+
+    {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-search-partial-v2.hbs') this }}
+
     <section class="item-list-container">
         <div class="item-header">
             <div class="item-column item-description">{{localize "ActorSheet.Description"}}</div>
