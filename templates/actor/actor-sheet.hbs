@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sheet' this}} --}}
+{{log 'actor-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off" data-actor-uuid="{{actor.uuid}}" data-token-uuid="{{token.uuid}}">
     {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}
         <aside>
@@ -179,7 +179,9 @@
             {{/if}}
 
 
-            <label class="upload-button flex0 {{#if isOwner}}is-owner{{/if}}">
+            <label class="upload-button flex0 {{#if (and isOwner (not actor.token))}}is-owner{{/if}}"
+            data-tooltip="{{#if actor.token}}Uploading HDC files to unlinked actors is unsupported.{{/if}}" 
+            >
                 <span>Upload&nbsp;.HDC</span>
                 <input type="file" accept=".hdc" \>
             </label>
