@@ -166,7 +166,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     tooltip: "",
                 },
                 {
-                    icon: "fas fa-rotate-right",
+                    icon: "fa-duotone fa-regular fa-cards-blank",
                     label: "Restore",
                     action: "restore",
                     disabled: !this.actor.token,
