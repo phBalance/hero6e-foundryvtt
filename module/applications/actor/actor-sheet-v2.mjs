@@ -114,27 +114,39 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static async #onFullHealth() {
         const resetRebuildDisabled = this.actor.token || !this.actor.system._hdcXml;
-        const content = `
+        const contentFullHealth = `
             <p>
                 <b>FULL HEALTH</b>: Set all characteristics to full health (including temporary HP) and remove all conditions/effects. 
                 This is intended for use when healing an actor after combat or when resetting an NPC between encounters. 
                 It will not remove items or change the actor's HP type (e.g. damage track vs point buy).
-            </p>
-            <p>
+            </p>`;
+
+        const contentRestore = `<p>
+            <b>RESTORE</b>: Restore this unlinked actor to match its prototype actor.
+            ${!this.actor.token ? `<b style='color:red;'>This is not an unlinked actor.</b>` : ``}
+            Any missing items will be re-created based on the prototype actor.
+            HP, END, charges, and other values will be changed to match the prototype actor.
+            Any newly acquired items on the unlinked actor will be removed.
+            </p>`;
+
+        const contentReset = `<p>
                 <b>RESET</b>: ${this.actor.system._hdcXml ? `A copy of the original HDC was saved when the actor was created.` : `<b style='color:red;'>A copy of the original HDC is not available.</b>`}
                 ${this.actor.token ? `<b style='color:red;'>Not supported for unlinked actors.</b>` : ``}
                 Several values will be retained (HP, END, charges, etc).
                 Any missing items will be re-created based on the original HDC.
                 You will be prompted to keep any newly acquired items.
                 This option is similar to re-uploading the HDC file. 
-            </p>
-            <p>
+            </p>`;
+
+        const contentRebuild = `<p>
                 <b>REBUILD</b>: ${this.actor.system._hdcXml ? `A copy of the original HDC was saved when the actor was created.` : `<b style='color:red;'>A copy of the original HDC is not available.</b>`}
                 ${this.actor.token ? `<b style='color:red;'>Not supported for unlinked actors.</b>` : ``}
                 All items will be removed and re-created based on the original HDC.
                 This option is similar to deleting and re-creating the actor with the same HDC file.
             </p>
         `;
+
+        const content = contentFullHealth + contentRestore + contentReset + contentRebuild;
 
         const action = await foundry.applications.api.DialogV2.wait({
             window: {
@@ -143,7 +155,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
             },
             position: {
-                width: 400,
+                width: 600,
             },
             content,
             buttons: [
@@ -152,6 +164,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     label: "Full Health",
                     action: "fullHealth",
                     tooltip: "",
+                },
+                {
+                    icon: "fas fa-rotate-right",
+                    label: "Restore",
+                    action: "restore",
+                    disabled: !this.actor.token,
                 },
                 {
                     icon: "fas fa-rotate-left",
@@ -177,6 +195,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         switch (action) {
             case "fullHealth":
                 return this.actor.FullHealth();
+            case "restore":
+                return this.actor.RestoreUnlinkedActorToMatchPrototype();
             case "reset":
                 return this.actor.ResetActor();
             case "rebuild":
