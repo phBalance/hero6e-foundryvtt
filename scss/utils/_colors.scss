@@ -20,6 +20,7 @@ $c-miss: $c-failure;
     --herosystem-header-text: var(--table-header-text-color);
 }
 
+body.theme-light .herosystem6e,
 .herosystem6e.theme-light {
     // opacity+sticky is a problem
     --herosystem-table-header-bg-color: #cac7bf;
