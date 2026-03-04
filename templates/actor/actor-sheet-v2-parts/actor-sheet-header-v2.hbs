@@ -1,3 +1,4 @@
+{{log 'actor-sheet-header-v2' this}}
 <header class="char-header sheet-header ">
     <div class="header-fields flexrow" style="width: 100%">
         <h1 class="charname flex4" title='"{{getScopedFlagValue actor @root/gameSystemId "file" "name"}}" was uploaded by {{getScopedFlagValue actor @root/gameSystemId "file" "uploadedBy"}} whose file was last modified on {{getUploadLastModifiedDate actor}}']"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
@@ -17,8 +18,10 @@
             <div class="points flex0" title="{{activePointsTitle}}">{{actor._activePointsForDisplay}}AP</div>
         {{/if}}
 
-
-        <label class="upload-button flex0 {{#if isOwner}}is-owner{{/if}}" data-action="upload">
+        <label class="upload-button flex0 {{#if (and isOwner (not actor.token))}}is-owner{{/if}}" 
+        data-action="upload"
+        data-tooltip="{{#if actor.token}}Uploading HDC files to unlinked actors is unsupported.{{/if}}" 
+        >
             <span>Upload&nbsp;.HDC</span>
             <input type="file" accept=".hdc" \>
         </label>

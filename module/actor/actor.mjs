@@ -2217,6 +2217,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         //     await game.actors.get(this.id).uploadFromXml(xml, options);
         //     return;
         // }
+        if (this.token) {
+            ui.notifications.error(
+                "Upload a linked actor is not supported. Use the prototype actor on the right sidebar.",
+            );
+            return;
+        }
 
         try {
             // Convert xml string to xml document (if necessary)
