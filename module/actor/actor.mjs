@@ -640,9 +640,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // TODO: This can mess up adjustment powers as they fade
         if (data.system) {
             for (const charKEY of Object.keys(data.system)) {
-                if (data.system[charKEY].LEVELS != null) {
+                if (data.system[charKEY]?.LEVELS != null) {
                     const charKey = charKEY.toLowerCase();
-                    if (this.system.characteristics[charKey]) {
+                    if (this.system.characteristics[charKey] && this.hasCharacteristic(charKey.toUpperCase())) {
                         const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
                         await this.update({
                             [`system.characteristics.${charKey}.max`]: basePlusLevels,
@@ -654,7 +654,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         // Check for any figuredCharacteristic dependencies.
                         await this.updateFiguredCharacteristicDependencies(charKey);
                     } else {
-                        console.error(`Unhandled characteristic key ${charKey}`, data);
+                        //console.log(`${this.name} does not have characteristic key ${charKey}`);
                     }
                 }
             }
@@ -1769,6 +1769,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // Restore characteristics to match baseActor
         await this.token.delta.restore();
+
+        await ChatMessage.create({
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            author: game.user._id,
+            speaker: ChatMessage.getSpeaker({ actor: this }),
+            whisper: whisperUserTargetsForActor(this),
+            content: `Restored to match prototype actor.`,
+        });
     }
 
     // Raw base is insufficient for 5e characters
