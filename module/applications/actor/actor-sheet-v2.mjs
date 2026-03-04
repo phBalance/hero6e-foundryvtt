@@ -462,7 +462,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             }
 
             // Check for missing data model properties.
-            // At some point we can probably get rid of this check.
+            // At some point we `can` probably get rid of this check.
             if (this.actor.system.debugModelProps) {
                 this.actor.system.debugModelProps();
             }
