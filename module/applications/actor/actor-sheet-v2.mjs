@@ -113,12 +113,75 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onFullHealth() {
-        const confirmed = await Dialog.confirm({
-            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
-            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content"),
+        const resetRebuildDisabled = this.actor.token || !this.actor.system._hdcXml;
+        const content = `
+            <p>
+                <b>FULL HEALTH</b>: Set all characteristics to full health (including temporary HP) and remove all conditions/effects. 
+                This is intended for use when healing an actor after combat or when resetting an NPC between encounters. 
+                It will not remove items or change the actor's HP type (e.g. damage track vs point buy).
+            </p>
+            <p>
+                <b>RESET</b>: ${this.actor.system._hdcXml ? `A copy of the original HDC was saved when the actor was created.` : `<b style='color:red;'>A copy of the original HDC is not available.</b>`}
+                ${this.actor.token ? `<b style='color:red;'>Not supported for unlinked actors.</b>` : ``}
+                Several values will be retained (HP, END, charges, etc).
+                Any missing items will be re-created based on the original HDC.
+                You will be prompted to keep any newly acquired items.
+                This option is similar to re-uploading the HDC file. 
+            </p>
+            <p>
+                <b>REBUILD</b>: ${this.actor.system._hdcXml ? `A copy of the original HDC was saved when the actor was created.` : `<b style='color:red;'>A copy of the original HDC is not available.</b>`}
+                ${this.actor.token ? `<b style='color:red;'>Not supported for unlinked actors.</b>` : ``}
+                All items will be removed and re-created based on the original HDC.
+                This option is similar to deleting and re-creating the actor with the same HDC file.
+            </p>
+        `;
+
+        const action = await foundry.applications.api.DialogV2.wait({
+            window: {
+                maxWidth: "200px",
+                title:
+                    game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
+            },
+            position: {
+                width: 400,
+            },
+            content,
+            buttons: [
+                {
+                    icon: "fas fa-heart-crack",
+                    label: "Full Health",
+                    action: "fullHealth",
+                    tooltip: "",
+                },
+                {
+                    icon: "fas fa-rotate-left",
+                    label: "Reset Actor",
+                    action: "reset",
+                    disabled: resetRebuildDisabled,
+                },
+                {
+                    icon: "fas fa-hammer",
+                    label: "Rebuild",
+                    action: "rebuild",
+                    disabled: resetRebuildDisabled,
+                },
+            ],
         });
-        if (!confirmed) return;
-        return this.actor.FullHealth();
+
+        // const confirmed = await Dialog.confirm({
+        //     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
+        //     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content"),
+        // });
+        // if (!confirmed) return;
+
+        switch (action) {
+            case "fullHealth":
+                return this.actor.FullHealth();
+            case "reset":
+                return this.actor.ResetActor();
+            case "rebuild":
+                return this.actor.RebuildActor();
+        }
     }
 
     static #onRecovery() {

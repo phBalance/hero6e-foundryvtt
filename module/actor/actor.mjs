@@ -1734,6 +1734,30 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
+    async ResetActor() {
+        const xml = this.system._hdcXml;
+        if (!xml) {
+            throw new Error("Cannot reset actor without _hdcXml in system");
+        }
+        if (this.token) {
+            throw new Error("Cannot reset unlinked actor");
+        }
+
+        await this.uploadFromXml(xml, { keepExistingImage: true });
+    }
+
+    async RebuildActor() {
+        const xml = this.system._hdcXml;
+        if (!xml) {
+            throw new Error("Cannot rebuild actor without _hdcXml in system");
+        }
+        if (this.token) {
+            throw new Error("Cannot rebuild unlinked actor");
+        }
+
+        await this.uploadFromXml(xml, { keepExistingImage: true, rebuild: true });
+    }
+
     // Raw base is insufficient for 5e characters
     getCharacteristicBase(key) {
         const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this, xmlTag: key.toUpperCase() });
@@ -2450,6 +2474,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
 
+            if (options.rebuild) {
+                uploadProgressBar.advance(`${this.name}: Deleting existing items when rebuilding`, 0);
+                const turnOffPromises = [];
+                for (const item of this.items) {
+                    turnOffPromises.push(item.turnOff({ silent: true }));
+                }
+                await Promise.all(turnOffPromises);
+                await this.deleteEmbeddedDocuments(
+                    "Item",
+                    this.items.map((o) => o.id),
+                );
+            }
+
             // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
             // if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
             uploadProgressBar.advance(`${this.name}: Evaluating non HDC items for PCs, NPCs, and Automatons`, 0);
@@ -2886,7 +2923,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // If they really want the image to stay, they should put it in the HDC file.
                 // Prompt before overwriting token image #2831
 
-                if (this.img !== CONST.DEFAULT_TOKEN) {
+                if (this.img !== CONST.DEFAULT_TOKEN && !options.keepExistingImage) {
                     new foundry.applications.api.DialogV2({
                         window: { title: "Choose token image" },
                         content: `
@@ -2981,7 +3018,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadProgressBar.advance(`${this.name}: Restoring retained damage`, 0);
 
             // Apply retained damage
-            if (this.id) {
+            if (this.id && !options.rebuild) {
                 for (const key of ["body", "stun", "end"]) {
                     if (!this.hasCharacteristic(key.toUpperCase())) continue;
                     if (retainValuesOnUpload[key] == undefined) continue;
