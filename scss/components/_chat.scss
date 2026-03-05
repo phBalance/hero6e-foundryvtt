@@ -234,6 +234,18 @@
     .target-info-row div {
         padding: 0.25em 0;
     }
+
+    .dice-flavor {
+        font-size: 15px;
+
+        .dice-succeeded {
+            color: #006400; // var(--color-level-success);
+        }
+
+        .dice-failed {
+            color: var(--color-level-error);
+        }
+    }
 }
 
 .chat-message .message-header.with-image .portrait img {

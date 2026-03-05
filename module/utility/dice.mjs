@@ -668,7 +668,8 @@ export class HeroRoller {
     // TODO: May wish to consider no flavour, but rather have it be the type of roll?
     // TODO: borderColor: margin >= 0 ? 0x00ff00 : 0xff0000, based on success/failure?
     async render(flavor) {
-        const template = this._buildRollClass.CHAT_TEMPLATE;
+        //const template = this._buildRollClass.CHAT_TEMPLATE;
+        const customTemplate = `systems/${game.system.id}/templates/chat/roll.hbs`;
         const chatData = {
             formula: this.#buildFormula(),
             flavor: flavor,
@@ -677,7 +678,7 @@ export class HeroRoller {
             total: this.getTotalSummary(),
         };
 
-        return foundryVttRenderTemplate(template, chatData);
+        return foundryVttRenderTemplate(customTemplate, chatData);
     }
 
     tags() {
