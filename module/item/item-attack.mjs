@@ -214,6 +214,16 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
 export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     const actor = item.actor;
     const token = options.token ?? tokenEducatedGuess({ token: options.token, actor: actor });
+
+    // Is our token from a different scene?
+    // If so bail as range and other calculations may be incorrect.
+    if (token && token.parent?.constructor.name === "Scene" && token.parent.id !== canvas.scene.id) {
+        return ui.notifications.error(
+            `${token.actor.name} was opened on scene <b>${token.parent.name}</b>. 
+            Close this actor sheet and reopen it so the proper token can be determined for range and other calculations.`,
+        );
+    }
+
     const data = {
         originalItem: item,
         actor: actor,
